@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -160,7 +160,7 @@ void ShellInterface::Private::createSurface(wl_client *client, uint32_t version,
  *********************************/
 ShellSurfaceInterface::Private::Private(ShellSurfaceInterface *q, ShellInterface *shell, SurfaceInterface *surface, wl_resource *parentResource)
     : Resource::Private(q, shell, parentResource, &wl_shell_surface_interface, &s_interface)
-    , GenericShellSurface<KWayland::Server::ShellSurfaceInterface>(q, surface)
+    , GenericShellSurface<Wrapland::Server::ShellSurfaceInterface>(q, surface)
     , pingTimer(new QTimer)
 {
     pingTimer->setSingleShot(true);

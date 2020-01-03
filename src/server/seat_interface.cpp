@@ -33,14 +33,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WL_SEAT_NAME_SINCE_VERSION 2
 #endif
 // linux
-#include <config-kwayland.h>
+#include <config-wrapland.h>
 #if HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 #endif
 
 #include <functional>
 
-namespace KWayland
+namespace Wrapland
 {
 
 namespace Server

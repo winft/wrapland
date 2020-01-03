@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "global.h"
 #include "resource.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include <QHash>
 #include <QSet>
@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 struct wl_buffer_interface;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -44,7 +44,7 @@ class BufferInterface;
  * Compositors should reimplement this class to store objects specific
  * to the underlying graphics stack.
  */
-class KWAYLANDSERVER_EXPORT LinuxDmabufBuffer
+class WRAPLANDSERVER_EXPORT LinuxDmabufBuffer
 {
 public:
     LinuxDmabufBuffer();
@@ -66,7 +66,7 @@ private:
     friend class LinuxDmabufUnstableV1Buffer;
 };
 
-class KWAYLANDSERVER_EXPORT LinuxDmabufUnstableV1Buffer : public LinuxDmabufBuffer
+class WRAPLANDSERVER_EXPORT LinuxDmabufUnstableV1Buffer : public LinuxDmabufBuffer
 {
 public:
     /**
@@ -89,7 +89,7 @@ private:
  *
  * This interface provides a way for clients to create generic dmabuf based wl_buffers.
  */
-class KWAYLANDSERVER_EXPORT LinuxDmabufUnstableV1Interface : public Global
+class WRAPLANDSERVER_EXPORT LinuxDmabufUnstableV1Interface : public Global
 {
     Q_OBJECT
 public:
@@ -179,7 +179,7 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::LinuxDmabufUnstableV1Interface*)
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Server::LinuxDmabufUnstableV1Interface::Flags)
+Q_DECLARE_METATYPE(Wrapland::Server::LinuxDmabufUnstableV1Interface*)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::LinuxDmabufUnstableV1Interface::Flags)
 
 #endif // WAYLAND_SERVER_LINUXDMABUF_INTERFACE_H

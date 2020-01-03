@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_IDLEINHIBIT_H
-#define KWAYLAND_CLIENT_IDLEINHIBIT_H
+#ifndef WRAPLAND_CLIENT_IDLEINHIBIT_H
+#define WRAPLAND_CLIENT_IDLEINHIBIT_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct zwp_idle_inhibit_manager_v1;
 struct zwp_idle_inhibitor_v1;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -60,7 +60,7 @@ class IdleInhibitor;
  * @see Registry
  * @since 5.41
  **/
-class KWAYLANDCLIENT_EXPORT IdleInhibitManager : public QObject
+class WRAPLANDCLIENT_EXPORT IdleInhibitManager : public QObject
 {
     Q_OBJECT
 public:
@@ -160,7 +160,7 @@ private:
  * @see Surface
  * @since 5.41
  **/
-class KWAYLANDCLIENT_EXPORT IdleInhibitor : public QObject
+class WRAPLANDCLIENT_EXPORT IdleInhibitor : public QObject
 {
     Q_OBJECT
 public:

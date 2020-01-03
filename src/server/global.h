@@ -22,11 +22,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 struct wl_global;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -57,7 +57,7 @@ class Display;
  * @see Display
  *
  **/
-class KWAYLANDSERVER_EXPORT Global : public QObject
+class WRAPLANDSERVER_EXPORT Global : public QObject
 {
     Q_OBJECT
 public:

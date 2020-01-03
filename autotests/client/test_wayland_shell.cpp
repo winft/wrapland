@@ -69,20 +69,20 @@ private Q_SLOTS:
     void testClientDisconnecting();
 
 private:
-    KWayland::Server::Display *m_display;
-    KWayland::Server::CompositorInterface *m_compositorInterface;
-    KWayland::Server::ShellInterface *m_shellInterface;
-    KWayland::Server::SeatInterface *m_seatInterface;
-    KWayland::Client::ConnectionThread *m_connection;
-    KWayland::Client::Compositor *m_compositor;
-    KWayland::Client::Shell *m_shell;
-    KWayland::Client::Seat *m_seat;
-    KWayland::Client::Pointer *m_pointer;
-    KWayland::Client::EventQueue *m_queue;
+    Wrapland::Server::Display *m_display;
+    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Server::ShellInterface *m_shellInterface;
+    Wrapland::Server::SeatInterface *m_seatInterface;
+    Wrapland::Client::ConnectionThread *m_connection;
+    Wrapland::Client::Compositor *m_compositor;
+    Wrapland::Client::Shell *m_shell;
+    Wrapland::Client::Seat *m_seat;
+    Wrapland::Client::Pointer *m_pointer;
+    Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("kwin-test-wayland-shell-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-shell-0");
 
 TestWaylandShell::TestWaylandShell(QObject *parent)
     : QObject(parent)
@@ -107,7 +107,7 @@ void TestWaylandShell::initTestCase()
 
 void TestWaylandShell::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -131,7 +131,7 @@ void TestWaylandShell::init()
     QVERIFY(m_seatInterface->isValid());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
     m_connection->setSocketName(s_socketName);
 
@@ -142,13 +142,13 @@ void TestWaylandShell::init()
     m_connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    m_queue = new KWayland::Client::EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
 
-    using namespace KWayland::Client;
-    KWayland::Client::Registry registry;
+    using namespace Wrapland::Client;
+    Wrapland::Client::Registry registry;
     QSignalSpy interfacesAnnouncedSpy(&registry, &Registry::interfacesAnnounced);
     QVERIFY(interfacesAnnouncedSpy.isValid());
     QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32,quint32)));
@@ -163,7 +163,7 @@ void TestWaylandShell::init()
     registry.setup();
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    m_compositor = new KWayland::Client::Compositor(this);
+    m_compositor = new Wrapland::Client::Compositor(this);
     m_compositor->setup(registry.bindCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>()));
     QVERIFY(m_compositor->isValid());
 
@@ -232,8 +232,8 @@ void TestWaylandShell::cleanup()
 
 void TestWaylandShell::testCreateMultiple()
 {
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
 
     QScopedPointer<Surface> s1(m_compositor->createSurface());
     QScopedPointer<Surface> s2(m_compositor->createSurface());
@@ -242,7 +242,7 @@ void TestWaylandShell::testCreateMultiple()
     QVERIFY(!s2.isNull());
     QVERIFY(s2->isValid());
 
-    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(KWayland::Server::ShellSurfaceInterface*)));
+    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(Wrapland::Server::ShellSurfaceInterface*)));
     QVERIFY(serverSurfaceSpy.isValid());
     QScopedPointer<ShellSurface> surface1(m_shell->createSurface(s1.data()));
     QVERIFY(!surface1.isNull());
@@ -273,16 +273,16 @@ void TestWaylandShell::testCreateMultiple()
 
 void TestWaylandShell::testFullscreen()
 {
-    using namespace KWayland::Server;
-    QScopedPointer<KWayland::Client::Surface> s(m_compositor->createSurface());
+    using namespace Wrapland::Server;
+    QScopedPointer<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
-    KWayland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
+    Wrapland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
     QSignalSpy sizeSpy(surface, SIGNAL(sizeChanged(QSize)));
     QVERIFY(sizeSpy.isValid());
     QCOMPARE(surface->size(), QSize());
 
-    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(KWayland::Server::ShellSurfaceInterface*)));
+    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(Wrapland::Server::ShellSurfaceInterface*)));
     QVERIFY(serverSurfaceSpy.isValid());
     QVERIFY(serverSurfaceSpy.wait());
     ShellSurfaceInterface *serverSurface = serverSurfaceSpy.first().first().value<ShellSurfaceInterface*>();
@@ -317,16 +317,16 @@ void TestWaylandShell::testFullscreen()
 
 void TestWaylandShell::testMaximize()
 {
-    using namespace KWayland::Server;
-    QScopedPointer<KWayland::Client::Surface> s(m_compositor->createSurface());
+    using namespace Wrapland::Server;
+    QScopedPointer<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
-    KWayland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
+    Wrapland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
     QSignalSpy sizeSpy(surface, SIGNAL(sizeChanged(QSize)));
     QVERIFY(sizeSpy.isValid());
     QCOMPARE(surface->size(), QSize());
 
-    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(KWayland::Server::ShellSurfaceInterface*)));
+    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(Wrapland::Server::ShellSurfaceInterface*)));
     QVERIFY(serverSurfaceSpy.isValid());
     QVERIFY(serverSurfaceSpy.wait());
     ShellSurfaceInterface *serverSurface = serverSurfaceSpy.first().first().value<ShellSurfaceInterface*>();
@@ -360,16 +360,16 @@ void TestWaylandShell::testMaximize()
 
 void TestWaylandShell::testToplevel()
 {
-    using namespace KWayland::Server;
-    QScopedPointer<KWayland::Client::Surface> s(m_compositor->createSurface());
+    using namespace Wrapland::Server;
+    QScopedPointer<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
-    KWayland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
+    Wrapland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
     QSignalSpy sizeSpy(surface, SIGNAL(sizeChanged(QSize)));
     QVERIFY(sizeSpy.isValid());
     QCOMPARE(surface->size(), QSize());
 
-    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(KWayland::Server::ShellSurfaceInterface*)));
+    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(Wrapland::Server::ShellSurfaceInterface*)));
     QVERIFY(serverSurfaceSpy.isValid());
     QVERIFY(serverSurfaceSpy.wait());
     ShellSurfaceInterface *serverSurface = serverSurfaceSpy.first().first().value<ShellSurfaceInterface*>();
@@ -413,8 +413,8 @@ void TestWaylandShell::testTransient_data()
 
 void TestWaylandShell::testTransient()
 {
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
     QScopedPointer<Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
@@ -478,8 +478,8 @@ void TestWaylandShell::testTransient()
 
 void TestWaylandShell::testTransientPopup()
 {
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
     QScopedPointer<Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
@@ -544,14 +544,14 @@ void TestWaylandShell::testTransientPopup()
 
 void TestWaylandShell::testPing()
 {
-    using namespace KWayland::Server;
-    QScopedPointer<KWayland::Client::Surface> s(m_compositor->createSurface());
+    using namespace Wrapland::Server;
+    QScopedPointer<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
-    KWayland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
+    Wrapland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
     QSignalSpy pingSpy(surface, SIGNAL(pinged()));
 
-    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(KWayland::Server::ShellSurfaceInterface*)));
+    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(Wrapland::Server::ShellSurfaceInterface*)));
     QVERIFY(serverSurfaceSpy.isValid());
     QVERIFY(serverSurfaceSpy.wait());
     ShellSurfaceInterface *serverSurface = serverSurfaceSpy.first().first().value<ShellSurfaceInterface*>();
@@ -589,13 +589,13 @@ void TestWaylandShell::testPing()
 
 void TestWaylandShell::testTitle()
 {
-    using namespace KWayland::Server;
-    QScopedPointer<KWayland::Client::Surface> s(m_compositor->createSurface());
+    using namespace Wrapland::Server;
+    QScopedPointer<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
-    KWayland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
+    Wrapland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
 
-    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(KWayland::Server::ShellSurfaceInterface*)));
+    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(Wrapland::Server::ShellSurfaceInterface*)));
     QVERIFY(serverSurfaceSpy.isValid());
     QVERIFY(serverSurfaceSpy.wait());
     ShellSurfaceInterface *serverSurface = serverSurfaceSpy.first().first().value<ShellSurfaceInterface*>();
@@ -614,13 +614,13 @@ void TestWaylandShell::testTitle()
 
 void TestWaylandShell::testWindowClass()
 {
-    using namespace KWayland::Server;
-    QScopedPointer<KWayland::Client::Surface> s(m_compositor->createSurface());
+    using namespace Wrapland::Server;
+    QScopedPointer<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
-    KWayland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
+    Wrapland::Client::ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
 
-    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(KWayland::Server::ShellSurfaceInterface*)));
+    QSignalSpy serverSurfaceSpy(m_shellInterface, SIGNAL(surfaceCreated(Wrapland::Server::ShellSurfaceInterface*)));
     QVERIFY(serverSurfaceSpy.isValid());
     QVERIFY(serverSurfaceSpy.wait());
     ShellSurfaceInterface *serverSurface = serverSurfaceSpy.first().first().value<ShellSurfaceInterface*>();
@@ -643,7 +643,7 @@ void TestWaylandShell::testWindowClass()
 
 void TestWaylandShell::testDestroy()
 {
-    using namespace KWayland::Client;
+    using namespace Wrapland::Client;
     QScopedPointer<Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
@@ -675,7 +675,7 @@ void TestWaylandShell::testDestroy()
 
 void TestWaylandShell::testCast()
 {
-    using namespace KWayland::Client;
+    using namespace Wrapland::Client;
     Registry registry;
     QSignalSpy shellSpy(&registry, SIGNAL(shellAnnounced(quint32,quint32)));
     registry.setEventQueue(m_queue);
@@ -699,9 +699,9 @@ void TestWaylandShell::testCast()
 
 void TestWaylandShell::testMove()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
-    QScopedPointer<KWayland::Client::Surface> s(m_compositor->createSurface());
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
+    QScopedPointer<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
     ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
@@ -757,9 +757,9 @@ void TestWaylandShell::testResize_data()
 
 void TestWaylandShell::testResize()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
-    QScopedPointer<KWayland::Client::Surface> s(m_compositor->createSurface());
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
+    QScopedPointer<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
     ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
@@ -791,9 +791,9 @@ void TestWaylandShell::testResize()
 void TestWaylandShell::testDisconnect()
 {
     // this test verifies that the server side correctly tears down the resources when the client disconnects
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
-    QScopedPointer<KWayland::Client::Surface> s(m_compositor->createSurface());
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
+    QScopedPointer<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(!s.isNull());
     QVERIFY(s->isValid());
     QScopedPointer<ShellSurface> surface(m_shell->createSurface(s.data(), m_shell));
@@ -837,8 +837,8 @@ void TestWaylandShell::testWhileDestroying()
     // this test tries to hit a condition that a Surface gets created with an ID which was already
     // used for a previous Surface. For each Surface we try to create a ShellSurface.
     // Even if there was a Surface in the past with the same ID, it should create the ShellSurface
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
     QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QScopedPointer<Surface> s(m_compositor->createSurface());
@@ -871,8 +871,8 @@ void TestWaylandShell::testClientDisconnecting()
 {
     // this test tries to request a new surface size while the client is actually already destroyed
     // see BUG: 370232
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
     // create ShellSurface
     QScopedPointer<Surface> s(m_compositor->createSurface());
     QSignalSpy shellSurfaceCreatedSpy(m_shellInterface, &ShellInterface::surfaceCreated);

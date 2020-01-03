@@ -18,14 +18,14 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
-#ifndef KWAYLAND_KEYSTATE_INTERFACE_H
-#define KWAYLAND_KEYSTATE_INTERFACE_H
+#ifndef WRAPLAND_KEYSTATE_INTERFACE_H
+#define WRAPLAND_KEYSTATE_INTERFACE_H
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
 #include "resource.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -37,7 +37,7 @@ class Display;
  *
  * @since 5.58
  **/
-class KWAYLANDSERVER_EXPORT KeyStateInterface : public Global
+class WRAPLANDSERVER_EXPORT KeyStateInterface : public Global
 {
     Q_OBJECT
 public:

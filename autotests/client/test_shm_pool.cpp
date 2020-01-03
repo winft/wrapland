@@ -50,15 +50,15 @@ private Q_SLOTS:
     void testDestroy();
 
 private:
-    KWayland::Server::Display *m_display;
-    KWayland::Server::CompositorInterface *m_compositorInterface;
-    KWayland::Client::ConnectionThread *m_connection;
-    KWayland::Client::Compositor *m_compositor;
-    KWayland::Client::ShmPool *m_shmPool;
+    Wrapland::Server::Display *m_display;
+    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Client::ConnectionThread *m_connection;
+    Wrapland::Client::Compositor *m_compositor;
+    Wrapland::Client::ShmPool *m_shmPool;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("kwin-test-wayland-surface-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-surface-0");
 
 TestShmPool::TestShmPool(QObject *parent)
     : QObject(parent)
@@ -73,7 +73,7 @@ TestShmPool::TestShmPool(QObject *parent)
 
 void TestShmPool::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -81,7 +81,7 @@ void TestShmPool::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
     m_connection->setSocketName(s_socketName);
 
@@ -92,7 +92,7 @@ void TestShmPool::init()
     m_connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    KWayland::Client::Registry registry;
+    Wrapland::Client::Registry registry;
     QSignalSpy shmSpy(&registry, SIGNAL(shmAnnounced(quint32,quint32)));
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
@@ -224,7 +224,7 @@ void TestShmPool::testReuseBuffer()
 
 void TestShmPool::testDestroy()
 {
-    using namespace KWayland::Client;
+    using namespace Wrapland::Client;
     connect(m_connection, &ConnectionThread::connectionDied, m_shmPool, &ShmPool::destroy);
     QVERIFY(m_shmPool->isValid());
 

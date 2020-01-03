@@ -33,7 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // wayland
 #include <wayland-client-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -128,21 +128,21 @@ EventQueue *ShmPool::eventQueue()
 bool ShmPool::Private::createPool()
 {
     if (!tmpFile->open()) {
-        qCDebug(KWAYLAND_CLIENT) << "Could not open temporary file for Shm pool";
+        qCDebug(WRAPLAND_CLIENT) << "Could not open temporary file for Shm pool";
         return false;
     }
     if (unlink(tmpFile->fileName().toUtf8().constData()) != 0) {
-        qCDebug(KWAYLAND_CLIENT) << "Unlinking temporary file for Shm pool from file system failed";
+        qCDebug(WRAPLAND_CLIENT) << "Unlinking temporary file for Shm pool from file system failed";
     }
     if (ftruncate(tmpFile->handle(), size) < 0) {
-        qCDebug(KWAYLAND_CLIENT) << "Could not set size for Shm pool file";
+        qCDebug(WRAPLAND_CLIENT) << "Could not set size for Shm pool file";
         return false;
     }
     poolData = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, tmpFile->handle(), 0);
     pool.setup(wl_shm_create_pool(shm, tmpFile->handle(), size));
 
     if (!poolData || !pool) {
-        qCDebug(KWAYLAND_CLIENT) << "Creating Shm pool failed";
+        qCDebug(WRAPLAND_CLIENT) << "Creating Shm pool failed";
         return false;
     }
     return true;
@@ -151,7 +151,7 @@ bool ShmPool::Private::createPool()
 bool ShmPool::Private::resizePool(int32_t newSize)
 {
     if (ftruncate(tmpFile->handle(), newSize) < 0) {
-        qCDebug(KWAYLAND_CLIENT) << "Could not set new size for Shm pool file";
+        qCDebug(WRAPLAND_CLIENT) << "Could not set new size for Shm pool file";
         return false;
     }
     wl_shm_pool_resize(pool, newSize);
@@ -159,7 +159,7 @@ bool ShmPool::Private::resizePool(int32_t newSize)
     poolData = mmap(nullptr, newSize, PROT_READ | PROT_WRITE, MAP_SHARED, tmpFile->handle(), 0);
     size = newSize;
     if (!poolData) {
-        qCDebug(KWAYLAND_CLIENT) << "Resizing Shm pool failed";
+        qCDebug(WRAPLAND_CLIENT) << "Resizing Shm pool failed";
         return false;
     }
     emit q->poolResized();
@@ -175,10 +175,10 @@ static Buffer::Format toBufferFormat(const QImage &image)
     case QImage::Format_RGB32:
         return Buffer::Format::RGB32;
     case QImage::Format_ARGB32:
-        qCWarning(KWAYLAND_CLIENT) << "Unsupported image format: " << image.format() << ". expect slow performance. Use QImage::Format_ARGB32_Premultiplied";
+        qCWarning(WRAPLAND_CLIENT) << "Unsupported image format: " << image.format() << ". expect slow performance. Use QImage::Format_ARGB32_Premultiplied";
         return Buffer::Format::ARGB32;
     default:
-        qCWarning(KWAYLAND_CLIENT) << "Unsupported image format: " << image.format() << ". expect slow performance.";
+        qCWarning(WRAPLAND_CLIENT) << "Unsupported image format: " << image.format() << ". expect slow performance.";
         return Buffer::Format::ARGB32;
     }
 }

@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_POINTERCONSTRAINTS_INTERFACE_H
-#define KWAYLAND_SERVER_POINTERCONSTRAINTS_INTERFACE_H
+#ifndef WRAPLAND_SERVER_POINTERCONSTRAINTS_INTERFACE_H
+#define WRAPLAND_SERVER_POINTERCONSTRAINTS_INTERFACE_H
 
 #include "global.h"
 #include "resource.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include <QRegion>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -57,7 +57,7 @@ enum class PointerConstraintsInterfaceVersion {
  * @see Display::createPointerConstraints
  * @since 5.29
  **/
-class KWAYLANDSERVER_EXPORT PointerConstraintsInterface : public Global
+class WRAPLANDSERVER_EXPORT PointerConstraintsInterface : public Global
 {
     Q_OBJECT
 public:
@@ -92,7 +92,7 @@ private:
  *
  * @since 5.29
  **/
-class KWAYLANDSERVER_EXPORT LockedPointerInterface : public Resource
+class WRAPLANDSERVER_EXPORT LockedPointerInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -214,7 +214,7 @@ private:
  *
  * @since 5.29
  **/
-class KWAYLANDSERVER_EXPORT ConfinedPointerInterface : public Resource
+class WRAPLANDSERVER_EXPORT ConfinedPointerInterface : public Resource
 {
     Q_OBJECT
 public:

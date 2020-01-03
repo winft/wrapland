@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "drm_fourcc.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -231,7 +231,7 @@ BufferInterface::BufferInterface(wl_resource *resource, SurfaceInterface *parent
 BufferInterface::~BufferInterface()
 {
     if (d->refCount != 0) {
-        qCWarning(KWAYLAND_SERVER) << "Buffer destroyed while still being referenced, ref count:" << d->refCount;
+        qCWarning(WRAPLAND_SERVER) << "Buffer destroyed while still being referenced, ref count:" << d->refCount;
     }
 }
 

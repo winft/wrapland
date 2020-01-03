@@ -24,14 +24,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 #include <QSize>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
 
 struct wl_global;
 struct wl_client;
 struct wl_resource;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -43,7 +43,7 @@ class Display;
  * @brief Global for the wl_output interface.
  *
  **/
-class KWAYLANDSERVER_EXPORT OutputInterface : public Global
+class WRAPLANDSERVER_EXPORT OutputInterface : public Global
 {
     Q_OBJECT
     Q_PROPERTY(QSize physicalSize READ physicalSize WRITE setPhysicalSize NOTIFY physicalSizeChanged)
@@ -154,7 +154,7 @@ Q_SIGNALS:
      * A server is free to ignore this request.
      * @since 5.5
      **/
-    void dpmsModeRequested(KWayland::Server::OutputInterface::DpmsMode mode);
+    void dpmsModeRequested(Wrapland::Server::OutputInterface::DpmsMode mode);
 
 private:
     friend class Display;
@@ -166,9 +166,9 @@ private:
 }
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Server::OutputInterface::ModeFlags)
-Q_DECLARE_METATYPE(KWayland::Server::OutputInterface::SubPixel)
-Q_DECLARE_METATYPE(KWayland::Server::OutputInterface::Transform)
-Q_DECLARE_METATYPE(KWayland::Server::OutputInterface::DpmsMode)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::OutputInterface::ModeFlags)
+Q_DECLARE_METATYPE(Wrapland::Server::OutputInterface::SubPixel)
+Q_DECLARE_METATYPE(Wrapland::Server::OutputInterface::Transform)
+Q_DECLARE_METATYPE(Wrapland::Server::OutputInterface::DpmsMode)
 
 #endif

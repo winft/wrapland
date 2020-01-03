@@ -17,20 +17,20 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_SERVER_CLIENTCONNECTION_H
-#define KWAYLAND_SERVER_CLIENTCONNECTION_H
+#ifndef WRAPLAND_SERVER_CLIENTCONNECTION_H
+#define WRAPLAND_SERVER_CLIENTCONNECTION_H
 
 #include <sys/types.h>
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 struct wl_client;
 struct wl_interface;
 struct wl_resource;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -41,12 +41,12 @@ class Display;
  * @brief Convenient Class which represents a wl_client.
  *
  * The ClientConnection gets automatically created for a wl_client when a wl_client is
- * first used in the context of KWayland::Server. In particular the signal
+ * first used in the context of Wrapland::Server. In particular the signal
  * @link Display::clientConnected @endlink will be emitted.
  *
  * @see Display
  **/
-class KWAYLANDSERVER_EXPORT ClientConnection : public QObject
+class WRAPLANDSERVER_EXPORT ClientConnection : public QObject
 {
     Q_OBJECT
 public:
@@ -86,7 +86,7 @@ public:
      * The pid of the ClientConnection endpoint.
      *
      * Please note: if the ClientConnection got created with @link Display::createClient @endlink
-     * the pid will be identical to the process running the KWayland::Server::Display.
+     * the pid will be identical to the process running the Wrapland::Server::Display.
      *
      * @returns The pid of the connection.
      **/
@@ -95,7 +95,7 @@ public:
      * The uid of the ClientConnection endpoint.
      *
      * Please note: if the ClientConnection got created with @link Display::createClient @endlink
-     * the uid will be identical to the process running the KWayland::Server::Display.
+     * the uid will be identical to the process running the Wrapland::Server::Display.
      *
      * @returns The uid of the connection.
      **/
@@ -104,7 +104,7 @@ public:
      * The gid of the ClientConnection endpoint.
      *
      * Please note: if the ClientConnection got created with @link Display::createClient @endlink
-     * the gid will be identical to the process running the KWayland::Server::Display.
+     * the gid will be identical to the process running the Wrapland::Server::Display.
      *
      * @returns The gid of the connection.
      **/
@@ -114,7 +114,7 @@ public:
      * The absolute path to the executable.
      *
      * Please note: if the ClientConnection got created with @link Display::createClient @endlink
-     * the executablePath will be identical to the process running the KWayland::Server::Display.
+     * the executablePath will be identical to the process running the Wrapland::Server::Display.
      *
      * If the executable path cannot be resolved an empty QString is returned.
      *
@@ -145,7 +145,7 @@ Q_SIGNALS:
     /**
      * Signal emitted when the ClientConnection got disconnected from the server.
      **/
-    void disconnected(KWayland::Server::ClientConnection*);
+    void disconnected(Wrapland::Server::ClientConnection*);
 
 private:
     friend class Display;
@@ -157,6 +157,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::ClientConnection*)
+Q_DECLARE_METATYPE(Wrapland::Server::ClientConnection*)
 
 #endif

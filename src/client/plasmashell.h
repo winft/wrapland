@@ -23,13 +23,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QSize>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_surface;
 struct org_kde_plasma_shell;
 struct org_kde_plasma_surface;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -62,7 +62,7 @@ class PlasmaShellSurface;
  * @see Registry
  * @see PlasmaShellSurface
  **/
-class KWAYLANDCLIENT_EXPORT PlasmaShell : public QObject
+class WRAPLANDCLIENT_EXPORT PlasmaShell : public QObject
 {
     Q_OBJECT
 public:
@@ -184,7 +184,7 @@ private:
  * @see PlasmaShell
  * @see Surface
  **/
-class KWAYLANDCLIENT_EXPORT PlasmaShellSurface : public QObject
+class WRAPLANDCLIENT_EXPORT PlasmaShellSurface : public QObject
 {
     Q_OBJECT
 public:
@@ -363,7 +363,7 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::PlasmaShellSurface::Role)
-Q_DECLARE_METATYPE(KWayland::Client::PlasmaShellSurface::PanelBehavior)
+Q_DECLARE_METATYPE(Wrapland::Client::PlasmaShellSurface::Role)
+Q_DECLARE_METATYPE(Wrapland::Client::PlasmaShellSurface::PanelBehavior)
 
 #endif

@@ -45,22 +45,22 @@ private Q_SLOTS:
     void testDecoration();
 
 private:
-    KWayland::Server::Display *m_display = nullptr;
-    KWayland::Server::CompositorInterface *m_compositorInterface = nullptr;
-    KWayland::Server::XdgShellInterface *m_xdgShellInterface = nullptr;
-    KWayland::Server::XdgDecorationManagerInterface *m_xdgDecorationManagerInterface = nullptr;
+    Wrapland::Server::Display *m_display = nullptr;
+    Wrapland::Server::CompositorInterface *m_compositorInterface = nullptr;
+    Wrapland::Server::XdgShellInterface *m_xdgShellInterface = nullptr;
+    Wrapland::Server::XdgDecorationManagerInterface *m_xdgDecorationManagerInterface = nullptr;
 
-    KWayland::Client::ConnectionThread *m_connection = nullptr;
-    KWayland::Client::Compositor *m_compositor = nullptr;
-    KWayland::Client::EventQueue *m_queue = nullptr;
-    KWayland::Client::XdgShell *m_xdgShell = nullptr;
-    KWayland::Client::XdgDecorationManager *m_xdgDecorationManager = nullptr;
+    Wrapland::Client::ConnectionThread *m_connection = nullptr;
+    Wrapland::Client::Compositor *m_compositor = nullptr;
+    Wrapland::Client::EventQueue *m_queue = nullptr;
+    Wrapland::Client::XdgShell *m_xdgShell = nullptr;
+    Wrapland::Client::XdgDecorationManager *m_xdgDecorationManager = nullptr;
 
     QThread *m_thread = nullptr;
-    KWayland::Client::Registry *m_registry = nullptr;
+    Wrapland::Client::Registry *m_registry = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-server-side-decoration-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-server-side-decoration-0");
 
 TestXdgDecoration::TestXdgDecoration(QObject *parent)
     : QObject(parent)
@@ -69,8 +69,8 @@ TestXdgDecoration::TestXdgDecoration(QObject *parent)
 
 void TestXdgDecoration::init()
 {
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
 
     qRegisterMetaType<XdgDecoration::Mode>();
     qRegisterMetaType<XdgDecorationInterface::Mode>();
@@ -82,7 +82,7 @@ void TestXdgDecoration::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
@@ -172,12 +172,12 @@ void TestXdgDecoration::cleanup()
 
 void TestXdgDecoration::testDecoration_data()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
-    QTest::addColumn<KWayland::Server::XdgDecorationInterface::Mode>("configuredMode");
-    QTest::addColumn<KWayland::Client::XdgDecoration::Mode>("configuredModeExp");
-    QTest::addColumn<KWayland::Client::XdgDecoration::Mode>("setMode");
-    QTest::addColumn<KWayland::Server::XdgDecorationInterface::Mode>("setModeExp");
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
+    QTest::addColumn<Wrapland::Server::XdgDecorationInterface::Mode>("configuredMode");
+    QTest::addColumn<Wrapland::Client::XdgDecoration::Mode>("configuredModeExp");
+    QTest::addColumn<Wrapland::Client::XdgDecoration::Mode>("setMode");
+    QTest::addColumn<Wrapland::Server::XdgDecorationInterface::Mode>("setModeExp");
 
     const auto serverClient = XdgDecorationInterface::Mode::ClientSide;
     const auto serverServer = XdgDecorationInterface::Mode::ServerSide;
@@ -192,13 +192,13 @@ void TestXdgDecoration::testDecoration_data()
 
 void TestXdgDecoration::testDecoration()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
 
-    QFETCH(KWayland::Server::XdgDecorationInterface::Mode, configuredMode);
-    QFETCH(KWayland::Client::XdgDecoration::Mode, configuredModeExp);
-    QFETCH(KWayland::Client::XdgDecoration::Mode, setMode);
-    QFETCH(KWayland::Server::XdgDecorationInterface::Mode, setModeExp);
+    QFETCH(Wrapland::Server::XdgDecorationInterface::Mode, configuredMode);
+    QFETCH(Wrapland::Client::XdgDecoration::Mode, configuredModeExp);
+    QFETCH(Wrapland::Client::XdgDecoration::Mode, setMode);
+    QFETCH(Wrapland::Server::XdgDecorationInterface::Mode, setModeExp);
 
 
     QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);

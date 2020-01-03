@@ -17,21 +17,21 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_XDGFOREIGN_H
-#define KWAYLAND_CLIENT_XDGFOREIGN_H
+#ifndef WRAPLAND_CLIENT_XDGFOREIGN_H
+#define WRAPLAND_CLIENT_XDGFOREIGN_H
 
 #include "surface.h"
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct zxdg_exporter_v2;
 struct zxdg_importer_v2;
 struct zxdg_exported_v2;
 struct zxdg_imported_v2;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -64,7 +64,7 @@ class XdgImported;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT XdgExporter : public QObject
+class WRAPLANDCLIENT_EXPORT XdgExporter : public QObject
 {
     Q_OBJECT
 public:
@@ -164,7 +164,7 @@ protected:
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT XdgImporter : public QObject
+class WRAPLANDCLIENT_EXPORT XdgImporter : public QObject
 {
     Q_OBJECT
 public:
@@ -246,7 +246,7 @@ protected:
     QScopedPointer<Private> d;
 };
 
-class KWAYLANDCLIENT_EXPORT XdgExported : public QObject
+class WRAPLANDCLIENT_EXPORT XdgExported : public QObject
 {
     Q_OBJECT
 public:
@@ -310,7 +310,7 @@ protected:
     QScopedPointer<Private> d;
 };
 
-class KWAYLANDCLIENT_EXPORT XdgImported : public QObject
+class WRAPLANDCLIENT_EXPORT XdgImported : public QObject
 {
     Q_OBJECT
 public:

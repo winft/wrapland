@@ -18,15 +18,15 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
-#ifndef KWAYLAND_SERVER_FILTERED_DISPLAY_H
-#define KWAYLAND_SERVER_FILTERED_DISPLAY_H
+#ifndef WRAPLAND_SERVER_FILTERED_DISPLAY_H
+#define WRAPLAND_SERVER_FILTERED_DISPLAY_H
 
 #include "global.h"
 #include "display.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -38,7 +38,7 @@ namespace Server
 *
 * @since 5.FIXME
 */
-class KWAYLANDSERVER_EXPORT FilteredDisplay : public Display
+class WRAPLANDSERVER_EXPORT FilteredDisplay : public Display
 {
     Q_OBJECT
 public:

@@ -26,13 +26,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSize>
 #include <QVector>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_outputdevice;
 class QPoint;
 class QRect;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -69,7 +69,7 @@ class EventQueue;
  * @see Registry
  * @since 5.5
  **/
-class KWAYLANDCLIENT_EXPORT OutputDevice : public QObject
+class WRAPLANDCLIENT_EXPORT OutputDevice : public QObject
 {
     Q_OBJECT
 public:
@@ -191,7 +191,7 @@ public:
      **/
     int refreshRate() const;
 
-#if KWAYLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 50)
+#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 50)
     /**
      * Scaling factor of this output.
      *
@@ -200,7 +200,7 @@ public:
      * applications rendering at the native resolution would be too small to be legible.
      * @deprecated Since 5.50, use scaleF()
      **/
-    KWAYLANDCLIENT_DEPRECATED_VERSION(5, 50, "Use OutputDevice::scaleF()")
+    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 50, "Use OutputDevice::scaleF()")
     int scale() const;
 #endif
 
@@ -236,7 +236,7 @@ public:
      **/
     QList<Mode> modes() const;
 
-    KWayland::Client::OutputDevice::Mode currentMode() const;
+    Wrapland::Client::OutputDevice::Mode currentMode() const;
 
 
     /**
@@ -299,13 +299,13 @@ Q_SIGNALS:
      * @param mode The newly added Mode.
      * @see modeChanged
      **/
-    void modeAdded(const KWayland::Client::OutputDevice::Mode &mode);
+    void modeAdded(const Wrapland::Client::OutputDevice::Mode &mode);
     /**
      * Emitted whenever a Mode changes.
      * This normally means that the @c Mode::Flag::Current is added or removed.
      * @param mode The changed Mode
      **/
-    void modeChanged(const KWayland::Client::OutputDevice::Mode &mode);
+    void modeChanged(const Wrapland::Client::OutputDevice::Mode &mode);
     /**
      * Emitted whenever the color curves changed.
      *
@@ -330,11 +330,11 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::OutputDevice::SubPixel)
-Q_DECLARE_METATYPE(KWayland::Client::OutputDevice::Transform)
-Q_DECLARE_METATYPE(KWayland::Client::OutputDevice::Enablement)
-Q_DECLARE_METATYPE(KWayland::Client::OutputDevice::Mode)
-Q_DECLARE_METATYPE(KWayland::Client::OutputDevice::ColorCurves)
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Client::OutputDevice::Mode::Flags)
+Q_DECLARE_METATYPE(Wrapland::Client::OutputDevice::SubPixel)
+Q_DECLARE_METATYPE(Wrapland::Client::OutputDevice::Transform)
+Q_DECLARE_METATYPE(Wrapland::Client::OutputDevice::Enablement)
+Q_DECLARE_METATYPE(Wrapland::Client::OutputDevice::Mode)
+Q_DECLARE_METATYPE(Wrapland::Client::OutputDevice::ColorCurves)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::OutputDevice::Mode::Flags)
 
 #endif

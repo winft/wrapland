@@ -17,15 +17,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_XDG_DECORATION_UNSTABLE_V1_H
-#define KWAYLAND_SERVER_XDG_DECORATION_UNSTABLE_V1_H
+#ifndef WRAPLAND_SERVER_XDG_DECORATION_UNSTABLE_V1_H
+#define WRAPLAND_SERVER_XDG_DECORATION_UNSTABLE_V1_H
 
 #include "global.h"
 #include "resource.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -39,7 +39,7 @@ class XdgShellSurfaceInterface;
  * @brief The XdgDecorationManagerInterface class
  * @since 5.54
  */
-class KWAYLANDSERVER_EXPORT XdgDecorationManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT XdgDecorationManagerInterface : public Global
 {
     Q_OBJECT
 public:
@@ -56,7 +56,7 @@ private:
  * @brief The XdgDecorationInterface class
  * @since 5.54
  */
-class KWAYLANDSERVER_EXPORT XdgDecorationInterface : public Resource
+class WRAPLANDSERVER_EXPORT XdgDecorationInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -91,7 +91,7 @@ Q_SIGNALS:
     /**
      * New mode requested by the client
      */
-    void modeRequested(KWayland::Server::XdgDecorationInterface::Mode requestedMode);
+    void modeRequested(Wrapland::Server::XdgDecorationInterface::Mode requestedMode);
 
 private:
     explicit XdgDecorationInterface(XdgDecorationManagerInterface *parent, XdgShellSurfaceInterface *surface, wl_resource *parentResource);

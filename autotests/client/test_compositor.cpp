@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 // Qt
 #include <QtTest>
-// KWin
+
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/surface.h"
@@ -43,14 +43,14 @@ private Q_SLOTS:
     void testCast();
 
 private:
-    KWayland::Server::Display *m_display;
-    KWayland::Server::CompositorInterface *m_compositorInterface;
-    KWayland::Client::ConnectionThread *m_connection;
-    KWayland::Client::Compositor *m_compositor;
+    Wrapland::Server::Display *m_display;
+    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Client::ConnectionThread *m_connection;
+    Wrapland::Client::Compositor *m_compositor;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-compositor-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-compositor-0");
 
 TestCompositor::TestCompositor(QObject *parent)
     : QObject(parent)
@@ -64,7 +64,7 @@ TestCompositor::TestCompositor(QObject *parent)
 
 void TestCompositor::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -72,7 +72,7 @@ void TestCompositor::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
     m_connection->setSocketName(s_socketName);
 
@@ -83,7 +83,7 @@ void TestCompositor::init()
     m_connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    KWayland::Client::Registry registry;
+    Wrapland::Client::Registry registry;
     QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32,quint32)));
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
@@ -120,7 +120,7 @@ void TestCompositor::cleanup()
 
 void TestCompositor::testDestroy()
 {
-    using namespace KWayland::Client;
+    using namespace Wrapland::Client;
     connect(m_connection, &ConnectionThread::connectionDied, m_compositor, &Compositor::destroy);
     QVERIFY(m_compositor->isValid());
 
@@ -139,7 +139,7 @@ void TestCompositor::testDestroy()
 
 void TestCompositor::testCast()
 {
-    using namespace KWayland::Client;
+    using namespace Wrapland::Client;
     Registry registry;
     QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32,quint32)));
     registry.create(m_connection->display());

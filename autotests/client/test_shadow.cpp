@@ -33,8 +33,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/compositor_interface.h"
 #include "../../src/server/shadow_interface.h"
 
-using namespace KWayland::Client;
-using namespace KWayland::Server;
+using namespace Wrapland::Client;
+using namespace Wrapland::Server;
 
 class ShadowTest : public QObject
 {
@@ -60,7 +60,7 @@ private:
     ShadowManager *m_shadow = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-shadow-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-shadow-0");
 
 void ShadowTest::init()
 {
@@ -76,7 +76,7 @@ void ShadowTest::init()
     m_shadowInterface->create();
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
@@ -269,12 +269,12 @@ void ShadowTest::testShadowElements()
 
 void ShadowTest::testSurfaceDestroy()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<KWayland::Client::Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<SurfaceInterface*>();
     QSignalSpy shadowChangedSpy(serverSurface, &SurfaceInterface::shadowChanged);

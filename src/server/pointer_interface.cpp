@@ -31,7 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Wayland
 #include <wayland-server.h>
 
-namespace KWayland
+namespace Wrapland
 {
 
 namespace Server

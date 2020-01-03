@@ -23,11 +23,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QRegion>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include "resource.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -41,7 +41,7 @@ class CompositorInterface;
  *
  * @see CompositorInterface
  **/
-class KWAYLANDSERVER_EXPORT RegionInterface : public Resource
+class WRAPLANDSERVER_EXPORT RegionInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -73,6 +73,6 @@ private:
 
 }
 }
-Q_DECLARE_METATYPE(KWayland::Server::RegionInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::RegionInterface*)
 
 #endif

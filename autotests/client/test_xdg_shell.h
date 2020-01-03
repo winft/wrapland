@@ -40,8 +40,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/surface_interface.h"
 #include "../../src/server/xdgshell_interface.h"
 
-using namespace KWayland::Client;
-using namespace KWayland::Server;
+using namespace Wrapland::Client;
+using namespace Wrapland::Server;
 
 Q_DECLARE_METATYPE(Qt::MouseButton)
 

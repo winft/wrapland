@@ -17,15 +17,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_SERVER_FAKEINPUT_INTERFACE_H
-#define KWAYLAND_SERVER_FAKEINPUT_INTERFACE_H
+#ifndef WRAPLAND_SERVER_FAKEINPUT_INTERFACE_H
+#define WRAPLAND_SERVER_FAKEINPUT_INTERFACE_H
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
 
 struct wl_resource;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -50,7 +50,7 @@ class FakeInputDevice;
  * @see FakeInputDevice
  * @since 5.4
  **/
-class KWAYLANDSERVER_EXPORT FakeInputInterface : public Global
+class WRAPLANDSERVER_EXPORT FakeInputInterface : public Global
 {
     Q_OBJECT
 public:
@@ -61,7 +61,7 @@ Q_SIGNALS:
      * Signal emitted whenever a client bound the fake input @p device.
      * @param device The created FakeInputDevice
      **/
-    void deviceCreated(KWayland::Server::FakeInputDevice *device);
+    void deviceCreated(Wrapland::Server::FakeInputDevice *device);
 
 private:
     explicit FakeInputInterface(Display *display, QObject *parent = nullptr);
@@ -75,7 +75,7 @@ private:
  * @see FakeInputInterface
  * @since 5.4
  **/
-class KWAYLANDSERVER_EXPORT FakeInputDevice : public QObject
+class WRAPLANDSERVER_EXPORT FakeInputDevice : public QObject
 {
     Q_OBJECT
 public:
@@ -184,6 +184,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::FakeInputDevice*)
+Q_DECLARE_METATYPE(Wrapland::Server::FakeInputDevice*)
 
 #endif

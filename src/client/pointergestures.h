@@ -17,13 +17,13 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_POINTERGESTURES_H
-#define KWAYLAND_CLIENT_POINTERGESTURES_H
+#ifndef WRAPLAND_CLIENT_POINTERGESTURES_H
+#define WRAPLAND_CLIENT_POINTERGESTURES_H
 
 #include <QObject>
 #include <QPointer>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct zwp_pointer_gestures_v1;
 struct zwp_pointer_gesture_swipe_v1;
@@ -31,7 +31,7 @@ struct zwp_pointer_gesture_pinch_v1;
 
 class QSizeF;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -68,7 +68,7 @@ class PointerSwipeGesture;
  * @see PointerPinchGesture
  * @since 5.29
  **/
-class KWAYLANDCLIENT_EXPORT PointerGestures : public QObject
+class WRAPLANDCLIENT_EXPORT PointerGestures : public QObject
 {
     Q_OBJECT
 public:
@@ -173,7 +173,7 @@ private:
  * @see PointerPinchGesture
  * @since 5.29
  **/
-class KWAYLANDCLIENT_EXPORT PointerSwipeGesture : public QObject
+class WRAPLANDCLIENT_EXPORT PointerSwipeGesture : public QObject
 {
     Q_OBJECT
 public:
@@ -301,7 +301,7 @@ private:
  * @see PointerSwipeGesture
  * @since 5.29
  **/
-class KWAYLANDCLIENT_EXPORT PointerPinchGesture : public QObject
+class WRAPLANDCLIENT_EXPORT PointerPinchGesture : public QObject
 {
     Q_OBJECT
 public:

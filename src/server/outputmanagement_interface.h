@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
-#ifndef KWAYLAND_SERVER_OUTPUTMANAGEMENT_INTERFACE_H
-#define KWAYLAND_SERVER_OUTPUTMANAGEMENT_INTERFACE_H
+#ifndef WRAPLAND_SERVER_OUTPUTMANAGEMENT_INTERFACE_H
+#define WRAPLAND_SERVER_OUTPUTMANAGEMENT_INTERFACE_H
 
 #include "global.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -44,7 +44,7 @@ class OutputConfigurationInterface;
  * @see OutputConfigurationInterface
  * @since 5.5
  */
-class KWAYLANDSERVER_EXPORT OutputManagementInterface : public Global
+class WRAPLANDSERVER_EXPORT OutputManagementInterface : public Global
 {
     Q_OBJECT
 public:
@@ -64,7 +64,7 @@ Q_SIGNALS:
      * @see OutputDeviceInterface
      * @see OutputInterface
      */
-    void configurationChangeRequested(KWayland::Server::OutputConfigurationInterface *configurationInterface);
+    void configurationChangeRequested(Wrapland::Server::OutputConfigurationInterface *configurationInterface);
 
 private:
     explicit OutputManagementInterface(Display *display, QObject *parent = nullptr);

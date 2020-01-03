@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 #include <QMatrix4x4>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
 #include "keyboard_interface.h"
 #include "pointer_interface.h"
@@ -33,7 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 struct wl_client;
 struct wl_resource;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -115,7 +115,7 @@ enum class PointerAxisSource {
  * @see TouchInterface
  * @see SurfaceInterface
  **/
-class KWAYLANDSERVER_EXPORT SeatInterface : public Global
+class WRAPLANDSERVER_EXPORT SeatInterface : public Global
 {
     Q_OBJECT
     /**
@@ -716,15 +716,15 @@ Q_SIGNALS:
     void touchMoved(qint32 id, quint32 serial, const QPointF &globalPosition);
     void timestampChanged(quint32);
 
-    void pointerCreated(KWayland::Server::PointerInterface*);
-    void keyboardCreated(KWayland::Server::KeyboardInterface*);
-    void touchCreated(KWayland::Server::TouchInterface*);
+    void pointerCreated(Wrapland::Server::PointerInterface*);
+    void keyboardCreated(Wrapland::Server::KeyboardInterface*);
+    void touchCreated(Wrapland::Server::TouchInterface*);
 
     /**
      * Emitted whenever the focused pointer changes
      * @since 5.6
      **/
-    void focusedPointerChanged(KWayland::Server::PointerInterface*);
+    void focusedPointerChanged(Wrapland::Server::PointerInterface*);
 
     /**
      * Emitted whenever the selection changes
@@ -773,6 +773,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::SeatInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::SeatInterface*)
 
 #endif

@@ -22,11 +22,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_region;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -43,7 +43,7 @@ namespace Client
  * @see Compositor
  * @see Surface
  **/
-class KWAYLANDCLIENT_EXPORT Region : public QObject
+class WRAPLANDCLIENT_EXPORT Region : public QObject
 {
     Q_OBJECT
 public:

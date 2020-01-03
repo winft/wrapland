@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland-linux-dmabuf-unstable-v1-server-protocol.h"
 #include "wayland-server-protocol.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include <QVector>
 
@@ -36,7 +36,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include <unistd.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

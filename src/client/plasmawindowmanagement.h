@@ -24,12 +24,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QIcon>
 #include <QSize>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_plasma_window_management;
 struct org_kde_plasma_window;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -69,7 +69,7 @@ class PlasmaVirtualDesktop;
  * @see Registry
  * @see PlasmaWindowManagementSurface
  **/
-class KWAYLANDCLIENT_EXPORT PlasmaWindowManagement : public QObject
+class WRAPLANDCLIENT_EXPORT PlasmaWindowManagement : public QObject
 {
     Q_OBJECT
 public:
@@ -189,7 +189,7 @@ Q_SIGNALS:
      * A new @p window got created.
      * @see windows
      **/
-    void windowCreated(KWayland::Client::PlasmaWindow *window);
+    void windowCreated(Wrapland::Client::PlasmaWindow *window);
     /**
      * The active window changed.
      * @see activeWindow
@@ -225,7 +225,7 @@ private:
  *
  * @see PlasmaWindowManager
  **/
-class KWAYLANDCLIENT_EXPORT PlasmaWindow : public QObject
+class WRAPLANDCLIENT_EXPORT PlasmaWindow : public QObject
 {
     Q_OBJECT
 public:
@@ -272,13 +272,13 @@ public:
      * @see appIdChanged
      **/
     QString appId() const;
-#if KWAYLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 52)
+#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 52)
     /**
      * @returns the id of the virtual desktop this PlasmaWindow is on
      * @see virtualDesktopChanged
      * @deprecated: Since 5.52, use plasmaVirtualDesktops instead
      **/
-    KWAYLANDCLIENT_DEPRECATED_VERSION(5, 52, "Use PlasmaWindow::plasmaVirtualDesktops()")
+    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 52, "Use PlasmaWindow::plasmaVirtualDesktops()")
     quint32 virtualDesktop() const;
 #endif
     /**
@@ -413,12 +413,12 @@ public:
      * @since 5.22
      */
     void requestResize();
-#if KWAYLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 52)
+#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 52)
     /**
      * Requests to send the window to virtual @p desktop.
      * @deprecated: Since 5.52, use requestEnterVirtualDesktop instead
      **/
-    KWAYLANDCLIENT_DEPRECATED_VERSION(5, 52, "Use PlasmaWindow::requestEnterVirtualDesktop(const QString &)")
+    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 52, "Use PlasmaWindow::requestEnterVirtualDesktop(const QString &)")
     void requestVirtualDesktop(quint32 desktop);
 #endif
 
@@ -534,12 +534,12 @@ Q_SIGNALS:
      * @see appId
      **/
     void appIdChanged();
-#if KWAYLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 52)
+#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 52)
     /**
      * The virtual desktop changed.
      * @deprecated Since 5.52, use plasmaVirtualDesktopEntered and plasmaVirtualDesktopLeft instead
      **/
-    KWAYLANDCLIENT_DEPRECATED_VERSION(5, 52, "Use PlasmaWindow::plasmaVirtualDesktopEntered(const QString &) and PlasmaWindow::plasmaVirtualDesktopLeft(const QString &)")
+    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 52, "Use PlasmaWindow::plasmaVirtualDesktopEntered(const QString &) and PlasmaWindow::plasmaVirtualDesktopLeft(const QString &)")
     void virtualDesktopChanged();
 #endif
     /**
@@ -691,6 +691,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::PlasmaWindow*)
+Q_DECLARE_METATYPE(Wrapland::Client::PlasmaWindow*)
 
 #endif

@@ -17,14 +17,14 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_SERVER_DATAOFFERINTERFACE_P_H
-#define KWAYLAND_SERVER_DATAOFFERINTERFACE_P_H
+#ifndef WRAPLAND_SERVER_DATAOFFERINTERFACE_P_H
+#define WRAPLAND_SERVER_DATAOFFERINTERFACE_P_H
 #include "dataoffer_interface.h"
 #include "datasource_interface.h"
 #include "resource_p.h"
 #include <wayland-server.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

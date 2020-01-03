@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #ifndef WAYLAND_SERVER_SEAT_INTERFACE_P_H
 #define WAYLAND_SERVER_SEAT_INTERFACE_P_H
-// KWayland
+// Wrapland
 #include "seat_interface.h"
 #include "global_p.h"
 // Qt
@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Wayland
 #include <wayland-server.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

@@ -17,19 +17,19 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_XDGOUTPUT_H
-#define KWAYLAND_CLIENT_XDGOUTPUT_H
+#ifndef WRAPLAND_CLIENT_XDGOUTPUT_H
+#define WRAPLAND_CLIENT_XDGOUTPUT_H
 
 #include <QObject>
 #include <QSize>
 #include <QPoint>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct zxdg_output_manager_v1;
 struct zxdg_output_v1;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -66,7 +66,7 @@ class Output;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT XdgOutputManager : public QObject
+class WRAPLANDCLIENT_EXPORT XdgOutputManager : public QObject
 {
     Q_OBJECT
 public:
@@ -155,7 +155,7 @@ private:
  * @see Registry
  **/
 
-class KWAYLANDCLIENT_EXPORT XdgOutput : public QObject
+class WRAPLANDCLIENT_EXPORT XdgOutput : public QObject
 {
     Q_OBJECT
 public:

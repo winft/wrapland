@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_SLIDE_H
-#define KWAYLAND_CLIENT_SLIDE_H
+#ifndef WRAPLAND_CLIENT_SLIDE_H
+#define WRAPLAND_CLIENT_SLIDE_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_slide_manager;
 struct org_kde_kwin_slide;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -66,7 +66,7 @@ class Surface;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT SlideManager : public QObject
+class WRAPLANDCLIENT_EXPORT SlideManager : public QObject
 {
     Q_OBJECT
 public:
@@ -144,7 +144,7 @@ private:
 /**
  * TODO
  */
-class KWAYLANDCLIENT_EXPORT Slide : public QObject
+class WRAPLANDCLIENT_EXPORT Slide : public QObject
 {
     Q_OBJECT
 public:

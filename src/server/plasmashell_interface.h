@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include "global.h"
 #include "resource.h"
@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 class QSize;
 struct wl_resource;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -51,7 +51,7 @@ class PlasmaShellSurfaceInterface;
  *
  * @since 5.4
  **/
-class KWAYLANDSERVER_EXPORT PlasmaShellInterface : public Global
+class WRAPLANDSERVER_EXPORT PlasmaShellInterface : public Global
 {
     Q_OBJECT
 public:
@@ -61,7 +61,7 @@ Q_SIGNALS:
     /**
      * Emitted whenever a PlasmaShellSurfaceInterface got created.
      **/
-    void surfaceCreated(KWayland::Server::PlasmaShellSurfaceInterface*);
+    void surfaceCreated(Wrapland::Server::PlasmaShellSurfaceInterface*);
 
 private:
     friend class Display;
@@ -76,7 +76,7 @@ private:
  *
  * @since 5.4
  **/
-class KWAYLANDSERVER_EXPORT PlasmaShellSurfaceInterface : public Resource
+class WRAPLANDSERVER_EXPORT PlasmaShellSurfaceInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -252,7 +252,7 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::PlasmaShellSurfaceInterface::Role)
-Q_DECLARE_METATYPE(KWayland::Server::PlasmaShellSurfaceInterface::PanelBehavior)
+Q_DECLARE_METATYPE(Wrapland::Server::PlasmaShellSurfaceInterface::Role)
+Q_DECLARE_METATYPE(Wrapland::Server::PlasmaShellSurfaceInterface::PanelBehavior)
 
 #endif

@@ -32,21 +32,21 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <linux/input.h>
 
-using namespace KWayland::Client;
-using namespace KWayland::Server;
+using namespace Wrapland::Client;
+using namespace Wrapland::Server;
 
 Q_DECLARE_METATYPE(Qt::MouseButton)
-typedef void (KWayland::Client::PlasmaWindow::*ClientWindowSignal)();
+typedef void (Wrapland::Client::PlasmaWindow::*ClientWindowSignal)();
 Q_DECLARE_METATYPE(ClientWindowSignal)
-typedef void (KWayland::Server::PlasmaWindowInterface::*ServerWindowBoolSetter)(bool);
+typedef void (Wrapland::Server::PlasmaWindowInterface::*ServerWindowBoolSetter)(bool);
 Q_DECLARE_METATYPE(ServerWindowBoolSetter)
-typedef void (KWayland::Server::PlasmaWindowInterface::*ServerWindowStringSetter)(const QString&);
+typedef void (Wrapland::Server::PlasmaWindowInterface::*ServerWindowStringSetter)(const QString&);
 Q_DECLARE_METATYPE(ServerWindowStringSetter)
-typedef void (KWayland::Server::PlasmaWindowInterface::*ServerWindowQuint32Setter)(quint32);
+typedef void (Wrapland::Server::PlasmaWindowInterface::*ServerWindowQuint32Setter)(quint32);
 Q_DECLARE_METATYPE(ServerWindowQuint32Setter)
-typedef void (KWayland::Server::PlasmaWindowInterface::*ServerWindowVoidSetter)();
+typedef void (Wrapland::Server::PlasmaWindowInterface::*ServerWindowVoidSetter)();
 Q_DECLARE_METATYPE(ServerWindowVoidSetter)
-typedef void (KWayland::Server::PlasmaWindowInterface::*ServerWindowIconSetter)(const QIcon&);
+typedef void (Wrapland::Server::PlasmaWindowInterface::*ServerWindowIconSetter)(const QIcon&);
 Q_DECLARE_METATYPE(ServerWindowIconSetter)
 
 class PlasmaWindowModelTest : public QObject
@@ -98,13 +98,13 @@ private:
     Display *m_display = nullptr;
     PlasmaWindowManagementInterface *m_pwInterface = nullptr;
     PlasmaWindowManagement *m_pw = nullptr;
-    KWayland::Server::PlasmaVirtualDesktopManagementInterface *m_plasmaVirtualDesktopManagementInterface = nullptr;
+    Wrapland::Server::PlasmaVirtualDesktopManagementInterface *m_plasmaVirtualDesktopManagementInterface = nullptr;
     ConnectionThread *m_connection = nullptr;
     QThread *m_thread = nullptr;
     EventQueue *m_queue = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-fake-input-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-fake-input-0");
 
 void PlasmaWindowModelTest::init()
 {
@@ -124,7 +124,7 @@ void PlasmaWindowModelTest::init()
     m_pwInterface->setPlasmaVirtualDesktopManagementInterface(m_plasmaVirtualDesktopManagementInterface);
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
@@ -883,7 +883,7 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy_data()
     QTest::newRow("onallDesktop")     << &PlasmaWindow::onAllDesktopsChanged            << QVariant::fromValue(&PlasmaWindowInterface::setOnAllDesktops)            << QVariant(true);
     QTest::newRow("title")            << &PlasmaWindow::titleChanged                    << QVariant::fromValue(&PlasmaWindowInterface::setTitle)                    << QVariant(QStringLiteral("foo"));
     QTest::newRow("appId")            << &PlasmaWindow::appIdChanged                    << QVariant::fromValue(&PlasmaWindowInterface::setAppId)                    << QVariant(QStringLiteral("foo"));
-#if KWAYLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 28)
+#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 28)
     QTest::newRow("iconname" )            << &PlasmaWindow::iconChanged                     << QVariant::fromValue(&PlasmaWindowInterface::setThemedIconName)           << QVariant(QStringLiteral("foo"));
 #endif
     QTest::newRow("icon" )            << &PlasmaWindow::iconChanged                     << QVariant::fromValue(&PlasmaWindowInterface::setIcon)                     << QVariant::fromValue(QIcon::fromTheme(QStringLiteral("foo")));

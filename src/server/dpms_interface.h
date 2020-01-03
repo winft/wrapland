@@ -22,10 +22,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -58,14 +58,14 @@ class Display;
  * To connect to Dpms change requests use:
  * @code
  * connect(output, &OutputInterface::dpmsModeRequested,
- *         [] (KWayland::Server::OutputInterface::DpmsMode requestedMode) { qDebug() << "Mode change requested"; });
+ *         [] (Wrapland::Server::OutputInterface::DpmsMode requestedMode) { qDebug() << "Mode change requested"; });
  * @endcode
  *
  * @see Display
  * @see OutputInterface
  * @since 5.5
  **/
-class KWAYLANDSERVER_EXPORT DpmsManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT DpmsManagerInterface : public Global
 {
     Q_OBJECT
 public:

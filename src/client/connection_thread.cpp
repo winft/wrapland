@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Wayland
 #include <wayland-client-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 
 namespace Client
@@ -101,14 +101,14 @@ void ConnectionThread::Private::doInitConnection()
         display = wl_display_connect(socketName.toUtf8().constData());
     }
     if (!display) {
-        qCWarning(KWAYLAND_CLIENT) << "Failed connecting to Wayland display";
+        qCWarning(WRAPLAND_CLIENT) << "Failed connecting to Wayland display";
         emit q->failed();
         return;
     }
     if (fd != -1) {
-        qCDebug(KWAYLAND_CLIENT) << "Connected to Wayland server over file descriptor:" << fd;
+        qCDebug(WRAPLAND_CLIENT) << "Connected to Wayland server over file descriptor:" << fd;
     } else {
-        qCDebug(KWAYLAND_CLIENT) << "Connected to Wayland server at:" << socketName;
+        qCDebug(WRAPLAND_CLIENT) << "Connected to Wayland server at:" << socketName;
     }
 
     // setup socket notifier
@@ -154,7 +154,7 @@ void ConnectionThread::Private::setupSocketFileWatcher()
             if (QFile::exists(file) || serverDied) {
                 return;
             }
-            qCWarning(KWAYLAND_CLIENT) << "Connection to server went away";
+            qCWarning(WRAPLAND_CLIENT) << "Connection to server went away";
             serverDied = true;
             if (display) {
                 free(display);
@@ -171,7 +171,7 @@ void ConnectionThread::Private::setupSocketFileWatcher()
                         return;
                     }
                     if (runtimeDir.exists(socketName)) {
-                        qCDebug(KWAYLAND_CLIENT) << "Socket reappeared";
+                        qCDebug(WRAPLAND_CLIENT) << "Socket reappeared";
                         socketWatcher.reset();
                         serverDied = false;
                         error = 0;

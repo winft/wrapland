@@ -27,14 +27,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSize>
 #include <QWindow>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_buffer;
 struct wl_surface;
 
 class QWindow;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -55,7 +55,7 @@ class Region;
  *
  * @see Compositor
  **/
-class KWAYLANDCLIENT_EXPORT Surface : public QObject
+class WRAPLANDCLIENT_EXPORT Surface : public QObject
 {
     Q_OBJECT
 public:
@@ -288,7 +288,7 @@ Q_SIGNALS:
      * @see outputs
      * @since 5.27
      **/
-    void outputEntered(KWayland::Client::Output *o);
+    void outputEntered(Wrapland::Client::Output *o);
 
     /**
      * Emitted whenever a change in the Surface (e.g. creation, movement, resize, unmapping)
@@ -299,7 +299,7 @@ Q_SIGNALS:
      * @see outputs
      * @since 5.27
      **/
-    void outputLeft(KWayland::Client::Output *o);
+    void outputLeft(Wrapland::Client::Output *o);
 
 private:
     class Private;

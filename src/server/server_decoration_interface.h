@@ -17,15 +17,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_SERVER_DECORATION_INTERFACE_H
-#define KWAYLAND_SERVER_SERVER_DECORATION_INTERFACE_H
+#ifndef WRAPLAND_SERVER_SERVER_DECORATION_INTERFACE_H
+#define WRAPLAND_SERVER_SERVER_DECORATION_INTERFACE_H
 
 #include "global.h"
 #include "resource.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -39,7 +39,7 @@ class SurfaceInterface;
  *
  * @since 5.6
  **/
-class KWAYLANDSERVER_EXPORT ServerSideDecorationManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT ServerSideDecorationManagerInterface : public Global
 {
     Q_OBJECT
 public:
@@ -79,7 +79,7 @@ Q_SIGNALS:
     /**
      * Emitted whenever a new ServerSideDecorationInterface is created.
      **/
-    void decorationCreated(KWayland::Server::ServerSideDecorationInterface*);
+    void decorationCreated(Wrapland::Server::ServerSideDecorationInterface*);
 
 private:
     explicit ServerSideDecorationManagerInterface(Display *display, QObject *parent = nullptr);
@@ -95,7 +95,7 @@ private:
  *
  * @since 5.6
  **/
-class KWAYLANDSERVER_EXPORT ServerSideDecorationInterface : public Resource
+class WRAPLANDSERVER_EXPORT ServerSideDecorationInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -132,7 +132,7 @@ Q_SIGNALS:
      * @see setMode
      * @see mode
      **/
-    void modeRequested(KWayland::Server::ServerSideDecorationManagerInterface::Mode);
+    void modeRequested(Wrapland::Server::ServerSideDecorationManagerInterface::Mode);
 
 private:
     explicit ServerSideDecorationInterface(ServerSideDecorationManagerInterface *parent, SurfaceInterface *surface, wl_resource *parentResource);
@@ -145,7 +145,7 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::ServerSideDecorationInterface*)
-Q_DECLARE_METATYPE(KWayland::Server::ServerSideDecorationManagerInterface::Mode)
+Q_DECLARE_METATYPE(Wrapland::Server::ServerSideDecorationInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::ServerSideDecorationManagerInterface::Mode)
 
 #endif

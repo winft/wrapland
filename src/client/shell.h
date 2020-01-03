@@ -25,13 +25,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSize>
 #include <QWindow>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_surface;
 struct wl_shell;
 struct wl_shell_surface;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -66,7 +66,7 @@ class Surface;
  * @see Registry
  * @see ShellSurface
  **/
-class KWAYLANDCLIENT_EXPORT Shell : public QObject
+class WRAPLANDCLIENT_EXPORT Shell : public QObject
 {
     Q_OBJECT
 public:
@@ -177,7 +177,7 @@ private:
  * @see Shell
  * @see Surface
  **/
-class KWAYLANDCLIENT_EXPORT ShellSurface : public QObject
+class WRAPLANDCLIENT_EXPORT ShellSurface : public QObject
 {
     Q_OBJECT
     /**
@@ -366,7 +366,7 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::ShellSurface::TransientFlag)
-Q_DECLARE_METATYPE(KWayland::Client::ShellSurface::TransientFlags)
+Q_DECLARE_METATYPE(Wrapland::Client::ShellSurface::TransientFlag)
+Q_DECLARE_METATYPE(Wrapland::Client::ShellSurface::TransientFlags)
 
 #endif

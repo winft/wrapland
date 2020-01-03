@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland-org_kde_kwin_outputdevice-client-protocol.h"
 #include <wayland-client-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 
 namespace Client
@@ -254,14 +254,14 @@ void OutputDevice::Private::addMode(uint32_t flags, int32_t width, int32_t heigh
     }
 }
 
-KWayland::Client::OutputDevice::Mode OutputDevice::currentMode() const
+Wrapland::Client::OutputDevice::Mode OutputDevice::currentMode() const
 {
     for (const auto &m: modes()) {
-        if (m.flags.testFlag(KWayland::Client::OutputDevice::Mode::Flag::Current)) {
+        if (m.flags.testFlag(Wrapland::Client::OutputDevice::Mode::Flag::Current)) {
             return m;
         }
     }
-    qCWarning(KWAYLAND_CLIENT) << "current mode not found";
+    qCWarning(WRAPLAND_CLIENT) << "current mode not found";
     return Mode();
 }
 

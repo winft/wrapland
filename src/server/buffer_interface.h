@@ -23,12 +23,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QImage>
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 struct wl_resource;
 struct wl_shm_buffer;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -62,7 +62,7 @@ class LinuxDmabufBuffer;
  * @see Display
  * @see SurfaceInterace
  **/
-class KWAYLANDSERVER_EXPORT BufferInterface : public QObject
+class WRAPLANDSERVER_EXPORT BufferInterface : public QObject
 {
     Q_OBJECT
 public:
@@ -171,7 +171,7 @@ public:
     static BufferInterface *get(wl_resource *r);
 
 Q_SIGNALS:
-    void aboutToBeDestroyed(KWayland::Server::BufferInterface*);
+    void aboutToBeDestroyed(Wrapland::Server::BufferInterface*);
     /**
      * Emitted when the size of the Buffer changes.
      * @since 5.3
@@ -188,6 +188,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::BufferInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::BufferInterface*)
 
 #endif

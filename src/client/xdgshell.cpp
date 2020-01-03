@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output.h"
 #include "../compat/wayland-xdg-shell-v5-client-protocol.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -360,7 +360,7 @@ EventQueue *XdgShellPopup::eventQueue()
     return d->queue;
 }
 
-void XdgShellPopup::requestGrab(KWayland::Client::Seat* seat, quint32 serial)
+void XdgShellPopup::requestGrab(Wrapland::Client::Seat* seat, quint32 serial)
 {
     d->requestGrab(seat, serial);
 }

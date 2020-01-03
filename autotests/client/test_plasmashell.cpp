@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 // Qt
 #include <QtTest>
-// KWayland
+// Wrapland
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/compositor.h"
 #include "../../src/client/event_queue.h"
@@ -31,8 +31,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/plasmashell_interface.h"
 
 
-using namespace KWayland::Client;
-using namespace KWayland::Server;
+using namespace Wrapland::Client;
+using namespace Wrapland::Server;
 
 
 class TestPlasmaShell : public QObject
@@ -68,7 +68,7 @@ private:
     PlasmaShell *m_plasmaShell = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-plasma-shell-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-plasma-shell-0");
 
 void TestPlasmaShell::init()
 {
@@ -86,7 +86,7 @@ void TestPlasmaShell::init()
     m_plasmaShellInterface->create();
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
@@ -153,8 +153,8 @@ void TestPlasmaShell::cleanup()
 
 void TestPlasmaShell::testRole_data()
 {
-    QTest::addColumn<KWayland::Client::PlasmaShellSurface::Role>("clientRole");
-    QTest::addColumn<KWayland::Server::PlasmaShellSurfaceInterface::Role>("serverRole");
+    QTest::addColumn<Wrapland::Client::PlasmaShellSurface::Role>("clientRole");
+    QTest::addColumn<Wrapland::Server::PlasmaShellSurfaceInterface::Role>("serverRole");
 
     QTest::newRow("desktop") << PlasmaShellSurface::Role::Desktop << PlasmaShellSurfaceInterface::Role::Desktop;
     QTest::newRow("osd") << PlasmaShellSurface::Role::OnScreenDisplay << PlasmaShellSurfaceInterface::Role::OnScreenDisplay;

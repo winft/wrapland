@@ -31,7 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDebug>
 #include <QPointer>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -42,7 +42,7 @@ public:
     Private(XdgDecorationManagerInterface *q, XdgShellInterface *shellInterface, Display *d);
 
     QHash<XdgShellSurfaceInterface*, XdgDecorationInterface*> m_decorations;
-    KWayland::Server::XdgShellStableInterface *m_shellInterface;
+    Wrapland::Server::XdgShellStableInterface *m_shellInterface;
 private:
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
 

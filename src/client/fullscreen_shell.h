@@ -22,13 +22,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct _wl_fullscreen_shell;
 struct wl_output;
 struct wl_surface;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -60,7 +60,7 @@ class Output;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT FullscreenShell : public QObject
+class WRAPLANDCLIENT_EXPORT FullscreenShell : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool capabilityArbitraryModes READ hasCapabilityArbitraryModes NOTIFY capabilityArbitraryModesChanged)

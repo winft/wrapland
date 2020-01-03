@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QVector>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -91,7 +91,7 @@ void ServerSideDecorationManager::Private::defaultModeCallback(void *data, org_k
         break;
     default:
         // invalid mode cannot set
-        qCWarning(KWAYLAND_CLIENT) << "Invalid decoration mode pushed by Server:" << mode;
+        qCWarning(WRAPLAND_CLIENT) << "Invalid decoration mode pushed by Server:" << mode;
         return;
     }
     p->defaultMode = m;
@@ -206,7 +206,7 @@ void ServerSideDecoration::Private::modeCallback(void *data, org_kde_kwin_server
         break;
     default:
         // invalid mode cannot set
-        qCWarning(KWAYLAND_CLIENT) << "Invalid decoration mode pushed by Server:" << mode;
+        qCWarning(WRAPLAND_CLIENT) << "Invalid decoration mode pushed by Server:" << mode;
         return;
     }
     p->mode = m;

@@ -23,11 +23,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QPoint>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_pointer;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -43,7 +43,7 @@ class Surface;
  *
  * @see Seat
  **/
-class KWAYLANDCLIENT_EXPORT Pointer : public QObject
+class WRAPLANDCLIENT_EXPORT Pointer : public QObject
 {
     Q_OBJECT
 public:
@@ -166,7 +166,7 @@ Q_SIGNALS:
      * @param button The button which got changed
      * @param state @c Released or @c Pressed
      **/
-    void buttonStateChanged(quint32 serial, quint32 time, quint32 button, KWayland::Client::Pointer::ButtonState state);
+    void buttonStateChanged(quint32 serial, quint32 time, quint32 button, Wrapland::Client::Pointer::ButtonState state);
     /**
      * Scroll and other axis notifications.
      *
@@ -174,25 +174,25 @@ Q_SIGNALS:
      * @param axis @c Vertical or @c Horizontal
      * @param delta
      **/
-    void axisChanged(quint32 time, KWayland::Client::Pointer::Axis axis, qreal delta);
+    void axisChanged(quint32 time, Wrapland::Client::Pointer::Axis axis, qreal delta);
     /**
      * Indicates the source of scroll and other axes.
      *
      * @since 5.59
      **/
-    void axisSourceChanged(KWayland::Client::Pointer::AxisSource source);
+    void axisSourceChanged(Wrapland::Client::Pointer::AxisSource source);
     /**
      * Discrete step information for scroll and other axes.
      *
      * @since 5.59
      **/
-    void axisDiscreteChanged(KWayland::Client::Pointer::Axis axis, qint32 discreteDelta);
+    void axisDiscreteChanged(Wrapland::Client::Pointer::Axis axis, qint32 discreteDelta);
     /**
      * Stop notification for scroll and other axes.
      *
      * @since 5.59
      **/
-    void axisStopped(quint32 time, KWayland::Client::Pointer::Axis axis);
+    void axisStopped(quint32 time, Wrapland::Client::Pointer::Axis axis);
 
     /**
      * Indicates the end of a set of events that logically belong together.
@@ -210,8 +210,8 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::Pointer::ButtonState)
-Q_DECLARE_METATYPE(KWayland::Client::Pointer::Axis)
-Q_DECLARE_METATYPE(KWayland::Client::Pointer::AxisSource)
+Q_DECLARE_METATYPE(Wrapland::Client::Pointer::ButtonState)
+Q_DECLARE_METATYPE(Wrapland::Client::Pointer::Axis)
+Q_DECLARE_METATYPE(Wrapland::Client::Pointer::AxisSource)
 
 #endif

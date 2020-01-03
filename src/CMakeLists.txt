@@ -2,7 +2,7 @@ add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(tools)
 
-install( FILES org_kde_kwayland.categories DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR} )
+install( FILES org_kde_wrapland.categories DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR} )
 
 
 if(BUILD_QCH)
@@ -18,33 +18,33 @@ if(BUILD_QCH)
         set(${var_name} ${_result})
     endmacro()
 
-    _make_absolute(KWaylandClient_APIDOX_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/client")
-    _make_absolute(KWaylandServer_APIDOX_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/server")
+    _make_absolute(Wrapland::Client_APIDOX_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/client")
+    _make_absolute(Wrapland::Server_APIDOX_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/server")
 
     ecm_add_qch(
-        KF5Wayland_QCH
-        NAME KWayland
-        BASE_NAME KF5Wayland
-        VERSION ${KF5_VERSION}
+        Wrapland_QCH
+        NAME Wrapland
+        BASE_NAME Wrapland
+        VERSION ${PROJECT_VERSION}
         ORG_DOMAIN org.kde
         SOURCES # using only public headers, to cover only public API
-            ${KWaylandClient_APIDOX_SRCS}
-            ${KWaylandServer_APIDOX_SRCS}
+            ${Wrapland::Client_APIDOX_SRCS}
+            ${Wrapland::Server_APIDOX_SRCS}
         MD_MAINPAGE "${CMAKE_SOURCE_DIR}/README.md"
         LINK_QCHS
             Qt5Gui_QCH
         INCLUDE_DIRS
-            ${KWaylandClient_APIDOX_BUILD_INCLUDE_DIRS}
-            ${KWaylandServer_APIDOX_BUILD_INCLUDE_DIRS}
+            ${Wrapland::Client_APIDOX_BUILD_INCLUDE_DIRS}
+            ${Wrapland::Server_APIDOX_BUILD_INCLUDE_DIRS}
         BLANK_MACROS
-            KWAYLANDCLIENT_EXPORT
-            KWAYLANDCLIENT_DEPRECATED
-            KWAYLANDCLIENT_DEPRECATED_EXPORT
-            "KWAYLANDCLIENT_DEPRECATED_VERSION(x, y, t)"
-            KWAYLANDSERVER_EXPORT
-            KWAYLANDSERVER_DEPRECATED
-            KWAYLANDSERVER_DEPRECATED_EXPORT
-            "KWAYLANDSERVER_DEPRECATED_VERSION(x, y, t)"
+            WRAPLANDCLIENT_EXPORT
+            WRAPLANDCLIENT_DEPRECATED
+            WRAPLANDCLIENT_DEPRECATED_EXPORT
+            "WRAPLANDCLIENT_DEPRECATED_VERSION(x, y, t)"
+            WRAPLANDSERVER_EXPORT
+            WRAPLANDSERVER_DEPRECATED
+            WRAPLANDSERVER_DEPRECATED_EXPORT
+            "WRAPLANDSERVER_DEPRECATED_VERSION(x, y, t)"
         TAGFILE_INSTALL_DESTINATION ${KDE_INSTALL_QTQCHDIR}
         QCH_INSTALL_DESTINATION ${KDE_INSTALL_QTQCHDIR}
         COMPONENT Devel

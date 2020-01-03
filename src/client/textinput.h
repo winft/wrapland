@@ -17,18 +17,18 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_TEXTINPUT_H
-#define KWAYLAND_CLIENT_TEXTINPUT_H
+#ifndef WRAPLAND_CLIENT_TEXTINPUT_H
+#define WRAPLAND_CLIENT_TEXTINPUT_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_text_input;
 struct wl_text_input_manager;
 struct zwp_text_input_manager_v2;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -51,7 +51,7 @@ class Seat;
  *
  * @since 5.23
  **/
-class KWAYLANDCLIENT_EXPORT TextInput : public QObject
+class WRAPLANDCLIENT_EXPORT TextInput : public QObject
 {
     Q_OBJECT
 public:
@@ -386,7 +386,7 @@ Q_SIGNALS:
      * @param modifiers The hold modifiers on this event
      * @param time Timestamp of this event
      **/
-    void keyEvent(quint32 xkbKeySym, KWayland::Client::TextInput::KeyState state, Qt::KeyboardModifiers modifiers, quint32 time);
+    void keyEvent(quint32 xkbKeySym, Wrapland::Client::TextInput::KeyState state, Qt::KeyboardModifiers modifiers, quint32 time);
 
     /**
      * Emitted whenever the composing text and related states changed.
@@ -428,7 +428,7 @@ protected:
  *
  * @since 5.23
  **/
-class KWAYLANDCLIENT_EXPORT TextInputManager : public QObject
+class WRAPLANDCLIENT_EXPORT TextInputManager : public QObject
 {
     Q_OBJECT
 public:
@@ -525,10 +525,10 @@ protected:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::TextInput::KeyState)
-Q_DECLARE_METATYPE(KWayland::Client::TextInput::ContentHint)
-Q_DECLARE_METATYPE(KWayland::Client::TextInput::ContentPurpose)
-Q_DECLARE_METATYPE(KWayland::Client::TextInput::ContentHints)
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Client::TextInput::ContentHints)
+Q_DECLARE_METATYPE(Wrapland::Client::TextInput::KeyState)
+Q_DECLARE_METATYPE(Wrapland::Client::TextInput::ContentHint)
+Q_DECLARE_METATYPE(Wrapland::Client::TextInput::ContentPurpose)
+Q_DECLARE_METATYPE(Wrapland::Client::TextInput::ContentHints)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::TextInput::ContentHints)
 
 #endif

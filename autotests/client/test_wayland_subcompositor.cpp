@@ -40,15 +40,15 @@ private Q_SLOTS:
     void testCast();
 
 private:
-    KWayland::Server::Display *m_display;
-    KWayland::Server::SubCompositorInterface *m_subcompositorInterface;
-    KWayland::Client::ConnectionThread *m_connection;
-    KWayland::Client::SubCompositor *m_subCompositor;
-    KWayland::Client::EventQueue *m_queue;
+    Wrapland::Server::Display *m_display;
+    Wrapland::Server::SubCompositorInterface *m_subcompositorInterface;
+    Wrapland::Client::ConnectionThread *m_connection;
+    Wrapland::Client::SubCompositor *m_subCompositor;
+    Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-subcompositor-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-subcompositor-0");
 
 TestSubCompositor::TestSubCompositor(QObject *parent)
     : QObject(parent)
@@ -63,7 +63,7 @@ TestSubCompositor::TestSubCompositor(QObject *parent)
 
 void TestSubCompositor::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -71,7 +71,7 @@ void TestSubCompositor::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
     m_connection->setSocketName(s_socketName);
 
@@ -82,12 +82,12 @@ void TestSubCompositor::init()
     m_connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    m_queue = new KWayland::Client::EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
 
-    KWayland::Client::Registry registry;
+    Wrapland::Client::Registry registry;
     QSignalSpy subCompositorSpy(&registry, SIGNAL(subCompositorAnnounced(quint32,quint32)));
     QVERIFY(subCompositorSpy.isValid());
     QVERIFY(!registry.eventQueue());
@@ -131,7 +131,7 @@ void TestSubCompositor::cleanup()
 
 void TestSubCompositor::testDestroy()
 {
-    using namespace KWayland::Client;
+    using namespace Wrapland::Client;
     connect(m_connection, &ConnectionThread::connectionDied, m_subCompositor, &SubCompositor::destroy);
     connect(m_connection, &ConnectionThread::connectionDied, m_queue, &EventQueue::destroy);
     QVERIFY(m_subCompositor->isValid());
@@ -151,7 +151,7 @@ void TestSubCompositor::testDestroy()
 
 void TestSubCompositor::testCast()
 {
-    using namespace KWayland::Client;
+    using namespace Wrapland::Client;
     Registry registry;
     QSignalSpy subCompositorSpy(&registry, SIGNAL(subCompositorAnnounced(quint32,quint32)));
     registry.create(m_connection->display());

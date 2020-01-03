@@ -24,11 +24,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QScopedPointer>
 #include <QWeakPointer>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_buffer;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -42,7 +42,7 @@ class ShmPool;
  *
  * @see ShmPool
  **/
-class KWAYLANDCLIENT_EXPORT Buffer
+class WRAPLANDCLIENT_EXPORT Buffer
 {
 public:
     /**

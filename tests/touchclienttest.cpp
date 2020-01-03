@@ -43,7 +43,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <linux/input.h>
 
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
 static Qt::GlobalColor s_colors[] = {
     Qt::white,
@@ -183,7 +183,7 @@ void WaylandClientTest::setupRegistry(Registry *registry)
                     }
                     Touch *t = s->createTouch(this);
                     connect(t, &Touch::sequenceStarted, this,
-                        [] (KWayland::Client::TouchPoint *startPoint) {
+                        [] (Wrapland::Client::TouchPoint *startPoint) {
                             qDebug() << "Touch sequence started at" << startPoint->position() << "with id" << startPoint->id();
                         }
                     );
@@ -203,17 +203,17 @@ void WaylandClientTest::setupRegistry(Registry *registry)
                         }
                     );
                     connect(t, &Touch::pointAdded, this,
-                        [] (KWayland::Client::TouchPoint *point) {
+                        [] (Wrapland::Client::TouchPoint *point) {
                             qDebug() << "Touch point added at" << point->position() << "with id" << point->id();
                         }
                     );
                     connect(t, &Touch::pointRemoved, this,
-                        [] (KWayland::Client::TouchPoint *point) {
+                        [] (Wrapland::Client::TouchPoint *point) {
                             qDebug() << "Touch point " << point->id() << " removed at" << point->position();
                         }
                     );
                     connect(t, &Touch::pointMoved, this,
-                        [] (KWayland::Client::TouchPoint *point) {
+                        [] (Wrapland::Client::TouchPoint *point) {
                             qDebug() << "Touch point " << point->id() << " moved to" << point->position();
                         }
                     );

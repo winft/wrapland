@@ -23,11 +23,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "global.h"
 #include "surface_interface.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 #include <wayland-util.h>
 #include <QObject>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -42,7 +42,7 @@ class Display;
  * of buffer contents between client and compositor.
  *
  */
-class KWAYLANDSERVER_EXPORT EglStreamControllerInterface : public Global
+class WRAPLANDSERVER_EXPORT EglStreamControllerInterface : public Global
 {
     Q_OBJECT
 public:

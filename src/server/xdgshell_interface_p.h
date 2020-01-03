@@ -17,8 +17,8 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_XDGSHELL_INTERFACE_P_H
-#define KWAYLAND_SERVER_XDGSHELL_INTERFACE_P_H
+#ifndef WRAPLAND_SERVER_XDGSHELL_INTERFACE_P_H
+#define WRAPLAND_SERVER_XDGSHELL_INTERFACE_P_H
 #include "xdgshell_interface.h"
 #include "global_p.h"
 #include "generic_shell_surface_p.h"
@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QTimer>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

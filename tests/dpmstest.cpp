@@ -29,7 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/client/registry.h"
 #include "../src/client/output.h"
 
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
 static QString modeToString(Dpms::Mode mode)
 {

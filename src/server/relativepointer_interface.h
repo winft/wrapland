@@ -17,14 +17,14 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_RELATIVE_POINTER_INTERFACE_H
-#define KWAYLAND_SERVER_RELATIVE_POINTER_INTERFACE_H
+#ifndef WRAPLAND_SERVER_RELATIVE_POINTER_INTERFACE_H
+#define WRAPLAND_SERVER_RELATIVE_POINTER_INTERFACE_H
 
 #include "global.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -48,7 +48,7 @@ enum class RelativePointerInterfaceVersion {
  * @see SeatInterface::relativePointerMotion
  * @since 5.28
  **/
-class KWAYLANDSERVER_EXPORT RelativePointerManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT RelativePointerManagerInterface : public Global
 {
     Q_OBJECT
 public:

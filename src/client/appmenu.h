@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_APPMENU_H
-#define KWAYLAND_CLIENT_APPMENU_H
+#ifndef WRAPLAND_CLIENT_APPMENU_H
+#define WRAPLAND_CLIENT_APPMENU_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_appmenu_manager;
 struct org_kde_kwin_appmenu;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -60,7 +60,7 @@ class AppMenu;
  * @see Registry
  * @since 5.42
  **/
-class KWAYLANDCLIENT_EXPORT AppMenuManager : public QObject
+class WRAPLANDCLIENT_EXPORT AppMenuManager : public QObject
 {
     Q_OBJECT
 public:
@@ -139,7 +139,7 @@ private:
  *
  * @since 5.42
  **/
-class KWAYLANDCLIENT_EXPORT AppMenu : public QObject
+class WRAPLANDCLIENT_EXPORT AppMenu : public QObject
 {
     Q_OBJECT
 public:

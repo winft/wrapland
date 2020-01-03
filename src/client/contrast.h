@@ -18,19 +18,19 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_CONTRAST_H
-#define KWAYLAND_CONTRAST_H
+#ifndef WRAPLAND_CONTRAST_H
+#define WRAPLAND_CONTRAST_H
 
 #include <QObject>
 #include <QPoint>
 #include <QSize>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_contrast;
 struct org_kde_kwin_contrast_manager;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -43,7 +43,7 @@ class Region;
 /**
  * TODO
  */
-class KWAYLANDCLIENT_EXPORT ContrastManager : public QObject
+class WRAPLANDCLIENT_EXPORT ContrastManager : public QObject
 {
     Q_OBJECT
 public:
@@ -139,7 +139,7 @@ private:
  *
  * @see ContrastManager
  **/
-class KWAYLANDCLIENT_EXPORT Contrast : public QObject
+class WRAPLANDCLIENT_EXPORT Contrast : public QObject
 {
     Q_OBJECT
 public:

@@ -22,9 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QAbstractListModel>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -54,7 +54,7 @@ class Surface;
  * @see PlasmaWindow
  **/
 
-class KWAYLANDCLIENT_EXPORT PlasmaWindowModel : public QAbstractListModel
+class WRAPLANDCLIENT_EXPORT PlasmaWindowModel : public QAbstractListModel
 {
     Q_OBJECT
 
@@ -70,7 +70,7 @@ public:
         IsMinimized,
         IsKeepAbove,
         IsKeepBelow,
-#if KWAYLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 53)
+#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 53)
         /**
           @deprecated Since 5.53, use VirtualDesktops
          */

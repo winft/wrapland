@@ -17,12 +17,12 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_REMOTE_ACCESS_INTERFACE_H
-#define KWAYLAND_SERVER_REMOTE_ACCESS_INTERFACE_H
+#ifndef WRAPLAND_SERVER_REMOTE_ACCESS_INTERFACE_H
+#define WRAPLAND_SERVER_REMOTE_ACCESS_INTERFACE_H
 
 #include "global.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -43,7 +43,7 @@ class OutputInterface;
  *     It's the responsibility of your process to delete this BufferHandle
  *     and release its' fd afterwards.
  **/
-class KWAYLANDSERVER_EXPORT BufferHandle
+class WRAPLANDSERVER_EXPORT BufferHandle
 {
 public:
     explicit BufferHandle();
@@ -66,7 +66,7 @@ private:
     QScopedPointer<Private> d;
 };
 
-class KWAYLANDSERVER_EXPORT RemoteAccessManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT RemoteAccessManagerInterface : public Global
 {
     Q_OBJECT
 public:

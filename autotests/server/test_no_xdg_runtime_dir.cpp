@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // WaylandServer
 #include "../../src/server/display.h"
 
-using namespace KWayland::Server;
+using namespace Wrapland::Server;
 
 class NoXdgRuntimeDirTest : public QObject
 {
@@ -41,7 +41,7 @@ void NoXdgRuntimeDirTest::testCreate()
 {
     // this test verifies that not having an XDG_RUNTIME_DIR is handled gracefully
     // the server cannot start, but should not crash
-    const QString testSocketName = QStringLiteral("kwayland-test-no-xdg-runtime-dir-0");
+    const QString testSocketName = QStringLiteral("wrapland-test-no-xdg-runtime-dir-0");
     Display display;
     QSignalSpy runningSpy(&display, &Display::runningChanged);
     QVERIFY(runningSpy.isValid());

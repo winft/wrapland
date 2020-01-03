@@ -44,7 +44,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <linux/input.h>
 
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
 class PanelTest : public QObject
 {
@@ -182,7 +182,7 @@ void PanelTest::setupRegistry(Registry *registry)
                     }
                     auto p = m_seat->createPointer(this);
                     connect(p, &Pointer::buttonStateChanged, this,
-                        [this] (quint32 serial, quint32 time, quint32 button, KWayland::Client::Pointer::ButtonState state) {
+                        [this] (quint32 serial, quint32 time, quint32 button, Wrapland::Client::Pointer::ButtonState state) {
                             Q_UNUSED(time)
                             Q_UNUSED(serial)
                             if (!m_windowManagement) {

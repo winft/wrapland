@@ -24,7 +24,7 @@
 #include "wayland-output-management-client-protocol.h"
 
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {

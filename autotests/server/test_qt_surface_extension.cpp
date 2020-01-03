@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/seat_interface.h"
 #include "../../src/server/shell_interface.h"
 
-using namespace KWayland::Server;
+using namespace Wrapland::Server;
 
 
 class TestQtSurfaceExtension : public QObject

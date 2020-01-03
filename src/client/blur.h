@@ -18,8 +18,8 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_BLUR_H
-#define KWAYLAND_BLUR_H
+#ifndef WRAPLAND_BLUR_H
+#define WRAPLAND_BLUR_H
 
 #include "buffer.h"
 
@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 #include <QSize>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_buffer;
 struct wl_region;
@@ -37,7 +37,7 @@ struct org_kde_kwin_blur_manager;
 class QMarginsF;
 class QWindow;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -50,7 +50,7 @@ class Region;
 /**
  * TODO
  */
-class KWAYLANDCLIENT_EXPORT BlurManager : public QObject
+class WRAPLANDCLIENT_EXPORT BlurManager : public QObject
 {
     Q_OBJECT
 public:
@@ -146,7 +146,7 @@ private:
  *
  * @see BlurManager
  **/
-class KWAYLANDCLIENT_EXPORT Blur : public QObject
+class WRAPLANDCLIENT_EXPORT Blur : public QObject
 {
     Q_OBJECT
 public:

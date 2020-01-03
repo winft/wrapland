@@ -44,7 +44,7 @@ private:
     QProcess *m_westonProcess;
 };
 
-static const QString s_socketName = QStringLiteral("kwin-test-wayland-fullscreen-shell-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-fullscreen-shell-0");
 
 TestWaylandFullscreenShell::TestWaylandFullscreenShell(QObject *parent)
     : QObject(parent)
@@ -98,14 +98,14 @@ void TestWaylandFullscreenShell::testRegistry()
     if (m_westonProcess->state() != QProcess::Running) {
         QSKIP("This test requires a running wayland server");
     }
-    KWayland::Client::ConnectionThread connection;
+    Wrapland::Client::ConnectionThread connection;
     QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
     connection.setSocketName(s_socketName);
     connection.initConnection();
     QVERIFY(connectedSpy.wait());
 
-    KWayland::Client::Registry registry;
-    QSignalSpy interfacesAnnouncedSpy(&registry, &KWayland::Client::Registry::interfaceAnnounced);
+    Wrapland::Client::Registry registry;
+    QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfaceAnnounced);
     QVERIFY(interfacesAnnouncedSpy.isValid());
     QSignalSpy announced(&registry, SIGNAL(fullscreenShellAnnounced(quint32,quint32)));
     registry.create(connection.display());
@@ -114,12 +114,12 @@ void TestWaylandFullscreenShell::testRegistry()
     wl_display_flush(connection.display());
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    if (!registry.hasInterface(KWayland::Client::Registry::Interface::FullscreenShell)) {
+    if (!registry.hasInterface(Wrapland::Client::Registry::Interface::FullscreenShell)) {
         QSKIP("Weston does not have fullscreen shell support");
     }
     QCOMPARE(announced.count(), 1);
 
-    KWayland::Client::FullscreenShell fullscreenShell;
+    Wrapland::Client::FullscreenShell fullscreenShell;
     QVERIFY(!fullscreenShell.isValid());
     QVERIFY(!fullscreenShell.hasCapabilityArbitraryModes());
     QVERIFY(!fullscreenShell.hasCapabilityCursorPlane());
@@ -132,14 +132,14 @@ void TestWaylandFullscreenShell::testRegistryCreate()
 {    if (m_westonProcess->state() != QProcess::Running) {
         QSKIP("This test requires a running wayland server");
     }
-    KWayland::Client::ConnectionThread connection;
+    Wrapland::Client::ConnectionThread connection;
     QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
     connection.setSocketName(s_socketName);
     connection.initConnection();
     QVERIFY(connectedSpy.wait());
 
-    KWayland::Client::Registry registry;
-    QSignalSpy interfacesAnnouncedSpy(&registry, &KWayland::Client::Registry::interfaceAnnounced);
+    Wrapland::Client::Registry registry;
+    QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfaceAnnounced);
     QVERIFY(interfacesAnnouncedSpy.isValid());
     QSignalSpy announced(&registry, SIGNAL(fullscreenShellAnnounced(quint32,quint32)));
     registry.create(connection.display());
@@ -148,12 +148,12 @@ void TestWaylandFullscreenShell::testRegistryCreate()
     wl_display_flush(connection.display());
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    if (!registry.hasInterface(KWayland::Client::Registry::Interface::FullscreenShell)) {
+    if (!registry.hasInterface(Wrapland::Client::Registry::Interface::FullscreenShell)) {
         QSKIP("Weston does not have fullscreen shell support");
     }
     QCOMPARE(announced.count(), 1);
 
-    KWayland::Client::FullscreenShell *fullscreenShell = registry.createFullscreenShell(announced.first().first().value<quint32>(), 1, &registry);
+    Wrapland::Client::FullscreenShell *fullscreenShell = registry.createFullscreenShell(announced.first().first().value<quint32>(), 1, &registry);
     QVERIFY(fullscreenShell->isValid());
 }
 

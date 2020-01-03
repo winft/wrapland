@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QList>
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include "clientconnection.h"
 
@@ -32,17 +32,17 @@ struct wl_client;
 struct wl_display;
 struct wl_event_loop;
 
-namespace KWayland
+namespace Wrapland
 {
 /**
- * @short KWayland Server.
+ * @short Wrapland Server.
  *
  * This namespace groups all classes related to the Server module.
  *
- * The main entry point into the KWayland::Server API is the Display class.
+ * The main entry point into the Wrapland::Server API is the Display class.
  * It allows to create a Wayland server and create various global objects on it.
  *
- * KWayland::Server is an API to easily create a head-less Wayland server with a
+ * Wrapland::Server is an API to easily create a head-less Wayland server with a
  * Qt style API.
  *
  * @see Display
@@ -99,7 +99,7 @@ class LinuxDmabufUnstableV1Interface;
  *
  * @todo Improve documentation
  **/
-class KWAYLANDSERVER_EXPORT Display : public QObject
+class WRAPLANDSERVER_EXPORT Display : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString socketName READ socketName WRITE setSocketName NOTIFY socketNameChanged)
@@ -355,8 +355,8 @@ Q_SIGNALS:
     void automaticSocketNamingChanged(bool);
     void runningChanged(bool);
     void aboutToTerminate();
-    void clientConnected(KWayland::Server::ClientConnection*);
-    void clientDisconnected(KWayland::Server::ClientConnection*);
+    void clientConnected(Wrapland::Server::ClientConnection*);
+    void clientDisconnected(Wrapland::Server::ClientConnection*);
 
 private:
     class Private;

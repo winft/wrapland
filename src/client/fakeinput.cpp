@@ -24,14 +24,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPointF>
 #include <QSizeF>
 
-#include <config-kwayland.h>
+#include <config-wrapland.h>
 #if HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 #endif
 
 #include <wayland-fake-input-client-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {

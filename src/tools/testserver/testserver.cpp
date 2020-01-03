@@ -37,7 +37,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/types.h>
 #include <sys/socket.h>
 
-using namespace KWayland::Server;
+using namespace Wrapland::Server;
 
 TestServer::TestServer(QObject *parent)
     : QObject(parent)

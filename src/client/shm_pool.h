@@ -23,14 +23,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 
 #include "buffer.h"
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 class QImage;
 class QSize;
 
 struct wl_shm;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -127,7 +127,7 @@ class EventQueue;
  *
  * @see Buffer
  **/
-class KWAYLANDCLIENT_EXPORT ShmPool : public QObject
+class WRAPLANDCLIENT_EXPORT ShmPool : public QObject
 {
     Q_OBJECT
 public:

@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Wayland
 #include <wayland-remote-access-client-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -62,7 +62,7 @@ void RemoteAccessManager::Private::bufferReadyCallback(void *data, org_kde_kwin_
     auto requested = org_kde_kwin_remote_access_manager_get_buffer(ramp->ram, buffer_id);
     auto rbuf = new RemoteBuffer(ramp->q);
     rbuf->setup(requested);
-    qCDebug(KWAYLAND_CLIENT) << "Got buffer, server fd:" << buffer_id;
+    qCDebug(WRAPLAND_CLIENT) << "Got buffer, server fd:" << buffer_id;
 
     emit ramp->q->bufferReady(output, rbuf);
 }
@@ -183,7 +183,7 @@ RemoteBuffer::RemoteBuffer(QObject *parent)
 RemoteBuffer::~RemoteBuffer()
 {
     release();
-    qCDebug(KWAYLAND_CLIENT) << "Buffer released";
+    qCDebug(WRAPLAND_CLIENT) << "Buffer released";
 }
 
 void RemoteBuffer::setup(org_kde_kwin_remote_buffer *remotebuffer)

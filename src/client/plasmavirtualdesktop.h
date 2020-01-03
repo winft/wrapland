@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_PLASMAVIRTUALDESKTOP_H
-#define KWAYLAND_CLIENT_PLASMAVIRTUALDESKTOP_H
+#ifndef WRAPLAND_CLIENT_PLASMAVIRTUALDESKTOP_H
+#define WRAPLAND_CLIENT_PLASMAVIRTUALDESKTOP_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_plasma_virtual_desktop_management;
 struct org_kde_plasma_virtual_desktop;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -59,7 +59,7 @@ class PlasmaVirtualDesktop;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT PlasmaVirtualDesktopManagement : public QObject
+class WRAPLANDCLIENT_EXPORT PlasmaVirtualDesktopManagement : public QObject
 {
     Q_OBJECT
 public:
@@ -185,7 +185,7 @@ private:
     QScopedPointer<Private> d;
 };
 
-class KWAYLANDCLIENT_EXPORT PlasmaVirtualDesktop : public QObject
+class WRAPLANDCLIENT_EXPORT PlasmaVirtualDesktop : public QObject
 {
     Q_OBJECT
 public:

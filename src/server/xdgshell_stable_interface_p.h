@@ -17,18 +17,18 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_XDGSHELL_STABLE_INTERFACE_P_H
-#define KWAYLAND_SERVER_XDGSHELL_STABLE_INTERFACE_P_H
+#ifndef WRAPLAND_SERVER_XDGSHELL_STABLE_INTERFACE_P_H
+#define WRAPLAND_SERVER_XDGSHELL_STABLE_INTERFACE_P_H
 
 #include "global.h"
 #include "resource.h"
 #include "xdgshell_interface.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include <QSize>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -72,7 +72,7 @@ private:
     Private *d_func() const;
 };
 
-class XdgSurfaceStableInterface : public KWayland::Server::Resource
+class XdgSurfaceStableInterface : public Wrapland::Server::Resource
 {
     Q_OBJECT
 public:
@@ -125,7 +125,7 @@ private:
  * This is a private internal class that keeps track of sent data
  * At the time of PopupCreation these values are copied to the popup
  */
-class XdgPositionerStableInterface: public KWayland::Server::Resource
+class XdgPositionerStableInterface: public Wrapland::Server::Resource
 {
 public:
     QSize initialSize() const;

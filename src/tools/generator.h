@@ -17,8 +17,8 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_TOOLS_GENERATOR_H
-#define KWAYLAND_TOOLS_GENERATOR_H
+#ifndef WRAPLAND_TOOLS_GENERATOR_H
+#define WRAPLAND_TOOLS_GENERATOR_H
 
 #include <QObject>
 #include <QMap>
@@ -29,7 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 class QTextStream;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Tools
 {
@@ -154,10 +154,10 @@ public:
     quint32 version() const {
         return m_version;
     }
-    QString kwaylandClientName() const {
+    QString wraplandClientName() const {
         return m_clientName;
     }
-    QString kwaylandServerName() const {
+    QString wraplandServerName() const {
         return m_clientName + QStringLiteral("Interface");
     }
 

@@ -36,8 +36,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/display.h"
 #include "../../src/server/seat_interface.h"
 
-using namespace KWayland::Client;
-using namespace KWayland::Server;
+using namespace Wrapland::Client;
+using namespace Wrapland::Server;
 
 
 class SelectionTest : public QObject
@@ -71,7 +71,7 @@ private:
     Connection m_client2;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-selection-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-selection-0");
 
 void SelectionTest::init()
 {

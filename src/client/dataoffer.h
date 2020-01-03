@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 #include "datadevicemanager.h"
 
@@ -30,7 +30,7 @@ struct wl_data_offer;
 
 class QMimeType;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -44,7 +44,7 @@ class DataDevice;
  *
  * @see DataOfferManager
  **/
-class KWAYLANDCLIENT_EXPORT DataOffer : public QObject
+class WRAPLANDCLIENT_EXPORT DataOffer : public QObject
 {
     Q_OBJECT
 public:
@@ -140,6 +140,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::DataOffer*)
+Q_DECLARE_METATYPE(Wrapland::Client::DataOffer*)
 
 #endif

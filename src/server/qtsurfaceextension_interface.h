@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include "global.h"
 #include "resource.h"
@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 class QSize;
 struct wl_resource;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -42,14 +42,14 @@ class QtExtendedSurfaceInterface;
 /**
  * TODO
  */
-class KWAYLANDSERVER_EXPORT QtSurfaceExtensionInterface : public Global
+class WRAPLANDSERVER_EXPORT QtSurfaceExtensionInterface : public Global
 {
     Q_OBJECT
 public:
     virtual ~QtSurfaceExtensionInterface();
 
 Q_SIGNALS:
-    void surfaceCreated(KWayland::Server::QtExtendedSurfaceInterface*);
+    void surfaceCreated(Wrapland::Server::QtExtendedSurfaceInterface*);
 
 private:
     friend class Display;
@@ -60,7 +60,7 @@ private:
 /**
  * TODO
  */
-class KWAYLANDSERVER_EXPORT QtExtendedSurfaceInterface : public Resource
+class WRAPLANDSERVER_EXPORT QtExtendedSurfaceInterface : public Resource
 {
     Q_OBJECT
 public:

@@ -48,18 +48,18 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    KWayland::Server::Display *m_display = nullptr;
-    KWayland::Server::CompositorInterface *m_compositorInterface = nullptr;
-    KWayland::Server::ServerSideDecorationManagerInterface *m_serverSideDecorationManagerInterface = nullptr;
-    KWayland::Client::ConnectionThread *m_connection = nullptr;
-    KWayland::Client::Compositor *m_compositor = nullptr;
-    KWayland::Client::EventQueue *m_queue = nullptr;
-    KWayland::Client::ServerSideDecorationManager *m_serverSideDecorationManager = nullptr;
+    Wrapland::Server::Display *m_display = nullptr;
+    Wrapland::Server::CompositorInterface *m_compositorInterface = nullptr;
+    Wrapland::Server::ServerSideDecorationManagerInterface *m_serverSideDecorationManagerInterface = nullptr;
+    Wrapland::Client::ConnectionThread *m_connection = nullptr;
+    Wrapland::Client::Compositor *m_compositor = nullptr;
+    Wrapland::Client::EventQueue *m_queue = nullptr;
+    Wrapland::Client::ServerSideDecorationManager *m_serverSideDecorationManager = nullptr;
     QThread *m_thread = nullptr;
-    KWayland::Client::Registry *m_registry = nullptr;
+    Wrapland::Client::Registry *m_registry = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-server-side-decoration-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-server-side-decoration-0");
 
 TestServerSideDecoration::TestServerSideDecoration(QObject *parent)
     : QObject(parent)
@@ -68,8 +68,8 @@ TestServerSideDecoration::TestServerSideDecoration(QObject *parent)
 
 void TestServerSideDecoration::init()
 {
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -77,7 +77,7 @@ void TestServerSideDecoration::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
@@ -156,8 +156,8 @@ void TestServerSideDecoration::cleanup()
 
 void TestServerSideDecoration::testCreate_data()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
     QTest::addColumn<ServerSideDecorationManagerInterface::Mode>("serverMode");
     QTest::addColumn<ServerSideDecoration::Mode>("clientMode");
 
@@ -168,9 +168,9 @@ void TestServerSideDecoration::testCreate_data()
 
 void TestServerSideDecoration::testCreate()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
-    QFETCH(KWayland::Server::ServerSideDecorationManagerInterface::Mode, serverMode);
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
+    QFETCH(Wrapland::Server::ServerSideDecorationManagerInterface::Mode, serverMode);
     m_serverSideDecorationManagerInterface->setDefaultMode(serverMode);
     QCOMPARE(m_serverSideDecorationManagerInterface->defaultMode(), serverMode);
 
@@ -213,8 +213,8 @@ void TestServerSideDecoration::testCreate()
 
 void TestServerSideDecoration::testRequest_data()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
     QTest::addColumn<ServerSideDecorationManagerInterface::Mode>("defaultMode");
     QTest::addColumn<ServerSideDecoration::Mode>("clientMode");
     QTest::addColumn<ServerSideDecoration::Mode>("clientRequestMode");
@@ -240,9 +240,9 @@ void TestServerSideDecoration::testRequest_data()
 
 void TestServerSideDecoration::testRequest()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
-    QFETCH(KWayland::Server::ServerSideDecorationManagerInterface::Mode, defaultMode);
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
+    QFETCH(Wrapland::Server::ServerSideDecorationManagerInterface::Mode, defaultMode);
     m_serverSideDecorationManagerInterface->setDefaultMode(defaultMode);
     QCOMPARE(m_serverSideDecorationManagerInterface->defaultMode(), defaultMode);
 
@@ -294,14 +294,14 @@ void TestServerSideDecoration::testRequest()
 
 void TestServerSideDecoration::testSurfaceDestroy()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     QSignalSpy decorationCreated(m_serverSideDecorationManagerInterface, &ServerSideDecorationManagerInterface::decorationCreated);
     QVERIFY(decorationCreated.isValid());
 
-    QScopedPointer<KWayland::Client::Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<SurfaceInterface*>();

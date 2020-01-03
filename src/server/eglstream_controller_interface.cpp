@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-util.h>
 #include <QLibrary>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -73,7 +73,7 @@ void EglStreamControllerInterface::Private::create()
 {
     // bail out early if we were unable to load the interface
     if (m_interface == nullptr) {
-        qCWarning(KWAYLAND_SERVER) << "failed to resolve wl_eglstream_controller_interface";
+        qCWarning(WRAPLAND_SERVER) << "failed to resolve wl_eglstream_controller_interface";
         return;
     }
     

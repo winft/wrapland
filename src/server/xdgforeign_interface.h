@@ -17,15 +17,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_XDGFOREIGN_INTERFACE_H
-#define KWAYLAND_SERVER_XDGFOREIGN_INTERFACE_H
+#ifndef WRAPLAND_SERVER_XDGFOREIGN_INTERFACE_H
+#define WRAPLAND_SERVER_XDGFOREIGN_INTERFACE_H
 
 #include "global.h"
 #include "resource.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -45,7 +45,7 @@ class XdgImporterUnstableV2Interface;
  *
  * @since 5.40
  */
-class KWAYLANDSERVER_EXPORT XdgForeignInterface : public QObject
+class WRAPLANDSERVER_EXPORT XdgForeignInterface : public QObject
 {
     Q_OBJECT
 public:
@@ -81,7 +81,7 @@ Q_SIGNALS:
      * valid anymore and either one of the surfaces has been unmapped, or the parent surface
      * is not exported anymore.
      */
-    void transientChanged(KWayland::Server::SurfaceInterface *child, KWayland::Server::SurfaceInterface *parent);
+    void transientChanged(Wrapland::Server::SurfaceInterface *child, Wrapland::Server::SurfaceInterface *parent);
 
 private:
     friend class Display;

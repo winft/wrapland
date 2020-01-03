@@ -20,11 +20,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef WAYLAND_SERVER_KEYBOARD_INTERFACE_H
 #define WAYLAND_SERVER_KEYBOARD_INTERFACE_H
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include "resource.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -36,7 +36,7 @@ class SurfaceInterface;
  * @brief Resource for the wl_keyboard interface.
  *
  **/
-class KWAYLANDSERVER_EXPORT KeyboardInterface : public Resource
+class WRAPLANDSERVER_EXPORT KeyboardInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -64,6 +64,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::KeyboardInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::KeyboardInterface*)
 
 #endif

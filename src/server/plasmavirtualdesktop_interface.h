@@ -17,15 +17,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_PLASMAVIRTUALDESKTOP_H
-#define KWAYLAND_SERVER_PLASMAVIRTUALDESKTOP_H
+#ifndef WRAPLAND_SERVER_PLASMAVIRTUALDESKTOP_H
+#define WRAPLAND_SERVER_PLASMAVIRTUALDESKTOP_H
 
 #include "global.h"
 #include "resource.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -39,7 +39,7 @@ class PlasmaVirtualDesktopInterface;
  * This class provides a convenient wrapper for the org_kde_plasma_virtual_desktop_management interface.
  * @since 5.52
  */
-class KWAYLANDSERVER_EXPORT PlasmaVirtualDesktopManagementInterface : public Global
+class WRAPLANDSERVER_EXPORT PlasmaVirtualDesktopManagementInterface : public Global
 {
     Q_OBJECT
 public:
@@ -111,7 +111,7 @@ private:
     Private *d_func() const;
 };
 
-class KWAYLANDSERVER_EXPORT PlasmaVirtualDesktopInterface : public QObject
+class WRAPLANDSERVER_EXPORT PlasmaVirtualDesktopInterface : public QObject
 {
     Q_OBJECT
 public:

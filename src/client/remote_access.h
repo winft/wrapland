@@ -17,18 +17,18 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_REMOTE_ACCESS_H
-#define KWAYLAND_CLIENT_REMOTE_ACCESS_H
+#ifndef WRAPLAND_CLIENT_REMOTE_ACCESS_H
+#define WRAPLAND_CLIENT_REMOTE_ACCESS_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_remote_access_manager;
 struct org_kde_kwin_remote_buffer;
 struct wl_output;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -59,7 +59,7 @@ class RemoteBuffer;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT RemoteAccessManager : public QObject
+class WRAPLANDCLIENT_EXPORT RemoteAccessManager : public QObject
 {
     Q_OBJECT
 public:
@@ -143,7 +143,7 @@ private:
  * The instances of this class are created by parent RemoteAccessManager.
  * Deletion (by noLongerNeeded call) is in responsibility of underlying system.
  */
-class KWAYLANDCLIENT_EXPORT RemoteBuffer : public QObject
+class WRAPLANDCLIENT_EXPORT RemoteBuffer : public QObject
 {
     Q_OBJECT
 public:

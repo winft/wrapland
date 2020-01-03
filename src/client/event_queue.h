@@ -22,13 +22,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_display;
 struct wl_proxy;
 struct wl_event_queue;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -66,7 +66,7 @@ class ConnectionThread;
  * The EventQueue can be used as a drop-in replacement for any wl_event_queue
  * pointer as it provides matching cast operators.
  **/
-class KWAYLANDCLIENT_EXPORT EventQueue : public QObject
+class WRAPLANDCLIENT_EXPORT EventQueue : public QObject
 {
     Q_OBJECT
 public:

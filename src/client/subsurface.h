@@ -23,11 +23,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QPointer>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_subsurface;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -52,7 +52,7 @@ class Surface;
  * @see SubCompositor
  * @see Surface
  **/
-class KWAYLANDCLIENT_EXPORT SubSurface : public QObject
+class WRAPLANDCLIENT_EXPORT SubSurface : public QObject
 {
     Q_OBJECT
 public:

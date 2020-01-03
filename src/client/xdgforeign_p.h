@@ -17,13 +17,13 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_XDGFOREIGN_P_H
-#define KWAYLAND_CLIENT_XDGFOREIGN_P_H
+#ifndef WRAPLAND_CLIENT_XDGFOREIGN_P_H
+#define WRAPLAND_CLIENT_XDGFOREIGN_P_H
 
 #include "xdgforeign.h"
 #include <QObject>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {

@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 #include "seat_interface.h"
 
 #include "global.h"
@@ -31,7 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 class QSize;
 struct wl_resource;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -49,7 +49,7 @@ class GenericShellSurface;
  * @see ShellSurfaceInterface
  * @see SurfaceInterface
  **/
-class KWAYLANDSERVER_EXPORT ShellInterface : public Global
+class WRAPLANDSERVER_EXPORT ShellInterface : public Global
 {
     Q_OBJECT
 public:
@@ -59,7 +59,7 @@ Q_SIGNALS:
     /**
      * Emitted whenever a new ShellSurfaceInterface gets created for a SurfaceInterface.
      **/
-    void surfaceCreated(KWayland::Server::ShellSurfaceInterface*);
+    void surfaceCreated(Wrapland::Server::ShellSurfaceInterface*);
 
 private:
     friend class Display;
@@ -78,7 +78,7 @@ private:
  * @see SurfaceInterface
  * @see ShellInterface
  **/
-class KWAYLANDSERVER_EXPORT ShellSurfaceInterface : public Resource
+class WRAPLANDSERVER_EXPORT ShellSurfaceInterface : public Resource
 {
     Q_OBJECT
     /**
@@ -293,7 +293,7 @@ Q_SIGNALS:
      * @param serial The serial of the implicit mouse grab which triggered the move
      * @since 5.5
      **/
-    void moveRequested(KWayland::Server::SeatInterface *seat, quint32 serial);
+    void moveRequested(Wrapland::Server::SeatInterface *seat, quint32 serial);
     /**
      * The surface requested a window resize.
      *
@@ -302,7 +302,7 @@ Q_SIGNALS:
      * @param edges A hint which edges are involved in the resize
      * @since 5.5
      **/
-    void resizeRequested(KWayland::Server::SeatInterface *seat, quint32 serial, Qt::Edges edges);
+    void resizeRequested(Wrapland::Server::SeatInterface *seat, quint32 serial, Qt::Edges edges);
 
 private:
     friend class ShellInterface;

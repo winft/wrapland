@@ -34,8 +34,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/seat_interface.h"
 #include "../../src/server/textinput_interface.h"
 
-using namespace KWayland::Client;
-using namespace KWayland::Server;
+using namespace Wrapland::Client;
+using namespace Wrapland::Server;
 
 class TextInputTest : public QObject
 {
@@ -89,7 +89,7 @@ private:
     TextInputManager *m_textInputManagerV2 = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-text-input-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-text-input-0");
 
 void TextInputTest::init()
 {
@@ -111,7 +111,7 @@ void TextInputTest::init()
     m_textInputManagerV2Interface->create();
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);

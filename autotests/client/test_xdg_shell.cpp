@@ -25,7 +25,7 @@ XdgShellTest::XdgShellTest(XdgShellInterfaceVersion version):
     m_version(version)
 {}
 
-static const QString s_socketName = QStringLiteral("kwayland-test-xdg_shell-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-xdg_shell-0");
 
 void XdgShellTest::init()
 {
@@ -53,7 +53,7 @@ void XdgShellTest::init()
     m_xdgShellInterface->create();
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);

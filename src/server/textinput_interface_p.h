@@ -17,8 +17,8 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_TEXTINPUT_INTERFACE_P_H
-#define KWAYLAND_SERVER_TEXTINPUT_INTERFACE_P_H
+#ifndef WRAPLAND_SERVER_TEXTINPUT_INTERFACE_P_H
+#define WRAPLAND_SERVER_TEXTINPUT_INTERFACE_P_H
 #include "textinput_interface.h"
 #include "resource_p.h"
 #include "global_p.h"
@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QRect>
 #include <QVector>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -109,7 +109,7 @@ Q_SIGNALS:
     /**
      * @internal
      **/
-    void requestActivate(KWayland::Server::SeatInterface *seat, KWayland::Server::SurfaceInterface *surface);
+    void requestActivate(Wrapland::Server::SeatInterface *seat, Wrapland::Server::SurfaceInterface *surface);
 
 private:
     explicit TextInputUnstableV0Interface(TextInputManagerUnstableV0Interface *parent, wl_resource *parentResource);

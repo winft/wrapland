@@ -25,12 +25,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_data_source;
 class QMimeType;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -44,7 +44,7 @@ namespace Client
  *
  * @see DataDeviceManager
  **/
-class KWAYLANDCLIENT_EXPORT DataSource : public QObject
+class WRAPLANDCLIENT_EXPORT DataSource : public QObject
 {
     Q_OBJECT
 public:

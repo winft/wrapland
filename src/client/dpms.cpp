@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {

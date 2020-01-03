@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-appmenu-server-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -69,7 +69,7 @@ void AppMenuManagerInterface::Private::createCallback(wl_client *client, wl_reso
     SurfaceInterface *s = SurfaceInterface::get(surface);
     if (!s) {
         // TODO: send error?
-        qCWarning(KWAYLAND_SERVER) << "ServerSideDecorationInterface requested for non existing SurfaceInterface";
+        qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationInterface requested for non existing SurfaceInterface";
         return;
     }
     auto appmenu = new AppMenuInterface(p->q, s, resource);

@@ -17,17 +17,17 @@
 * You should have received a copy of the GNU Lesser General Public
 * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_OUTPUTCONFIGURATION_INTERFACE_H
-#define KWAYLAND_SERVER_OUTPUTCONFIGURATION_INTERFACE_H
+#ifndef WRAPLAND_SERVER_OUTPUTCONFIGURATION_INTERFACE_H
+#define WRAPLAND_SERVER_OUTPUTCONFIGURATION_INTERFACE_H
 
 #include "resource.h"
 #include "outputmanagement_interface.h"
 #include "outputdevice_interface.h"
 #include "outputchangeset.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -45,7 +45,7 @@ namespace Server
  * to the compositor through the OutputManagement::configurationChangeRequested(OutputConfiguration*)
  * signal, the compositor can then decide what to do with the changes.
  *
- * These KWayland classes will not apply changes to the OutputDevices, this is the compositor's
+ * These Wrapland classes will not apply changes to the OutputDevices, this is the compositor's
  * task. As such, the configuration set through this interface can be seen as a hint what the
  * compositor should set up, but whether or not the compositor does it (based on hardware or
  * rendering policies, for example), is up to the compositor. The mode setting is passed on to
@@ -56,7 +56,7 @@ namespace Server
  * @see OutputConfiguration
  * @since 5.5
  */
-class KWAYLANDSERVER_EXPORT OutputConfigurationInterface : public Resource
+class WRAPLANDSERVER_EXPORT OutputConfigurationInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -105,6 +105,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::OutputConfigurationInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::OutputConfigurationInterface*)
 
 #endif

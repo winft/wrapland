@@ -21,7 +21,7 @@
 #include "outputchangeset.h"
 #include "outputchangeset_p.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_XDG_DECORATION_UNSTABLE_V1_H
-#define KWAYLAND_CLIENT_XDG_DECORATION_UNSTABLE_V1_H
+#ifndef WRAPLAND_CLIENT_XDG_DECORATION_UNSTABLE_V1_H
+#define WRAPLAND_CLIENT_XDG_DECORATION_UNSTABLE_V1_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct zxdg_decoration_manager_v1;
 struct zxdg_toplevel_decoration_v1;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -62,7 +62,7 @@ class XdgShellSurface;
  * @see Registry
  * @since 5.54
  **/
-class KWAYLANDCLIENT_EXPORT XdgDecorationManager : public QObject
+class WRAPLANDCLIENT_EXPORT XdgDecorationManager : public QObject
 {
     Q_OBJECT
 public:
@@ -137,7 +137,7 @@ private:
     QScopedPointer<Private> d;
 };
 
-class KWAYLANDCLIENT_EXPORT XdgDecoration : public QObject
+class WRAPLANDCLIENT_EXPORT XdgDecoration : public QObject
 {
     Q_OBJECT
 public:
@@ -204,7 +204,7 @@ public:
     operator zxdg_toplevel_decoration_v1*() const;
 
 Q_SIGNALS:
-    void modeChanged(KWayland::Client::XdgDecoration::Mode mode);
+    void modeChanged(Wrapland::Client::XdgDecoration::Mode mode);
 
 private:
     friend class XdgDecorationManager;

@@ -17,15 +17,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_TEXTINPUT_INTERFACE_H
-#define KWAYLAND_SERVER_TEXTINPUT_INTERFACE_H
+#ifndef WRAPLAND_SERVER_TEXTINPUT_INTERFACE_H
+#define WRAPLAND_SERVER_TEXTINPUT_INTERFACE_H
 
 #include "global.h"
 #include "resource.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -65,7 +65,7 @@ enum class TextInputInterfaceVersion {
  *
  * @since 5.23
  **/
-class KWAYLANDSERVER_EXPORT TextInputManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT TextInputManagerInterface : public Global
 {
     Q_OBJECT
 public:
@@ -102,7 +102,7 @@ private:
  * @see SeatInterface
  * @since 5.23
  **/
-class KWAYLANDSERVER_EXPORT TextInputInterface : public Resource
+class WRAPLANDSERVER_EXPORT TextInputInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -429,11 +429,11 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::TextInputInterfaceVersion)
-Q_DECLARE_METATYPE(KWayland::Server::TextInputInterface *)
-Q_DECLARE_METATYPE(KWayland::Server::TextInputInterface::ContentHint)
-Q_DECLARE_METATYPE(KWayland::Server::TextInputInterface::ContentHints)
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Server::TextInputInterface::ContentHints)
-Q_DECLARE_METATYPE(KWayland::Server::TextInputInterface::ContentPurpose)
+Q_DECLARE_METATYPE(Wrapland::Server::TextInputInterfaceVersion)
+Q_DECLARE_METATYPE(Wrapland::Server::TextInputInterface *)
+Q_DECLARE_METATYPE(Wrapland::Server::TextInputInterface::ContentHint)
+Q_DECLARE_METATYPE(Wrapland::Server::TextInputInterface::ContentHints)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::TextInputInterface::ContentHints)
+Q_DECLARE_METATYPE(Wrapland::Server::TextInputInterface::ContentPurpose)
 
 #endif

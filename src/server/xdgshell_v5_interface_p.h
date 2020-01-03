@@ -17,18 +17,18 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_XDGSHELL_V5_INTERFACE_P_H
-#define KWAYLAND_SERVER_XDGSHELL_V5_INTERFACE_P_H
+#ifndef WRAPLAND_SERVER_XDGSHELL_V5_INTERFACE_P_H
+#define WRAPLAND_SERVER_XDGSHELL_V5_INTERFACE_P_H
 
 #include "global.h"
 #include "resource.h"
 #include "xdgshell_interface.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include <QSize>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

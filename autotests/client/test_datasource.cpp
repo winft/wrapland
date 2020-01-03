@@ -17,10 +17,6 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
-#include <QtTest>
-#include <QMimeDatabase>
-// KWayland
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/datadevicemanager.h"
@@ -29,7 +25,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/display.h"
 #include "../../src/server/datadevicemanager_interface.h"
 #include "../../src/server/datasource_interface.h"
-// Wayland
+
+#include <QtTest>
+#include <QMimeDatabase>
+
 #include <wayland-client.h>
 
 class TestDataSource : public QObject
@@ -49,11 +48,11 @@ private Q_SLOTS:
     void testDestroy();
 
 private:
-    KWayland::Server::Display *m_display = nullptr;
-    KWayland::Server::DataDeviceManagerInterface *m_dataDeviceManagerInterface = nullptr;
-    KWayland::Client::ConnectionThread *m_connection = nullptr;
-    KWayland::Client::DataDeviceManager *m_dataDeviceManager = nullptr;
-    KWayland::Client::EventQueue *m_queue = nullptr;
+    Wrapland::Server::Display *m_display = nullptr;
+    Wrapland::Server::DataDeviceManagerInterface *m_dataDeviceManagerInterface = nullptr;
+    Wrapland::Client::ConnectionThread *m_connection = nullptr;
+    Wrapland::Client::DataDeviceManager *m_dataDeviceManager = nullptr;
+    Wrapland::Client::EventQueue *m_queue = nullptr;
     QThread *m_thread = nullptr;
 };
 
@@ -61,7 +60,7 @@ static const QString s_socketName = QStringLiteral("kwayland-test-wayland-dataso
 
 void TestDataSource::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -69,7 +68,7 @@ void TestDataSource::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
     m_connection->setSocketName(s_socketName);
 
@@ -80,12 +79,12 @@ void TestDataSource::init()
     m_connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    m_queue = new KWayland::Client::EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
 
-    KWayland::Client::Registry registry;
+    Wrapland::Client::Registry registry;
     QSignalSpy dataDeviceManagerSpy(&registry, SIGNAL(dataDeviceManagerAnnounced(quint32,quint32)));
     QVERIFY(dataDeviceManagerSpy.isValid());
     QVERIFY(!registry.eventQueue());
@@ -129,11 +128,11 @@ void TestDataSource::cleanup()
 
 void TestDataSource::testOffer()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
 
-    qRegisterMetaType<KWayland::Server::DataSourceInterface*>();
-    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(KWayland::Server::DataSourceInterface*)));
+    qRegisterMetaType<Wrapland::Server::DataSourceInterface*>();
+    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
     QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
@@ -193,10 +192,10 @@ void TestDataSource::testTargetAccepts_data()
 
 void TestDataSource::testTargetAccepts()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
 
-    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(KWayland::Server::DataSourceInterface*)));
+    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
     QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
@@ -218,10 +217,10 @@ void TestDataSource::testTargetAccepts()
 
 void TestDataSource::testRequestSend()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
 
-    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(KWayland::Server::DataSourceInterface*)));
+    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
     QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
@@ -251,8 +250,8 @@ void TestDataSource::testRequestSend()
 void TestDataSource::testRequestSendOnUnbound()
 {
     // this test verifies that the server doesn't crash when requesting a send on an unbound DataSource
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
     QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, &DataDeviceManagerInterface::dataSourceCreated);
     QVERIFY(dataSourceCreatedSpy.isValid());
 
@@ -272,10 +271,10 @@ void TestDataSource::testRequestSendOnUnbound()
 
 void TestDataSource::testCancel()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
 
-    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(KWayland::Server::DataSourceInterface*)));
+    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
     QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
@@ -294,10 +293,10 @@ void TestDataSource::testCancel()
 
 void TestDataSource::testServerGet()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
 
-    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(KWayland::Server::DataSourceInterface*)));
+    QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
     QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
@@ -313,7 +312,7 @@ void TestDataSource::testServerGet()
 
 void TestDataSource::testDestroy()
 {
-    using namespace KWayland::Client;
+    using namespace Wrapland::Client;
 
     QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource->isValid());

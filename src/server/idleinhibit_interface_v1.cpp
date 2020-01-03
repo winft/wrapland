@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "surface_interface_p.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

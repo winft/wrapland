@@ -69,7 +69,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <EGL/egl.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -110,7 +110,7 @@ void Display::Private::installSocketNotifier()
     }
     int fd = wl_event_loop_get_fd(loop);
     if (fd == -1) {
-        qCWarning(KWAYLAND_SERVER) << "Did not get the file descriptor for the event loop";
+        qCWarning(WRAPLAND_SERVER) << "Did not get the file descriptor for the event loop";
         return;
     }
     QSocketNotifier *m_notifier = new QSocketNotifier(fd, QSocketNotifier::Read, q);
@@ -147,7 +147,7 @@ void Display::Private::dispatch()
         return;
     }
     if (wl_event_loop_dispatch(loop, 0) != 0) {
-        qCWarning(KWAYLAND_SERVER) << "Error on dispatching Wayland event loop";
+        qCWarning(WRAPLAND_SERVER) << "Error on dispatching Wayland event loop";
     }
 }
 
@@ -188,7 +188,7 @@ void Display::start(StartMode mode)
         if (d->automaticSocketNaming) {
             const char *socket = wl_display_add_socket_auto(d->display);
             if (socket == nullptr) {
-                qCWarning(KWAYLAND_SERVER) << "Failed to create Wayland socket";
+                qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
                 return;
             }
 
@@ -198,7 +198,7 @@ void Display::start(StartMode mode)
                 emit socketNameChanged(d->socketName);
             }
         } else if (wl_display_add_socket(d->display, qPrintable(d->socketName)) != 0) {
-            qCWarning(KWAYLAND_SERVER) << "Failed to create Wayland socket";
+            qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
             return;
         }
     }
@@ -641,7 +641,7 @@ ClientConnection *Display::createClient(int fd)
 void Display::setEglDisplay(void *display)
 {
     if (d->eglDisplay != EGL_NO_DISPLAY) {
-        qCWarning(KWAYLAND_SERVER) << "EGLDisplay cannot be changed";
+        qCWarning(WRAPLAND_SERVER) << "EGLDisplay cannot be changed";
         return;
     }
     d->eglDisplay = (EGLDisplay)display;

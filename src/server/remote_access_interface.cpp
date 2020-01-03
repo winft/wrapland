@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <functional>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -197,7 +197,7 @@ void RemoteAccessManagerInterface::Private::sendBufferReady(const OutputInterfac
 {
     BufferHolder holder {buf, 0};
     // notify clients
-    qCDebug(KWAYLAND_SERVER) << "Server buffer sent: fd" << buf->fd();
+    qCDebug(WRAPLAND_SERVER) << "Server buffer sent: fd" << buf->fd();
     for (auto res : clientResources) {
         auto client = wl_resource_get_client(res);
         auto boundScreens = output->clientResources(display->getConnection(client));
@@ -252,7 +252,7 @@ void RemoteAccessManagerInterface::Private::getBufferCallback(wl_client *client,
             // all relevant buffers are already unreferenced
             return;
         }
-        qCDebug(KWAYLAND_SERVER) << "Remote buffer returned, client" << wl_resource_get_id(resource)
+        qCDebug(WRAPLAND_SERVER) << "Remote buffer returned, client" << wl_resource_get_id(resource)
                                                      << ", id" << rbuf->id()
                                                      << ", fd" << bh.buf->fd();
         if (p->unref(bh)) {
@@ -275,7 +275,7 @@ bool RemoteAccessManagerInterface::Private::unref(BufferHolder &bh)
     bh.counter--;
     if (!bh.counter) {
         // no more clients using this buffer
-        qCDebug(KWAYLAND_SERVER) << "Buffer released, fd" << bh.buf->fd();
+        qCDebug(WRAPLAND_SERVER) << "Buffer released, fd" << bh.buf->fd();
         emit q->bufferReleased(bh.buf);
         return true;
     }

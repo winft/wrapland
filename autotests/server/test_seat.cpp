@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/pointer_interface.h"
 #include "../../src/server/seat_interface.h"
 
-using namespace KWayland::Server;
+using namespace Wrapland::Server;
 
 
 class TestWaylandServerSeat : public QObject

@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_IDLE_H
-#define KWAYLAND_IDLE_H
+#ifndef WRAPLAND_IDLE_H
+#define WRAPLAND_IDLE_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_idle;
 struct org_kde_kwin_idle_timeout;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -64,7 +64,7 @@ class Seat;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT Idle : public QObject
+class WRAPLANDCLIENT_EXPORT Idle : public QObject
 {
     Q_OBJECT
 public:
@@ -159,7 +159,7 @@ private:
  *
  * @see IdleTimeoutManager
  **/
-class KWAYLANDCLIENT_EXPORT IdleTimeout : public QObject
+class WRAPLANDCLIENT_EXPORT IdleTimeout : public QObject
 {
     Q_OBJECT
 public:

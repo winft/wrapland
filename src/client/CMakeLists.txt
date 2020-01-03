@@ -64,82 +64,82 @@ set(CLIENT_LIB_SRCS
     ../compat/wayland-xdg-shell-v5-protocol.c
 )
 
-ecm_qt_declare_logging_category(CLIENT_LIB_SRCS HEADER logging.h IDENTIFIER KWAYLAND_CLIENT CATEGORY_NAME kwayland-client DEFAULT_SEVERITY Critical)
+ecm_qt_declare_logging_category(CLIENT_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_CLIENT CATEGORY_NAME wrapland-client DEFAULT_SEVERITY Critical)
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/fullscreen-shell.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/fullscreen-shell.xml
     BASENAME fullscreen-shell
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/output-management.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/output-management.xml
     BASENAME output-management
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/outputdevice.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/outputdevice.xml
     BASENAME org_kde_kwin_outputdevice
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/plasma-shell.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/plasma-shell.xml
     BASENAME plasma-shell
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/plasma-virtual-desktop.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/plasma-virtual-desktop.xml
     BASENAME plasma-virtual-desktop
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/plasma-window-management.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/plasma-window-management.xml
     BASENAME plasma-window-management
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/idle.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/idle.xml
     BASENAME idle
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/fake-input.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/fake-input.xml
     BASENAME fake-input
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/shadow.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/shadow.xml
     BASENAME shadow
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/blur.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/blur.xml
     BASENAME blur
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/contrast.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/contrast.xml
     BASENAME contrast
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/slide.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/slide.xml
     BASENAME slide
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/dpms.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/dpms.xml
     BASENAME dpms
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/server-decoration.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/server-decoration.xml
     BASENAME server-decoration
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/text-input.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input.xml
     BASENAME text-input-v0
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
     BASENAME text-input-v2
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
@@ -167,11 +167,11 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     BASENAME idle-inhibit-unstable-v1
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/appmenu.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/appmenu.xml
     BASENAME appmenu
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/server-decoration-palette.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/server-decoration-palette.xml
     BASENAME server-decoration-palette
 )
 
@@ -191,7 +191,7 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/keystate.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/keystate.xml
     BASENAME keystate
 )
 
@@ -226,43 +226,43 @@ set(CLIENT_GENERATED_FILES
 set_source_files_properties(${CLIENT_GENERATED_FILES} PROPERTIES SKIP_AUTOMOC ON)
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${KWayland_SOURCE_DIR}/src/client/protocols/remote-access.xml
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/remote-access.xml
     BASENAME remote-access
 )
 
-add_library(KF5WaylandClient ${CLIENT_LIB_SRCS})
-add_library(KF5::WaylandClient ALIAS KF5WaylandClient)
-ecm_generate_export_header(KF5WaylandClient
+add_library(WraplandClient ${CLIENT_LIB_SRCS})
+add_library(Wrapland::Client ALIAS WraplandClient)
+ecm_generate_export_header(WraplandClient
     BASE_NAME
-        KWaylandClient
+        WraplandClient
     EXPORT_FILE_NAME
-        KWayland/Client/kwaylandclient_export.h
+        Wrapland/Client/wraplandclient_export.h
     GROUP_BASE_NAME KF
-    VERSION ${KF5_VERSION}
+    VERSION ${PROJECT_VERSION}
     DEPRECATED_BASE_VERSION 0
     DEPRECATION_VERSIONS 5.49 5.50 5.52 5.53
 )
-# TODO: add support for EXCLUDE_DEPRECATED_BEFORE_AND_AT to all KWayland libs
+# TODO: add support for EXCLUDE_DEPRECATED_BEFORE_AND_AT to all Wrapland libs
 # needs fixing of undeprecated API being still implemented using own deprecated API
 
 
-target_include_directories(KF5WaylandClient INTERFACE "$<INSTALL_INTERFACE:${KF5_INCLUDE_INSTALL_DIR}/KWayland/Client>")
+target_include_directories(WraplandClient INTERFACE "$<INSTALL_INTERFACE:${KF5_INCLUDE_INSTALL_DIR}/Wrapland/Client>")
 
-target_link_libraries(KF5WaylandClient
+target_link_libraries(WraplandClient
     PUBLIC Qt5::Gui
     PRIVATE Wayland::Client
         Qt5::Concurrent
 )
 
-set_target_properties(KF5WaylandClient PROPERTIES VERSION   ${KWAYLAND_VERSION_STRING}
-                                                 SOVERSION ${KWAYLAND_SOVERSION}
+set_target_properties(WraplandClient PROPERTIES VERSION   ${WRAPLAND_VERSION_STRING}
+                                                 SOVERSION ${WRAPLAND_SOVERSION}
                                                  EXPORT_NAME WaylandClient
 )
 
-install(TARGETS KF5WaylandClient EXPORT KF5WaylandTargets ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS WraplandClient EXPORT WraplandTargets ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
 
 set(CLIENT_LIB_HEADERS
-  ${CMAKE_CURRENT_BINARY_DIR}/KWayland/Client/kwaylandclient_export.h
+  ${CMAKE_CURRENT_BINARY_DIR}/Wrapland/Client/wraplandclient_export.h
   appmenu.h
   blur.h
   buffer.h
@@ -316,14 +316,14 @@ set(CLIENT_LIB_HEADERS
 
 install(FILES
   ${CLIENT_LIB_HEADERS}
-  DESTINATION ${KF5_INCLUDE_INSTALL_DIR}/KWayland/Client COMPONENT Devel
+  DESTINATION ${KF5_INCLUDE_INSTALL_DIR}/Wrapland/Client COMPONENT Devel
 )
 
 # make available to ecm_add_qch in parent folder
-set(KWaylandClient_APIDOX_SRCS ${CLIENT_LIB_HEADERS} PARENT_SCOPE)
-set(KWaylandClient_APIDOX_BUILD_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
+set(WraplandClient_APIDOX_SRCS ${CLIENT_LIB_HEADERS} PARENT_SCOPE)
+set(WraplandClient_APIDOX_BUILD_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
 
 include(ECMGeneratePriFile)
-ecm_generate_pri_file(BASE_NAME KWaylandClient LIB_NAME KF5WaylandClient DEPS "core" FILENAME_VAR PRI_FILENAME INCLUDE_INSTALL_DIR ${KDE_INSTALL_INCLUDEDIR_KF5})
+ecm_generate_pri_file(BASE_NAME WraplandClient LIB_NAME WraplandClient DEPS "core" FILENAME_VAR PRI_FILENAME INCLUDE_INSTALL_DIR ${KDE_INSTALL_INCLUDEDIR_KF5})
 install(FILES ${PRI_FILENAME}
         DESTINATION ${ECM_MKSPECS_INSTALL_DIR})

@@ -22,11 +22,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include "resource.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -48,7 +48,7 @@ class SurfaceInterface;
  * @see SeatInterface
  * @see DataSourceInterface
  **/
-class KWAYLANDSERVER_EXPORT DataDeviceInterface : public Resource
+class WRAPLANDSERVER_EXPORT DataDeviceInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -95,7 +95,7 @@ public:
 
 Q_SIGNALS:
     void dragStarted();
-    void selectionChanged(KWayland::Server::DataSourceInterface*);
+    void selectionChanged(Wrapland::Server::DataSourceInterface*);
     void selectionCleared();
 
 private:
@@ -109,6 +109,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::DataDeviceInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::DataDeviceInterface*)
 
 #endif

@@ -18,12 +18,12 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 
-#ifndef KWAYLAND_SERVER_SURFACEROLE_P_H
-#define KWAYLAND_SERVER_SURFACEROLE_P_H
+#ifndef WRAPLAND_SERVER_SURFACEROLE_P_H
+#define WRAPLAND_SERVER_SURFACEROLE_P_H
 
 #include <QPointer>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -47,4 +47,4 @@ private:
 }
 }
 
-#endif // KWAYLAND_SERVER_SURFACEROLE_P_H
+#endif // WRAPLAND_SERVER_SURFACEROLE_P_H

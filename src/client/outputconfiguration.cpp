@@ -26,7 +26,7 @@
 #include "wayland-output-management-client-protocol.h"
 #include "wayland-org_kde_kwin_outputdevice-client-protocol.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -128,26 +128,26 @@ void OutputConfiguration::setMode(OutputDevice* outputdevice, const int modeId)
                                           modeId);
 }
 
-void OutputConfiguration::setTransform(OutputDevice *outputdevice, KWayland::Client::OutputDevice::Transform transform)
+void OutputConfiguration::setTransform(OutputDevice *outputdevice, Wrapland::Client::OutputDevice::Transform transform)
 {
     auto toTransform = [transform]() {
         switch (transform) {
-            using KWayland::Client::OutputDevice;
-            case KWayland::Client::OutputDevice::Transform::Normal:
+            using Wrapland::Client::OutputDevice;
+            case Wrapland::Client::OutputDevice::Transform::Normal:
                 return WL_OUTPUT_TRANSFORM_NORMAL;
-            case KWayland::Client::OutputDevice::Transform::Rotated90:
+            case Wrapland::Client::OutputDevice::Transform::Rotated90:
                 return WL_OUTPUT_TRANSFORM_90;
-            case KWayland::Client::OutputDevice::Transform::Rotated180:
+            case Wrapland::Client::OutputDevice::Transform::Rotated180:
                 return WL_OUTPUT_TRANSFORM_180;
-            case KWayland::Client::OutputDevice::Transform::Rotated270:
+            case Wrapland::Client::OutputDevice::Transform::Rotated270:
                 return WL_OUTPUT_TRANSFORM_270;
-            case KWayland::Client::OutputDevice::Transform::Flipped:
+            case Wrapland::Client::OutputDevice::Transform::Flipped:
                 return WL_OUTPUT_TRANSFORM_FLIPPED;
-            case KWayland::Client::OutputDevice::Transform::Flipped90:
+            case Wrapland::Client::OutputDevice::Transform::Flipped90:
                 return WL_OUTPUT_TRANSFORM_FLIPPED_90;
-            case KWayland::Client::OutputDevice::Transform::Flipped180:
+            case Wrapland::Client::OutputDevice::Transform::Flipped180:
                 return WL_OUTPUT_TRANSFORM_FLIPPED_180;
-            case KWayland::Client::OutputDevice::Transform::Flipped270:
+            case Wrapland::Client::OutputDevice::Transform::Flipped270:
                 return WL_OUTPUT_TRANSFORM_FLIPPED_270;
         }
         abort();

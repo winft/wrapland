@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_SERVER_DECORATION_PALETTE_H
-#define KWAYLAND_CLIENT_SERVER_DECORATION_PALETTE_H
+#ifndef WRAPLAND_CLIENT_SERVER_DECORATION_PALETTE_H
+#define WRAPLAND_CLIENT_SERVER_DECORATION_PALETTE_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_server_decoration_palette_manager;
 struct org_kde_kwin_server_decoration_palette;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -59,7 +59,7 @@ class ServerSideDecorationPalette;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT ServerSideDecorationPaletteManager : public QObject
+class WRAPLANDCLIENT_EXPORT ServerSideDecorationPaletteManager : public QObject
 {
     Q_OBJECT
 public:
@@ -134,7 +134,7 @@ private:
     QScopedPointer<Private> d;
 };
 
-class KWAYLANDCLIENT_EXPORT ServerSideDecorationPalette : public QObject
+class WRAPLANDCLIENT_EXPORT ServerSideDecorationPalette : public QObject
 {
     Q_OBJECT
 public:

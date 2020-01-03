@@ -5,8 +5,8 @@ set( testWaylandConnectionThread_SRCS
         test_wayland_connection_thread.cpp
     )
 add_executable(testWaylandConnectionThread ${testWaylandConnectionThread_SRCS})
-target_link_libraries( testWaylandConnectionThread Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client Wayland::Server)
-add_test(NAME kwayland-testWaylandConnectionThread COMMAND testWaylandConnectionThread)
+target_link_libraries( testWaylandConnectionThread Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+add_test(NAME wrapland-testWaylandConnectionThread COMMAND testWaylandConnectionThread)
 ecm_mark_as_test(testWaylandConnectionThread)
 
 ########################################################
@@ -16,8 +16,8 @@ set( testWaylandRegistry_SRCS
         test_wayland_registry.cpp
     )
 add_executable(testWaylandRegistry ${testWaylandRegistry_SRCS})
-target_link_libraries( testWaylandRegistry Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client Wayland::Server)
-add_test(NAME kwayland-testWaylandRegistry COMMAND testWaylandRegistry)
+target_link_libraries( testWaylandRegistry Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+add_test(NAME wrapland-testWaylandRegistry COMMAND testWaylandRegistry)
 ecm_mark_as_test(testWaylandRegistry)
 
 ########################################################
@@ -30,8 +30,8 @@ if(Wayland_VERSION VERSION_GREATER "1.4.0")
             test_wayland_fullscreen_shell.cpp
         )
     add_executable(testWaylandFullscreenShell ${testWaylandFullscreenShell_SRCS})
-    target_link_libraries( testWaylandFullscreenShell Qt5::Test KF5::WaylandClient Wayland::Client)
-    add_test(NAME kwayland-testWaylandFullscreenShell COMMAND testWaylandFullscreenShell)
+    target_link_libraries( testWaylandFullscreenShell Qt5::Test Wrapland::Client Wayland::Client)
+    add_test(NAME wrapland-testWaylandFullscreenShell COMMAND testWaylandFullscreenShell)
     ecm_mark_as_test(testWaylandFullscreenShell)
   else()
     message(STATUS "The weston executable was not found. Some autotests will not be executed.")
@@ -45,8 +45,8 @@ set( testWaylandOutput_SRCS
         test_wayland_output.cpp
     )
 add_executable(testWaylandOutput ${testWaylandOutput_SRCS})
-target_link_libraries( testWaylandOutput Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client Wayland::Server)
-add_test(NAME kwayland-testWaylandOutput COMMAND testWaylandOutput)
+target_link_libraries( testWaylandOutput Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+add_test(NAME wrapland-testWaylandOutput COMMAND testWaylandOutput)
 ecm_mark_as_test(testWaylandOutput)
 
 ########################################################
@@ -56,8 +56,8 @@ set( testWaylandShell_SRCS
         test_wayland_shell.cpp
     )
 add_executable(testWaylandShell ${testWaylandShell_SRCS})
-target_link_libraries( testWaylandShell Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client Wayland::Server)
-add_test(NAME kwayland-testWaylandShell COMMAND testWaylandShell)
+target_link_libraries( testWaylandShell Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+add_test(NAME wrapland-testWaylandShell COMMAND testWaylandShell)
 ecm_mark_as_test(testWaylandShell)
 
 ########################################################
@@ -67,8 +67,8 @@ set( testWaylandSurface_SRCS
         test_wayland_surface.cpp
     )
 add_executable(testWaylandSurface ${testWaylandSurface_SRCS})
-target_link_libraries( testWaylandSurface Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client Wayland::Server)
-add_test(NAME kwayland-testWaylandSurface COMMAND testWaylandSurface)
+target_link_libraries( testWaylandSurface Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+add_test(NAME wrapland-testWaylandSurface COMMAND testWaylandSurface)
 ecm_mark_as_test(testWaylandSurface)
 
 ########################################################
@@ -79,8 +79,8 @@ if (HAVE_LINUX_INPUT_H)
             test_wayland_seat.cpp
         )
     add_executable(testWaylandSeat ${testWaylandSeat_SRCS})
-    target_link_libraries( testWaylandSeat Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client Wayland::Server)
-    add_test(NAME kwayland-testWaylandSeat COMMAND testWaylandSeat)
+    target_link_libraries( testWaylandSeat Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+    add_test(NAME wrapland-testWaylandSeat COMMAND testWaylandSeat)
     ecm_mark_as_test(testWaylandSeat)
 endif()
 
@@ -91,8 +91,8 @@ set( testShmPool_SRCS
         test_shm_pool.cpp
     )
 add_executable(testShmPool ${testShmPool_SRCS})
-target_link_libraries( testShmPool Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testShmPool COMMAND testShmPool)
+target_link_libraries( testShmPool Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testShmPool COMMAND testShmPool)
 ecm_mark_as_test(testShmPool)
 
 ########################################################
@@ -102,8 +102,8 @@ set( test_wayland_outputmanagement_SRCS
         test_wayland_outputmanagement.cpp
     )
 add_executable(testWaylandOutputManagement ${test_wayland_outputmanagement_SRCS})
-target_link_libraries( testWaylandOutputManagement Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testWaylandOutputManagement COMMAND testWaylandOutputManagement)
+target_link_libraries( testWaylandOutputManagement Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testWaylandOutputManagement COMMAND testWaylandOutputManagement)
 ecm_mark_as_test(testWaylandOutputManagement)
 
 ########################################################
@@ -113,8 +113,8 @@ set( test_wayland_outputdevice_SRCS
         test_wayland_outputdevice.cpp
     )
 add_executable(testWaylandOutputDevice ${test_wayland_outputdevice_SRCS})
-target_link_libraries( testWaylandOutputDevice Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testWaylandOutputDevice COMMAND testWaylandOutputDevice)
+target_link_libraries( testWaylandOutputDevice Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testWaylandOutputDevice COMMAND testWaylandOutputDevice)
 ecm_mark_as_test(testWaylandOutputDevice)
 
 ########################################################
@@ -124,8 +124,8 @@ set( testCompositor_SRCS
         test_compositor.cpp
     )
 add_executable(testCompositor ${testCompositor_SRCS})
-target_link_libraries( testCompositor Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testCompositor COMMAND testCompositor)
+target_link_libraries( testCompositor Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testCompositor COMMAND testCompositor)
 ecm_mark_as_test(testCompositor)
 
 ########################################################
@@ -135,8 +135,8 @@ set( testSubCompositor_SRCS
         test_wayland_subcompositor.cpp
     )
 add_executable(testSubCompositor ${testSubCompositor_SRCS})
-target_link_libraries( testSubCompositor Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testSubCompositor COMMAND testSubCompositor)
+target_link_libraries( testSubCompositor Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testSubCompositor COMMAND testSubCompositor)
 ecm_mark_as_test(testSubCompositor)
 
 
@@ -147,8 +147,8 @@ set( testSubSurface_SRCS
         test_wayland_subsurface.cpp
     )
 add_executable(testSubSurface ${testSubSurface_SRCS})
-target_link_libraries( testSubSurface Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testSubSurface COMMAND testSubSurface)
+target_link_libraries( testSubSurface Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testSubSurface COMMAND testSubSurface)
 ecm_mark_as_test(testSubSurface)
 
 ########################################################
@@ -158,8 +158,8 @@ set( testRegion_SRCS
         test_wayland_region.cpp
     )
 add_executable(testRegion ${testRegion_SRCS})
-target_link_libraries( testRegion Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testRegion COMMAND testRegion)
+target_link_libraries( testRegion Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testRegion COMMAND testRegion)
 ecm_mark_as_test(testRegion)
 
 ########################################################
@@ -169,8 +169,8 @@ set( testBlur_SRCS
         test_wayland_blur.cpp
     )
 add_executable(testBlur ${testBlur_SRCS})
-target_link_libraries( testBlur Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testBlur COMMAND testBlur)
+target_link_libraries( testBlur Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testBlur COMMAND testBlur)
 ecm_mark_as_test(testBlur)
 
 ########################################################
@@ -180,8 +180,8 @@ set( testContrast_SRCS
         test_wayland_contrast.cpp
     )
 add_executable(testContrast ${testContrast_SRCS})
-target_link_libraries( testContrast Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testContrast COMMAND testContrast)
+target_link_libraries( testContrast Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testContrast COMMAND testContrast)
 ecm_mark_as_test(testContrast)
 
 ########################################################
@@ -191,8 +191,8 @@ set( testSlide_SRCS
         test_wayland_slide.cpp
     )
 add_executable(testSlide ${testSlide_SRCS})
-target_link_libraries( testSlide Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testSlide COMMAND testSlide)
+target_link_libraries( testSlide Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testSlide COMMAND testSlide)
 ecm_mark_as_test(testSlide)
 
 ########################################################
@@ -202,8 +202,8 @@ set( testWindowmanagement_SRCS
         test_wayland_windowmanagement.cpp
     )
 add_executable(testWindowmanagement ${testWindowmanagement_SRCS})
-target_link_libraries( testWindowmanagement Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testWindowmanagement COMMAND testWindowmanagement)
+target_link_libraries( testWindowmanagement Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testWindowmanagement COMMAND testWindowmanagement)
 ecm_mark_as_test(testWindowmanagement)
 
 ########################################################
@@ -213,8 +213,8 @@ set( testDataSource_SRCS
         test_datasource.cpp
     )
 add_executable(testDataSource ${testDataSource_SRCS})
-target_link_libraries( testDataSource Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testDataSource COMMAND testDataSource)
+target_link_libraries( testDataSource Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testDataSource COMMAND testDataSource)
 ecm_mark_as_test(testDataSource)
 
 ########################################################
@@ -224,8 +224,8 @@ set( testDataDevice_SRCS
         test_datadevice.cpp
     )
 add_executable(testDataDevice ${testDataDevice_SRCS})
-target_link_libraries( testDataDevice Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testDataDevice COMMAND testDataDevice)
+target_link_libraries( testDataDevice Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testDataDevice COMMAND testDataDevice)
 ecm_mark_as_test(testDataDevice)
 
 ########################################################
@@ -235,8 +235,8 @@ set( testServerSideDecoration_SRCS
         test_server_side_decoration.cpp
     )
 add_executable(testServerSideDecoration ${testServerSideDecoration_SRCS})
-target_link_libraries( testServerSideDecoration Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testServerSideDecoration COMMAND testServerSideDecoration)
+target_link_libraries( testServerSideDecoration Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testServerSideDecoration COMMAND testServerSideDecoration)
 ecm_mark_as_test(testServerSideDecoration)
 
 ########################################################
@@ -246,8 +246,8 @@ set( testDragAndDrop_SRCS
         test_drag_drop.cpp
     )
 add_executable(testDragAndDrop ${testDragAndDrop_SRCS})
-target_link_libraries( testDragAndDrop Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testDragAndDrop COMMAND testDragAndDrop)
+target_link_libraries( testDragAndDrop Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testDragAndDrop COMMAND testDragAndDrop)
 ecm_mark_as_test(testDragAndDrop)
 
 ########################################################
@@ -257,8 +257,8 @@ set( testPlasmaShell_SRCS
         test_plasmashell.cpp
     )
 add_executable(testPlasmaShell ${testPlasmaShell_SRCS})
-target_link_libraries( testPlasmaShell Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testPlasmaShell COMMAND testPlasmaShell)
+target_link_libraries( testPlasmaShell Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testPlasmaShell COMMAND testPlasmaShell)
 ecm_mark_as_test(testPlasmaShell)
 
 ########################################################
@@ -268,8 +268,8 @@ set( testIdle_SRCS
         test_idle.cpp
     )
 add_executable(testIdle ${testIdle_SRCS})
-target_link_libraries( testIdle Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testIdle COMMAND testIdle)
+target_link_libraries( testIdle Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testIdle COMMAND testIdle)
 ecm_mark_as_test(testIdle)
 
 ########################################################
@@ -279,8 +279,8 @@ set( testShadow_SRCS
         test_shadow.cpp
     )
 add_executable(testShadow ${testShadow_SRCS})
-target_link_libraries( testShadow Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testShadow COMMAND testShadow)
+target_link_libraries( testShadow Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testShadow COMMAND testShadow)
 ecm_mark_as_test(testShadow)
 
 ########################################################
@@ -291,8 +291,8 @@ if (HAVE_LINUX_INPUT_H)
             test_fake_input.cpp
         )
     add_executable(testFakeInput ${testFakeInput_SRCS})
-    target_link_libraries( testFakeInput Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-    add_test(NAME kwayland-testFakeInput COMMAND testFakeInput)
+    target_link_libraries( testFakeInput Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+    add_test(NAME wrapland-testFakeInput COMMAND testFakeInput)
     ecm_mark_as_test(testFakeInput)
 endif()
 
@@ -304,8 +304,8 @@ if (HAVE_LINUX_INPUT_H)
             test_plasma_window_model.cpp
         )
     add_executable(testPlasmaWindowModel ${testPlasmaWindowModel_SRCS})
-    target_link_libraries( testPlasmaWindowModel Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-    add_test(NAME kwayland-testPlasmaWindowModel COMMAND testPlasmaWindowModel)
+    target_link_libraries( testPlasmaWindowModel Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+    add_test(NAME wrapland-testPlasmaWindowModel COMMAND testPlasmaWindowModel)
     ecm_mark_as_test(testPlasmaWindowModel)
 endif()
 
@@ -316,8 +316,8 @@ set( testTextInput_SRCS
         test_text_input.cpp
     )
 add_executable(testTextInput ${testTextInput_SRCS})
-target_link_libraries( testTextInput Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testTextInput COMMAND testTextInput)
+target_link_libraries( testTextInput Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testTextInput COMMAND testTextInput)
 ecm_mark_as_test(testTextInput)
 
 ########################################################
@@ -327,8 +327,8 @@ set( testError_SRCS
         test_error.cpp
     )
 add_executable(testError ${testError_SRCS})
-target_link_libraries( testError Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testError COMMAND testError)
+target_link_libraries( testError Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testError COMMAND testError)
 ecm_mark_as_test(testError)
 
 ########################################################
@@ -338,8 +338,8 @@ set( testSelection_SRCS
         test_selection.cpp
     )
 add_executable(testSelection ${testSelection_SRCS})
-target_link_libraries( testSelection Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client)
-add_test(NAME kwayland-testSelection COMMAND testSelection)
+target_link_libraries( testSelection Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testSelection COMMAND testSelection)
 ecm_mark_as_test(testSelection)
 
 ########################################################
@@ -350,8 +350,8 @@ set( testXdgShellV5_SRCS
       test_xdg_shell_v5.cpp
       )
 add_executable(testXdgShellV5 ${testXdgShellV5_SRCS})
-target_link_libraries( testXdgShellV5 Qt5::Test Qt5::Gui KF5::WaylandServer KF5::WaylandClient Wayland::Client)
-add_test(NAME kwayland-testXdgShellV5 COMMAND testXdgShellV5)
+target_link_libraries( testXdgShellV5 Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
+add_test(NAME wrapland-testXdgShellV5 COMMAND testXdgShellV5)
 ecm_mark_as_test(testXdgShellV5)
 
 ########################################################
@@ -361,8 +361,8 @@ set( testXdgForeign_SRCS
       test_xdg_foreign.cpp
       )
 add_executable(testXdgForeign ${testXdgForeign_SRCS})
-target_link_libraries( testXdgForeign Qt5::Test Qt5::Gui KF5::WaylandServer KF5::WaylandClient Wayland::Client)
-add_test(NAME kwayland-testXdgForeign COMMAND testXdgForeign)
+target_link_libraries( testXdgForeign Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
+add_test(NAME wrapland-testXdgForeign COMMAND testXdgForeign)
 ecm_mark_as_test(testXdgForeign)
 
 ########################################################
@@ -373,8 +373,8 @@ set( testXdgShellV6_SRCS
       test_xdg_shell_v6.cpp
       )
 add_executable(testXdgShellV6 ${testXdgShellV6_SRCS})
-target_link_libraries( testXdgShellV6 Qt5::Test Qt5::Gui KF5::WaylandServer KF5::WaylandClient Wayland::Client)
-add_test(NAME kwayland-testXdgShellV6 COMMAND testXdgShellV6)
+target_link_libraries( testXdgShellV6 Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
+add_test(NAME wrapland-testXdgShellV6 COMMAND testXdgShellV6)
 ecm_mark_as_test(testXdgShellV6)
 ########################################################
 # Test XdgShellStable
@@ -384,16 +384,16 @@ set( testXdgShellStable_SRCS
       test_xdg_shell_stable.cpp
       )
 add_executable(testXdgShellStable ${testXdgShellStable_SRCS})
-target_link_libraries( testXdgShellStable Qt5::Test Qt5::Gui KF5::WaylandServer KF5::WaylandClient Wayland::Client)
-add_test(NAME kwayland-testXdgShellStable COMMAND testXdgShellStable)
+target_link_libraries( testXdgShellStable Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
+add_test(NAME wrapland-testXdgShellStable COMMAND testXdgShellStable)
 ecm_mark_as_test(testXdgShellStable)
 
 ########################################################
 # Test Pointer Constraints
 ########################################################
 add_executable(testPointerConstraints test_pointer_constraints.cpp)
-target_link_libraries( testPointerConstraints Qt5::Test Qt5::Gui KF5::WaylandServer KF5::WaylandClient Wayland::Client)
-add_test(NAME kwayland-testPointerConstraints COMMAND testPointerConstraints)
+target_link_libraries( testPointerConstraints Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
+add_test(NAME wrapland-testPointerConstraints COMMAND testPointerConstraints)
 ecm_mark_as_test(testPointerConstraints)
 
 
@@ -404,8 +404,8 @@ set( testFilter_SRCS
         test_wayland_filter.cpp
     )
 add_executable(testFilter ${testFilter_SRCS})
-target_link_libraries( testFilter Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Server)
-add_test(NAME kwayland-testFilter COMMAND testFilter)
+target_link_libraries( testFilter Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Server)
+add_test(NAME wrapland-testFilter COMMAND testFilter)
 ecm_mark_as_test(testFilter)
 
 ########################################################
@@ -415,8 +415,8 @@ set( testAppmenu_SRCS
         test_wayland_appmenu.cpp
     )
 add_executable(testAppmenu ${testAppmenu_SRCS})
-target_link_libraries( testAppmenu Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testAppmenu COMMAND testAppmenu)
+target_link_libraries( testAppmenu Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testAppmenu COMMAND testAppmenu)
 ecm_mark_as_test(testAppmenu)
 
 ########################################################
@@ -426,8 +426,8 @@ set( testServerSideDecorationPalette_SRCS
         test_server_side_decoration_palette.cpp
     )
 add_executable(testServerSideDecorationPalette ${testServerSideDecorationPalette_SRCS})
-target_link_libraries( testServerSideDecorationPalette Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testServerSideDecorationPalette COMMAND testServerSideDecorationPalette)
+target_link_libraries( testServerSideDecorationPalette Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testServerSideDecorationPalette COMMAND testServerSideDecorationPalette)
 ecm_mark_as_test(testServerSideDecorationPalette)
 
 ########################################################
@@ -437,8 +437,8 @@ set( testRemoteAccess_SRCS
         test_remote_access.cpp
     )
 add_executable(testRemoteAccess ${testRemoteAccess_SRCS})
-target_link_libraries( testRemoteAccess Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testRemoteAccess COMMAND testRemoteAccess)
+target_link_libraries( testRemoteAccess Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testRemoteAccess COMMAND testRemoteAccess)
 ecm_mark_as_test(testRemoteAccess)
 
 ########################################################
@@ -448,8 +448,8 @@ set( testPlasmaVirtualDesktop_SRCS
         test_plasma_virtual_desktop.cpp
     )
 add_executable(testPlasmaVirtualDesktop ${testPlasmaVirtualDesktop_SRCS})
-target_link_libraries( testPlasmaVirtualDesktop Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer)
-add_test(NAME kwayland-testPlasmaVirtualDesktop COMMAND testPlasmaVirtualDesktop)
+target_link_libraries( testPlasmaVirtualDesktop Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testPlasmaVirtualDesktop COMMAND testPlasmaVirtualDesktop)
 ecm_mark_as_test(testPlasmaVirtualDesktop)
 
 ########################################################
@@ -459,8 +459,8 @@ set( testXdgOutput_SRCS
         test_xdg_output.cpp
     )
 add_executable(testXdgOutput ${testXdgOutput_SRCS})
-target_link_libraries( testXdgOutput Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client Wayland::Server)
-add_test(NAME kwayland-testXdgOutput COMMAND testXdgOutput)
+target_link_libraries( testXdgOutput Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+add_test(NAME wrapland-testXdgOutput COMMAND testXdgOutput)
 ecm_mark_as_test(testXdgOutput)
 
 ########################################################
@@ -470,7 +470,7 @@ set( testXdgdecoration_SRCS
         test_xdg_decoration.cpp
     )
 add_executable(testXdgDecoration ${testXdgdecoration_SRCS})
-target_link_libraries( testXdgDecoration Qt5::Test Qt5::Gui KF5::WaylandClient KF5::WaylandServer Wayland::Client Wayland::Server)
-add_test(NAME kwayland-testXdgDecoration COMMAND testXdgDecoration)
+target_link_libraries( testXdgDecoration Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+add_test(NAME wrapland-testXdgDecoration COMMAND testXdgDecoration)
 ecm_mark_as_test(testXdgDecoration)
 

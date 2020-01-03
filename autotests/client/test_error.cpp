@@ -37,8 +37,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <errno.h>  // For EPROTO
 
-using namespace KWayland::Client;
-using namespace KWayland::Server;
+using namespace Wrapland::Client;
+using namespace Wrapland::Server;
 
 class ErrorTest : public QObject
 {
@@ -65,7 +65,7 @@ private:
     PlasmaShell *m_plasmaShell = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-error-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-error-0");
 
 void ErrorTest::init()
 {
@@ -83,7 +83,7 @@ void ErrorTest::init()
     m_psi->create();
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);

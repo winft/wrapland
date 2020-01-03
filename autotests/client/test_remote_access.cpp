@@ -33,8 +33,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <linux/input.h>
 
-using namespace KWayland::Client;
-using namespace KWayland::Server;
+using namespace Wrapland::Client;
+using namespace Wrapland::Server;
 
 Q_DECLARE_METATYPE(const BufferHandle *)
 Q_DECLARE_METATYPE(const RemoteBuffer *)
@@ -76,13 +76,13 @@ public:
     Output *outputs[2] = {nullptr};
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-remote-access-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-remote-access-0");
 
 MockupClient::MockupClient(QObject *parent)
     : QObject(parent)
 {
     // setup connection
-    connection = new KWayland::Client::ConnectionThread;
+    connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketName(s_socketName);

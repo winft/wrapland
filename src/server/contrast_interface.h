@@ -18,17 +18,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_SERVER_CONTRAST_INTERFACE_H
-#define KWAYLAND_SERVER_CONTRAST_INTERFACE_H
+#ifndef WRAPLAND_SERVER_CONTRAST_INTERFACE_H
+#define WRAPLAND_SERVER_CONTRAST_INTERFACE_H
 
 #include "global.h"
 #include "resource.h"
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -44,7 +44,7 @@ class Display;
  * @see SurfaceInterface
  * @since 5.5
  **/
-class KWAYLANDSERVER_EXPORT ContrastManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT ContrastManagerInterface : public Global
 {
     Q_OBJECT
 public:
@@ -69,7 +69,7 @@ private:
  * @see SurfaceInterface
  * @since 5.5
  **/
-class KWAYLANDSERVER_EXPORT ContrastInterface : public Resource
+class WRAPLANDSERVER_EXPORT ContrastInterface : public Resource
 {
     Q_OBJECT
 public:

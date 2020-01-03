@@ -22,12 +22,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include "resource.h"
 #include "datadevicemanager_interface.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -39,7 +39,7 @@ class DataSourceInterface;
  * @brief Represents the Resource for the wl_data_offer interface.
  *
  **/
-class KWAYLANDSERVER_EXPORT DataOfferInterface : public Resource
+class WRAPLANDSERVER_EXPORT DataOfferInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -84,6 +84,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::DataOfferInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::DataOfferInterface*)
 
 #endif

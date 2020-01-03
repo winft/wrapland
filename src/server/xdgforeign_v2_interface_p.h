@@ -17,13 +17,13 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_XDGFOREIGNV2_INTERFACE_P_H
-#define KWAYLAND_SERVER_XDGFOREIGNV2_INTERFACE_P_H
+#ifndef WRAPLAND_SERVER_XDGFOREIGNV2_INTERFACE_P_H
+#define WRAPLAND_SERVER_XDGFOREIGNV2_INTERFACE_P_H
 
 #include "global.h"
 #include "resource.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -75,7 +75,7 @@ public:
 Q_SIGNALS:
     void surfaceImported(const QString &handle, XdgImportedUnstableV2Interface *imported);
     void surfaceUnimported(const QString &handle);
-    void transientChanged(KWayland::Server::SurfaceInterface *child, KWayland::Server::SurfaceInterface *parent);
+    void transientChanged(Wrapland::Server::SurfaceInterface *child, Wrapland::Server::SurfaceInterface *parent);
 
 private:
     explicit XdgImporterUnstableV2Interface(Display *display, XdgForeignInterface *parent = nullptr);
@@ -108,7 +108,7 @@ public:
     SurfaceInterface *child() const;
 
 Q_SIGNALS:
-    void childChanged(KWayland::Server::SurfaceInterface *child);
+    void childChanged(Wrapland::Server::SurfaceInterface *child);
 
 private:
     explicit XdgImportedUnstableV2Interface(XdgImporterUnstableV2Interface *parent, wl_resource *parentResource);

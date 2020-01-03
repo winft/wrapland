@@ -17,16 +17,16 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_FAKEINPUT_H
-#define KWAYLAND_FAKEINPUT_H
+#ifndef WRAPLAND_FAKEINPUT_H
+#define WRAPLAND_FAKEINPUT_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_fake_input;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -61,7 +61,7 @@ class Seat;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT FakeInput : public QObject
+class WRAPLANDCLIENT_EXPORT FakeInput : public QObject
 {
     Q_OBJECT
 public:

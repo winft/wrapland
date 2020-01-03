@@ -33,7 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QImage>
 #include <QThread>
 #include <QDebug>
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
 class XdgForeignTest : public QObject
 {
@@ -60,11 +60,11 @@ private:
     XdgShellSurface *m_childShellSurface = nullptr;
     Surface *m_childSurface = nullptr;
 
-    KWayland::Client::XdgExporter *m_exporter = nullptr;
-    KWayland::Client::XdgImporter *m_importer = nullptr;
-    KWayland::Client::XdgExported *m_exported = nullptr;
-    KWayland::Client::XdgImported *m_imported = nullptr;
-    KWayland::Client::ServerSideDecorationManager *m_decoration = nullptr;
+    Wrapland::Client::XdgExporter *m_exporter = nullptr;
+    Wrapland::Client::XdgImporter *m_importer = nullptr;
+    Wrapland::Client::XdgExported *m_exported = nullptr;
+    Wrapland::Client::XdgImported *m_imported = nullptr;
+    Wrapland::Client::ServerSideDecorationManager *m_decoration = nullptr;
 };
 
 XdgForeignTest::XdgForeignTest(QObject *parent)

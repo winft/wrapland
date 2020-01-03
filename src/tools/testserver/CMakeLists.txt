@@ -1,3 +1,3 @@
-add_executable(org-kde-kf5-kwayland-testserver main.cpp testserver.cpp)
-target_link_libraries(org-kde-kf5-kwayland-testserver Qt5::Core KF5::WaylandServer)
-install(TARGETS org-kde-kf5-kwayland-testserver DESTINATION ${LIBEXEC_INSTALL_DIR} )
+add_executable(org-kde-kf5-wrapland-testserver main.cpp testserver.cpp)
+target_link_libraries(org-kde-kf5-wrapland-testserver Qt5::Core Wrapland::Server)
+install(TARGETS org-kde-kf5-wrapland-testserver DESTINATION ${LIBEXEC_INSTALL_DIR} )

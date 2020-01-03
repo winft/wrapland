@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server_decoration_palette-server-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -69,7 +69,7 @@ void ServerSideDecorationPaletteManagerInterface::Private::createCallback(wl_cli
     SurfaceInterface *s = SurfaceInterface::get(surface);
     if (!s) {
         // TODO: send error?
-        qCWarning(KWAYLAND_SERVER) << "ServerSideDecorationPaletteInterface requested for non existing SurfaceInterface";
+        qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationPaletteInterface requested for non existing SurfaceInterface";
         return;
     }
     auto palette = new ServerSideDecorationPaletteInterface(p->q, s, resource);

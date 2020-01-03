@@ -144,12 +144,12 @@ To find the package use for example:
 Now to link against the Client library use:
 
     add_executable(exampleApp example.cpp)
-    target_link_libraries(exampleApp KF5::WraplandClient)
+    target_link_libraries(exampleApp Wrapland::Client)
 
 To link against the Server library use:
 
     add_executable(exampleServer exampleServer.cpp)
-    target_link_libraries(exampleServer KF5::WraplandServer)
+    target_link_libraries(exampleServer Wrapland::Server)
 
 ### With QMake
 
@@ -158,11 +158,11 @@ applications.
 
 Just use:
 
-    QT += WraplandClient
+    QT += Wrapland::Client
 
 Respectively:
 
-    QT += WraplandServer
+    QT += Wrapland::Server
 
 Please make sure that your project is configured with C++11 support:
 

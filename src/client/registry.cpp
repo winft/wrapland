@@ -107,7 +107,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * * extend registry unit test to verify that it works
  ****/
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -570,10 +570,10 @@ void Registry::Private::handleAnnounce(uint32_t name, const char *interface, uin
     Interface i = nameToInterface(interface);
     emit q->interfaceAnnounced(QByteArray(interface), name, version);
     if (i == Interface::Unknown) {
-        qCDebug(KWAYLAND_CLIENT) << "Unknown interface announced: " << interface << "/" << name << "/" << version;
+        qCDebug(WRAPLAND_CLIENT) << "Unknown interface announced: " << interface << "/" << name << "/" << version;
         return;
     }
-    qCDebug(KWAYLAND_CLIENT) << "Wayland Interface: " << interface << "/" << name << "/" << version;
+    qCDebug(WRAPLAND_CLIENT) << "Wayland Interface: " << interface << "/" << name << "/" << version;
     m_interfaces.append({i, name, version});
     auto it = s_interfaces.constFind(i);
     if (it != s_interfaces.end()) {
@@ -877,7 +877,7 @@ T *Registry::Private::bind(Registry::Interface interface, uint32_t name, uint32_
         return data.interface == interface && data.name == name && data.version >= version;
     });
     if (it == m_interfaces.constEnd()) {
-        qCDebug(KWAYLAND_CLIENT) << "Don't have interface " << int(interface) << "with name " << name << "and minimum version" << version;
+        qCDebug(WRAPLAND_CLIENT) << "Don't have interface " << int(interface) << "with name " << name << "and minimum version" << version;
         return nullptr;
     }
     auto t = reinterpret_cast<T*>(wl_registry_bind(registry, name, wlInterface(interface), version));

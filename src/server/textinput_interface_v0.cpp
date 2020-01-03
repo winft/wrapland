@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-text-server-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

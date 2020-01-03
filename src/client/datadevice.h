@@ -24,11 +24,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_data_device;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -43,7 +43,7 @@ class Surface;
  *
  * @see DataDeviceManager
  **/
-class KWAYLANDCLIENT_EXPORT DataDevice : public QObject
+class WRAPLANDCLIENT_EXPORT DataDevice : public QObject
 {
     Q_OBJECT
 public:
@@ -105,7 +105,7 @@ public:
     operator wl_data_device*() const;
 
 Q_SIGNALS:
-    void selectionOffered(KWayland::Client::DataOffer*);
+    void selectionOffered(Wrapland::Client::DataOffer*);
     void selectionCleared();
     /**
      * Notification that a drag'n'drop operation entered a Surface on this DataDevice.

@@ -20,11 +20,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef WAYLAND_SERVER_TOUCH_INTERFACE_H
 #define WAYLAND_SERVER_TOUCH_INTERFACE_H
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include "resource.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -35,7 +35,7 @@ class SeatInterface;
  * @brief Resource for the wl_touch interface.
  *
  **/
-class KWAYLANDSERVER_EXPORT TouchInterface : public Resource
+class WRAPLANDSERVER_EXPORT TouchInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -56,6 +56,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::TouchInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::TouchInterface*)
 
 #endif

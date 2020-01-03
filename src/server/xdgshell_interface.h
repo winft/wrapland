@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_XDGSHELL_INTERFACE_H
-#define KWAYLAND_SERVER_XDGSHELL_INTERFACE_H
+#ifndef WRAPLAND_SERVER_XDGSHELL_INTERFACE_H
+#define WRAPLAND_SERVER_XDGSHELL_INTERFACE_H
 
 #include "global.h"
 #include "resource.h"
 
 #include <QSize>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -100,7 +100,7 @@ Q_DECLARE_FLAGS(PositionerConstraints, PositionerConstraint)
  *
  * @since 5.25
  **/
-class KWAYLANDSERVER_EXPORT XdgShellInterface : public Global
+class WRAPLANDSERVER_EXPORT XdgShellInterface : public Global
 {
     Q_OBJECT
 public:
@@ -128,7 +128,7 @@ public:
     quint32 ping(XdgShellSurfaceInterface * surface);
 
 Q_SIGNALS:
-    void surfaceCreated(KWayland::Server::XdgShellSurfaceInterface *surface);
+    void surfaceCreated(Wrapland::Server::XdgShellSurfaceInterface *surface);
 
     /**
      * Emitted whenever a new popup got created.
@@ -144,7 +144,7 @@ Q_SIGNALS:
      * Use both xdgPopupCreated and XdgShellPopupInterface::grabbed to cover both XDGV5 and XDGV6
      **/
 
-    void popupCreated(KWayland::Server::XdgShellPopupInterface *surface, KWayland::Server::SeatInterface *seat, quint32 serial);
+    void popupCreated(Wrapland::Server::XdgShellPopupInterface *surface, Wrapland::Server::SeatInterface *seat, quint32 serial);
 
     /*
      * Emitted whenever a new popup gets created.
@@ -152,7 +152,7 @@ Q_SIGNALS:
      * @param surface The popup xdg shell surface which got created
      * @since 5.39
      */
-    void xdgPopupCreated(KWayland::Server::XdgShellPopupInterface *surface);
+    void xdgPopupCreated(Wrapland::Server::XdgShellPopupInterface *surface);
 
     /*
      * Emitted in response to a ping request
@@ -194,7 +194,7 @@ private:
  *
  * @since 5.25
  **/
-class KWAYLANDSERVER_EXPORT XdgShellSurfaceInterface : public Resource
+class WRAPLANDSERVER_EXPORT XdgShellSurfaceInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -318,7 +318,7 @@ Q_SIGNALS:
      * @param seat The SeatInterface on which the surface requested the move
      * @param serial The serial of the implicit mouse grab which triggered the move
      **/
-    void moveRequested(KWayland::Server::SeatInterface *seat, quint32 serial);
+    void moveRequested(Wrapland::Server::SeatInterface *seat, quint32 serial);
     /**
      * The surface requested a window resize.
      *
@@ -326,8 +326,8 @@ Q_SIGNALS:
      * @param serial The serial of the implicit mouse grab which triggered the resize
      * @param edges A hint which edges are involved in the resize
      **/
-    void resizeRequested(KWayland::Server::SeatInterface *seat, quint32 serial, Qt::Edges edges);
-    void windowMenuRequested(KWayland::Server::SeatInterface *seat, quint32 serial, const QPoint &surfacePos);
+    void resizeRequested(Wrapland::Server::SeatInterface *seat, quint32 serial, Qt::Edges edges);
+    void windowMenuRequested(Wrapland::Server::SeatInterface *seat, quint32 serial, const QPoint &surfacePos);
     /**
      * The surface requested a change of maximized state.
      * @param maximized Whether the window wants to be maximized
@@ -338,7 +338,7 @@ Q_SIGNALS:
      * @param fullscreen Whether the window wants to be fullscreen
      * @param output An optional output hint on which the window wants to be fullscreen
      **/
-    void fullscreenChanged(bool fullscreen, KWayland::Server::OutputInterface *output);
+    void fullscreenChanged(bool fullscreen, Wrapland::Server::OutputInterface *output);
     /**
      * The surface requested to be minimized.
      **/
@@ -387,7 +387,7 @@ private:
  *
  * @since 5.25
  **/
-class KWAYLANDSERVER_EXPORT XdgShellPopupInterface : public Resource
+class WRAPLANDSERVER_EXPORT XdgShellPopupInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -495,7 +495,7 @@ Q_SIGNALS:
      * @param serial The serial of the action on the seat
      * @since 5.39
      */
-    void grabRequested(KWayland::Server::SeatInterface *seat, quint32 serial);
+    void grabRequested(Wrapland::Server::SeatInterface *seat, quint32 serial);
 
     /**
      * @brief windowGeometryChanged
@@ -517,10 +517,10 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::XdgShellSurfaceInterface *)
-Q_DECLARE_METATYPE(KWayland::Server::XdgShellPopupInterface *)
-Q_DECLARE_METATYPE(KWayland::Server::XdgShellSurfaceInterface::State)
-Q_DECLARE_METATYPE(KWayland::Server::XdgShellSurfaceInterface::States)
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Server::PositionerConstraints)
+Q_DECLARE_METATYPE(Wrapland::Server::XdgShellSurfaceInterface *)
+Q_DECLARE_METATYPE(Wrapland::Server::XdgShellPopupInterface *)
+Q_DECLARE_METATYPE(Wrapland::Server::XdgShellSurfaceInterface::State)
+Q_DECLARE_METATYPE(Wrapland::Server::XdgShellSurfaceInterface::States)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::PositionerConstraints)
 
 #endif

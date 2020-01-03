@@ -22,11 +22,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_keyboard;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -42,7 +42,7 @@ class Surface;
  *
  * @see Seat
  **/
-class KWAYLANDCLIENT_EXPORT Keyboard : public QObject
+class WRAPLANDCLIENT_EXPORT Keyboard : public QObject
 {
     Q_OBJECT
 public:
@@ -157,7 +157,7 @@ Q_SIGNALS:
      * @param state Whether the key got @c Released or @c Pressed
      * @param time The timestamp
      **/
-    void keyChanged(quint32 key, KWayland::Client::Keyboard::KeyState state, quint32 time);
+    void keyChanged(quint32 key, Wrapland::Client::Keyboard::KeyState state, quint32 time);
     /**
      * Notifies clients that the modifier and/or group state has changed,
      * and it should update its local state.
@@ -180,6 +180,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::Keyboard::KeyState)
+Q_DECLARE_METATYPE(Wrapland::Client::Keyboard::KeyState)
 
 #endif

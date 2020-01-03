@@ -34,7 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QThread>
 #include <QPainter>
 
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
 class XdgTest : public QObject
 {
@@ -121,7 +121,7 @@ void XdgTest::setupRegistry(Registry *registry)
             Q_ASSERT(m_surface);
             m_xdgShellSurface = m_xdgShell->createSurface(m_surface, this);
             Q_ASSERT(m_xdgShellSurface);
-            connect(m_xdgShellSurface, &XdgShellSurface::configureRequested, this, [this](const QSize &size, KWayland::Client::XdgShellSurface::States states, int serial) {
+            connect(m_xdgShellSurface, &XdgShellSurface::configureRequested, this, [this](const QSize &size, Wrapland::Client::XdgShellSurface::States states, int serial) {
                 Q_UNUSED(size);
                 Q_UNUSED(states);
                 m_xdgShellSurface->ackConfigure(serial);

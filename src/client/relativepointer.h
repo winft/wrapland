@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_RELATIVEPOINTER_H
-#define KWAYLAND_CLIENT_RELATIVEPOINTER_H
+#ifndef WRAPLAND_CLIENT_RELATIVEPOINTER_H
+#define WRAPLAND_CLIENT_RELATIVEPOINTER_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct zwp_relative_pointer_manager_v1;
 struct zwp_relative_pointer_v1;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -60,7 +60,7 @@ class RelativePointer;
  * @see Registry
  * @since 5.28
  **/
-class KWAYLANDCLIENT_EXPORT RelativePointerManager : public QObject
+class WRAPLANDCLIENT_EXPORT RelativePointerManager : public QObject
 {
     Q_OBJECT
 public:
@@ -147,7 +147,7 @@ private:
  *
  * @since 5.28
  **/
-class KWAYLANDCLIENT_EXPORT RelativePointer : public QObject
+class WRAPLANDCLIENT_EXPORT RelativePointer : public QObject
 {
     Q_OBJECT
 public:

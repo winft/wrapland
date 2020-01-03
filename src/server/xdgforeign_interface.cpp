@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QUuid>
 #include <QDebug>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

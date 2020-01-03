@@ -17,12 +17,12 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_POINTERCONSTRAINTS_H
-#define KWAYLAND_CLIENT_POINTERCONSTRAINTS_H
+#ifndef WRAPLAND_CLIENT_POINTERCONSTRAINTS_H
+#define WRAPLAND_CLIENT_POINTERCONSTRAINTS_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct zwp_pointer_constraints_v1;
 struct zwp_locked_pointer_v1;
@@ -30,7 +30,7 @@ struct zwp_confined_pointer_v1;
 
 class QPointF;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -66,7 +66,7 @@ class Pointer;
  * @see Registry
  * @since 5.29
  **/
-class KWAYLANDCLIENT_EXPORT PointerConstraints : public QObject
+class WRAPLANDCLIENT_EXPORT PointerConstraints : public QObject
 {
     Q_OBJECT
 public:
@@ -258,7 +258,7 @@ private:
  * @see PointerConstraints::lockedPointer
  * @since 5.29
  **/
-class KWAYLANDCLIENT_EXPORT LockedPointer : public QObject
+class WRAPLANDCLIENT_EXPORT LockedPointer : public QObject
 {
     Q_OBJECT
 public:
@@ -376,7 +376,7 @@ private:
  * @see PointerConstraints::confinePointer
  * @since 5.29
  **/
-class KWAYLANDCLIENT_EXPORT ConfinedPointer : public QObject
+class WRAPLANDCLIENT_EXPORT ConfinedPointer : public QObject
 {
     Q_OBJECT
 public:

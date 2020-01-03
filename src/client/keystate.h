@@ -22,17 +22,17 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_keystate;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
 class EventQueue;
 
-class KWAYLANDCLIENT_EXPORT Keystate : public QObject
+class WRAPLANDCLIENT_EXPORT Keystate : public QObject
 {
     Q_OBJECT
 public:

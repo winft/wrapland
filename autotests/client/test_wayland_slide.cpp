@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/region_interface.h"
 #include "../../src/server/slide_interface.h"
 
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
 class TestSlide : public QObject
 {
@@ -47,17 +47,17 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    KWayland::Server::Display *m_display;
-    KWayland::Server::CompositorInterface *m_compositorInterface;
-    KWayland::Server::SlideManagerInterface *m_slideManagerInterface;
-    KWayland::Client::ConnectionThread *m_connection;
-    KWayland::Client::Compositor *m_compositor;
-    KWayland::Client::SlideManager *m_slideManager;
-    KWayland::Client::EventQueue *m_queue;
+    Wrapland::Server::Display *m_display;
+    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Server::SlideManagerInterface *m_slideManagerInterface;
+    Wrapland::Client::ConnectionThread *m_connection;
+    Wrapland::Client::Compositor *m_compositor;
+    Wrapland::Client::SlideManager *m_slideManager;
+    Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-slide-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-slide-0");
 
 TestSlide::TestSlide(QObject *parent)
     : QObject(parent)
@@ -72,7 +72,7 @@ TestSlide::TestSlide(QObject *parent)
 
 void TestSlide::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -80,7 +80,7 @@ void TestSlide::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
     m_connection->setSocketName(s_socketName);
 
@@ -91,7 +91,7 @@ void TestSlide::init()
     m_connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    m_queue = new KWayland::Client::EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
@@ -153,23 +153,23 @@ void TestSlide::cleanup()
 
 void TestSlide::testCreate()
 {
-    QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(KWayland::Server::SurfaceInterface*)));
+    QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<KWayland::Client::Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
-    auto serverSurface = serverSurfaceCreated.first().first().value<KWayland::Server::SurfaceInterface*>();
+    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
     QSignalSpy slideChanged(serverSurface, SIGNAL(slideOnShowHideChanged()));
 
     auto slide = m_slideManager->createSlide(surface.data(), surface.data());
-    slide->setLocation(KWayland::Client::Slide::Location::Top);
+    slide->setLocation(Wrapland::Client::Slide::Location::Top);
     slide->setOffset(15);
     slide->commit();
-    surface->commit(KWayland::Client::Surface::CommitFlag::None);
+    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
     QVERIFY(slideChanged.wait());
-    QCOMPARE(serverSurface->slideOnShowHide()->location(), KWayland::Server::SlideInterface::Location::Top);
+    QCOMPARE(serverSurface->slideOnShowHide()->location(), Wrapland::Server::SlideInterface::Location::Top);
     QCOMPARE(serverSurface->slideOnShowHide()->offset(), 15);
 
     // and destroy
@@ -181,11 +181,11 @@ void TestSlide::testCreate()
 
 void TestSlide::testSurfaceDestroy()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<KWayland::Client::Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<SurfaceInterface*>();
@@ -194,7 +194,7 @@ void TestSlide::testSurfaceDestroy()
 
     QScopedPointer<Slide> slide(m_slideManager->createSlide(surface.data()));
     slide->commit();
-    surface->commit(KWayland::Client::Surface::CommitFlag::None);
+    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(slideChanged.wait());
     auto serverSlide = serverSurface->slideOnShowHide();
     QVERIFY(!serverSlide.isNull());

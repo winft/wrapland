@@ -26,9 +26,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -40,7 +40,7 @@ class SurfaceInterface;
  * @brief Represents the Global for wl_compositor interface.
  *
  **/
-class KWAYLANDSERVER_EXPORT CompositorInterface : public Global
+class WRAPLANDSERVER_EXPORT CompositorInterface : public Global
 {
     Q_OBJECT
 public:
@@ -50,11 +50,11 @@ Q_SIGNALS:
     /**
      * Emitted whenever this CompositorInterface created a SurfaceInterface.
      **/
-    void surfaceCreated(KWayland::Server::SurfaceInterface*);
+    void surfaceCreated(Wrapland::Server::SurfaceInterface*);
     /**
      * Emitted whenever this CompositorInterface created a RegionInterface.
      **/
-    void regionCreated(KWayland::Server::RegionInterface*);
+    void regionCreated(Wrapland::Server::RegionInterface*);
 
 private:
     explicit CompositorInterface(Display *display, QObject *parent = nullptr);

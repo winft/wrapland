@@ -33,7 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/region_interface.h"
 #include "../../src/server/server_decoration_palette_interface.h"
 
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
 class TestServerSideDecorationPalette : public QObject
 {
@@ -47,17 +47,17 @@ private Q_SLOTS:
     void testCreateAndSet();
 
 private:
-    KWayland::Server::Display *m_display;
-    KWayland::Server::CompositorInterface *m_compositorInterface;
-    KWayland::Server::ServerSideDecorationPaletteManagerInterface *m_paletteManagerInterface;
-    KWayland::Client::ConnectionThread *m_connection;
-    KWayland::Client::Compositor *m_compositor;
-    KWayland::Client::ServerSideDecorationPaletteManager *m_paletteManager;
-    KWayland::Client::EventQueue *m_queue;
+    Wrapland::Server::Display *m_display;
+    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Server::ServerSideDecorationPaletteManagerInterface *m_paletteManagerInterface;
+    Wrapland::Client::ConnectionThread *m_connection;
+    Wrapland::Client::Compositor *m_compositor;
+    Wrapland::Client::ServerSideDecorationPaletteManager *m_paletteManager;
+    Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-decopalette-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-decopalette-0");
 
 TestServerSideDecorationPalette::TestServerSideDecorationPalette(QObject *parent)
     : QObject(parent)
@@ -72,7 +72,7 @@ TestServerSideDecorationPalette::TestServerSideDecorationPalette(QObject *parent
 
 void TestServerSideDecorationPalette::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -80,7 +80,7 @@ void TestServerSideDecorationPalette::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
@@ -92,7 +92,7 @@ void TestServerSideDecorationPalette::init()
     m_connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    m_queue = new KWayland::Client::EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
@@ -154,25 +154,25 @@ void TestServerSideDecorationPalette::cleanup()
 
 void TestServerSideDecorationPalette::testCreateAndSet()
 {
-    QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(KWayland::Server::SurfaceInterface*)));
+    QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<KWayland::Client::Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
-    auto serverSurface = serverSurfaceCreated.first().first().value<KWayland::Server::SurfaceInterface*>();
-    QSignalSpy paletteCreatedSpy(m_paletteManagerInterface, &KWayland::Server::ServerSideDecorationPaletteManagerInterface::paletteCreated);
+    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    QSignalSpy paletteCreatedSpy(m_paletteManagerInterface, &Wrapland::Server::ServerSideDecorationPaletteManagerInterface::paletteCreated);
 
     QVERIFY(!m_paletteManagerInterface->paletteForSurface(serverSurface));
 
     auto palette = m_paletteManager->create(surface.data(), surface.data());
     QVERIFY(paletteCreatedSpy.wait());
-    auto paletteInterface = paletteCreatedSpy.first().first().value<KWayland::Server::ServerSideDecorationPaletteInterface*>();
+    auto paletteInterface = paletteCreatedSpy.first().first().value<Wrapland::Server::ServerSideDecorationPaletteInterface*>();
     QCOMPARE(m_paletteManagerInterface->paletteForSurface(serverSurface), paletteInterface);
 
     QCOMPARE(paletteInterface->palette(), QString());
 
-    QSignalSpy changedSpy(paletteInterface, &KWayland::Server::ServerSideDecorationPaletteInterface::paletteChanged);
+    QSignalSpy changedSpy(paletteInterface, &Wrapland::Server::ServerSideDecorationPaletteInterface::paletteChanged);
 
     palette->setPalette("foobar");
 

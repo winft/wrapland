@@ -17,15 +17,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_DECORATION_PALETTE_INTERFACE_H
-#define KWAYLAND_SERVER_DECORATION_PALETTE_INTERFACE_H
+#ifndef WRAPLAND_SERVER_DECORATION_PALETTE_INTERFACE_H
+#define WRAPLAND_SERVER_DECORATION_PALETTE_INTERFACE_H
 
 #include "global.h"
 #include "resource.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -41,7 +41,7 @@ class ServerSideDecorationPaletteInterface;
  * and notifies when a new one is created
  * @since 5.42
  */
-class KWAYLANDSERVER_EXPORT ServerSideDecorationPaletteManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT ServerSideDecorationPaletteManagerInterface : public Global
 {
     Q_OBJECT
 public:
@@ -56,7 +56,7 @@ Q_SIGNALS:
     /**
      * Emitted whenever a new ServerSideDecorationPaletteInterface is created.
      **/
-    void paletteCreated(KWayland::Server::ServerSideDecorationPaletteInterface*);
+    void paletteCreated(Wrapland::Server::ServerSideDecorationPaletteInterface*);
 
 private:
     explicit ServerSideDecorationPaletteManagerInterface(Display *display, QObject *parent = nullptr);
@@ -70,7 +70,7 @@ private:
  * This interface is attached to a wl_surface and informs the server of a requested palette
  * @since 5.42
  */
-class KWAYLANDSERVER_EXPORT ServerSideDecorationPaletteInterface : public Resource
+class WRAPLANDSERVER_EXPORT ServerSideDecorationPaletteInterface : public Resource
 {
     Q_OBJECT
 public:

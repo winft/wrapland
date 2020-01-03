@@ -17,13 +17,13 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_XDG_SHELL_H
-#define KWAYLAND_CLIENT_XDG_SHELL_H
+#ifndef WRAPLAND_CLIENT_XDG_SHELL_H
+#define WRAPLAND_CLIENT_XDG_SHELL_H
 
 #include <QObject>
 #include <QSize>
 #include <QRect>
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 //This is a mix of structs for both xdgshell unstable v5 AND xdg wm base stable
 struct xdg_wm_base;
@@ -38,7 +38,7 @@ struct zxdg_surface_v6;
 struct zxdg_popup_v6;
 struct zxdg_position_v6;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -56,7 +56,7 @@ class XdgShellSurface;
  *
  * @since 5.39
  */
-class KWAYLANDCLIENT_EXPORT XdgPositioner
+class WRAPLANDCLIENT_EXPORT XdgPositioner
 {
 public:
     /*
@@ -165,7 +165,7 @@ private:
  * @see Registry
  * @since 5.25
  **/
-class KWAYLANDCLIENT_EXPORT XdgShell : public QObject
+class WRAPLANDCLIENT_EXPORT XdgShell : public QObject
 {
     Q_OBJECT
 public:
@@ -284,7 +284,7 @@ private:
  *
  * @since 5.25
  **/
-class KWAYLANDCLIENT_EXPORT XdgShellSurface : public QObject
+class WRAPLANDCLIENT_EXPORT XdgShellSurface : public QObject
 {
     Q_OBJECT
 public:
@@ -492,7 +492,7 @@ Q_SIGNALS:
      * The compositor sent a configure with the new @p size and the @p states.
      * Before the next commit of the surface the @p serial needs to be passed to ackConfigure.
      **/
-    void configureRequested(const QSize &size, KWayland::Client::XdgShellSurface::States states, quint32 serial);
+    void configureRequested(const QSize &size, Wrapland::Client::XdgShellSurface::States states, quint32 serial);
 
     /**
      * Emitted whenever the size of the XdgShellSurface changes by e.g. receiving a configure request.
@@ -519,7 +519,7 @@ private:
  * or even locking the screen through closing the lid or a timeout.
  * @since 5.25
  **/
-class KWAYLANDCLIENT_EXPORT XdgShellPopup : public QObject
+class WRAPLANDCLIENT_EXPORT XdgShellPopup : public QObject
 {
     Q_OBJECT
 public:
@@ -532,7 +532,7 @@ public:
      *
      * @deprecated Since 5.49. This was for XDGShellV5, this is now deprecated
      **/
-    KWAYLANDCLIENT_DEPRECATED_VERSION(5, 49, "Use XDGShell version >5")
+    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 49, "Use XDGShell version >5")
     void setup(xdg_popup *xdgpopupv5);
 
     /**
@@ -645,14 +645,14 @@ private:
 }
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Client::XdgShellSurface::States)
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Client::XdgPositioner::Constraints)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::XdgShellSurface::States)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::XdgPositioner::Constraints)
 
-Q_DECLARE_METATYPE(KWayland::Client::XdgPositioner)
-Q_DECLARE_METATYPE(KWayland::Client::XdgShellSurface::State)
-Q_DECLARE_METATYPE(KWayland::Client::XdgShellSurface::States)
-Q_DECLARE_METATYPE(KWayland::Client::XdgPositioner::Constraint)
-Q_DECLARE_METATYPE(KWayland::Client::XdgPositioner::Constraints)
+Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner)
+Q_DECLARE_METATYPE(Wrapland::Client::XdgShellSurface::State)
+Q_DECLARE_METATYPE(Wrapland::Client::XdgShellSurface::States)
+Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner::Constraint)
+Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner::Constraints)
 
 
 #endif

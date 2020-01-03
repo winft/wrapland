@@ -1,4 +1,4 @@
-#wl_name;KWayland::ClientName
+#wl_name;Wrapland::ClientName
 wl_buffer;Buffer
 wl_compositor;Compositor
 wl_data_device;DataDevice

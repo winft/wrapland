@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 class QElapsedTimer;
 class QTimer;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -52,10 +52,10 @@ public:
 private:
     void repaint();
 
-    KWayland::Server::Display *m_display = nullptr;
-    KWayland::Server::ShellInterface *m_shell = nullptr;
-    KWayland::Server::SeatInterface *m_seat = nullptr;
-    QVector<KWayland::Server::ShellSurfaceInterface*> m_shellSurfaces;
+    Wrapland::Server::Display *m_display = nullptr;
+    Wrapland::Server::ShellInterface *m_shell = nullptr;
+    Wrapland::Server::SeatInterface *m_seat = nullptr;
+    QVector<Wrapland::Server::ShellSurfaceInterface*> m_shellSurfaces;
     QTimer *m_repaintTimer;
     QScopedPointer<QElapsedTimer> m_timeSinceStart;
     QPointF m_cursorPos;

@@ -35,7 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
 class TestDisplay;
 
@@ -52,27 +52,27 @@ private Q_SLOTS:
 
 private:
     TestDisplay *m_display;
-    KWayland::Server::CompositorInterface *m_compositorInterface;
-    KWayland::Server::BlurManagerInterface *m_blurManagerInterface;
+    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Server::BlurManagerInterface *m_blurManagerInterface;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-blur-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-blur-0");
 
 //The following non-realistic class allows only clients in the m_allowedClients list to access the blur interface
 //all other interfaces are allowed
-class TestDisplay : public KWayland::Server::FilteredDisplay
+class TestDisplay : public Wrapland::Server::FilteredDisplay
 {
 public:
     TestDisplay(QObject *parent);
-    bool allowInterface(KWayland::Server::ClientConnection * client, const QByteArray & interfaceName) override;
+    bool allowInterface(Wrapland::Server::ClientConnection * client, const QByteArray & interfaceName) override;
     QList<wl_client*> m_allowedClients;
 };
 
 TestDisplay::TestDisplay(QObject *parent):
-    KWayland::Server::FilteredDisplay(parent)
+    Wrapland::Server::FilteredDisplay(parent)
 {}
 
-bool TestDisplay::allowInterface(KWayland::Server::ClientConnection* client, const QByteArray& interfaceName)
+bool TestDisplay::allowInterface(Wrapland::Server::ClientConnection* client, const QByteArray& interfaceName)
 {
     if (interfaceName == "org_kde_kwin_blur_manager") {
         return m_allowedClients.contains(*client);
@@ -88,7 +88,7 @@ TestFilter::TestFilter(QObject *parent)
 
 void TestFilter::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new TestDisplay(this);
     m_display->setSocketName(s_socketName);
@@ -121,7 +121,7 @@ void TestFilter::testFilter()
     QFETCH(bool, accessAllowed);
 
   // setup connection
-    QScopedPointer<KWayland::Client::ConnectionThread> connection(new KWayland::Client::ConnectionThread());
+    QScopedPointer<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread());
     QSignalSpy connectedSpy(connection.data(), &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketName(s_socketName);
@@ -142,7 +142,7 @@ void TestFilter::testFilter()
         }
     }
 
-    KWayland::Client::EventQueue queue;
+    Wrapland::Client::EventQueue queue;
     queue.setup(connection.data());
 
     Registry registry;

@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QUuid>
 #include <QDebug>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -294,7 +294,7 @@ void XdgImporterUnstableV2Interface::Private::importCallback(wl_client *client, 
                         s->q, [s, child]() {
                             auto it = s->parents.find(child);
                             if (it != s->parents.end()) {
-                                KWayland::Server::XdgImportedUnstableV2Interface* parent = *it;
+                                Wrapland::Server::XdgImportedUnstableV2Interface* parent = *it;
                                 s->children.remove(*it);
                                 s->parents.erase(it);
                                 emit s->q->transientChanged(nullptr, SurfaceInterface::get(parent->parentResource()));
@@ -310,7 +310,7 @@ void XdgImporterUnstableV2Interface::Private::importCallback(wl_client *client, 
 
                 auto it = s->children.find(imp);
                 if (it != s->children.end()) {
-                    KWayland::Server::SurfaceInterface* child = *it;
+                    Wrapland::Server::SurfaceInterface* child = *it;
                     s->parents.remove(*it);
                     s->children.erase(it);
                     emit s->q->transientChanged(child, nullptr);

@@ -24,13 +24,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPointer>
 #include <QSize>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_output;
 class QPoint;
 class QRect;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -66,7 +66,7 @@ class EventQueue;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT Output : public QObject
+class WRAPLANDCLIENT_EXPORT Output : public QObject
 {
     Q_OBJECT
 public:
@@ -229,13 +229,13 @@ Q_SIGNALS:
      * @param mode The newly added Mode.
      * @see modeChanged
      **/
-    void modeAdded(const KWayland::Client::Output::Mode &mode);
+    void modeAdded(const Wrapland::Client::Output::Mode &mode);
     /**
      * Emitted whenever a Mode changes.
      * This normally means that the @c Mode::Flag::Current is added or removed.
      * @param mode The changed Mode
      **/
-    void modeChanged(const KWayland::Client::Output::Mode &mode);
+    void modeChanged(const Wrapland::Client::Output::Mode &mode);
 
     /**
      * The corresponding global for this interface on the Registry got removed.
@@ -255,10 +255,10 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::Output*)
-Q_DECLARE_METATYPE(KWayland::Client::Output::SubPixel)
-Q_DECLARE_METATYPE(KWayland::Client::Output::Transform)
-Q_DECLARE_METATYPE(KWayland::Client::Output::Mode)
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Client::Output::Mode::Flags)
+Q_DECLARE_METATYPE(Wrapland::Client::Output*)
+Q_DECLARE_METATYPE(Wrapland::Client::Output::SubPixel)
+Q_DECLARE_METATYPE(Wrapland::Client::Output::Transform)
+Q_DECLARE_METATYPE(Wrapland::Client::Output::Mode)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::Output::Mode::Flags)
 
 #endif

@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QHash>
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_compositor;
 struct wl_data_device_manager;
@@ -67,7 +67,7 @@ struct zwp_idle_inhibit_manager_v1;
 struct zxdg_output_manager_v1;
 struct zxdg_decoration_manager_v1;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -139,7 +139,7 @@ class XdgDecorationManager;
  * The interfaces are announced in an asynchronous way by the Wayland server.
  * To initiate the announcing of the interfaces one needs to call setup.
  **/
-class KWAYLANDCLIENT_EXPORT Registry : public QObject
+class WRAPLANDCLIENT_EXPORT Registry : public QObject
 {
     Q_OBJECT
 public:

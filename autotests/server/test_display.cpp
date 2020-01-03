@@ -19,19 +19,18 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 // Qt
 #include <QtTest>
-// WaylandServer
+
 #include "../../src/server/display.h"
 #include "../../src/server/clientconnection.h"
 #include "../../src/server/outputmanagement_interface.h"
 #include "../../src/server/output_interface.h"
-// Wayland
-#include <wayland-server.h>
-// system
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <wayland-server.h>
 
-using namespace KWayland::Server;
+using namespace Wrapland::Server;
 
 class TestWaylandServerDisplay : public QObject
 {
@@ -118,9 +117,9 @@ void TestWaylandServerDisplay::testClientConnection()
     Display display;
     display.setSocketName(QStringLiteral("kwin-wayland-server-display-test-client-connection"));
     display.start();
-    QSignalSpy connectedSpy(&display, SIGNAL(clientConnected(KWayland::Server::ClientConnection*)));
+    QSignalSpy connectedSpy(&display, SIGNAL(clientConnected(Wrapland::Server::ClientConnection*)));
     QVERIFY(connectedSpy.isValid());
-    QSignalSpy disconnectedSpy(&display, SIGNAL(clientDisconnected(KWayland::Server::ClientConnection*)));
+    QSignalSpy disconnectedSpy(&display, SIGNAL(clientDisconnected(Wrapland::Server::ClientConnection*)));
     QVERIFY(disconnectedSpy.isValid());
 
     int sv[2];
@@ -209,7 +208,7 @@ void TestWaylandServerDisplay::testConnectNoSocket()
 void TestWaylandServerDisplay::testOutputManagement()
 {
     Display display;
-    display.setSocketName("kwayland-test-0");
+    display.setSocketName("wrapland-test-0");
     display.start();
     auto kwin = display.createOutputManagement(this);
     kwin->create();

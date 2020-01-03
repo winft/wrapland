@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 struct wl_client;
 struct wl_interface;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-relativepointer-unstable-v1-client-protocol.h>
 #include <QSizeF>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {

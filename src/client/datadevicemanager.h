@@ -22,11 +22,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_data_device_manager;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -59,7 +59,7 @@ class Seat;
  *
  * @see Registry
  **/
-class KWAYLANDCLIENT_EXPORT DataDeviceManager : public QObject
+class WRAPLANDCLIENT_EXPORT DataDeviceManager : public QObject
 {
     Q_OBJECT
 public:
@@ -151,6 +151,6 @@ private:
 }
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Client::DataDeviceManager::DnDActions)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::DataDeviceManager::DnDActions)
 
 #endif

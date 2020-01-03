@@ -23,26 +23,26 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QVector>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_display;
 
-namespace KWayland
+namespace Wrapland
 {
 /**
- * @short KWayland Client.
+ * @short Wrapland Client.
  *
  * This namespace groups all classes related to the Client module.
  *
- * The main entry point into the KWayland::Client API is the ConnectionThread class.
+ * The main entry point into the Wrapland::Client API is the ConnectionThread class.
  * It allows to create a Wayland client connection either in a native way or wrap a
  * connection created by the QtWayland QPA plugin.
  *
- * KWayland::Client provides one the one hand a low-level API to interact with the
+ * Wrapland::Client provides one the one hand a low-level API to interact with the
  * Wayland API, on the other hand an easy to use convenience API. Each class directly
  * relates to a low-level Wayland type and allows direct casting into the type.
  *
- * On the convenience side KWayland::Client allows easy creation of objects, signals
+ * On the convenience side Wrapland::Client allows easy creation of objects, signals
  * emitted for Wayland events and easy conversion from Qt to Wayland types.
  *
  * Once one has a ConnectionThread created, it's possible to setup a Registry to
@@ -118,7 +118,7 @@ namespace Client
  * in that case as QtWayland holds it's connection in an own thread anyway.
  *
  **/
-class KWAYLANDCLIENT_EXPORT ConnectionThread : public QObject
+class WRAPLANDCLIENT_EXPORT ConnectionThread : public QObject
 {
     Q_OBJECT
 public:

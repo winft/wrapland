@@ -23,7 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QSize>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -51,15 +51,15 @@ private:
     void init();
     void render(const QSize &size);
     void render();
-    void setupRegistry(KWayland::Client::Registry *registry);
+    void setupRegistry(Wrapland::Client::Registry *registry);
     void toggleTimer();
     QThread *m_connectionThread;
-    KWayland::Client::ConnectionThread *m_connectionThreadObject;
-    KWayland::Client::EventQueue *m_eventQueue;
-    KWayland::Client::Compositor *m_compositor;
-    KWayland::Client::Output *m_output;
-    KWayland::Client::Surface *m_surface;
-    KWayland::Client::ShmPool *m_shm;
+    Wrapland::Client::ConnectionThread *m_connectionThreadObject;
+    Wrapland::Client::EventQueue *m_eventQueue;
+    Wrapland::Client::Compositor *m_compositor;
+    Wrapland::Client::Output *m_output;
+    Wrapland::Client::Surface *m_surface;
+    Wrapland::Client::ShmPool *m_shm;
     QSize m_currentSize;
     QTimer *m_timer;
 };

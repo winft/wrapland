@@ -17,17 +17,17 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_CLIENT_DPMS_H
-#define KWAYLAND_CLIENT_DPMS_H
+#ifndef WRAPLAND_CLIENT_DPMS_H
+#define WRAPLAND_CLIENT_DPMS_H
 
 #include <QObject>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_dpms;
 struct org_kde_kwin_dpms_manager;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -60,7 +60,7 @@ class Output;
  * @see Registry, Dpms
  * @since 5.5
  **/
-class KWAYLANDCLIENT_EXPORT DpmsManager : public QObject
+class WRAPLANDCLIENT_EXPORT DpmsManager : public QObject
 {
     Q_OBJECT
 public:
@@ -142,7 +142,7 @@ private:
  *
  * @see DpmsManager
  **/
-class KWAYLANDCLIENT_EXPORT Dpms : public QObject
+class WRAPLANDCLIENT_EXPORT Dpms : public QObject
 {
     Q_OBJECT
 public:
@@ -242,6 +242,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::Dpms::Mode)
+Q_DECLARE_METATYPE(Wrapland::Client::Dpms::Mode)
 
 #endif

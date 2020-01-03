@@ -17,15 +17,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_SERVER_APPMENU_INTERFACE_H
-#define KWAYLAND_SERVER_APPMENU_INTERFACE_H
+#ifndef WRAPLAND_SERVER_APPMENU_INTERFACE_H
+#define WRAPLAND_SERVER_APPMENU_INTERFACE_H
 
 #include "global.h"
 #include "resource.h"
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -41,7 +41,7 @@ class AppMenuInterface;
  * and notifies when a new one is created
  * @since 5.42
  */
-class KWAYLANDSERVER_EXPORT AppMenuManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT AppMenuManagerInterface : public Global
 {
     Q_OBJECT
 public:
@@ -56,7 +56,7 @@ Q_SIGNALS:
     /**
      * Emitted whenever a new AppmenuInterface is created.
      **/
-    void appMenuCreated(KWayland::Server::AppMenuInterface*);
+    void appMenuCreated(Wrapland::Server::AppMenuInterface*);
 
 private:
     explicit AppMenuManagerInterface(Display *display, QObject *parent = nullptr);
@@ -71,7 +71,7 @@ private:
  * the AppMenu DBus interface is registered.
  * @since 5.42
  */
-class KWAYLANDSERVER_EXPORT AppMenuInterface : public Resource
+class WRAPLANDSERVER_EXPORT AppMenuInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -100,7 +100,7 @@ Q_SIGNALS:
     /**
      * Emitted when the address changes or is first received
      */
-    void addressChanged(KWayland::Server::AppMenuInterface::InterfaceAddress);
+    void addressChanged(Wrapland::Server::AppMenuInterface::InterfaceAddress);
 
 private:
     explicit AppMenuInterface(AppMenuManagerInterface *parent, SurfaceInterface *s, wl_resource *parentResource);

@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <functional>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {

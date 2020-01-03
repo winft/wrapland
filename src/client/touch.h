@@ -23,11 +23,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QPoint>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_touch;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -38,7 +38,7 @@ class Touch;
 /**
  * TODO
  */
-class KWAYLANDCLIENT_EXPORT TouchPoint
+class WRAPLANDCLIENT_EXPORT TouchPoint
 {
 public:
     virtual ~TouchPoint();
@@ -99,7 +99,7 @@ private:
  *
  * @see Seat
  **/
-class KWAYLANDCLIENT_EXPORT Touch : public QObject
+class WRAPLANDCLIENT_EXPORT Touch : public QObject
 {
     Q_OBJECT
 public:
@@ -155,7 +155,7 @@ Q_SIGNALS:
      * A new touch sequence is started. The previous sequence is discarded.
      * @param startPoint The first point which started the sequence
      **/
-    void sequenceStarted(KWayland::Client::TouchPoint *startPoint);
+    void sequenceStarted(Wrapland::Client::TouchPoint *startPoint);
     /**
      * Sent if the compositor decides the touch stream is a global
      * gesture.
@@ -172,16 +172,16 @@ Q_SIGNALS:
     /**
      * TouchPoint @p point got added to the sequence.
      **/
-    void pointAdded(KWayland::Client::TouchPoint *point);
+    void pointAdded(Wrapland::Client::TouchPoint *point);
     /**
      * TouchPoint @p point is no longer down.
      * A new TouchPoint might reuse the Id of the @p point.
      **/
-    void pointRemoved(KWayland::Client::TouchPoint *point);
+    void pointRemoved(Wrapland::Client::TouchPoint *point);
     /**
      * TouchPoint @p point moved.
      **/
-    void pointMoved(KWayland::Client::TouchPoint *point);
+    void pointMoved(Wrapland::Client::TouchPoint *point);
 
 private:
     class Private;
@@ -191,6 +191,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::TouchPoint*)
+Q_DECLARE_METATYPE(Wrapland::Client::TouchPoint*)
 
 #endif

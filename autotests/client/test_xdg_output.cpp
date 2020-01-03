@@ -43,16 +43,16 @@ private Q_SLOTS:
     void cleanup();
     void testChanges();
 private:
-    KWayland::Server::Display *m_display;
-    KWayland::Server::OutputInterface *m_serverOutput;
-    KWayland::Server::XdgOutputManagerInterface *m_serverXdgOutputManager;
-    KWayland::Server::XdgOutputInterface *m_serverXdgOutput;
-    KWayland::Client::ConnectionThread *m_connection;
-    KWayland::Client::EventQueue *m_queue;
+    Wrapland::Server::Display *m_display;
+    Wrapland::Server::OutputInterface *m_serverOutput;
+    Wrapland::Server::XdgOutputManagerInterface *m_serverXdgOutputManager;
+    Wrapland::Server::XdgOutputInterface *m_serverXdgOutput;
+    Wrapland::Client::ConnectionThread *m_connection;
+    Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("kwin-test-xdg-output-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-xdg-output-0");
 
 TestXdgOutput::TestXdgOutput(QObject *parent)
     : QObject(parent)
@@ -65,7 +65,7 @@ TestXdgOutput::TestXdgOutput(QObject *parent)
 
 void TestXdgOutput::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -85,7 +85,7 @@ void TestXdgOutput::init()
     m_serverXdgOutput->done();
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
     m_connection->setSocketName(s_socketName);
 
@@ -96,7 +96,7 @@ void TestXdgOutput::init()
     m_connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    m_queue = new KWayland::Client::EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
@@ -127,9 +127,9 @@ void TestXdgOutput::cleanup()
 void TestXdgOutput::testChanges()
 {
     // verify the server modes
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
-    KWayland::Client::Registry registry;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
+    Wrapland::Client::Registry registry;
     QSignalSpy announced(&registry, SIGNAL(outputAnnounced(quint32,quint32)));
     QSignalSpy xdgOutputAnnounced(&registry, SIGNAL(xdgOutputAnnounced(quint32,quint32)));
 
@@ -142,15 +142,15 @@ void TestXdgOutput::testChanges()
         QVERIFY(xdgOutputAnnounced.wait());
     }
 
-    KWayland::Client::Output output;
+    Wrapland::Client::Output output;
     QSignalSpy outputChanged(&output, SIGNAL(changed()));
 
     output.setup(registry.bindOutput(announced.first().first().value<quint32>(), announced.first().last().value<quint32>()));
     QVERIFY(outputChanged.wait());
 
-    QScopedPointer<KWayland::Client::XdgOutputManager> xdgOutputManager(registry.createXdgOutputManager(xdgOutputAnnounced.first().first().value<quint32>(), xdgOutputAnnounced.first().last().value<quint32>(), this));
+    QScopedPointer<Wrapland::Client::XdgOutputManager> xdgOutputManager(registry.createXdgOutputManager(xdgOutputAnnounced.first().first().value<quint32>(), xdgOutputAnnounced.first().last().value<quint32>(), this));
 
-    QScopedPointer<KWayland::Client::XdgOutput> xdgOutput(xdgOutputManager->getXdgOutput(&output, this));
+    QScopedPointer<Wrapland::Client::XdgOutput> xdgOutput(xdgOutputManager->getXdgOutput(&output, this));
     QSignalSpy xdgOutputChanged(xdgOutput.data(), SIGNAL(changed()));
 
     //check details are sent on client bind

@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server_decoration-server-protocol.h>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -76,7 +76,7 @@ void ServerSideDecorationManagerInterface::Private::create(wl_client *client, wl
     SurfaceInterface *s = SurfaceInterface::get(surface);
     if (!s) {
         // TODO: send error?
-        qCWarning(KWAYLAND_SERVER) << "ServerSideDecorationInterface requested for non existing SurfaceInterface";
+        qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationInterface requested for non existing SurfaceInterface";
         return;
     }
     ServerSideDecorationInterface *decoration = new ServerSideDecorationInterface(q, s, resource);
@@ -209,7 +209,7 @@ void ServerSideDecorationInterface::Private::requestModeCallback(wl_client *clie
         break;
     default:
         // invalid mode
-        qCWarning(KWAYLAND_SERVER) << "Invalid mode:" << mode;
+        qCWarning(WRAPLAND_SERVER) << "Invalid mode:" << mode;
         return;
     }
     emit cast<Private>(resource)->q_func()->modeRequested(m);

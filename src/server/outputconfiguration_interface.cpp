@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 #include <QSize>
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -131,7 +131,7 @@ void OutputConfigurationInterface::Private::modeCallback(wl_client *client, wl_r
         }
     }
     if (!modeValid) {
-        qCWarning(KWAYLAND_SERVER) << "Set invalid mode id:" << mode_id;
+        qCWarning(WRAPLAND_SERVER) << "Set invalid mode id:" << mode_id;
         return;
     }
     auto s = cast<Private>(resource);
@@ -184,7 +184,7 @@ void OutputConfigurationInterface::Private::scaleCallback(wl_client *client, wl_
 {
     Q_UNUSED(client);
     if (scale <= 0) {
-        qCWarning(KWAYLAND_SERVER) << "Requested to scale output device to" << scale << ", but I can't do that.";
+        qCWarning(WRAPLAND_SERVER) << "Requested to scale output device to" << scale << ", but I can't do that.";
         return;
     }
     OutputDeviceInterface *o = OutputDeviceInterface::get(outputdevice);
@@ -199,7 +199,7 @@ void OutputConfigurationInterface::Private::scaleFCallback(wl_client *client, wl
     const qreal scale = wl_fixed_to_double(scale_fixed);
 
     if (scale <= 0) {
-        qCWarning(KWAYLAND_SERVER) << "Requested to scale output device to" << scale << ", but I can't do that.";
+        qCWarning(WRAPLAND_SERVER) << "Requested to scale output device to" << scale << ", but I can't do that.";
         return;
     }
     OutputDeviceInterface *o = OutputDeviceInterface::get(outputdevice);
@@ -230,7 +230,7 @@ void OutputConfigurationInterface::Private::colorcurvesCallback(wl_client *clien
                 (newColor->size / sizeof(uint16_t) == static_cast<size_t>(oldColor.size()));
     };
     if (!checkArg(red, oldCc.red) || !checkArg(green, oldCc.green) || !checkArg(blue, oldCc.blue)) {
-        qCWarning(KWAYLAND_SERVER) << "Requested to change color curves, but have wrong size.";
+        qCWarning(WRAPLAND_SERVER) << "Requested to change color curves, but have wrong size.";
         return;
     }
 

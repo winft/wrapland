@@ -20,11 +20,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef WAYLAND_SERVER_POINTER_INTERFACE_H
 #define WAYLAND_SERVER_POINTER_INTERFACE_H
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 #include "resource.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -42,7 +42,7 @@ enum class PointerAxisSource;
  *
  * @see SeatInterface
  **/
-class KWAYLANDSERVER_EXPORT PointerInterface : public Resource
+class WRAPLANDSERVER_EXPORT PointerInterface : public Resource
 {
     Q_OBJECT
 public:
@@ -91,7 +91,7 @@ private:
  *
  * @since 5.3
  **/
-class KWAYLANDSERVER_EXPORT Cursor : public QObject
+class WRAPLANDSERVER_EXPORT Cursor : public QObject
 {
     Q_OBJECT
 public:
@@ -129,6 +129,6 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Server::PointerInterface*)
+Q_DECLARE_METATYPE(Wrapland::Server::PointerInterface*)
 
 #endif

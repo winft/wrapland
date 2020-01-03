@@ -48,10 +48,10 @@ private Q_SLOTS:
     void testConnectFdNoSocketName();
 
 private:
-    KWayland::Server::Display *m_display;
+    Wrapland::Server::Display *m_display;
 };
 
-static const QString s_socketName = QStringLiteral("kwin-test-wayland-connection-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-connection-0");
 
 TestWaylandConnectionThread::TestWaylandConnectionThread(QObject *parent)
     : QObject(parent)
@@ -61,7 +61,7 @@ TestWaylandConnectionThread::TestWaylandConnectionThread(QObject *parent)
 
 void TestWaylandConnectionThread::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -78,9 +78,9 @@ void TestWaylandConnectionThread::cleanup()
 
 void TestWaylandConnectionThread::testInitConnectionNoThread()
 {
-    QVERIFY(KWayland::Client::ConnectionThread::connections().isEmpty());
-    QScopedPointer<KWayland::Client::ConnectionThread> connection(new KWayland::Client::ConnectionThread);
-    QVERIFY(KWayland::Client::ConnectionThread::connections().contains(connection.data()));
+    QVERIFY(Wrapland::Client::ConnectionThread::connections().isEmpty());
+    QScopedPointer<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread);
+    QVERIFY(Wrapland::Client::ConnectionThread::connections().contains(connection.data()));
     QCOMPARE(connection->socketName(), QStringLiteral("wayland-0"));
     connection->setSocketName(s_socketName);
     QCOMPARE(connection->socketName(), s_socketName);
@@ -94,12 +94,12 @@ void TestWaylandConnectionThread::testInitConnectionNoThread()
     QVERIFY(connection->display());
 
     connection.reset();
-    QVERIFY(KWayland::Client::ConnectionThread::connections().isEmpty());
+    QVERIFY(Wrapland::Client::ConnectionThread::connections().isEmpty());
 }
 
 void TestWaylandConnectionThread::testConnectionFailure()
 {
-    QScopedPointer<KWayland::Client::ConnectionThread> connection(new KWayland::Client::ConnectionThread);
+    QScopedPointer<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread);
     connection->setSocketName(QStringLiteral("kwin-test-socket-does-not-exist"));
 
     QSignalSpy connectedSpy(connection.data(), SIGNAL(connected()));
@@ -135,7 +135,7 @@ static const struct wl_registry_listener s_registryListener = {
 
 void TestWaylandConnectionThread::testConnectionThread()
 {
-    KWayland::Client::ConnectionThread *connection = new KWayland::Client::ConnectionThread;
+    Wrapland::Client::ConnectionThread *connection = new Wrapland::Client::ConnectionThread;
     connection->setSocketName(s_socketName);
 
     QThread *connectionThread = new QThread(this);
@@ -156,10 +156,10 @@ void TestWaylandConnectionThread::testConnectionThread()
     QSignalSpy eventsSpy(connection, SIGNAL(eventsRead()));
     QVERIFY(eventsSpy.isValid());
     wl_display *display = connection->display();
-    QScopedPointer<KWayland::Client::EventQueue> queue(new KWayland::Client::EventQueue);
+    QScopedPointer<Wrapland::Client::EventQueue> queue(new Wrapland::Client::EventQueue);
     queue->setup(display);
     QVERIFY(queue->isValid());
-    connect(connection, &KWayland::Client::ConnectionThread::eventsRead, queue.data(), &KWayland::Client::EventQueue::dispatch, Qt::QueuedConnection);
+    connect(connection, &Wrapland::Client::ConnectionThread::eventsRead, queue.data(), &Wrapland::Client::EventQueue::dispatch, Qt::QueuedConnection);
 
     wl_registry *registry = wl_display_get_registry(display);
     wl_proxy_set_queue((wl_proxy*)registry, *(queue.data()));
@@ -183,7 +183,7 @@ void TestWaylandConnectionThread::testConnectionThread()
 
 void TestWaylandConnectionThread::testConnectionDieing()
 {
-    QScopedPointer<KWayland::Client::ConnectionThread> connection(new KWayland::Client::ConnectionThread);
+    QScopedPointer<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread);
     QSignalSpy connectedSpy(connection.data(), SIGNAL(connected()));
     connection->setSocketName(s_socketName);
     connection->initConnection();
@@ -210,8 +210,8 @@ void TestWaylandConnectionThread::testConnectionDieing()
 
 void TestWaylandConnectionThread::testConnectFd()
 {
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
     int sv[2];
     QVERIFY(socketpair(AF_UNIX, SOCK_STREAM, 0, sv) >= 0);
     auto c = m_display->createClient(sv[0]);
@@ -256,8 +256,8 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
 {
     delete m_display;
     m_display = nullptr;
-    using namespace KWayland::Client;
-    using namespace KWayland::Server;
+    using namespace Wrapland::Client;
+    using namespace Wrapland::Server;
 
     Display display;
     display.start(Display::StartMode::ConnectClientsOnly);

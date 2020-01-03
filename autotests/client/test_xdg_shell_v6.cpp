@@ -26,7 +26,7 @@ class XdgShellTestV6 : public XdgShellTest {
     Q_OBJECT
 public:
     XdgShellTestV6() :
-        XdgShellTest(KWayland::Server::XdgShellInterfaceVersion::UnstableV6) {}
+        XdgShellTest(Wrapland::Server::XdgShellInterfaceVersion::UnstableV6) {}
 
 private Q_SLOTS:
     void testMaxSize();
@@ -169,7 +169,7 @@ void XdgShellTestV6::testMultipleRoles1()
 
     QScopedPointer<Surface> surface(m_compositor->createSurface());
     //This is testing we work when a client does something stupid
-    //we can't use KWayland API here because by design that stops you from doing anything stupid
+    //we can't use Wrapland API here because by design that stops you from doing anything stupid
     auto xdgSurface = zxdg_shell_v6_get_xdg_surface(*m_xdgShell, *surface.data());
 
     //create a top level

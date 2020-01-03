@@ -17,20 +17,20 @@
 * You should have received a copy of the GNU Lesser General Public
 * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef KWAYLAND_CLIENT_OUTPUTCONFIGURATION_H
-#define KWAYLAND_CLIENT_OUTPUTCONFIGURATION_H
+#ifndef WRAPLAND_CLIENT_OUTPUTCONFIGURATION_H
+#define WRAPLAND_CLIENT_OUTPUTCONFIGURATION_H
 
 #include <QObject>
 #include <QPoint>
 #include <QVector>
 
 #include "outputdevice.h"
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_outputmanagement;
 struct org_kde_kwin_outputconfiguration;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -51,7 +51,7 @@ class EventQueue;
  * The current settings for outputdevices can be gotten from @c Registry::outputDevices(), these
  * are used in the set* calls to identify the output the setting applies to.
  *
- * These KWayland classes will not apply changes to the OutputDevices, this is the compositor's
+ * These Wrapland classes will not apply changes to the OutputDevices, this is the compositor's
  * task. As such, the configuration set through this interface can be seen as a hint what the
  * compositor should set up, but whether or not the compositor does it (based on hardware or
  * rendering policies, for example), is up to the compositor. The mode setting is passed on to
@@ -65,7 +65,7 @@ class EventQueue;
  *
  * \verbatim
     // We're just picking the first of our outputdevices
-    KWayland::Client::OutputDevice *output = m_clientOutputs.first();
+    Wrapland::Client::OutputDevice *output = m_clientOutputs.first();
 
     // Create a new configuration object
     auto config = m_outputManagement.createConfiguration();
@@ -94,7 +94,7 @@ class EventQueue;
  * @see OutputManagement::createConfiguration()
  * @since 5.5
  */
-class KWAYLANDCLIENT_EXPORT OutputConfiguration : public QObject
+class WRAPLANDCLIENT_EXPORT OutputConfiguration : public QObject
 {
     Q_OBJECT
 public:
@@ -172,7 +172,7 @@ public:
      * @param outputdevice the OutputDevice this change applies to.
      * @param scale the scaling factor for this output device.
      */
-    void setTransform(OutputDevice *outputdevice, KWayland::Client::OutputDevice::Transform transform);
+    void setTransform(OutputDevice *outputdevice, Wrapland::Client::OutputDevice::Transform transform);
 
     /**
      * Position this output in the global space, relative to other outputs.
@@ -188,7 +188,7 @@ public:
      */
     void setPosition(OutputDevice *outputdevice, const QPoint &pos);
 
-#if KWAYLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 50)
+#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 50)
     /**
      * Scale rendering of this output.
      * The changes done in this call will be recorded in the
@@ -198,7 +198,7 @@ public:
      * @param outputdevice the OutputDevice this change applies to.
      * @deprecated Since 5.50, use setScaleF(OutputDevice *, qreal)
      */
-    KWAYLANDCLIENT_DEPRECATED_VERSION(5, 50, "Use OutputConfiguration::setScaleF(OutputDevice *, qreal)")
+    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 50, "Use OutputConfiguration::setScaleF(OutputDevice *, qreal)")
     void setScale(OutputDevice *outputdevice, qint32 scale);
 #endif
 
@@ -270,7 +270,7 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(KWayland::Client::OutputConfiguration*)
+Q_DECLARE_METATYPE(Wrapland::Client::OutputConfiguration*)
 
 
 #endif

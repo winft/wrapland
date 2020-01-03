@@ -25,12 +25,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSize>
 #include <QVector>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
 
 struct wl_resource;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -45,7 +45,7 @@ class Display;
  * @see OutputManagementInterface
  * @since 5.5
  */
-class KWAYLANDSERVER_EXPORT OutputDeviceInterface : public Global
+class WRAPLANDSERVER_EXPORT OutputDeviceInterface : public Global
 {
     Q_OBJECT
     Q_PROPERTY(QSize physicalSize READ physicalSize WRITE setPhysicalSize NOTIFY physicalSizeChanged)
@@ -109,9 +109,9 @@ public:
     QString eisaId() const;
     QSize pixelSize() const;
     int refreshRate() const;
-#if KWAYLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 50)
+#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 50)
     /// @deprecated Since 5.50, use scaleF()
-    KWAYLANDSERVER_DEPRECATED_VERSION(5, 50, "Use OutputDeviceInterface::scaleF()")
+    WRAPLANDSERVER_DEPRECATED_VERSION(5, 50, "Use OutputDeviceInterface::scaleF()")
     int scale() const;
 #endif
     /// @since 5.50
@@ -132,9 +132,9 @@ public:
     void setModel(const QString &model);
     void setSerialNumber(const QString &serialNumber);
     void setEisaId(const QString &eisaId);
-#if KWAYLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 50)
+#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 50)
     /// @deprecated Since 5.50, use setScale(qreal)
-    KWAYLANDSERVER_DEPRECATED_VERSION(5, 50, "Use OutputDeviceInterface::setScale(qreal)")
+    WRAPLANDSERVER_DEPRECATED_VERSION(5, 50, "Use OutputDeviceInterface::setScale(qreal)")
     void setScale(int scale);
 #endif
     /// @since 5.50
@@ -168,9 +168,9 @@ Q_SIGNALS:
     void eisaIdChanged(const QString &);
     void pixelSizeChanged(const QSize&);
     void refreshRateChanged(int);
-#if KWAYLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 50)
+#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 50)
     /// @deprecated Since 5.50, use scaleFChanged(qreal)
-    KWAYLANDSERVER_DEPRECATED_VERSION(5, 50, "Use OutputDeviceInterface::scaleFChanged(qreal)")
+    WRAPLANDSERVER_DEPRECATED_VERSION(5, 50, "Use OutputDeviceInterface::scaleFChanged(qreal)")
     void scaleChanged(int);
 #endif
     /// @since 5.50
@@ -195,10 +195,10 @@ private:
 }
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(KWayland::Server::OutputDeviceInterface::ModeFlags)
-Q_DECLARE_METATYPE(KWayland::Server::OutputDeviceInterface::Enablement)
-Q_DECLARE_METATYPE(KWayland::Server::OutputDeviceInterface::SubPixel)
-Q_DECLARE_METATYPE(KWayland::Server::OutputDeviceInterface::Transform)
-Q_DECLARE_METATYPE(KWayland::Server::OutputDeviceInterface::ColorCurves)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::OutputDeviceInterface::ModeFlags)
+Q_DECLARE_METATYPE(Wrapland::Server::OutputDeviceInterface::Enablement)
+Q_DECLARE_METATYPE(Wrapland::Server::OutputDeviceInterface::SubPixel)
+Q_DECLARE_METATYPE(Wrapland::Server::OutputDeviceInterface::Transform)
+Q_DECLARE_METATYPE(Wrapland::Server::OutputDeviceInterface::ColorCurves)
 
 #endif

@@ -25,7 +25,7 @@ class XdgShellTestV5 : public XdgShellTest {
     Q_OBJECT
 public:
     XdgShellTestV5() :
-        XdgShellTest(KWayland::Server::XdgShellInterfaceVersion::UnstableV5) {}
+        XdgShellTest(Wrapland::Server::XdgShellInterfaceVersion::UnstableV5) {}
 private Q_SLOTS:
     void testPopup();
 };

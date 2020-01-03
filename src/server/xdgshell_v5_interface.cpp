@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../compat/wayland-xdg-shell-v5-server-protocol.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -541,7 +541,7 @@ XdgShellV5Interface::XdgShellV5Interface(Display *display, QObject *parent)
 XdgShellV5Interface::~XdgShellV5Interface() = default;
 
 XdgSurfaceV5Interface::XdgSurfaceV5Interface(XdgShellV5Interface *parent, SurfaceInterface *surface, wl_resource *parentResource)
-    : KWayland::Server::XdgShellSurfaceInterface(new Private(this, parent, surface, parentResource))
+    : Wrapland::Server::XdgShellSurfaceInterface(new Private(this, parent, surface, parentResource))
 {
 }
 

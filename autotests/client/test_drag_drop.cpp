@@ -54,35 +54,35 @@ private Q_SLOTS:
     void testPointerEventsIgnored();
 
 private:
-    KWayland::Client::Surface *createSurface();
-    KWayland::Server::SurfaceInterface *getServerSurface();
+    Wrapland::Client::Surface *createSurface();
+    Wrapland::Server::SurfaceInterface *getServerSurface();
 
-    KWayland::Server::Display *m_display = nullptr;
-    KWayland::Server::CompositorInterface *m_compositorInterface = nullptr;
-    KWayland::Server::DataDeviceManagerInterface *m_dataDeviceManagerInterface = nullptr;
-    KWayland::Server::SeatInterface *m_seatInterface = nullptr;
-    KWayland::Server::ShellInterface *m_shellInterface = nullptr;
-    KWayland::Client::ConnectionThread *m_connection = nullptr;
-    KWayland::Client::Compositor *m_compositor = nullptr;
-    KWayland::Client::EventQueue *m_queue = nullptr;
-    KWayland::Client::DataDevice *m_dataDevice = nullptr;
-    KWayland::Client::DataSource *m_dataSource = nullptr;
+    Wrapland::Server::Display *m_display = nullptr;
+    Wrapland::Server::CompositorInterface *m_compositorInterface = nullptr;
+    Wrapland::Server::DataDeviceManagerInterface *m_dataDeviceManagerInterface = nullptr;
+    Wrapland::Server::SeatInterface *m_seatInterface = nullptr;
+    Wrapland::Server::ShellInterface *m_shellInterface = nullptr;
+    Wrapland::Client::ConnectionThread *m_connection = nullptr;
+    Wrapland::Client::Compositor *m_compositor = nullptr;
+    Wrapland::Client::EventQueue *m_queue = nullptr;
+    Wrapland::Client::DataDevice *m_dataDevice = nullptr;
+    Wrapland::Client::DataSource *m_dataSource = nullptr;
     QThread *m_thread = nullptr;
-    KWayland::Client::Registry *m_registry = nullptr;
-    KWayland::Client::Seat *m_seat = nullptr;
-    KWayland::Client::Pointer *m_pointer = nullptr;
-    KWayland::Client::Touch *m_touch = nullptr;
-    KWayland::Client::DataDeviceManager *m_ddm = nullptr;
-    KWayland::Client::ShmPool *m_shm = nullptr;
-    KWayland::Client::Shell *m_shell = nullptr;
+    Wrapland::Client::Registry *m_registry = nullptr;
+    Wrapland::Client::Seat *m_seat = nullptr;
+    Wrapland::Client::Pointer *m_pointer = nullptr;
+    Wrapland::Client::Touch *m_touch = nullptr;
+    Wrapland::Client::DataDeviceManager *m_ddm = nullptr;
+    Wrapland::Client::ShmPool *m_shm = nullptr;
+    Wrapland::Client::Shell *m_shell = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-drag-n-drop-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-drag-n-drop-0");
 
 void TestDragAndDrop::init()
 {
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -90,7 +90,7 @@ void TestDragAndDrop::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
@@ -190,9 +190,9 @@ void TestDragAndDrop::cleanup()
     m_display = nullptr;
 }
 
-KWayland::Client::Surface *TestDragAndDrop::createSurface()
+Wrapland::Client::Surface *TestDragAndDrop::createSurface()
 {
-    using namespace KWayland::Client;
+    using namespace Wrapland::Client;
     auto s = m_compositor->createSurface();
 
     QImage img(QSize(100, 200), QImage::Format_RGB32);
@@ -203,9 +203,9 @@ KWayland::Client::Surface *TestDragAndDrop::createSurface()
     return s;
 }
 
-KWayland::Server::SurfaceInterface *TestDragAndDrop::getServerSurface()
+Wrapland::Server::SurfaceInterface *TestDragAndDrop::getServerSurface()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
     if (!surfaceCreatedSpy.isValid()) {
         return nullptr;
@@ -219,8 +219,8 @@ KWayland::Server::SurfaceInterface *TestDragAndDrop::getServerSurface()
 void TestDragAndDrop::testPointerDragAndDrop()
 {
     // this test verifies the very basic drag and drop on one surface, an enter, a move and the drop
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
     // first create a window
     QScopedPointer<Surface> s(createSurface());
     auto serverSurface = getServerSurface();
@@ -312,8 +312,8 @@ void TestDragAndDrop::testPointerDragAndDrop()
 void TestDragAndDrop::testTouchDragAndDrop()
 {
     // this test verifies the very basic drag and drop on one surface, an enter, a move and the drop
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
     // first create a window
     QScopedPointer<Surface> s(createSurface());
     s->setSize(QSize(100,100));
@@ -412,8 +412,8 @@ void TestDragAndDrop::testTouchDragAndDrop()
 void TestDragAndDrop::testDragAndDropWithCancelByDestroyDataSource()
 {
     // this test simulates the problem from BUG 389221
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
     // first create a window
     QScopedPointer<Surface> s(createSurface());
     auto serverSurface = getServerSurface();
@@ -504,8 +504,8 @@ void TestDragAndDrop::testDragAndDropWithCancelByDestroyDataSource()
 void TestDragAndDrop::testPointerEventsIgnored()
 {
     // this test verifies that all pointer events are ignored on the focused Pointer device during drag
-    using namespace KWayland::Server;
-    using namespace KWayland::Client;
+    using namespace Wrapland::Server;
+    using namespace Wrapland::Client;
     // first create a window
     QScopedPointer<Surface> s(createSurface());
     auto serverSurface = getServerSurface();

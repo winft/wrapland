@@ -33,9 +33,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/region_interface.h"
 #include "../../src/server/appmenu_interface.h"
 
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
-Q_DECLARE_METATYPE(KWayland::Server::AppMenuInterface::InterfaceAddress)
+Q_DECLARE_METATYPE(Wrapland::Server::AppMenuInterface::InterfaceAddress)
 
 class TestAppmenu : public QObject
 {
@@ -49,17 +49,17 @@ private Q_SLOTS:
     void testCreateAndSet();
 
 private:
-    KWayland::Server::Display *m_display;
-    KWayland::Server::CompositorInterface *m_compositorInterface;
-    KWayland::Server::AppMenuManagerInterface *m_appmenuManagerInterface;
-    KWayland::Client::ConnectionThread *m_connection;
-    KWayland::Client::Compositor *m_compositor;
-    KWayland::Client::AppMenuManager *m_appmenuManager;
-    KWayland::Client::EventQueue *m_queue;
+    Wrapland::Server::Display *m_display;
+    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Server::AppMenuManagerInterface *m_appmenuManagerInterface;
+    Wrapland::Client::ConnectionThread *m_connection;
+    Wrapland::Client::Compositor *m_compositor;
+    Wrapland::Client::AppMenuManager *m_appmenuManager;
+    Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("kwayland-test-wayland-appmenu-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-appmenu-0");
 
 TestAppmenu::TestAppmenu(QObject *parent)
     : QObject(parent)
@@ -74,7 +74,7 @@ TestAppmenu::TestAppmenu(QObject *parent)
 
 void TestAppmenu::init()
 {
-    using namespace KWayland::Server;
+    using namespace Wrapland::Server;
     qRegisterMetaType<AppMenuInterface::InterfaceAddress>();
     delete m_display;
     m_display = new Display(this);
@@ -83,7 +83,7 @@ void TestAppmenu::init()
     QVERIFY(m_display->isRunning());
 
     // setup connection
-    m_connection = new KWayland::Client::ConnectionThread;
+    m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
@@ -95,7 +95,7 @@ void TestAppmenu::init()
     m_connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    m_queue = new KWayland::Client::EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
@@ -157,26 +157,26 @@ void TestAppmenu::cleanup()
 
 void TestAppmenu::testCreateAndSet()
 {
-    QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(KWayland::Server::SurfaceInterface*)));
+    QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<KWayland::Client::Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
-    auto serverSurface = serverSurfaceCreated.first().first().value<KWayland::Server::SurfaceInterface*>();
-    QSignalSpy appMenuCreated(m_appmenuManagerInterface, &KWayland::Server::AppMenuManagerInterface::appMenuCreated);
+    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    QSignalSpy appMenuCreated(m_appmenuManagerInterface, &Wrapland::Server::AppMenuManagerInterface::appMenuCreated);
 
     QVERIFY(!m_appmenuManagerInterface->appMenuForSurface(serverSurface));
 
     auto appmenu = m_appmenuManager->create(surface.data(), surface.data());
     QVERIFY(appMenuCreated.wait());
-    auto appMenuInterface = appMenuCreated.first().first().value<KWayland::Server::AppMenuInterface*>();
+    auto appMenuInterface = appMenuCreated.first().first().value<Wrapland::Server::AppMenuInterface*>();
     QCOMPARE(m_appmenuManagerInterface->appMenuForSurface(serverSurface), appMenuInterface);
 
     QCOMPARE(appMenuInterface->address().serviceName, QString());
     QCOMPARE(appMenuInterface->address().objectPath, QString());
 
-    QSignalSpy appMenuChangedSpy(appMenuInterface, &KWayland::Server::AppMenuInterface::addressChanged);
+    QSignalSpy appMenuChangedSpy(appMenuInterface, &Wrapland::Server::AppMenuInterface::addressChanged);
 
     appmenu->setAddress("net.somename", "/test/path");
 

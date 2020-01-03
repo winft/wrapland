@@ -17,8 +17,8 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_SHADOW_H
-#define KWAYLAND_SHADOW_H
+#ifndef WRAPLAND_SHADOW_H
+#define WRAPLAND_SHADOW_H
 
 #include "buffer.h"
 
@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 #include <QSize>
 
-#include <KWayland/Client/kwaylandclient_export.h>
+#include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_buffer;
 struct org_kde_kwin_shadow;
@@ -35,7 +35,7 @@ struct org_kde_kwin_shadow_manager;
 class QMarginsF;
 class QWindow;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Client
 {
@@ -68,7 +68,7 @@ class Surface;
  * @see Registry
  * @since 5.4
  **/
-class KWAYLANDCLIENT_EXPORT ShadowManager : public QObject
+class WRAPLANDCLIENT_EXPORT ShadowManager : public QObject
 {
     Q_OBJECT
 public:
@@ -162,7 +162,7 @@ private:
  *
  * @see Compositor
  **/
-class KWAYLANDCLIENT_EXPORT Shadow : public QObject
+class WRAPLANDCLIENT_EXPORT Shadow : public QObject
 {
     Q_OBJECT
 public:

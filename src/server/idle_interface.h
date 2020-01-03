@@ -17,14 +17,14 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef KWAYLAND_SERVER_IDLE_INTERFACE_H
-#define KWAYLAND_SERVER_IDLE_INTERFACE_H
+#ifndef WRAPLAND_SERVER_IDLE_INTERFACE_H
+#define WRAPLAND_SERVER_IDLE_INTERFACE_H
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
 #include "resource.h"
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -52,7 +52,7 @@ class SeatInterface;
  *
  * @since 5.4
  **/
-class KWAYLANDSERVER_EXPORT IdleInterface : public Global
+class WRAPLANDSERVER_EXPORT IdleInterface : public Global
 {
     Q_OBJECT
 public:
@@ -121,7 +121,7 @@ private:
 };
 
 // TODO: KF6 make private class
-class KWAYLANDSERVER_EXPORT IdleTimeoutInterface : public Resource
+class WRAPLANDSERVER_EXPORT IdleTimeoutInterface : public Resource
 {
     Q_OBJECT
 public:

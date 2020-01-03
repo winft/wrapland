@@ -22,12 +22,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-#include <KWayland/Server/kwaylandserver_export.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
 struct wl_client;
 struct wl_resource;
 
-namespace KWayland
+namespace Wrapland
 {
 namespace Server
 {
@@ -43,7 +43,7 @@ class Global;
  * The Resource is a base class for all specific resources and provides
  * access to various common aspects.
  **/
-class KWAYLANDSERVER_EXPORT Resource : public QObject
+class WRAPLANDSERVER_EXPORT Resource : public QObject
 {
     Q_OBJECT
 public:

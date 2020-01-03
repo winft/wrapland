@@ -37,7 +37,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QImage>
 #include <QThread>
 
-using namespace KWayland::Client;
+using namespace Wrapland::Client;
 
 class CopyClient : public QObject
 {
