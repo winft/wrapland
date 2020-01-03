@@ -6,7 +6,7 @@ set(PROJECT_VERSION_MAJOR 5)
 
 # ECM setup
 include(FeatureSummary)
-find_package(ECM 5.65.0  NO_MODULE)
+find_package(ECM 5.66.0  NO_MODULE)
 set_package_properties(ECM PROPERTIES TYPE REQUIRED DESCRIPTION "Extra CMake Modules." URL "https://commits.kde.org/extra-cmake-modules")
 feature_summary(WHAT REQUIRED_PACKAGES_NOT_FOUND FATAL_ON_MISSING_REQUIRED_PACKAGES)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/Modules)
