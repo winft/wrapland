@@ -31,10 +31,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keystate.h"
 #include "remote_access.h"
 #include "logging.h"
-#include "outputconfiguration.h"
-#include "outputmanagement.h"
-#include "outputdevice.h"
 #include "output.h"
+#include "output_configuration_v1.h"
+#include "output_management_v1.h"
+#include "output_device_v1.h"
 #include "plasmashell.h"
 #include "plasmavirtualdesktop.h"
 #include "plasmawindowmanagement.h"
@@ -72,8 +72,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-remote-access-client-protocol.h>
 #include <wayland-fake-input-client-protocol.h>
 #include <wayland-shadow-client-protocol.h>
-#include <wayland-output-management-client-protocol.h>
-#include <wayland-org_kde_kwin_outputdevice-client-protocol.h>
+#include <wayland-output-management-v1-client-protocol.h>
+#include <wayland-output-device-v1-client-protocol.h>
 #include <wayland-blur-client-protocol.h>
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
@@ -212,19 +212,19 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &Registry::fakeInputAnnounced,
         &Registry::fakeInputRemoved
     }},
-    {Registry::Interface::OutputManagement, {
-        2,
-        QByteArrayLiteral("org_kde_kwin_outputmanagement"),
-        &org_kde_kwin_outputmanagement_interface,
-        &Registry::outputManagementAnnounced,
-        &Registry::outputManagementRemoved
+    {Registry::Interface::OutputManagementV1, {
+        1,
+        QByteArrayLiteral("zkwinft_output_management_v1"),
+        &zkwinft_output_management_v1_interface,
+        &Registry::outputManagementV1Announced,
+        &Registry::outputManagementV1Removed
     }},
-    {Registry::Interface::OutputDevice, {
-        2,
-        QByteArrayLiteral("org_kde_kwin_outputdevice"),
-        &org_kde_kwin_outputdevice_interface,
-        &Registry::outputDeviceAnnounced,
-        &Registry::outputDeviceRemoved
+    {Registry::Interface::OutputDeviceV1, {
+        1,
+        QByteArrayLiteral("zkwinft_output_device_v1"),
+        &zkwinft_output_device_v1_interface,
+        &Registry::outputDeviceV1Announced,
+        &Registry::outputDeviceV1Removed
     }},
     {Registry::Interface::Shadow, {
         2,
@@ -679,8 +679,8 @@ BIND(PlasmaWindowManagement, org_kde_plasma_window_management)
 BIND(Idle, org_kde_kwin_idle)
 BIND(RemoteAccessManager, org_kde_kwin_remote_access_manager)
 BIND(FakeInput, org_kde_kwin_fake_input)
-BIND(OutputManagement, org_kde_kwin_outputmanagement)
-BIND(OutputDevice, org_kde_kwin_outputdevice)
+BIND(OutputManagementV1, zkwinft_output_management_v1)
+BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(ServerSideDecorationManager, org_kde_kwin_server_decoration_manager)
 BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
@@ -745,8 +745,8 @@ CREATE(PlasmaWindowManagement)
 CREATE(Idle)
 CREATE(RemoteAccessManager)
 CREATE(FakeInput)
-CREATE(OutputManagement)
-CREATE(OutputDevice)
+CREATE(OutputManagementV1)
+CREATE(OutputDeviceV1)
 CREATE(ShadowManager)
 CREATE(BlurManager)
 CREATE(ContrastManager)

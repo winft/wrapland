@@ -1,34 +1,36 @@
-/****************************************************************************
-* Copyright 2015  Sebastian Kügler <sebas@kde.org>
-*
-* This library is free software; you can redistribute it and/or
-* modify it under the terms of the GNU Lesser General Public
-* License as published by the Free Software Foundation; either
-* version 2.1 of the License, or (at your option) version 3, or any
-* later version accepted by the membership of KDE e.V. (or its
-* successor approved by the membership of KDE e.V.), which shall
-* act as a proxy defined in Section 6 of version 3 of the license.
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with this library.  If not, see <http://www.gnu.org/licenses/>.
-****************************************************************************/
-#ifndef WRAPLAND_CLIENT_OUTPUTCONFIGURATION_H
-#define WRAPLAND_CLIENT_OUTPUTCONFIGURATION_H
+/********************************************************************
+Copyright © 2015  Sebastian Kügler <sebas@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) version 3, or any
+later version accepted by the membership of KDE e.V. (or its
+successor approved by the membership of KDE e.V.), which shall
+act as a proxy defined in Section 6 of version 3 of the license.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************/
+#pragma once
+
+#include "output_device_v1.h"
+
+#include <Wrapland/Client/wraplandclient_export.h>
 
 #include <QObject>
 #include <QPoint>
 #include <QVector>
 
-#include "outputdevice.h"
-#include <Wrapland/Client/wraplandclient_export.h>
-
-struct org_kde_kwin_outputmanagement;
-struct org_kde_kwin_outputconfiguration;
+class QRectF;
+struct zkwinft_output_management_v1;
+struct zkwinft_output_configuration_v1;
 
 namespace Wrapland
 {
@@ -37,13 +39,13 @@ namespace Client
 
 class EventQueue;
 
-/** @class OutputConfiguration
+/** @class OutputConfigurationV1
  *
- * OutputConfiguration provides access to changing OutputDevices. The interface is async
- * and atomic. An OutputConfiguration is created through OutputManagement::createConfiguration().
+ * OutputConfigurationV1 provides access to changing OutputDevices. The interface is async
+ * and atomic. An OutputConfigurationV1 is created through OutputManagementV1::createConfiguration().
  *
- * The overall mechanism is to get a new OutputConfiguration from the OutputManagement global and
- * apply changes through the OutputConfiguration::set* calls. When all changes are set, the client
+ * The overall mechanism is to get a new OutputConfigurationV1 from the OutputManagementV1 global and
+ * apply changes through the OutputConfigurationV1::set* calls. When all changes are set, the client
  * calls apply, which asks the server to look at the changes and apply them. The server will then
  * signal back whether the changes have been applied successfully (@c applied()) or were rejected
  * or failed to apply (@c failed()).
@@ -71,10 +73,10 @@ class EventQueue;
     auto config = m_outputManagement.createConfiguration();
 
     // handle applied and failed signals
-    connect(config, &OutputConfiguration::applied, []() {
+    connect(config, &OutputConfigurationV1::applied, []() {
         qDebug() << "Configuration applied!";
     });
-    connect(config, &OutputConfiguration::failed, []() {
+    connect(config, &OutputConfigurationV1::failed, []() {
         qDebug() << "Configuration failed!";
     });
 
@@ -90,55 +92,54 @@ class EventQueue;
    \endverbatim
 
  * @see OutputDevice
- * @see OutputManagement
- * @see OutputManagement::createConfiguration()
- * @since 5.5
+ * @see OutputManagementV1
+ * @see OutputManagementV1::createConfiguration()
  */
-class WRAPLANDCLIENT_EXPORT OutputConfiguration : public QObject
+class WRAPLANDCLIENT_EXPORT OutputConfigurationV1 : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~OutputConfiguration();
+    ~OutputConfigurationV1() override;
 
     /**
-    * Setup this OutputConfiguration to manage the @p outputconfiguration.
-    * When using OutputManagement::createOutputConfiguration there is no need to call this
+    * Setup this OutputConfigurationV1 to manage the @p outputconfiguration.
+    * When using OutputManagementV1::createOutputConfiguration there is no need to call this
     * method.
     * @param outputconfiguration the outputconfiguration object to set up.
     **/
-    void setup(org_kde_kwin_outputconfiguration *outputconfiguration);
+    void setup(zkwinft_output_configuration_v1 *outputconfiguration);
     /**
-    * @returns @c true if managing a org_kde_kwin_outputconfiguration.
+    * @returns @c true if managing a zkwinft_output_configuration_v1.
     **/
     bool isValid() const;
     /**
-    * Releases the org_kde_kwin_outputconfiguration interface.
-    * After the interface has been released the OutputConfiguration instance is no
-    * longer valid and can be setup with another org_kde_kwin_outputconfiguration interface.
+    * Releases the zkwinft_output_configuration_v1 interface.
+    * After the interface has been released the OutputConfigurationV1 instance is no
+    * longer valid and can be setup with another zkwinft_output_configuration_v1 interface.
     **/
     void release();
     /**
-    * Destroys the data held by this OutputConfiguration.
+    * Destroys the data held by this OutputConfigurationV1.
     * This method is supposed to be used when the connection to the Wayland
     * server goes away. If the connection is not valid any more, it's not
     * possible to call release any more as that calls into the Wayland
     * connection and the call would fail. This method cleans up the data, so
-    * that the instance can be deleted or setup to a new org_kde_kwin_outputconfiguration interface
+    * that the instance can be deleted or setup to a new zkwinft_output_configuration_v1 interface
     * once there is a new connection available.
     *
     * This method is automatically invoked when the Registry which created this
-    * OutputConfiguration gets destroyed.
+    * OutputConfigurationV1 gets destroyed.
     *
     *
     * @see release
     **/
     void destroy();
     /**
-     * Sets the @p queue to use for creating a OutputConfiguration.
+     * Sets the @p queue to use for creating a OutputConfigurationV1.
      **/
     void setEventQueue(EventQueue *queue);
     /**
-     * @returns The event queue to use for creating a OutputConfiguration
+     * @returns The event queue to use for creating a OutputConfigurationV1
      **/
     EventQueue *eventQueue();
 
@@ -153,7 +154,7 @@ public:
      * @param outputdevice the OutputDevice this change applies to.
      * @param enable new Enablement state of this output device.
      */
-    void setEnabled(OutputDevice *outputdevice, OutputDevice::Enablement enable);
+    void setEnabled(OutputDeviceV1 *outputDevice, OutputDeviceV1::Enablement enable);
 
     /**
      * Set the mode of this output, identified by its mode id.
@@ -163,7 +164,7 @@ public:
      * @param outputdevice the OutputDevice this change applies to.
      * @param modeId the id of the mode.
      */
-    void setMode(OutputDevice *outputdevice, const int modeId);
+    void setMode(OutputDeviceV1 *outputDevice, const int modeId);
     /**
      * Set transformation for this output, for example rotated or flipped.
      * The changes done in this call will be recorded in the
@@ -172,61 +173,26 @@ public:
      * @param outputdevice the OutputDevice this change applies to.
      * @param scale the scaling factor for this output device.
      */
-    void setTransform(OutputDevice *outputdevice, Wrapland::Client::OutputDevice::Transform transform);
+    void setTransform(OutputDeviceV1 *outputDevice, OutputDeviceV1::Transform transform);
 
     /**
-     * Position this output in the global space, relative to other outputs.
+     * Sets the geometry of this output in the global space, relative to other outputs.
      * QPoint(0, 0) for top-left. The position is the top-left corner of this output.
-     * There may not be gaps between outputs, they have to be positioned adjacent to
-     * each other.
+     *
+     * When width and height are both set to 0, no new content is posted to the output what
+     * implicitly disables it.
+     *
+     * The x, width and height argument must be non-negative and width must be 0 if and only if
+     * height is 0.
+     *
      * The changes done in this call will be recorded in the
      * OutputDevice and only applied after apply() has been called.
      *
      * @param outputdevice the OutputDevice this change applies to.
-     * @param pos the OutputDevice global position relative to other outputs,
+     * @param geo the OutputDevice geometry relative to other outputs,
      *
      */
-    void setPosition(OutputDevice *outputdevice, const QPoint &pos);
-
-#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 50)
-    /**
-     * Scale rendering of this output.
-     * The changes done in this call will be recorded in the
-     * OutputDevice and only applied after apply() has been called.
-     *
-     * @param scale the scaling factor for this output device.
-     * @param outputdevice the OutputDevice this change applies to.
-     * @deprecated Since 5.50, use setScaleF(OutputDevice *, qreal)
-     */
-    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 50, "Use OutputConfiguration::setScaleF(OutputDevice *, qreal)")
-    void setScale(OutputDevice *outputdevice, qint32 scale);
-#endif
-
-    /**
-     * Scale rendering of this output.
-     * The changes done in this call will be recorded in the
-     * OutputDevice and only applied after apply() has been called.
-     *
-     * @param scale the scaling factor for this output device.
-     * @param outputdevice the OutputDevice this change applies to.
-     * @since 5.50
-     */
-    void setScaleF(OutputDevice *outputdevice, qreal scale);
-
-    /* Set color curves for this output. The respective color curve vector
-     * lengths must equal the current ones in the OutputDevice. The codomain
-     * of the curves is always the full uint16 value range, such that any vector
-     * is accepted as long as it has the right size.
-     * The changes done in this call will be recorded in the
-     * OutputDevice and only applied after apply() has been called.
-     *
-     * @param red color curve of red channel.
-     * @param green color curve of green channel.
-     * @param blue color curve of blue channel.
-     * @param outputdevice the OutputDevice this change applies to.
-     * @since 5.50
-     */
-    void setColorCurves(OutputDevice *outputdevice, QVector<quint16> red, QVector<quint16> green, QVector<quint16> blue);
+    void setGeometry(OutputDeviceV1 *outputDevice, const QRectF &geo);
 
     /**
      * Ask the compositor to apply the changes.
@@ -242,8 +208,8 @@ public:
      */
     void apply();
 
-    operator org_kde_kwin_outputconfiguration*();
-    operator org_kde_kwin_outputconfiguration*() const;
+    operator zkwinft_output_configuration_v1*();
+    operator zkwinft_output_configuration_v1*() const;
 
 Q_SIGNALS:
     /**
@@ -260,8 +226,8 @@ Q_SIGNALS:
     void failed();
 
 private:
-    friend class OutputManagement;
-    explicit OutputConfiguration(QObject *parent = nullptr);
+    friend class OutputManagementV1;
+    explicit OutputConfigurationV1(QObject *parent = nullptr);
     class Private;
     QScopedPointer<Private> d;
 };
@@ -270,7 +236,4 @@ private:
 }
 }
 
-Q_DECLARE_METATYPE(Wrapland::Client::OutputConfiguration*)
-
-
-#endif
+Q_DECLARE_METATYPE(Wrapland::Client::OutputConfigurationV1*)

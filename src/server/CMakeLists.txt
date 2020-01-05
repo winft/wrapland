@@ -23,10 +23,10 @@ set(SERVER_LIB_SRCS
     keystate_interface.cpp
     linuxdmabuf_v1_interface.cpp
     output_interface.cpp
-    outputchangeset.cpp
-    outputconfiguration_interface.cpp
-    outputdevice_interface.cpp
-    outputmanagement_interface.cpp
+    output_changeset_v1.cpp
+    output_configuration_v1_interface.cpp
+    output_device_v1_interface.cpp
+    output_management_v1_interface.cpp
     plasmashell_interface.cpp
     plasmavirtualdesktop_interface.cpp
     plasmawindowmanagement_interface.cpp
@@ -68,13 +68,13 @@ set(SERVER_LIB_SRCS
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/output-management.xml
-    BASENAME output-management
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-management-unstable-v1.xml
+    BASENAME output-management-v1
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/outputdevice.xml
-    BASENAME org_kde_kwin_outputdevice
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-device-unstable-v1.xml
+    BASENAME output-device-v1
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
@@ -236,13 +236,10 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-inhibit-unstable-v1-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-linux-dmabuf-unstable-v1-server-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-org_kde_kwin_outputdevice-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-org_kde_kwin_outputdevice-server-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-server-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-unstable-v1-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-unstable-v1-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-unstable-v1-server-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-server-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-server-protocol.h
@@ -298,7 +295,8 @@ ecm_generate_export_header(WraplandServer
 # needs fixing of undeprecated API being still implemented using own deprecated API
 
 
-target_include_directories(WraplandServer INTERFACE "$<INSTALL_INTERFACE:${KF5_INCLUDE_INSTALL_DIR}/Wrapland/Server>")
+target_include_directories(WraplandServer INTERFACE
+    "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/Wrapland/Server>")
 
 target_link_libraries(WraplandServer
     PUBLIC Qt5::Gui
@@ -310,10 +308,10 @@ target_link_libraries(WraplandServer
 
 set_target_properties(WraplandServer PROPERTIES VERSION   ${WRAPLAND_VERSION_STRING}
                                                  SOVERSION ${WRAPLAND_SOVERSION}
-                                                 EXPORT_NAME WaylandServer
+                                                 EXPORT_NAME WraplandServer
 )
 
-install(TARGETS WraplandServer EXPORT WraplandTargets ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS WraplandServer EXPORT WraplandTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 set(SERVER_LIB_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/Wrapland/Server/wraplandserver_export.h
@@ -339,10 +337,10 @@ set(SERVER_LIB_HEADERS
   keystate_interface.h
   linuxdmabuf_v1_interface.h
   output_interface.h
-  outputchangeset.h
-  outputconfiguration_interface.h
-  outputdevice_interface.h
-  outputmanagement_interface.h
+  output_changeset_v1.h
+  output_configuration_v1_interface.h
+  output_device_v1_interface.h
+  output_management_v1_interface.h
   plasmashell_interface.h
   plasmavirtualdesktop_interface.h
   plasmawindowmanagement_interface.h
@@ -372,14 +370,9 @@ set(SERVER_LIB_HEADERS
 
 install(FILES
   ${SERVER_LIB_HEADERS}
-  DESTINATION ${KF5_INCLUDE_INSTALL_DIR}/Wrapland/Server COMPONENT Devel
+  DESTINATION ${INCLUDE_INSTALL_DIR}/Wrapland/Server COMPONENT Devel
 )
 
 # make available to ecm_add_qch in parent folder
 set(WraplandServer_APIDOX_SRCS ${SERVER_LIB_HEADERS} PARENT_SCOPE)
 set(WraplandServer_APIDOX_BUILD_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
-
-include(ECMGeneratePriFile)
-ecm_generate_pri_file(BASE_NAME WraplandServer LIB_NAME WraplandServer DEPS "core" FILENAME_VAR PRI_FILENAME INCLUDE_INSTALL_DIR ${KDE_INSTALL_INCLUDEDIR_KF5})
-install(FILES ${PRI_FILENAME}
-        DESTINATION ${ECM_MKSPECS_INSTALL_DIR})

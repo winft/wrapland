@@ -98,24 +98,24 @@ ecm_mark_as_test(testShmPool)
 ########################################################
 # Test KWin OutputManagement
 ########################################################
-set( test_wayland_outputmanagement_SRCS
-        test_wayland_outputmanagement.cpp
+set( test_output_management_SRCS
+        test_output_management.cpp
     )
-add_executable(testWaylandOutputManagement ${test_wayland_outputmanagement_SRCS})
-target_link_libraries( testWaylandOutputManagement Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
-add_test(NAME wrapland-testWaylandOutputManagement COMMAND testWaylandOutputManagement)
-ecm_mark_as_test(testWaylandOutputManagement)
+add_executable(testOutputManagement ${test_output_management_SRCS})
+target_link_libraries( testOutputManagement Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testOutputManagement COMMAND testOutputManagement)
+ecm_mark_as_test(testOutputManagement)
 
 ########################################################
 # Test KWin OutputDevice
 ########################################################
-set( test_wayland_outputdevice_SRCS
-        test_wayland_outputdevice.cpp
+set( test_output_device_SRCS
+        test_output_device.cpp
     )
-add_executable(testWaylandOutputDevice ${test_wayland_outputdevice_SRCS})
-target_link_libraries( testWaylandOutputDevice Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
-add_test(NAME wrapland-testWaylandOutputDevice COMMAND testWaylandOutputDevice)
-ecm_mark_as_test(testWaylandOutputDevice)
+add_executable(testOutputDevice ${test_output_device_SRCS})
+target_link_libraries( testOutputDevice Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testOutputDevice COMMAND testOutputDevice)
+ecm_mark_as_test(testOutputDevice)
 
 ########################################################
 # Test Compositor

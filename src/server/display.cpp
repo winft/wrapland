@@ -22,9 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "compositor_interface.h"
 #include "datadevicemanager_interface.h"
 #include "dpms_interface.h"
-#include "outputconfiguration_interface.h"
-#include "outputmanagement_interface.h"
-#include "outputdevice_interface.h"
+#include "output_configuration_v1_interface.h"
+#include "output_management_v1_interface.h"
+#include "output_device_v1_interface.h"
 #include "idle_interface.h"
 #include "idleinhibit_interface_p.h"
 #include "remote_access_interface.h"
@@ -89,7 +89,7 @@ public:
     bool running = false;
     bool automaticSocketNaming = false;
     QList<OutputInterface*> outputs;
-    QList<OutputDeviceInterface*> outputdevices;
+    QList<OutputDeviceV1Interface*> outputDevices;
     QVector<SeatInterface*> seats;
     QVector<ClientConnection*> clients;
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
@@ -268,18 +268,18 @@ ShellInterface *Display::createShell(QObject *parent)
     return shell;
 }
 
-OutputDeviceInterface *Display::createOutputDevice(QObject *parent)
+OutputDeviceV1Interface *Display::createOutputDeviceV1(QObject *parent)
 {
-    OutputDeviceInterface *output = new OutputDeviceInterface(this, parent);
-    connect(output, &QObject::destroyed, this, [this,output] { d->outputdevices.removeAll(output); });
+    auto *output = new OutputDeviceV1Interface(this, parent);
+    connect(output, &QObject::destroyed, this, [this,output] { d->outputDevices.removeAll(output); });
     connect(this, &Display::aboutToTerminate, output, [this,output] { removeOutputDevice(output); });
-    d->outputdevices << output;
+    d->outputDevices << output;
     return output;
 }
 
-OutputManagementInterface *Display::createOutputManagement(QObject *parent)
+OutputManagementV1Interface *Display::createOutputManagementV1(QObject *parent)
 {
-    OutputManagementInterface *om = new OutputManagementInterface(this, parent);
+    auto *om = new OutputManagementV1Interface(this, parent);
     connect(this, &Display::aboutToTerminate, om, [this,om] { delete om; });
     return om;
 }
@@ -549,10 +549,10 @@ void Display::removeOutput(OutputInterface *output)
     delete output;
 }
 
-void Display::removeOutputDevice(OutputDeviceInterface *output)
+void Display::removeOutputDevice(OutputDeviceV1Interface *outputDevice)
 {
-    d->outputdevices.removeAll(output);
-    delete output;
+    d->outputDevices.removeAll(outputDevice);
+    delete outputDevice;
 }
 
 quint32 Display::nextSerial()
@@ -580,14 +580,14 @@ Display::operator wl_display*() const
     return d->display;
 }
 
-QList< OutputInterface* > Display::outputs() const
+QList<OutputInterface*> Display::outputs() const
 {
     return d->outputs;
 }
 
-QList< OutputDeviceInterface* > Display::outputDevices() const
+QList<OutputDeviceV1Interface*> Display::outputDevices() const
 {
-    return d->outputdevices;
+    return d->outputDevices;
 }
 
 QVector<SeatInterface*> Display::seats() const

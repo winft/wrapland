@@ -17,83 +17,85 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
-#include "outputmanagement.h"
-#include "outputconfiguration.h"
-#include "event_queue.h"
-#include "wayland_pointer_p.h"
-#include "wayland-output-management-client-protocol.h"
+#include "output_management_v1.h"
 
+#include "event_queue.h"
+#include "output_configuration_v1.h"
+#include "wayland_pointer_p.h"
+
+#include "wayland-output-management-v1-client-protocol.h"
 
 namespace Wrapland
 {
 namespace Client
 {
 
-class Q_DECL_HIDDEN OutputManagement::Private
+class Q_DECL_HIDDEN OutputManagementV1::Private
 {
 public:
     Private() = default;
 
-    WaylandPointer<org_kde_kwin_outputmanagement, org_kde_kwin_outputmanagement_destroy> outputmanagement;
+    WaylandPointer<zkwinft_output_management_v1,
+                    zkwinft_output_management_v1_destroy> outputManagement;
     EventQueue *queue = nullptr;
 };
 
-OutputManagement::OutputManagement(QObject *parent)
+OutputManagementV1::OutputManagementV1(QObject *parent)
 : QObject(parent)
 , d(new Private)
 {
 }
 
-OutputManagement::~OutputManagement()
+OutputManagementV1::~OutputManagementV1()
 {
-    d->outputmanagement.release();
+    d->outputManagement.release();
 }
 
-void OutputManagement::setup(org_kde_kwin_outputmanagement *outputmanagement)
+void OutputManagementV1::setup(zkwinft_output_management_v1 *outputManagement)
 {
-    Q_ASSERT(outputmanagement);
-    Q_ASSERT(!d->outputmanagement);
-    d->outputmanagement.setup(outputmanagement);
+    Q_ASSERT(outputManagement);
+    Q_ASSERT(!d->outputManagement);
+    d->outputManagement.setup(outputManagement);
 }
 
-void OutputManagement::release()
+void OutputManagementV1::release()
 {
-    d->outputmanagement.release();
+    d->outputManagement.release();
 }
 
-void OutputManagement::destroy()
+void OutputManagementV1::destroy()
 {
-    d->outputmanagement.destroy();
+    d->outputManagement.destroy();
 }
 
-void OutputManagement::setEventQueue(EventQueue *queue)
+void OutputManagementV1::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;
 }
 
-EventQueue *OutputManagement::eventQueue()
+EventQueue* OutputManagementV1::eventQueue()
 {
     return d->queue;
 }
 
-OutputManagement::operator org_kde_kwin_outputmanagement*() {
-    return d->outputmanagement;
+OutputManagementV1::operator zkwinft_output_management_v1*() {
+    return d->outputManagement;
 }
 
-OutputManagement::operator org_kde_kwin_outputmanagement*() const {
-    return d->outputmanagement;
+OutputManagementV1::operator zkwinft_output_management_v1*() const {
+    return d->outputManagement;
 }
 
-bool OutputManagement::isValid() const
+bool OutputManagementV1::isValid() const
 {
-    return d->outputmanagement.isValid();
+    return d->outputManagement.isValid();
 }
 
-OutputConfiguration *OutputManagement::createConfiguration(QObject *parent)
+OutputConfigurationV1* OutputManagementV1::createConfiguration(QObject *parent)
 {
     Q_UNUSED(parent);
-    OutputConfiguration *config = new OutputConfiguration(this);
-    auto w = org_kde_kwin_outputmanagement_create_configuration(d->outputmanagement);
+    auto *config = new OutputConfigurationV1(this);
+    auto w = zkwinft_output_management_v1_create_configuration(d->outputManagement);
 
     if (d->queue) {
         d->queue->addProxy(w);

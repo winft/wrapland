@@ -1,6 +1,7 @@
 /********************************************************************
-Copyright 2014 Martin Gräßlin <mgraesslin@kde.org>
-Copyright 2015 Sebastian Kügler <sebas@kde.org>
+Copyright © 2014 Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2015 Sebastian Kügler <sebas@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -18,13 +19,14 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#include "outputmanagement_interface.h"
-#include "outputconfiguration_interface.h"
+#include "output_management_v1_interface.h"
+
 #include "display.h"
 #include "global_p.h"
+#include "output_configuration_v1_interface.h"
 
+#include "wayland-output-management-v1-server-protocol.h"
 #include <wayland-server.h>
-#include "wayland-output-management-server-protocol.h"
 
 #include <QHash>
 
@@ -33,10 +35,10 @@ namespace Wrapland
 namespace Server
 {
 
-class OutputManagementInterface::Private : public Global::Private
+class OutputManagementV1Interface::Private : public Global::Private
 {
 public:
-    Private(OutputManagementInterface *q, Display *d);
+    Private(OutputManagementV1Interface *q, Display *d);
 
 private:
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
@@ -49,36 +51,40 @@ private:
 
     static void createConfigurationCallback(wl_client *client, wl_resource *resource, uint32_t id);
 
-    OutputManagementInterface *q;
-    static const struct org_kde_kwin_outputmanagement_interface s_interface;
+    OutputManagementV1Interface *q;
+    static const struct zkwinft_output_management_v1_interface s_interface;
     static const quint32 s_version;
 
-    QHash<wl_resource*, OutputConfigurationInterface*> configurationInterfaces;
+    QHash<wl_resource*, OutputConfigurationV1Interface*> configurationInterfaces;
 };
 
-const quint32 OutputManagementInterface::Private::s_version = 2;
+const quint32 OutputManagementV1Interface::Private::s_version = 1;
 
-const struct org_kde_kwin_outputmanagement_interface OutputManagementInterface::Private::s_interface = {
+const struct zkwinft_output_management_v1_interface
+        OutputManagementV1Interface::Private::s_interface = {
     createConfigurationCallback
 };
 
-OutputManagementInterface::OutputManagementInterface(Display *display, QObject *parent)
+OutputManagementV1Interface::OutputManagementV1Interface(Display *display, QObject *parent)
 : Global(new Private(this, display), parent)
 {
 }
 
-OutputManagementInterface::~OutputManagementInterface()
+OutputManagementV1Interface::~OutputManagementV1Interface()
 {
 }
 
-void OutputManagementInterface::Private::createConfigurationCallback(wl_client *client, wl_resource *resource, uint32_t id)
+void OutputManagementV1Interface::Private::createConfigurationCallback(wl_client *client,
+                                                                       wl_resource *resource,
+                                                                       uint32_t id)
 {
     cast(resource)->createConfiguration(client, resource, id);
 }
 
-void OutputManagementInterface::Private::createConfiguration(wl_client* client, wl_resource* resource, uint32_t id)
+void OutputManagementV1Interface::Private::createConfiguration(wl_client* client,
+                                                               wl_resource* resource, uint32_t id)
 {
-    auto config = new OutputConfigurationInterface(q, resource);
+    auto config = new OutputConfigurationV1Interface(q, resource);
     config->create(display->getConnection(client), wl_resource_get_version(resource), id);
     if (!config->resource()) {
         wl_resource_post_no_memory(resource);
@@ -92,16 +98,17 @@ void OutputManagementInterface::Private::createConfiguration(wl_client* client, 
     });
 }
 
-OutputManagementInterface::Private::Private(OutputManagementInterface *q, Display *d)
-: Global::Private(d, &org_kde_kwin_outputmanagement_interface, s_version)
+OutputManagementV1Interface::Private::Private(OutputManagementV1Interface *q, Display *d)
+: Global::Private(d, &zkwinft_output_management_v1_interface, s_version)
 , q(q)
 {
 }
 
-void OutputManagementInterface::Private::bind(wl_client *client, uint32_t version, uint32_t id)
+void OutputManagementV1Interface::Private::bind(wl_client *client, uint32_t version, uint32_t id)
 {
     auto c = display->getConnection(client);
-    wl_resource *resource = c->createResource(&org_kde_kwin_outputmanagement_interface, qMin(version, s_version), id);
+    wl_resource *resource = c->createResource(&zkwinft_output_management_v1_interface,
+                                              qMin(version, s_version), id);
     if (!resource) {
         wl_client_post_no_memory(client);
         return;
@@ -110,7 +117,7 @@ void OutputManagementInterface::Private::bind(wl_client *client, uint32_t versio
     // TODO: should we track?
 }
 
-void OutputManagementInterface::Private::unbind(wl_resource *resource)
+void OutputManagementV1Interface::Private::unbind(wl_resource *resource)
 {
     Q_UNUSED(resource)
     // TODO: implement?

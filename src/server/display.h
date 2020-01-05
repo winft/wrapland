@@ -58,10 +58,6 @@ enum class IdleInhibitManagerInterfaceVersion;
 class RemoteAccessManagerInterface;
 class IdleInhibitManagerInterface;
 class FakeInputInterface;
-class OutputInterface;
-class OutputDeviceInterface;
-class OutputConfigurationInterface;
-class OutputManagementInterface;
 class PlasmaShellInterface;
 class PlasmaWindowManagementInterface;
 class QtSurfaceExtensionInterface;
@@ -69,6 +65,10 @@ class SeatInterface;
 class ShadowManagerInterface;
 class BlurManagerInterface;
 class ContrastManagerInterface;
+class OutputInterface;
+class OutputConfigurationV1Interface;
+class OutputDeviceV1Interface;
+class OutputManagementV1Interface;
 class ServerSideDecorationManagerInterface;
 class SlideManagerInterface;
 class ShellInterface;
@@ -178,9 +178,9 @@ public:
     void removeOutput(OutputInterface *output);
     QList<OutputInterface*> outputs() const;
 
-    OutputDeviceInterface *createOutputDevice(QObject *parent = nullptr);
-    void removeOutputDevice(OutputDeviceInterface *output);
-    QList<OutputDeviceInterface*> outputDevices() const;
+    OutputDeviceV1Interface *createOutputDeviceV1(QObject *parent = nullptr);
+    void removeOutputDevice(OutputDeviceV1Interface *outputDevice);
+    QList<OutputDeviceV1Interface*> outputDevices() const;
 
     CompositorInterface *createCompositor(QObject *parent = nullptr);
     void createShm();
@@ -193,7 +193,7 @@ public:
     QVector<SeatInterface*> seats() const;
     SubCompositorInterface *createSubCompositor(QObject *parent = nullptr);
     DataDeviceManagerInterface *createDataDeviceManager(QObject *parent = nullptr);
-    OutputManagementInterface *createOutputManagement(QObject *parent = nullptr);
+    OutputManagementV1Interface *createOutputManagementV1(QObject *parent = nullptr);
     PlasmaShellInterface *createPlasmaShell(QObject *parent = nullptr);
     PlasmaWindowManagementInterface *createPlasmaWindowManagement(QObject *parent = nullptr);
     QtSurfaceExtensionInterface *createQtSurfaceExtension(QObject *parent = nullptr);

@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../src/server/display.h"
 #include "../../src/server/clientconnection.h"
-#include "../../src/server/outputmanagement_interface.h"
+#include "../../src/server/output_management_v1_interface.h"
 #include "../../src/server/output_interface.h"
 
 #include <sys/types.h>
@@ -210,7 +210,7 @@ void TestWaylandServerDisplay::testOutputManagement()
     Display display;
     display.setSocketName("wrapland-test-0");
     display.start();
-    auto kwin = display.createOutputManagement(this);
+    auto kwin = display.createOutputManagementV1(this);
     kwin->create();
     QVERIFY(kwin->isValid());
 }

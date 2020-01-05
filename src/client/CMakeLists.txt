@@ -26,10 +26,10 @@ set(CLIENT_LIB_SRCS
     keyboard.cpp
     keystate.cpp
     remote_access.cpp
-    outputconfiguration.cpp
-    outputmanagement.cpp
-    outputdevice.cpp
     output.cpp
+    output_configuration_v1.cpp
+    output_management_v1.cpp
+    output_device_v1.cpp
     pointer.cpp
     pointerconstraints.cpp
     pointergestures.cpp
@@ -72,13 +72,13 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/output-management.xml
-    BASENAME output-management
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-management-unstable-v1.xml
+    BASENAME output-management-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/outputdevice.xml
-    BASENAME org_kde_kwin_outputdevice
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-device-unstable-v1.xml
+    BASENAME output-device-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
@@ -197,8 +197,8 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 
 set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-fullscreen-shell-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-org_kde_kwin_outputdevice-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-window-management-client-protocol.h
@@ -246,7 +246,8 @@ ecm_generate_export_header(WraplandClient
 # needs fixing of undeprecated API being still implemented using own deprecated API
 
 
-target_include_directories(WraplandClient INTERFACE "$<INSTALL_INTERFACE:${KF5_INCLUDE_INSTALL_DIR}/Wrapland/Client>")
+target_include_directories(WraplandClient INTERFACE
+    "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/Wrapland/Client>")
 
 target_link_libraries(WraplandClient
     PUBLIC Qt5::Gui
@@ -256,10 +257,10 @@ target_link_libraries(WraplandClient
 
 set_target_properties(WraplandClient PROPERTIES VERSION   ${WRAPLAND_VERSION_STRING}
                                                  SOVERSION ${WRAPLAND_SOVERSION}
-                                                 EXPORT_NAME WaylandClient
+                                                 EXPORT_NAME WraplandClient
 )
 
-install(TARGETS WraplandClient EXPORT WraplandTargets ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS WraplandClient EXPORT WraplandTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 set(CLIENT_LIB_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/Wrapland/Client/wraplandclient_export.h
@@ -282,10 +283,10 @@ set(CLIENT_LIB_HEADERS
   keyboard.h
   keystate.h
   remote_access.h
-  outputconfiguration.h
-  outputmanagement.h
-  outputdevice.h
   output.h
+  output_configuration_v1.h
+  output_management_v1.h
+  output_device_v1.h
   pointer.h
   pointerconstraints.h
   plasmashell.h
@@ -316,14 +317,9 @@ set(CLIENT_LIB_HEADERS
 
 install(FILES
   ${CLIENT_LIB_HEADERS}
-  DESTINATION ${KF5_INCLUDE_INSTALL_DIR}/Wrapland/Client COMPONENT Devel
+  DESTINATION ${INCLUDE_INSTALL_DIR}/Wrapland/Client COMPONENT Devel
 )
 
 # make available to ecm_add_qch in parent folder
 set(WraplandClient_APIDOX_SRCS ${CLIENT_LIB_HEADERS} PARENT_SCOPE)
 set(WraplandClient_APIDOX_BUILD_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
-
-include(ECMGeneratePriFile)
-ecm_generate_pri_file(BASE_NAME WraplandClient LIB_NAME WraplandClient DEPS "core" FILENAME_VAR PRI_FILENAME INCLUDE_INSTALL_DIR ${KDE_INSTALL_INCLUDEDIR_KF5})
-install(FILES ${PRI_FILENAME}
-        DESTINATION ${ECM_MKSPECS_INSTALL_DIR})
