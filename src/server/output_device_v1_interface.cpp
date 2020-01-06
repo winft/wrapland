@@ -42,18 +42,11 @@ public:
         uint32_t version;
     };
     Private(OutputDeviceV1Interface *q, Display *d);
-    ~Private();
+    ~Private() override;
+    void create() override;
 
     void addMode(Mode &mode);
     void setMode(int id);
-
-    void updateGeometry();
-    void updateUuid();
-    void updateEdid();
-    void updateEnabled();
-    void updateScale();
-    void updateEisaId();
-    void updateSerialNumber();
 
     void sendInfo(const ResourceData &data);
     void sendEnabled(const ResourceData &data);
@@ -201,24 +194,24 @@ void OutputDeviceV1Interface::Private::addMode(Mode &mode)
 
     auto removeFlag = [this](Mode &mode, ModeFlag flag) {
         mode.flags &= ~uint(flag);
-        if (pending.mode.id ==  mode.id) {
-            pending.mode.flags = mode.flags;
+        if (published.mode.id ==  mode.id) {
+            published.mode.flags = mode.flags;
             published.mode.flags = mode.flags;
         }
     };
 
     if (mode.flags.testFlag(ModeFlag::Current)) {
-        Q_ASSERT(pending.mode.id < 0);
-        if (pending.mode.id >= 0 && pending.mode.id != mode.id) {
-            qCWarning(WRAPLAND_SERVER) << "Duplicate current Mode id" << pending.mode.id
+        Q_ASSERT(published.mode.id < 0);
+        if (published.mode.id >= 0 && published.mode.id != mode.id) {
+            qCWarning(WRAPLAND_SERVER) << "Duplicate current Mode id" << published.mode.id
                                        << "and" << mode.id <<  mode.size << mode.refreshRate
                                        << ": setting current mode to:"
                                        << mode.size << mode.refreshRate;
 
         }
         mode.flags &= ~uint(ModeFlag::Current);
-        pending.mode = mode;
         published.mode = mode;
+        pending.mode = mode;
         currentChanged = true;
     }
 
@@ -310,6 +303,15 @@ void OutputDeviceV1Interface::setMode(int id)
     d->setMode(id);
 }
 
+void OutputDeviceV1Interface::Private::create()
+{
+    // This is just a quick way to copy all pending to published data. There are no clients
+    // connected yet.
+    Q_ASSERT(resources.isEmpty());
+    q->broadcast();
+    Global::Private::create();
+}
+
 void OutputDeviceV1Interface::Private::bind(wl_client *client, uint32_t version, uint32_t id)
 {
     auto c = display->getConnection(client);
@@ -325,6 +327,7 @@ void OutputDeviceV1Interface::Private::bind(wl_client *client, uint32_t version,
     r.version = version;
     resources << r;
 
+    sendInfo(r);
 
     auto currentModeIt = modes.constEnd();
     for (auto it = modes.constBegin(); it != modes.constEnd(); ++it) {
@@ -360,6 +363,26 @@ void OutputDeviceV1Interface::Private::unbind(wl_resource *resource)
     }
 }
 
+void OutputDeviceV1Interface::Private::sendInfo(const ResourceData &data)
+{
+    const auto &info = published.info;
+    zkwinft_output_device_v1_send_info(data.resource,
+                                       info.uuid.constData(),
+                                       qPrintable(info.eisaId),
+                                       qPrintable(info.serialNumber),
+                                       info.edid.toBase64().constData(),
+                                       qPrintable(info.manufacturer),
+                                       qPrintable(info.model),
+                                       info.physicalSize.width(),
+                                       info.physicalSize.height());
+}
+
+void OutputDeviceV1Interface::Private::sendEnabled(const ResourceData &data)
+{
+    const int enabled = published.enabled == OutputDeviceV1Interface::Enablement::Enabled;
+    zkwinft_output_device_v1_send_enabled(data.resource, enabled);
+}
+
 void OutputDeviceV1Interface::Private::sendMode(const ResourceData &data, const Mode &mode)
 {
     int32_t flags = 0;
@@ -372,20 +395,6 @@ void OutputDeviceV1Interface::Private::sendMode(const ResourceData &data, const 
     zkwinft_output_device_v1_send_mode(data.resource, flags,
                                        mode.size.width(), mode.size.height(),
                                        mode.refreshRate, mode.id);
-}
-
-void OutputDeviceV1Interface::Private::sendInfo(const ResourceData &data)
-{
-    const auto info = pending.info;
-    zkwinft_output_device_v1_send_info(data.resource,
-                                       pending.info.uuid.constData(),
-                                       qPrintable(pending.info.eisaId),
-                                       qPrintable(pending.info.serialNumber),
-                                       pending.info.edid.toBase64().constData(),
-                                       qPrintable(pending.info.manufacturer),
-                                       qPrintable(pending.info.model),
-                                       pending.info.physicalSize.width(),
-                                       pending.info.physicalSize.height());
 }
 
 void OutputDeviceV1Interface::Private::sendGeometry(const ResourceData &data)
@@ -429,13 +438,6 @@ void OutputDeviceV1Interface::Private::sendTransform(const ResourceData &data)
 void OutputDeviceV1Interface::Private::sendDone(const ResourceData &data)
 {
     zkwinft_output_device_v1_send_done(data.resource);
-}
-
-void OutputDeviceV1Interface::Private::updateGeometry()
-{
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        sendGeometry(*it);
-    }
 }
 
 #define SETTER(setterName, type, argumentName, variableName) \
@@ -545,22 +547,6 @@ OutputDeviceV1Interface::Enablement OutputDeviceV1Interface::enabled() const
 {
     Q_D();
     return d->pending.enabled;
-}
-
-void OutputDeviceV1Interface::Private::sendEnabled(const ResourceData &data)
-{
-    int _enabled = 0;
-    if (pending.enabled == OutputDeviceV1Interface::Enablement::Enabled) {
-        _enabled = 1;
-    }
-    zkwinft_output_device_v1_send_enabled(data.resource, _enabled);
-}
-
-void OutputDeviceV1Interface::Private::updateEnabled()
-{
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        sendEnabled(*it);
-    }
 }
 
 bool OutputDeviceV1Interface::Private::broadcastMode()
