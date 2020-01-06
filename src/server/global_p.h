@@ -35,7 +35,7 @@ class Global::Private
 public:
     static constexpr quint32 version = 0;
     virtual ~Private();
-    void create();
+    virtual void create();
 
     Display *display = nullptr;
     wl_global *global = nullptr;

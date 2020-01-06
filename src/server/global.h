@@ -61,7 +61,7 @@ class WRAPLANDSERVER_EXPORT Global : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~Global();
+    ~Global() override;
     /**
      * Creates the global by creating a native wl_global and by that announcing it
      * to the clients.
