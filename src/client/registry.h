@@ -38,6 +38,7 @@ struct wl_shell;
 struct wl_shm;
 struct wl_subcompositor;
 struct wl_text_input_manager;
+struct wp_presentation;
 struct zwp_text_input_manager_v2;
 struct _wl_fullscreen_shell;
 struct org_kde_kwin_appmenu_manager;
@@ -98,6 +99,7 @@ class PlasmaVirtualDesktopManagement;
 class PlasmaWindowManagement;
 class PointerConstraints;
 class PointerGestures;
+class PresentationManager;
 class Seat;
 class ShadowManager;
 class BlurManager;
@@ -184,6 +186,7 @@ public:
         RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since 0.0.528
         PointerGesturesUnstableV1, ///< Refers to zwp_pointer_gestures_v1, @since 0.0.529
         PointerConstraintsUnstableV1, ///< Refers to zwp_pointer_constraints_v1, @since 0.0.529
+        PresentationManager, ///< Refers to wp_presentation, @since 0.519.0
         XdgExporterUnstableV2, ///< refers to zxdg_exporter_v2, @since 0.0.540
         XdgImporterUnstableV2, ///< refers to zxdg_importer_v2, @since 0.0.540
         XdgShellUnstableV6, ///< Refers to zxdg_shell_v6 (unstable version 6), @since 0.0.539
@@ -605,6 +608,17 @@ public:
      * @since 0.0.529
      **/
     zwp_pointer_constraints_v1 *bindPointerConstraintsUnstableV1(uint32_t name, uint32_t version) const;
+
+    /**
+     * Binds the wp_presentation with @p name and @p version.
+     * If the @p name does not exist or is not for the presentation interface,
+     * @c null will be returned.
+     *
+     * Prefer using createPresentationManager instead.
+     * @see createPresentationManager
+     * @since 0.520.0
+     **/
+    wp_presentation *bindPresentationManager(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the zxdg_exporter_v2 with @p name and @p version.
@@ -1178,6 +1192,24 @@ public:
     PointerConstraints *createPointerConstraints(quint32 name, quint32 version, QObject *parent = nullptr);
 
     /**
+     * Creates a PresentationManager and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the wp_presentation interface,
+     * the returned PresentationManager will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the wp_presentation interface to bind
+     * @param version The version or the wp_presentation interface to use
+     * @param parent The parent for PresentationManager
+     *
+     * @returns The created PresentationManager.
+     * @since 0.520.0
+     **/
+    PresentationManager *createPresentationManager(quint32 name, quint32 version,
+                                                   QObject *parent = nullptr);
+
+    /**
      * Creates an XdgExporter and sets it up to manage the interface identified by
      * @p name and @p version.
      *
@@ -1550,6 +1582,14 @@ Q_SIGNALS:
     void pointerConstraintsUnstableV1Announced(quint32 name, quint32 version);
 
     /**
+     * Emitted whenever a wp_presentation interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.520.0
+     **/
+    void presentationManagerAnnounced(quint32 name, quint32 version);
+
+    /**
      * Emitted whenever a zxdg_exporter_v2 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1804,6 +1844,13 @@ Q_SIGNALS:
      * @since 0.0.529
      **/
     void pointerConstraintsUnstableV1Removed(quint32 name);
+
+    /**
+     * Emitted whenever a wp_presentation interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.520.0
+     **/
+    void presentationManagerRemoved(quint32 name);
 
     /**
      * Emitted whenever a zxdg_exporter_v2 interface gets removed.

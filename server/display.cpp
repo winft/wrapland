@@ -48,6 +48,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer.h"
 #include "pointer_constraints_v1.h"
 #include "pointer_gestures_v1.h"
+#include "presentation_time.h"
 #include "relative_pointer_v1.h"
 #include "remote_access.h"
 #include "seat.h"
@@ -358,6 +359,11 @@ EglStreamController* Display::createEglStreamController(QObject* parent)
 KeyState* Display::createKeyState(QObject* parent)
 {
     return new KeyState(this, parent);
+}
+
+PresentationManager* Display::createPresentationManager(QObject* parent)
+{
+    return new PresentationManager(this, parent);
 }
 
 void Display::createShm()

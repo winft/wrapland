@@ -31,6 +31,7 @@ set(SERVER_LIB_SRCS
     pointer.cpp
     pointer_constraints_v1.cpp
     pointer_gestures_v1.cpp
+    presentation_time.cpp
     region.cpp
     relative_pointer_v1.cpp
     remote_access.cpp
@@ -149,6 +150,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/stable/presentation-time/presentation-time.xml
+    BASENAME presentation-time
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-foreign/xdg-foreign-unstable-v2.xml
     BASENAME xdg-foreign-unstable-v2
 )
@@ -244,6 +250,7 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-constraints-unstable-v1-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-gestures-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-gestures-unstable-v1-server-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-presentation-time-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-qt-surface-extension-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-qt-surface-extension-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-client-protocol.h
@@ -335,6 +342,7 @@ set(SERVER_LIB_HEADERS
   pointer.h
   pointer_constraints_v1.h
   pointer_gestures_v1.h
+  presentation_time.h
   region.h
   relative_pointer_v1.h
   remote_access.h

@@ -29,6 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_p.h"
 #include "pointer_constraints_v1.h"
 #include "pointer_constraints_v1_p.h"
+#include "presentation_time.h"
 #include "region.h"
 #include "subcompositor.h"
 #include "subsurface_p.h"
@@ -38,6 +39,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QListIterator>
 
 #include <algorithm>
+#include <cassert>
 #include <wayland-server.h>
 #include <wayland-viewporter-server-protocol.h>
 
@@ -267,6 +269,11 @@ void Surface::Private::installViewport(Viewport* vp)
         setDestinationSize(QSize());
         setSourceRectangle(QRectF());
     });
+}
+
+void Surface::Private::addPresentationFeedback(PresentationFeedback* feedback) const
+{
+    pending.feedbacks->add(feedback);
 }
 
 void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
@@ -645,6 +652,8 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
     if (source.childrenChanged) {
         Q_EMIT handle()->subsurfaceTreeChanged();
     }
+
+    current.feedbacks = std::move(source.feedbacks);
 
     if (damaged) {
         Q_EMIT handle()->damaged(current.damage);
@@ -1117,6 +1126,130 @@ wl_resource* Surface::resource() const
 uint32_t Surface::id() const
 {
     return d_ptr->id();
+}
+
+uint32_t Surface::lockPresentation(Output* output)
+{
+    if (!d_ptr->current.feedbacks) {
+        return 0;
+    }
+    if (!d_ptr->current.feedbacks->active()) {
+        return 0;
+    }
+    d_ptr->current.feedbacks->setOutput(output);
+
+    if (++d_ptr->feedbackId == 0) {
+        d_ptr->feedbackId++;
+    }
+
+    d_ptr->waitingFeedbacks[d_ptr->feedbackId] = std::move(d_ptr->current.feedbacks);
+    return d_ptr->feedbackId;
+}
+
+void Surface::presentationFeedback(uint32_t presentationId,
+                                   uint32_t tvSecHi,
+                                   uint32_t tvSecLo,
+                                   uint32_t tvNsec,
+                                   uint32_t refresh,
+                                   uint32_t seqHi,
+                                   uint32_t seqLo,
+                                   PresentationKinds kinds)
+{
+    auto feedbacksIt = d_ptr->waitingFeedbacks.find(presentationId);
+    assert(feedbacksIt != d_ptr->waitingFeedbacks.end());
+
+    feedbacksIt->second->presented(tvSecHi, tvSecLo, tvNsec, refresh, seqHi, seqLo, kinds);
+    d_ptr->waitingFeedbacks.erase(feedbacksIt);
+}
+
+void Surface::presentationDiscarded(uint32_t presentationId)
+{
+    auto feedbacksIt = d_ptr->waitingFeedbacks.find(presentationId);
+    assert(feedbacksIt != d_ptr->waitingFeedbacks.end());
+    d_ptr->waitingFeedbacks.erase(feedbacksIt);
+}
+
+Feedbacks::Feedbacks(QObject* parent)
+    : QObject(parent)
+{
+}
+
+Feedbacks::~Feedbacks()
+{
+    discard();
+}
+
+bool Feedbacks::active()
+{
+    return !m_feedbacks.empty();
+}
+
+void Feedbacks::add(PresentationFeedback* feedback)
+{
+    connect(feedback, &PresentationFeedback::resourceDestroyed, this, [this, feedback] {
+        m_feedbacks.erase(std::find(m_feedbacks.begin(), m_feedbacks.end(), feedback));
+    });
+    m_feedbacks.push_back(feedback);
+}
+
+void Feedbacks::setOutput(Output* output)
+{
+    assert(!m_output);
+    m_output = output;
+    QObject::connect(output, &Output::removed, this, &Feedbacks::handleOutputRemoval);
+}
+
+void Feedbacks::handleOutputRemoval()
+{
+    assert(m_output);
+    m_output = nullptr;
+    discard();
+}
+
+PresentationFeedback::Kinds toKinds(Surface::PresentationKinds kinds)
+{
+    using PresentationKind = Surface::PresentationKind;
+    using FeedbackKind = PresentationFeedback::Kind;
+
+    PresentationFeedback::Kinds ret;
+    if (kinds.testFlag(PresentationKind::Vsync)) {
+        ret |= FeedbackKind::Vsync;
+    }
+    if (kinds.testFlag(PresentationKind::HwClock)) {
+        ret |= FeedbackKind::HwClock;
+    }
+    if (kinds.testFlag(PresentationKind::HwCompletion)) {
+        ret |= FeedbackKind::HwCompletion;
+    }
+    if (kinds.testFlag(PresentationKind::ZeroCopy)) {
+        ret |= FeedbackKind::ZeroCopy;
+    }
+    return ret;
+}
+
+void Feedbacks::presented(uint32_t tvSecHi,
+                          uint32_t tvSecLo,
+                          uint32_t tvNsec,
+                          uint32_t refresh,
+                          uint32_t seqHi,
+                          uint32_t seqLo,
+                          Surface::PresentationKinds kinds)
+{
+    std::for_each(m_feedbacks.begin(), m_feedbacks.end(), [=](PresentationFeedback* fb) {
+        fb->sync(m_output);
+        fb->presented(tvSecHi, tvSecLo, tvNsec, refresh, seqHi, seqLo, toKinds(kinds));
+        delete fb;
+    });
+    m_feedbacks.clear();
+}
+
+void Feedbacks::discard()
+{
+    std::for_each(m_feedbacks.begin(), m_feedbacks.end(), [=](PresentationFeedback* feedback) {
+        feedback->discarded();
+        delete feedback;
+    });
+    m_feedbacks.clear();
 }
 
 }

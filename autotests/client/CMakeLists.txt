@@ -459,6 +459,18 @@ add_test(NAME wrapland-testServerSideDecorationPalette COMMAND testServerSideDec
 ecm_mark_as_test(testServerSideDecorationPalette)
 
 ########################################################
+# Test PresentationTime
+########################################################
+set( testPresentationTime_SRCS presentation_time.cpp )
+add_executable(testPresentationTime ${testPresentationTime_SRCS})
+target_link_libraries( testPresentationTime
+    Qt5::Test
+    Wrapland::Client
+    Wrapland::Server)
+add_test(NAME wrapland-testPresentationTime COMMAND testPresentationTime)
+ecm_mark_as_test(testPresentationTime)
+
+########################################################
 # Test RemoteAccess
 ########################################################
 set( testRemoteAccess_SRCS
