@@ -130,6 +130,14 @@ is a way to get a Wayland object from Qt, the respective class provides a static
 
 ## Using Wrapland in your application
 
+> :warning: There is for the forseeable future no API/ABI-stability guarantee. You need to align
+> your releases with Wrapland's release schedule and track breaking changes (announced in the
+> changelog).
+
+Wrapland releases are aligned with Plasma releases. See the [Plasma schedule][plasma-schedule] for
+information on when the next new major version is released from master branch or a minor release
+with changes from one of the bug-fix branches.
+
 ### With CMake
 
 Wrapland installs a CMake Config file which allows to use Wrapland as imported targets. There is
@@ -167,3 +175,5 @@ Respectively:
 Please make sure that your project is configured with C++11 support:
 
     CONFIG += c++11
+
+[plasma-schedule]: https://community.kde.org/Schedules/Plasma_5
