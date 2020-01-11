@@ -53,6 +53,7 @@ set(CLIENT_LIB_SRCS
     textinput.cpp
     textinput_v0.cpp
     textinput_v2.cpp
+    viewporter.cpp
     xdgdecoration.cpp
     xdgshell.cpp
     xdgforeign_v2.cpp
@@ -174,6 +175,10 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/server-decoration-palette.xml
     BASENAME server-decoration-palette
 )
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/stable/viewporter/viewporter.xml
+    BASENAME viewporter
+)
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-output/xdg-output-unstable-v1.xml
@@ -213,6 +218,7 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-server-decoration-palette-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-v0-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-v2-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-shell-v6-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-gestures-unstable-v1-client-protocol.h
@@ -309,6 +315,7 @@ set(CLIENT_LIB_HEADERS
   surface.h
   touch.h
   textinput.h
+  viewporter.h
   xdgdecoration.h
   xdgshell.h
   xdgforeign.h

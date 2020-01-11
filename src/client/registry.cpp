@@ -51,6 +51,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "shm_pool.h"
 #include "subcompositor.h"
 #include "textinput_p.h"
+#include "viewporter.h"
 #include "xdgshell.h"
 #include "xdgshell_p.h"
 #include "wayland_pointer_p.h"
@@ -90,6 +91,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-xdg-foreign-unstable-v2-client-protocol.h>
 #include <wayland-appmenu-client-protocol.h>
 #include <wayland-server-decoration-palette-client-protocol.h>
+#include <wayland-viewporter-client-protocol.h>
 #include <wayland-xdg-output-unstable-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-keystate-client-protocol.h>
@@ -288,6 +290,13 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &zwp_text_input_manager_v2_interface,
         &Registry::textInputManagerUnstableV2Announced,
         &Registry::textInputManagerUnstableV2Removed
+    }},
+    {Registry::Interface::Viewporter, {
+        1,
+        QByteArrayLiteral("wp_viewporter"),
+        &wp_viewporter_interface,
+        &Registry::viewporterAnnounced,
+        &Registry::viewporterRemoved
     }},
     {Registry::Interface::XdgShellUnstableV5, {
         1,
@@ -684,6 +693,7 @@ BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(ServerSideDecorationManager, org_kde_kwin_server_decoration_manager)
 BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
+BIND(Viewporter, wp_viewporter)
 BIND(XdgShellUnstableV5, xdg_shell)
 BIND(XdgShellUnstableV6, zxdg_shell_v6)
 BIND(XdgShellStable, xdg_wm_base)
@@ -757,6 +767,7 @@ CREATE2(ShmPool, Shm)
 CREATE(AppMenuManager)
 CREATE(Keystate)
 CREATE(ServerSideDecorationPaletteManager)
+CREATE(Viewporter)
 
 #undef CREATE
 #undef CREATE2

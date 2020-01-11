@@ -53,6 +53,7 @@ struct org_kde_plasma_virtual_desktop_management;
 struct org_kde_plasma_window_management;
 struct org_kde_kwin_server_decoration_manager;
 struct org_kde_kwin_server_decoration_palette_manager;
+struct wp_viewporter;
 struct xdg_shell;
 struct zxdg_shell_v6;
 struct xdg_wm_base;
@@ -105,6 +106,7 @@ class SubCompositor;
 class TextInputManager;
 class TextInputManagerUnstableV0;
 class TextInputManagerUnstableV2;
+class Viewporter;
 class XdgShell;
 class RelativePointerManager;
 class XdgExporterUnstableV2;
@@ -188,6 +190,7 @@ public:
         XdgShellStable, ///refers to xdg_wm_base @since 5.48
         XdgDecorationUnstableV1, ///refers to zxdg_decoration_manager_v1, @since 5.54
         Keystate,///<refers to org_kwin_keystate, @since 5.57
+        Viewporter, ///< Refers to wp_viewporter, @since 5.18
     };
     explicit Registry(QObject *parent = nullptr);
     virtual ~Registry();
@@ -541,6 +544,16 @@ public:
      * @since 5.23
      **/
     zwp_text_input_manager_v2 *bindTextInputManagerUnstableV2(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the wp_viewporter with @p name and @p version.
+     * If the @p name does not exist or is not for the viewporter interface,
+     * @c null will be returned.
+     *
+     * Prefer using createViewporter instead.
+     * @see createViewporter
+     * @since 5.18
+     **/
+    wp_viewporter *bindViewporter(uint32_t name, uint32_t version) const;
     /**
      * Binds the xdg_shell (unstable version 5) with @p name and @p version.
      * If the @p name does not exist or is not for the xdg shell interface in unstable version 5,
@@ -1064,6 +1077,22 @@ public:
      **/
     TextInputManager *createTextInputManager(quint32 name, quint32 version, QObject *parent = nullptr);
     /**
+     * Creates a Viewporter and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the wp_viewporter interface,
+     * the returned Viewporter will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the interface to bind
+     * @param version The version of the interface to use
+     * @param parent The parent for the Viewporter
+     *
+     * @returns The created Viewporter
+     * @since 5.18
+     **/
+    Viewporter *createViewporter(quint32 name, quint32 version, QObject *parent = nullptr);
+    /**
      * Creates an XdgShell and sets it up to manage the interface identified by
      * @p name and @p version.
      *
@@ -1430,6 +1459,13 @@ Q_SIGNALS:
      **/
     void textInputManagerUnstableV2Announced(quint32 name, quint32 version);
     /**
+     * Emitted whenever a wp_viewporter interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 5.18
+     **/
+    void viewporterAnnounced(quint32 name, quint32 version);
+    /**
      * Emitted whenever a xdg_shell (unstable version 5) interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1670,6 +1706,12 @@ Q_SIGNALS:
      * @since 5.23
      **/
     void textInputManagerUnstableV2Removed(quint32 name);
+    /**
+     * Emitted whenever a wp_viewporter interface gets removed.
+     * @param name The name for the removed interface
+     * @since 5.18
+     **/
+    void viewporterRemoved(quint32 name);
     /**
      * Emitted whenever an xdg_shell (unstable version 5) interface gets removed.
      * @param name The name for the removed interface

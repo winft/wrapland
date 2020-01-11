@@ -54,6 +54,7 @@ set(SERVER_LIB_SRCS
     textinput_interface_v0.cpp
     textinput_interface_v2.cpp
     touch_interface.cpp
+    viewporter_interface.cpp
     xdgdecoration_interface.cpp
     xdgforeign_interface.cpp
     xdgforeign_v2_interface.cpp
@@ -192,6 +193,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/stable/viewporter/viewporter.xml
+    BASENAME viewporter
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-output/xdg-output-unstable-v1.xml
     BASENAME xdg-output
 )
@@ -267,6 +273,8 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-unstable-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-unstable-v2-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-server-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-foreign-unstable-v2-client-protocol.h
@@ -362,6 +370,7 @@ set(SERVER_LIB_HEADERS
   surface_interface.h
   textinput_interface.h
   touch_interface.h
+  viewporter_interface.h
   xdgdecoration_interface.h
   xdgforeign_interface.h
   xdgoutput_interface.h
