@@ -28,6 +28,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "subcompositor_interface.h"
 #include "subsurface_interface_p.h"
 #include "surfacerole_p.h"
+#include "viewporter_interface.h"
+
+#include <wayland-viewporter-server-protocol.h>
 // Qt
 #include <QListIterator>
 // Wayland
@@ -175,6 +178,41 @@ void SurfaceInterface::Private::setContrast(const QPointer<ContrastInterface> &c
 {
     pending.contrast = contrast;
     pending.contrastIsSet = true;
+}
+
+
+void SurfaceInterface::Private::setSourceRectangle(const QRectF &source)
+{
+    pending.sourceRectangle = source;
+    pending.sourceRectangleIsSet = true;
+}
+
+void SurfaceInterface::Private::setDestinationSize(const QSize &dest)
+{
+    pending.destinationSize = dest;
+    pending.destinationSizeIsSet = true;
+}
+
+void SurfaceInterface::Private::installViewport(ViewportInterface *vp)
+{
+    Q_ASSERT(viewport.isNull());
+    viewport = QPointer<ViewportInterface>(vp);
+    connect(viewport, &ViewportInterface::destinationSizeSet, q_func(),
+        [this](const QSize &size) {
+            setDestinationSize(size);
+        }
+    );
+    connect(viewport, &ViewportInterface::sourceRectangleSet, q_func(),
+        [this](const QRectF &rect) {
+            setSourceRectangle(rect);
+        }
+    );
+    connect(viewport, &ViewportInterface::unbound, q_func(),
+        [this] {
+            setDestinationSize(QSize());
+            setSourceRectangle(QRectF());
+        }
+    );
 }
 
 void SurfaceInterface::Private::installPointerConstraint(LockedPointerInterface *lock)
@@ -329,6 +367,50 @@ void SurfaceInterface::Private::destroy()
     }
 }
 
+void SurfaceInterface::Private::soureRectangleIntegerCheck(const QSize &destinationSize,
+                                                           const QRectF &sourceRectangle) const
+{
+    if (destinationSize.isValid()) {
+        // Source rectangle must be integer valued only when the destination size is not set.
+        return;
+    }
+    if (!sourceRectangle.isValid()) {
+        // When the source rectangle is unset there is no integer condition.
+        return;
+    }
+    Q_ASSERT(viewport);
+
+    const double width = sourceRectangle.width();
+    const double height = sourceRectangle.height();
+    if (!qFuzzyCompare(width, (int)width) || !qFuzzyCompare(height, (int)height)) {
+        wl_resource_post_error(viewport->parentResource(), WP_VIEWPORT_ERROR_BAD_SIZE,
+                               "Source rectangle not integer valued");
+    }
+}
+
+void SurfaceInterface::Private::soureRectangleContainCheck(const BufferInterface *buffer,
+                                                           OutputInterface::Transform transform,
+                                                           qint32 scale,
+                                                           const QRectF &sourceRectangle) const
+{
+    if (!buffer || !viewport || !sourceRectangle.isValid()) {
+        return;
+    }
+    QSizeF bufferSize = buffer->size() / scale;
+
+    if (transform == OutputInterface::Transform::Rotated90 ||
+        transform == OutputInterface::Transform::Rotated270 ||
+        transform == OutputInterface::Transform::Flipped90 ||
+        transform == OutputInterface::Transform::Flipped270) {
+        bufferSize.transpose();
+    }
+    if (!QRectF(QPointF(), bufferSize).contains(sourceRectangle)) {
+        wl_resource_post_error(viewport->parentResource(),
+                               WP_VIEWPORT_ERROR_OUT_OF_BUFFER,
+                               "Source rectangle not contained in buffer");
+    }
+}
+
 void SurfaceInterface::Private::swapStates(State *source, State *target, bool emitChanged)
 {
     Q_Q(SurfaceInterface);
@@ -341,6 +423,9 @@ void SurfaceInterface::Private::swapStates(State *source, State *target, bool em
     const bool blurChanged = source->blurIsSet;
     const bool contrastChanged = source->contrastIsSet;
     const bool slideChanged = source->slideIsSet;
+    const bool sourceRectangleChanged = source->sourceRectangleIsSet;
+    const bool destinationSizeChanged = source->destinationSizeIsSet;
+
     const bool childrenChanged = source->childrenChanged;
     bool sizeChanged = false;
     auto buffer = target->buffer;
@@ -417,6 +502,27 @@ void SurfaceInterface::Private::swapStates(State *source, State *target, bool em
         target->transform = source->transform;
         target->transformIsSet = true;
     }
+
+    if (destinationSizeChanged) {
+        target->destinationSize = source->destinationSize;
+        target->destinationSizeIsSet = true;
+        sizeChanged |= static_cast<bool>(buffer);
+    }
+    if (sourceRectangleChanged) {
+        if (buffer && !target->destinationSize.isValid() && source->sourceRectangle.isValid()) {
+            // TODO: We should make this dependent on the previous size being different.
+            //       But looking at above sizeChanged calculation when setting the buffer
+            //       we need to do fix this there as well (does not look at buffer transform
+            //       and destination size).
+            sizeChanged = true;
+        }
+        target->sourceRectangle = source->sourceRectangle;
+        target->sourceRectangleIsSet = true;
+    }
+    // Now check that source rectangle is (still) well defined.
+    soureRectangleIntegerCheck(target->destinationSize, target->sourceRectangle);
+    soureRectangleContainCheck(buffer, target->transform, target->scale, target->sourceRectangle);
+
     if (!lockedPointer.isNull()) {
         lockedPointer->d_func()->commit();
     }
@@ -504,6 +610,9 @@ void SurfaceInterface::Private::swapStates(State *source, State *target, bool em
     }
     if (slideChanged) {
         emit q->slideOnShowHideChanged();
+    }
+    if (sourceRectangleChanged) {
+        emit q->sourceRectangleChanged();
     }
     if (childrenChanged) {
         emit q->subSurfaceTreeChanged();
@@ -747,10 +856,22 @@ BufferInterface *SurfaceInterface::buffer()
     return d->current.buffer;
 }
 
+BufferInterface *SurfaceInterface::buffer() const
+{
+    Q_D();
+    return d->current.buffer;
+}
+
 QPoint SurfaceInterface::offset() const
 {
     Q_D();
     return d->current.offset;
+}
+
+QRectF SurfaceInterface::sourceRectangle() const
+{
+    Q_D();
+    return d->current.sourceRectangle;
 }
 
 SurfaceInterface *SurfaceInterface::get(wl_resource *native)
@@ -778,11 +899,17 @@ QPointer< SubSurfaceInterface > SurfaceInterface::subSurface() const
 QSize SurfaceInterface::size() const
 {
     Q_D();
-    // TODO: apply transform to the buffer size
-    if (d->current.buffer) {
-        return d->current.buffer->size() / scale();
+    if (!d->current.buffer) {
+        return QSize();
     }
-    return QSize();
+    if (d->current.destinationSize.isValid()) {
+        return d->current.destinationSize;
+    }
+    if (d->current.sourceRectangle.isValid()) {
+        return d->current.sourceRectangle.size().toSize();
+    }
+    // TODO: apply transform to the buffer size
+    return d->current.buffer->size() / scale();
 }
 
 QPointer< ShadowInterface > SurfaceInterface::shadow() const
