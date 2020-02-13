@@ -47,6 +47,8 @@ class ShadowManagerInterface;
 class ShadowInterface;
 class SlideInterface;
 class SubSurfaceInterface;
+class ViewportInterface;
+class ViewporterInterface;
 
 /**
  * @brief Resource representing a wl_surface.
@@ -72,6 +74,7 @@ class SubSurfaceInterface;
  * @see ContrastInterface
  * @see ShadowInterface
  * @see SlideInterface
+ * @see ViewportInterface
  **/
 class WRAPLANDSERVER_EXPORT SurfaceInterface : public Resource
 {
@@ -118,6 +121,10 @@ public:
      * @returns the current BufferInterface, might be @c nullptr.
      **/
     BufferInterface *buffer();
+    /**
+     * @returns the current BufferInterface, might be @c nullptr.
+     **/
+    BufferInterface *buffer() const;
     QPoint offset() const;
     /**
      * The size of the Surface in global compositor space.
@@ -159,6 +166,12 @@ public:
      * @since 5.5
      **/
     QPointer<ContrastInterface> contrast() const;
+
+    /**
+     * @returns The Viewport for this Surface.
+     * @since 5.18
+     **/
+    QPointer<ViewportInterface> viewport() const;
 
     /**
      * Whether the SurfaceInterface is currently considered to be mapped.
@@ -292,6 +305,11 @@ public:
      * @since 5.56
      **/
     SurfaceInterface* dataProxy() const;
+    /**
+     * Returns the source rectangle. If none is set the returned rectangle is not valid.
+     * @since 5.18
+     **/
+    QRectF sourceRectangle() const;
 
 Q_SIGNALS:
     /**
@@ -331,6 +349,10 @@ Q_SIGNALS:
      * @since 5.5
      **/
     void contrastChanged();
+    /**
+     * @since 5.18
+     **/
+    void sourceRectangleChanged();
     /**
      * Emitted whenever the tree of sub-surfaces changes in a way which requires a repaint.
      * @since 5.22
@@ -375,6 +397,8 @@ private:
     friend class IdleInhibitManagerUnstableV1Interface;
     friend class PointerConstraintsUnstableV1Interface;
     friend class SurfaceRole;
+    friend class ViewporterInterface;
+
     explicit SurfaceInterface(CompositorInterface *parent, wl_resource *parentResource);
 
     class Private;

@@ -1,4 +1,15 @@
 ########################################################
+# Test Viewporter
+########################################################
+set( testViewporter_SRCS
+        test_viewporter.cpp
+    )
+add_executable(testViewporter ${testViewporter_SRCS})
+target_link_libraries( testViewporter Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+add_test(NAME wrapland-testViewporter COMMAND testViewporter)
+ecm_mark_as_test(testViewporter)
+
+########################################################
 # Test WaylandConnectionThread
 ########################################################
 set( testWaylandConnectionThread_SRCS

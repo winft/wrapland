@@ -88,6 +88,7 @@ class XdgForeignInterface;
 class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
 class PlasmaVirtualDesktopManagementInterface;
+class ViewporterInterface;
 class XdgOutputManagerInterface;
 class XdgDecorationManagerInterface;
 class EglStreamControllerInterface;
@@ -289,6 +290,14 @@ public:
      * @returns A pointer to the created interface
      **/
     LinuxDmabufUnstableV1Interface *createLinuxDmabufInterface(QObject *parent = nullptr);
+
+    /**
+     * Creates the ViewporterInterface
+     *
+     * @return the created viewporter
+     * @since 5.18
+     */
+    ViewporterInterface *createViewporterInterface(QObject *parent = nullptr);
 
     /**
      * Creates the XdgOutputManagerInterface
