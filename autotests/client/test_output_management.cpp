@@ -70,7 +70,6 @@ private:
     Wrapland::Server::OutputManagementV1Interface *m_outputManagementInterface;
     QList<Wrapland::Server::OutputDeviceV1Interface *> m_serverOutputs;
 
-
     Wrapland::Client::Registry *m_registry = nullptr;
     Wrapland::Client::OutputDeviceV1 *m_outputDevice = nullptr;
     Wrapland::Client::OutputManagementV1 *m_outputManagement = nullptr;
@@ -98,12 +97,13 @@ TestOutputManagement::TestOutputManagement(QObject *parent)
     , m_thread(nullptr)
     , m_announcedSpy(nullptr)
 {
-    qRegisterMetaType<Wrapland::Server::OutputConfigurationV1Interface*>();
+    qRegisterMetaType<OutputConfigurationV1Interface*>();
 }
 
 void TestOutputManagement::init()
 {
     using namespace Wrapland::Server;
+
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -301,10 +301,12 @@ void TestOutputManagement::testBasicMemoryManagement()
 
     QVERIFY(serverApplySpy.wait());
     QVERIFY(configurationInterface);
+
     QSignalSpy interfaceDeletedSpy(configurationInterface, &QObject::destroyed);
 
     delete m_outputConfiguration;
     m_outputConfiguration = nullptr;
+
     QVERIFY(interfaceDeletedSpy.wait());
 }
 
@@ -415,7 +417,7 @@ void TestOutputManagement::testMultipleSettings()
     QVERIFY(configAppliedSpy.isValid());
     QVERIFY(configAppliedSpy.wait(200));
     QCOMPARE(configAppliedSpy.count(), 1);
-    QCOMPARE(outputChangedSpy.count(), 6);
+    QCOMPARE(outputChangedSpy.count(), 0);
 
     config->setMode(output, m_modes.at(1).id);
     config->setTransform(output, OutputDeviceV1::Transform::Normal);
@@ -430,7 +432,7 @@ void TestOutputManagement::testMultipleSettings()
 
     QVERIFY(configAppliedSpy.wait(200));
     QCOMPARE(configAppliedSpy.count(), 2);
-    QCOMPARE(outputChangedSpy.count(), 12);
+    QCOMPARE(outputChangedSpy.count(), 0);
 
 }
 
