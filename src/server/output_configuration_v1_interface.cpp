@@ -76,8 +76,9 @@ private:
     static const struct zkwinft_output_configuration_v1_interface s_interface;
 };
 
-const struct zkwinft_output_configuration_v1_interface OutputConfigurationV1Interface::Private::
-                                                                                    s_interface = {
+const struct zkwinft_output_configuration_v1_interface
+        OutputConfigurationV1Interface::Private::s_interface = {
+    resourceDestroyedCallback,
     enableCallback,
     modeCallback,
     transformCallback,
