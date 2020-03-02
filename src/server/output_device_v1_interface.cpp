@@ -346,6 +346,7 @@ void OutputDeviceV1Interface::Private::bind(wl_client *client, uint32_t version,
 
     sendEnabled(r);
     sendGeometry(r);
+    sendTransform(r);
 
     sendDone(r);
     c->flush();
