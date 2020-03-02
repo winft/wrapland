@@ -146,12 +146,10 @@ void OutputDeviceV1::Private::enabledCallback(void* data, zkwinft_output_device_
     if (enabled == ZKWINFT_OUTPUT_DEVICE_V1_ENABLEMENT_ENABLED) {
         _enabled = OutputDeviceV1::Enablement::Enabled;
     }
+
     if (out->enabled != _enabled) {
         out->enabled = _enabled;
         emit out->q->enabledChanged(out->enabled);
-        if (out->done) {
-            emit out->q->changed();
-        }
     }
 }
 
@@ -230,7 +228,6 @@ void OutputDeviceV1::Private::transformCallback(void *data,
                                                 zkwinft_output_device_v1 *output,
                                                 int32_t transform)
 {
-//    Q_UNUSED(transform)
     auto out = reinterpret_cast<OutputDeviceV1::Private*>(data);
     Q_ASSERT(out->output == output);
 
@@ -263,6 +260,7 @@ void OutputDeviceV1::Private::doneCallback(void *data, zkwinft_output_device_v1 
     auto out = reinterpret_cast<OutputDeviceV1::Private*>(data);
     Q_ASSERT(out->output == output);
     out->done = true;
+
     emit out->q->changed();
     emit out->q->done();
 }

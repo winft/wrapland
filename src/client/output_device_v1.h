@@ -235,7 +235,7 @@ Q_SIGNALS:
     void done();
 
     /**
-     * Emitted whenever at least one of the data changed.
+     * Emitted when the data change has been completed.
      **/
     void changed();
 
