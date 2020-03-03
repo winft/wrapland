@@ -97,6 +97,14 @@
             applied to the hardware and before the server side sends the applied event.
         </description>
 
+        <request name="destroy" type="destructor">
+          <description summary="unbind from the presentation interface">
+            Informs the server that the client will no longer be using this
+            protocol object. Existing objects created by this object are not
+            affected.
+          </description>
+        </request>
+
         <request name="enable">
             <description summary="enable or disable an output">
                 Mark the output as enabled or disabled.

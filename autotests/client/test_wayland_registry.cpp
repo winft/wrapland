@@ -393,7 +393,7 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(compositorAnnouncedSpy.isValid());
     QSignalSpy outputAnnouncedSpy(&registry, SIGNAL(outputAnnounced(quint32,quint32)));
     QVERIFY(outputAnnouncedSpy.isValid());
-    QSignalSpy outputDeviceAnnouncedSpy(&registry, SIGNAL(outputDeviceAnnounced(quint32,quint32)));
+    QSignalSpy outputDeviceAnnouncedSpy(&registry, SIGNAL(outputDeviceV1Announced(quint32,quint32)));
     QVERIFY(outputDeviceAnnouncedSpy.isValid());
     QSignalSpy shellAnnouncedSpy(&registry, SIGNAL(shellAnnounced(quint32,quint32)));
     QVERIFY(shellAnnouncedSpy.isValid());
@@ -401,7 +401,7 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(seatAnnouncedSpy.isValid());
     QSignalSpy subCompositorAnnouncedSpy(&registry, SIGNAL(subCompositorAnnounced(quint32,quint32)));
     QVERIFY(subCompositorAnnouncedSpy.isValid());
-    QSignalSpy outputManagementAnnouncedSpy(&registry, SIGNAL(outputManagementAnnounced(quint32,quint32)));
+    QSignalSpy outputManagementAnnouncedSpy(&registry, SIGNAL(outputManagementV1Announced(quint32,quint32)));
     QVERIFY(outputManagementAnnouncedSpy.isValid());
     QSignalSpy serverSideDecorationManagerAnnouncedSpy(&registry, &Registry::serverSideDecorationManagerAnnounced);
     QVERIFY(serverSideDecorationManagerAnnouncedSpy.isValid());
@@ -507,7 +507,7 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::Output).isEmpty());
     QCOMPARE(outputObjectRemovedSpy.count(), 1);
 
-    QSignalSpy outputDeviceRemovedSpy(&registry, SIGNAL(outputDeviceRemoved(quint32)));
+    QSignalSpy outputDeviceRemovedSpy(&registry, SIGNAL(outputDeviceV1Removed(quint32)));
     QVERIFY(outputDeviceRemovedSpy.isValid());
 
     delete m_outputDevice;
@@ -536,7 +536,7 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::SubCompositor).isEmpty());
     QCOMPARE(subcompositorObjectRemovedSpy.count(), 1);
 
-    QSignalSpy outputManagementRemovedSpy(&registry, SIGNAL(outputManagementRemoved(quint32)));
+    QSignalSpy outputManagementRemovedSpy(&registry, SIGNAL(outputManagementV1Removed(quint32)));
     QVERIFY(outputManagementRemovedSpy.isValid());
 
     delete m_outputManagement;

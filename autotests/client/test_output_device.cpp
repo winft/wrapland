@@ -76,11 +76,13 @@ TestOutputDevice::TestOutputDevice(QObject *parent)
     , m_queue(nullptr)
     , m_thread(nullptr)
 {
+    qRegisterMetaType<OutputDeviceV1::Enablement>();
 }
 
 void TestOutputDevice::init()
 {
     using namespace Wrapland::Server;
+
     delete m_display;
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
@@ -110,7 +112,7 @@ void TestOutputDevice::init()
 
     m_serverOutputDevice->setMode(1);
 
-    m_edid = QByteArray::fromBase64("AP///////wAQrBbwTExLQQ4WAQOANCB46h7Frk80sSYOUFSlSwCBgKlA0QBxTwEBAQEBAQEBKDyAoHCwI0AwIDYABkQhAAAaAAAA/wBGNTI1TTI0NUFLTEwKAAAA/ABERUxMIFUyNDEwCiAgAAAA/QA4TB5REQAKICAgICAgAToCAynxUJAFBAMCBxYBHxITFCAVEQYjCQcHZwMMABAAOC2DAQAA4wUDAQI6gBhxOC1AWCxFAAZEIQAAHgEdgBhxHBYgWCwlAAZEIQAAngEdAHJR0B4gbihVAAZEIQAAHowK0Iog4C0QED6WAAZEIQAAGAAAAAAAAAAAAAAAAAAAPg==");
+    m_edid = QByteArray::fromBase64("\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00\x10\xAC\x16\xF0LLKA\x0E\x16\x01\x03\x80""4 x\xEA\x1E\xC5\xAEO4\xB1&\x0EPT\xA5K\x00\x81\x80\xA9@\xD1\x00qO\x01\x01\x01\x01\x01\x01\x01\x01(<\x80\xA0p\xB0#@0 6\x00\x06""D!\x00\x00\x1A\x00\x00\x00\xFF\x00""F525M245AK");
     m_serverOutputDevice->setEdid(m_edid);
 
     m_serialNumber = "23498723948723";
@@ -164,6 +166,7 @@ void TestOutputDevice::testRegistry()
 {
     m_serverOutputDevice->setGeometry(QRectF(QPointF(100, 50), QSizeF(400, 200)));
     m_serverOutputDevice->setPhysicalSize(QSize(200, 100));
+    m_serverOutputDevice->broadcast();
 
     Wrapland::Client::Registry registry;
     QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
@@ -199,7 +202,7 @@ void TestOutputDevice::testRegistry()
     QVERIFY(outputChanged.wait());
 
     QCOMPARE(output.geometry(), QRectF(100, 50, 400, 200));
-    QCOMPARE(output.manufacturer(), QStringLiteral("org.kde.kwin"));
+    QCOMPARE(output.manufacturer(), QStringLiteral("kwinft"));
     QCOMPARE(output.model(), QStringLiteral("none"));
     QCOMPARE(output.physicalSize(), QSize(200, 100));
     QCOMPARE(output.pixelSize(), QSize(1024, 768));
@@ -270,6 +273,7 @@ void TestOutputDevice::testModeChanges()
     QSignalSpy modeChangedSpy(&output, &Wrapland::Client::OutputDeviceV1::modeChanged);
     QVERIFY(modeChangedSpy.isValid());
     m_serverOutputDevice->setMode(0);
+    m_serverOutputDevice->broadcast();
     QVERIFY(doneSpy.wait());
     QCOMPARE(modeChangedSpy.size(), 2);
     // the one which lost the current flag
@@ -297,6 +301,7 @@ void TestOutputDevice::testModeChanges()
     outputChanged.clear();
     modeChangedSpy.clear();
     m_serverOutputDevice->setMode(2);
+    m_serverOutputDevice->broadcast();
     QVERIFY(doneSpy.wait());
     QCOMPARE(modeChangedSpy.size(), 2);
     // the one which lost the current flag
@@ -333,6 +338,7 @@ void TestOutputDevice::testTransform()
     using namespace Wrapland::Server;
     QFETCH(OutputDeviceV1Interface::Transform, actual);
     m_serverOutputDevice->setTransform(actual);
+    m_serverOutputDevice->broadcast();
 
     Wrapland::Client::Registry registry;
     QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
@@ -356,6 +362,7 @@ void TestOutputDevice::testTransform()
     // change back to normal
     outputChanged.clear();
     m_serverOutputDevice->setTransform(OutputDeviceV1Interface::Transform::Normal);
+    m_serverOutputDevice->broadcast();
     QVERIFY(outputChanged.wait());
     QCOMPARE(output->transform(), OutputDeviceV1::Transform::Normal);
 }
@@ -384,9 +391,11 @@ void TestOutputDevice::testEnabled()
 
     QSignalSpy changed(&output, &Wrapland::Client::OutputDeviceV1::changed);
     QSignalSpy enabledChanged(&output, &Wrapland::Client::OutputDeviceV1::enabledChanged);
+    QVERIFY(changed.isValid());
     QVERIFY(enabledChanged.isValid());
 
     m_serverOutputDevice->setEnabled(OutputDeviceV1Interface::Enablement::Disabled);
+    m_serverOutputDevice->broadcast();
     QVERIFY(enabledChanged.wait());
     QCOMPARE(output.enabled(), OutputDeviceV1::Enablement::Disabled);
     if (changed.count() != enabledChanged.count()) {
@@ -395,6 +404,7 @@ void TestOutputDevice::testEnabled()
     QCOMPARE(changed.count(), enabledChanged.count());
 
     m_serverOutputDevice->setEnabled(OutputDeviceV1Interface::Enablement::Enabled);
+    m_serverOutputDevice->broadcast();
     QVERIFY(enabledChanged.wait());
     QCOMPARE(output.enabled(), OutputDeviceV1::Enablement::Enabled);
     if (changed.count() != enabledChanged.count()) {
