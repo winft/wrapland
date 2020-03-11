@@ -371,15 +371,18 @@ void RemoteAccessTest::testSendReleaseCrossScreen()
     QSignalSpy paramsObtainedSpy2(rbuf2, &RemoteBuffer::parametersObtained);
     QVERIFY(paramsObtainedSpy2.isValid());
 
-    // wait for event loop
-    if (paramsObtainedSpy1.isEmpty()) {
+    // Wait for event loop.
+    // Note: The parametersObtained signal might have been received before that (and by this
+    //       the fd and so on already set. While clients can check this easily this still can
+    //       be seen as an inconsistency in teh API.
+    if (paramsObtainedSpy1.isEmpty() && rbuf1->fd() == 0) {
         QVERIFY(paramsObtainedSpy1.wait());
+        QCOMPARE(paramsObtainedSpy1.size(), 1);
     }
-    if (paramsObtainedSpy2.isEmpty()) {
+    if (paramsObtainedSpy2.isEmpty() && rbuf2->fd() == 0) {
         QVERIFY(paramsObtainedSpy2.wait());
+        QCOMPARE(paramsObtainedSpy2.size(), 1);
     }
-    QCOMPARE(paramsObtainedSpy1.size(), 1);
-    QCOMPARE(paramsObtainedSpy2.size(), 1);
 
     // release
     QSignalSpy bufferReleasedSpy(m_remoteAccessInterface, &RemoteAccessManagerInterface::bufferReleased);
