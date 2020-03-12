@@ -47,6 +47,7 @@ public:
     void setupSocketNotifier();
     void setupSocketFileWatcher();
 
+    bool connected = false;
     wl_display *display = nullptr;
     int fd = -1;
     QString socketName;
@@ -56,6 +57,7 @@ public:
     bool serverDied = false;
     bool foreign = false;
     QMetaObject::Connection eventDispatcherConnection;
+
     int error = 0;
     static QVector<ConnectionThread*> connections;
     static QMutex mutex;
@@ -88,7 +90,9 @@ ConnectionThread::Private::~Private()
         connections.removeOne(q);
     }
     if (display && !foreign) {
-        wl_display_flush(display);
+        if (connected) {
+            wl_display_flush(display);
+        }
         wl_display_disconnect(display);
     }
 }
@@ -114,6 +118,8 @@ void ConnectionThread::Private::doInitConnection()
     // setup socket notifier
     setupSocketNotifier();
     setupSocketFileWatcher();
+
+    connected = true;
     emit q->connected();
 }
 
@@ -123,20 +129,19 @@ void ConnectionThread::Private::setupSocketNotifier()
     socketNotifier.reset(new QSocketNotifier(fd, QSocketNotifier::Read));
     QObject::connect(socketNotifier.data(), &QSocketNotifier::activated, q,
         [this]() {
-            if (!display) {
+            if (!connected) {
                 return;
             }
+
             if (wl_display_dispatch(display) == -1) {
                 error = wl_display_get_error(display);
-                if (error != 0) {
-                    if (display) {
-                        free(display);
-                        display = nullptr;
-                    }
-                    emit q->errorOccurred();
-                    return;
-                }
+                Q_ASSERT(error);
+
+                connected = false;
+                emit q->errorOccurred();
+                return;
             }
+
             emit q->eventsRead();
         }
     );
@@ -156,10 +161,7 @@ void ConnectionThread::Private::setupSocketFileWatcher()
             }
             qCWarning(WRAPLAND_CLIENT) << "Connection to server went away";
             serverDied = true;
-            if (display) {
-                free(display);
-                display = nullptr;
-            }
+            connected = false;
             socketNotifier.reset();
 
             // need a new filesystem watcher
@@ -265,7 +267,7 @@ QString ConnectionThread::socketName() const
 
 void ConnectionThread::flush()
 {
-    if (!d->display) {
+    if (!d->connected) {
         return;
     }
     wl_display_flush(d->display);
@@ -273,7 +275,7 @@ void ConnectionThread::flush()
 
 void ConnectionThread::roundtrip()
 {
-    if (!d->display) {
+    if (!d->connected) {
         return;
     }
     if (d->foreign) {
