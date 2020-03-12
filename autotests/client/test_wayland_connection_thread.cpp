@@ -17,19 +17,20 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// KWin
+
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/registry.h"
 #include "../../src/server/display.h"
-// Wayland
-#include <wayland-client-protocol.h>
-// system
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <wayland-client-protocol.h>
+
+namespace Cnt = Wrapland::Client;
+namespace Srv = Wrapland::Server;
 
 class TestWaylandConnectionThread : public QObject
 {
@@ -42,13 +43,13 @@ private Q_SLOTS:
 
     void testInitConnectionNoThread();
     void testConnectionFailure();
-    void testConnectionDieing();
+    void testConnectionDying();
     void testConnectionThread();
     void testConnectFd();
     void testConnectFdNoSocketName();
 
 private:
-    Wrapland::Server::Display *m_display;
+    Srv::Display *m_display;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-connection-0");
@@ -61,9 +62,8 @@ TestWaylandConnectionThread::TestWaylandConnectionThread(QObject *parent)
 
 void TestWaylandConnectionThread::init()
 {
-    using namespace Wrapland::Server;
     delete m_display;
-    m_display = new Display(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     QVERIFY(m_display->isRunning());
@@ -78,15 +78,16 @@ void TestWaylandConnectionThread::cleanup()
 
 void TestWaylandConnectionThread::testInitConnectionNoThread()
 {
-    QVERIFY(Wrapland::Client::ConnectionThread::connections().isEmpty());
-    QScopedPointer<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread);
-    QVERIFY(Wrapland::Client::ConnectionThread::connections().contains(connection.data()));
+    QVERIFY(Cnt::ConnectionThread::connections().isEmpty());
+    QScopedPointer<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
+    QVERIFY(Cnt::ConnectionThread::connections().contains(connection.data()));
+
     QCOMPARE(connection->socketName(), QStringLiteral("wayland-0"));
     connection->setSocketName(s_socketName);
     QCOMPARE(connection->socketName(), s_socketName);
 
-    QSignalSpy connectedSpy(connection.data(), SIGNAL(connected()));
-    QSignalSpy failedSpy(connection.data(), SIGNAL(failed()));
+    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::connected);
+    QSignalSpy failedSpy(connection.data(), &Cnt::ConnectionThread::failed);
     connection->initConnection();
     QVERIFY(connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
@@ -94,16 +95,16 @@ void TestWaylandConnectionThread::testInitConnectionNoThread()
     QVERIFY(connection->display());
 
     connection.reset();
-    QVERIFY(Wrapland::Client::ConnectionThread::connections().isEmpty());
+    QVERIFY(Cnt::ConnectionThread::connections().isEmpty());
 }
 
 void TestWaylandConnectionThread::testConnectionFailure()
 {
-    QScopedPointer<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread);
+    QScopedPointer<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
     connection->setSocketName(QStringLiteral("kwin-test-socket-does-not-exist"));
 
-    QSignalSpy connectedSpy(connection.data(), SIGNAL(connected()));
-    QSignalSpy failedSpy(connection.data(), SIGNAL(failed()));
+    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::connected);
+    QSignalSpy failedSpy(connection.data(), &Cnt::ConnectionThread::failed);
     connection->initConnection();
     QVERIFY(failedSpy.wait());
     QCOMPARE(connectedSpy.count(), 0);
@@ -135,16 +136,16 @@ static const struct wl_registry_listener s_registryListener = {
 
 void TestWaylandConnectionThread::testConnectionThread()
 {
-    Wrapland::Client::ConnectionThread *connection = new Wrapland::Client::ConnectionThread;
+    auto *connection = new Cnt::ConnectionThread;
     connection->setSocketName(s_socketName);
 
     QThread *connectionThread = new QThread(this);
     connection->moveToThread(connectionThread);
     connectionThread->start();
 
-    QSignalSpy connectedSpy(connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
-    QSignalSpy failedSpy(connection, SIGNAL(failed()));
+    QSignalSpy failedSpy(connection, &Cnt::ConnectionThread::failed);
     QVERIFY(failedSpy.isValid());
     connection->initConnection();
     QVERIFY(connectedSpy.wait());
@@ -152,14 +153,18 @@ void TestWaylandConnectionThread::testConnectionThread()
     QCOMPARE(failedSpy.count(), 0);
     QVERIFY(connection->display());
 
-    // now we have the connection ready, let's get some events
-    QSignalSpy eventsSpy(connection, SIGNAL(eventsRead()));
+    // Now we have the connection ready. let's get some events.
+    QSignalSpy eventsSpy(connection, &Cnt::ConnectionThread::eventsRead);
     QVERIFY(eventsSpy.isValid());
+
     wl_display *display = connection->display();
-    QScopedPointer<Wrapland::Client::EventQueue> queue(new Wrapland::Client::EventQueue);
+    QScopedPointer<Cnt::EventQueue> queue(new Cnt::EventQueue);
     queue->setup(display);
     QVERIFY(queue->isValid());
-    connect(connection, &Wrapland::Client::ConnectionThread::eventsRead, queue.data(), &Wrapland::Client::EventQueue::dispatch, Qt::QueuedConnection);
+
+    connect(connection, &Cnt::ConnectionThread::eventsRead,
+            queue.data(), &Cnt::EventQueue::dispatch,
+            Qt::QueuedConnection);
 
     wl_registry *registry = wl_display_get_registry(display);
     wl_proxy_set_queue((wl_proxy*)registry, *(queue.data()));
@@ -181,16 +186,17 @@ void TestWaylandConnectionThread::testConnectionThread()
     delete connectionThread;
 }
 
-void TestWaylandConnectionThread::testConnectionDieing()
+void TestWaylandConnectionThread::testConnectionDying()
 {
-    QScopedPointer<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread);
-    QSignalSpy connectedSpy(connection.data(), SIGNAL(connected()));
+    QScopedPointer<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
+
+    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::connected);
     connection->setSocketName(s_socketName);
     connection->initConnection();
     QVERIFY(connectedSpy.wait());
     QVERIFY(connection->display());
 
-    QSignalSpy diedSpy(connection.data(), SIGNAL(connectionDied()));
+    QSignalSpy diedSpy(connection.data(), &Cnt::ConnectionThread::connectionDied);
     m_display->terminate();
     QVERIFY(!m_display->isRunning());
     QVERIFY(diedSpy.wait());
@@ -210,17 +216,15 @@ void TestWaylandConnectionThread::testConnectionDieing()
 
 void TestWaylandConnectionThread::testConnectFd()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
     int sv[2];
     QVERIFY(socketpair(AF_UNIX, SOCK_STREAM, 0, sv) >= 0);
     auto c = m_display->createClient(sv[0]);
     QVERIFY(c);
-    QSignalSpy disconnectedSpy(c, &ClientConnection::disconnected);
+    QSignalSpy disconnectedSpy(c, &Srv::ClientConnection::disconnected);
     QVERIFY(disconnectedSpy.isValid());
 
-    ConnectionThread *connection = new ConnectionThread;
-    QSignalSpy connectedSpy(connection, SIGNAL(connected()));
+    auto *connection = new Cnt::ConnectionThread;
+    QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketFd(sv[1]);
 
@@ -230,12 +234,12 @@ void TestWaylandConnectionThread::testConnectFd()
     connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    // create the Registry
-    QScopedPointer<Registry> registry(new Registry);
-    QSignalSpy announcedSpy(registry.data(), SIGNAL(interfacesAnnounced()));
+    // Create the Registry.
+    QScopedPointer<Cnt::Registry> registry(new Cnt::Registry);
+    QSignalSpy announcedSpy(registry.data(), &Cnt::Registry::interfacesAnnounced);
     QVERIFY(announcedSpy.isValid());
     registry->create(connection);
-    QScopedPointer<EventQueue> queue(new EventQueue);
+    QScopedPointer<Cnt::EventQueue> queue(new Cnt::EventQueue);
     queue->setup(connection);
     registry->setEventQueue(queue.data());
     registry->setup();
@@ -256,19 +260,17 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
 {
     delete m_display;
     m_display = nullptr;
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
 
-    Display display;
-    display.start(Display::StartMode::ConnectClientsOnly);
+    Srv::Display display;
+    display.start(Srv::Display::StartMode::ConnectClientsOnly);
     QVERIFY(display.isRunning());
 
     int sv[2];
     QVERIFY(socketpair(AF_UNIX, SOCK_STREAM, 0, sv) >= 0);
     QVERIFY(display.createClient(sv[0]));
 
-    ConnectionThread *connection = new ConnectionThread;
-    QSignalSpy connectedSpy(connection, SIGNAL(connected()));
+    auto *connection = new Cnt::ConnectionThread;
+    QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::connected);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketFd(sv[1]);
 
@@ -278,12 +280,12 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
     connection->initConnection();
     QVERIFY(connectedSpy.wait());
 
-    // create the Registry
-    QScopedPointer<Registry> registry(new Registry);
-    QSignalSpy announcedSpy(registry.data(), SIGNAL(interfacesAnnounced()));
+    // Create the Registry.
+    QScopedPointer<Cnt::Registry> registry(new Cnt::Registry);
+    QSignalSpy announcedSpy(registry.data(), &Cnt::Registry::interfacesAnnounced);
     QVERIFY(announcedSpy.isValid());
     registry->create(connection);
-    QScopedPointer<EventQueue> queue(new EventQueue);
+    QScopedPointer<Cnt::EventQueue> queue(new Cnt::EventQueue);
     queue->setup(connection);
     registry->setEventQueue(queue.data());
     registry->setup();
