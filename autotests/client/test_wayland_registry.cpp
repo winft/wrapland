@@ -219,9 +219,9 @@ void TestWaylandRegistry::cleanup()
 void TestWaylandRegistry::testCreate()
 {
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
 
     Wrapland::Client::Registry registry;
@@ -234,9 +234,9 @@ void TestWaylandRegistry::testCreate()
 
 #define TEST_BIND(iface, signalName, bindMethod, destroyFunction) \
     Wrapland::Client::ConnectionThread connection; \
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected())); \
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged); \
     connection.setSocketName(s_socketName); \
-    connection.initConnection(); \
+    connection.establishConnection(); \
     QVERIFY(connectedSpy.wait()); \
     \
     Wrapland::Client::Registry registry; \
@@ -376,9 +376,9 @@ void TestWaylandRegistry::testRemoval()
 {
     using namespace Wrapland::Client;
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
     connect(QCoreApplication::eventDispatcher(), &QAbstractEventDispatcher::aboutToBlock, &connection,
         [&connection] {
@@ -602,9 +602,9 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
 
     using namespace Wrapland::Client;
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
     connect(QCoreApplication::eventDispatcher(), &QAbstractEventDispatcher::aboutToBlock, &connection,
         [&connection] {
@@ -668,9 +668,9 @@ void TestWaylandRegistry::testDestroy()
 {
     using namespace Wrapland::Client;
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
 
     Registry registry;
@@ -683,28 +683,26 @@ void TestWaylandRegistry::testDestroy()
 
     //create some arbitrary Interface
     shellAnnouncedSpy.wait();
-    QScopedPointer<Shell> shell(registry.createShell(registry.interface(Registry::Interface::Shell).name, registry.interface(Registry::Interface::Shell).version, &registry));
+    QScopedPointer<Shell>
+            shell(registry.createShell(registry.interface(Registry::Interface::Shell).name,
+                                       registry.interface(Registry::Interface::Shell).version,
+                                       &registry));
 
-
-    QSignalSpy connectionDiedSpy(&connection, SIGNAL(connectionDied()));
-    QSignalSpy registryDiedSpy(&registry, SIGNAL(registryDestroyed()));
-
-    QVERIFY(connectionDiedSpy.isValid());
+    QSignalSpy registryDiedSpy(&registry, &Registry::registryReleased);
     QVERIFY(registryDiedSpy.isValid());
 
     delete m_display;
     m_display = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_VERIFY(!connection.established());
 
-    QVERIFY(connectionDiedSpy.count() == 1);
-    QVERIFY(registryDiedSpy.count() == 1);
+    QTRY_VERIFY(registryDiedSpy.count() == 1);
 
-    // now the registry should be destroyed;
+    // Now the registry should be released.
     QVERIFY(!registry.isValid());
 
-    // calling destroy again should not fail
-    registry.destroy();
-    shell->destroy();
+    // Calling release again should not fail.
+    registry.release();
+    shell->release();
 }
 
 void TestWaylandRegistry::testGlobalSync()
@@ -712,8 +710,8 @@ void TestWaylandRegistry::testGlobalSync()
     using namespace Wrapland::Client;
     ConnectionThread connection;
     connection.setSocketName(s_socketName);
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
-    connection.initConnection();
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
 
     Registry registry;
@@ -738,8 +736,8 @@ void TestWaylandRegistry::testGlobalSyncThreaded()
     connection.moveToThread(&thread);
     thread.start();
 
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
-    connection.initConnection();
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    connection.establishConnection();
 
     QVERIFY(connectedSpy.wait());
     EventQueue queue;
@@ -764,9 +762,9 @@ void TestWaylandRegistry::testAnnounceMultiple()
     using namespace Wrapland::Client;
     ConnectionThread connection;
     connection.setSocketName(s_socketName);
-    QSignalSpy connectedSpy(&connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(&connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
     connect(QCoreApplication::eventDispatcher(), &QAbstractEventDispatcher::aboutToBlock, &connection,
             [&connection] {
@@ -823,9 +821,9 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     using namespace Wrapland::Client;
     ConnectionThread connection;
     connection.setSocketName(s_socketName);
-    QSignalSpy connectedSpy(&connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(&connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
     connect(QCoreApplication::eventDispatcher(), &QAbstractEventDispatcher::aboutToBlock, &connection,
             [&connection] {

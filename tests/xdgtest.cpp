@@ -78,8 +78,11 @@ XdgTest::~XdgTest()
 
 void XdgTest::init()
 {
-    connect(m_connectionThreadObject, &ConnectionThread::connected, this,
-        [this] {
+    connect(m_connectionThreadObject, &ConnectionThread::establishedChanged, this,
+        [this] (bool established) {
+            if (!established) {
+                return;
+            }
             m_eventQueue = new EventQueue(this);
             m_eventQueue->setup(m_connectionThreadObject);
 
@@ -91,7 +94,7 @@ void XdgTest::init()
     m_connectionThreadObject->moveToThread(m_connectionThread);
     m_connectionThread->start();
 
-    m_connectionThreadObject->initConnection();
+    m_connectionThreadObject->establishConnection();
 }
 
 void XdgTest::setupRegistry(Registry *registry)

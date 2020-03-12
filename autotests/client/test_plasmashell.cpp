@@ -87,7 +87,7 @@ void TestPlasmaShell::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -95,7 +95,7 @@ void TestPlasmaShell::init()
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new EventQueue(this);
@@ -428,7 +428,7 @@ void TestPlasmaShell::testAutoHidePanel()
     // change panel type
     ps->setPanelBehavior(PlasmaShellSurface::PanelBehavior::AlwaysVisible);
     // requesting auto hide should raise error
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     ps->requestHideAutoHidingPanel();
     QVERIFY(errorSpy.wait());
@@ -521,7 +521,7 @@ void TestPlasmaShell::testWhileDestroying()
     QVERIFY(shellSurfaceCreatedSpy.wait());
 
     // now try to create more surfaces
-    QSignalSpy clientErrorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy clientErrorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(clientErrorSpy.isValid());
     for (int i = 0; i < 100; i++) {
         s.reset();

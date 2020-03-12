@@ -83,7 +83,7 @@ MockupClient::MockupClient(QObject *parent)
 {
     // setup connection
     connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketName(s_socketName);
 
@@ -91,7 +91,7 @@ MockupClient::MockupClient(QObject *parent)
     connection->moveToThread(thread);
     thread->start();
 
-    connection->initConnection();
+    connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     queue = new EventQueue(this);

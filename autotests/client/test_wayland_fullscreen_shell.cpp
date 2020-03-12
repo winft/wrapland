@@ -99,9 +99,9 @@ void TestWaylandFullscreenShell::testRegistry()
         QSKIP("This test requires a running wayland server");
     }
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
 
     Wrapland::Client::Registry registry;
@@ -133,9 +133,9 @@ void TestWaylandFullscreenShell::testRegistryCreate()
         QSKIP("This test requires a running wayland server");
     }
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
 
     Wrapland::Client::Registry registry;

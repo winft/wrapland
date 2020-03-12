@@ -69,14 +69,14 @@ void TestDataSource::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
@@ -317,21 +317,19 @@ void TestDataSource::testDestroy()
     QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource->isValid());
 
-    connect(m_connection, &ConnectionThread::connectionDied, m_dataDeviceManager, &DataDeviceManager::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_queue, &EventQueue::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, dataSource.data(), &DataSource::destroy);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_dataDeviceManager, &DataDeviceManager::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, dataSource.data(), &DataSource::release);
 
-    QSignalSpy connectionDiedSpy(m_connection, SIGNAL(connectionDied()));
-    QVERIFY(connectionDiedSpy.isValid());
     delete m_display;
     m_display = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_VERIFY(!m_connection->established());
 
-    // now the pool should be destroyed;
-    QVERIFY(!dataSource->isValid());
+    // Now the pool should be destroyed.
+    QTRY_VERIFY(!dataSource->isValid());
 
-    // calling destroy again should not fail
-    dataSource->destroy();
+    // Calling destroy again should not fail.
+    dataSource->release();
 }
 
 QTEST_GUILESS_MAIN(TestDataSource)

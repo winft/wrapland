@@ -165,14 +165,14 @@ void TestWaylandSeat::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
@@ -570,9 +570,14 @@ void TestWaylandSeat::testPointer()
     QVERIFY(unboundSpy.wait());
     QCOMPARE(unboundSpy.count(), 1);
     QCOMPARE(destroyedSpy.count(), 0);
-    // now test that calling into the methods in Seat does not crash
-    QCOMPARE(m_seatInterface->focusedPointer(), serverPointer);
+
+    // Now test that calling into the methods in Seat does not crash.
+    // The focused pointer must be null now since it got destroyed.
+    QCOMPARE(m_seatInterface->focusedPointer(), nullptr);
+    // The focused surface is still the same since it does still exist and it was once set
+    // and not changed since then.
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
+
     m_seatInterface->setTimestamp(8);
     m_seatInterface->setPointerPos(QPoint(10, 15));
     m_seatInterface->setTimestamp(9);
@@ -584,9 +589,9 @@ void TestWaylandSeat::testPointer()
     m_seatInterface->setTimestamp(12);
     m_seatInterface->pointerAxis(Qt::Vertical, 20);
     m_seatInterface->setFocusedPointerSurface(nullptr);
-    QCOMPARE(focusedPointerChangedSpy.count(), 7);
-    m_seatInterface->setFocusedPointerSurface(serverSurface);
     QCOMPARE(focusedPointerChangedSpy.count(), 8);
+    m_seatInterface->setFocusedPointerSurface(serverSurface);
+    QCOMPARE(focusedPointerChangedSpy.count(), 9);
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
     QVERIFY(!m_seatInterface->focusedPointer());
 
@@ -600,7 +605,7 @@ void TestWaylandSeat::testPointer()
     // create a pointer again
     p = m_seat->createPointer(m_seat);
     QVERIFY(focusedPointerChangedSpy.wait());
-    QCOMPARE(focusedPointerChangedSpy.count(), 9);
+    QCOMPARE(focusedPointerChangedSpy.count(), 10);
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
     serverPointer = m_seatInterface->focusedPointer();
     QVERIFY(serverPointer);
@@ -613,7 +618,7 @@ void TestWaylandSeat::testPointer()
     delete s;
     QVERIFY(!p->enteredSurface());
     QVERIFY(leftSpy2.wait());
-    QCOMPARE(focusedPointerChangedSpy.count(), 10);
+    QCOMPARE(focusedPointerChangedSpy.count(), 11);
     QVERIFY(!m_seatInterface->focusedPointerSurface());
     QVERIFY(!m_seatInterface->focusedPointer());
 }
@@ -1796,15 +1801,15 @@ void TestWaylandSeat::testDestroy()
 
     delete m_compositor;
     m_compositor = nullptr;
-    connect(m_connection, &ConnectionThread::connectionDied, m_seat, &Seat::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_shm, &ShmPool::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_subCompositor, &SubCompositor::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_relativePointerManager, &RelativePointerManager::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_pointerGestures, &PointerGestures::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_queue, &EventQueue::destroy);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_seat, &Seat::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_shm, &ShmPool::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_subCompositor, &SubCompositor::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_relativePointerManager, &RelativePointerManager::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_pointerGestures, &PointerGestures::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
     QVERIFY(m_seat->isValid());
 
-    QSignalSpy connectionDiedSpy(m_connection, SIGNAL(connectionDied()));
+    QSignalSpy connectionDiedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectionDiedSpy.isValid());
     delete m_display;
     m_display = nullptr;
@@ -1813,19 +1818,19 @@ void TestWaylandSeat::testDestroy()
     m_subCompositorInterface = nullptr;
     m_relativePointerManagerInterface = nullptr;
     m_pointerGesturesInterface = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_COMPARE(connectionDiedSpy.count(), 1);
 
-    // now the seat should be destroyed;
-    QVERIFY(!m_seat->isValid());
-    QVERIFY(!k->isValid());
-    QVERIFY(!p->isValid());
-    QVERIFY(!t->isValid());
+    // Now the seat should be destroyed.
+    QTRY_VERIFY(!m_seat->isValid());
+    QTRY_VERIFY(!k->isValid());
+    QTRY_VERIFY(!p->isValid());
+    QTRY_VERIFY(!t->isValid());
 
-    // calling destroy again should not fail
-    m_seat->destroy();
-    k->destroy();
-    p->destroy();
-    t->destroy();
+    // Calling release again should not fail.
+    m_seat->release();
+    k->release();
+    p->release();
+    t->release();
 }
 
 void TestWaylandSeat::testSelection()
@@ -2000,7 +2005,7 @@ void TestWaylandSeat::testDataDeviceForKeyboardSurface()
 
     // create a second Wayland client connection to use it for setSelection
     auto c = new ConnectionThread;
-    QSignalSpy connectedSpy(c, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(c, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     c->setSocketName(s_socketName);
 
@@ -2008,7 +2013,7 @@ void TestWaylandSeat::testDataDeviceForKeyboardSurface()
     c->moveToThread(thread);
     thread->start();
 
-    c->initConnection();
+    c->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     QScopedPointer<EventQueue> queue(new EventQueue);
@@ -2400,10 +2405,7 @@ void TestWaylandSeat::testPointerEnterOnUnboundSurface()
     QVERIFY(surfaceUnboundSpy.isValid());
     s.reset();
     QVERIFY(surfaceUnboundSpy.wait());
-    QSignalSpy clientErrorSpy(m_connection, &ConnectionThread::errorOccurred);
-    QVERIFY(clientErrorSpy.isValid());
     m_seatInterface->setFocusedPointerSurface(serverSurface);
-    QVERIFY(!clientErrorSpy.wait(100));
 }
 
 QTEST_GUILESS_MAIN(TestWaylandSeat)

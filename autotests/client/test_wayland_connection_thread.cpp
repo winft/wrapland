@@ -29,6 +29,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include <wayland-client-protocol.h>
 
+#include <errno.h>
+
 namespace Cnt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
 
@@ -86,9 +88,9 @@ void TestWaylandConnectionThread::testInitConnectionNoThread()
     connection->setSocketName(s_socketName);
     QCOMPARE(connection->socketName(), s_socketName);
 
-    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::connected);
+    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::establishedChanged);
     QSignalSpy failedSpy(connection.data(), &Cnt::ConnectionThread::failed);
-    connection->initConnection();
+    connection->establishConnection();
     QVERIFY(connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
     QCOMPARE(failedSpy.count(), 0);
@@ -103,9 +105,9 @@ void TestWaylandConnectionThread::testConnectionFailure()
     QScopedPointer<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
     connection->setSocketName(QStringLiteral("kwin-test-socket-does-not-exist"));
 
-    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::connected);
+    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::establishedChanged);
     QSignalSpy failedSpy(connection.data(), &Cnt::ConnectionThread::failed);
-    connection->initConnection();
+    connection->establishConnection();
     QVERIFY(failedSpy.wait());
     QCOMPARE(connectedSpy.count(), 0);
     QCOMPARE(failedSpy.count(), 1);
@@ -143,11 +145,11 @@ void TestWaylandConnectionThread::testConnectionThread()
     connection->moveToThread(connectionThread);
     connectionThread->start();
 
-    QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::connected);
+    QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     QSignalSpy failedSpy(connection, &Cnt::ConnectionThread::failed);
     QVERIFY(failedSpy.isValid());
-    connection->initConnection();
+    connection->establishConnection();
     QVERIFY(connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
     QCOMPARE(failedSpy.count(), 0);
@@ -190,24 +192,33 @@ void TestWaylandConnectionThread::testConnectionDying()
 {
     QScopedPointer<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
 
-    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::connected);
+    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::establishedChanged);
+    QVERIFY(connectedSpy.isValid());
+
     connection->setSocketName(s_socketName);
-    connection->initConnection();
+    connection->establishConnection();
     QVERIFY(connectedSpy.wait());
     QVERIFY(connection->display());
 
-    QSignalSpy diedSpy(connection.data(), &Cnt::ConnectionThread::connectionDied);
     m_display->terminate();
     QVERIFY(!m_display->isRunning());
-    QVERIFY(diedSpy.wait());
-    QCOMPARE(diedSpy.count(), 1);
-    QVERIFY(!connection->display());
+
+    QVERIFY(connectedSpy.wait());
+    QCOMPARE(connectedSpy.count(), 2);
+    QEXPECT_FAIL("", "Looking at Wayland library a clean exit should have EPIPE.", Continue);
+    QCOMPARE(connection->error(), EPIPE);
+    QCOMPARE(connection->error(), ECONNRESET);
+    QVERIFY(!connection->protocolError());
 
     connectedSpy.clear();
     QVERIFY(connectedSpy.isEmpty());
-    // restarts the server
+
+    // Restart the server.
     m_display->start();
     QVERIFY(m_display->isRunning());
+
+    // Try to reuse the connection thread instance.
+    connection->establishConnection();
     if (connectedSpy.count() == 0) {
         QVERIFY(connectedSpy.wait());
     }
@@ -224,14 +235,14 @@ void TestWaylandConnectionThread::testConnectFd()
     QVERIFY(disconnectedSpy.isValid());
 
     auto *connection = new Cnt::ConnectionThread;
-    QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::connected);
+    QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketFd(sv[1]);
 
     QThread *connectionThread = new QThread(this);
     connection->moveToThread(connectionThread);
     connectionThread->start();
-    connection->initConnection();
+    connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     // Create the Registry.
@@ -270,14 +281,14 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
     QVERIFY(display.createClient(sv[0]));
 
     auto *connection = new Cnt::ConnectionThread;
-    QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::connected);
+    QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketFd(sv[1]);
 
     QThread *connectionThread = new QThread(this);
     connection->moveToThread(connectionThread);
     connectionThread->start();
-    connection->initConnection();
+    connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     // Create the Registry.

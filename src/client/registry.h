@@ -1836,9 +1836,9 @@ Q_SIGNALS:
 
 Q_SIGNALS:
     /*
-     * Emitted when the registry has been destroyed rather than released
+     * Emitted when the registry has been released.
      */
-    void registryDestroyed();
+    void registryReleased();
 
 private:
     class Private;

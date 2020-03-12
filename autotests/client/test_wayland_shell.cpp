@@ -132,14 +132,14 @@ void TestWaylandShell::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
@@ -650,27 +650,25 @@ void TestWaylandShell::testDestroy()
     ShellSurface *surface = m_shell->createSurface(s.data(), m_shell);
     QVERIFY(surface->isValid());
 
-    connect(m_connection, &ConnectionThread::connectionDied, m_shell, &Shell::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_pointer, &Pointer::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_seat, &Seat::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_compositor, &Compositor::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, s.data(), &Surface::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_queue, &EventQueue::destroy);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_shell, &Shell::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_pointer, &Pointer::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_seat, &Seat::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_compositor, &Compositor::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, s.data(), &Surface::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
 
-    QSignalSpy connectionDiedSpy(m_connection, SIGNAL(connectionDied()));
-    QVERIFY(connectionDiedSpy.isValid());
     delete m_display;
     m_display = nullptr;
     m_compositorInterface = nullptr;
     m_shellInterface = nullptr;
     m_seatInterface = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_VERIFY(!m_connection->established());
 
-    QVERIFY(!m_shell->isValid());
-    QVERIFY(!surface->isValid());
+    QTRY_VERIFY(!m_shell->isValid());
+    QTRY_VERIFY(!surface->isValid());
 
-    m_shell->destroy();
-    surface->destroy();
+    m_shell->release();
+    surface->release();
 }
 
 void TestWaylandShell::testCast()
@@ -721,11 +719,15 @@ void TestWaylandShell::testMove()
     m_seatInterface->pointerButtonPressed(Qt::LeftButton);
     QVERIFY(pointerButtonChangedSpy.wait());
 
+    qDebug() << "XXX TestWaylandShell::testMove1" << serverSurface;
+
     surface->requestMove(m_seat, pointerButtonChangedSpy.first().first().value<quint32>());
     QVERIFY(moveRequestedSpy.wait());
     QCOMPARE(moveRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.first().at(0).value<SeatInterface*>(), m_seatInterface);
     QCOMPARE(moveRequestedSpy.first().at(1).value<quint32>(), m_seatInterface->pointerButtonSerial(Qt::LeftButton));
+
+    qDebug() << "XXX TestWaylandShell::testMove2" << serverSurface;
 }
 
 void TestWaylandShell::testResize_data()
@@ -853,7 +855,7 @@ void TestWaylandShell::testWhileDestroying()
     QVERIFY(shellSurfaceCreatedSpy.wait());
 
     // now try to create more surfaces
-    QSignalSpy clientErrorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy clientErrorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(clientErrorSpy.isValid());
     for (int i = 0; i < 100; i++) {
         s.reset();

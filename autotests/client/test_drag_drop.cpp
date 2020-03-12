@@ -91,7 +91,7 @@ void TestDragAndDrop::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -114,7 +114,7 @@ void TestDragAndDrop::init()
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new EventQueue(this);

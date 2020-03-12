@@ -91,7 +91,7 @@ void TestPointerConstraints::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -99,7 +99,7 @@ void TestPointerConstraints::init()
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new EventQueue(this);
@@ -411,8 +411,8 @@ void TestPointerConstraints::testAlreadyConstrained()
     }
     QVERIFY(confinedPointer || lockedPointer);
 
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
-    QVERIFY(errorSpy.isValid());
+    QSignalSpy connectionSpy(m_connection, &ConnectionThread::establishedChanged);
+    QVERIFY(connectionSpy.isValid());
     QFETCH(Constraint, secondConstraint);
     QScopedPointer<ConfinedPointer> confinedPointer2;
     QScopedPointer<LockedPointer> lockedPointer2;
@@ -426,8 +426,8 @@ void TestPointerConstraints::testAlreadyConstrained()
     default:
         Q_UNREACHABLE();
     }
-    QVERIFY(errorSpy.wait());
-    QVERIFY(m_connection->hasError());
+    QVERIFY(connectionSpy.wait());
+    QVERIFY(m_connection->protocolError());
     if (confinedPointer2) {
         confinedPointer2->destroy();
     }

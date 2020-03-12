@@ -79,14 +79,14 @@ void TestRegion::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
@@ -264,22 +264,21 @@ void TestRegion::testDestroy()
     using namespace Wrapland::Client;
     QScopedPointer<Region> region(m_compositor->createRegion());
 
-    connect(m_connection, &ConnectionThread::connectionDied, region.data(), &Region::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_compositor, &Compositor::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_queue, &EventQueue::destroy);
+    connect(m_connection, &ConnectionThread::establishedChanged, region.data(), &Region::release);
+    connect(m_connection, &ConnectionThread::establishedChanged,
+            m_compositor, &Compositor::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
     QVERIFY(region->isValid());
 
-    QSignalSpy connectionDiedSpy(m_connection, SIGNAL(connectionDied()));
-    QVERIFY(connectionDiedSpy.isValid());
     delete m_display;
     m_display = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_VERIFY(!m_connection->established());
 
-    // now the region should be destroyed;
-    QVERIFY(!region->isValid());
+    // Now the region should be destroyed.
+    QTRY_VERIFY(!region->isValid());
 
-    // calling destroy again should not fail
-    region->destroy();
+    // Calling release again should not fail.
+    region->release();
 }
 
 void TestRegion::testDisconnect()

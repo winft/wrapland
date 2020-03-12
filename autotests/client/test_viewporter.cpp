@@ -104,14 +104,14 @@ void TestViewporter::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(m_connection, SIGNAL(establishedChanged(bool)));
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
@@ -213,7 +213,7 @@ void TestViewporter::testViewportExists()
     QVERIFY(serverViewport);
 
     // Create second viewport with error.
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     QScopedPointer<Viewport> vp2(m_viewporter->createViewport(s.data(), this));
     QVERIFY(errorSpy.wait());
@@ -480,9 +480,9 @@ void TestViewporter::testDataError()
     QFETCH(QSize, destinationSize);
     QFETCH(QRectF, sourceRectangle);
 
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
-    QVERIFY(!m_connection->hasError());
+    QVERIFY(!m_connection->error());
 
     // Set the destination size.
     vp->setDestinationSize(destinationSize);
@@ -493,7 +493,7 @@ void TestViewporter::testDataError()
 
     // One of these lead to an error.
     QVERIFY(errorSpy.wait());
-    QVERIFY(m_connection->hasError());
+    QVERIFY(m_connection->error());
     // TODO: compare protocol error code
 }
 
@@ -577,13 +577,13 @@ void TestViewporter::testBufferSizeChange()
     s->attachBuffer(m_shm->createBuffer(image3));
 
     // And try to commit without changing the source rectangle accordingly, what leads to an error.
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
-    QVERIFY(!m_connection->hasError());
+    QVERIFY(!m_connection->error());
 
     s->commit(Surface::CommitFlag::None);
     QVERIFY(errorSpy.wait());
-    QVERIFY(m_connection->hasError());
+    QVERIFY(m_connection->error());
     // TODO: compare protocol error code
 }
 
@@ -686,14 +686,14 @@ void TestViewporter::testDestinationSizeChange()
                 - rect2.bottomRight()).manhattanLength() < 0.01);
 
     // And try to unset the destination size, what leads to an error.
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
-    QVERIFY(!m_connection->hasError());
+    QVERIFY(!m_connection->error());
 
     vp->setDestinationSize(QSize(-1, -1));
     s->commit(Surface::CommitFlag::None);
     QVERIFY(errorSpy.wait());
-    QVERIFY(m_connection->hasError());
+    QVERIFY(m_connection->error());
     // TODO: compare protocol error code
 }
 
@@ -746,13 +746,13 @@ void TestViewporter::testNoSurface()
     surface.reset();
 
     // And try to set data with the viewport what leads to a protocol error.
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
-    QVERIFY(!m_connection->hasError());
+    QVERIFY(!m_connection->error());
 
     vp->setDestinationSize(QSize(500, 300));
     QVERIFY(errorSpy.wait());
-    QVERIFY(m_connection->hasError());
+    QVERIFY(m_connection->error());
     // TODO: compare protocol error code
 }
 

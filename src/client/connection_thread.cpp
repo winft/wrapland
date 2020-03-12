@@ -1,5 +1,6 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -19,7 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "connection_thread.h"
 #include "logging.h"
-// Qt
+
 #include <QAbstractEventDispatcher>
 #include <QGuiApplication>
 #include <QDebug>
@@ -29,7 +30,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QMutexLocker>
 #include <QSocketNotifier>
 #include <qpa/qplatformnativeinterface.h>
-// Wayland
+
+#include <errno.h>
 #include <wayland-client-protocol.h>
 
 namespace Wrapland
@@ -43,22 +45,25 @@ class Q_DECL_HIDDEN ConnectionThread::Private
 public:
     Private(ConnectionThread *q);
     ~Private();
-    void doInitConnection();
-    void setupSocketNotifier();
-    void setupSocketFileWatcher();
 
-    bool connected = false;
+    void doEstablishConnection();
+    void setupSocketNotifier();
+
+    bool established = false;
+    int error = 0;
+    int protocolError = 0;
+
     wl_display *display = nullptr;
     int fd = -1;
+
     QString socketName;
     QDir runtimeDir;
     QScopedPointer<QSocketNotifier> socketNotifier;
     QScopedPointer<QFileSystemWatcher> socketWatcher;
-    bool serverDied = false;
+
     bool foreign = false;
     QMetaObject::Connection eventDispatcherConnection;
 
-    int error = 0;
     static QVector<ConnectionThread*> connections;
     static QMutex mutex;
 private:
@@ -90,14 +95,14 @@ ConnectionThread::Private::~Private()
         connections.removeOne(q);
     }
     if (display && !foreign) {
-        if (connected) {
+        if (established) {
             wl_display_flush(display);
         }
         wl_display_disconnect(display);
     }
 }
 
-void ConnectionThread::Private::doInitConnection()
+void ConnectionThread::Private::doEstablishConnection()
 {
     if (fd != -1) {
         display = wl_display_connect_to_fd(fd);
@@ -110,17 +115,17 @@ void ConnectionThread::Private::doInitConnection()
         return;
     }
     if (fd != -1) {
-        qCDebug(WRAPLAND_CLIENT) << "Connected to Wayland server over file descriptor:" << fd;
+        qCDebug(WRAPLAND_CLIENT)
+                << "Established connection to Wayland server over file descriptor:" << fd;
     } else {
-        qCDebug(WRAPLAND_CLIENT) << "Connected to Wayland server at:" << socketName;
+        qCDebug(WRAPLAND_CLIENT) << "Established connection to Wayland server at:" << socketName;
     }
 
     // setup socket notifier
     setupSocketNotifier();
-    setupSocketFileWatcher();
 
-    connected = true;
-    emit q->connected();
+    established = true;
+    emit q->establishedChanged(true);
 }
 
 void ConnectionThread::Private::setupSocketNotifier()
@@ -128,60 +133,27 @@ void ConnectionThread::Private::setupSocketNotifier()
     const int fd = wl_display_get_fd(display);
     socketNotifier.reset(new QSocketNotifier(fd, QSocketNotifier::Read));
     QObject::connect(socketNotifier.data(), &QSocketNotifier::activated, q,
-        [this]() {
-            if (!connected) {
+        [this](int count) {
+            Q_UNUSED(count)
+            if (!established) {
                 return;
             }
 
-            if (wl_display_dispatch(display) == -1) {
+            int ret = wl_display_dispatch(display);
+            error = wl_display_get_error(display);
+
+            if (ret < 0) {
                 error = wl_display_get_error(display);
                 Q_ASSERT(error);
+                protocolError = wl_display_get_protocol_error(display, nullptr, nullptr);
 
-                connected = false;
-                emit q->errorOccurred();
+                established = false;
+                emit q->establishedChanged(false);
+                socketNotifier.reset();
                 return;
             }
 
             emit q->eventsRead();
-        }
-    );
-}
-
-void ConnectionThread::Private::setupSocketFileWatcher()
-{
-    if (!runtimeDir.exists() || fd != -1) {
-        return;
-    }
-    socketWatcher.reset(new QFileSystemWatcher);
-    socketWatcher->addPath(runtimeDir.absoluteFilePath(socketName));
-    QObject::connect(socketWatcher.data(), &QFileSystemWatcher::fileChanged, q,
-        [this] (const QString &file) {
-            if (QFile::exists(file) || serverDied) {
-                return;
-            }
-            qCWarning(WRAPLAND_CLIENT) << "Connection to server went away";
-            serverDied = true;
-            connected = false;
-            socketNotifier.reset();
-
-            // need a new filesystem watcher
-            socketWatcher.reset(new QFileSystemWatcher);
-            socketWatcher->addPath(runtimeDir.absolutePath());
-            QObject::connect(socketWatcher.data(), &QFileSystemWatcher::directoryChanged, q,
-                [this]() {
-                    if (!serverDied) {
-                        return;
-                    }
-                    if (runtimeDir.exists(socketName)) {
-                        qCDebug(WRAPLAND_CLIENT) << "Socket reappeared";
-                        socketWatcher.reset();
-                        serverDied = false;
-                        error = 0;
-                        q->initConnection();
-                    }
-                }
-            );
-            emit q->connectionDied();
         }
     );
 }
@@ -222,19 +194,21 @@ ConnectionThread *ConnectionThread::fromApplication(QObject *parent)
     if (!display) {
         return nullptr;
     }
-    ConnectionThread *ct = new ConnectionThread(display, parent);
-    connect(native, &QObject::destroyed, ct, &ConnectionThread::connectionDied);
+    auto *ct = new ConnectionThread(display, parent);
+    connect(native, &QObject::destroyed, ct, [ct] { Q_EMIT ct->establishedChanged(false); } );
     return ct;
 }
 
-void ConnectionThread::initConnection()
+void ConnectionThread::establishConnection()
 {
-    QMetaObject::invokeMethod(this, "doInitConnection", Qt::QueuedConnection);
+    d->error = 0;
+    d->protocolError = 0;
+    QMetaObject::invokeMethod(this, "doEstablishConnection", Qt::QueuedConnection);
 }
 
-void ConnectionThread::doInitConnection()
+void ConnectionThread::doEstablishConnection()
 {
-    d->doInitConnection();
+    d->doEstablishConnection();
 }
 
 void ConnectionThread::setSocketName(const QString &socketName)
@@ -267,7 +241,7 @@ QString ConnectionThread::socketName() const
 
 void ConnectionThread::flush()
 {
-    if (!d->connected) {
+    if (!d->established) {
         return;
     }
     wl_display_flush(d->display);
@@ -275,7 +249,7 @@ void ConnectionThread::flush()
 
 void ConnectionThread::roundtrip()
 {
-    if (!d->connected) {
+    if (!d->established) {
         return;
     }
     if (d->foreign) {
@@ -292,14 +266,24 @@ void ConnectionThread::roundtrip()
     wl_display_roundtrip(d->display);
 }
 
-bool ConnectionThread::hasError() const
+bool ConnectionThread::established() const
 {
-    return d->error != 0;
+    return d->established;
 }
 
-int ConnectionThread::errorCode() const
+int ConnectionThread::error() const
 {
     return d->error;
+}
+
+bool ConnectionThread::hasProtocolError() const
+{
+    return d->error = EPROTO;
+}
+
+int ConnectionThread::protocolError() const
+{
+    return d->protocolError;
 }
 
 QVector<ConnectionThread*> ConnectionThread::connections()

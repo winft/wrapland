@@ -114,7 +114,7 @@ void TestWaylandSurface::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
@@ -129,7 +129,7 @@ void TestWaylandSurface::init()
         }
     );*/
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
@@ -823,15 +823,12 @@ void TestWaylandSurface::testDestroy()
     using namespace Wrapland::Client;
     Surface *s = m_compositor->createSurface();
 
-    connect(m_connection, &ConnectionThread::connectionDied, s, &Surface::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_compositor, &Compositor::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_shm, &ShmPool::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_queue, &EventQueue::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_idleInhibitManager, &IdleInhibitManager::destroy);
+    connect(m_connection, &ConnectionThread::establishedChanged, s, &Surface::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_compositor, &Compositor::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_shm, &ShmPool::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_idleInhibitManager, &IdleInhibitManager::release);
     QVERIFY(s->isValid());
-
-    QSignalSpy connectionDiedSpy(m_connection, SIGNAL(connectionDied()));
-    QVERIFY(connectionDiedSpy.isValid());
 
     delete m_compositorInterface;
     m_compositorInterface = nullptr;
@@ -839,14 +836,13 @@ void TestWaylandSurface::testDestroy()
     m_idleInhibitInterface = nullptr;
     delete m_display;
     m_display = nullptr;
+    QTRY_VERIFY(!m_connection->established());
 
-    QVERIFY(connectionDiedSpy.wait());
+    // Now the Surface should be destroyed.
+    QTRY_VERIFY(!s->isValid());
 
-    // now the Surface should be destroyed;
-    QVERIFY(!s->isValid());
-
-    // calling destroy again should not fail
-    s->destroy();
+    // Calling destroy again should not fail.
+    s->release();
 }
 
 void TestWaylandSurface::testUnmapOfNotMappedSurface()
