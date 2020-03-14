@@ -199,12 +199,20 @@ void PlasmaWindowManagementInterface::Private::getWindowCallback(wl_client *clie
     (*it)->d->createResource(resource, id);
 }
 
+// TODO: This is currently a hack such that we don't segfault when the interface has been destroyed
+//       by the compositor before shutdown and some clients still need to unbind from it.
+bool isDestroyed = false;
+
 PlasmaWindowManagementInterface::PlasmaWindowManagementInterface(Display *display, QObject *parent)
     : Global(new Private(this, display), parent)
 {
+    isDestroyed = false;
 }
 
-PlasmaWindowManagementInterface::~PlasmaWindowManagementInterface() = default;
+PlasmaWindowManagementInterface::~PlasmaWindowManagementInterface()
+{
+    isDestroyed = true;
+}
 
 void PlasmaWindowManagementInterface::Private::bind(wl_client *client, uint32_t version, uint32_t id)
 {
@@ -223,6 +231,9 @@ void PlasmaWindowManagementInterface::Private::bind(wl_client *client, uint32_t 
 
 void PlasmaWindowManagementInterface::Private::unbind(wl_resource *resource)
 {
+    if (isDestroyed) {
+        return;
+    }
     auto wm = reinterpret_cast<Private*>(wl_resource_get_user_data(resource));
     wm->resources.removeAll(resource);
 }

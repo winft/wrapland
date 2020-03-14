@@ -36,6 +36,8 @@ class FakeInputInterface::Private : public Global::Private
 {
 public:
     Private(FakeInputInterface *q, Display *d);
+    ~Private() override;
+
     QList<FakeInputDevice*> devices;
 
 private:
@@ -101,6 +103,16 @@ FakeInputInterface::Private::Private(FakeInputInterface *q, Display *d)
 {
 }
 
+FakeInputInterface::Private::~Private()
+{
+    for (auto *device : devices) {
+        wl_resource_set_destructor(device->resource(), nullptr);
+        wl_resource_set_user_data(device->resource(), nullptr);
+        delete device;
+    }
+    devices.clear();
+}
+
 void FakeInputInterface::Private::bind(wl_client *client, uint32_t version, uint32_t id)
 {
     auto c = display->getConnection(client);
@@ -119,6 +131,7 @@ void FakeInputInterface::Private::bind(wl_client *client, uint32_t version, uint
 void FakeInputInterface::Private::unbind(wl_resource *resource)
 {
     if (FakeInputDevice *d = device(resource)) {
+        cast(resource)->devices.removeAll(d);
         d->deleteLater();
     }
 }

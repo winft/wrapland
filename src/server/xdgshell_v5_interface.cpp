@@ -39,6 +39,7 @@ class XdgShellV5Interface::Private : public XdgShellInterface::Private
 {
 public:
     Private(XdgShellV5Interface *q, Display *d);
+    ~Private() override;
 
     QVector<XdgSurfaceV5Interface*> surfaces;
 
@@ -181,6 +182,14 @@ XdgShellV5Interface::Private::Private(XdgShellV5Interface *q, Display *d)
     : XdgShellInterface::Private(XdgShellInterfaceVersion::UnstableV5, q, d, &zxdg_shell_v5_interface, s_version)
     , q(q)
 {
+}
+
+XdgShellV5Interface::Private::~Private()
+{
+    for (auto *resource : resources) {
+        wl_resource_set_destructor(resource, NULL);
+        wl_resource_set_user_data(resource, NULL);
+    }
 }
 
 void XdgShellV5Interface::Private::bind(wl_client *client, uint32_t version, uint32_t id)
