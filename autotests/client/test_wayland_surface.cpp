@@ -1075,11 +1075,11 @@ void TestWaylandSurface::testDisconnect()
     }
     QTRY_COMPARE(surfaceDestroyedSpy.count(), 1);
 
-    s->destroy();
-    m_shm->destroy();
-    m_compositor->destroy();
-    m_queue->destroy();
-    m_idleInhibitManager->destroy();
+    s->release();
+    m_shm->release();
+    m_compositor->release();
+    m_queue->release();
+    m_idleInhibitManager->release();
 }
 
 void TestWaylandSurface::testOutput()

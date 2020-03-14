@@ -62,23 +62,7 @@ public:
      * longer valid and can be setup with another wl_region interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this Region.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new wl_region interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, region, &Region::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
+
     /**
      * @returns @c true if managing a wl_region.
      **/

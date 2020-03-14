@@ -88,23 +88,6 @@ public:
      * longer valid and can be setup with another org_kde_kwin_remote_access_manager interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this RemoteAccessManager.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new org_kde_kwin_remote_access_manager interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, remoteaccessmanager, &RemoteAccessManager::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating objects with this RemoteAccessManager.
@@ -162,23 +145,6 @@ public:
      * longer valid and can be setup with another org_kde_kwin_remote_buffer interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this RemoteBuffer.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new org_kde_kwin_remote_buffer interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, remotebuffer, &RemoteBuffer::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     operator org_kde_kwin_remote_buffer*();
     operator org_kde_kwin_remote_buffer*() const;

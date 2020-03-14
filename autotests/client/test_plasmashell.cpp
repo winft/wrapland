@@ -494,12 +494,12 @@ void TestPlasmaShell::testDisconnect()
     QVERIFY(surfaceDestroyedSpy.wait());
     QCOMPARE(surfaceDestroyedSpy.count(), 1);
 
-    s->destroy();
-    ps->destroy();
-    m_plasmaShell->destroy();
-    m_compositor->destroy();
-    m_registry->destroy();
-    m_queue->destroy();
+    s->release();
+    ps->release();
+    m_plasmaShell->release();
+    m_compositor->release();
+    m_registry->release();
+    m_queue->release();
 }
 
 void TestPlasmaShell::testWhileDestroying()

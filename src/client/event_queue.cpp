@@ -62,12 +62,6 @@ void EventQueue::release()
     d->display = nullptr;
 }
 
-void EventQueue::destroy()
-{
-    d->queue.destroy();
-    d->display = nullptr;
-}
-
 bool EventQueue::isValid()
 {
     return d->queue.isValid();

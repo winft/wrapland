@@ -68,11 +68,6 @@ void AppMenuManager::release()
     d->appmenumanager.release();
 }
 
-void AppMenuManager::destroy()
-{
-    d->appmenumanager.destroy();
-}
-
 AppMenuManager::operator org_kde_kwin_appmenu_manager*() {
     return d->appmenumanager;
 }
@@ -152,11 +147,6 @@ void AppMenu::setup(org_kde_kwin_appmenu *appmenu)
 void AppMenu::release()
 {
     d->appmenu.release();
-}
-
-void AppMenu::destroy()
-{
-    d->appmenu.destroy();
 }
 
 AppMenu::operator org_kde_kwin_appmenu*() {

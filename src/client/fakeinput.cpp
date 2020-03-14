@@ -61,11 +61,6 @@ void FakeInput::release()
     d->manager.release();
 }
 
-void FakeInput::destroy()
-{
-    d->manager.destroy();
-}
-
 bool FakeInput::isValid() const
 {
     return d->manager.isValid();

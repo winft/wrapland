@@ -309,9 +309,9 @@ void TestRegion::testDisconnect()
     QVERIFY(regionDestroyedSpy.wait());
     QCOMPARE(regionDestroyedSpy.count(), 1);
 
-    r->destroy();
-    m_compositor->destroy();
-    m_queue->destroy();
+    r->release();
+    m_compositor->release();
+    m_queue->release();
 }
 
 QTEST_GUILESS_MAIN(TestRegion)

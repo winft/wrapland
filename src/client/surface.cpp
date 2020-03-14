@@ -133,15 +133,6 @@ void Surface::release()
     d->surface.release();
 }
 
-void Surface::destroy()
-{
-    if (d->pendingFrameCallback) {
-        free(d->pendingFrameCallback);
-        d->pendingFrameCallback = nullptr;
-    }
-    d->surface.destroy();
-}
-
 void Surface::setup(wl_surface *surface)
 {
     d->setup(surface);

@@ -86,23 +86,6 @@ public:
      * longer valid and can be setup with another zxdg_exporter_v2 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this .
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zxdg_exporter_v2 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, , &::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating objects with this .
@@ -186,23 +169,6 @@ public:
      * longer valid and can be setup with another zxdg_importer_v2 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this .
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zxdg_importer_v2 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, , &::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating objects with this .
@@ -268,23 +234,6 @@ public:
      * longer valid and can be setup with another zxdg_exported_v2 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this .
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zxdg_exported_v2 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, , &::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * @returns The unique handle corresponding tho this exported surface.
@@ -332,23 +281,6 @@ public:
      * longer valid and can be setup with another zxdg_imported_v2 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this .
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zxdg_imported_v2 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, , &::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Set the imported surface as the parent of some surface of the client.

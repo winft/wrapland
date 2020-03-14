@@ -61,11 +61,6 @@ void RelativePointerManager::release()
     d->relativepointermanagerunstablev1.release();
 }
 
-void RelativePointerManager::destroy()
-{
-    d->relativepointermanagerunstablev1.destroy();
-}
-
 void RelativePointerManager::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;
@@ -170,11 +165,6 @@ void RelativePointer::setup(zwp_relative_pointer_v1 *relativepointerunstablev1)
 void RelativePointer::release()
 {
     d->relativepointerunstablev1.release();
-}
-
-void RelativePointer::destroy()
-{
-    d->relativepointerunstablev1.destroy();
 }
 
 RelativePointer::operator zwp_relative_pointer_v1*() {

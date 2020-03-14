@@ -259,11 +259,6 @@ Touch::~Touch()
     release();
 }
 
-void Touch::destroy()
-{
-    d->touch.destroy();
-}
-
 void Touch::release()
 {
     d->touch.release();

@@ -107,24 +107,6 @@ public:
      * @see interfaceAboutToBeReleased
      **/
     void release();
-    /**
-     * Destroys the data held by this Seat.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new wl_shell interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * Seat gets destroyed.
-     *
-     * Right before the data is destroyed the signal interfaceAboutToBeDestroyed is emitted.
-     *
-     * @see release
-     * @see interfaceAboutToBeDestroyed
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating Keyboard, Pointer and Touch.
@@ -180,10 +162,6 @@ Q_SIGNALS:
      * This signal is emitted right before the interface is going to be released.
      **/
     void interfaceAboutToBeReleased();
-    /**
-     * This signal is emitted right before the data is going to be destroyed.
-     **/
-    void interfaceAboutToBeDestroyed();
 
     /**
      * The corresponding global for this interface on the Registry got removed.

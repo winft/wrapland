@@ -43,7 +43,6 @@ public:
     virtual zxdg_exporter_v2 *exporterV2() = 0;
 
     virtual void release() = 0;
-    virtual void destroy() = 0;
     virtual bool isValid() = 0;
 
     EventQueue *queue = nullptr;
@@ -61,7 +60,6 @@ public:
     virtual zxdg_importer_v2 *importerV2() = 0;
 
     virtual void release() = 0;
-    virtual void destroy() = 0;
     virtual bool isValid() = 0;
 
     EventQueue *queue = nullptr;
@@ -78,7 +76,6 @@ public:
     virtual zxdg_exported_v2 *exportedV2() = 0;
 
     virtual void release() = 0;
-    virtual void destroy() = 0;
     virtual bool isValid() = 0;
 
     QString handle;
@@ -100,7 +97,6 @@ public:
 
     virtual void setParentOf(Surface *surface) = 0;
     virtual void release() = 0;
-    virtual void destroy() = 0;
     virtual bool isValid() = 0;
 
 protected:

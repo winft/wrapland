@@ -89,24 +89,7 @@ public:
      * @see interfaceAboutToBeReleased
      **/
     void release();
-    /**
-     * Destroys the data held by this PlasmaWindowManagement.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. Once the connection becomes invalid, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new org_kde_plasma_window_management interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * PlasmaWindowManagement gets destroyed.
-     *
-     * Right before the data is destroyed, the signal interfaceAboutToBeDestroyed is emitted.
-     *
-     * @see release
-     * @see interfaceAboutToBeDestroyed
-     **/
-    void destroy();
+
     /**
      * Setup this Shell to manage the @p shell.
      * When using Registry::createShell there is no need to call this
@@ -175,10 +158,7 @@ Q_SIGNALS:
      * This signal is emitted right before the interface is released.
      **/
     void interfaceAboutToBeReleased();
-    /**
-     * This signal is emitted right before the data is destroyed.
-     **/
-    void interfaceAboutToBeDestroyed();
+
     /**
      * The showing desktop state changed.
      * @see isShowingDesktop
@@ -237,23 +217,7 @@ public:
      * longer valid and can be setup with another org_kde_plasma_window interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this PlasmaWindow.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new org_kde_plasma_window interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, source, &PlasmaWindow::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
+
     /**
      * @returns @c true if managing a org_kde_plasma_window.
      **/

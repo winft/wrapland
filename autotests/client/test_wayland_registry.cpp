@@ -725,7 +725,7 @@ void TestWaylandRegistry::testGlobalSync()
     registry.setup();
     QVERIFY(syncSpy.wait());
     QCOMPARE(syncSpy.count(), 1);
-    registry.destroy();
+    registry.release();
 }
 
 void TestWaylandRegistry::testGlobalSyncThreaded()
@@ -754,7 +754,7 @@ void TestWaylandRegistry::testGlobalSyncThreaded()
 
     QVERIFY(syncSpy.wait());
     QCOMPARE(syncSpy.count(), 1);
-    registry.destroy();
+    registry.release();
 
     thread.quit();
     thread.wait();

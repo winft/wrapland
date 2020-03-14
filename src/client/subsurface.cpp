@@ -82,11 +82,6 @@ void SubSurface::setup(wl_subsurface *subsurface)
     d->setup(subsurface);
 }
 
-void SubSurface::destroy()
-{
-    d->subSurface.destroy();
-}
-
 void SubSurface::release()
 {
     d->subSurface.release();

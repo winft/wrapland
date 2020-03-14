@@ -55,11 +55,6 @@ Buffer::Private::~Private()
     nativeBuffer.release();
 }
 
-void Buffer::Private::destroy()
-{
-    nativeBuffer.destroy();
-}
-
 void Buffer::Private::releasedCallback(void *data, wl_buffer *buffer)
 {
     auto b = reinterpret_cast<Buffer::Private*>(data);

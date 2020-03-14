@@ -205,17 +205,11 @@ public:
     static Output *get(wl_output *native);
 
     /**
-    * Destroys the data hold by this Output.
-    * This method is supposed to be used when the connection to the Wayland
-    * server goes away. If the connection is not valid any more, it's not
-    * possible to call release any more as that calls into the Wayland
-    * connection and the call would fail.
-    *
-    * This method is automatically invoked when the Registry which created this
-    * Output gets destroyed.
-    *
-    **/
-    void destroy();
+     * Releases the wl_output interface.
+     * After the interface has been released the Output instance is no
+     * longer valid and can be setup with another wl_output interface.
+     **/
+    void release();
 
 Q_SIGNALS:
     /**

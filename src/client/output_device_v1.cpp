@@ -380,9 +380,9 @@ QByteArray OutputDeviceV1::uuid() const
     return d->uuid;
 }
 
-void OutputDeviceV1::destroy()
+void OutputDeviceV1::release()
 {
-    d->output.destroy();
+    d->output.release();
 }
 
 }

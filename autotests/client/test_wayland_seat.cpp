@@ -2364,16 +2364,16 @@ void TestWaylandSeat::testDisconnect()
     QCOMPARE(pointerDestroyedSpy.count(), 1);
     QCOMPARE(touchDestroyedSpy.count(), 1);
 
-    keyboard->destroy();
-    pointer->destroy();
-    touch->destroy();
-    m_relativePointerManager->destroy();
-    m_pointerGestures->destroy();
-    m_compositor->destroy();
-    m_seat->destroy();
-    m_shm->destroy();
-    m_subCompositor->destroy();
-    m_queue->destroy();
+    keyboard->release();
+    pointer->release();
+    touch->release();
+    m_relativePointerManager->release();
+    m_pointerGestures->release();
+    m_compositor->release();
+    m_seat->release();
+    m_shm->release();
+    m_subCompositor->release();
+    m_queue->release();
 }
 
 void TestWaylandSeat::testPointerEnterOnUnboundSurface()

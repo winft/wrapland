@@ -54,15 +54,6 @@ Shell::~Shell()
     release();
 }
 
-void Shell::destroy()
-{
-    if (!d->shell) {
-        return;
-    }
-    emit interfaceAboutToBeDestroyed();
-    d->shell.destroy();
-}
-
 void Shell::release()
 {
     if (!d->shell) {
@@ -94,7 +85,6 @@ ShellSurface *Shell::createSurface(wl_surface *surface, QObject *parent)
     Q_ASSERT(isValid());
     ShellSurface *s = new ShellSurface(parent);
     connect(this, &Shell::interfaceAboutToBeReleased, s, &ShellSurface::release);
-    connect(this, &Shell::interfaceAboutToBeDestroyed, s, &ShellSurface::destroy);
     auto w = wl_shell_get_shell_surface(d->shell, surface);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -227,11 +217,6 @@ ShellSurface::~ShellSurface()
 void ShellSurface::release()
 {
     d->surface.release();
-}
-
-void ShellSurface::destroy()
-{
-    d->surface.destroy();
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

@@ -95,23 +95,6 @@ public:
      * longer valid and can be setup with another zwp_pointer_constraints_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this PointerConstraints.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zwp_pointer_constraints_v1 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, pointerconstraints, &PointerConstraints::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating objects with this PointerConstraints.
@@ -280,23 +263,6 @@ public:
      * longer valid and can be setup with another zwp_locked_pointer_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this LockedPointer.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zwp_locked_pointer_v1 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, lockedpointer, &LockedPointer::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Set the cursor position hint relative to the top left corner of the Surface.
@@ -398,21 +364,6 @@ public:
      * longer valid and can be setup with another zwp_confined_pointer_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this ConfinedPointer.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zwp_confined_pointer_v1 interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * PointerConstraints gets destroyed.
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Set a new region used to confine the pointer.

@@ -429,23 +429,23 @@ void TestPointerConstraints::testAlreadyConstrained()
     QVERIFY(connectionSpy.wait());
     QVERIFY(m_connection->protocolError());
     if (confinedPointer2) {
-        confinedPointer2->destroy();
+        confinedPointer2->release();
     }
     if (lockedPointer2) {
-        lockedPointer2->destroy();
+        lockedPointer2->release();
     }
     if (confinedPointer) {
-        confinedPointer->destroy();
+        confinedPointer->release();
     }
     if (lockedPointer) {
-        lockedPointer->destroy();
+        lockedPointer->release();
     }
-    surface->destroy();
-    m_compositor->destroy();
-    m_pointerConstraints->destroy();
-    m_pointer->destroy();
-    m_seat->destroy();
-    m_queue->destroy();
+    surface->release();
+    m_compositor->release();
+    m_pointerConstraints->release();
+    m_pointer->release();
+    m_seat->release();
+    m_queue->release();
 }
 
 QTEST_GUILESS_MAIN(TestPointerConstraints)

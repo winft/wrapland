@@ -151,11 +151,6 @@ void DataOffer::release()
     d->dataOffer.release();
 }
 
-void DataOffer::destroy()
-{
-    d->dataOffer.destroy();
-}
-
 bool DataOffer::isValid() const
 {
     return d->dataOffer.isValid();

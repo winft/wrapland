@@ -88,23 +88,6 @@ public:
      * longer valid and can be setup with another org_kde_plasma_virtual_desktop_management interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this PlasmaVirtualDesktopManagement.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new org_kde_plasma_virtual_desktop_management interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, plasmavirtualdesktopmanagement, &PlasmaVirtualDesktopManagement::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating objects with this PlasmaVirtualDesktopManagement.
@@ -209,24 +192,6 @@ public:
      * longer valid and can be setup with another org_kde_plasma_virtual_desktop interface.
      **/
     void release();
-
-    /**
-     * Destroys the data held by this PlasmaVirtualDesktop.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new org_kde_plasma_virtual_desktop interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, plasmavirtualdesktop, &PlasmaVirtualDesktop::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Requests this desktop to be activated.

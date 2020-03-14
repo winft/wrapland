@@ -44,7 +44,6 @@ public:
         Q_UNUSED(xdgshell);
     }
     virtual void release() = 0;
-    virtual void destroy() = 0;
     virtual bool isValid() const = 0;
     virtual operator xdg_shell*() {
         return nullptr;
@@ -194,7 +193,6 @@ public:
         Q_UNUSED(toplevel)
     }
     virtual void release() = 0;
-    virtual void destroy() = 0;
     virtual bool isValid() const = 0;
     virtual operator xdg_surface*() {
         return nullptr;
@@ -265,7 +263,6 @@ public:
         Q_UNUSED(p)
     }
     virtual void release() = 0;
-    virtual void destroy() = 0;
     virtual bool isValid() const = 0;
     virtual void requestGrab(Seat *seat, quint32 serial) {
         Q_UNUSED(seat);

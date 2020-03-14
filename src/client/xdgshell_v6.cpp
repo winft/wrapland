@@ -37,7 +37,6 @@ class XdgShellUnstableV6::Private : public XdgShell::Private
 public:
     void setupV6(zxdg_shell_v6 *shell) override;
     void release() override;
-    void destroy() override;
     bool isValid() const override;
     XdgShellSurface *getXdgSurface(Surface *surface, QObject *parent) override;
 
@@ -82,11 +81,6 @@ void XdgShellUnstableV6::Private::setupV6(zxdg_shell_v6 *shell)
 void XdgShellUnstableV6::Private::release()
 {
     xdgshellv6.release();
-}
-
-void XdgShellUnstableV6::Private::destroy()
-{
-    xdgshellv6.destroy();
 }
 
 bool XdgShellUnstableV6::Private::isValid() const
@@ -234,7 +228,6 @@ public:
 
     void setupV6(zxdg_surface_v6 *surface, zxdg_toplevel_v6 *toplevel) override;
     void release() override;
-    void destroy() override;
     bool isValid() const override;
 
     using XdgShellSurface::Private::operator xdg_surface*;
@@ -353,12 +346,6 @@ void XdgTopLevelUnstableV6::Private::release()
 {
     xdgtoplevelv6.release();
     xdgsurfacev6.release();
-}
-
-void XdgTopLevelUnstableV6::Private::destroy()
-{
-    xdgtoplevelv6.destroy();
-    xdgsurfacev6.destroy();
 }
 
 bool XdgTopLevelUnstableV6::Private::isValid() const
@@ -480,7 +467,6 @@ public:
 
     void setupV6(zxdg_surface_v6 *s, zxdg_popup_v6 *p) override;
     void release() override;
-    void destroy() override;
     bool isValid() const override;
     void requestGrab(Seat *seat, quint32 serial) override;
     void ackConfigure(quint32 serial) override;
@@ -564,11 +550,6 @@ void XdgShellPopupUnstableV6::Private::setupV6(zxdg_surface_v6 *s, zxdg_popup_v6
 void XdgShellPopupUnstableV6::Private::release()
 {
     xdgpopupv6.release();
-}
-
-void XdgShellPopupUnstableV6::Private::destroy()
-{
-    xdgpopupv6.destroy();
 }
 
 bool XdgShellPopupUnstableV6::Private::isValid() const

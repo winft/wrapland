@@ -134,7 +134,6 @@ void PlasmaVirtualDesktopManagement::Private::removedCallback(void *data, org_kd
     auto i = p->findDesktop(stringId);
     p->desktops.erase(i);
     vd->release();
-    vd->destroy();
     vd->deleteLater();
     emit p->q->desktopRemoved(stringId);
 }
@@ -188,11 +187,6 @@ void PlasmaVirtualDesktopManagement::setup(org_kde_plasma_virtual_desktop_manage
 void PlasmaVirtualDesktopManagement::release()
 {
     d->plasmavirtualdesktopmanagement.release();
-}
-
-void PlasmaVirtualDesktopManagement::destroy()
-{
-    d->plasmavirtualdesktopmanagement.destroy();
 }
 
 PlasmaVirtualDesktopManagement::operator org_kde_plasma_virtual_desktop_management*() {
@@ -357,11 +351,6 @@ void PlasmaVirtualDesktop::setup(org_kde_plasma_virtual_desktop *plasmavirtualde
 void PlasmaVirtualDesktop::release()
 {
     d->plasmavirtualdesktop.release();
-}
-
-void PlasmaVirtualDesktop::destroy()
-{
-    d->plasmavirtualdesktop.destroy();
 }
 
 PlasmaVirtualDesktop::operator org_kde_plasma_virtual_desktop*() {

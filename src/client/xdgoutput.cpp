@@ -71,11 +71,6 @@ void XdgOutputManager::release()
     d->xdgoutputmanager.release();
 }
 
-void XdgOutputManager::destroy()
-{
-    d->xdgoutputmanager.destroy();
-}
-
 XdgOutputManager::operator zxdg_output_manager_v1*() {
     return d->xdgoutputmanager;
 }
@@ -204,11 +199,6 @@ void XdgOutput::setup(zxdg_output_v1 *xdgoutput)
 void XdgOutput::release()
 {
     d->xdgoutput.release();
-}
-
-void XdgOutput::destroy()
-{
-    d->xdgoutput.destroy();
 }
 
 QSize XdgOutput::logicalSize() const

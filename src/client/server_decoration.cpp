@@ -131,11 +131,6 @@ void ServerSideDecorationManager::release()
     d->serversidedecorationmanager.release();
 }
 
-void ServerSideDecorationManager::destroy()
-{
-    d->serversidedecorationmanager.destroy();
-}
-
 void ServerSideDecorationManager::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;
@@ -240,11 +235,6 @@ void ServerSideDecoration::setup(org_kde_kwin_server_decoration *serversidedecor
 void ServerSideDecoration::release()
 {
     d->serversidedecoration.release();
-}
-
-void ServerSideDecoration::destroy()
-{
-    d->serversidedecoration.destroy();
 }
 
 ServerSideDecoration::operator org_kde_kwin_server_decoration*() {

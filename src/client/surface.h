@@ -97,21 +97,7 @@ public:
      * longer valid and can be setup with another wl_surface interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this Surface.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new wl_surface interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * Surface gets destroyed.
-     *
-     * @see release
-     **/
-    void destroy();
+
     /**
      * @returns @c true if managing a wl_surface.
      **/

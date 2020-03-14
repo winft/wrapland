@@ -179,11 +179,6 @@ void TextInputManager::release()
     d->release();
 }
 
-void TextInputManager::destroy()
-{
-    d->destroy();
-}
-
 void TextInputManager::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;

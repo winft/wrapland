@@ -825,13 +825,13 @@ void TestWaylandShell::testDisconnect()
     QVERIFY(shellSurfaceDestroyedSpy.wait());
     QCOMPARE(shellSurfaceDestroyedSpy.count(), 1);
 
-    s->destroy();
-    surface->destroy();
-    m_shell->destroy();
-    m_compositor->destroy();
-    m_pointer->destroy();
-    m_seat->destroy();
-    m_queue->destroy();
+    s->release();
+    surface->release();
+    m_shell->release();
+    m_compositor->release();
+    m_pointer->release();
+    m_seat->release();
+    m_queue->release();
 }
 
 void TestWaylandShell::testWhileDestroying()
@@ -909,15 +909,15 @@ void TestWaylandShell::testClientDisconnecting()
 
     QVERIFY(shellSurfaceUnboundSpy.wait());
 
-    ps->destroy();
-    s->destroy();
-    ps2->destroy();
-    s2->destroy();
-    m_pointer->destroy();
-    m_seat->destroy();
-    m_shell->destroy();
-    m_compositor->destroy();
-    m_queue->destroy();
+    ps->release();
+    s->release();
+    ps2->release();
+    s2->release();
+    m_pointer->release();
+    m_seat->release();
+    m_shell->release();
+    m_compositor->release();
+    m_queue->release();
 }
 
 QTEST_GUILESS_MAIN(TestWaylandShell)

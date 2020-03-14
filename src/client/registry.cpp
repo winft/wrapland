@@ -473,12 +473,6 @@ void Registry::release()
     d->callback.release();
 }
 
-void Registry::destroy()
-{
-    d->registry.destroy();
-    d->callback.destroy();
-}
-
 void Registry::create(wl_display *display)
 {
     Q_ASSERT(display);
@@ -735,8 +729,7 @@ T *Registry::Private::create(quint32 name, quint32 version, QObject *parent, WL 
             }
         }
     );
-    // TODO: Make this connect to release (and remove destroy everywhere!).
-    QObject::connect(q, &Registry::registryReleased, t, &T::destroy);
+    QObject::connect(q, &Registry::registryReleased, t, &T::release);
     return t;
 }
 

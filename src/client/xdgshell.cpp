@@ -63,11 +63,6 @@ void XdgShell::release()
     d->release();
 }
 
-void XdgShell::destroy()
-{
-    d->destroy();
-}
-
 void XdgShell::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;
@@ -165,11 +160,6 @@ void XdgShellSurface::setup(xdg_surface *xdgsurface, xdg_toplevel *xdgtoplevel)
 void XdgShellSurface::release()
 {
     d->release();
-}
-
-void XdgShellSurface::destroy()
-{
-    d->destroy();
 }
 
 void XdgShellSurface::setEventQueue(EventQueue *queue)
@@ -343,11 +333,6 @@ void XdgShellPopup::setup(xdg_surface *surface, xdg_popup *popup)
 void XdgShellPopup::release()
 {
     d->release();
-}
-
-void XdgShellPopup::destroy()
-{
-    d->destroy();
 }
 
 void XdgShellPopup::setEventQueue(EventQueue *queue)

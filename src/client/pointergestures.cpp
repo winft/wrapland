@@ -64,11 +64,6 @@ void PointerGestures::release()
     d->pointergestures.release();
 }
 
-void PointerGestures::destroy()
-{
-    d->pointergestures.destroy();
-}
-
 PointerGestures::operator zwp_pointer_gestures_v1*() {
     return d->pointergestures;
 }
@@ -215,11 +210,6 @@ void PointerSwipeGesture::release()
     d->pointerswipegesture.release();
 }
 
-void PointerSwipeGesture::destroy()
-{
-    d->pointerswipegesture.destroy();
-}
-
 PointerSwipeGesture::operator zwp_pointer_gesture_swipe_v1*() {
     return d->pointerswipegesture;
 }
@@ -320,11 +310,6 @@ void PointerPinchGesture::setup(zwp_pointer_gesture_pinch_v1 *pointerpinchgestur
 void PointerPinchGesture::release()
 {
     d->pointerpinchgesture.release();
-}
-
-void PointerPinchGesture::destroy()
-{
-    d->pointerpinchgesture.destroy();
 }
 
 PointerPinchGesture::operator zwp_pointer_gesture_pinch_v1*() {
