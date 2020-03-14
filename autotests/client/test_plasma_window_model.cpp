@@ -222,22 +222,39 @@ if (!QTest::qCompare(actual, expected, #actual, #expected, __FILE__, __LINE__))\
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     VERIFY(rowInsertedSpy.isValid());
 
-    auto *serverWindow = m_pwInterface->createWindow(m_pwInterface);
-    VERIFY(serverWindow);
-    VERIFY(rowInsertedSpy.wait());
-
-    m_connection->flush();
-    m_display->dispatchEvents();
-
+    QSignalSpy initSpy(m_pw, &Clt::PlasmaWindowManagement::windowCreated);
+    VERIFY(initSpy.isValid());
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     VERIFY(dataChangedSpy.isValid());
+
+    auto *serverWindow = m_pwInterface->createWindow(m_pwInterface);
+    VERIFY(serverWindow);
+
+    COMPARE(dataChangedSpy.count(), 0);
+    COMPARE(initSpy.count(), 0);
+
+    VERIFY(rowInsertedSpy.wait());
+    COMPARE(initSpy.count(), 1);
+
+    // Wait for the first event announcing the icon on resource creation.
+    VERIFY(dataChangedSpy.count() == 1 || dataChangedSpy.wait());
+    COMPARE(dataChangedSpy.count(), 1);
+    COMPARE(initSpy.count(), 1);
+
+    // The current API is not very well defined in regards to which evente we can except when.
+    // Make sure we do not get additional data changed signals before actually setting the data.
+    VERIFY(!dataChangedSpy.wait(100));
 
     const QModelIndex index = model->index(0);
     COMPARE(model->data(index, role).toBool(), false);
 
     (serverWindow->*(function))(true);
+
     VERIFY(dataChangedSpy.wait());
-    COMPARE(dataChangedSpy.count(), 1);
+    COMPARE(dataChangedSpy.count(), 2);
+
+    // Check that there is only one data changed signal we receive.
+    VERIFY(!dataChangedSpy.wait(100));
 
     COMPARE(dataChangedSpy.last().first().toModelIndex(), index);
     COMPARE(dataChangedSpy.last().last().value<QVector<int>>(), QVector<int>{int(role)});
@@ -245,7 +262,7 @@ if (!QTest::qCompare(actual, expected, #actual, #expected, __FILE__, __LINE__))\
 
     (serverWindow->*(function))(false);
     VERIFY(dataChangedSpy.wait());
-    COMPARE(dataChangedSpy.count(), 2);
+    COMPARE(dataChangedSpy.count(), 3);
 
     COMPARE(dataChangedSpy.last().first().toModelIndex(), index);
     COMPARE(dataChangedSpy.last().last().value<QVector<int>>(), QVector<int>{int(role)});
@@ -586,9 +603,13 @@ void PlasmaWindowModelTest::testGeometry()
     serverWindow->setGeometry(geom);
 
     QVERIFY(dataChangedSpy.wait());
-    QCOMPARE(dataChangedSpy.count(), 1);
-    QCOMPARE(dataChangedSpy.last().first().toModelIndex(), index);
-    QCOMPARE(dataChangedSpy.last().last().value<QVector<int>>(),
+
+    // An icon and the geometry will be sent.
+    QTRY_COMPARE(dataChangedSpy.count(), 2);
+
+    // The goemetry is sent before the icon (which is always sent in the beginning).
+    QCOMPARE(dataChangedSpy.first().first().toModelIndex(), index);
+    QCOMPARE(dataChangedSpy.first().last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::Geometry)});
 
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::Geometry).toRect(), geom);
@@ -617,9 +638,13 @@ void PlasmaWindowModelTest::testTitle()
 
     serverWindow->setTitle(QStringLiteral("foo"));
     QVERIFY(dataChangedSpy.wait());
-    QCOMPARE(dataChangedSpy.count(), 1);
-    QCOMPARE(dataChangedSpy.last().first().toModelIndex(), index);
-    QCOMPARE(dataChangedSpy.last().last().value<QVector<int>>(),
+
+    // An icon and the title will be sent.
+    QTRY_COMPARE(dataChangedSpy.count(), 2);
+
+    // The geometry is sent before the icon (which is always sent in the beginning).
+    QCOMPARE(dataChangedSpy.first().first().toModelIndex(), index);
+    QCOMPARE(dataChangedSpy.first().last().value<QVector<int>>(),
              QVector<int>{int(Qt::DisplayRole)});
     QCOMPARE(model->data(index, Qt::DisplayRole).toString(), QStringLiteral("foo"));
 }
@@ -647,9 +672,13 @@ void PlasmaWindowModelTest::testAppId()
 
     serverWindow->setAppId(QStringLiteral("org.kde.testapp"));
     QVERIFY(dataChangedSpy.wait());
-    QCOMPARE(dataChangedSpy.count(), 1);
-    QCOMPARE(dataChangedSpy.last().first().toModelIndex(), index);
-    QCOMPARE(dataChangedSpy.last().last().value<QVector<int>>(),
+
+    // The App Id and the geometry will be sent.
+    QTRY_COMPARE(dataChangedSpy.count(), 2);
+
+    // The App Id is sent before the icon (which is always sent in the beginning).
+    QCOMPARE(dataChangedSpy.first().first().toModelIndex(), index);
+    QCOMPARE(dataChangedSpy.first().last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::AppId)});
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::AppId).toString(),
              QStringLiteral("org.kde.testapp"));
@@ -698,13 +727,14 @@ void PlasmaWindowModelTest::testVirtualDesktops()
 
     serverWindow->addPlasmaVirtualDesktop("desktop1");
     QVERIFY(dataChangedSpy.wait());
-    QCOMPARE(dataChangedSpy.count(), 2);
+    QTRY_COMPARE(dataChangedSpy.count(), 3);
+
     QCOMPARE(dataChangedSpy.first().first().toModelIndex(), index);
     QCOMPARE(dataChangedSpy.last().first().toModelIndex(), index);
 
     QCOMPARE(dataChangedSpy.first().last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::VirtualDesktops)});
-    QCOMPARE(dataChangedSpy.last().last().value<QVector<int>>(),
+    QCOMPARE(dataChangedSpy[1].last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::IsOnAllDesktops)});
 
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::VirtualDesktops).toStringList(),
@@ -712,13 +742,16 @@ void PlasmaWindowModelTest::testVirtualDesktops()
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::IsOnAllDesktops).toBool(), false);
 
     dataChangedSpy.clear();
+    QVERIFY(!dataChangedSpy.count());
 
     serverWindow->addPlasmaVirtualDesktop("desktop2");
     QVERIFY(dataChangedSpy.wait());
-    QCOMPARE(dataChangedSpy.count(), 1);
-    QCOMPARE(dataChangedSpy.last().first().toModelIndex(), index);
-    QCOMPARE(dataChangedSpy.last().last().value<QVector<int>>(),
+    QTRY_COMPARE(dataChangedSpy.count(), 1);
+
+    QCOMPARE(dataChangedSpy.first().first().toModelIndex(), index);
+    QCOMPARE(dataChangedSpy.first().last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::VirtualDesktops)});
+
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::VirtualDesktops).toStringList(),
              QStringList({"desktop1", "desktop2"}));
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::IsOnAllDesktops).toBool(), false);
@@ -727,14 +760,10 @@ void PlasmaWindowModelTest::testVirtualDesktops()
     serverWindow->removePlasmaVirtualDesktop("desktop1");
 
     QVERIFY(dataChangedSpy.wait());
-    QTRY_COMPARE(dataChangedSpy.count(), 6);
+    QTRY_COMPARE(dataChangedSpy.count(), 5);
 
-    QEXPECT_FAIL("", "This was the old check and it does not work anymore. Was it wrong?",
-                 Continue);
     QCOMPARE(dataChangedSpy.last().last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::IsOnAllDesktops)});
-    // This works now in comparision.
-    QCOMPARE(dataChangedSpy.last().last().value<QVector<int>>(), QVector<int>{1});
 
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::VirtualDesktops).toStringList(),
              QStringList({}));
