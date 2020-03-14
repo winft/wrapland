@@ -621,6 +621,9 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
 
     blurAnnouncedSpy.wait();
     contrastAnnouncedSpy.wait();
+    if (!contrastAnnouncedSpy.count()) {
+        contrastAnnouncedSpy.wait();
+    }
     BlurManager *blurManager = registry.createBlurManager(registry.interface(Registry::Interface::Blur).name, registry.interface(Registry::Interface::Blur).version, &registry);
     ContrastManager *contrastManager = registry.createContrastManager(registry.interface(Registry::Interface::Contrast).name, registry.interface(Registry::Interface::Contrast).version, &registry);
 
