@@ -291,9 +291,8 @@ void RemoteAccessTest::testSendReleaseMultiple()
     // wait for event loop
     QVERIFY(paramsObtainedSpy1.size() == 1 || paramsObtainedSpy1.wait());
     QCOMPARE(paramsObtainedSpy1.size(), 1);
-    if (paramsObtainedSpy2.size() == 0) {
-        QVERIFY(paramsObtainedSpy2.wait());
-    }
+
+    QVERIFY(paramsObtainedSpy2.size() == 1 || paramsObtainedSpy2.wait());
     QCOMPARE(paramsObtainedSpy2.size(), 1);
 
     // release

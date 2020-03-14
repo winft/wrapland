@@ -542,7 +542,9 @@ void XdgShellTest::testConfigureMultipleAcks()
     QVERIFY(serial2 != serial3);
 
     QVERIFY(configureSpy.wait());
-    QCOMPARE(configureSpy.count(), 3);
+    QTRY_COMPARE(configureSpy.count(), 3);
+    QVERIFY(!configureSpy.wait(100));
+
     QCOMPARE(configureSpy.at(0).at(0).toSize(), QSize(10, 20));
     QCOMPARE(configureSpy.at(0).at(1).value<XdgShellSurface::States>(), XdgShellSurface::States());
     QCOMPARE(configureSpy.at(0).at(2).value<quint32>(), serial1);
