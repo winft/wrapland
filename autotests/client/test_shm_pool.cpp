@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // KWin
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
+#include "../../src/client/event_queue.h"
 #include "../../src/client/surface.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/shm_pool.h"
@@ -55,6 +56,7 @@ private:
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
     Wrapland::Client::ShmPool *m_shmPool;
+    Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
@@ -74,7 +76,7 @@ TestShmPool::TestShmPool(QObject *parent)
 void TestShmPool::init()
 {
     using namespace Wrapland::Server;
-    delete m_display;
+
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
@@ -92,7 +94,12 @@ void TestShmPool::init()
     m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
+    m_queue = new Wrapland::Client::EventQueue(this);
+    m_queue->setup(m_connection);
+
     Wrapland::Client::Registry registry;
+    registry.setEventQueue(m_queue);
+
     QSignalSpy shmSpy(&registry, SIGNAL(shmAnnounced(quint32,quint32)));
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
@@ -115,6 +122,7 @@ void TestShmPool::cleanup()
         delete m_shmPool;
         m_shmPool = nullptr;
     }
+    delete m_queue;
     if (m_thread) {
         m_thread->quit();
         m_thread->wait();
