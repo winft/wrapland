@@ -90,6 +90,13 @@ SeatInterface::SeatInterface(Display *display, QObject *parent)
 SeatInterface::~SeatInterface()
 {
     Q_D();
+
+    // Need to unset all focused surfaces.
+    setFocusedKeyboardSurface(nullptr);
+    setFocusedTextInputSurface(nullptr);
+    setFocusedTouchSurface(nullptr);
+    setFocusedPointerSurface(nullptr);
+
     while (!d->resources.isEmpty()) {
         wl_resource_destroy(d->resources.takeLast());
     }
@@ -505,7 +512,7 @@ void SeatInterface::Private::getPointer(wl_client *client, wl_resource *resource
             emit q->focusedPointerChanged(pointer);
         }
     }
-    QObject::connect(pointer, &QObject::destroyed, q,
+    connect(pointer, &PointerInterface::aboutToBeUnbound, q,
         [pointer,this] {
             pointers.removeAt(pointers.indexOf(pointer));
             if (globalPointer.focus.pointers.removeOne(pointer)) {
