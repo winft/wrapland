@@ -484,22 +484,23 @@ void TestPlasmaShell::testDisconnect()
     QVERIFY(clientDisconnectedSpy.isValid());
     QSignalSpy surfaceDestroyedSpy(sps, &QObject::destroyed);
     QVERIFY(surfaceDestroyedSpy.isValid());
-    if (m_connection) {
-        m_connection->deleteLater();
-        m_connection = nullptr;
-    }
-    QVERIFY(clientDisconnectedSpy.wait());
-    QCOMPARE(clientDisconnectedSpy.count(), 1);
-    QCOMPARE(surfaceDestroyedSpy.count(), 0);
-    QVERIFY(surfaceDestroyedSpy.wait());
-    QCOMPARE(surfaceDestroyedSpy.count(), 1);
 
+    QVERIFY(m_connection);
     s->release();
     ps->release();
     m_plasmaShell->release();
     m_compositor->release();
     m_registry->release();
     m_queue->release();
+
+    QCOMPARE(surfaceDestroyedSpy.count(), 0);
+
+    m_connection->deleteLater();
+    m_connection = nullptr;
+
+    QVERIFY(clientDisconnectedSpy.wait());
+    QCOMPARE(clientDisconnectedSpy.count(), 1);
+    QTRY_COMPARE(surfaceDestroyedSpy.count(), 1);
 }
 
 void TestPlasmaShell::testWhileDestroying()

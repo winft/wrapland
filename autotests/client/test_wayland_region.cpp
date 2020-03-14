@@ -299,19 +299,20 @@ void TestRegion::testDisconnect()
     QVERIFY(clientDisconnectedSpy.isValid());
     QSignalSpy regionDestroyedSpy(serverRegion, &QObject::destroyed);
     QVERIFY(regionDestroyedSpy.isValid());
-    if (m_connection) {
-        m_connection->deleteLater();
-        m_connection = nullptr;
-    }
-    QVERIFY(clientDisconnectedSpy.wait());
-    QCOMPARE(clientDisconnectedSpy.count(), 1);
-    QCOMPARE(regionDestroyedSpy.count(), 0);
-    QVERIFY(regionDestroyedSpy.wait());
-    QCOMPARE(regionDestroyedSpy.count(), 1);
 
     r->release();
     m_compositor->release();
     m_queue->release();
+
+    QCOMPARE(regionDestroyedSpy.count(), 0);
+
+    QVERIFY(m_connection);
+    m_connection->deleteLater();
+    m_connection = nullptr;
+
+    QVERIFY(clientDisconnectedSpy.wait());
+    QCOMPARE(clientDisconnectedSpy.count(), 1);
+    QTRY_COMPARE(regionDestroyedSpy.count(), 1);
 }
 
 QTEST_GUILESS_MAIN(TestRegion)

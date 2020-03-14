@@ -1064,22 +1064,22 @@ void TestWaylandSurface::testDisconnect()
     QVERIFY(clientDisconnectedSpy.isValid());
     QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
     QVERIFY(surfaceDestroyedSpy.isValid());
-    if (m_connection) {
-        m_connection->deleteLater();
-        m_connection = nullptr;
-    }
-    QVERIFY(clientDisconnectedSpy.wait());
-    QCOMPARE(clientDisconnectedSpy.count(), 1);
-    if (surfaceDestroyedSpy.isEmpty()) {
-        QVERIFY(surfaceDestroyedSpy.wait());
-    }
-    QTRY_COMPARE(surfaceDestroyedSpy.count(), 1);
 
     s->release();
     m_shm->release();
     m_compositor->release();
     m_queue->release();
     m_idleInhibitManager->release();
+
+    QCOMPARE(surfaceDestroyedSpy.count(), 0);
+
+    QVERIFY(m_connection);
+    m_connection->deleteLater();
+    m_connection = nullptr;
+
+    QVERIFY(clientDisconnectedSpy.wait());
+    QCOMPARE(clientDisconnectedSpy.count(), 1);
+    QTRY_COMPARE(surfaceDestroyedSpy.count(), 1);
 }
 
 void TestWaylandSurface::testOutput()

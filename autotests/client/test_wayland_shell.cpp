@@ -810,10 +810,19 @@ void TestWaylandShell::testDisconnect()
     QVERIFY(clientDisconnectedSpy.isValid());
     QSignalSpy shellSurfaceDestroyedSpy(serverSurface, &QObject::destroyed);
     QVERIFY(shellSurfaceDestroyedSpy.isValid());
-    if (m_connection) {
-        m_connection->deleteLater();
-        m_connection = nullptr;
-    }
+
+    s->release();
+    surface->release();
+    m_shell->release();
+    m_compositor->release();
+    m_pointer->release();
+    m_seat->release();
+    m_queue->release();
+
+    QVERIFY(m_connection);
+    m_connection->deleteLater();
+    m_connection = nullptr;
+
     QVERIFY(clientDisconnectedSpy.wait());
     QCOMPARE(clientDisconnectedSpy.count(), 1);
     QCOMPARE(shellSurfaceDestroyedSpy.count(), 0);
@@ -824,14 +833,6 @@ void TestWaylandShell::testDisconnect()
     serverSurface->requestSize(QSize(1, 2));
     QVERIFY(shellSurfaceDestroyedSpy.wait());
     QCOMPARE(shellSurfaceDestroyedSpy.count(), 1);
-
-    s->release();
-    surface->release();
-    m_shell->release();
-    m_compositor->release();
-    m_pointer->release();
-    m_seat->release();
-    m_queue->release();
 }
 
 void TestWaylandShell::testWhileDestroying()
@@ -900,15 +901,6 @@ void TestWaylandShell::testClientDisconnecting()
         }
     );
 
-    m_connection->deleteLater();
-    m_connection = nullptr;
-    m_thread->quit();
-    m_thread->wait();
-    delete m_thread;
-    m_thread = nullptr;
-
-    QVERIFY(shellSurfaceUnboundSpy.wait());
-
     ps->release();
     s->release();
     ps2->release();
@@ -918,6 +910,15 @@ void TestWaylandShell::testClientDisconnecting()
     m_shell->release();
     m_compositor->release();
     m_queue->release();
+
+    m_connection->deleteLater();
+    m_connection = nullptr;
+    m_thread->quit();
+    m_thread->wait();
+    delete m_thread;
+    m_thread = nullptr;
+
+    QVERIFY(shellSurfaceUnboundSpy.wait());
 }
 
 QTEST_GUILESS_MAIN(TestWaylandShell)

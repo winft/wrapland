@@ -2350,20 +2350,6 @@ void TestWaylandSeat::testDisconnect()
     QSignalSpy clientDisconnectedSpy(serverKeyboard->client(), &ClientConnection::disconnected);
     QVERIFY(clientDisconnectedSpy.isValid());
 
-    if (m_connection) {
-        m_connection->deleteLater();
-        m_connection = nullptr;
-    }
-    QVERIFY(clientDisconnectedSpy.wait());
-    QCOMPARE(clientDisconnectedSpy.count(), 1);
-    QCOMPARE(keyboardDestroyedSpy.count(), 0);
-    QCOMPARE(pointerDestroyedSpy.count(), 0);
-    QCOMPARE(touchDestroyedSpy.count(), 0);
-    QVERIFY(keyboardDestroyedSpy.wait());
-    QCOMPARE(keyboardDestroyedSpy.count(), 1);
-    QCOMPARE(pointerDestroyedSpy.count(), 1);
-    QCOMPARE(touchDestroyedSpy.count(), 1);
-
     keyboard->release();
     pointer->release();
     touch->release();
@@ -2374,6 +2360,21 @@ void TestWaylandSeat::testDisconnect()
     m_shm->release();
     m_subCompositor->release();
     m_queue->release();
+
+    QCOMPARE(keyboardDestroyedSpy.count(), 0);
+    QCOMPARE(pointerDestroyedSpy.count(), 0);
+    QCOMPARE(touchDestroyedSpy.count(), 0);
+
+    QVERIFY(m_connection);
+    m_connection->deleteLater();
+    m_connection = nullptr;
+
+    QVERIFY(clientDisconnectedSpy.wait());
+    QCOMPARE(clientDisconnectedSpy.count(), 1);
+
+    QTRY_COMPARE(keyboardDestroyedSpy.count(), 1);
+    QTRY_COMPARE(pointerDestroyedSpy.count(), 1);
+    QTRY_COMPARE(touchDestroyedSpy.count(), 1);
 }
 
 void TestWaylandSeat::testPointerEnterOnUnboundSurface()
