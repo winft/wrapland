@@ -337,14 +337,14 @@ void TestWaylandSeat::testCapabilities()
     m_seatInterface->setHasTouch(touch);
 
     // do processing
-    QCOMPARE(pointerSpy.wait(1000), pointer);
+    QCOMPARE(pointerSpy.wait(200), pointer);
     QCOMPARE(pointerSpy.isEmpty(), !pointer);
     if (!pointerSpy.isEmpty()) {
         QCOMPARE(pointerSpy.first().first().toBool(), pointer);
     }
 
     if (keyboardSpy.isEmpty()) {
-        QCOMPARE(keyboardSpy.wait(1000), keyboard);
+        QCOMPARE(keyboardSpy.wait(200), keyboard);
     }
     QCOMPARE(keyboardSpy.isEmpty(), !keyboard);
     if (!keyboardSpy.isEmpty()) {
@@ -352,7 +352,7 @@ void TestWaylandSeat::testCapabilities()
     }
 
     if (touchSpy.isEmpty()) {
-        QCOMPARE(touchSpy.wait(1000), touch);
+        QCOMPARE(touchSpy.wait(200), touch);
     }
     QCOMPARE(touchSpy.isEmpty(), !touch);
     if (!touchSpy.isEmpty()) {
@@ -443,6 +443,7 @@ void TestWaylandSeat::testPointer()
     QCOMPARE(enteredSpy.first().first().value<quint32>(), m_display->serial());
     QCOMPARE(enteredSpy.first().last().toPoint(), QPoint(10, 3));
     QCOMPARE(frameSpy.count(), 3);
+
     PointerInterface *serverPointer = m_seatInterface->focusedPointer();
     QVERIFY(serverPointer);
     QCOMPARE(p->enteredSurface(), s);
@@ -543,7 +544,7 @@ void TestWaylandSeat::testPointer()
 
     // now a relative motion should not be sent to the relative pointer
     m_seatInterface->relativePointerMotion(QSizeF(1, 2), QSizeF(3, 4), quint64(-1));
-    QVERIFY(!relativeMotionSpy.wait(500));
+    QVERIFY(!relativeMotionSpy.wait(200));
 
     // enter it again
     m_seatInterface->setFocusedPointerSurface(serverSurface, QPoint(0, 0));
@@ -981,7 +982,7 @@ void TestWaylandSeat::testPointerSwipeGesture()
 
     // another start should not be possible
     m_seatInterface->startPointerSwipeGesture(2);
-    QVERIFY(!startSpy.wait(500));
+    QVERIFY(!startSpy.wait(200));
 
     // send in some updates
     m_seatInterface->setTimestamp(timestamp++);
@@ -1097,7 +1098,7 @@ void TestWaylandSeat::testPointerPinchGesture()
 
     // another start should not be possible
     m_seatInterface->startPointerPinchGesture(3);
-    QVERIFY(!startSpy.wait(500));
+    QVERIFY(!startSpy.wait(200));
 
     // send in some updates
     m_seatInterface->setTimestamp(timestamp++);
