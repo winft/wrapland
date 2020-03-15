@@ -458,7 +458,7 @@ void TestWaylandSeat::testPointer()
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.first().first().value<quint32>(), m_display->serial());
     QCOMPARE(enteredSpy.first().last().toPoint(), QPoint(10, 3));
-    QCOMPARE(frameSpy.count(), 3);
+    QTRY_COMPARE(frameSpy.count(), 3);
 
     auto *serverPointer = m_seatInterface->focusedPointer();
     QVERIFY(serverPointer);
@@ -472,7 +472,7 @@ void TestWaylandSeat::testPointer()
     m_seatInterface->setTimestamp(1);
     m_seatInterface->setPointerPos(QPoint(10, 16));
     QVERIFY(motionSpy.wait());
-    QCOMPARE(frameSpy.count(), 4);
+    QTRY_COMPARE(frameSpy.count(), 4);
     QCOMPARE(motionSpy.first().first().toPoint(), QPoint(0, 1));
     QCOMPARE(motionSpy.first().last().value<quint32>(), quint32(1));
 
@@ -480,7 +480,7 @@ void TestWaylandSeat::testPointer()
     m_seatInterface->relativePointerMotion(QSizeF(1, 2), QSizeF(3, 4), quint64(-1));
     QVERIFY(relativeMotionSpy.wait());
     QCOMPARE(relativeMotionSpy.count(), 1);
-    QCOMPARE(frameSpy.count(), 5);
+    QTRY_COMPARE(frameSpy.count(), 5);
     QCOMPARE(relativeMotionSpy.first().at(0).toSizeF(), QSizeF(1, 2));
     QCOMPARE(relativeMotionSpy.first().at(1).toSizeF(), QSizeF(3, 4));
     QCOMPARE(relativeMotionSpy.first().at(2).value<quint64>(), quint64(-1));
@@ -489,12 +489,12 @@ void TestWaylandSeat::testPointer()
     m_seatInterface->setTimestamp(2);
     m_seatInterface->pointerAxis(Qt::Horizontal, 10);
     QVERIFY(axisSpy.wait());
-    QCOMPARE(frameSpy.count(), 6);
+    QTRY_COMPARE(frameSpy.count(), 6);
     m_seatInterface->setTimestamp(3);
     m_seatInterface->pointerAxis(Qt::Vertical, 20);
 
     QVERIFY(axisSpy.wait());
-    QCOMPARE(frameSpy.count(), 7);
+    QTRY_COMPARE(frameSpy.count(), 7);
     QCOMPARE(axisSpy.first().at(0).value<quint32>(), quint32(2));
     QCOMPARE(axisSpy.first().at(1).value<Clt::Pointer::Axis>(), Clt::Pointer::Axis::Horizontal);
     QCOMPARE(axisSpy.first().at(2).value<qreal>(), qreal(10));
@@ -507,25 +507,25 @@ void TestWaylandSeat::testPointer()
     m_seatInterface->setTimestamp(4);
     m_seatInterface->pointerButtonPressed(1);
     QVERIFY(buttonSpy.wait());
-    QCOMPARE(frameSpy.count(), 8);
+    QTRY_COMPARE(frameSpy.count(), 8);
     QCOMPARE(buttonSpy.at(0).at(0).value<quint32>(), m_display->serial());
     m_seatInterface->setTimestamp(5);
     m_seatInterface->pointerButtonPressed(2);
 
     QVERIFY(buttonSpy.wait());
-    QCOMPARE(frameSpy.count(), 9);
+    QTRY_COMPARE(frameSpy.count(), 9);
     QCOMPARE(buttonSpy.at(1).at(0).value<quint32>(), m_display->serial());
     m_seatInterface->setTimestamp(6);
     m_seatInterface->pointerButtonReleased(2);
 
     QVERIFY(buttonSpy.wait());
-    QCOMPARE(frameSpy.count(), 10);
+    QTRY_COMPARE(frameSpy.count(), 10);
     QCOMPARE(buttonSpy.at(2).at(0).value<quint32>(), m_display->serial());
     m_seatInterface->setTimestamp(7);
     m_seatInterface->pointerButtonReleased(1);
 
     QVERIFY(buttonSpy.wait());
-    QCOMPARE(frameSpy.count(), 11);
+    QTRY_COMPARE(frameSpy.count(), 11);
     QCOMPARE(buttonSpy.count(), 4);
 
     // Timestamp
@@ -562,7 +562,7 @@ void TestWaylandSeat::testPointer()
     m_seatInterface->setFocusedPointerSurface(nullptr);
     QCOMPARE(focusedPointerChangedSpy.count(), 5);
     QVERIFY(leftSpy.wait());
-    QCOMPARE(frameSpy.count(), 12);
+    QTRY_COMPARE(frameSpy.count(), 12);
     QCOMPARE(leftSpy.first().first().value<quint32>(), m_display->serial());
     QVERIFY(!p->enteredSurface());
     QVERIFY(!cp.enteredSurface());
@@ -575,7 +575,7 @@ void TestWaylandSeat::testPointer()
     m_seatInterface->setFocusedPointerSurface(serverSurface, QPoint(0, 0));
     QCOMPARE(focusedPointerChangedSpy.count(), 6);
     QVERIFY(enteredSpy.wait());
-    QCOMPARE(frameSpy.count(), 13);
+    QTRY_COMPARE(frameSpy.count(), 13);
     QCOMPARE(p->enteredSurface(), s);
     QCOMPARE(cp.enteredSurface(), s);
 
