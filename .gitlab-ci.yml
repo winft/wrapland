@@ -10,7 +10,7 @@ Lint commit messages:
     - yarn global add @commitlint/cli
     - yarn add conventional-changelog-conventionalcommits
     - git fetch -q origin master
-    - commitlint --config=ci/commitlint.config.js --from=origin/master
+    - commitlint --verbose --config=ci/commitlint.config.js --from=origin/master
   cache:
     paths:
       - node_modules/
