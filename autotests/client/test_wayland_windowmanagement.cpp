@@ -618,12 +618,24 @@ void TestWindowManagement::testIcon()
     QCOMPARE(m_window->icon().name(), QStringLiteral("wayland"));
 
     // create an icon with a pixmap
-    QPixmap p(32, 32);
-    p.fill(Qt::red);
-    m_windowInterface->setIcon(p);
+    QPixmap pixmap(32, 32);
+    pixmap.fill(Qt::red);
+    QImage image = pixmap.toImage();
+
+    m_windowInterface->setIcon(pixmap);
     QVERIFY(iconChangedSpy.wait());
     QCOMPARE(iconChangedSpy.count(), 3);
-    QCOMPARE(m_window->icon().pixmap(32, 32), p);
+
+    QVERIFY(!m_window->icon().isNull());
+    const QImage cmp = m_window->icon().pixmap(32, 32).toImage();
+
+    QCOMPARE(cmp.size(), image.size());
+
+    // Image format might be different from QPixmap to QIcon transformation. So check only
+    // the raw pixel data.
+    for (int i = 0; i < image.width() * image.height(); i++) {
+        QCOMPARE(image.constBits()[i], cmp.constBits()[i]);
+    }
 
     // let's set a themed icon
     m_windowInterface->setIcon(QIcon::fromTheme(QStringLiteral("xorg")));
