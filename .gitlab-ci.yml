@@ -16,7 +16,7 @@ Lint commit messages:
       - node_modules/
 
 variables:
-  IMAGE_BASE: ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/ci-images/archlinux/base:latest
+  IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base:latest
 
 Arch Linux build:
   stage: Build
