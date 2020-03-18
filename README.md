@@ -1,5 +1,7 @@
 # Wrapland
 
+[![pipeline status][pipe-status-img]][pipe-status-link]
+
 Wrapland is a Qt-style API to interact with the wayland-client and wayland-server API.
 
 ## Introduction
@@ -176,4 +178,6 @@ Please make sure that your project is configured with C++11 support:
 
     CONFIG += c++11
 
+[pipe-status-img]: https://gitlab.com/kwinft/wrapland/badges/master/pipeline.svg
+[pipe-status-link]: https://gitlab.com/kwinft/wrapland/-/commits/master
 [plasma-schedule]: https://community.kde.org/Schedules/Plasma_5
