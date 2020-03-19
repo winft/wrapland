@@ -1,7 +1,7 @@
 stages:
   - Compliance
   - Build
-  - Tests
+  - Test
 
 Lint commit messages:
   stage: Compliance
@@ -18,26 +18,39 @@ Lint commit messages:
 variables:
   IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base:latest
 
-Arch Linux build:
+
+.common-build: &common-build
   stage: Build
   image: ${IMAGE_BASE}
   needs: []
-  script:
-    - pacman -Sy extra-cmake-modules --noconfirm
-    - mkdir ci-build && cd ci-build
-    - cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ../
-    - make -j$(nproc)
-    - make install -j$(nproc)
   artifacts:
     paths:
       - ci-build
     expire_in: 1 week
 
-Autotests:
-  stage: Tests
+Normal build:
+  <<: *common-build
+  script:
+    - pacman -Sy extra-cmake-modules --noconfirm --needed
+    - mkdir ci-build && cd ci-build
+    - cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ../
+    - make -j$(nproc)
+    - make install -j$(nproc)
+
+Sanitizers build:
+  <<: *common-build
+  script:
+    - pacman -Sy extra-cmake-modules clang --noconfirm --needed
+    - mkdir ci-build && cd ci-build
+    - cmake -DECM_ENABLE_SANITIZERS='address;leak;undefined'
+      -DCMAKE_CXX_COMPILER=clang++ ../
+    - make -j$(nproc)
+    - make install -j$(nproc)
+
+
+.common-test: &common-test
+  stage: Test
   image: ${IMAGE_BASE}
-  dependencies:
-    - Arch Linux build
   script:
     - cd ci-build
     - Xvfb :1 -ac -screen 0 1920x1080x24 > /dev/null 2>&1 &
@@ -47,3 +60,13 @@ Autotests:
     - ctest -N
     # Tests currently can only run in one thread, see issue #3.
     - dbus-run-session ctest --output-on-failure
+
+Autotests:
+  <<: *common-test
+  needs: ['Normal build']
+  dependencies: ['Normal build']
+
+Sanitizers:
+  <<: *common-test
+  needs: ['Sanitizers build']
+  dependencies: ['Sanitizers build']
