@@ -32,8 +32,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QRect>
 #include <QHash>
 
-#include <wayland-server.h>
 #include <wayland-plasma-window-management-server-protocol.h>
+
+#include <signal.h>
+#include <wayland-server.h>
 
 namespace Wrapland
 {
@@ -206,6 +208,12 @@ bool isDestroyed = false;
 PlasmaWindowManagementInterface::PlasmaWindowManagementInterface(Display *display, QObject *parent)
     : Global(new Private(this, display), parent)
 {
+    // Needed because the icon is sent via a pipe and when it closes while being written to would
+    // kill off the compositor.
+    // TODO: Replace the pipe with a Unix domain socket and set on it to ignore the SIGPIPE signal.
+    //       See issue #7.
+    signal(SIGPIPE, SIG_IGN);
+
     isDestroyed = false;
 }
 
