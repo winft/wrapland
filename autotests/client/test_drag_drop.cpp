@@ -333,8 +333,8 @@ void TestDragAndDrop::testTouchDragAndDrop()
     const qint32 touchId = m_seatInterface->touchDown(QPointF(50,50));
     QVERIFY(sequenceStartedSpy.wait());
 
-    QScopedPointer<TouchPoint> tp(sequenceStartedSpy.first().at(0).value<TouchPoint*>());
-    QVERIFY(!tp.isNull());
+    TouchPoint *tp(sequenceStartedSpy.first().at(0).value<TouchPoint*>());
+    QVERIFY(tp);
     QCOMPARE(tp->time(), quint32(2));
 
     // add some signal spies for client side

@@ -207,10 +207,6 @@ void TestWindowManagement::cleanup()
         delete m_compositor;
         m_compositor = nullptr;
     }
-    if (m_queue) {
-        delete m_queue;
-        m_queue = nullptr;
-    }
     if (m_windowManagement) {
         delete m_windowManagement;
         m_windowManagement = nullptr;
@@ -218,6 +214,10 @@ void TestWindowManagement::cleanup()
     if (m_registry) {
         delete m_registry;
         m_registry = nullptr;
+    }
+    if (m_queue) {
+        delete m_queue;
+        m_queue = nullptr;
     }
     if (m_thread) {
         if (m_connection) {

@@ -162,13 +162,12 @@ void TestDataDevice::cleanup()
         delete m_queue;
         m_queue = nullptr;
     }
-    if (m_thread) {
-        m_thread->quit();
-        m_thread->wait();
-        delete m_thread;
-        m_thread = nullptr;
-    }
-    delete m_connection;
+    m_connection->deleteLater();
+    m_thread->quit();
+    m_thread->wait();
+    delete m_thread;
+
+    m_thread = nullptr;
     m_connection = nullptr;
 
     delete m_display;

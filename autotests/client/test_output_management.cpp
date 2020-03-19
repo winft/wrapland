@@ -199,10 +199,16 @@ void TestOutputManagement::cleanup()
         delete m_outputConfiguration;
         m_outputConfiguration = nullptr;
     }
+    delete m_outputDevice;
+    m_clientOutputs.clear();
     if (m_outputManagement) {
         delete m_outputManagement;
         m_outputManagement = nullptr;
     }
+
+    delete m_announcedSpy;
+    delete m_omSpy;
+
     if (m_registry) {
         delete m_registry;
         m_registry = nullptr;
@@ -229,7 +235,6 @@ void TestOutputManagement::cleanup()
     delete m_display;
     m_display = nullptr;
     m_serverOutputs.clear();
-    m_clientOutputs.clear();
 }
 
 void TestOutputManagement::applyPendingChanges(Wrapland::Server::OutputConfigurationV1Interface *configurationInterface)

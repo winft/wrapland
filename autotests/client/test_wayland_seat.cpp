@@ -1953,10 +1953,9 @@ void TestWaylandSeat::testDestroy()
     QTRY_VERIFY(!t->isValid());
 
     // Calling release again should not fail.
-    m_seat->release();
-    k->release();
-    p->release();
-    t->release();
+    delete k;
+    delete p;
+    delete t;
 }
 
 void TestWaylandSeat::testSelection()

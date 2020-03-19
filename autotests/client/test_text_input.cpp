@@ -321,7 +321,7 @@ void TextInputTest::testEnterLeave()
     QSignalSpy unboundSpy(serverSurface, &QObject::destroyed);
     surface.reset();
     QVERIFY(unboundSpy.wait());
-    QVERIFY(leftSpy.wait());
+    QVERIFY(leftSpy.count() == 2 || leftSpy.wait());
     QVERIFY(!textInput->enteredSurface());
 }
 

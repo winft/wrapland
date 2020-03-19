@@ -1031,8 +1031,9 @@ void TestWaylandSurface::testDestroyWithPendingCallback()
     s->attachBuffer(b);
     s->damage(QRect(0, 0, 10, 10));
     // add some frame callbacks
+    wl_callback *callbacks[1000];
     for (int i = 0; i < 1000; i++) {
-        wl_surface_frame(*s);
+        callbacks[i] = wl_surface_frame(*s);
     }
     s->commit(Wrapland::Client::Surface::CommitFlag::FrameCallback);
     QSignalSpy damagedSpy(serverSurface, &SurfaceInterface::damaged);
@@ -1044,6 +1045,10 @@ void TestWaylandSurface::testDestroyWithPendingCallback()
     QVERIFY(destroyedSpy.isValid());
     s.reset();
     QVERIFY(destroyedSpy.wait());
+
+    for (int i = 0; i < 1000; i++) {
+        wl_callback_destroy(callbacks[i]);
+    }
 }
 
 void TestWaylandSurface::testDisconnect()
@@ -1117,7 +1122,7 @@ void TestWaylandSurface::testOutput()
     QSignalSpy outputAnnouncedSpy(&registry, &Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto serverOutput = m_display->createOutput(m_display);
+    OutputInterface *serverOutput = m_display->createOutput(m_display);
     serverOutput->create();
     QVERIFY(outputAnnouncedSpy.wait());
     QScopedPointer<Output> clientOutput(registry.createOutput(outputAnnouncedSpy.first().first().value<quint32>(), outputAnnouncedSpy.first().last().value<quint32>()));
@@ -1126,8 +1131,10 @@ void TestWaylandSurface::testOutput()
     m_display->dispatchEvents();
 
     // now enter it
-    serverSurface->setOutputs(QVector<OutputInterface*>{serverOutput});
-    QCOMPARE(serverSurface->outputs(), QVector<OutputInterface*>{serverOutput});
+    QVector<OutputInterface*> outputs;
+    outputs << serverOutput;
+    serverSurface->setOutputs(outputs);
+    QCOMPARE(serverSurface->outputs(), outputs);
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.count(), 1);
     QCOMPARE(enteredSpy.first().first().value<Output*>(), clientOutput.data());

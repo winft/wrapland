@@ -168,8 +168,8 @@ void TestForeign::cleanup()
     CLEANUP(m_exportedSurfaceInterface)
     CLEANUP(m_childSurfaceInterface)
 
-
-
+    m_exportedSurface.clear();
+    m_exported.clear();
     CLEANUP(m_compositor)
     CLEANUP(m_exporter)
     CLEANUP(m_importer)
@@ -252,14 +252,17 @@ void TestForeign::testDeleteImported()
     QSignalSpy transientSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::transientChanged);
  
     QVERIFY(transientSpy.isValid());
+
     m_imported->deleteLater();
-    m_imported = nullptr;
 
     QVERIFY(transientSpy.wait());
 
     QCOMPARE(transientSpy.first().first().value<Wrapland::Server::SurfaceInterface *>(), m_childSurfaceInterface.data());
     QVERIFY(!transientSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>());
     QVERIFY(!m_foreignInterface->transientFor(m_childSurfaceInterface));
+
+    m_exportedSurface.clear();
+    m_exported.clear();
 }
 
 void TestForeign::testDeleteChildSurface()
@@ -299,6 +302,9 @@ void TestForeign::testDeleteParentSurface()
     QCOMPARE(transientSpy.first().first().value<Wrapland::Server::SurfaceInterface *>(), m_childSurfaceInterface.data());
     QVERIFY(!transientSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>());
     QVERIFY(!m_foreignInterface->transientFor(m_childSurfaceInterface));
+
+    m_imported.clear();
+    m_exported.clear();
 }
 
 void TestForeign::testDeleteExported()
@@ -310,7 +316,6 @@ void TestForeign::testDeleteExported()
  
     QVERIFY(transientSpy.isValid());
     m_exported->deleteLater();
-    m_exported = nullptr;
 
     QVERIFY(transientSpy.wait());
     QVERIFY(destroyedSpy.wait());
@@ -320,6 +325,9 @@ void TestForeign::testDeleteExported()
     QVERIFY(!m_foreignInterface->transientFor(m_childSurfaceInterface));
 
     QVERIFY(!m_imported->isValid());
+
+    m_imported.clear();
+    m_exportedSurface.clear();
 }
 
 void TestForeign::testExportTwoTimes()
@@ -360,6 +368,11 @@ void TestForeign::testExportTwoTimes()
     QCOMPARE(m_foreignInterface->transientFor(m_childSurfaceInterface), m_exportedSurfaceInterface.data());
     //check the new relationship
     QCOMPARE(m_foreignInterface->transientFor(childSurface2Interface), m_exportedSurfaceInterface.data());
+
+    delete exported2;
+    m_imported.clear();
+    m_exportedSurface.clear();
+    m_exported.clear();
 }
 
 void TestForeign::testImportTwoTimes()
@@ -393,6 +406,11 @@ void TestForeign::testImportTwoTimes()
     QCOMPARE(m_foreignInterface->transientFor(m_childSurfaceInterface), m_exportedSurfaceInterface.data());
     //check the new relationship
     QCOMPARE(m_foreignInterface->transientFor(childSurface2Interface), m_exportedSurfaceInterface.data());
+
+    delete imported2;
+    m_imported.clear();
+    m_exportedSurface.clear();
+    m_exported.clear();
 }
 
 QTEST_GUILESS_MAIN(TestForeign)

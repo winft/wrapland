@@ -163,8 +163,8 @@ void TestBlur::testCreate()
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
     QSignalSpy blurChanged(serverSurface, SIGNAL(blurChanged()));
 
-    auto blur = m_blurManager->createBlur(surface.data(), surface.data());
-    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), nullptr));
+    auto *blur = m_blurManager->createBlur(surface.data(), surface.data());
+    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur));
     blur->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
@@ -191,7 +191,7 @@ void TestBlur::testSurfaceDestroy()
     QVERIFY(blurChanged.isValid());
 
     QScopedPointer<Wrapland::Client::Blur> blur(m_blurManager->createBlur(surface.data()));
-    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), nullptr));
+    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur.data()));
     blur->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 

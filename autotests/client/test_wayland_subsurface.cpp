@@ -739,9 +739,12 @@ void TestSubSurface::testMainSurfaceFromTree()
     QSignalSpy subSurfaceTreeChangedSpy(parentServerSurface, &SurfaceInterface::subSurfaceTreeChanged);
     QVERIFY(subSurfaceTreeChangedSpy.isValid());
 
-    m_subCompositor->createSubSurface(childLevel1Surface.data(), parentSurface.data());
-    m_subCompositor->createSubSurface(childLevel2Surface.data(), childLevel1Surface.data());
-    m_subCompositor->createSubSurface(childLevel3Surface.data(), childLevel2Surface.data());
+    auto *sub1 = m_subCompositor->createSubSurface(childLevel1Surface.data(),
+                                                   parentSurface.data());
+    auto *sub2 = m_subCompositor->createSubSurface(childLevel2Surface.data(),
+                                                   childLevel1Surface.data());
+    auto *sub3 = m_subCompositor->createSubSurface(childLevel3Surface.data(),
+                                                   childLevel2Surface.data());
 
     parentSurface->commit(Surface::CommitFlag::None);
     QVERIFY(subSurfaceTreeChangedSpy.wait());
@@ -759,6 +762,10 @@ void TestSubSurface::testMainSurfaceFromTree()
     QCOMPARE(child3->parentSurface().data(), child2->surface().data());
     QCOMPARE(child3->mainSurface().data(), parentServerSurface);
     QCOMPARE(child3->surface()->childSubSurfaces().count(), 0);
+
+    delete sub1;
+    delete sub2;
+    delete sub3;
 }
 
 void TestSubSurface::testRemoveSurface()
@@ -782,7 +789,8 @@ void TestSubSurface::testRemoveSurface()
     QSignalSpy subSurfaceTreeChangedSpy(parentServerSurface, &SurfaceInterface::subSurfaceTreeChanged);
     QVERIFY(subSurfaceTreeChangedSpy.isValid());
 
-    m_subCompositor->createSubSurface(childSurface.data(), parentSurface.data());
+    QScopedPointer<SubSurface> sub(m_subCompositor->createSubSurface(childSurface.data(),
+                                                                     parentSurface.data()));
     parentSurface->commit(Surface::CommitFlag::None);
     QVERIFY(subSurfaceTreeChangedSpy.wait());
 
@@ -920,6 +928,10 @@ void TestSubSurface::testMappingOfSurfaceTree()
     QVERIFY(!child->surface()->isMapped());
     QVERIFY(!child2->surface()->isMapped());
     QVERIFY(!child3->surface()->isMapped());
+
+    delete subSurfaceLevel1;
+    delete subSurfaceLevel2;
+    delete subSurfaceLevel3;
 }
 
 void TestSubSurface::testSurfaceAt()
@@ -1040,7 +1052,7 @@ void TestSubSurface::testDestroyAttachedBuffer()
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverChildSurface = serverSurfaceCreated.last().first().value<Wrapland::Server::SurfaceInterface*>();
     // create sub-surface
-    m_subCompositor->createSubSurface(child.data(), parent.data());
+    auto *sub = m_subCompositor->createSubSurface(child.data(), parent.data());
 
     // let's damage this surface, will be in sub-surface pending state
     QImage image(QSize(100, 100), QImage::Format_ARGB32_Premultiplied);
@@ -1057,6 +1069,8 @@ void TestSubSurface::testDestroyAttachedBuffer()
     m_shm = nullptr;
     child.reset();
     QVERIFY(destroySpy.wait());
+
+    delete sub;
 }
 
 void TestSubSurface::testDestroyParentSurface()
@@ -1103,6 +1117,9 @@ void TestSubSurface::testDestroyParentSurface()
     QVERIFY(destroySpy.isValid());
     child.reset();
     QVERIFY(destroySpy.wait());
+
+    delete sub1;
+    delete sub2;
 }
 
 QTEST_GUILESS_MAIN(TestSubSurface)

@@ -165,8 +165,8 @@ void TestContrast::testCreate()
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
     QSignalSpy contrastChanged(serverSurface, SIGNAL(contrastChanged()));
 
-    auto contrast = m_contrastManager->createContrast(surface.data(), surface.data());
-    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), nullptr));
+    auto *contrast = m_contrastManager->createContrast(surface.data(), surface.data());
+    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast));
 
     contrast->setContrast(0.2);
     contrast->setIntensity(2.0);
@@ -201,7 +201,7 @@ void TestContrast::testSurfaceDestroy()
     QVERIFY(contrastChanged.isValid());
 
     QScopedPointer<Wrapland::Client::Contrast> contrast(m_contrastManager->createContrast(surface.data()));
-    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), nullptr));
+    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast.data()));
     contrast->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 

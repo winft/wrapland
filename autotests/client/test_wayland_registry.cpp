@@ -59,10 +59,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/xdgshell_interface.h"
 #include "../../src/server/relativepointer_interface.h"
 // Wayland
+#include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
+#include <wayland-contrast-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
 #include <wayland-server-decoration-client-protocol.h>
+#include <wayland-slide-client-protocol.h>
 #include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-relativepointer-unstable-v1-client-protocol.h>
@@ -270,7 +273,9 @@ void TestWaylandRegistry::testCreate()
     /* registry should know about the interface now */ \
     QVERIFY(registry.hasInterface(iface)); \
     QVERIFY(!registry.bindMethod(name+1, version)); \
-    QVERIFY(registry.bindMethod(name, version+1)); \
+    auto *higherVersion = registry.bindMethod(name, version+1); \
+    QVERIFY(higherVersion); \
+    destroyFunction(higherVersion); \
     auto *c = registry.bindMethod(name, version); \
     QVERIFY(c); \
     destroyFunction(c); \
@@ -312,17 +317,23 @@ void TestWaylandRegistry::testBindDataDeviceManager()
 
 void TestWaylandRegistry::testBindBlurManager()
 {
-    TEST_BIND(Wrapland::Client::Registry::Interface::Blur, SIGNAL(blurAnnounced(quint32,quint32)), bindBlurManager, free)
+    TEST_BIND(Wrapland::Client::Registry::Interface::Blur,
+              SIGNAL(blurAnnounced(quint32,quint32)), bindBlurManager,
+              org_kde_kwin_blur_manager_destroy)
 }
 
 void TestWaylandRegistry::testBindContrastManager()
 {
-    TEST_BIND(Wrapland::Client::Registry::Interface::Contrast, SIGNAL(contrastAnnounced(quint32,quint32)), bindContrastManager, free)
+    TEST_BIND(Wrapland::Client::Registry::Interface::Contrast,
+              SIGNAL(contrastAnnounced(quint32,quint32)), bindContrastManager,
+              org_kde_kwin_contrast_manager_destroy)
 }
 
 void TestWaylandRegistry::testBindSlideManager()
 {
-    TEST_BIND(Wrapland::Client::Registry::Interface::Slide, SIGNAL(slideAnnounced(quint32,quint32)), bindSlideManager, free)
+    TEST_BIND(Wrapland::Client::Registry::Interface::Slide,
+              SIGNAL(slideAnnounced(quint32,quint32)), bindSlideManager,
+              org_kde_kwin_slide_manager_destroy)
 }
 
 void TestWaylandRegistry::testBindDpmsManager()
@@ -368,6 +379,7 @@ void TestWaylandRegistry::testBindPointerConstraintsUnstableV1()
 void TestWaylandRegistry::testBindIdleIhibitManagerUnstableV1()
 {
     TEST_BIND(Wrapland::Client::Registry::Interface::IdleInhibitManagerUnstableV1, SIGNAL(idleInhibitManagerUnstableV1Announced(quint32,quint32)), bindIdleInhibitManagerUnstableV1, zwp_idle_inhibit_manager_v1_destroy)
+    QTest::qWait(100);
 }
 
 #undef TEST_BIND
@@ -588,6 +600,16 @@ void TestWaylandRegistry::testRemoval()
     QCOMPARE(serverSideDecoManagerObjectRemovedSpy.count(), 1);
     QCOMPARE(blurObjectRemovedSpy.count(), 1);
     QCOMPARE(idleInhibitManagerObjectRemovedSpy.count(), 1);
+
+    delete seat;
+    delete shell;
+    delete output;
+    delete compositor;
+    delete subcompositor;
+    delete serverSideDeco;
+    delete blurManager;
+    delete idleInhibitManager;
+    registry.release();
 }
 
 void TestWaylandRegistry::testOutOfSyncRemoval()
@@ -643,7 +665,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QVERIFY(blurRemovedSpy.count() == 0);
 
     //use the in the client
-    blurManager->createBlur(surface.data(), nullptr);
+    auto *blur = blurManager->createBlur(surface.data(), nullptr);
 
     //now process events,
     QVERIFY(blurRemovedSpy.wait());
@@ -658,12 +680,19 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QVERIFY(contrastRemovedSpy.count() == 0);
 
     //use the in the client
-    contrastManager->createContrast(surface.data(), nullptr);
+    auto *contrast = contrastManager->createContrast(surface.data(), nullptr);
 
     //now process events,
     QVERIFY(contrastRemovedSpy.wait());
     QVERIFY(contrastRemovedSpy.count() == 1);
 
+    delete blur;
+    delete contrast;
+    surface.reset();
+    delete blurManager;
+    delete contrastManager;
+    compositor.reset();
+    registry.release();
 }
 
 void TestWaylandRegistry::testDestroy()
@@ -755,6 +784,9 @@ void TestWaylandRegistry::testGlobalSyncThreaded()
     QCOMPARE(syncSpy.count(), 1);
     registry.release();
 
+    queue.release();
+    connection.flush();
+
     thread.quit();
     thread.wait();
 }
@@ -816,6 +848,8 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().version, outputAnnouncedSpy.first().last().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::Output).name, outputAnnouncedSpy.first().first().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::Output).version, outputAnnouncedSpy.first().last().value<quint32>());
+
+    registry.release();
 }
 
 void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
@@ -875,6 +909,8 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().version, outputDeviceAnnouncedSpy.first().last().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).name, outputDeviceAnnouncedSpy.first().first().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).version, outputDeviceAnnouncedSpy.first().last().value<quint32>());
+
+    registry.release();
 }
 
 QTEST_GUILESS_MAIN(TestWaylandRegistry)
