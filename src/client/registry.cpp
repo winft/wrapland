@@ -491,8 +491,8 @@ void Registry::create(ConnectionThread *connection)
     connect(connection, &ConnectionThread::establishedChanged, this,
             [this] (bool established) {
         if (!established) {
-            release();
             Q_EMIT registryReleased();
+            release();
         }
     });
 }

@@ -203,7 +203,7 @@ void PlasmaWindowManagementInterface::Private::getWindowCallback(wl_client *clie
 
 // TODO: This is currently a hack such that we don't segfault when the interface has been destroyed
 //       by the compositor before shutdown and some clients still need to unbind from it.
-bool isDestroyed = false;
+static bool isDestroyed = false;
 
 PlasmaWindowManagementInterface::PlasmaWindowManagementInterface(Display *display, QObject *parent)
     : Global(new Private(this, display), parent)

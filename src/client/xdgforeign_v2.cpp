@@ -132,8 +132,8 @@ bool XdgImporterUnstableV2::Private::isValid()
 XdgImported *XdgImporterUnstableV2::Private::importTopLevelV2(const QString & handle, QObject *parent)
 {
     Q_ASSERT(isValid());
-    auto p = new XdgImportedUnstableV2(parent);
-    auto w = zxdg_importer_v2_import_toplevel(importer, handle.toUtf8());
+    auto *p = new XdgImportedUnstableV2(parent);
+    auto *w = zxdg_importer_v2_import_toplevel(importer, handle.toUtf8());
     if (queue) {
         queue->addProxy(w);
     }

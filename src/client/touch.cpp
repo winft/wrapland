@@ -256,6 +256,8 @@ Touch::Touch(QObject *parent)
 
 Touch::~Touch()
 {
+    qDeleteAll(d->sequence);
+    d->sequence.clear();
     release();
 }
 
