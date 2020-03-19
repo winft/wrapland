@@ -619,11 +619,10 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QSignalSpy blurAnnouncedSpy(&registry, &Registry::blurAnnounced);
     QSignalSpy contrastAnnouncedSpy(&registry, &Registry::blurAnnounced);
 
-    blurAnnouncedSpy.wait();
-    contrastAnnouncedSpy.wait();
-    if (!contrastAnnouncedSpy.count()) {
-        contrastAnnouncedSpy.wait();
-    }
+    QVERIFY(blurAnnouncedSpy.wait());
+    QVERIFY(contrastAnnouncedSpy.count() || contrastAnnouncedSpy.wait());
+    QCOMPARE(contrastAnnouncedSpy.count(), 1);
+
     BlurManager *blurManager = registry.createBlurManager(registry.interface(Registry::Interface::Blur).name, registry.interface(Registry::Interface::Blur).version, &registry);
     ContrastManager *contrastManager = registry.createContrastManager(registry.interface(Registry::Interface::Contrast).name, registry.interface(Registry::Interface::Contrast).version, &registry);
 
