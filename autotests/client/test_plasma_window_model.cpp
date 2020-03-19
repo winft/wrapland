@@ -1127,10 +1127,17 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy_data()
             << QVariant::fromValue(&Srv::PlasmaWindowInterface::setThemedIconName)
             << QVariant(QStringLiteral("foo"));
 #endif
+
+    // Disable the icon test for now. Our way of providing icons is fundamentally wrong and the
+    // whole concept needs to be redone so it works on all setups and in particular in a CI setting.
+    // See issue #8.
+#if 0
     QTest::newRow("icon" )
             << &Clt::PlasmaWindow::iconChanged
             << QVariant::fromValue(&Srv::PlasmaWindowInterface::setIcon)
             << QVariant::fromValue(QIcon::fromTheme(QStringLiteral("foo")));
+#endif
+
     QTest::newRow("vd")
             << &Clt::PlasmaWindow::virtualDesktopChanged
             << QVariant::fromValue(&Srv::PlasmaWindowInterface::setVirtualDesktop)
