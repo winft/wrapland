@@ -32,8 +32,8 @@ namespace Server
 
 class Display;
 class SurfaceInterface;
-class XdgExporterUnstableV2Interface;
-class XdgImporterUnstableV2Interface;
+class XdgExporterV2Interface;
+class XdgImporterV2Interface;
 
 /**
  * This class encapsulates the server side logic of the XdgForeign protocol.
@@ -85,8 +85,8 @@ Q_SIGNALS:
 
 private:
     friend class Display;
-    friend class XdgExporterUnstableV2Interface;
-    friend class XdgImporterUnstableV2Interface;
+    friend class XdgExporterV2Interface;
+    friend class XdgImporterV2Interface;
     class Private;
     Private *d;
 };

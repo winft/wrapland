@@ -30,8 +30,8 @@ namespace Server
 
 class Display;
 class SurfaceInterface;
-class XdgExportedUnstableV2Interface;
-class XdgImportedUnstableV2Interface;
+class XdgExportedV2Interface;
+class XdgImportedV2Interface;
 
 class Q_DECL_HIDDEN XdgForeignInterface::Private
 {
@@ -39,71 +39,71 @@ public:
     Private(Display *display, XdgForeignInterface *q);
 
     XdgForeignInterface *q;
-    XdgExporterUnstableV2Interface *exporter;
-    XdgImporterUnstableV2Interface *importer;
+    XdgExporterV2Interface *exporter;
+    XdgImporterV2Interface *importer;
 };
 
-class Q_DECL_HIDDEN XdgExporterUnstableV2Interface : public Global
+class Q_DECL_HIDDEN XdgExporterV2Interface : public Global
 {
     Q_OBJECT
 public:
-    virtual ~XdgExporterUnstableV2Interface();
+    virtual ~XdgExporterV2Interface();
 
-    XdgExportedUnstableV2Interface *exportedSurface(const QString &handle);
+    XdgExportedV2Interface *exportedSurface(const QString &handle);
 
 Q_SIGNALS:
-    void surfaceExported(const QString &handle, XdgExportedUnstableV2Interface *exported);
+    void surfaceExported(const QString &handle, XdgExportedV2Interface *exported);
     void surfaceUnexported(const QString &handle);
 
 private:
-    explicit XdgExporterUnstableV2Interface(Display *display, XdgForeignInterface *parent = nullptr);
+    explicit XdgExporterV2Interface(Display *display, XdgForeignInterface *parent = nullptr);
     friend class Display;
     friend class XdgForeignInterface;
     class Private;
     Private *d_func() const;
 };
 
-class Q_DECL_HIDDEN XdgImporterUnstableV2Interface : public Global
+class Q_DECL_HIDDEN XdgImporterV2Interface : public Global
 {
     Q_OBJECT
 public:
-    virtual ~XdgImporterUnstableV2Interface();
+    virtual ~XdgImporterV2Interface();
 
-    XdgImportedUnstableV2Interface *importedSurface(const QString &handle);
+    XdgImportedV2Interface *importedSurface(const QString &handle);
     SurfaceInterface *transientFor(SurfaceInterface *surface);
 
 Q_SIGNALS:
-    void surfaceImported(const QString &handle, XdgImportedUnstableV2Interface *imported);
+    void surfaceImported(const QString &handle, XdgImportedV2Interface *imported);
     void surfaceUnimported(const QString &handle);
     void transientChanged(Wrapland::Server::SurfaceInterface *child, Wrapland::Server::SurfaceInterface *parent);
 
 private:
-    explicit XdgImporterUnstableV2Interface(Display *display, XdgForeignInterface *parent = nullptr);
+    explicit XdgImporterV2Interface(Display *display, XdgForeignInterface *parent = nullptr);
     friend class Display;
     friend class XdgForeignInterface;
     class Private;
     Private *d_func() const;
 };
 
-class Q_DECL_HIDDEN XdgExportedUnstableV2Interface : public Resource
+class Q_DECL_HIDDEN XdgExportedV2Interface : public Resource
 {
     Q_OBJECT
 public:
-    virtual ~XdgExportedUnstableV2Interface();
+    virtual ~XdgExportedV2Interface();
 
 private:
-    explicit XdgExportedUnstableV2Interface(XdgExporterUnstableV2Interface *parent, wl_resource *parentResource);
-    friend class XdgExporterUnstableV2Interface;
+    explicit XdgExportedV2Interface(XdgExporterV2Interface *parent, wl_resource *parentResource);
+    friend class XdgExporterV2Interface;
 
     class Private;
     Private *d_func() const;
 };
 
-class Q_DECL_HIDDEN XdgImportedUnstableV2Interface : public Resource
+class Q_DECL_HIDDEN XdgImportedV2Interface : public Resource
 {
     Q_OBJECT
 public:
-    virtual ~XdgImportedUnstableV2Interface();
+    virtual ~XdgImportedV2Interface();
 
     SurfaceInterface *child() const;
 
@@ -111,8 +111,8 @@ Q_SIGNALS:
     void childChanged(Wrapland::Server::SurfaceInterface *child);
 
 private:
-    explicit XdgImportedUnstableV2Interface(XdgImporterUnstableV2Interface *parent, wl_resource *parentResource);
-    friend class XdgImporterUnstableV2Interface;
+    explicit XdgImportedV2Interface(XdgImporterV2Interface *parent, wl_resource *parentResource);
+    friend class XdgImporterV2Interface;
 
     class Private;
     Private *d_func() const;

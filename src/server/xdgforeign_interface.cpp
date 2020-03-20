@@ -38,10 +38,10 @@ namespace Server
 XdgForeignInterface::Private::Private(Display *display, XdgForeignInterface *q)
     : q(q)
 {
-    exporter = new XdgExporterUnstableV2Interface(display, q);
-    importer = new XdgImporterUnstableV2Interface(display, q);
+    exporter = new XdgExporterV2Interface(display, q);
+    importer = new XdgImporterV2Interface(display, q);
 
-    connect(importer, &XdgImporterUnstableV2Interface::transientChanged,
+    connect(importer, &XdgImporterV2Interface::transientChanged,
         q, &XdgForeignInterface::transientChanged);
 }
 
