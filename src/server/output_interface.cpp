@@ -148,7 +148,12 @@ OutputInterface::OutputInterface(Display *display, QObject *parent)
     connect(this, &OutputInterface::scaleChanged,          this, [this, d] { d->updateScale(); });
 }
 
-OutputInterface::~OutputInterface() = default;
+OutputInterface::~OutputInterface()
+{
+    // Must be called here so SurfaceInterfaces that were entered to the output will leave it
+    // before this sub-instance is destroyed.
+    Global::destroy();
+}
 
 QSize OutputInterface::pixelSize() const
 {
