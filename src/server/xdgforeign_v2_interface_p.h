@@ -68,8 +68,6 @@ public:
     SurfaceInterface *transientFor(SurfaceInterface *surface);
 
 Q_SIGNALS:
-    void surfaceImported(const QString &handle, XdgImportedV2Interface *imported);
-    void surfaceUnimported(const QString &handle);
     void transientChanged(Wrapland::Server::SurfaceInterface *child,
                           Wrapland::Server::SurfaceInterface *parent);
 

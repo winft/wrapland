@@ -273,7 +273,6 @@ void XdgImporterV2Interface::Private::importCallback(wl_client *client, wl_resou
                     imported->deleteLater();
                 }
                 priv->importedSurfaces.remove(handle);
-                Q_EMIT priv->q->surfaceUnimported(handle);
             });
 
     connect(imported.data(), &XdgImportedV2Interface::childChanged,
@@ -308,7 +307,6 @@ void XdgImporterV2Interface::Private::importCallback(wl_client *client, wl_resou
     connect(imported.data(), &XdgImportedV2Interface::unbound,
             priv->q, [priv, handle, imported]() {
                 priv->importedSurfaces.remove(handle);
-                Q_EMIT priv->q->surfaceUnimported(handle);
 
                 auto it = priv->children.find(imported);
                 if (it != priv->children.end()) {
@@ -326,7 +324,6 @@ void XdgImporterV2Interface::Private::importCallback(wl_client *client, wl_resou
     }
 
     priv->importedSurfaces[handle] = imported;
-    Q_EMIT priv->q->surfaceImported(handle, imported);
 }
 
 XdgImporterV2Interface::Private::Private(XdgImporterV2Interface *q, Display *d,
