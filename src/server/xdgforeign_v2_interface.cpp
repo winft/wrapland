@@ -118,7 +118,6 @@ void XdgExporterV2Interface::Private::exportCallback(wl_client *client, wl_resou
     connect(exported.data(), &XdgExportedV2Interface::unbound,
             priv->q, [priv, handle]() {
                 priv->exportedSurfaces.remove(handle);
-                Q_EMIT priv->q->surfaceUnexported(handle);
             });
 
     // If the surface dies before this, the export dies too.
@@ -128,12 +127,10 @@ void XdgExporterV2Interface::Private::exportCallback(wl_client *client, wl_resou
                     exported->deleteLater();
                 }
                 priv->exportedSurfaces.remove(handle);
-                Q_EMIT priv->q->surfaceUnexported(handle);
             });
 
     priv->exportedSurfaces[handle] = exported;
     zxdg_exported_v2_send_handle(exported->resource(), handle.toUtf8().constData());
-    Q_EMIT priv->q->surfaceExported(handle, exported);
 }
 
 XdgExporterV2Interface::Private::Private(XdgExporterV2Interface *q, Display *d,

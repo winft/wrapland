@@ -50,10 +50,6 @@ public:
 
     XdgExportedV2Interface *exportedSurface(const QString &handle);
 
-Q_SIGNALS:
-    void surfaceExported(const QString &handle, XdgExportedV2Interface *exported);
-    void surfaceUnexported(const QString &handle);
-
 private:
     explicit XdgExporterV2Interface(Display *display, XdgForeignInterface *parent = nullptr);
     friend class Display;
