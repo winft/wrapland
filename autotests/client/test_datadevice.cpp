@@ -261,6 +261,8 @@ void TestDataDevice::testDrag()
     // now we have all we need to start a drag operation
     QSignalSpy dragStartedSpy(deviceInterface, SIGNAL(dragStarted()));
     QVERIFY(dragStartedSpy.isValid());
+    QSignalSpy dragEnteredSpy(dataDevice.data(), &DataDevice::dragEntered);
+    QVERIFY(dragEnteredSpy.isValid());
 
     // first we need to fake the pointer enter
     QFETCH(bool, hasGrab);
@@ -289,6 +291,14 @@ void TestDataDevice::testDrag()
     QCOMPARE(deviceInterface->dragSource(), success ? sourceInterface : nullptr);
     QCOMPARE(deviceInterface->origin(), success ? surfaceInterface : nullptr);
     QVERIFY(!deviceInterface->icon());
+
+    if (success) {
+        // Wait for the drag-enter on itself, otherwise we leak the data offer.
+        // There also seem to be no way to eliminate this issue. If the client closes the connection
+        // at the moment a drag enters (and afterwards a data offer is sent) the memory is lost.
+        // Must this be solved in libwayland?
+        QVERIFY(dragEnteredSpy.count() || dragEnteredSpy.wait());
+    }
 }
 
 void TestDataDevice::testDragInternally_data()
