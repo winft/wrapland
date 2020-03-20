@@ -46,14 +46,12 @@ class Q_DECL_HIDDEN XdgExporterV2Interface : public Global
 {
     Q_OBJECT
 public:
+    explicit XdgExporterV2Interface(Display *display, QObject *parent = nullptr);
     ~XdgExporterV2Interface() override;
 
     XdgExportedV2Interface *exportedSurface(const QString &handle);
 
 private:
-    explicit XdgExporterV2Interface(Display *display, XdgForeignInterface *parent = nullptr);
-    friend class Display;
-    friend class XdgForeignInterface;
     class Private;
     Private *d_func() const;
 };
@@ -62,19 +60,17 @@ class Q_DECL_HIDDEN XdgImporterV2Interface : public Global
 {
     Q_OBJECT
 public:
+    explicit XdgImporterV2Interface(Display *display, QObject *parent = nullptr);
     ~XdgImporterV2Interface() override;
+    void setExporter(XdgExporterV2Interface *exporter);
 
-    XdgImportedV2Interface *importedSurface(const QString &handle);
-    SurfaceInterface *transientFor(SurfaceInterface *surface);
+    SurfaceInterface *parentOf(SurfaceInterface *surface);
 
 Q_SIGNALS:
-    void transientChanged(Wrapland::Server::SurfaceInterface *child,
-                          Wrapland::Server::SurfaceInterface *parent);
+    void parentChanged(Wrapland::Server::SurfaceInterface *child,
+                       Wrapland::Server::SurfaceInterface *parent);
 
 private:
-    explicit XdgImporterV2Interface(Display *display, XdgForeignInterface *parent = nullptr);
-    friend class Display;
-    friend class XdgForeignInterface;
     class Private;
     Private *d_func() const;
 };
@@ -83,12 +79,12 @@ class Q_DECL_HIDDEN XdgExportedV2Interface : public Resource
 {
     Q_OBJECT
 public:
+    XdgExportedV2Interface(XdgExporterV2Interface *parent, SurfaceInterface *surface);
     ~XdgExportedV2Interface() override;
 
-private:
-    explicit XdgExportedV2Interface(XdgExporterV2Interface *parent, wl_resource *parentResource);
-    friend class XdgExporterV2Interface;
+    SurfaceInterface *surface() const;
 
+private:
     class Private;
     Private *d_func() const;
 };
@@ -97,17 +93,18 @@ class Q_DECL_HIDDEN XdgImportedV2Interface : public Resource
 {
     Q_OBJECT
 public:
+    XdgImportedV2Interface(XdgImporterV2Interface *parent, wl_resource *parentResource,
+                           XdgExportedV2Interface *exported);
     ~XdgImportedV2Interface() override;
 
+    XdgExportedV2Interface* source() const;
     SurfaceInterface *child() const;
 
 Q_SIGNALS:
-    void childChanged(Wrapland::Server::SurfaceInterface *child);
+    void childChanged(SurfaceInterface *parent, SurfaceInterface *prevChild,
+                      SurfaceInterface *nextChild);
 
 private:
-    explicit XdgImportedV2Interface(XdgImporterV2Interface *parent, wl_resource *parentResource);
-    friend class XdgImporterV2Interface;
-
     class Private;
     Private *d_func() const;
 };

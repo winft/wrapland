@@ -40,9 +40,10 @@ XdgForeignInterface::Private::Private(Display *display, XdgForeignInterface *q)
 {
     exporter = new XdgExporterV2Interface(display, q);
     importer = new XdgImporterV2Interface(display, q);
+    importer->setExporter(exporter);
 
-    connect(importer, &XdgImporterV2Interface::transientChanged,
-            q, &XdgForeignInterface::transientChanged);
+    connect(importer, &XdgImporterV2Interface::parentChanged,
+            q, &XdgForeignInterface::parentChanged);
 }
 
 XdgForeignInterface::XdgForeignInterface(Display *display, QObject *parent)
@@ -69,9 +70,9 @@ bool XdgForeignInterface::isValid()
     return d->exporter->isValid() && d->importer->isValid();
 }
 
-SurfaceInterface *XdgForeignInterface::transientFor(SurfaceInterface *surface)
+SurfaceInterface *XdgForeignInterface::parentOf(SurfaceInterface *surface)
 {
-    return d->importer->transientFor(surface);
+    return d->importer->parentOf(surface);
 }
 
 }

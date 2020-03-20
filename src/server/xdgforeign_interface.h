@@ -39,8 +39,8 @@ class XdgImporterV2Interface;
  * a process can export a surface to be identifiable by a server-wide unique
  * string handle, and another process can in turn import that surface, and set it
  * as transient parent for one of its own surfaces.
- * This parent relationship is traced by the transientChanged signal and the
- * transientFor method.
+ * This parent relationship is traced by the parentChanged signal and the
+ * parentFor method.
  *
  * @since 5.40
  */
@@ -63,16 +63,19 @@ public:
     bool isValid();
 
     /**
-     * If a client did import a surface and set one of its own as child of the
-     * imported one, this returns the mapping.
-     * @param surface the child surface we want to search an imported transientParent for.
-     * @returns the transient parent of the surface, if found, nullptr otherwise.
+     * This returns the xdg-foreign parent surface of @param surface, i.e. this returns a valid
+     * surface pointer if:
+     * - the client did import a foreign surface via the xdg-foreign protocol and
+     * - set the foreign surface as the parent of @param surface.
+     *
+     * @param surface that a parent is searched for
+     * @returns the parent if found, nullptr otherwise
      */
-    SurfaceInterface* transientFor(SurfaceInterface *surface);
+    SurfaceInterface* parentOf(SurfaceInterface *surface);
 
 Q_SIGNALS:
     /**
-     * A surface got a new imported transient parent
+     * An inheritance relation between surfaces changed.
      * @param parent is the surface exported by one client and imported into another, which will act
      *        as parent.
      * @param child is the surface that the importer client did set as child of the surface that it
@@ -81,13 +84,11 @@ Q_SIGNALS:
      * anymore and either one of the surfaces has been unmapped, or the parent surface is not
      * exported anymore.
      */
-    void transientChanged(Wrapland::Server::SurfaceInterface *child,
-                          Wrapland::Server::SurfaceInterface *parent);
+    void parentChanged(Wrapland::Server::SurfaceInterface *parent,
+                       Wrapland::Server::SurfaceInterface *child);
 
 private:
     friend class Display;
-    friend class XdgExporterV2Interface;
-    friend class XdgImporterV2Interface;
     class Private;
     Private *d;
 };

@@ -38,9 +38,8 @@ namespace Server
 class Q_DECL_HIDDEN XdgExporterV2Interface::Private : public Global::Private
 {
 public:
-    Private(XdgExporterV2Interface *q, Display *d, XdgForeignInterface *foreignInterface);
+    Private(XdgExporterV2Interface *q, Display *d);
 
-    XdgForeignInterface *foreignInterface;
     QHash<QString, XdgExportedV2Interface *> exportedSurfaces;
 
 private:
@@ -69,8 +68,8 @@ const struct zxdg_exporter_v2_interface XdgExporterV2Interface::Private::s_inter
 };
 #endif
 
-XdgExporterV2Interface::XdgExporterV2Interface(Display *display, XdgForeignInterface *parent)
-    : Global(new Private(this, display, parent), parent)
+XdgExporterV2Interface::XdgExporterV2Interface(Display *display, QObject *parent)
+    : Global(new Private(this, display), parent)
 {
 }
 
@@ -102,8 +101,13 @@ void XdgExporterV2Interface::Private::exportCallback(wl_client *client, wl_resou
                                                      uint32_t id, wl_resource * surface)
 {
     auto *priv = cast(resource);
-    QPointer <XdgExportedV2Interface> exported = new XdgExportedV2Interface(priv->q, surface);
 
+    auto *surfaceInterface = SurfaceInterface::get(surface);
+    Q_ASSERT(surfaceInterface);
+
+    const QString handle = QUuid::createUuid().toString();
+
+    auto *exported = new XdgExportedV2Interface(priv->q, surfaceInterface);
     exported->create(priv->display->getConnection(client), wl_resource_get_version(resource), id);
 
     if (!exported->resource()) {
@@ -112,31 +116,17 @@ void XdgExporterV2Interface::Private::exportCallback(wl_client *client, wl_resou
         return;
     }
 
-    const QString handle = QUuid::createUuid().toString();
-
     // Surface not exported anymore.
-    connect(exported.data(), &XdgExportedV2Interface::unbound,
-            priv->q, [priv, handle]() {
-                priv->exportedSurfaces.remove(handle);
-            });
-
-    // If the surface dies before this, the export dies too.
-    connect(SurfaceInterface::get(surface), &Resource::unbound,
-            priv->q, [priv, exported, handle]() {
-                if (exported) {
-                    exported->deleteLater();
-                }
-                priv->exportedSurfaces.remove(handle);
-            });
+    connect(exported, &XdgExportedV2Interface::destroyed,
+            priv->q, [priv, handle] { priv->exportedSurfaces.remove(handle); }
+    );
 
     priv->exportedSurfaces[handle] = exported;
     zxdg_exported_v2_send_handle(exported->resource(), handle.toUtf8().constData());
 }
 
-XdgExporterV2Interface::Private::Private(XdgExporterV2Interface *q, Display *d,
-                                         XdgForeignInterface *foreignInterface)
+XdgExporterV2Interface::Private::Private(XdgExporterV2Interface *q, Display *d)
     : Global::Private(d, &zxdg_exporter_v2_interface, s_version)
-    , foreignInterface(foreignInterface)
     , q(q)
 {
 }
@@ -164,18 +154,19 @@ void XdgExporterV2Interface::Private::unbind(wl_resource *resource)
 class Q_DECL_HIDDEN XdgImporterV2Interface::Private : public Global::Private
 {
 public:
-    Private(XdgImporterV2Interface *q, Display *d, XdgForeignInterface *foreignInterface);
+    Private(XdgImporterV2Interface *q, Display *d);
 
-    XdgForeignInterface *foreignInterface;
+    void parentChange(XdgImportedV2Interface *imported, XdgExportedV2Interface *exported);
 
-    QHash<QString, XdgImportedV2Interface *> importedSurfaces;
+    XdgExporterV2Interface *exporter = nullptr;
 
     // Child -> parent hash
-    QHash<SurfaceInterface *, XdgImportedV2Interface *> parents;
-    // Parent -> child hash
-    QHash<XdgImportedV2Interface *, SurfaceInterface *> children;
+    QHash<SurfaceInterface*, SurfaceInterface*> parents;
 
 private:
+    void childChange(SurfaceInterface *parent,
+                     SurfaceInterface *prevChild, SurfaceInterface *nextChild);
+
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
 
     static void unbind(wl_resource *resource);
@@ -185,7 +176,7 @@ private:
 
     static void destroyCallback(wl_client *client, wl_resource *resource);
     static void importCallback(wl_client *client, wl_resource *resource, uint32_t id,
-                               const char * handle);
+                               const char *handle);
 
     XdgImporterV2Interface *q;
     static const struct zxdg_importer_v2_interface s_interface;
@@ -201,33 +192,27 @@ const struct zxdg_importer_v2_interface XdgImporterV2Interface::Private::s_inter
 };
 #endif
 
-XdgImporterV2Interface::XdgImporterV2Interface(Display *display, XdgForeignInterface *parent)
-    : Global(new Private(this, display, parent), parent)
+XdgImporterV2Interface::XdgImporterV2Interface(Display *display, QObject *parent)
+    : Global(new Private(this, display), parent)
 {
 }
 
 XdgImporterV2Interface::~XdgImporterV2Interface() = default;
 
-XdgImportedV2Interface *XdgImporterV2Interface::importedSurface(const QString &handle)
+void XdgImporterV2Interface::setExporter(XdgExporterV2Interface *exporter)
 {
     Q_D();
-
-    auto it = d->importedSurfaces.constFind(handle);
-    if (it != d->importedSurfaces.constEnd()) {
-        return it.value();
-    }
-    return nullptr;
+    d->exporter = exporter;
 }
 
-SurfaceInterface *XdgImporterV2Interface::transientFor(SurfaceInterface *surface)
+SurfaceInterface *XdgImporterV2Interface::parentOf(SurfaceInterface *surface)
 {
     Q_D();
 
-    auto it = d->parents.constFind(surface);
-    if (it == d->parents.constEnd()) {
+    if (!d->parents.contains(surface)) {
         return nullptr;
     }
-    return SurfaceInterface::get((*it)->parentResource());
+    return d->parents[surface];
 }
 
 XdgImporterV2Interface::Private *XdgImporterV2Interface::d_func() const
@@ -242,14 +227,16 @@ void XdgImporterV2Interface::Private::destroyCallback(wl_client *client, wl_reso
 }
 
 void XdgImporterV2Interface::Private::importCallback(wl_client *client, wl_resource *resource,
-                                                     uint32_t id, const char *h)
+                                                     uint32_t id, const char *handle)
 {
     auto *priv = cast(resource);
 
-    Q_ASSERT(priv->foreignInterface);
-    const QString handle = QString::fromUtf8(h);
+    if (!priv->exporter) {
+        zxdg_imported_v2_send_destroyed(resource);
+        return;
+    }
 
-    XdgExportedV2Interface *exported = priv->foreignInterface->d->exporter->exportedSurface(handle);
+    auto *exported = priv->exporter->exportedSurface(QString::fromUtf8(handle));
     if (!exported) {
         zxdg_imported_v2_send_destroyed(resource);
         return;
@@ -261,61 +248,8 @@ void XdgImporterV2Interface::Private::importCallback(wl_client *client, wl_resou
         return;
     }
 
-    QPointer<XdgImportedV2Interface> imported = new XdgImportedV2Interface(priv->q, surface);
+    auto *imported = new XdgImportedV2Interface(priv->q, surface, exported);
     imported->create(priv->display->getConnection(client), wl_resource_get_version(resource), id);
-
-    // Surface no longer exported.
-    connect(exported, &XdgExportedV2Interface::unbound,
-            priv->q, [priv, imported, handle]() {
-                // Imported valid when the exported is deleted before the imported.
-                if (imported) {
-                    zxdg_imported_v2_send_destroyed(imported->resource());
-                    imported->deleteLater();
-                }
-                priv->importedSurfaces.remove(handle);
-            });
-
-    connect(imported.data(), &XdgImportedV2Interface::childChanged,
-            priv->q, [priv, imported](SurfaceInterface *child) {
-                // Remove any previous association.
-                auto it = priv->children.find(imported);
-                if (it != priv->children.end()) {
-                    priv->parents.remove(*it);
-                    priv->children.erase(it);
-                }
-
-                priv->parents[child] = imported;
-                priv->children[imported] = child;
-                SurfaceInterface *parent = SurfaceInterface::get(imported->parentResource());
-                Q_EMIT priv->q->transientChanged(child, parent);
-
-                // Child surface destroyed.
-                connect(child, &Resource::unbound,
-                        priv->q, [priv, child]() {
-                            auto it = priv->parents.find(child);
-                            if (it != priv->parents.end()) {
-                                Wrapland::Server::XdgImportedV2Interface* parent = *it;
-                                priv->children.remove(*it);
-                                priv->parents.erase(it);
-                                Q_EMIT priv->q->transientChanged(nullptr,
-                                                SurfaceInterface::get(parent->parentResource()));
-                            }
-                        });
-            });
-
-    // Surface no longer imported.
-    connect(imported.data(), &XdgImportedV2Interface::unbound,
-            priv->q, [priv, handle, imported]() {
-                priv->importedSurfaces.remove(handle);
-
-                auto it = priv->children.find(imported);
-                if (it != priv->children.end()) {
-                    Wrapland::Server::SurfaceInterface* child = *it;
-                    priv->parents.remove(*it);
-                    priv->children.erase(it);
-                    Q_EMIT priv->q->transientChanged(child, nullptr);
-                }
-            });
 
     if (!imported->resource()) {
         wl_resource_post_no_memory(resource);
@@ -323,13 +257,16 @@ void XdgImporterV2Interface::Private::importCallback(wl_client *client, wl_resou
         return;
     }
 
-    priv->importedSurfaces[handle] = imported;
+    connect(imported, &XdgImportedV2Interface::childChanged,
+            priv->q, [priv] (SurfaceInterface *parent, SurfaceInterface *prevChild,
+                             SurfaceInterface *nextChild) {
+                priv->childChange(parent, prevChild, nextChild);
+            }
+    );
 }
 
-XdgImporterV2Interface::Private::Private(XdgImporterV2Interface *q, Display *d,
-                                         XdgForeignInterface *foreignInterface)
+XdgImporterV2Interface::Private::Private(XdgImporterV2Interface *q, Display *d)
     : Global::Private(d, &zxdg_importer_v2_interface, s_version)
-    , foreignInterface(foreignInterface)
     , q(q)
 {
 }
@@ -353,14 +290,30 @@ void XdgImporterV2Interface::Private::unbind(wl_resource *resource)
     // TODO: implement?
 }
 
+void XdgImporterV2Interface::Private::childChange(SurfaceInterface *parent,
+                                                  SurfaceInterface *prevChild,
+                                                  SurfaceInterface *nextChild)
+{
+    if (prevChild) {
+        int removed = parents.remove(prevChild);
+        Q_ASSERT(removed);
+    }
+    if (nextChild && parent) {
+        parents[nextChild] = parent;
+    }
+
+    Q_EMIT q->parentChanged(parent, nextChild);
+}
+
 
 class Q_DECL_HIDDEN XdgExportedV2Interface::Private : public Resource::Private
 {
 public:
-    Private(XdgExportedV2Interface *q, XdgExporterV2Interface *c, wl_resource *parentResource);
+    Private(XdgExportedV2Interface *q, XdgExporterV2Interface *c, SurfaceInterface *surface);
+
+    SurfaceInterface *exportedSurface;
 
 private:
-
     XdgExportedV2Interface *q_func() {
         return reinterpret_cast<XdgExportedV2Interface *>(q);
     }
@@ -375,12 +328,21 @@ const struct zxdg_exported_v2_interface XdgExportedV2Interface::Private::s_inter
 #endif
 
 XdgExportedV2Interface::XdgExportedV2Interface(XdgExporterV2Interface *parent,
-                                               wl_resource *parentResource)
-    : Resource(new Private(this, parent, parentResource))
+                                               SurfaceInterface *surface)
+    : Resource(new Private(this, parent, surface))
 {
+    // If the surface dies, the export dies too.
+    connect(surface, &SurfaceInterface::aboutToBeUnbound,
+            this, [this]() { delete this; } );
 }
 
 XdgExportedV2Interface::~XdgExportedV2Interface() = default;
+
+SurfaceInterface* XdgExportedV2Interface::surface() const
+{
+    Q_D();
+    return d->exportedSurface;
+}
 
 XdgExportedV2Interface::Private *XdgExportedV2Interface::d_func() const
 {
@@ -388,8 +350,9 @@ XdgExportedV2Interface::Private *XdgExportedV2Interface::d_func() const
 }
 
 XdgExportedV2Interface::Private::Private(XdgExportedV2Interface *q, XdgExporterV2Interface *c,
-                                         wl_resource *parentResource)
-    : Resource::Private(q, c, parentResource, &zxdg_exported_v2_interface, &s_interface)
+                                         SurfaceInterface *surface)
+    : Resource::Private(q, c, surface->resource(), &zxdg_exported_v2_interface, &s_interface)
+    , exportedSurface(surface)
 {
 }
 
@@ -398,9 +361,13 @@ class Q_DECL_HIDDEN XdgImportedV2Interface::Private : public Resource::Private
 {
 public:
     Private(XdgImportedV2Interface *q, XdgImporterV2Interface *importer,
-            wl_resource *parentResource);
+            wl_resource *parentResource, XdgExportedV2Interface *exported);
+    ~Private();
 
-    QPointer<SurfaceInterface> parentOf;
+    void setChild(SurfaceInterface *surface);
+
+    XdgExportedV2Interface *source = nullptr;
+    SurfaceInterface *child = nullptr;
 
 private:
     static void setParentOfCallback(wl_client *client, wl_resource *resource,
@@ -421,12 +388,30 @@ const struct zxdg_imported_v2_interface XdgImportedV2Interface::Private::s_inter
 #endif
 
 XdgImportedV2Interface::XdgImportedV2Interface(XdgImporterV2Interface *parent,
-                                               wl_resource *parentResource)
-    : Resource(new Private(this, parent, parentResource))
+                                               wl_resource *parentResource,
+                                               XdgExportedV2Interface *exported)
+    : Resource(new Private(this, parent, parentResource, exported))
 {
+    connect(exported, &QObject::destroyed, this, [this] {
+            // Export no longer available.
+            Q_D();
+            d->source = nullptr;
+            d->setChild(child());
+            zxdg_imported_v2_send_destroyed(resource());
+            delete this;
+        }
+    );
 }
 
-XdgImportedV2Interface::~XdgImportedV2Interface() = default;
+XdgImportedV2Interface::~XdgImportedV2Interface()
+{
+    Q_D();
+
+    if (source()) {
+        d->setChild(nullptr);
+    }
+
+}
 
 XdgImportedV2Interface::Private *XdgImportedV2Interface::d_func() const
 {
@@ -436,7 +421,13 @@ XdgImportedV2Interface::Private *XdgImportedV2Interface::d_func() const
 SurfaceInterface *XdgImportedV2Interface::child() const
 {
     Q_D();
-    return d->parentOf.data(); 
+    return d->child;
+}
+
+XdgExportedV2Interface* XdgImportedV2Interface::source() const
+{
+    Q_D();
+    return d->source;
 }
 
 void XdgImportedV2Interface::Private::setParentOfCallback(wl_client *client, wl_resource *resource,
@@ -447,20 +438,44 @@ void XdgImportedV2Interface::Private::setParentOfCallback(wl_client *client, wl_
     auto *priv = cast<Private>(resource);
     auto *surfaceInterface = SurfaceInterface::get(surface);
 
-    if (!surfaceInterface) {
-        return;
+    // Guaranteed by libwayland (?).
+    Q_ASSERT(surfaceInterface);
+
+    if (priv->child != surfaceInterface) {
+        // Only set on change. We do the check here so the setChild function can be reused
+        // for setting the same child when the exporting source goes away.
+        priv->setChild(surfaceInterface);
+    }
+}
+
+void XdgImportedV2Interface::Private::setChild(SurfaceInterface *surface)
+{
+    auto *prevChild = child;
+    if (prevChild) {
+        disconnect(prevChild, &SurfaceInterface::aboutToBeUnbound, q_func(), nullptr);
     }
 
-    priv->parentOf = surfaceInterface;
-    Q_EMIT priv->q_func()->childChanged(surfaceInterface);
+    child = surface;
+
+    connect(surface, &SurfaceInterface::aboutToBeUnbound, q_func(), [this] {
+        // Child surface is destroyed, this means relation is cancelled.
+        Q_EMIT q_func()->childChanged(source->surface(), this->child, nullptr);
+        this->child = nullptr;
+    });
+
+    Q_EMIT q_func()->childChanged(source ? source->surface() : nullptr, prevChild, surface);
 }
 
 XdgImportedV2Interface::Private::Private(XdgImportedV2Interface *q,
                                          XdgImporterV2Interface *importer,
-                                         wl_resource *parentResource)
+                                         wl_resource *parentResource,
+                                         XdgExportedV2Interface *exported)
     : Resource::Private(q, importer, parentResource, &zxdg_imported_v2_interface, &s_interface)
+    , source(exported)
 {
 }
+
+XdgImportedV2Interface::Private::~Private() = default;
 
 }
 }

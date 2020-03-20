@@ -64,13 +64,13 @@ private:
     Wrapland::Client::XdgExporter *m_exporter;
     Wrapland::Client::XdgImporter *m_importer;
 
-    QPointer<Wrapland::Client::Surface> m_exportedSurface;
+    Wrapland::Client::Surface *m_exportedSurface;
     QPointer<Wrapland::Server::SurfaceInterface> m_exportedSurfaceInterface;
 
-    QPointer<Wrapland::Client::XdgExported> m_exported;
-    QPointer<Wrapland::Client::XdgImported> m_imported;
+    Wrapland::Client::XdgExported *m_exported;
+    Wrapland::Client::XdgImported *m_imported;
 
-    QPointer<Wrapland::Client::Surface> m_childSurface;
+    Wrapland::Client::Surface *m_childSurface;
     QPointer<Wrapland::Server::SurfaceInterface> m_childSurfaceInterface;
 
     QThread *m_thread;
@@ -168,8 +168,6 @@ void TestForeign::cleanup()
     CLEANUP(m_exportedSurfaceInterface)
     CLEANUP(m_childSurfaceInterface)
 
-    m_exportedSurface.clear();
-    m_exported.clear();
     CLEANUP(m_compositor)
     CLEANUP(m_exporter)
     CLEANUP(m_importer)
@@ -212,12 +210,12 @@ void TestForeign::doExport()
     //Export a window
     m_exported = m_exporter->exportTopLevel(m_exportedSurface, m_connection);
     QVERIFY(m_exported->handle().isEmpty());
-    QSignalSpy doneSpy(m_exported.data(), &XdgExported::done);
+    QSignalSpy doneSpy(m_exported, &XdgExported::done);
     QVERIFY(doneSpy.wait());
     QVERIFY(!m_exported->handle().isEmpty());
 
-    QSignalSpy transientSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::transientChanged);
-    QVERIFY(transientSpy.isValid());
+    QSignalSpy parentSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::parentChanged);
+    QVERIFY(parentSpy.isValid());
 
     //Import the just exported window
     m_imported = m_importer->importTopLevel(m_exported->handle(), m_connection);
@@ -225,109 +223,120 @@ void TestForeign::doExport()
 
     QSignalSpy childSurfaceInterfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
     QVERIFY(serverSurfaceCreated.isValid());
+
     m_childSurface = m_compositor->createSurface();
     QVERIFY(childSurfaceInterfaceCreated.wait());
+
     m_childSurfaceInterface = childSurfaceInterfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
     m_childSurface->commit(Surface::CommitFlag::None);
 
     m_imported->setParentOf(m_childSurface);
-    QVERIFY(transientSpy.wait());
 
-    QCOMPARE(transientSpy.first().first().value<Wrapland::Server::SurfaceInterface *>(), m_childSurfaceInterface.data());
-    QCOMPARE(transientSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>(), m_exportedSurfaceInterface.data());
+    QVERIFY(parentSpy.wait());
 
-    //transientFor api
-    QCOMPARE(m_foreignInterface->transientFor(m_childSurfaceInterface), m_exportedSurfaceInterface.data());
+    QCOMPARE(parentSpy.first().at(0).value<Wrapland::Server::SurfaceInterface *>(), m_exportedSurfaceInterface);
+    QCOMPARE(parentSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>(), m_childSurfaceInterface);
+
+    // parentOf API
+    QCOMPARE(m_foreignInterface->parentOf(m_childSurfaceInterface), m_exportedSurfaceInterface);
 }
 
 void TestForeign::testExport()
 {
     doExport();
+
+    delete m_imported;
+    delete m_exportedSurface;
+    delete m_exported;
 }
 
 void TestForeign::testDeleteImported()
 {
     doExport();
 
-    QSignalSpy transientSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::transientChanged);
+    QSignalSpy parentSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::parentChanged);
  
-    QVERIFY(transientSpy.isValid());
+    QVERIFY(parentSpy.isValid());
 
     m_imported->deleteLater();
 
-    QVERIFY(transientSpy.wait());
+    QVERIFY(parentSpy.wait());
 
-    QCOMPARE(transientSpy.first().first().value<Wrapland::Server::SurfaceInterface *>(), m_childSurfaceInterface.data());
-    QVERIFY(!transientSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>());
-    QVERIFY(!m_foreignInterface->transientFor(m_childSurfaceInterface));
+    QCOMPARE(parentSpy.first().at(0).value<Wrapland::Server::SurfaceInterface *>(), m_exportedSurfaceInterface);
+    QVERIFY(!parentSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>());
+    QVERIFY(!m_foreignInterface->parentOf(m_childSurfaceInterface));
 
-    m_exportedSurface.clear();
-    m_exported.clear();
+    delete m_exportedSurface;
+    delete m_exported;
 }
 
 void TestForeign::testDeleteChildSurface()
 {
     doExport();
 
-    QSignalSpy transientSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::transientChanged);
+    QSignalSpy parentSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::parentChanged);
  
-    QVERIFY(transientSpy.isValid());
+    QVERIFY(parentSpy.isValid());
     m_childSurface->deleteLater();
 
-    QVERIFY(transientSpy.wait());
+    QVERIFY(parentSpy.wait());
 
     //when the client surface dies, the server one will eventually die too
     QSignalSpy surfaceDestroyedSpy(m_childSurfaceInterface, SIGNAL(destroyed()));
     QVERIFY(surfaceDestroyedSpy.wait());
 
-    QVERIFY(!transientSpy.first().at(0).value<Wrapland::Server::SurfaceInterface *>());
-    QCOMPARE(transientSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>(), m_exportedSurfaceInterface.data());    
+    QCOMPARE(parentSpy.first().at(0).value<Wrapland::Server::SurfaceInterface *>(), m_exportedSurfaceInterface);
+    QVERIFY(!parentSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>());
+
+    delete m_imported;
+    delete m_exportedSurface;
+    delete m_exported;
 }
 
 void TestForeign::testDeleteParentSurface()
 {
     doExport();
 
-    QSignalSpy transientSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::transientChanged);
+    QSignalSpy parentSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::parentChanged);
  
-    QVERIFY(transientSpy.isValid());
+    QVERIFY(parentSpy.isValid());
     m_exportedSurface->deleteLater();
 
-    QSignalSpy exportedSurfaceDestroyedSpy(m_exportedSurfaceInterface.data(), &QObject::destroyed);
+    QSignalSpy exportedSurfaceDestroyedSpy(m_exportedSurfaceInterface, &QObject::destroyed);
     QVERIFY(exportedSurfaceDestroyedSpy.isValid());
     exportedSurfaceDestroyedSpy.wait();
 
-    QVERIFY(transientSpy.wait());
+    QVERIFY(parentSpy.count() || parentSpy.wait());
 
-    QCOMPARE(transientSpy.first().first().value<Wrapland::Server::SurfaceInterface *>(), m_childSurfaceInterface.data());
-    QVERIFY(!transientSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>());
-    QVERIFY(!m_foreignInterface->transientFor(m_childSurfaceInterface));
+    QVERIFY(!parentSpy.first().at(0).value<Wrapland::Server::SurfaceInterface *>());
+    QCOMPARE(parentSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>(), m_childSurfaceInterface);
+    QVERIFY(!m_foreignInterface->parentOf(m_childSurfaceInterface));
 
-    m_imported.clear();
-    m_exported.clear();
+    delete m_imported;
+    delete m_exported;
 }
 
 void TestForeign::testDeleteExported()
 {
     doExport();
 
-    QSignalSpy transientSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::transientChanged);
-    QSignalSpy destroyedSpy(m_imported.data(), &Wrapland::Client::XdgImported::importedDestroyed);
+    QSignalSpy parentSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::parentChanged);
+    QSignalSpy destroyedSpy(m_imported, &Wrapland::Client::XdgImported::importedDestroyed);
  
-    QVERIFY(transientSpy.isValid());
+    QVERIFY(parentSpy.isValid());
     m_exported->deleteLater();
 
-    QVERIFY(transientSpy.wait());
+    QVERIFY(parentSpy.wait());
     QVERIFY(destroyedSpy.wait());
 
-    QCOMPARE(transientSpy.first().first().value<Wrapland::Server::SurfaceInterface *>(), m_childSurfaceInterface.data());
-    QVERIFY(!transientSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>());
-    QVERIFY(!m_foreignInterface->transientFor(m_childSurfaceInterface));
+    QCOMPARE(parentSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>(), m_childSurfaceInterface);
+    QVERIFY(!parentSpy.first().at(0).value<Wrapland::Server::SurfaceInterface *>());
+    QVERIFY(!m_foreignInterface->parentOf(m_childSurfaceInterface));
 
     QVERIFY(!m_imported->isValid());
 
-    m_imported.clear();
-    m_exportedSurface.clear();
+    delete m_imported;
+    delete m_exportedSurface;
 }
 
 void TestForeign::testExportTwoTimes()
@@ -341,8 +350,8 @@ void TestForeign::testExportTwoTimes()
     QVERIFY(doneSpy.wait());
     QVERIFY(!exported2->handle().isEmpty());
 
-    QSignalSpy transientSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::transientChanged);
-    QVERIFY(transientSpy.isValid());
+    QSignalSpy parentSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::parentChanged);
+    QVERIFY(parentSpy.isValid());
 
     //Import the just exported window
     Wrapland::Client::XdgImported *imported2 = m_importer->importTopLevel(exported2->handle(), m_connection);
@@ -358,29 +367,32 @@ void TestForeign::testExportTwoTimes()
     Wrapland::Server::SurfaceInterface *childSurface2Interface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
 
     imported2->setParentOf(childSurface2);
-    QVERIFY(transientSpy.wait());
+    QVERIFY(parentSpy.wait());
     
-    QCOMPARE(transientSpy.first().first().value<Wrapland::Server::SurfaceInterface *>(), childSurface2Interface);
-    QCOMPARE(transientSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>(), m_exportedSurfaceInterface.data());
+    QCOMPARE(parentSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>(), childSurface2Interface);
+    QCOMPARE(parentSpy.first().at(0).value<Wrapland::Server::SurfaceInterface *>(), m_exportedSurfaceInterface.data());
 
-    //transientFor api
-    //check the old relationship is still here
-    QCOMPARE(m_foreignInterface->transientFor(m_childSurfaceInterface), m_exportedSurfaceInterface.data());
-    //check the new relationship
-    QCOMPARE(m_foreignInterface->transientFor(childSurface2Interface), m_exportedSurfaceInterface.data());
+    // parentOf API:
+    // Check the old relationship is still here.
+    QCOMPARE(m_foreignInterface->parentOf(m_childSurfaceInterface), m_exportedSurfaceInterface.data());
 
+    // Check the new relationship.
+    QCOMPARE(m_foreignInterface->parentOf(childSurface2Interface), m_exportedSurfaceInterface.data());
+
+    delete childSurface2;
+    delete imported2;
     delete exported2;
-    m_imported.clear();
-    m_exportedSurface.clear();
-    m_exported.clear();
+    delete m_imported;
+    delete m_exportedSurface;
+    delete m_exported;
 }
 
 void TestForeign::testImportTwoTimes()
 {
     doExport();
 
-    QSignalSpy transientSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::transientChanged);
-    QVERIFY(transientSpy.isValid());
+    QSignalSpy parentSpy(m_foreignInterface, &Wrapland::Server::XdgForeignInterface::parentChanged);
+    QVERIFY(parentSpy.isValid());
 
     //Import another time the exported window
     Wrapland::Client::XdgImported *imported2 = m_importer->importTopLevel(m_exported->handle(), m_connection);
@@ -396,21 +408,21 @@ void TestForeign::testImportTwoTimes()
     Wrapland::Server::SurfaceInterface *childSurface2Interface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
 
     imported2->setParentOf(childSurface2);
-    QVERIFY(transientSpy.wait());
+    QVERIFY(parentSpy.wait());
     
-    QCOMPARE(transientSpy.first().first().value<Wrapland::Server::SurfaceInterface *>(), childSurface2Interface);
-    QCOMPARE(transientSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>(), m_exportedSurfaceInterface.data());
+    QCOMPARE(parentSpy.first().at(1).value<Wrapland::Server::SurfaceInterface *>(), childSurface2Interface);
+    QCOMPARE(parentSpy.first().at(0).value<Wrapland::Server::SurfaceInterface *>(), m_exportedSurfaceInterface.data());
 
-    //transientFor api
-    //check the old relationship is still here
-    QCOMPARE(m_foreignInterface->transientFor(m_childSurfaceInterface), m_exportedSurfaceInterface.data());
-    //check the new relationship
-    QCOMPARE(m_foreignInterface->transientFor(childSurface2Interface), m_exportedSurfaceInterface.data());
+    // parentOf API:
+    // Check the old relationship is still here.
+    QCOMPARE(m_foreignInterface->parentOf(m_childSurfaceInterface), m_exportedSurfaceInterface.data());
+    // Check the new relationship.
+    QCOMPARE(m_foreignInterface->parentOf(childSurface2Interface), m_exportedSurfaceInterface.data());
 
     delete imported2;
-    m_imported.clear();
-    m_exportedSurface.clear();
-    m_exported.clear();
+    delete m_imported;
+    delete m_exportedSurface;
+    delete m_exported;
 }
 
 QTEST_GUILESS_MAIN(TestForeign)
