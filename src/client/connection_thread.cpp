@@ -104,6 +104,13 @@ ConnectionThread::Private::~Private()
 
 void ConnectionThread::Private::doEstablishConnection()
 {
+    // To not leak memory we disconnect previous display objects.
+    //
+    // TODO: But in reality this API should better be constructed in a way that it is not possible
+    // to reuse a ConnectionThread that was once connected to a display.
+    if (display) {
+        wl_display_disconnect(display);
+    }
     if (fd != -1) {
         display = wl_display_connect_to_fd(fd);
     } else {
