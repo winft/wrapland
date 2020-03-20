@@ -17,9 +17,10 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-
 #include "xdgforeign_interface.h"
+
 #include "xdgforeign_v2_interface_p.h"
+
 #include "display.h"
 #include "global_p.h"
 #include "resource_p.h"
@@ -28,7 +29,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland-xdg-foreign-unstable-v2-server-protocol.h"
 
 #include <QUuid>
-#include <QDebug>
 
 namespace Wrapland
 {
@@ -42,7 +42,7 @@ XdgForeignInterface::Private::Private(Display *display, XdgForeignInterface *q)
     importer = new XdgImporterV2Interface(display, q);
 
     connect(importer, &XdgImporterV2Interface::transientChanged,
-        q, &XdgForeignInterface::transientChanged);
+            q, &XdgForeignInterface::transientChanged);
 }
 
 XdgForeignInterface::XdgForeignInterface(Display *display, QObject *parent)

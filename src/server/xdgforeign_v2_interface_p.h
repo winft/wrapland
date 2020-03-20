@@ -17,8 +17,7 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef WRAPLAND_SERVER_XDGFOREIGNV2_INTERFACE_P_H
-#define WRAPLAND_SERVER_XDGFOREIGNV2_INTERFACE_P_H
+#pragma once
 
 #include "global.h"
 #include "resource.h"
@@ -47,7 +46,7 @@ class Q_DECL_HIDDEN XdgExporterV2Interface : public Global
 {
     Q_OBJECT
 public:
-    virtual ~XdgExporterV2Interface();
+    ~XdgExporterV2Interface() override;
 
     XdgExportedV2Interface *exportedSurface(const QString &handle);
 
@@ -67,7 +66,7 @@ class Q_DECL_HIDDEN XdgImporterV2Interface : public Global
 {
     Q_OBJECT
 public:
-    virtual ~XdgImporterV2Interface();
+    ~XdgImporterV2Interface() override;
 
     XdgImportedV2Interface *importedSurface(const QString &handle);
     SurfaceInterface *transientFor(SurfaceInterface *surface);
@@ -75,7 +74,8 @@ public:
 Q_SIGNALS:
     void surfaceImported(const QString &handle, XdgImportedV2Interface *imported);
     void surfaceUnimported(const QString &handle);
-    void transientChanged(Wrapland::Server::SurfaceInterface *child, Wrapland::Server::SurfaceInterface *parent);
+    void transientChanged(Wrapland::Server::SurfaceInterface *child,
+                          Wrapland::Server::SurfaceInterface *parent);
 
 private:
     explicit XdgImporterV2Interface(Display *display, XdgForeignInterface *parent = nullptr);
@@ -89,7 +89,7 @@ class Q_DECL_HIDDEN XdgExportedV2Interface : public Resource
 {
     Q_OBJECT
 public:
-    virtual ~XdgExportedV2Interface();
+    ~XdgExportedV2Interface() override;
 
 private:
     explicit XdgExportedV2Interface(XdgExporterV2Interface *parent, wl_resource *parentResource);
@@ -103,7 +103,7 @@ class Q_DECL_HIDDEN XdgImportedV2Interface : public Resource
 {
     Q_OBJECT
 public:
-    virtual ~XdgImportedV2Interface();
+    ~XdgImportedV2Interface() override;
 
     SurfaceInterface *child() const;
 
@@ -120,5 +120,3 @@ private:
 
 }
 }
-
-#endif

@@ -17,8 +17,7 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef WRAPLAND_SERVER_XDGFOREIGN_INTERFACE_H
-#define WRAPLAND_SERVER_XDGFOREIGN_INTERFACE_H
+#pragma once
 
 #include "global.h"
 #include "resource.h"
@@ -50,7 +49,7 @@ class WRAPLANDSERVER_EXPORT XdgForeignInterface : public QObject
     Q_OBJECT
 public:
     XdgForeignInterface(Display *display, QObject *parent = nullptr);
-    ~XdgForeignInterface();
+    ~XdgForeignInterface() override;
 
     /**
      * Creates the native zxdg_exporter_v2 and zxdg_importer_v2 interfaces
@@ -69,19 +68,21 @@ public:
      * @param surface the child surface we want to search an imported transientParent for.
      * @returns the transient parent of the surface, if found, nullptr otherwise.
      */
-    SurfaceInterface *transientFor(SurfaceInterface *surface);
+    SurfaceInterface* transientFor(SurfaceInterface *surface);
 
 Q_SIGNALS:
     /**
      * A surface got a new imported transient parent
-     * @param parent is the surface exported by one client and imported into another, which will act as parent.
-     * @param child is the surface that the importer client did set as child of the surface
-     * that it imported.
-     * If one of the two paramenters is nullptr, it means that a previously relation is not
-     * valid anymore and either one of the surfaces has been unmapped, or the parent surface
-     * is not exported anymore.
+     * @param parent is the surface exported by one client and imported into another, which will act
+     *        as parent.
+     * @param child is the surface that the importer client did set as child of the surface that it
+     *        imported.
+     * If one of the two paramenters is nullptr, it means that a previously relation is not valid
+     * anymore and either one of the surfaces has been unmapped, or the parent surface is not
+     * exported anymore.
      */
-    void transientChanged(Wrapland::Server::SurfaceInterface *child, Wrapland::Server::SurfaceInterface *parent);
+    void transientChanged(Wrapland::Server::SurfaceInterface *child,
+                          Wrapland::Server::SurfaceInterface *parent);
 
 private:
     friend class Display;
@@ -93,5 +94,3 @@ private:
 
 }
 }
-
-#endif
