@@ -2544,11 +2544,18 @@ void TestWaylandSeat::testPointerEnterOnUnboundSurface()
     QVERIFY(serverSurface);
 
     // Unbind the surface again.
+    QSignalSpy serverPointerChangedSpy(m_seatInterface, &Srv::SeatInterface::focusedPointerChanged);
+    QVERIFY(serverPointerChangedSpy.isValid());
     QSignalSpy surfaceUnboundSpy(serverSurface, &Srv::SurfaceInterface::unbound);
     QVERIFY(surfaceUnboundSpy.isValid());
     s.reset();
     QVERIFY(surfaceUnboundSpy.wait());
+
     m_seatInterface->setFocusedPointerSurface(serverSurface);
+
+    QVERIFY(!pointerChangedSpy.wait(200));
+    QCOMPARE(serverPointerChangedSpy.count(), 2);
+    QVERIFY(!m_seatInterface->focusedPointerSurface());
 }
 
 QTEST_GUILESS_MAIN(TestWaylandSeat)
