@@ -71,11 +71,6 @@ void XdgDecorationManager::release()
     d->xdgdecorationmanager.release();
 }
 
-void XdgDecorationManager::destroy()
-{
-    d->xdgdecorationmanager.destroy();
-}
-
 XdgDecorationManager::operator zxdg_decoration_manager_v1*() {
     return d->xdgdecorationmanager;
 }
@@ -186,11 +181,6 @@ void XdgDecoration::setup(zxdg_toplevel_decoration_v1 *xdgdecoration)
 void XdgDecoration::release()
 {
     d->xdgdecoration.release();
-}
-
-void XdgDecoration::destroy()
-{
-    d->xdgdecoration.destroy();
 }
 
 XdgDecoration::operator zxdg_toplevel_decoration_v1*() {

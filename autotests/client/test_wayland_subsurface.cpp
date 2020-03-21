@@ -102,14 +102,14 @@ void TestSubSurface::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
@@ -557,26 +557,24 @@ void TestSubSurface::testDestroy()
     // create subSurface for surface of parent
     QScopedPointer<SubSurface> subSurface(m_subCompositor->createSubSurface(QPointer<Surface>(surface.data()), QPointer<Surface>(parent.data())));
 
-    connect(m_connection, &ConnectionThread::connectionDied, m_compositor, &Compositor::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_subCompositor, &SubCompositor::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_shm, &ShmPool::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_queue, &EventQueue::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, surface.data(), &Surface::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, parent.data(), &Surface::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, subSurface.data(), &SubSurface::destroy);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_compositor, &Compositor::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_subCompositor, &SubCompositor::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_shm, &ShmPool::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, surface.data(), &Surface::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, parent.data(), &Surface::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, subSurface.data(), &SubSurface::release);
     QVERIFY(subSurface->isValid());
 
-    QSignalSpy connectionDiedSpy(m_connection, SIGNAL(connectionDied()));
-    QVERIFY(connectionDiedSpy.isValid());
     delete m_display;
     m_display = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_VERIFY(!m_connection->established());
 
-    // now the pool should be destroyed;
-    QVERIFY(!subSurface->isValid());
+    // Now the pool should be destroyed.
+    QTRY_VERIFY(!subSurface->isValid());
 
-    // calling destroy again should not fail
-    subSurface->destroy();
+    // Calling destroy again should not fail.
+    subSurface->release();
 }
 
 void TestSubSurface::testCast()
@@ -741,9 +739,12 @@ void TestSubSurface::testMainSurfaceFromTree()
     QSignalSpy subSurfaceTreeChangedSpy(parentServerSurface, &SurfaceInterface::subSurfaceTreeChanged);
     QVERIFY(subSurfaceTreeChangedSpy.isValid());
 
-    m_subCompositor->createSubSurface(childLevel1Surface.data(), parentSurface.data());
-    m_subCompositor->createSubSurface(childLevel2Surface.data(), childLevel1Surface.data());
-    m_subCompositor->createSubSurface(childLevel3Surface.data(), childLevel2Surface.data());
+    auto *sub1 = m_subCompositor->createSubSurface(childLevel1Surface.data(),
+                                                   parentSurface.data());
+    auto *sub2 = m_subCompositor->createSubSurface(childLevel2Surface.data(),
+                                                   childLevel1Surface.data());
+    auto *sub3 = m_subCompositor->createSubSurface(childLevel3Surface.data(),
+                                                   childLevel2Surface.data());
 
     parentSurface->commit(Surface::CommitFlag::None);
     QVERIFY(subSurfaceTreeChangedSpy.wait());
@@ -761,6 +762,10 @@ void TestSubSurface::testMainSurfaceFromTree()
     QCOMPARE(child3->parentSurface().data(), child2->surface().data());
     QCOMPARE(child3->mainSurface().data(), parentServerSurface);
     QCOMPARE(child3->surface()->childSubSurfaces().count(), 0);
+
+    delete sub1;
+    delete sub2;
+    delete sub3;
 }
 
 void TestSubSurface::testRemoveSurface()
@@ -784,7 +789,8 @@ void TestSubSurface::testRemoveSurface()
     QSignalSpy subSurfaceTreeChangedSpy(parentServerSurface, &SurfaceInterface::subSurfaceTreeChanged);
     QVERIFY(subSurfaceTreeChangedSpy.isValid());
 
-    m_subCompositor->createSubSurface(childSurface.data(), parentSurface.data());
+    QScopedPointer<SubSurface> sub(m_subCompositor->createSubSurface(childSurface.data(),
+                                                                     parentSurface.data()));
     parentSurface->commit(Surface::CommitFlag::None);
     QVERIFY(subSurfaceTreeChangedSpy.wait());
 
@@ -922,6 +928,10 @@ void TestSubSurface::testMappingOfSurfaceTree()
     QVERIFY(!child->surface()->isMapped());
     QVERIFY(!child2->surface()->isMapped());
     QVERIFY(!child3->surface()->isMapped());
+
+    delete subSurfaceLevel1;
+    delete subSurfaceLevel2;
+    delete subSurfaceLevel3;
 }
 
 void TestSubSurface::testSurfaceAt()
@@ -1042,7 +1052,7 @@ void TestSubSurface::testDestroyAttachedBuffer()
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverChildSurface = serverSurfaceCreated.last().first().value<Wrapland::Server::SurfaceInterface*>();
     // create sub-surface
-    m_subCompositor->createSubSurface(child.data(), parent.data());
+    auto *sub = m_subCompositor->createSubSurface(child.data(), parent.data());
 
     // let's damage this surface, will be in sub-surface pending state
     QImage image(QSize(100, 100), QImage::Format_ARGB32_Premultiplied);
@@ -1059,6 +1069,8 @@ void TestSubSurface::testDestroyAttachedBuffer()
     m_shm = nullptr;
     child.reset();
     QVERIFY(destroySpy.wait());
+
+    delete sub;
 }
 
 void TestSubSurface::testDestroyParentSurface()
@@ -1105,6 +1117,9 @@ void TestSubSurface::testDestroyParentSurface()
     QVERIFY(destroySpy.isValid());
     child.reset();
     QVERIFY(destroySpy.wait());
+
+    delete sub1;
+    delete sub2;
 }
 
 QTEST_GUILESS_MAIN(TestSubSurface)

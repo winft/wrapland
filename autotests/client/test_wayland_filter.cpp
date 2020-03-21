@@ -122,7 +122,7 @@ void TestFilter::testFilter()
 
   // setup connection
     QScopedPointer<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread());
-    QSignalSpy connectedSpy(connection.data(), &ConnectionThread::connected);
+    QSignalSpy connectedSpy(connection.data(), &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketName(s_socketName);
 
@@ -130,7 +130,7 @@ void TestFilter::testFilter()
     connection->moveToThread(thread.data());
     thread->start();
 
-    connection->initConnection();
+    connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     //use low level API as Server::Display::connections only lists connections which have

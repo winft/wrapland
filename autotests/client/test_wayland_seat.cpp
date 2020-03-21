@@ -1,5 +1,6 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,9 +18,6 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
-#include <QtTest>
-// KWin
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/datadevice.h"
@@ -48,13 +46,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/seat_interface.h"
 #include "../../src/server/subcompositor_interface.h"
 #include "../../src/server/surface_interface.h"
-// Wayland
-#include <wayland-client-protocol.h>
+
+#include <QtTest>
 
 #include <linux/input.h>
-// System
 #include <fcntl.h>
 #include <unistd.h>
+#include <wayland-client-protocol.h>
+
+namespace Clt = Wrapland::Client;
+namespace Srv = Wrapland::Server;
 
 class TestWaylandSeat : public QObject
 {
@@ -66,18 +67,23 @@ private Q_SLOTS:
     void cleanup();
 
     void testName();
+
     void testCapabilities_data();
     void testCapabilities();
     void testPointer();
+
     void testPointerTransformation_data();
     void testPointerTransformation();
     void testPointerButton_data();
     void testPointerButton();
+
     void testPointerSubSurfaceTree();
+
     void testPointerSwipeGesture_data();
     void testPointerSwipeGesture();
     void testPointerPinchGesture_data();
     void testPointerPinchGesture();
+
     void testPointerAxis();
     void testKeyboardSubSurfaceTreeFromPointer();
     void testCursor();
@@ -94,20 +100,20 @@ private Q_SLOTS:
     // TODO: add test for keymap
 
 private:
-    Wrapland::Server::Display *m_display;
-    Wrapland::Server::CompositorInterface *m_compositorInterface;
-    Wrapland::Server::SeatInterface *m_seatInterface;
-    Wrapland::Server::SubCompositorInterface *m_subCompositorInterface;
-    Wrapland::Server::RelativePointerManagerInterface *m_relativePointerManagerInterface;
-    Wrapland::Server::PointerGesturesInterface *m_pointerGesturesInterface;
-    Wrapland::Client::ConnectionThread *m_connection;
-    Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::Seat *m_seat;
-    Wrapland::Client::ShmPool *m_shm;
-    Wrapland::Client::SubCompositor * m_subCompositor;
-    Wrapland::Client::RelativePointerManager *m_relativePointerManager;
-    Wrapland::Client::PointerGestures *m_pointerGestures;
-    Wrapland::Client::EventQueue *m_queue;
+    Srv::Display *m_display;
+    Srv::CompositorInterface *m_compositorInterface;
+    Srv::SeatInterface *m_seatInterface;
+    Srv::SubCompositorInterface *m_subCompositorInterface;
+    Srv::RelativePointerManagerInterface *m_relativePointerManagerInterface;
+    Srv::PointerGesturesInterface *m_pointerGesturesInterface;
+    Clt::ConnectionThread *m_connection;
+    Clt::Compositor *m_compositor;
+    Clt::Seat *m_seat;
+    Clt::ShmPool *m_shm;
+    Clt::SubCompositor * m_subCompositor;
+    Clt::RelativePointerManager *m_relativePointerManager;
+    Clt::PointerGestures *m_pointerGestures;
+    Clt::EventQueue *m_queue;
     QThread *m_thread;
 };
 
@@ -135,9 +141,7 @@ TestWaylandSeat::TestWaylandSeat(QObject *parent)
 
 void TestWaylandSeat::init()
 {
-    using namespace Wrapland::Server;
-    delete m_display;
-    m_display = new Display(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     QVERIFY(m_display->isRunning());
@@ -153,35 +157,40 @@ void TestWaylandSeat::init()
     m_subCompositorInterface->create();
     QVERIFY(m_subCompositorInterface->isValid());
 
-    m_relativePointerManagerInterface = m_display->createRelativePointerManager(RelativePointerInterfaceVersion::UnstableV1, m_display);
+    m_relativePointerManagerInterface
+            = m_display->createRelativePointerManager(Srv::RelativePointerInterfaceVersion::
+                                                      UnstableV1, m_display);
     QVERIFY(m_relativePointerManagerInterface);
     m_relativePointerManagerInterface->create();
     QVERIFY(m_relativePointerManagerInterface->isValid());
 
-    m_pointerGesturesInterface = m_display->createPointerGestures(PointerGesturesInterfaceVersion::UnstableV1, m_display);
+    m_pointerGesturesInterface
+            = m_display->createPointerGestures(Srv::PointerGesturesInterfaceVersion::
+                                               UnstableV1, m_display);
     QVERIFY(m_pointerGesturesInterface);
     m_pointerGesturesInterface->create();
     QVERIFY(m_pointerGesturesInterface->isValid());
 
-    // setup connection
-    m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    // Setup connection.
+    m_connection = new Clt::ConnectionThread;
+    QSignalSpy connectedSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
-    m_queue = new Wrapland::Client::EventQueue(this);
+    m_queue = new Clt::EventQueue(this);
     m_queue->setup(m_connection);
 
-    Wrapland::Client::Registry registry;
-    QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32,quint32)));
-    QSignalSpy seatSpy(&registry, SIGNAL(seatAnnounced(quint32,quint32)));
-    QSignalSpy shmSpy(&registry, SIGNAL(shmAnnounced(quint32,quint32)));
+    Clt::Registry registry;
+    QSignalSpy compositorSpy(&registry, &Clt::Registry::compositorAnnounced);
+    QSignalSpy seatSpy(&registry, &Clt::Registry::seatAnnounced);
+    QSignalSpy shmSpy(&registry, &Clt::Registry::shmAnnounced);
+
     registry.setEventQueue(m_queue);
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
@@ -195,64 +204,63 @@ void TestWaylandSeat::init()
     QVERIFY(m_seatInterface->isValid());
     QVERIFY(seatSpy.wait());
 
-    m_compositor = new Wrapland::Client::Compositor(this);
-    m_compositor->setup(registry.bindCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>()));
+    m_compositor = new Clt::Compositor(this);
+    m_compositor->setup(registry.bindCompositor(compositorSpy.first().first().value<quint32>(),
+                                                compositorSpy.first().last().value<quint32>()));
     QVERIFY(m_compositor->isValid());
 
-    m_seat = registry.createSeat(seatSpy.first().first().value<quint32>(), seatSpy.first().last().value<quint32>(), this);
-    QSignalSpy nameSpy(m_seat, SIGNAL(nameChanged(QString)));
+    m_seat = registry.createSeat(seatSpy.first().first().value<quint32>(),
+                                 seatSpy.first().last().value<quint32>(), this);
+    QSignalSpy nameSpy(m_seat, &Clt::Seat::nameChanged);
     QVERIFY(nameSpy.wait());
 
-    m_shm = new Wrapland::Client::ShmPool(this);
-    m_shm->setup(registry.bindShm(shmSpy.first().first().value<quint32>(), shmSpy.first().last().value<quint32>()));
+    m_shm = new Clt::ShmPool(this);
+    m_shm->setup(registry.bindShm(shmSpy.first().first().value<quint32>(),
+                                  shmSpy.first().last().value<quint32>()));
     QVERIFY(m_shm->isValid());
 
-    m_subCompositor = registry.createSubCompositor(registry.interface(Wrapland::Client::Registry::Interface::SubCompositor).name,
-                                                   registry.interface(Wrapland::Client::Registry::Interface::SubCompositor).version,
-                                                   this);
+    m_subCompositor = registry.createSubCompositor(
+                registry.interface(Clt::Registry::Interface::SubCompositor).name,
+                registry.interface(Clt::Registry::Interface::SubCompositor).version,
+                this);
     QVERIFY(m_subCompositor->isValid());
 
-    m_relativePointerManager = registry.createRelativePointerManager(registry.interface(Wrapland::Client::Registry::Interface::RelativePointerManagerUnstableV1).name,
-                                                                     registry.interface(Wrapland::Client::Registry::Interface::RelativePointerManagerUnstableV1).version,
-                                                                     this);
+    m_relativePointerManager = registry.createRelativePointerManager(
+            registry.interface(Clt::Registry::Interface::RelativePointerManagerUnstableV1).name,
+            registry.interface(Clt::Registry::Interface::RelativePointerManagerUnstableV1).version,
+                this);
     QVERIFY(m_relativePointerManager->isValid());
 
-    m_pointerGestures = registry.createPointerGestures(registry.interface(Wrapland::Client::Registry::Interface::PointerGesturesUnstableV1).name,
-                                                       registry.interface(Wrapland::Client::Registry::Interface::PointerGesturesUnstableV1).version,
-                                                       this);
+    m_pointerGestures = registry.createPointerGestures(
+                registry.interface(Clt::Registry::Interface::PointerGesturesUnstableV1).name,
+                registry.interface(Clt::Registry::Interface::PointerGesturesUnstableV1).version,
+                this);
     QVERIFY(m_pointerGestures->isValid());
 }
 
 void TestWaylandSeat::cleanup()
 {
-    if (m_pointerGestures) {
-        delete m_pointerGestures;
-        m_pointerGestures = nullptr;
-    }
-    if (m_relativePointerManager) {
-        delete m_relativePointerManager;
-        m_relativePointerManager = nullptr;
-    }
-    if (m_subCompositor) {
-        delete m_subCompositor;
-        m_subCompositor = nullptr;
-    }
-    if (m_shm) {
-        delete m_shm;
-        m_shm = nullptr;
-    }
-    if (m_seat) {
-        delete m_seat;
-        m_seat = nullptr;
-    }
-    if (m_compositor) {
-        delete m_compositor;
-        m_compositor = nullptr;
-    }
-    if (m_queue) {
-        delete m_queue;
-        m_queue = nullptr;
-    }
+    delete m_pointerGestures;
+    m_pointerGestures = nullptr;
+
+    delete m_relativePointerManager;
+    m_relativePointerManager = nullptr;
+
+    delete m_subCompositor;
+    m_subCompositor = nullptr;
+
+    delete m_shm;
+    m_shm = nullptr;
+
+    delete m_seat;
+    m_seat = nullptr;
+
+    delete m_compositor;
+    m_compositor = nullptr;
+
+    delete m_queue;
+    m_queue = nullptr;
+
     if (m_connection) {
         m_connection->deleteLater();
         m_connection = nullptr;
@@ -285,10 +293,10 @@ void TestWaylandSeat::cleanup()
 
 void TestWaylandSeat::testName()
 {
-    // no name set yet
+    // No name set yet.
     QCOMPARE(m_seat->name(), QStringLiteral("seat0"));
 
-    QSignalSpy spy(m_seat, SIGNAL(nameChanged(QString)));
+    QSignalSpy spy(m_seat, &Clt::Seat::nameChanged);
     QVERIFY(spy.isValid());
 
     const QString name = QStringLiteral("foobar");
@@ -325,26 +333,26 @@ void TestWaylandSeat::testCapabilities()
     QFETCH(bool, keyboard);
     QFETCH(bool, touch);
 
-    QSignalSpy pointerSpy(m_seat, SIGNAL(hasPointerChanged(bool)));
+    QSignalSpy pointerSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(pointerSpy.isValid());
-    QSignalSpy keyboardSpy(m_seat, SIGNAL(hasKeyboardChanged(bool)));
+    QSignalSpy keyboardSpy(m_seat, &Clt::Seat::hasKeyboardChanged);
     QVERIFY(keyboardSpy.isValid());
-    QSignalSpy touchSpy(m_seat, SIGNAL(hasTouchChanged(bool)));
+    QSignalSpy touchSpy(m_seat, &Clt::Seat::hasTouchChanged);
     QVERIFY(touchSpy.isValid());
 
     m_seatInterface->setHasPointer(pointer);
     m_seatInterface->setHasKeyboard(keyboard);
     m_seatInterface->setHasTouch(touch);
 
-    // do processing
-    QCOMPARE(pointerSpy.wait(1000), pointer);
+    // Do processing.
+    QCOMPARE(pointerSpy.wait(200), pointer);
     QCOMPARE(pointerSpy.isEmpty(), !pointer);
     if (!pointerSpy.isEmpty()) {
         QCOMPARE(pointerSpy.first().first().toBool(), pointer);
     }
 
     if (keyboardSpy.isEmpty()) {
-        QCOMPARE(keyboardSpy.wait(1000), keyboard);
+        QCOMPARE(keyboardSpy.wait(200), keyboard);
     }
     QCOMPARE(keyboardSpy.isEmpty(), !keyboard);
     if (!keyboardSpy.isEmpty()) {
@@ -352,7 +360,7 @@ void TestWaylandSeat::testCapabilities()
     }
 
     if (touchSpy.isEmpty()) {
-        QCOMPARE(touchSpy.wait(1000), touch);
+        QCOMPARE(touchSpy.wait(200), touch);
     }
     QCOMPARE(touchSpy.isEmpty(), !touch);
     if (!touchSpy.isEmpty()) {
@@ -366,194 +374,212 @@ void TestWaylandSeat::testCapabilities()
 
 void TestWaylandSeat::testPointer()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    QSignalSpy pointerSpy(m_seat, SIGNAL(hasPointerChanged(bool)));
+    QSignalSpy pointerSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(pointerSpy.isValid());
     m_seatInterface->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    Surface *s = m_compositor->createSurface(m_compositor);
+    auto *s = m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    SurfaceInterface *serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+
+    Srv::SurfaceInterface *serverSurface
+            = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
 
-    QSignalSpy focusedPointerChangedSpy(m_seatInterface, &SeatInterface::focusedPointerChanged);
+    QSignalSpy focusedPointerChangedSpy(m_seatInterface,
+                                        &Srv::SeatInterface::focusedPointerChanged);
     QVERIFY(focusedPointerChangedSpy.isValid());
 
     m_seatInterface->setPointerPos(QPoint(20, 18));
     m_seatInterface->setFocusedPointerSurface(serverSurface, QPoint(10, 15));
     QCOMPARE(focusedPointerChangedSpy.count(), 1);
-    QVERIFY(!focusedPointerChangedSpy.first().first().value<PointerInterface*>());
-    // no pointer yet
+    QVERIFY(!focusedPointerChangedSpy.first().first().value<Srv::PointerInterface*>());
+
+    // No pointer yet.
     QVERIFY(m_seatInterface->focusedPointerSurface());
     QVERIFY(!m_seatInterface->focusedPointer());
 
-    Pointer *p = m_seat->createPointer(m_seat);
-    QSignalSpy frameSpy(p, &Pointer::frame);
+    auto *p = m_seat->createPointer(m_seat);
+    QSignalSpy frameSpy(p, &Clt::Pointer::frame);
     QVERIFY(frameSpy.isValid());
-    const Pointer &cp = *p;
+    const Clt::Pointer &cp = *p;
     QVERIFY(p->isValid());
-    QScopedPointer<RelativePointer> relativePointer(m_relativePointerManager->createRelativePointer(p));
+
+    QScopedPointer<Clt::RelativePointer>
+            relativePointer(m_relativePointerManager->createRelativePointer(p));
     QVERIFY(relativePointer->isValid());
-    QSignalSpy pointerCreatedSpy(m_seatInterface, SIGNAL(pointerCreated(Wrapland::Server::PointerInterface*)));
+
+    QSignalSpy pointerCreatedSpy(m_seatInterface, &Srv::SeatInterface::pointerCreated);
     QVERIFY(pointerCreatedSpy.isValid());
-    // once the pointer is created it should be set as the focused pointer
+
+    // Once the pointer is created it should be set as the focused pointer.
     QVERIFY(pointerCreatedSpy.wait());
     QVERIFY(m_seatInterface->focusedPointer());
-    QCOMPARE(pointerCreatedSpy.first().first().value<PointerInterface*>(), m_seatInterface->focusedPointer());
+    QCOMPARE(pointerCreatedSpy.first().first().value<Srv::PointerInterface*>(),
+             m_seatInterface->focusedPointer());
     QCOMPARE(focusedPointerChangedSpy.count(), 2);
-    QCOMPARE(focusedPointerChangedSpy.last().first().value<PointerInterface*>(), m_seatInterface->focusedPointer());
+    QCOMPARE(focusedPointerChangedSpy.last().first().value<Srv::PointerInterface*>(),
+             m_seatInterface->focusedPointer());
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 1);
 
     m_seatInterface->setFocusedPointerSurface(nullptr);
     QCOMPARE(focusedPointerChangedSpy.count(), 3);
-    QVERIFY(!focusedPointerChangedSpy.last().first().value<PointerInterface*>());
+    QVERIFY(!focusedPointerChangedSpy.last().first().value<Srv::PointerInterface*>());
     serverSurface->client()->flush();
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 2);
 
-    QSignalSpy enteredSpy(p, SIGNAL(entered(quint32,QPointF)));
+    QSignalSpy enteredSpy(p, &Clt::Pointer::entered);
     QVERIFY(enteredSpy.isValid());
 
-    QSignalSpy leftSpy(p, SIGNAL(left(quint32)));
+    QSignalSpy leftSpy(p, &Clt::Pointer::left);
     QVERIFY(leftSpy.isValid());
 
-    QSignalSpy motionSpy(p, SIGNAL(motion(QPointF,quint32)));
+    QSignalSpy motionSpy(p, &Clt::Pointer::motion);
     QVERIFY(motionSpy.isValid());
 
-    QSignalSpy axisSpy(p, SIGNAL(axisChanged(quint32,Wrapland::Client::Pointer::Axis,qreal)));
+    QSignalSpy axisSpy(p, &Clt::Pointer::axisChanged);
     QVERIFY(axisSpy.isValid());
 
-    QSignalSpy buttonSpy(p, SIGNAL(buttonStateChanged(quint32,quint32,quint32,Wrapland::Client::Pointer::ButtonState)));
+    QSignalSpy buttonSpy(p, &Clt::Pointer::buttonStateChanged);
     QVERIFY(buttonSpy.isValid());
 
-    QSignalSpy relativeMotionSpy(relativePointer.data(), &RelativePointer::relativeMotion);
+    QSignalSpy relativeMotionSpy(relativePointer.data(), &Clt::RelativePointer::relativeMotion);
     QVERIFY(relativeMotionSpy.isValid());
 
     QVERIFY(!p->enteredSurface());
     QVERIFY(!cp.enteredSurface());
     m_seatInterface->setFocusedPointerSurface(serverSurface, QPoint(10, 15));
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
+
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.first().first().value<quint32>(), m_display->serial());
     QCOMPARE(enteredSpy.first().last().toPoint(), QPoint(10, 3));
-    QCOMPARE(frameSpy.count(), 3);
-    PointerInterface *serverPointer = m_seatInterface->focusedPointer();
+    QTRY_COMPARE(frameSpy.count(), 3);
+
+    auto *serverPointer = m_seatInterface->focusedPointer();
     QVERIFY(serverPointer);
     QCOMPARE(p->enteredSurface(), s);
     QCOMPARE(cp.enteredSurface(), s);
     QCOMPARE(focusedPointerChangedSpy.count(), 4);
-    QCOMPARE(focusedPointerChangedSpy.last().first().value<PointerInterface*>(), serverPointer);
+    QCOMPARE(focusedPointerChangedSpy.last().first().value<Srv::PointerInterface*>(),
+             serverPointer);
 
-    // test motion
+    // Test motion.
     m_seatInterface->setTimestamp(1);
     m_seatInterface->setPointerPos(QPoint(10, 16));
     QVERIFY(motionSpy.wait());
-    QCOMPARE(frameSpy.count(), 4);
+    QTRY_COMPARE(frameSpy.count(), 4);
     QCOMPARE(motionSpy.first().first().toPoint(), QPoint(0, 1));
     QCOMPARE(motionSpy.first().last().value<quint32>(), quint32(1));
 
-    // test relative motion
+    // Test relative motion.
     m_seatInterface->relativePointerMotion(QSizeF(1, 2), QSizeF(3, 4), quint64(-1));
     QVERIFY(relativeMotionSpy.wait());
     QCOMPARE(relativeMotionSpy.count(), 1);
-    QCOMPARE(frameSpy.count(), 5);
+    QTRY_COMPARE(frameSpy.count(), 5);
     QCOMPARE(relativeMotionSpy.first().at(0).toSizeF(), QSizeF(1, 2));
     QCOMPARE(relativeMotionSpy.first().at(1).toSizeF(), QSizeF(3, 4));
     QCOMPARE(relativeMotionSpy.first().at(2).value<quint64>(), quint64(-1));
 
-    // test axis
+    // Test axis.
     m_seatInterface->setTimestamp(2);
     m_seatInterface->pointerAxis(Qt::Horizontal, 10);
     QVERIFY(axisSpy.wait());
-    QCOMPARE(frameSpy.count(), 6);
+    QTRY_COMPARE(frameSpy.count(), 6);
     m_seatInterface->setTimestamp(3);
     m_seatInterface->pointerAxis(Qt::Vertical, 20);
+
     QVERIFY(axisSpy.wait());
-    QCOMPARE(frameSpy.count(), 7);
+    QTRY_COMPARE(frameSpy.count(), 7);
     QCOMPARE(axisSpy.first().at(0).value<quint32>(), quint32(2));
-    QCOMPARE(axisSpy.first().at(1).value<Pointer::Axis>(), Pointer::Axis::Horizontal);
+    QCOMPARE(axisSpy.first().at(1).value<Clt::Pointer::Axis>(), Clt::Pointer::Axis::Horizontal);
     QCOMPARE(axisSpy.first().at(2).value<qreal>(), qreal(10));
 
     QCOMPARE(axisSpy.last().at(0).value<quint32>(), quint32(3));
-    QCOMPARE(axisSpy.last().at(1).value<Pointer::Axis>(), Pointer::Axis::Vertical);
+    QCOMPARE(axisSpy.last().at(1).value<Clt::Pointer::Axis>(), Clt::Pointer::Axis::Vertical);
     QCOMPARE(axisSpy.last().at(2).value<qreal>(), qreal(20));
 
-    // test button
+    // Test button.
     m_seatInterface->setTimestamp(4);
     m_seatInterface->pointerButtonPressed(1);
     QVERIFY(buttonSpy.wait());
-    QCOMPARE(frameSpy.count(), 8);
+    QTRY_COMPARE(frameSpy.count(), 8);
     QCOMPARE(buttonSpy.at(0).at(0).value<quint32>(), m_display->serial());
     m_seatInterface->setTimestamp(5);
     m_seatInterface->pointerButtonPressed(2);
+
     QVERIFY(buttonSpy.wait());
-    QCOMPARE(frameSpy.count(), 9);
+    QTRY_COMPARE(frameSpy.count(), 9);
     QCOMPARE(buttonSpy.at(1).at(0).value<quint32>(), m_display->serial());
     m_seatInterface->setTimestamp(6);
     m_seatInterface->pointerButtonReleased(2);
+
     QVERIFY(buttonSpy.wait());
-    QCOMPARE(frameSpy.count(), 10);
+    QTRY_COMPARE(frameSpy.count(), 10);
     QCOMPARE(buttonSpy.at(2).at(0).value<quint32>(), m_display->serial());
     m_seatInterface->setTimestamp(7);
     m_seatInterface->pointerButtonReleased(1);
+
     QVERIFY(buttonSpy.wait());
-    QCOMPARE(frameSpy.count(), 11);
+    QTRY_COMPARE(frameSpy.count(), 11);
     QCOMPARE(buttonSpy.count(), 4);
 
-    // timestamp
+    // Timestamp
     QCOMPARE(buttonSpy.at(0).at(1).value<quint32>(), quint32(4));
-    // button
+    // Button
     QCOMPARE(buttonSpy.at(0).at(2).value<quint32>(), quint32(1));
-    QCOMPARE(buttonSpy.at(0).at(3).value<Wrapland::Client::Pointer::ButtonState>(), Wrapland::Client::Pointer::ButtonState::Pressed);
+    QCOMPARE(buttonSpy.at(0).at(3).value<Clt::Pointer::ButtonState>(),
+             Clt::Pointer::ButtonState::Pressed);
 
-    // timestamp
+    // Timestamp
     QCOMPARE(buttonSpy.at(1).at(1).value<quint32>(), quint32(5));
-    // button
+    // Button
     QCOMPARE(buttonSpy.at(1).at(2).value<quint32>(), quint32(2));
-    QCOMPARE(buttonSpy.at(1).at(3).value<Wrapland::Client::Pointer::ButtonState>(), Wrapland::Client::Pointer::ButtonState::Pressed);
+    QCOMPARE(buttonSpy.at(1).at(3).value<Clt::Pointer::ButtonState>(),
+             Clt::Pointer::ButtonState::Pressed);
 
     QCOMPARE(buttonSpy.at(2).at(0).value<quint32>(), m_seatInterface->pointerButtonSerial(2));
-    // timestamp
+    // Timestamp
     QCOMPARE(buttonSpy.at(2).at(1).value<quint32>(), quint32(6));
-    // button
+    // Button
     QCOMPARE(buttonSpy.at(2).at(2).value<quint32>(), quint32(2));
-    QCOMPARE(buttonSpy.at(2).at(3).value<Wrapland::Client::Pointer::ButtonState>(), Wrapland::Client::Pointer::ButtonState::Released);
+    QCOMPARE(buttonSpy.at(2).at(3).value<Clt::Pointer::ButtonState>(),
+             Clt::Pointer::ButtonState::Released);
 
     QCOMPARE(buttonSpy.at(3).at(0).value<quint32>(), m_seatInterface->pointerButtonSerial(1));
-    // timestamp
+    // Timestamp
     QCOMPARE(buttonSpy.at(3).at(1).value<quint32>(), quint32(7));
-    // button
+    // Button
     QCOMPARE(buttonSpy.at(3).at(2).value<quint32>(), quint32(1));
-    QCOMPARE(buttonSpy.at(3).at(3).value<Wrapland::Client::Pointer::ButtonState>(), Wrapland::Client::Pointer::ButtonState::Released);
+    QCOMPARE(buttonSpy.at(3).at(3).value<Clt::Pointer::ButtonState>(),
+             Clt::Pointer::ButtonState::Released);
 
-    // leave the surface
+    // Leave the surface.
     m_seatInterface->setFocusedPointerSurface(nullptr);
     QCOMPARE(focusedPointerChangedSpy.count(), 5);
     QVERIFY(leftSpy.wait());
-    QCOMPARE(frameSpy.count(), 12);
+    QTRY_COMPARE(frameSpy.count(), 12);
     QCOMPARE(leftSpy.first().first().value<quint32>(), m_display->serial());
     QVERIFY(!p->enteredSurface());
     QVERIFY(!cp.enteredSurface());
 
-    // now a relative motion should not be sent to the relative pointer
+    // Now a relative motion should not be sent to the relative pointer.
     m_seatInterface->relativePointerMotion(QSizeF(1, 2), QSizeF(3, 4), quint64(-1));
-    QVERIFY(!relativeMotionSpy.wait(500));
+    QVERIFY(!relativeMotionSpy.wait(200));
 
-    // enter it again
+    // Enter it again.
     m_seatInterface->setFocusedPointerSurface(serverSurface, QPoint(0, 0));
     QCOMPARE(focusedPointerChangedSpy.count(), 6);
     QVERIFY(enteredSpy.wait());
-    QCOMPARE(frameSpy.count(), 13);
+    QTRY_COMPARE(frameSpy.count(), 13);
     QCOMPARE(p->enteredSurface(), s);
     QCOMPARE(cp.enteredSurface(), s);
 
-    // send another relative motion event
+    // Send another relative motion event.
     m_seatInterface->relativePointerMotion(QSizeF(4, 5), QSizeF(6, 7), quint64(1));
     QVERIFY(relativeMotionSpy.wait());
     QCOMPARE(relativeMotionSpy.count(), 2);
@@ -561,18 +587,24 @@ void TestWaylandSeat::testPointer()
     QCOMPARE(relativeMotionSpy.last().at(1).toSizeF(), QSizeF(6, 7));
     QCOMPARE(relativeMotionSpy.last().at(2).value<quint64>(), quint64(1));
 
-    // destroy the focused pointer
-    QSignalSpy unboundSpy(serverPointer, &Resource::unbound);
+    // Destroy the focused pointer.
+    QSignalSpy unboundSpy(serverPointer, &Srv::Resource::unbound);
     QVERIFY(unboundSpy.isValid());
-    QSignalSpy destroyedSpy(serverPointer, &Resource::destroyed);
+    QSignalSpy destroyedSpy(serverPointer, &Srv::Resource::destroyed);
     QVERIFY(destroyedSpy.isValid());
+
     delete p;
     QVERIFY(unboundSpy.wait());
     QCOMPARE(unboundSpy.count(), 1);
     QCOMPARE(destroyedSpy.count(), 0);
-    // now test that calling into the methods in Seat does not crash
-    QCOMPARE(m_seatInterface->focusedPointer(), serverPointer);
+
+    // Now test that calling into the methods in Seat does not crash.
+    // The focused pointer must be null now since it got destroyed.
+    QCOMPARE(m_seatInterface->focusedPointer(), nullptr);
+    // The focused surface is still the same since it does still exist and it was once set
+    // and not changed since then.
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
+
     m_seatInterface->setTimestamp(8);
     m_seatInterface->setPointerPos(QPoint(10, 15));
     m_seatInterface->setTimestamp(9);
@@ -583,37 +615,40 @@ void TestWaylandSeat::testPointer()
     m_seatInterface->pointerAxis(Qt::Horizontal, 10);
     m_seatInterface->setTimestamp(12);
     m_seatInterface->pointerAxis(Qt::Vertical, 20);
+
     m_seatInterface->setFocusedPointerSurface(nullptr);
-    QCOMPARE(focusedPointerChangedSpy.count(), 7);
-    m_seatInterface->setFocusedPointerSurface(serverSurface);
     QCOMPARE(focusedPointerChangedSpy.count(), 8);
+
+    m_seatInterface->setFocusedPointerSurface(serverSurface);
+    QCOMPARE(focusedPointerChangedSpy.count(), 9);
+
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
     QVERIFY(!m_seatInterface->focusedPointer());
 
-    // and now destroy
+    // And now destroy.
     QVERIFY(destroyedSpy.wait());
     QCOMPARE(unboundSpy.count(), 1);
     QCOMPARE(destroyedSpy.count(), 1);
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
     QVERIFY(!m_seatInterface->focusedPointer());
 
-    // create a pointer again
+    // Create a pointer again.
     p = m_seat->createPointer(m_seat);
     QVERIFY(focusedPointerChangedSpy.wait());
-    QCOMPARE(focusedPointerChangedSpy.count(), 9);
+    QCOMPARE(focusedPointerChangedSpy.count(), 10);
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
     serverPointer = m_seatInterface->focusedPointer();
     QVERIFY(serverPointer);
 
-    QSignalSpy entered2Spy(p, &Pointer::entered);
+    QSignalSpy entered2Spy(p, &Clt::Pointer::entered);
     QVERIFY(entered2Spy.wait());
     QCOMPARE(p->enteredSurface(), s);
-    QSignalSpy leftSpy2(p, &Pointer::left);
+    QSignalSpy leftSpy2(p, &Clt::Pointer::left);
     QVERIFY(leftSpy2.isValid());
     delete s;
     QVERIFY(!p->enteredSurface());
     QVERIFY(leftSpy2.wait());
-    QCOMPARE(focusedPointerChangedSpy.count(), 10);
+    QCOMPARE(focusedPointerChangedSpy.count(), 11);
     QVERIFY(!m_seatInterface->focusedPointerSurface());
     QVERIFY(!m_seatInterface->focusedPointer());
 }
@@ -621,9 +656,9 @@ void TestWaylandSeat::testPointer()
 void TestWaylandSeat::testPointerTransformation_data()
 {
     QTest::addColumn<QMatrix4x4>("enterTransformation");
-    // global position at 20/18
+    // Global position at 20/18.
     QTest::addColumn<QPointF>("expectedEnterPoint");
-    // global position at 10/16
+    // Global position at 10/16.
     QTest::addColumn<QPointF>("expectedMovePoint");
 
     QMatrix4x4 tm;
@@ -639,50 +674,52 @@ void TestWaylandSeat::testPointerTransformation_data()
 
 void TestWaylandSeat::testPointerTransformation()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    QSignalSpy pointerSpy(m_seat, &Seat::hasPointerChanged);
+    QSignalSpy pointerSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(pointerSpy.isValid());
     m_seatInterface->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    Surface *s = m_compositor->createSurface(m_compositor);
+
+    auto *s = m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    SurfaceInterface *serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
 
     m_seatInterface->setPointerPos(QPoint(20, 18));
     QFETCH(QMatrix4x4, enterTransformation);
     m_seatInterface->setFocusedPointerSurface(serverSurface, enterTransformation);
     QCOMPARE(m_seatInterface->focusedPointerSurfaceTransformation(), enterTransformation);
-    // no pointer yet
+
+    // No pointer yet.
     QVERIFY(m_seatInterface->focusedPointerSurface());
     QVERIFY(!m_seatInterface->focusedPointer());
 
-    Pointer *p = m_seat->createPointer(m_seat);
-    const Pointer &cp = *p;
+    auto *p = m_seat->createPointer(m_seat);
+    const Clt::Pointer &cp = *p;
     QVERIFY(p->isValid());
-    QSignalSpy pointerCreatedSpy(m_seatInterface, &SeatInterface::pointerCreated);
+    QSignalSpy pointerCreatedSpy(m_seatInterface, &Srv::SeatInterface::pointerCreated);
     QVERIFY(pointerCreatedSpy.isValid());
-    // once the pointer is created it should be set as the focused pointer
+
+    // Once the pointer is created it should be set as the focused pointer.
     QVERIFY(pointerCreatedSpy.wait());
     QVERIFY(m_seatInterface->focusedPointer());
-    QCOMPARE(pointerCreatedSpy.first().first().value<PointerInterface*>(), m_seatInterface->focusedPointer());
+    QCOMPARE(pointerCreatedSpy.first().first().value<Srv::PointerInterface*>(),
+             m_seatInterface->focusedPointer());
 
     m_seatInterface->setFocusedPointerSurface(nullptr);
     serverSurface->client()->flush();
     QTest::qWait(100);
 
-    QSignalSpy enteredSpy(p, &Pointer::entered);
+    QSignalSpy enteredSpy(p, &Clt::Pointer::entered);
     QVERIFY(enteredSpy.isValid());
 
-    QSignalSpy leftSpy(p, &Pointer::left);
+    QSignalSpy leftSpy(p, &Clt::Pointer::left);
     QVERIFY(leftSpy.isValid());
 
-    QSignalSpy motionSpy(p, &Pointer::motion);
+    QSignalSpy motionSpy(p, &Clt::Pointer::motion);
     QVERIFY(motionSpy.isValid());
 
     QVERIFY(!p->enteredSurface());
@@ -692,26 +729,27 @@ void TestWaylandSeat::testPointerTransformation()
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.first().first().value<quint32>(), m_display->serial());
     QTEST(enteredSpy.first().last().toPointF(), "expectedEnterPoint");
-    PointerInterface *serverPointer = m_seatInterface->focusedPointer();
+
+    auto *serverPointer = m_seatInterface->focusedPointer();
     QVERIFY(serverPointer);
     QCOMPARE(p->enteredSurface(), s);
     QCOMPARE(cp.enteredSurface(), s);
 
-    // test motion
+    // Test motion.
     m_seatInterface->setTimestamp(1);
     m_seatInterface->setPointerPos(QPoint(10, 16));
     QVERIFY(motionSpy.wait());
     QTEST(motionSpy.first().first().toPointF(), "expectedMovePoint");
     QCOMPARE(motionSpy.first().last().value<quint32>(), quint32(1));
 
-    // leave the surface
+    // Leave the surface.
     m_seatInterface->setFocusedPointerSurface(nullptr);
     QVERIFY(leftSpy.wait());
     QCOMPARE(leftSpy.first().first().value<quint32>(), m_display->serial());
     QVERIFY(!p->enteredSurface());
     QVERIFY(!cp.enteredSurface());
 
-    // enter it again
+    // Enter it again.
     m_seatInterface->setFocusedPointerSurface(serverSurface);
     QVERIFY(enteredSpy.wait());
     QCOMPARE(p->enteredSurface(), s);
@@ -756,24 +794,21 @@ void TestWaylandSeat::testPointerButton_data()
 
 void TestWaylandSeat::testPointerButton()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    QSignalSpy pointerSpy(m_seat, SIGNAL(hasPointerChanged(bool)));
+    QSignalSpy pointerSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(pointerSpy.isValid());
     m_seatInterface->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    SurfaceInterface *serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
 
-    QScopedPointer<Pointer> p(m_seat->createPointer());
+    QScopedPointer<Clt::Pointer> p(m_seat->createPointer());
     QVERIFY(p->isValid());
-    QSignalSpy buttonChangedSpy(p.data(), SIGNAL(buttonStateChanged(quint32,quint32,quint32,Wrapland::Client::Pointer::ButtonState)));
+    QSignalSpy buttonChangedSpy(p.data(), &Clt::Pointer::buttonStateChanged);
     QVERIFY(buttonChangedSpy.isValid());
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -786,10 +821,11 @@ void TestWaylandSeat::testPointerButton()
     QCoreApplication::processEvents();
 
     m_seatInterface->setFocusedPointerSurface(serverSurface, QPoint(10, 15));
-    PointerInterface *serverPointer = m_seatInterface->focusedPointer();
+    auto *serverPointer = m_seatInterface->focusedPointer();
     QVERIFY(serverPointer);
     QFETCH(Qt::MouseButton, qtButton);
     QFETCH(quint32, waylandButton);
+
     quint32 msec = QDateTime::currentMSecsSinceEpoch();
     QCOMPARE(m_seatInterface->isPointerButtonPressed(waylandButton), false);
     QCOMPARE(m_seatInterface->isPointerButtonPressed(qtButton), false);
@@ -797,61 +833,78 @@ void TestWaylandSeat::testPointerButton()
     m_seatInterface->pointerButtonPressed(qtButton);
     QCOMPARE(m_seatInterface->isPointerButtonPressed(waylandButton), true);
     QCOMPARE(m_seatInterface->isPointerButtonPressed(qtButton), true);
+
     QVERIFY(buttonChangedSpy.wait());
     QCOMPARE(buttonChangedSpy.count(), 1);
-    QCOMPARE(buttonChangedSpy.last().at(0).value<quint32>(), m_seatInterface->pointerButtonSerial(waylandButton));
-    QCOMPARE(buttonChangedSpy.last().at(0).value<quint32>(), m_seatInterface->pointerButtonSerial(qtButton));
+    QCOMPARE(buttonChangedSpy.last().at(0).value<quint32>(),
+             m_seatInterface->pointerButtonSerial(waylandButton));
+    QCOMPARE(buttonChangedSpy.last().at(0).value<quint32>(),
+             m_seatInterface->pointerButtonSerial(qtButton));
     QCOMPARE(buttonChangedSpy.last().at(1).value<quint32>(), msec);
     QCOMPARE(buttonChangedSpy.last().at(2).value<quint32>(), waylandButton);
-    QCOMPARE(buttonChangedSpy.last().at(3).value<Wrapland::Client::Pointer::ButtonState>(), Pointer::ButtonState::Pressed);
+    QCOMPARE(buttonChangedSpy.last().at(3).value<Clt::Pointer::ButtonState>(),
+             Clt::Pointer::ButtonState::Pressed);
+
     msec = QDateTime::currentMSecsSinceEpoch();
     m_seatInterface->setTimestamp(QDateTime::currentMSecsSinceEpoch());
     m_seatInterface->pointerButtonReleased(qtButton);
     QCOMPARE(m_seatInterface->isPointerButtonPressed(waylandButton), false);
     QCOMPARE(m_seatInterface->isPointerButtonPressed(qtButton), false);
+
     QVERIFY(buttonChangedSpy.wait());
     QCOMPARE(buttonChangedSpy.count(), 2);
-    QCOMPARE(buttonChangedSpy.last().at(0).value<quint32>(), m_seatInterface->pointerButtonSerial(waylandButton));
-    QCOMPARE(buttonChangedSpy.last().at(0).value<quint32>(), m_seatInterface->pointerButtonSerial(qtButton));
+    QCOMPARE(buttonChangedSpy.last().at(0).value<quint32>(),
+             m_seatInterface->pointerButtonSerial(waylandButton));
+    QCOMPARE(buttonChangedSpy.last().at(0).value<quint32>(),
+             m_seatInterface->pointerButtonSerial(qtButton));
+
     QCOMPARE(buttonChangedSpy.last().at(1).value<quint32>(), msec);
     QCOMPARE(buttonChangedSpy.last().at(2).value<quint32>(), waylandButton);
-    QCOMPARE(buttonChangedSpy.last().at(3).value<Wrapland::Client::Pointer::ButtonState>(), Pointer::ButtonState::Released);
+    QCOMPARE(buttonChangedSpy.last().at(3).value<Clt::Pointer::ButtonState>(),
+             Clt::Pointer::ButtonState::Released);
 }
 
 void TestWaylandSeat::testPointerSubSurfaceTree()
 {
-    // this test verifies that pointer motion on a surface with sub-surfaces sends motion enter/leave to the sub-surface
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
+    // This test verifies that pointer motion on a surface with sub-surfaces sends motion
+    // enter/leave to the sub-surface.
 
-    // first create the pointer
-    QSignalSpy hasPointerChangedSpy(m_seat, &Seat::hasPointerChanged);
+    // First create the pointer.
+    QSignalSpy hasPointerChangedSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(hasPointerChangedSpy.isValid());
     m_seatInterface->setHasPointer(true);
     QVERIFY(hasPointerChangedSpy.wait());
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
+    QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
 
-    // create a sub surface tree
-    // parent surface (100, 100) with one sub surface taking the half of it's size (50, 100)
-    // which has two further children (50, 50) which are overlapping
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    // Create a sub surface tree.
+    // Parent surface (100, 100) with one sub surface taking the half of it's size (50, 100)
+    // which has two further children (50, 50) which are overlapping.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> parentSurface(m_compositor->createSurface());
-    QScopedPointer<Surface> childSurface(m_compositor->createSurface());
-    QScopedPointer<Surface> grandChild1Surface(m_compositor->createSurface());
-    QScopedPointer<Surface> grandChild2Surface(m_compositor->createSurface());
-    QScopedPointer<SubSurface> childSubSurface(m_subCompositor->createSubSurface(childSurface.data(), parentSurface.data()));
-    QScopedPointer<SubSurface> grandChild1SubSurface(m_subCompositor->createSubSurface(grandChild1Surface.data(), childSurface.data()));
-    QScopedPointer<SubSurface> grandChild2SubSurface(m_subCompositor->createSubSurface(grandChild2Surface.data(), childSurface.data()));
+    QScopedPointer<Clt::Surface> parentSurface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> childSurface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> grandChild1Surface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> grandChild2Surface(m_compositor->createSurface());
+
+    QScopedPointer<Clt::SubSurface>
+            childSubSurface(m_subCompositor->createSubSurface(childSurface.data(),
+                                                              parentSurface.data()));
+    QScopedPointer<Clt::SubSurface>
+            grandChild1SubSurface(m_subCompositor->createSubSurface(grandChild1Surface.data(),
+                                                                    childSurface.data()));
+    QScopedPointer<Clt::SubSurface>
+            grandChild2SubSurface(m_subCompositor->createSubSurface(grandChild2Surface.data(),
+                                                                    childSurface.data()));
+
     grandChild2SubSurface->setPosition(QPoint(0, 25));
 
-    // let's map the surfaces
-    auto render = [this] (Surface *s, const QSize &size) {
+    // Let's map the surfaces.
+    auto render = [this] (Clt::Surface *s, const QSize &size) {
         QImage image(size, QImage::Format_ARGB32_Premultiplied);
         image.fill(Qt::black);
         s->attachBuffer(m_shm->createBuffer(image));
         s->damage(QRect(QPoint(0, 0), size));
-        s->commit(Surface::CommitFlag::None);
+        s->commit(Clt::Surface::CommitFlag::None);
     };
     render(grandChild2Surface.data(), QSize(50, 50));
     render(grandChild1Surface.data(), QSize(50, 50));
@@ -859,17 +912,18 @@ void TestWaylandSeat::testPointerSubSurfaceTree()
     render(parentSurface.data(), QSize(100, 100));
 
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface->isMapped());
 
-    // send in pointer events
-    QSignalSpy enteredSpy(pointer.data(), &Pointer::entered);
+    // Send in pointer events.
+    QSignalSpy enteredSpy(pointer.data(), &Clt::Pointer::entered);
     QVERIFY(enteredSpy.isValid());
-    QSignalSpy leftSpy(pointer.data(), &Pointer::left);
+    QSignalSpy leftSpy(pointer.data(), &Clt::Pointer::left);
     QVERIFY(leftSpy.isValid());
-    QSignalSpy motionSpy(pointer.data(), &Pointer::motion);
+    QSignalSpy motionSpy(pointer.data(), &Clt::Pointer::motion);
     QVERIFY(motionSpy.isValid());
-    // first to the grandChild2 in the overlapped area
+
+    // First to the grandChild2 in the overlapped area.
     quint32 timestamp = 1;
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->setPointerPos(QPointF(25, 50));
@@ -880,7 +934,8 @@ void TestWaylandSeat::testPointerSubSurfaceTree()
     QCOMPARE(motionSpy.count(), 0);
     QCOMPARE(enteredSpy.last().last().toPointF(), QPointF(25, 25));
     QCOMPARE(pointer->enteredSurface(), grandChild2Surface.data());
-    // a motion on grandchild2
+
+    // A motion on grandchild2.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->setPointerPos(QPointF(25, 60));
     QVERIFY(motionSpy.wait());
@@ -888,7 +943,8 @@ void TestWaylandSeat::testPointerSubSurfaceTree()
     QCOMPARE(leftSpy.count(), 0);
     QCOMPARE(motionSpy.count(), 1);
     QCOMPARE(motionSpy.last().first().toPointF(), QPointF(25, 35));
-    // motion which changes to childSurface
+
+    // Motion which changes to childSurface.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->setPointerPos(QPointF(25, 80));
     QVERIFY(enteredSpy.wait());
@@ -897,14 +953,16 @@ void TestWaylandSeat::testPointerSubSurfaceTree()
     QCOMPARE(motionSpy.count(), 1);
     QCOMPARE(enteredSpy.last().last().toPointF(), QPointF(25, 80));
     QCOMPARE(pointer->enteredSurface(), childSurface.data());
-    // a leave for the whole surface
+
+    // A leave for the whole surface.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->setFocusedPointerSurface(nullptr);
     QVERIFY(leftSpy.wait());
     QCOMPARE(enteredSpy.count(), 2);
     QCOMPARE(leftSpy.count(), 2);
     QCOMPARE(motionSpy.count(), 1);
-    // a new enter on the main surface
+
+    // A new enter on the main surface.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->setPointerPos(QPointF(75, 50));
     m_seatInterface->setFocusedPointerSurface(serverSurface);
@@ -928,45 +986,46 @@ void TestWaylandSeat::testPointerSwipeGesture_data()
 
 void TestWaylandSeat::testPointerSwipeGesture()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    // first create the pointer and pointer swipe gesture
-    QSignalSpy hasPointerChangedSpy(m_seat, &Seat::hasPointerChanged);
+    // First create the pointer and pointer swipe gesture.
+    QSignalSpy hasPointerChangedSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(hasPointerChangedSpy.isValid());
+
     m_seatInterface->setHasPointer(true);
     QVERIFY(hasPointerChangedSpy.wait());
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
-    QScopedPointer<PointerSwipeGesture> gesture(m_pointerGestures->createSwipeGesture(pointer.data()));
+    QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
+    QScopedPointer<Clt::PointerSwipeGesture>
+            gesture(m_pointerGestures->createSwipeGesture(pointer.data()));
     QVERIFY(gesture);
     QVERIFY(gesture->isValid());
     QVERIFY(gesture->surface().isNull());
     QCOMPARE(gesture->fingerCount(), 0u);
 
-    QSignalSpy startSpy(gesture.data(), &PointerSwipeGesture::started);
+    QSignalSpy startSpy(gesture.data(), &Clt::PointerSwipeGesture::started);
     QVERIFY(startSpy.isValid());
-    QSignalSpy updateSpy(gesture.data(), &PointerSwipeGesture::updated);
+    QSignalSpy updateSpy(gesture.data(), &Clt::PointerSwipeGesture::updated);
     QVERIFY(updateSpy.isValid());
-    QSignalSpy endSpy(gesture.data(), &PointerSwipeGesture::ended);
+    QSignalSpy endSpy(gesture.data(), &Clt::PointerSwipeGesture::ended);
     QVERIFY(endSpy.isValid());
-    QSignalSpy cancelledSpy(gesture.data(), &PointerSwipeGesture::cancelled);
+    QSignalSpy cancelledSpy(gesture.data(), &Clt::PointerSwipeGesture::cancelled);
     QVERIFY(cancelledSpy.isValid());
 
-    // now create a surface
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    // Now create a surface.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
     m_seatInterface->setFocusedPointerSurface(serverSurface);
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
     QVERIFY(m_seatInterface->focusedPointer());
 
-    // send in the start
+    // Send in the start.
     quint32 timestamp = 1;
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->startPointerSwipeGesture(2);
+
     QVERIFY(startSpy.wait());
     QCOMPARE(startSpy.count(), 1);
     QCOMPARE(startSpy.first().at(0).value<quint32>(), m_display->serial());
@@ -974,16 +1033,18 @@ void TestWaylandSeat::testPointerSwipeGesture()
     QCOMPARE(gesture->fingerCount(), 2u);
     QCOMPARE(gesture->surface().data(), surface.data());
 
-    // another start should not be possible
+    // Another start should not be possible.
     m_seatInterface->startPointerSwipeGesture(2);
-    QVERIFY(!startSpy.wait(500));
+    QVERIFY(!startSpy.wait(200));
 
-    // send in some updates
+    // Send in some updates.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->updatePointerSwipeGesture(QSizeF(2, 3));
+
     QVERIFY(updateSpy.wait());
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->updatePointerSwipeGesture(QSizeF(4, 5));
+
     QVERIFY(updateSpy.wait());
     QCOMPARE(updateSpy.count(), 2);
     QCOMPARE(updateSpy.at(0).at(0).toSizeF(), QSizeF(2, 3));
@@ -991,9 +1052,10 @@ void TestWaylandSeat::testPointerSwipeGesture()
     QCOMPARE(updateSpy.at(1).at(0).toSizeF(), QSizeF(4, 5));
     QCOMPARE(updateSpy.at(1).at(1).value<quint32>(), 3u);
 
-    // now end or cancel
+    // Now end or cancel.
     QFETCH(bool, cancel);
     QSignalSpy *spy;
+
     m_seatInterface->setTimestamp(timestamp++);
     if (cancel) {
         m_seatInterface->cancelPointerSwipeGesture();
@@ -1002,9 +1064,11 @@ void TestWaylandSeat::testPointerSwipeGesture()
         m_seatInterface->endPointerSwipeGesture();
         spy = &endSpy;
     }
+
     QVERIFY(spy->wait());
     QTEST(endSpy.count(), "expectedEndCount");
     QTEST(cancelledSpy.count(), "expectedCancelCount");
+
     QCOMPARE(spy->count(), 1);
     QCOMPARE(spy->first().at(0).value<quint32>(), m_display->serial());
     QCOMPARE(spy->first().at(1).value<quint32>(), 4u);
@@ -1012,17 +1076,17 @@ void TestWaylandSeat::testPointerSwipeGesture()
     QCOMPARE(gesture->fingerCount(), 0u);
     QVERIFY(gesture->surface().isNull());
 
-    // now a start should be possible again
+    // Now a start should be possible again.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->startPointerSwipeGesture(2);
     QVERIFY(startSpy.wait());
 
-    // unsetting the focused pointer surface should not change anything
+    // Unsetting the focused pointer surface should not change anything.
     m_seatInterface->setFocusedPointerSurface(nullptr);
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->updatePointerSwipeGesture(QSizeF(6, 7));
     QVERIFY(updateSpy.wait());
-    // and end
+    // And end.
     m_seatInterface->setTimestamp(timestamp++);
     if (cancel) {
         m_seatInterface->cancelPointerSwipeGesture();
@@ -1044,45 +1108,46 @@ void TestWaylandSeat::testPointerPinchGesture_data()
 
 void TestWaylandSeat::testPointerPinchGesture()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    // first create the pointer and pointer swipe gesture
-    QSignalSpy hasPointerChangedSpy(m_seat, &Seat::hasPointerChanged);
+    // First create the pointer and pointer swipe gesture.
+    QSignalSpy hasPointerChangedSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(hasPointerChangedSpy.isValid());
     m_seatInterface->setHasPointer(true);
+
     QVERIFY(hasPointerChangedSpy.wait());
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
-    QScopedPointer<PointerPinchGesture> gesture(m_pointerGestures->createPinchGesture(pointer.data()));
+    QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
+    QScopedPointer<Clt::PointerPinchGesture>
+            gesture(m_pointerGestures->createPinchGesture(pointer.data()));
     QVERIFY(gesture);
     QVERIFY(gesture->isValid());
     QVERIFY(gesture->surface().isNull());
     QCOMPARE(gesture->fingerCount(), 0u);
 
-    QSignalSpy startSpy(gesture.data(), &PointerPinchGesture::started);
+    QSignalSpy startSpy(gesture.data(), &Clt::PointerPinchGesture::started);
     QVERIFY(startSpy.isValid());
-    QSignalSpy updateSpy(gesture.data(), &PointerPinchGesture::updated);
+    QSignalSpy updateSpy(gesture.data(), &Clt::PointerPinchGesture::updated);
     QVERIFY(updateSpy.isValid());
-    QSignalSpy endSpy(gesture.data(), &PointerPinchGesture::ended);
+    QSignalSpy endSpy(gesture.data(), &Clt::PointerPinchGesture::ended);
     QVERIFY(endSpy.isValid());
-    QSignalSpy cancelledSpy(gesture.data(), &PointerPinchGesture::cancelled);
+    QSignalSpy cancelledSpy(gesture.data(), &Clt::PointerPinchGesture::cancelled);
     QVERIFY(cancelledSpy.isValid());
 
-    // now create a surface
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    // Now create a surface.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
+
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
     m_seatInterface->setFocusedPointerSurface(serverSurface);
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
     QVERIFY(m_seatInterface->focusedPointer());
 
-    // send in the start
+    // Send in the start.
     quint32 timestamp = 1;
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->startPointerPinchGesture(3);
+
     QVERIFY(startSpy.wait());
     QCOMPARE(startSpy.count(), 1);
     QCOMPARE(startSpy.first().at(0).value<quint32>(), m_display->serial());
@@ -1090,16 +1155,18 @@ void TestWaylandSeat::testPointerPinchGesture()
     QCOMPARE(gesture->fingerCount(), 3u);
     QCOMPARE(gesture->surface().data(), surface.data());
 
-    // another start should not be possible
+    // Another start should not be possible.
     m_seatInterface->startPointerPinchGesture(3);
-    QVERIFY(!startSpy.wait(500));
+    QVERIFY(!startSpy.wait(200));
 
-    // send in some updates
+    // Send in some updates.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->updatePointerPinchGesture(QSizeF(2, 3), 2, 45);
+
     QVERIFY(updateSpy.wait());
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->updatePointerPinchGesture(QSizeF(4, 5), 1, 90);
+
     QVERIFY(updateSpy.wait());
     QCOMPARE(updateSpy.count(), 2);
     QCOMPARE(updateSpy.at(0).at(0).toSizeF(), QSizeF(2, 3));
@@ -1111,9 +1178,10 @@ void TestWaylandSeat::testPointerPinchGesture()
     QCOMPARE(updateSpy.at(1).at(2).value<quint32>(), 90u);
     QCOMPARE(updateSpy.at(1).at(3).value<quint32>(), 3u);
 
-    // now end or cancel
+    // Now end or cancel.
     QFETCH(bool, cancel);
     QSignalSpy *spy;
+
     m_seatInterface->setTimestamp(timestamp++);
     if (cancel) {
         m_seatInterface->cancelPointerPinchGesture();
@@ -1122,6 +1190,7 @@ void TestWaylandSeat::testPointerPinchGesture()
         m_seatInterface->endPointerPinchGesture();
         spy = &endSpy;
     }
+
     QVERIFY(spy->wait());
     QTEST(endSpy.count(), "expectedEndCount");
     QTEST(cancelledSpy.count(), "expectedCancelCount");
@@ -1132,164 +1201,198 @@ void TestWaylandSeat::testPointerPinchGesture()
     QCOMPARE(gesture->fingerCount(), 0u);
     QVERIFY(gesture->surface().isNull());
 
-    // now a start should be possible again
+    // Now a start should be possible again.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->startPointerPinchGesture(3);
     QVERIFY(startSpy.wait());
 
-    // unsetting the focused pointer surface should not change anything
+    // Unsetting the focused pointer surface should not change anything.
     m_seatInterface->setFocusedPointerSurface(nullptr);
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->updatePointerPinchGesture(QSizeF(6, 7), 2, -45);
+
     QVERIFY(updateSpy.wait());
-    // and end
+
+    // And end.
     m_seatInterface->setTimestamp(timestamp++);
+
     if (cancel) {
         m_seatInterface->cancelPointerPinchGesture();
     } else {
         m_seatInterface->endPointerPinchGesture();
     }
+
     QVERIFY(spy->wait());
 }
 
 void TestWaylandSeat::testPointerAxis()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    // first create the pointer
-    QSignalSpy hasPointerChangedSpy(m_seat, &Seat::hasPointerChanged);
+    // First create the pointer.
+    QSignalSpy hasPointerChangedSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(hasPointerChangedSpy.isValid());
     m_seatInterface->setHasPointer(true);
+
     QVERIFY(hasPointerChangedSpy.wait());
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
+    QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
     QVERIFY(pointer);
 
-    // now create a surface
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    // Now create a surface.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
+
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
     m_seatInterface->setFocusedPointerSurface(serverSurface);
     QCOMPARE(m_seatInterface->focusedPointerSurface(), serverSurface);
     QVERIFY(m_seatInterface->focusedPointer());
-    QSignalSpy frameSpy(pointer.data(), &Pointer::frame);
+
+    QSignalSpy frameSpy(pointer.data(), &Clt::Pointer::frame);
     QVERIFY(frameSpy.isValid());
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 1);
 
-    // let's scroll vertically
-    QSignalSpy axisSourceSpy(pointer.data(), &Pointer::axisSourceChanged);
+    // Let's scroll vertically.
+    QSignalSpy axisSourceSpy(pointer.data(), &Clt::Pointer::axisSourceChanged);
     QVERIFY(axisSourceSpy.isValid());
-    QSignalSpy axisSpy(pointer.data(), &Pointer::axisChanged);
+    QSignalSpy axisSpy(pointer.data(), &Clt::Pointer::axisChanged);
     QVERIFY(axisSpy.isValid());
-    QSignalSpy axisDiscreteSpy(pointer.data(), &Pointer::axisDiscreteChanged);
+    QSignalSpy axisDiscreteSpy(pointer.data(), &Clt::Pointer::axisDiscreteChanged);
     QVERIFY(axisDiscreteSpy.isValid());
-    QSignalSpy axisStoppedSpy(pointer.data(), &Pointer::axisStopped);
+    QSignalSpy axisStoppedSpy(pointer.data(), &Clt::Pointer::axisStopped);
     QVERIFY(axisStoppedSpy.isValid());
 
     quint32 timestamp = 1;
     m_seatInterface->setTimestamp(timestamp++);
-    m_seatInterface->pointerAxisV5(Qt::Vertical, 10, 1, PointerAxisSource::Wheel);
+    m_seatInterface->pointerAxisV5(Qt::Vertical, 10, 1, Srv::PointerAxisSource::Wheel);
+
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 2);
     QCOMPARE(axisSourceSpy.count(), 1);
-    QCOMPARE(axisSourceSpy.last().at(0).value<Pointer::AxisSource>(), Pointer::AxisSource::Wheel);
+
+    QCOMPARE(axisSourceSpy.last().at(0).value<Clt::Pointer::AxisSource>(),
+             Clt::Pointer::AxisSource::Wheel);
     QCOMPARE(axisDiscreteSpy.count(), 1);
-    QCOMPARE(axisDiscreteSpy.last().at(0).value<Pointer::Axis>(), Pointer::Axis::Vertical);
+    QCOMPARE(axisDiscreteSpy.last().at(0).value<Clt::Pointer::Axis>(),
+             Clt::Pointer::Axis::Vertical);
     QCOMPARE(axisDiscreteSpy.last().at(1).value<qint32>(), 1);
+
     QCOMPARE(axisSpy.count(), 1);
     QCOMPARE(axisSpy.last().at(0).value<quint32>(), quint32(1));
-    QCOMPARE(axisSpy.last().at(1).value<Pointer::Axis>(), Pointer::Axis::Vertical);
+    QCOMPARE(axisSpy.last().at(1).value<Clt::Pointer::Axis>(), Clt::Pointer::Axis::Vertical);
     QCOMPARE(axisSpy.last().at(2).value<qreal>(), 10.0);
+
     QCOMPARE(axisStoppedSpy.count(), 0);
 
-    // let's scroll using fingers
+    // Let's scroll using fingers.
     m_seatInterface->setTimestamp(timestamp++);
-    m_seatInterface->pointerAxisV5(Qt::Horizontal, 42, 0, PointerAxisSource::Finger);
+    m_seatInterface->pointerAxisV5(Qt::Horizontal, 42, 0, Srv::PointerAxisSource::Finger);
+
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 3);
+
     QCOMPARE(axisSourceSpy.count(), 2);
-    QCOMPARE(axisSourceSpy.last().at(0).value<Pointer::AxisSource>(), Pointer::AxisSource::Finger);
+    QCOMPARE(axisSourceSpy.last().at(0).value<Clt::Pointer::AxisSource>(),
+             Clt::Pointer::AxisSource::Finger);
+
     QCOMPARE(axisDiscreteSpy.count(), 1);
+
     QCOMPARE(axisSpy.count(), 2);
     QCOMPARE(axisSpy.last().at(0).value<quint32>(), quint32(2));
-    QCOMPARE(axisSpy.last().at(1).value<Pointer::Axis>(), Pointer::Axis::Horizontal);
+    QCOMPARE(axisSpy.last().at(1).value<Clt::Pointer::Axis>(), Clt::Pointer::Axis::Horizontal);
     QCOMPARE(axisSpy.last().at(2).value<qreal>(), 42.0);
+
     QCOMPARE(axisStoppedSpy.count(), 0);
 
-    // lift the fingers off the device
+    // Lift the fingers off the device.
     m_seatInterface->setTimestamp(timestamp++);
-    m_seatInterface->pointerAxisV5(Qt::Horizontal, 0, 0, PointerAxisSource::Finger);
+    m_seatInterface->pointerAxisV5(Qt::Horizontal, 0, 0, Srv::PointerAxisSource::Finger);
+
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 4);
+
     QCOMPARE(axisSourceSpy.count(), 3);
-    QCOMPARE(axisSourceSpy.last().at(0).value<Pointer::AxisSource>(), Pointer::AxisSource::Finger);
+    QCOMPARE(axisSourceSpy.last().at(0).value<Clt::Pointer::AxisSource>(),
+             Clt::Pointer::AxisSource::Finger);
+
     QCOMPARE(axisDiscreteSpy.count(), 1);
     QCOMPARE(axisSpy.count(), 2);
+
     QCOMPARE(axisStoppedSpy.count(), 1);
     QCOMPARE(axisStoppedSpy.last().at(0).value<quint32>(), 3);
-    QCOMPARE(axisStoppedSpy.last().at(1).value<Pointer::Axis>(), Pointer::Axis::Horizontal);
+    QCOMPARE(axisStoppedSpy.last().at(1).value<Clt::Pointer::Axis>(),
+             Clt::Pointer::Axis::Horizontal);
 
-    // if the device is unknown, no axis_source event should be sent
+    // If the device is unknown, no axis_source event should be sent.
     m_seatInterface->setTimestamp(timestamp++);
-    m_seatInterface->pointerAxisV5(Qt::Horizontal, 42, 1, PointerAxisSource::Unknown);
+    m_seatInterface->pointerAxisV5(Qt::Horizontal, 42, 1, Srv::PointerAxisSource::Unknown);
+
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 5);
     QCOMPARE(axisSourceSpy.count(), 3);
+
     QCOMPARE(axisDiscreteSpy.count(), 2);
-    QCOMPARE(axisDiscreteSpy.last().at(0).value<Pointer::Axis>(), Pointer::Axis::Horizontal);
+    QCOMPARE(axisDiscreteSpy.last().at(0).value<Clt::Pointer::Axis>(),
+             Clt::Pointer::Axis::Horizontal);
     QCOMPARE(axisDiscreteSpy.last().at(1).value<qint32>(), 1);
+
     QCOMPARE(axisSpy.count(), 3);
     QCOMPARE(axisSpy.last().at(0).value<quint32>(), quint32(4));
-    QCOMPARE(axisSpy.last().at(1).value<Pointer::Axis>(), Pointer::Axis::Horizontal);
+    QCOMPARE(axisSpy.last().at(1).value<Clt::Pointer::Axis>(), Clt::Pointer::Axis::Horizontal);
     QCOMPARE(axisSpy.last().at(2).value<qreal>(), 42.0);
+
     QCOMPARE(axisStoppedSpy.count(), 1);
 }
 
 void TestWaylandSeat::testKeyboardSubSurfaceTreeFromPointer()
 {
-    // this test verifies that when clicking on a sub-surface the keyboard focus passes to it
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
+    // This test verifies that when clicking on a sub-surface the keyboard focus passes to it.
 
-    // first create the pointer
-    QSignalSpy hasPointerChangedSpy(m_seat, &Seat::hasPointerChanged);
+    // First create the pointer.
+    QSignalSpy hasPointerChangedSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(hasPointerChangedSpy.isValid());
     m_seatInterface->setHasPointer(true);
     QVERIFY(hasPointerChangedSpy.wait());
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
+    QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
 
-    // and create keyboard
-    QSignalSpy hasKeyboardChangedSpy(m_seat, &Seat::hasKeyboardChanged);
+    // And create keyboard.
+    QSignalSpy hasKeyboardChangedSpy(m_seat, &Clt::Seat::hasKeyboardChanged);
     QVERIFY(hasKeyboardChangedSpy.isValid());
     m_seatInterface->setHasKeyboard(true);
     QVERIFY(hasKeyboardChangedSpy.wait());
-    QScopedPointer<Keyboard> keyboard(m_seat->createKeyboard());
+    QScopedPointer<Clt::Keyboard> keyboard(m_seat->createKeyboard());
 
-    // create a sub surface tree
-    // parent surface (100, 100) with one sub surface taking the half of it's size (50, 100)
-    // which has two further children (50, 50) which are overlapping
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    // Create a sub surface tree.
+    // Parent surface (100, 100) with one sub surface taking the half of it's size (50, 100)
+    // which has two further children (50, 50) which are overlapping.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> parentSurface(m_compositor->createSurface());
-    QScopedPointer<Surface> childSurface(m_compositor->createSurface());
-    QScopedPointer<Surface> grandChild1Surface(m_compositor->createSurface());
-    QScopedPointer<Surface> grandChild2Surface(m_compositor->createSurface());
-    QScopedPointer<SubSurface> childSubSurface(m_subCompositor->createSubSurface(childSurface.data(), parentSurface.data()));
-    QScopedPointer<SubSurface> grandChild1SubSurface(m_subCompositor->createSubSurface(grandChild1Surface.data(), childSurface.data()));
-    QScopedPointer<SubSurface> grandChild2SubSurface(m_subCompositor->createSubSurface(grandChild2Surface.data(), childSurface.data()));
+
+    QScopedPointer<Clt::Surface> parentSurface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> childSurface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> grandChild1Surface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> grandChild2Surface(m_compositor->createSurface());
+
+    QScopedPointer<Clt::SubSurface>
+            childSubSurface(m_subCompositor->createSubSurface(childSurface.data(),
+                                                              parentSurface.data()));
+    QScopedPointer<Clt::SubSurface>
+            grandChild1SubSurface(m_subCompositor->createSubSurface(grandChild1Surface.data(),
+                                                                    childSurface.data()));
+    QScopedPointer<Clt::SubSurface>
+            grandChild2SubSurface(m_subCompositor->createSubSurface(grandChild2Surface.data(),
+                                                                    childSurface.data()));
+
     grandChild2SubSurface->setPosition(QPoint(0, 25));
 
-    // let's map the surfaces
-    auto render = [this] (Surface *s, const QSize &size) {
+    // Let's map the surfaces.
+    auto render = [this] (Clt::Surface *s, const QSize &size) {
         QImage image(size, QImage::Format_ARGB32_Premultiplied);
         image.fill(Qt::black);
         s->attachBuffer(m_shm->createBuffer(image));
         s->damage(QRect(QPoint(0, 0), size));
-        s->commit(Surface::CommitFlag::None);
+        s->commit(Clt::Surface::CommitFlag::None);
     };
     render(grandChild2Surface.data(), QSize(50, 50));
     render(grandChild1Surface.data(), QSize(50, 50));
@@ -1297,34 +1400,36 @@ void TestWaylandSeat::testKeyboardSubSurfaceTreeFromPointer()
     render(parentSurface.data(), QSize(100, 100));
 
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface->isMapped());
 
-    // pass keyboard focus to the main surface
-    QSignalSpy enterSpy(keyboard.data(), &Keyboard::entered);
+    // Pass keyboard focus to the main surface.
+    QSignalSpy enterSpy(keyboard.data(), &Clt::Keyboard::entered);
     QVERIFY(enterSpy.isValid());
-    QSignalSpy leftSpy(keyboard.data(), &Keyboard::left);
+    QSignalSpy leftSpy(keyboard.data(), &Clt::Keyboard::left);
     QVERIFY(leftSpy.isValid());
+
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
     QVERIFY(enterSpy.wait());
     QCOMPARE(enterSpy.count(), 1);
     QCOMPARE(leftSpy.count(), 0);
     QCOMPARE(keyboard->enteredSurface(), parentSurface.data());
 
-    // now pass also pointer focus to the surface
-    QSignalSpy pointerEnterSpy(pointer.data(), &Pointer::entered);
+    // Now pass also pointer focus to the surface.
+    QSignalSpy pointerEnterSpy(pointer.data(), &Clt::Pointer::entered);
     QVERIFY(pointerEnterSpy.isValid());
     quint32 timestamp = 1;
+
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->setPointerPos(QPointF(25, 50));
     m_seatInterface->setFocusedPointerSurface(serverSurface);
     QVERIFY(pointerEnterSpy.wait());
     QCOMPARE(pointerEnterSpy.count(), 1);
-    // should not have affected the keyboard
+    // Should not have affected the keyboard.
     QCOMPARE(enterSpy.count(), 1);
     QCOMPARE(leftSpy.count(), 0);
 
-    // let's click
+    // Let's click.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->pointerButtonPressed(Qt::LeftButton);
     m_seatInterface->setTimestamp(timestamp++);
@@ -1334,7 +1439,7 @@ void TestWaylandSeat::testKeyboardSubSurfaceTreeFromPointer()
     QCOMPARE(leftSpy.count(), 1);
     QCOMPARE(keyboard->enteredSurface(), grandChild2Surface.data());
 
-    // click on same surface should not trigger another enter
+    // Click on same surface should not trigger another enter.
     m_seatInterface->setTimestamp(timestamp++);
     m_seatInterface->pointerButtonPressed(Qt::LeftButton);
     m_seatInterface->setTimestamp(timestamp++);
@@ -1344,7 +1449,7 @@ void TestWaylandSeat::testKeyboardSubSurfaceTreeFromPointer()
     QCOMPARE(leftSpy.count(), 1);
     QCOMPARE(keyboard->enteredSurface(), grandChild2Surface.data());
 
-    // unfocus keyboard
+    // Unfocus keyboard.
     m_seatInterface->setFocusedKeyboardSurface(nullptr);
     QVERIFY(leftSpy.wait());
     QCOMPARE(enterSpy.count(), 2);
@@ -1353,27 +1458,24 @@ void TestWaylandSeat::testKeyboardSubSurfaceTreeFromPointer()
 
 void TestWaylandSeat::testCursor()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    QSignalSpy pointerSpy(m_seat, SIGNAL(hasPointerChanged(bool)));
+    QSignalSpy pointerSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(pointerSpy.isValid());
     m_seatInterface->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    SurfaceInterface *serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
 
-    QScopedPointer<Pointer> p(m_seat->createPointer());
+    QScopedPointer<Clt::Pointer> p(m_seat->createPointer());
     QVERIFY(p->isValid());
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
 
-    QSignalSpy enteredSpy(p.data(), SIGNAL(entered(quint32,QPointF)));
+    QSignalSpy enteredSpy(p.data(), &Clt::Pointer::entered);
     QVERIFY(enteredSpy.isValid());
 
     m_seatInterface->setPointerPos(QPoint(20, 18));
@@ -1385,9 +1487,10 @@ void TestWaylandSeat::testCursor()
     QVERIFY(m_seatInterface->focusedPointer());
     QVERIFY(!m_seatInterface->focusedPointer()->cursor());
 
-    QSignalSpy cursorChangedSpy(m_seatInterface->focusedPointer(), SIGNAL(cursorChanged()));
+    QSignalSpy cursorChangedSpy(m_seatInterface->focusedPointer(),
+                                &Srv::PointerInterface::cursorChanged);
     QVERIFY(cursorChangedSpy.isValid());
-    // just remove the pointer
+    // Just remove the pointer.
     p->setCursor(nullptr);
     QVERIFY(cursorChangedSpy.wait());
     QCOMPARE(cursorChangedSpy.count(), 1);
@@ -1398,16 +1501,16 @@ void TestWaylandSeat::testCursor()
     QCOMPARE(cursor->enteredSerial(), serial);
     QCOMPARE(cursor->pointer(), m_seatInterface->focusedPointer());
 
-    QSignalSpy hotspotChangedSpy(cursor, SIGNAL(hotspotChanged()));
+    QSignalSpy hotspotChangedSpy(cursor, &Srv::Cursor::hotspotChanged);
     QVERIFY(hotspotChangedSpy.isValid());
-    QSignalSpy surfaceChangedSpy(cursor, SIGNAL(surfaceChanged()));
+    QSignalSpy surfaceChangedSpy(cursor, &Srv::Cursor::surfaceChanged);
     QVERIFY(surfaceChangedSpy.isValid());
-    QSignalSpy enteredSerialChangedSpy(cursor, SIGNAL(enteredSerialChanged()));
+    QSignalSpy enteredSerialChangedSpy(cursor, &Srv::Cursor::enteredSerialChanged);
     QVERIFY(enteredSerialChangedSpy.isValid());
-    QSignalSpy changedSpy(cursor, SIGNAL(changed()));
+    QSignalSpy changedSpy(cursor, &Srv::Cursor::changed);
     QVERIFY(changedSpy.isValid());
 
-    // test changing hotspot
+    // Test changing hotspot.
     p->setCursor(nullptr, QPoint(1, 2));
     QVERIFY(hotspotChangedSpy.wait());
     QCOMPARE(hotspotChangedSpy.count(), 1);
@@ -1417,7 +1520,7 @@ void TestWaylandSeat::testCursor()
     QVERIFY(enteredSerialChangedSpy.isEmpty());
     QVERIFY(surfaceChangedSpy.isEmpty());
 
-    // set surface
+    // Set surface.
     auto cursorSurface = m_compositor->createSurface(m_compositor);
     QVERIFY(cursorSurface->isValid());
     p->setCursor(cursorSurface, QPoint(1, 2));
@@ -1429,24 +1532,24 @@ void TestWaylandSeat::testCursor()
     QCOMPARE(cursor->hotspot(), QPoint(1, 2));
     QVERIFY(cursor->surface());
 
-    // and add an image to the surface
+    // And add an image to the surface.
     QImage img(QSize(10, 20), QImage::Format_RGB32);
     img.fill(Qt::red);
     cursorSurface->attachBuffer(m_shm->createBuffer(img));
     cursorSurface->damage(QRect(0, 0, 10, 20));
-    cursorSurface->commit(Surface::CommitFlag::None);
+    cursorSurface->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(changedSpy.wait());
     QCOMPARE(changedSpy.count(), 3);
     QCOMPARE(cursorChangedSpy.count(), 4);
     QCOMPARE(surfaceChangedSpy.count(), 1);
     QCOMPARE(cursor->surface()->buffer()->data(), img);
 
-    // and add another image to the surface
+    // And add another image to the surface.
     QImage blue(QSize(10, 20), QImage::Format_ARGB32_Premultiplied);
     blue.fill(Qt::blue);
     cursorSurface->attachBuffer(m_shm->createBuffer(blue));
     cursorSurface->damage(QRect(0, 0, 10, 20));
-    cursorSurface->commit(Surface::CommitFlag::None);
+    cursorSurface->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(changedSpy.wait());
     QCOMPARE(changedSpy.count(), 4);
     QCOMPARE(cursorChangedSpy.count(), 5);
@@ -1462,86 +1565,83 @@ void TestWaylandSeat::testCursor()
 
 void TestWaylandSeat::testCursorDamage()
 {
-    // this test verifies that damaging a cursor surface triggers a cursor changed on the server
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
+    // This test verifies that damaging a cursor surface triggers a cursor changed on the server.
 
-    QSignalSpy pointerSpy(m_seat, &Seat::hasPointerChanged);
+    QSignalSpy pointerSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(pointerSpy.isValid());
     m_seatInterface->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
 
-    // create pointer
-    QScopedPointer<Pointer> p(m_seat->createPointer());
+    // Create pointer.
+    QScopedPointer<Clt::Pointer> p(m_seat->createPointer());
     QVERIFY(p->isValid());
-    QSignalSpy enteredSpy(p.data(), &Pointer::entered);
+    QSignalSpy enteredSpy(p.data(), &Clt::Pointer::entered);
+
     QVERIFY(enteredSpy.isValid());
-    // create surface
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    // Create surface.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    SurfaceInterface *serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
 
-    // send enter to the surface
+    // Send enter to the surface.
     m_seatInterface->setFocusedPointerSurface(serverSurface);
     QVERIFY(enteredSpy.wait());
 
-    // create a signal spy for the cursor changed signal
+    // Create a signal spy for the cursor changed signal.
     auto pointer = m_seatInterface->focusedPointer();
-    QSignalSpy cursorChangedSpy(pointer, &PointerInterface::cursorChanged);
+    QSignalSpy cursorChangedSpy(pointer, &Srv::PointerInterface::cursorChanged);
     QVERIFY(cursorChangedSpy.isValid());
 
-    // now let's set the cursor
-    Surface *cursorSurface = m_compositor->createSurface(m_compositor);
+    // Now let's set the cursor.
+    auto *cursorSurface = m_compositor->createSurface(m_compositor);
     QVERIFY(cursorSurface);
     QImage red(QSize(10, 10), QImage::Format_ARGB32_Premultiplied);
     red.fill(Qt::red);
     cursorSurface->attachBuffer(m_shm->createBuffer(red));
     cursorSurface->damage(QRect(0, 0, 10, 10));
-    cursorSurface->commit(Surface::CommitFlag::None);
+    cursorSurface->commit(Clt::Surface::CommitFlag::None);
     p->setCursor(cursorSurface, QPoint(0, 0));
     QVERIFY(cursorChangedSpy.wait());
     QCOMPARE(pointer->cursor()->surface()->buffer()->data(), red);
 
-    // and damage the surface
+    // And damage the surface.
     QImage blue(QSize(10, 10), QImage::Format_ARGB32_Premultiplied);
     blue.fill(Qt::blue);
     cursorSurface->attachBuffer(m_shm->createBuffer(blue));
     cursorSurface->damage(QRect(0, 0, 10, 10));
-    cursorSurface->commit(Surface::CommitFlag::None);
+    cursorSurface->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(cursorChangedSpy.wait());
     QCOMPARE(pointer->cursor()->surface()->buffer()->data(), blue);
 }
 
 void TestWaylandSeat::testKeyboard()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    QSignalSpy keyboardSpy(m_seat, SIGNAL(hasKeyboardChanged(bool)));
+    QSignalSpy keyboardSpy(m_seat, &Clt::Seat::hasKeyboardChanged);
     QVERIFY(keyboardSpy.isValid());
     m_seatInterface->setHasKeyboard(true);
     QVERIFY(keyboardSpy.wait());
 
-    // create the surface
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
+    // Create the surface.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    Surface *s = m_compositor->createSurface(m_compositor);
+    auto *s = m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    SurfaceInterface *serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
 
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    // no keyboard yet
+
+    // No keyboard yet.
     QCOMPARE(m_seatInterface->focusedKeyboardSurface(), serverSurface);
     QVERIFY(!m_seatInterface->focusedKeyboard());
 
-    Keyboard *keyboard = m_seat->createKeyboard(m_seat);
-    QSignalSpy repeatInfoSpy(keyboard, &Keyboard::keyRepeatChanged);
+    auto *keyboard = m_seat->createKeyboard(m_seat);
+    QSignalSpy repeatInfoSpy(keyboard, &Clt::Keyboard::keyRepeatChanged);
     QVERIFY(repeatInfoSpy.isValid());
-    const Keyboard &ckeyboard = *keyboard;
+    const Clt::Keyboard &ckeyboard = *keyboard;
     QVERIFY(keyboard->isValid());
     QCOMPARE(keyboard->isKeyRepeatEnabled(), false);
     QCOMPARE(keyboard->keyRepeatDelay(), 0);
@@ -1551,13 +1651,13 @@ void TestWaylandSeat::testKeyboard()
     auto serverKeyboard = m_seatInterface->focusedKeyboard();
     QVERIFY(serverKeyboard);
 
-    // we should get the repeat info announced
+    // We should get the repeat info announced.
     QCOMPARE(repeatInfoSpy.count(), 1);
     QCOMPARE(keyboard->isKeyRepeatEnabled(), false);
     QCOMPARE(keyboard->keyRepeatDelay(), 0);
     QCOMPARE(keyboard->keyRepeatRate(), 0);
 
-    // let's change repeat in server
+    // Let's change repeat in server.
     m_seatInterface->setKeyRepeatInfo(25, 660);
     m_seatInterface->focusedKeyboard()->client()->flush();
     QVERIFY(repeatInfoSpy.wait());
@@ -1573,16 +1673,16 @@ void TestWaylandSeat::testKeyboard()
     m_seatInterface->setTimestamp(3);
     m_seatInterface->keyPressed(KEY_E);
 
-    QSignalSpy modifierSpy(keyboard, SIGNAL(modifiersChanged(quint32,quint32,quint32,quint32)));
+    QSignalSpy modifierSpy(keyboard, &Clt::Keyboard::modifiersChanged);
     QVERIFY(modifierSpy.isValid());
 
-    QSignalSpy enteredSpy(keyboard, SIGNAL(entered(quint32)));
+    QSignalSpy enteredSpy(keyboard, &Clt::Keyboard::entered);
     QVERIFY(enteredSpy.isValid());
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_seatInterface->focusedKeyboardSurface(), serverSurface);
     QCOMPARE(m_seatInterface->focusedKeyboard()->focusedSurface(), serverSurface);
 
-    // we get the modifiers sent after the enter
+    // We get the modifiers sent after the enter.
     QVERIFY(modifierSpy.wait());
     QCOMPARE(modifierSpy.count(), 1);
     QCOMPARE(modifierSpy.first().at(0).value<quint32>(), quint32(0));
@@ -1590,10 +1690,11 @@ void TestWaylandSeat::testKeyboard()
     QCOMPARE(modifierSpy.first().at(2).value<quint32>(), quint32(0));
     QCOMPARE(modifierSpy.first().at(3).value<quint32>(), quint32(0));
     QCOMPARE(enteredSpy.count(), 1);
+
     // TODO: get through API
     QCOMPARE(enteredSpy.first().first().value<quint32>(), m_display->serial() - 1);
 
-    QSignalSpy keyChangedSpy(keyboard, SIGNAL(keyChanged(quint32,Wrapland::Client::Keyboard::KeyState,quint32)));
+    QSignalSpy keyChangedSpy(keyboard, &Clt::Keyboard::keyChanged);
     QVERIFY(keyChangedSpy.isValid());
 
     m_seatInterface->setTimestamp(4);
@@ -1614,32 +1715,40 @@ void TestWaylandSeat::testKeyboard()
 
     QCOMPARE(keyChangedSpy.count(), 5);
     QCOMPARE(keyChangedSpy.at(0).at(0).value<quint32>(), quint32(KEY_E));
-    QCOMPARE(keyChangedSpy.at(0).at(1).value<Keyboard::KeyState>(), Keyboard::KeyState::Released);
+    QCOMPARE(keyChangedSpy.at(0).at(1).value<Clt::Keyboard::KeyState>(),
+             Clt::Keyboard::KeyState::Released);
     QCOMPARE(keyChangedSpy.at(0).at(2).value<quint32>(), quint32(4));
     QCOMPARE(keyChangedSpy.at(1).at(0).value<quint32>(), quint32(KEY_D));
-    QCOMPARE(keyChangedSpy.at(1).at(1).value<Keyboard::KeyState>(), Keyboard::KeyState::Released);
+    QCOMPARE(keyChangedSpy.at(1).at(1).value<Clt::Keyboard::KeyState>(),
+             Clt::Keyboard::KeyState::Released);
     QCOMPARE(keyChangedSpy.at(1).at(2).value<quint32>(), quint32(5));
     QCOMPARE(keyChangedSpy.at(2).at(0).value<quint32>(), quint32(KEY_K));
-    QCOMPARE(keyChangedSpy.at(2).at(1).value<Keyboard::KeyState>(), Keyboard::KeyState::Released);
+    QCOMPARE(keyChangedSpy.at(2).at(1).value<Clt::Keyboard::KeyState>(),
+             Clt::Keyboard::KeyState::Released);
     QCOMPARE(keyChangedSpy.at(2).at(2).value<quint32>(), quint32(6));
     QCOMPARE(keyChangedSpy.at(3).at(0).value<quint32>(), quint32(KEY_F1));
-    QCOMPARE(keyChangedSpy.at(3).at(1).value<Keyboard::KeyState>(), Keyboard::KeyState::Pressed);
+    QCOMPARE(keyChangedSpy.at(3).at(1).value<Clt::Keyboard::KeyState>(),
+             Clt::Keyboard::KeyState::Pressed);
     QCOMPARE(keyChangedSpy.at(3).at(2).value<quint32>(), quint32(7));
     QCOMPARE(keyChangedSpy.at(4).at(0).value<quint32>(), quint32(KEY_F1));
-    QCOMPARE(keyChangedSpy.at(4).at(1).value<Keyboard::KeyState>(), Keyboard::KeyState::Released);
+    QCOMPARE(keyChangedSpy.at(4).at(1).value<Clt::Keyboard::KeyState>(),
+             Clt::Keyboard::KeyState::Released);
     QCOMPARE(keyChangedSpy.at(4).at(2).value<quint32>(), quint32(8));
 
-    // releasing a key which is already released should not set a key changed
+    // Releasing a key which is already released should not set a key changed.
     m_seatInterface->keyReleased(KEY_F1);
     QVERIFY(!keyChangedSpy.wait(200));
-    // let's press it again
+
+    // Let's press it again.
     m_seatInterface->keyPressed(KEY_F1);
     QVERIFY(keyChangedSpy.wait());
     QCOMPARE(keyChangedSpy.count(), 6);
-    // press again should be ignored
+
+    // Press again should be ignored.
     m_seatInterface->keyPressed(KEY_F1);
     QVERIFY(!keyChangedSpy.wait(200));
-    // and release
+
+    // And release.
     m_seatInterface->keyReleased(KEY_F1);
     QVERIFY(keyChangedSpy.wait());
     QCOMPARE(keyChangedSpy.count(), 7);
@@ -1652,20 +1761,21 @@ void TestWaylandSeat::testKeyboard()
     QCOMPARE(modifierSpy.last().at(2).value<quint32>(), quint32(3));
     QCOMPARE(modifierSpy.last().at(3).value<quint32>(), quint32(4));
 
-    QSignalSpy leftSpy(keyboard, SIGNAL(left(quint32)));
+    QSignalSpy leftSpy(keyboard, &Clt::Keyboard::left);
     QVERIFY(leftSpy.isValid());
     m_seatInterface->setFocusedKeyboardSurface(nullptr);
     QVERIFY(!m_seatInterface->focusedKeyboardSurface());
     QVERIFY(!m_seatInterface->focusedKeyboard());
     QVERIFY(leftSpy.wait());
     QCOMPARE(leftSpy.count(), 1);
+
     // TODO: get through API
     QCOMPARE(leftSpy.first().first().value<quint32>(), m_display->serial() -1 );
 
     QVERIFY(!keyboard->enteredSurface());
     QVERIFY(!ckeyboard.enteredSurface());
 
-    // enter it again
+    // Enter it again.
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
     QVERIFY(modifierSpy.wait());
     QCOMPARE(m_seatInterface->focusedKeyboardSurface(), serverSurface);
@@ -1680,32 +1790,36 @@ void TestWaylandSeat::testKeyboard()
     QCOMPARE(keyboard->enteredSurface(), s);
     delete s;
     QVERIFY(!keyboard->enteredSurface());
+
     QVERIFY(leftSpy.wait());
     QCOMPARE(serverSurfaceDestroyedSpy.count(), 1);
     QVERIFY(!m_seatInterface->focusedKeyboardSurface());
     QVERIFY(!m_seatInterface->focusedKeyboard());
     QVERIFY(!serverKeyboard->focusedSurface());
 
-    // let's create a Surface again
-    QScopedPointer<Surface> s2(m_compositor->createSurface());
+    // Let's create a Surface again.
+    QScopedPointer<Clt::Surface> s2(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
     QCOMPARE(surfaceCreatedSpy.count(), 2);
-    serverSurface = surfaceCreatedSpy.last().first().value<SurfaceInterface*>();
+    serverSurface = surfaceCreatedSpy.last().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
+
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_seatInterface->focusedKeyboardSurface(), serverSurface);
     QCOMPARE(m_seatInterface->focusedKeyboard(), serverKeyboard);
 
-    // delete the Keyboard
-    QSignalSpy unboundSpy(serverKeyboard, &Resource::unbound);
+    // Delete the Keyboard.
+    QSignalSpy unboundSpy(serverKeyboard, &Srv::Resource::unbound);
     QVERIFY(unboundSpy.isValid());
-    QSignalSpy destroyedSpy(serverKeyboard, &Resource::destroyed);
+    QSignalSpy destroyedSpy(serverKeyboard, &Srv::Resource::destroyed);
     QVERIFY(destroyedSpy.isValid());
+
     delete keyboard;
     QVERIFY(unboundSpy.wait());
     QCOMPARE(unboundSpy.count(), 1);
     QCOMPARE(destroyedSpy.count(), 0);
-    // verify that calling into the Keyboard related functionality doesn't crash
+
+    // Verify that calling into the Keyboard related functionality doesn't crash.
     m_seatInterface->setTimestamp(9);
     m_seatInterface->keyPressed(KEY_F2);
     m_seatInterface->setTimestamp(10);
@@ -1722,90 +1836,107 @@ void TestWaylandSeat::testKeyboard()
     QVERIFY(destroyedSpy.wait());
     QCOMPARE(destroyedSpy.count(), 1);
 
-    // create a second Keyboard to verify that repeat info is announced properly
-    Keyboard *keyboard2 = m_seat->createKeyboard(m_seat);
-    QSignalSpy repeatInfoSpy2(keyboard2, &Keyboard::keyRepeatChanged);
+    // Create a second Keyboard to verify that repeat info is announced properly.
+    auto *keyboard2 = m_seat->createKeyboard(m_seat);
+    QSignalSpy repeatInfoSpy2(keyboard2, &Clt::Keyboard::keyRepeatChanged);
     QVERIFY(repeatInfoSpy2.isValid());
     QVERIFY(keyboard2->isValid());
+
     QCOMPARE(keyboard2->isKeyRepeatEnabled(), false);
     QCOMPARE(keyboard2->keyRepeatDelay(), 0);
     QCOMPARE(keyboard2->keyRepeatRate(), 0);
+
     wl_display_flush(m_connection->display());
+
     QVERIFY(repeatInfoSpy2.wait());
     QCOMPARE(keyboard2->isKeyRepeatEnabled(), true);
     QCOMPARE(keyboard2->keyRepeatRate(), 25);
     QCOMPARE(keyboard2->keyRepeatDelay(), 660);
     QCOMPARE(m_seatInterface->focusedKeyboardSurface(), serverSurface);
+
     serverKeyboard = m_seatInterface->focusedKeyboard();
+
     QVERIFY(serverKeyboard);
     QSignalSpy keyboard2DestroyedSpy(serverKeyboard, &QObject::destroyed);
     QVERIFY(keyboard2DestroyedSpy.isValid());
+
     delete keyboard2;
     QVERIFY(keyboard2DestroyedSpy.wait());
-    // this should have unset it on the server
+
+    // This should have unset it on the server.
     QVERIFY(!m_seatInterface->focusedKeyboard());
-    // but not the surface
+
+    // But not the surface.
     QCOMPARE(m_seatInterface->focusedKeyboardSurface(), serverSurface);
 }
 
 void TestWaylandSeat::testCast()
 {
-    using namespace Wrapland::Client;
-    Registry registry;
-    QSignalSpy seatSpy(&registry, SIGNAL(seatAnnounced(quint32,quint32)));
+    Clt::Registry registry;
+    QSignalSpy seatSpy(&registry, &Clt::Registry::seatAnnounced);
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
     registry.setup();
 
     QVERIFY(seatSpy.wait());
-    Seat s;
+    Clt::Seat s;
     QVERIFY(!s.isValid());
-    auto wlSeat = registry.bindSeat(seatSpy.first().first().value<quint32>(), seatSpy.first().last().value<quint32>());
+    auto wlSeat = registry.bindSeat(seatSpy.first().first().value<quint32>(),
+                                    seatSpy.first().last().value<quint32>());
     QVERIFY(wlSeat);
     s.setup(wlSeat);
     QVERIFY(s.isValid());
 
     QCOMPARE((wl_seat*)s, wlSeat);
-    const Seat &s2(s);
+    const Clt::Seat &s2(s);
     QCOMPARE((wl_seat*)s2, wlSeat);
 }
 
 void TestWaylandSeat::testDestroy()
 {
-    using namespace Wrapland::Client;
-    QSignalSpy keyboardSpy(m_seat, SIGNAL(hasKeyboardChanged(bool)));
+
+    QSignalSpy keyboardSpy(m_seat, &Clt::Seat::hasKeyboardChanged);
     QVERIFY(keyboardSpy.isValid());
     m_seatInterface->setHasKeyboard(true);
     QVERIFY(keyboardSpy.wait());
-    Keyboard *k = m_seat->createKeyboard(m_seat);
+    auto *k = m_seat->createKeyboard(m_seat);
     QVERIFY(k->isValid());
 
-    QSignalSpy pointerSpy(m_seat, SIGNAL(hasPointerChanged(bool)));
+    QSignalSpy pointerSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(pointerSpy.isValid());
     m_seatInterface->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
-    Pointer *p = m_seat->createPointer(m_seat);
+    auto *p = m_seat->createPointer(m_seat);
     QVERIFY(p->isValid());
 
-    QSignalSpy touchSpy(m_seat, SIGNAL(hasTouchChanged(bool)));
+    QSignalSpy touchSpy(m_seat, &Clt::Seat::hasTouchChanged);
     QVERIFY(touchSpy.isValid());
     m_seatInterface->setHasTouch(true);
     QVERIFY(touchSpy.wait());
-    Touch *t = m_seat->createTouch(m_seat);
+    auto *t = m_seat->createTouch(m_seat);
     QVERIFY(t->isValid());
 
     delete m_compositor;
     m_compositor = nullptr;
-    connect(m_connection, &ConnectionThread::connectionDied, m_seat, &Seat::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_shm, &ShmPool::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_subCompositor, &SubCompositor::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_relativePointerManager, &RelativePointerManager::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_pointerGestures, &PointerGestures::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_queue, &EventQueue::destroy);
+
+    connect(m_connection, &Clt::ConnectionThread::establishedChanged,
+            m_seat, &Clt::Seat::release);
+    connect(m_connection, &Clt::ConnectionThread::establishedChanged,
+            m_shm, &Clt::ShmPool::release);
+    connect(m_connection, &Clt::ConnectionThread::establishedChanged,
+            m_subCompositor, &Clt::SubCompositor::release);
+    connect(m_connection, &Clt::ConnectionThread::establishedChanged,
+            m_relativePointerManager, &Clt::RelativePointerManager::release);
+    connect(m_connection, &Clt::ConnectionThread::establishedChanged,
+            m_pointerGestures, &Clt::PointerGestures::release);
+    connect(m_connection, &Clt::ConnectionThread::establishedChanged,
+            m_queue, &Clt::EventQueue::release);
+
     QVERIFY(m_seat->isValid());
 
-    QSignalSpy connectionDiedSpy(m_connection, SIGNAL(connectionDied()));
+    QSignalSpy connectionDiedSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(connectionDiedSpy.isValid());
+
     delete m_display;
     m_display = nullptr;
     m_compositorInterface = nullptr;
@@ -1813,29 +1944,27 @@ void TestWaylandSeat::testDestroy()
     m_subCompositorInterface = nullptr;
     m_relativePointerManagerInterface = nullptr;
     m_pointerGesturesInterface = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_COMPARE(connectionDiedSpy.count(), 1);
 
-    // now the seat should be destroyed;
-    QVERIFY(!m_seat->isValid());
-    QVERIFY(!k->isValid());
-    QVERIFY(!p->isValid());
-    QVERIFY(!t->isValid());
+    // Now the seat should be destroyed.
+    QTRY_VERIFY(!m_seat->isValid());
+    QTRY_VERIFY(!k->isValid());
+    QTRY_VERIFY(!p->isValid());
+    QTRY_VERIFY(!t->isValid());
 
-    // calling destroy again should not fail
-    m_seat->destroy();
-    k->destroy();
-    p->destroy();
-    t->destroy();
+    // Calling release again should not fail.
+    delete k;
+    delete p;
+    delete t;
 }
 
 void TestWaylandSeat::testSelection()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QScopedPointer<DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
+    QScopedPointer<Srv::DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
     ddmi->create();
-    Registry registry;
-    QSignalSpy dataDeviceManagerSpy(&registry, SIGNAL(dataDeviceManagerAnnounced(quint32,quint32)));
+
+    Clt::Registry registry;
+    QSignalSpy dataDeviceManagerSpy(&registry, &Clt::Registry::dataDeviceManagerAnnounced);
     QVERIFY(dataDeviceManagerSpy.isValid());
     registry.setEventQueue(m_queue);
     registry.create(m_connection->display());
@@ -1843,23 +1972,25 @@ void TestWaylandSeat::testSelection()
     registry.setup();
 
     QVERIFY(dataDeviceManagerSpy.wait());
-    QScopedPointer<DataDeviceManager> ddm(registry.createDataDeviceManager(dataDeviceManagerSpy.first().first().value<quint32>(),
-                                                                           dataDeviceManagerSpy.first().last().value<quint32>()));
+    QScopedPointer<Clt::DataDeviceManager>
+        ddm(registry.createDataDeviceManager(dataDeviceManagerSpy.first().first().value<quint32>(),
+                                             dataDeviceManagerSpy.first().last().value<quint32>()));
     QVERIFY(ddm->isValid());
 
-    QScopedPointer<DataDevice> dd1(ddm->getDataDevice(m_seat));
+    QScopedPointer<Clt::DataDevice> dd1(ddm->getDataDevice(m_seat));
     QVERIFY(dd1->isValid());
-    QSignalSpy selectionSpy(dd1.data(), SIGNAL(selectionOffered(Wrapland::Client::DataOffer*)));
+    QSignalSpy selectionSpy(dd1.data(), &Clt::DataDevice::selectionOffered);
     QVERIFY(selectionSpy.isValid());
-    QSignalSpy selectionClearedSpy(dd1.data(), SIGNAL(selectionCleared()));
+    QSignalSpy selectionClearedSpy(dd1.data(), &Clt::DataDevice::selectionCleared);
     QVERIFY(selectionClearedSpy.isValid());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(!m_seatInterface->selection());
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_seatInterface->focusedKeyboardSurface(), serverSurface);
@@ -1867,92 +1998,102 @@ void TestWaylandSeat::testSelection()
     QVERIFY(selectionClearedSpy.wait());
     QVERIFY(selectionSpy.isEmpty());
     QVERIFY(!selectionClearedSpy.isEmpty());
+
     selectionClearedSpy.clear();
     QVERIFY(!m_seatInterface->selection());
 
-    // now let's try to set a selection - we have keyboard focus, so it should be sent to us
-    QScopedPointer<DataSource> ds(ddm->createDataSource());
+    // Now let's try to set a selection - we have keyboard focus, so it should be sent to us.
+    QScopedPointer<Clt::DataSource> ds(ddm->createDataSource());
     QVERIFY(ds->isValid());
+
     ds->offer(QStringLiteral("text/plain"));
     dd1->setSelection(0, ds.data());
+
     QVERIFY(selectionSpy.wait());
     QCOMPARE(selectionSpy.count(), 1);
     auto ddi = m_seatInterface->selection();
     QVERIFY(ddi);
-    auto df = selectionSpy.first().first().value<DataOffer*>();
+
+    auto df = selectionSpy.first().first().value<Clt::DataOffer*>();
     QCOMPARE(df->offeredMimeTypes().count(), 1);
     QCOMPARE(df->offeredMimeTypes().first().name(), QStringLiteral("text/plain"));
 
-    // try to clear
+    // Try to clear.
     dd1->setSelection(0);
     QVERIFY(selectionClearedSpy.wait());
     QCOMPARE(selectionClearedSpy.count(), 1);
     QCOMPARE(selectionSpy.count(), 1);
 
-    // unset the keyboard focus
+    // Unset the keyboard focus.
     m_seatInterface->setFocusedKeyboardSurface(nullptr);
     QVERIFY(!m_seatInterface->focusedKeyboardSurface());
     QVERIFY(!m_seatInterface->focusedKeyboard());
+
     serverSurface->client()->flush();
     QCoreApplication::processEvents();
     QCoreApplication::processEvents();
 
-    // try to set Selection
+    // Try to set Selection.
     dd1->setSelection(0, ds.data());
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
     QCoreApplication::processEvents();
     QCOMPARE(selectionSpy.count(), 1);
 
-    // let's unset the selection on the seat
+    // Let's unset the selection on the seat.
     m_seatInterface->setSelection(nullptr);
-    // and pass focus back on our surface
+
+    // And pass focus back on our surface.
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    // we don't have a selection, so it should not send a selection
+
+    // We don't have a selection, so it should not send a selection.
     QVERIFY(!selectionSpy.wait(100));
-    // now let's set it manually
+
+    // Now let's set it manually.
     m_seatInterface->setSelection(ddi);
     QCOMPARE(m_seatInterface->selection(), ddi);
     QVERIFY(selectionSpy.wait());
     QCOMPARE(selectionSpy.count(), 2);
-    // setting the same again should not change
+
+    // Setting the same again should not change.
     m_seatInterface->setSelection(ddi);
     QVERIFY(!selectionSpy.wait(100));
-    // now clear it manually
+
+    // Now clear it manually.
     m_seatInterface->setSelection(nullptr);
     QVERIFY(selectionClearedSpy.wait());
     QCOMPARE(selectionSpy.count(), 2);
 
-    // create a second ddi and a data source
-    QScopedPointer<DataDevice> dd2(ddm->getDataDevice(m_seat));
+    // Create a second ddi and a data source.
+    QScopedPointer<Clt::DataDevice> dd2(ddm->getDataDevice(m_seat));
     QVERIFY(dd2->isValid());
-    QScopedPointer<DataSource> ds2(ddm->createDataSource());
+    QScopedPointer<Clt::DataSource> ds2(ddm->createDataSource());
     QVERIFY(ds2->isValid());
     ds2->offer(QStringLiteral("text/plain"));
     dd2->setSelection(0, ds2.data());
     QVERIFY(selectionSpy.wait());
-    QSignalSpy cancelledSpy(ds2.data(), &DataSource::cancelled);
+    QSignalSpy cancelledSpy(ds2.data(), &Clt::DataSource::cancelled);
     QVERIFY(cancelledSpy.isValid());
     m_seatInterface->setSelection(ddi);
     QVERIFY(cancelledSpy.wait());
 
-    // Copy already cleared selection,  BUG 383054
+    // Copy already cleared selection, BUG 383054.
     ddi->sendSelection(ddi);
 }
 
 void TestWaylandSeat::testSelectionNoDataSource()
 {
-    // this test verifies that the server doesn't crash when using setSelection with
-    // a DataDevice which doesn't have a DataSource yet
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    // first create the DataDevice
-    QScopedPointer<DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
+    // This test verifies that the server doesn't crash when using setSelection with
+    // a DataDevice which doesn't have a DataSource yet.
+
+    // First create the DataDevice.
+    QScopedPointer<Srv::DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
     ddmi->create();
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &DataDeviceManagerInterface::dataDeviceCreated);
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManagerInterface::dataDeviceCreated);
     QVERIFY(ddiCreatedSpy.isValid());
-    Registry registry;
-    QSignalSpy dataDeviceManagerSpy(&registry, &Registry::dataDeviceManagerAnnounced);
+
+    Clt::Registry registry;
+    QSignalSpy dataDeviceManagerSpy(&registry, &Clt::Registry::dataDeviceManagerAnnounced);
     QVERIFY(dataDeviceManagerSpy.isValid());
     registry.setEventQueue(m_queue);
     registry.create(m_connection->display());
@@ -1960,47 +2101,48 @@ void TestWaylandSeat::testSelectionNoDataSource()
     registry.setup();
 
     QVERIFY(dataDeviceManagerSpy.wait());
-    QScopedPointer<DataDeviceManager> ddm(registry.createDataDeviceManager(dataDeviceManagerSpy.first().first().value<quint32>(),
-                                                                           dataDeviceManagerSpy.first().last().value<quint32>()));
+    QScopedPointer<Clt::DataDeviceManager>
+        ddm(registry.createDataDeviceManager(dataDeviceManagerSpy.first().first().value<quint32>(),
+                                             dataDeviceManagerSpy.first().last().value<quint32>()));
     QVERIFY(ddm->isValid());
 
-    QScopedPointer<DataDevice> dd(ddm->getDataDevice(m_seat));
+    QScopedPointer<Clt::DataDevice> dd(ddm->getDataDevice(m_seat));
     QVERIFY(dd->isValid());
     QVERIFY(ddiCreatedSpy.wait());
-    auto ddi = ddiCreatedSpy.first().first().value<DataDeviceInterface*>();
+    auto *ddi = ddiCreatedSpy.first().first().value<Srv::DataDeviceInterface*>();
     QVERIFY(ddi);
 
-    // now create a surface and pass it keyboard focus
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    // Now create a surface and pass it keyboard focus.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(!m_seatInterface->selection());
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_seatInterface->focusedKeyboardSurface(), serverSurface);
 
-    // now let's set the selection
+    // Now let's set the selection.
     m_seatInterface->setSelection(ddi);
 }
 
 void TestWaylandSeat::testDataDeviceForKeyboardSurface()
 {
-    // this test verifies that the server does not crash when creating a datadevice for the focused keyboard surface
-    // and the currentSelection does not have a DataSource.
-    // to properly test the functionality this test requires a second client
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    // create the DataDeviceManager
-    QScopedPointer<DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
+    // This test verifies that the server does not crash when creating a datadevice for the focused
+    // keyboard surface and the currentSelection does not have a DataSource.
+    // To properly test the functionality this test requires a second client.
+
+    // Create the DataDeviceManager.
+    QScopedPointer<Srv::DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
     ddmi->create();
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &DataDeviceManagerInterface::dataDeviceCreated);
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManagerInterface::dataDeviceCreated);
     QVERIFY(ddiCreatedSpy.isValid());
 
-    // create a second Wayland client connection to use it for setSelection
-    auto c = new ConnectionThread;
-    QSignalSpy connectedSpy(c, &ConnectionThread::connected);
+    // Create a second Wayland client connection to use it for setSelection.
+    auto c = new Clt::ConnectionThread;
+    QSignalSpy connectedSpy(c, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     c->setSocketName(s_socketName);
 
@@ -2008,14 +2150,14 @@ void TestWaylandSeat::testDataDeviceForKeyboardSurface()
     c->moveToThread(thread);
     thread->start();
 
-    c->initConnection();
+    c->establishConnection();
     QVERIFY(connectedSpy.wait());
 
-    QScopedPointer<EventQueue> queue(new EventQueue);
+    QScopedPointer<Clt::EventQueue> queue(new Clt::EventQueue);
     queue->setup(c);
 
-    QScopedPointer<Registry> registry(new Registry);
-    QSignalSpy interfacesAnnouncedSpy(registry.data(), &Registry::interfacesAnnounced);
+    QScopedPointer<Clt::Registry> registry(new Clt::Registry);
+    QSignalSpy interfacesAnnouncedSpy(registry.data(), &Clt::Registry::interfacesAnnounced);
     QVERIFY(interfacesAnnouncedSpy.isValid());
     registry->setEventQueue(queue.data());
     registry->create(c);
@@ -2023,34 +2165,37 @@ void TestWaylandSeat::testDataDeviceForKeyboardSurface()
     registry->setup();
 
     QVERIFY(interfacesAnnouncedSpy.wait());
-    QScopedPointer<Seat> seat(registry->createSeat(registry->interface(Registry::Interface::Seat).name,
-                                                   registry->interface(Registry::Interface::Seat).version));
+    QScopedPointer<Clt::Seat>
+            seat(registry->createSeat(registry->interface(Clt::Registry::Interface::Seat).name,
+                                      registry->interface(Clt::Registry::Interface::Seat).version));
     QVERIFY(seat->isValid());
-    QScopedPointer<DataDeviceManager> ddm1(registry->createDataDeviceManager(registry->interface(Registry::Interface::DataDeviceManager).name,
-                                                                             registry->interface(Registry::Interface::DataDeviceManager).version));
+    QScopedPointer<Clt::DataDeviceManager>
+            ddm1(registry->createDataDeviceManager(
+                     registry->interface(Clt::Registry::Interface::DataDeviceManager).name,
+                     registry->interface(Clt::Registry::Interface::DataDeviceManager).version));
     QVERIFY(ddm1->isValid());
 
-    // now create our first datadevice
-    QScopedPointer<DataDevice> dd1(ddm1->getDataDevice(seat.data()));
+    // Now create our first datadevice.
+    QScopedPointer<Clt::DataDevice> dd1(ddm1->getDataDevice(seat.data()));
     QVERIFY(ddiCreatedSpy.wait());
-    auto ddi = ddiCreatedSpy.first().first().value<DataDeviceInterface*>();
+    auto *ddi = ddiCreatedSpy.first().first().value<Srv::DataDeviceInterface*>();
     QVERIFY(ddi);
     m_seatInterface->setSelection(ddi);
 
-    // switch to other client
-    // create a surface and pass it keyboard focus
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    // Switch to other client.
+    // Create a surface and pass it keyboard focus.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_seatInterface->focusedKeyboardSurface(), serverSurface);
 
-    // now create a DataDevice
-    Registry registry2;
-    QSignalSpy dataDeviceManagerSpy(&registry2, &Registry::dataDeviceManagerAnnounced);
+    // Now create a DataDevice.
+    Clt::Registry registry2;
+    QSignalSpy dataDeviceManagerSpy(&registry2, &Clt::Registry::dataDeviceManagerAnnounced);
     QVERIFY(dataDeviceManagerSpy.isValid());
     registry2.setEventQueue(m_queue);
     registry2.create(m_connection->display());
@@ -2058,19 +2203,20 @@ void TestWaylandSeat::testDataDeviceForKeyboardSurface()
     registry2.setup();
 
     QVERIFY(dataDeviceManagerSpy.wait());
-    QScopedPointer<DataDeviceManager> ddm(registry2.createDataDeviceManager(dataDeviceManagerSpy.first().first().value<quint32>(),
-                                                                           dataDeviceManagerSpy.first().last().value<quint32>()));
+    QScopedPointer<Clt::DataDeviceManager>
+       ddm(registry2.createDataDeviceManager(dataDeviceManagerSpy.first().first().value<quint32>(),
+                                             dataDeviceManagerSpy.first().last().value<quint32>()));
     QVERIFY(ddm->isValid());
 
-    QScopedPointer<DataDevice> dd(ddm->getDataDevice(m_seat));
+    QScopedPointer<Clt::DataDevice> dd(ddm->getDataDevice(m_seat));
     QVERIFY(dd->isValid());
     QVERIFY(ddiCreatedSpy.wait());
 
-    // unset surface and set again
+    // Unset surface and set again.
     m_seatInterface->setFocusedKeyboardSurface(nullptr);
     m_seatInterface->setFocusedKeyboardSurface(serverSurface);
 
-    // and delete the connection thread again
+    // And delete the connection thread again.
     dd1.reset();
     ddm1.reset();
     seat.reset();
@@ -2084,52 +2230,50 @@ void TestWaylandSeat::testDataDeviceForKeyboardSurface()
 
 void TestWaylandSeat::testTouch()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    QSignalSpy touchSpy(m_seat, SIGNAL(hasTouchChanged(bool)));
+    QSignalSpy touchSpy(m_seat, &Clt::Seat::hasTouchChanged);
     QVERIFY(touchSpy.isValid());
     m_seatInterface->setHasTouch(true);
     QVERIFY(touchSpy.wait());
 
-    // create the surface
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
+    // Create the surface.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    Surface *s = m_compositor->createSurface(m_compositor);
+    auto *s = m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    SurfaceInterface *serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
 
     m_seatInterface->setFocusedTouchSurface(serverSurface);
-    // no keyboard yet
+    // No keyboard yet.
     QCOMPARE(m_seatInterface->focusedTouchSurface(), serverSurface);
     QVERIFY(!m_seatInterface->focusedTouch());
 
-    QSignalSpy touchCreatedSpy(m_seatInterface, SIGNAL(touchCreated(Wrapland::Server::TouchInterface*)));
+    QSignalSpy touchCreatedSpy(m_seatInterface, &Srv::SeatInterface::touchCreated);
     QVERIFY(touchCreatedSpy.isValid());
-    Touch *touch = m_seat->createTouch(m_seat);
+    auto *touch = m_seat->createTouch(m_seat);
     QVERIFY(touch->isValid());
     QVERIFY(touchCreatedSpy.wait());
     auto serverTouch = m_seatInterface->focusedTouch();
     QVERIFY(serverTouch);
-    QCOMPARE(touchCreatedSpy.first().first().value<Wrapland::Server::TouchInterface*>(), m_seatInterface->focusedTouch());
+    QCOMPARE(touchCreatedSpy.first().first().value<Srv::TouchInterface*>(),
+             m_seatInterface->focusedTouch());
 
-    QSignalSpy sequenceStartedSpy(touch, SIGNAL(sequenceStarted(Wrapland::Client::TouchPoint*)));
+    QSignalSpy sequenceStartedSpy(touch, &Clt::Touch::sequenceStarted);
     QVERIFY(sequenceStartedSpy.isValid());
-    QSignalSpy sequenceEndedSpy(touch, SIGNAL(sequenceEnded()));
+    QSignalSpy sequenceEndedSpy(touch, &Clt::Touch::sequenceEnded);
     QVERIFY(sequenceEndedSpy.isValid());
-    QSignalSpy sequenceCanceledSpy(touch, SIGNAL(sequenceCanceled()));
+    QSignalSpy sequenceCanceledSpy(touch, &Clt::Touch::sequenceCanceled);
     QVERIFY(sequenceCanceledSpy.isValid());
-    QSignalSpy frameEndedSpy(touch, SIGNAL(frameEnded()));
+    QSignalSpy frameEndedSpy(touch, &Clt::Touch::frameEnded);
     QVERIFY(frameEndedSpy.isValid());
-    QSignalSpy pointAddedSpy(touch, SIGNAL(pointAdded(Wrapland::Client::TouchPoint*)));
+    QSignalSpy pointAddedSpy(touch, &Clt::Touch::pointAdded);
     QVERIFY(pointAddedSpy.isValid());
-    QSignalSpy pointMovedSpy(touch, SIGNAL(pointMoved(Wrapland::Client::TouchPoint*)));
+    QSignalSpy pointMovedSpy(touch, &Clt::Touch::pointMoved);
     QVERIFY(pointMovedSpy.isValid());
-    QSignalSpy pointRemovedSpy(touch, SIGNAL(pointRemoved(Wrapland::Client::TouchPoint*)));
+    QSignalSpy pointRemovedSpy(touch, &Clt::Touch::pointRemoved);
     QVERIFY(pointRemovedSpy.isValid());
 
-    // try a few things
+    // Try a few things.
     m_seatInterface->setFocusedTouchSurfacePosition(QPointF(10, 20));
     QCOMPARE(m_seatInterface->focusedTouchSurfacePosition(), QPointF(10, 20));
     m_seatInterface->setTimestamp(1);
@@ -2142,7 +2286,7 @@ void TestWaylandSeat::testTouch()
     QCOMPARE(pointAddedSpy.count(), 0);
     QCOMPARE(pointMovedSpy.count(), 0);
     QCOMPARE(pointRemovedSpy.count(), 0);
-    TouchPoint *tp = sequenceStartedSpy.first().first().value<TouchPoint*>();
+    auto *tp = sequenceStartedSpy.first().first().value<Clt::TouchPoint*>();
     QVERIFY(tp);
     QCOMPARE(tp->downSerial(), m_seatInterface->display()->serial());
     QCOMPARE(tp->id(), 0);
@@ -2156,12 +2300,12 @@ void TestWaylandSeat::testTouch()
     QCOMPARE(touch->sequence().count(), 1);
     QCOMPARE(touch->sequence().first(), tp);
 
-    // let's end the frame
+    // Let's end the frame.
     m_seatInterface->touchFrame();
     QVERIFY(frameEndedSpy.wait());
     QCOMPARE(frameEndedSpy.count(), 1);
 
-    // move the one point
+    // Move the one point.
     m_seatInterface->setTimestamp(2);
     m_seatInterface->touchMove(0, QPointF(10, 20));
     m_seatInterface->touchFrame();
@@ -2173,7 +2317,7 @@ void TestWaylandSeat::testTouch()
     QCOMPARE(pointAddedSpy.count(), 0);
     QCOMPARE(pointMovedSpy.count(), 1);
     QCOMPARE(pointRemovedSpy.count(), 0);
-    QCOMPARE(pointMovedSpy.first().first().value<TouchPoint*>(), tp);
+    QCOMPARE(pointMovedSpy.first().first().value<Clt::TouchPoint*>(), tp);
 
     QCOMPARE(tp->id(), 0);
     QVERIFY(tp->isDown());
@@ -2184,7 +2328,7 @@ void TestWaylandSeat::testTouch()
     QCOMPARE(tp->upSerial(), 0u);
     QCOMPARE(tp->surface().data(), s);
 
-    // add onther point
+    // Add onther point.
     m_seatInterface->setTimestamp(3);
     QCOMPARE(m_seatInterface->touchDown(QPointF(15, 26)), 1);
     m_seatInterface->touchFrame();
@@ -2198,7 +2342,8 @@ void TestWaylandSeat::testTouch()
     QCOMPARE(pointRemovedSpy.count(), 0);
     QCOMPARE(touch->sequence().count(), 2);
     QCOMPARE(touch->sequence().first(), tp);
-    TouchPoint *tp2 = pointAddedSpy.first().first().value<TouchPoint*>();
+
+    auto *tp2 = pointAddedSpy.first().first().value<Clt::TouchPoint*>();
     QVERIFY(tp2);
     QCOMPARE(touch->sequence().last(), tp2);
     QCOMPARE(tp2->id(), 1);
@@ -2210,7 +2355,7 @@ void TestWaylandSeat::testTouch()
     QCOMPARE(tp2->upSerial(), 0u);
     QCOMPARE(tp2->surface().data(), s);
 
-    // send it an up
+    // Send it an up.
     m_seatInterface->setTimestamp(4);
     m_seatInterface->touchUp(1);
     m_seatInterface->touchFrame();
@@ -2222,7 +2367,7 @@ void TestWaylandSeat::testTouch()
     QCOMPARE(pointAddedSpy.count(), 1);
     QCOMPARE(pointMovedSpy.count(), 1);
     QCOMPARE(pointRemovedSpy.count(), 1);
-    QCOMPARE(pointRemovedSpy.first().first().value<TouchPoint*>(), tp2);
+    QCOMPARE(pointRemovedSpy.first().first().value<Clt::TouchPoint*>(), tp2);
     QCOMPARE(tp2->id(), 1);
     QVERIFY(!tp2->isDown());
     QCOMPARE(tp2->position(), QPointF(5, 6));
@@ -2232,13 +2377,14 @@ void TestWaylandSeat::testTouch()
     QCOMPARE(tp2->upSerial(), m_seatInterface->display()->serial());
     QCOMPARE(tp2->surface().data(), s);
 
-    // send another down and up
+    // Send another down and up.
     m_seatInterface->setTimestamp(5);
     QCOMPARE(m_seatInterface->touchDown(QPointF(15, 26)), 1);
     m_seatInterface->touchFrame();
     m_seatInterface->setTimestamp(6);
     m_seatInterface->touchUp(1);
-    // and send an up for the first point
+
+    // And send an up for the first point.
     m_seatInterface->touchUp(0);
     m_seatInterface->touchFrame();
     QVERIFY(frameEndedSpy.wait());
@@ -2255,7 +2401,7 @@ void TestWaylandSeat::testTouch()
     QVERIFY(!touch->sequence().at(2)->isDown());
     QVERIFY(!m_seatInterface->isTouchSequence());
 
-    // try cancel
+    // Try cancel.
     m_seatInterface->setFocusedTouchSurface(serverSurface, QPointF(15, 26));
     m_seatInterface->setTimestamp(7);
     QCOMPARE(m_seatInterface->touchDown(QPointF(15, 26)), 0);
@@ -2271,17 +2417,18 @@ void TestWaylandSeat::testTouch()
     QCOMPARE(pointRemovedSpy.count(), 3);
     QCOMPARE(touch->sequence().first()->position(), QPointF(0, 0));
 
-    // destroy touch on client side
-    QSignalSpy unboundSpy(serverTouch, &TouchInterface::unbound);
+    // Destroy touch on client side.
+    QSignalSpy unboundSpy(serverTouch, &Srv::TouchInterface::unbound);
     QVERIFY(unboundSpy.isValid());
-    QSignalSpy destroyedSpy(serverTouch, &TouchInterface::destroyed);
+    QSignalSpy destroyedSpy(serverTouch, &Srv::TouchInterface::destroyed);
     QVERIFY(destroyedSpy.isValid());
     delete touch;
     QVERIFY(unboundSpy.wait());
     QCOMPARE(unboundSpy.count(), 1);
     QCOMPARE(destroyedSpy.count(), 0);
     QVERIFY(!serverTouch->resource());
-    // try to call into all the methods of the touch interface, should not crash
+
+    // Try to call into all the methods of the touch interface, should not crash.
     QCOMPARE(m_seatInterface->focusedTouch(), serverTouch);
     m_seatInterface->setTimestamp(8);
     QCOMPARE(m_seatInterface->touchDown(QPointF(15, 26)), 0);
@@ -2291,119 +2438,124 @@ void TestWaylandSeat::testTouch()
     m_seatInterface->cancelTouchSequence();
     QVERIFY(destroyedSpy.wait());
     QCOMPARE(destroyedSpy.count(), 1);
-    // should have unset the focused touch
+
+    // Should have unset the focused touch.
     QVERIFY(!m_seatInterface->focusedTouch());
-    // but not the focused touch surface
+
+    // But not the focused touch surface.
     QCOMPARE(m_seatInterface->focusedTouchSurface(), serverSurface);
 }
 
 void TestWaylandSeat::testDisconnect()
 {
-    // this test verifies that disconnecting the client cleans up correctly
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QSignalSpy keyboardCreatedSpy(m_seatInterface, &SeatInterface::keyboardCreated);
+    // This test verifies that disconnecting the client cleans up correctly.
+    QSignalSpy keyboardCreatedSpy(m_seatInterface, &Srv::SeatInterface::keyboardCreated);
     QVERIFY(keyboardCreatedSpy.isValid());
-    QSignalSpy pointerCreatedSpy(m_seatInterface, &SeatInterface::pointerCreated);
+    QSignalSpy pointerCreatedSpy(m_seatInterface, &Srv::SeatInterface::pointerCreated);
     QVERIFY(pointerCreatedSpy.isValid());
-    QSignalSpy touchCreatedSpy(m_seatInterface, &SeatInterface::touchCreated);
+    QSignalSpy touchCreatedSpy(m_seatInterface, &Srv::SeatInterface::touchCreated);
     QVERIFY(touchCreatedSpy.isValid());
 
-    // create the things we need
+    // Create the things we need.
     m_seatInterface->setHasKeyboard(true);
     m_seatInterface->setHasPointer(true);
     m_seatInterface->setHasTouch(true);
-    QSignalSpy touchSpy(m_seat, &Seat::hasTouchChanged);
+    QSignalSpy touchSpy(m_seat, &Clt::Seat::hasTouchChanged);
     QVERIFY(touchSpy.isValid());
     QVERIFY(touchSpy.wait());
 
-    QScopedPointer<Keyboard> keyboard(m_seat->createKeyboard());
+    QScopedPointer<Clt::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(!keyboard.isNull());
     QVERIFY(keyboardCreatedSpy.wait());
-    auto serverKeyboard = keyboardCreatedSpy.first().first().value<KeyboardInterface*>();
+    auto serverKeyboard = keyboardCreatedSpy.first().first().value<Srv::KeyboardInterface*>();
     QVERIFY(serverKeyboard);
 
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
+    QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
     QVERIFY(!pointer.isNull());
     QVERIFY(pointerCreatedSpy.wait());
-    auto serverPointer = pointerCreatedSpy.first().first().value<PointerInterface*>();
+    auto serverPointer = pointerCreatedSpy.first().first().value<Srv::PointerInterface*>();
     QVERIFY(serverPointer);
 
-    QScopedPointer<Touch> touch(m_seat->createTouch());
+    QScopedPointer<Clt::Touch> touch(m_seat->createTouch());
     QVERIFY(!touch.isNull());
     QVERIFY(touchCreatedSpy.wait());
-    auto serverTouch = touchCreatedSpy.first().first().value<TouchInterface*>();
+    auto serverTouch = touchCreatedSpy.first().first().value<Srv::TouchInterface*>();
     QVERIFY(serverTouch);
 
-    // setup destroys
+    // Setup destroys.
     QSignalSpy keyboardDestroyedSpy(serverKeyboard, &QObject::destroyed);
     QVERIFY(keyboardDestroyedSpy.isValid());
     QSignalSpy pointerDestroyedSpy(serverPointer, &QObject::destroyed);
     QVERIFY(pointerDestroyedSpy.isValid());
     QSignalSpy touchDestroyedSpy(serverTouch, &QObject::destroyed);
     QVERIFY(touchDestroyedSpy.isValid());
-    QSignalSpy clientDisconnectedSpy(serverKeyboard->client(), &ClientConnection::disconnected);
+    QSignalSpy clientDisconnectedSpy(serverKeyboard->client(),
+                                     &Srv::ClientConnection::disconnected);
     QVERIFY(clientDisconnectedSpy.isValid());
 
-    if (m_connection) {
-        m_connection->deleteLater();
-        m_connection = nullptr;
-    }
-    QVERIFY(clientDisconnectedSpy.wait());
-    QCOMPARE(clientDisconnectedSpy.count(), 1);
+    keyboard->release();
+    pointer->release();
+    touch->release();
+    m_relativePointerManager->release();
+    m_pointerGestures->release();
+    m_compositor->release();
+    m_seat->release();
+    m_shm->release();
+    m_subCompositor->release();
+    m_queue->release();
+
     QCOMPARE(keyboardDestroyedSpy.count(), 0);
     QCOMPARE(pointerDestroyedSpy.count(), 0);
     QCOMPARE(touchDestroyedSpy.count(), 0);
-    QVERIFY(keyboardDestroyedSpy.wait());
-    QCOMPARE(keyboardDestroyedSpy.count(), 1);
-    QCOMPARE(pointerDestroyedSpy.count(), 1);
-    QCOMPARE(touchDestroyedSpy.count(), 1);
 
-    keyboard->destroy();
-    pointer->destroy();
-    touch->destroy();
-    m_relativePointerManager->destroy();
-    m_pointerGestures->destroy();
-    m_compositor->destroy();
-    m_seat->destroy();
-    m_shm->destroy();
-    m_subCompositor->destroy();
-    m_queue->destroy();
+    QVERIFY(m_connection);
+    m_connection->deleteLater();
+    m_connection = nullptr;
+
+    QVERIFY(clientDisconnectedSpy.wait());
+    QCOMPARE(clientDisconnectedSpy.count(), 1);
+
+    QTRY_COMPARE(keyboardDestroyedSpy.count(), 1);
+    QTRY_COMPARE(pointerDestroyedSpy.count(), 1);
+    QTRY_COMPARE(touchDestroyedSpy.count(), 1);
 }
 
 void TestWaylandSeat::testPointerEnterOnUnboundSurface()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-
-    // create the things we need
+    // Create the things we need.
     m_seatInterface->setHasKeyboard(true);
     m_seatInterface->setHasPointer(true);
     m_seatInterface->setHasTouch(true);
-    QSignalSpy pointerChangedSpy(m_seat, &Seat::hasPointerChanged);
+    QSignalSpy pointerChangedSpy(m_seat, &Clt::Seat::hasPointerChanged);
     QVERIFY(pointerChangedSpy.isValid());
     QVERIFY(pointerChangedSpy.wait());
 
-    // create pointer and Surface
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
+    // Create pointer and Surface.
+    QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
     QVERIFY(!pointer.isNull());
-    // create the surface
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+
+    // Create the surface.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> s(m_compositor->createSurface());
+    QScopedPointer<Clt::Surface> s(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
-    SurfaceInterface *serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+
+    auto *serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(serverSurface);
 
-    // unbind the surface again
-    QSignalSpy surfaceUnboundSpy(serverSurface, &SurfaceInterface::unbound);
+    // Unbind the surface again.
+    QSignalSpy serverPointerChangedSpy(m_seatInterface, &Srv::SeatInterface::focusedPointerChanged);
+    QVERIFY(serverPointerChangedSpy.isValid());
+    QSignalSpy surfaceUnboundSpy(serverSurface, &Srv::SurfaceInterface::unbound);
     QVERIFY(surfaceUnboundSpy.isValid());
     s.reset();
     QVERIFY(surfaceUnboundSpy.wait());
-    QSignalSpy clientErrorSpy(m_connection, &ConnectionThread::errorOccurred);
-    QVERIFY(clientErrorSpy.isValid());
+
     m_seatInterface->setFocusedPointerSurface(serverSurface);
-    QVERIFY(!clientErrorSpy.wait(100));
+
+    QVERIFY(!pointerChangedSpy.wait(200));
+    QCOMPARE(serverPointerChangedSpy.count(), 2);
+    QVERIFY(!m_seatInterface->focusedPointerSurface());
 }
 
 QTEST_GUILESS_MAIN(TestWaylandSeat)

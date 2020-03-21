@@ -83,7 +83,7 @@ MockupClient::MockupClient(QObject *parent)
 {
     // setup connection
     connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketName(s_socketName);
 
@@ -91,7 +91,7 @@ MockupClient::MockupClient(QObject *parent)
     connection->moveToThread(thread);
     thread->start();
 
-    connection->initConnection();
+    connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     queue = new EventQueue(this);
@@ -291,9 +291,8 @@ void RemoteAccessTest::testSendReleaseMultiple()
     // wait for event loop
     QVERIFY(paramsObtainedSpy1.size() == 1 || paramsObtainedSpy1.wait());
     QCOMPARE(paramsObtainedSpy1.size(), 1);
-    if (paramsObtainedSpy2.size() == 0) {
-        QVERIFY(paramsObtainedSpy2.wait());
-    }
+
+    QVERIFY(paramsObtainedSpy2.size() == 1 || paramsObtainedSpy2.wait());
     QCOMPARE(paramsObtainedSpy2.size(), 1);
 
     // release

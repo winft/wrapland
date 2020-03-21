@@ -97,16 +97,6 @@ void Seat::release()
     d->resetSeat();
 }
 
-void Seat::destroy()
-{
-    if (!d->seat) {
-        return;
-    }
-    emit interfaceAboutToBeDestroyed();
-    d->seat.destroy();
-    d->resetSeat();
-}
-
 void Seat::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;
@@ -184,7 +174,6 @@ Keyboard *Seat::createKeyboard(QObject *parent)
     Q_ASSERT(d->capabilityKeyboard);
     Keyboard *k = new Keyboard(parent);
     connect(this, &Seat::interfaceAboutToBeReleased, k, &Keyboard::release);
-    connect(this, &Seat::interfaceAboutToBeDestroyed, k, &Keyboard::destroy);
     auto w = wl_seat_get_keyboard(d->seat);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -199,7 +188,6 @@ Pointer *Seat::createPointer(QObject *parent)
     Q_ASSERT(d->capabilityPointer);
     Pointer *p = new Pointer(parent);
     connect(this, &Seat::interfaceAboutToBeReleased, p, &Pointer::release);
-    connect(this, &Seat::interfaceAboutToBeDestroyed, p, &Pointer::destroy);
     auto w = wl_seat_get_pointer(d->seat);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -214,7 +202,6 @@ Touch *Seat::createTouch(QObject *parent)
     Q_ASSERT(d->capabilityTouch);
     Touch *t = new Touch(parent);
     connect(this, &Seat::interfaceAboutToBeReleased, t, &Touch::release);
-    connect(this, &Seat::interfaceAboutToBeDestroyed, t, &Touch::destroy);
     auto w = wl_seat_get_touch(d->seat);
     if (d->queue) {
         d->queue->addProxy(w);

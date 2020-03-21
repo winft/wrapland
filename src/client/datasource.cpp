@@ -156,11 +156,6 @@ void DataSource::release()
     d->source.release();
 }
 
-void DataSource::destroy()
-{
-    d->source.destroy();
-}
-
 bool DataSource::isValid() const
 {
     return d->source.isValid();

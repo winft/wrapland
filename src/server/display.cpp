@@ -231,9 +231,23 @@ void Display::terminate()
     if (!d->running) {
         return;
     }
-    emit aboutToTerminate();
+
+    // That call is not really necessary because we run our own Qt-embedded event loop and do not
+    // call wl_display_run() in the beginning. That being said leave it in here as a reminder that
+    // there is this possibility.
     wl_display_terminate(d->display);
+
+    // Then we destroy all remaining clients. There might be clients that have established
+    // a connection but not yet interacted with us in any way.
+    wl_display_destroy_clients(d->display);
+
+    // Globals are also destroyed in wl_display_destroy automatically, but we need to remove all
+    // global interfaces first because otherwise they would call back into the Wayland connection
+    // with wl_global_destroy again. Can we do it differently?
+    emit aboutToTerminate();
+
     wl_display_destroy(d->display);
+
     d->display = nullptr;
     d->loop = nullptr;
     d->setRunning(false);

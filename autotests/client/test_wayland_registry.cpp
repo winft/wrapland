@@ -59,10 +59,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/xdgshell_interface.h"
 #include "../../src/server/relativepointer_interface.h"
 // Wayland
+#include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
+#include <wayland-contrast-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
 #include <wayland-server-decoration-client-protocol.h>
+#include <wayland-slide-client-protocol.h>
 #include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-relativepointer-unstable-v1-client-protocol.h>
@@ -219,9 +222,9 @@ void TestWaylandRegistry::cleanup()
 void TestWaylandRegistry::testCreate()
 {
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
 
     Wrapland::Client::Registry registry;
@@ -234,9 +237,9 @@ void TestWaylandRegistry::testCreate()
 
 #define TEST_BIND(iface, signalName, bindMethod, destroyFunction) \
     Wrapland::Client::ConnectionThread connection; \
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected())); \
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged); \
     connection.setSocketName(s_socketName); \
-    connection.initConnection(); \
+    connection.establishConnection(); \
     QVERIFY(connectedSpy.wait()); \
     \
     Wrapland::Client::Registry registry; \
@@ -270,7 +273,9 @@ void TestWaylandRegistry::testCreate()
     /* registry should know about the interface now */ \
     QVERIFY(registry.hasInterface(iface)); \
     QVERIFY(!registry.bindMethod(name+1, version)); \
-    QVERIFY(registry.bindMethod(name, version+1)); \
+    auto *higherVersion = registry.bindMethod(name, version+1); \
+    QVERIFY(higherVersion); \
+    destroyFunction(higherVersion); \
     auto *c = registry.bindMethod(name, version); \
     QVERIFY(c); \
     destroyFunction(c); \
@@ -312,17 +317,23 @@ void TestWaylandRegistry::testBindDataDeviceManager()
 
 void TestWaylandRegistry::testBindBlurManager()
 {
-    TEST_BIND(Wrapland::Client::Registry::Interface::Blur, SIGNAL(blurAnnounced(quint32,quint32)), bindBlurManager, free)
+    TEST_BIND(Wrapland::Client::Registry::Interface::Blur,
+              SIGNAL(blurAnnounced(quint32,quint32)), bindBlurManager,
+              org_kde_kwin_blur_manager_destroy)
 }
 
 void TestWaylandRegistry::testBindContrastManager()
 {
-    TEST_BIND(Wrapland::Client::Registry::Interface::Contrast, SIGNAL(contrastAnnounced(quint32,quint32)), bindContrastManager, free)
+    TEST_BIND(Wrapland::Client::Registry::Interface::Contrast,
+              SIGNAL(contrastAnnounced(quint32,quint32)), bindContrastManager,
+              org_kde_kwin_contrast_manager_destroy)
 }
 
 void TestWaylandRegistry::testBindSlideManager()
 {
-    TEST_BIND(Wrapland::Client::Registry::Interface::Slide, SIGNAL(slideAnnounced(quint32,quint32)), bindSlideManager, free)
+    TEST_BIND(Wrapland::Client::Registry::Interface::Slide,
+              SIGNAL(slideAnnounced(quint32,quint32)), bindSlideManager,
+              org_kde_kwin_slide_manager_destroy)
 }
 
 void TestWaylandRegistry::testBindDpmsManager()
@@ -368,6 +379,7 @@ void TestWaylandRegistry::testBindPointerConstraintsUnstableV1()
 void TestWaylandRegistry::testBindIdleIhibitManagerUnstableV1()
 {
     TEST_BIND(Wrapland::Client::Registry::Interface::IdleInhibitManagerUnstableV1, SIGNAL(idleInhibitManagerUnstableV1Announced(quint32,quint32)), bindIdleInhibitManagerUnstableV1, zwp_idle_inhibit_manager_v1_destroy)
+    QTest::qWait(100);
 }
 
 #undef TEST_BIND
@@ -376,9 +388,9 @@ void TestWaylandRegistry::testRemoval()
 {
     using namespace Wrapland::Client;
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
     connect(QCoreApplication::eventDispatcher(), &QAbstractEventDispatcher::aboutToBlock, &connection,
         [&connection] {
@@ -588,6 +600,16 @@ void TestWaylandRegistry::testRemoval()
     QCOMPARE(serverSideDecoManagerObjectRemovedSpy.count(), 1);
     QCOMPARE(blurObjectRemovedSpy.count(), 1);
     QCOMPARE(idleInhibitManagerObjectRemovedSpy.count(), 1);
+
+    delete seat;
+    delete shell;
+    delete output;
+    delete compositor;
+    delete subcompositor;
+    delete serverSideDeco;
+    delete blurManager;
+    delete idleInhibitManager;
+    registry.release();
 }
 
 void TestWaylandRegistry::testOutOfSyncRemoval()
@@ -602,9 +624,9 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
 
     using namespace Wrapland::Client;
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
     connect(QCoreApplication::eventDispatcher(), &QAbstractEventDispatcher::aboutToBlock, &connection,
         [&connection] {
@@ -619,8 +641,10 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QSignalSpy blurAnnouncedSpy(&registry, &Registry::blurAnnounced);
     QSignalSpy contrastAnnouncedSpy(&registry, &Registry::blurAnnounced);
 
-    blurAnnouncedSpy.wait();
-    contrastAnnouncedSpy.wait();
+    QVERIFY(blurAnnouncedSpy.wait());
+    QVERIFY(contrastAnnouncedSpy.count() || contrastAnnouncedSpy.wait());
+    QCOMPARE(contrastAnnouncedSpy.count(), 1);
+
     BlurManager *blurManager = registry.createBlurManager(registry.interface(Registry::Interface::Blur).name, registry.interface(Registry::Interface::Blur).version, &registry);
     ContrastManager *contrastManager = registry.createContrastManager(registry.interface(Registry::Interface::Contrast).name, registry.interface(Registry::Interface::Contrast).version, &registry);
 
@@ -641,7 +665,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QVERIFY(blurRemovedSpy.count() == 0);
 
     //use the in the client
-    blurManager->createBlur(surface.data(), nullptr);
+    auto *blur = blurManager->createBlur(surface.data(), nullptr);
 
     //now process events,
     QVERIFY(blurRemovedSpy.wait());
@@ -656,21 +680,28 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QVERIFY(contrastRemovedSpy.count() == 0);
 
     //use the in the client
-    contrastManager->createContrast(surface.data(), nullptr);
+    auto *contrast = contrastManager->createContrast(surface.data(), nullptr);
 
     //now process events,
     QVERIFY(contrastRemovedSpy.wait());
     QVERIFY(contrastRemovedSpy.count() == 1);
 
+    delete blur;
+    delete contrast;
+    surface.reset();
+    delete blurManager;
+    delete contrastManager;
+    compositor.reset();
+    registry.release();
 }
 
 void TestWaylandRegistry::testDestroy()
 {
     using namespace Wrapland::Client;
     Wrapland::Client::ConnectionThread connection;
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
 
     Registry registry;
@@ -683,28 +714,26 @@ void TestWaylandRegistry::testDestroy()
 
     //create some arbitrary Interface
     shellAnnouncedSpy.wait();
-    QScopedPointer<Shell> shell(registry.createShell(registry.interface(Registry::Interface::Shell).name, registry.interface(Registry::Interface::Shell).version, &registry));
+    QScopedPointer<Shell>
+            shell(registry.createShell(registry.interface(Registry::Interface::Shell).name,
+                                       registry.interface(Registry::Interface::Shell).version,
+                                       &registry));
 
-
-    QSignalSpy connectionDiedSpy(&connection, SIGNAL(connectionDied()));
-    QSignalSpy registryDiedSpy(&registry, SIGNAL(registryDestroyed()));
-
-    QVERIFY(connectionDiedSpy.isValid());
+    QSignalSpy registryDiedSpy(&registry, &Registry::registryReleased);
     QVERIFY(registryDiedSpy.isValid());
 
     delete m_display;
     m_display = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_VERIFY(!connection.established());
 
-    QVERIFY(connectionDiedSpy.count() == 1);
-    QVERIFY(registryDiedSpy.count() == 1);
+    QTRY_VERIFY(registryDiedSpy.count() == 1);
 
-    // now the registry should be destroyed;
+    // Now the registry should be released.
     QVERIFY(!registry.isValid());
 
-    // calling destroy again should not fail
-    registry.destroy();
-    shell->destroy();
+    // Calling release again should not fail.
+    registry.release();
+    shell->release();
 }
 
 void TestWaylandRegistry::testGlobalSync()
@@ -712,8 +741,8 @@ void TestWaylandRegistry::testGlobalSync()
     using namespace Wrapland::Client;
     ConnectionThread connection;
     connection.setSocketName(s_socketName);
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
-    connection.initConnection();
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
 
     Registry registry;
@@ -724,7 +753,7 @@ void TestWaylandRegistry::testGlobalSync()
     registry.setup();
     QVERIFY(syncSpy.wait());
     QCOMPARE(syncSpy.count(), 1);
-    registry.destroy();
+    registry.release();
 }
 
 void TestWaylandRegistry::testGlobalSyncThreaded()
@@ -738,8 +767,8 @@ void TestWaylandRegistry::testGlobalSyncThreaded()
     connection.moveToThread(&thread);
     thread.start();
 
-    QSignalSpy connectedSpy(&connection, SIGNAL(connected()));
-    connection.initConnection();
+    QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    connection.establishConnection();
 
     QVERIFY(connectedSpy.wait());
     EventQueue queue;
@@ -753,7 +782,10 @@ void TestWaylandRegistry::testGlobalSyncThreaded()
 
     QVERIFY(syncSpy.wait());
     QCOMPARE(syncSpy.count(), 1);
-    registry.destroy();
+    registry.release();
+
+    queue.release();
+    connection.flush();
 
     thread.quit();
     thread.wait();
@@ -764,9 +796,9 @@ void TestWaylandRegistry::testAnnounceMultiple()
     using namespace Wrapland::Client;
     ConnectionThread connection;
     connection.setSocketName(s_socketName);
-    QSignalSpy connectedSpy(&connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(&connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
     connect(QCoreApplication::eventDispatcher(), &QAbstractEventDispatcher::aboutToBlock, &connection,
             [&connection] {
@@ -816,6 +848,8 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().version, outputAnnouncedSpy.first().last().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::Output).name, outputAnnouncedSpy.first().first().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::Output).version, outputAnnouncedSpy.first().last().value<quint32>());
+
+    registry.release();
 }
 
 void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
@@ -823,9 +857,9 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     using namespace Wrapland::Client;
     ConnectionThread connection;
     connection.setSocketName(s_socketName);
-    QSignalSpy connectedSpy(&connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(&connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    connection.initConnection();
+    connection.establishConnection();
     QVERIFY(connectedSpy.wait());
     connect(QCoreApplication::eventDispatcher(), &QAbstractEventDispatcher::aboutToBlock, &connection,
             [&connection] {
@@ -875,6 +909,8 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().version, outputDeviceAnnouncedSpy.first().last().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).name, outputDeviceAnnouncedSpy.first().first().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).version, outputDeviceAnnouncedSpy.first().last().value<quint32>());
+
+    registry.release();
 }
 
 QTEST_GUILESS_MAIN(TestWaylandRegistry)

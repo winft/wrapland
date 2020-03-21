@@ -61,11 +61,6 @@ void SlideManager::release()
     d->slidemanager.release();
 }
 
-void SlideManager::destroy()
-{
-    d->slidemanager.destroy();
-}
-
 void SlideManager::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;
@@ -135,11 +130,6 @@ void Slide::setup(org_kde_kwin_slide *slide)
 void Slide::release()
 {
     d->slide.release();
-}
-
-void Slide::destroy()
-{
-    d->slide.destroy();
 }
 
 Slide::operator org_kde_kwin_slide*() {

@@ -84,7 +84,7 @@ void ErrorTest::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -92,7 +92,7 @@ void ErrorTest::init()
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new EventQueue(this);
@@ -152,30 +152,33 @@ void ErrorTest::cleanup()
 void ErrorTest::testMultipleShellSurfacesForSurface()
 {
     // this test verifies that creating two ShellSurfaces for the same Surface triggers a protocol error
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     QScopedPointer<Surface> surface(m_compositor->createSurface());
     QScopedPointer<ShellSurface> shellSurface1(m_shell->createSurface(surface.data()));
     QScopedPointer<ShellSurface> shellSurface2(m_shell->createSurface(surface.data()));
+    QCOMPARE(m_connection->error(), 0);
     QVERIFY(errorSpy.wait());
-    QVERIFY(m_connection->hasError());
-    QCOMPARE(m_connection->errorCode(), EPROTO);
+    QCOMPARE(m_connection->error(), EPROTO);
+    QVERIFY(m_connection->hasProtocolError());
+    QCOMPARE(m_connection->protocolError(), WL_DISPLAY_ERROR_INVALID_OBJECT);
 }
 
 void ErrorTest::testMultiplePlasmaShellSurfacesForSurface()
 {
     // this test verifies that creating two ShellSurfaces for the same Surface triggers a protocol error
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     // PlasmaShell is too smart and doesn't allow us to create a second PlasmaShellSurface
     // thus we need to cheat by creating a surface manually
     auto surface = wl_compositor_create_surface(*m_compositor);
     QScopedPointer<PlasmaShellSurface> shellSurface1(m_plasmaShell->createSurface(surface));
     QScopedPointer<PlasmaShellSurface> shellSurface2(m_plasmaShell->createSurface(surface));
-    QVERIFY(!m_connection->hasError());
+    QCOMPARE(m_connection->error(), 0);
     QVERIFY(errorSpy.wait());
-    QVERIFY(m_connection->hasError());
-    QCOMPARE(m_connection->errorCode(), EPROTO);
+    QCOMPARE(m_connection->error(), EPROTO);
+    QVERIFY(m_connection->hasProtocolError());
+    QCOMPARE(m_connection->protocolError(), WL_DISPLAY_ERROR_INVALID_OBJECT);
     wl_surface_destroy(surface);
 }
 
@@ -190,15 +193,17 @@ void ErrorTest::testTransientForSameSurface_data()
 void ErrorTest::testTransientForSameSurface()
 {
     // this test verifies that creating a transient shell surface for itself triggers a protocol error
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::errorOccurred);
+    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     QScopedPointer<Surface> surface(m_compositor->createSurface());
     QScopedPointer<ShellSurface> shellSurface(m_shell->createSurface(surface.data()));
     QFETCH(ShellSurface::TransientFlag, flag);
     shellSurface->setTransient(surface.data(), QPoint(), flag);
+    QCOMPARE(m_connection->error(), 0);
     QVERIFY(errorSpy.wait());
-    QVERIFY(m_connection->hasError());
-    QCOMPARE(m_connection->errorCode(), EPROTO);
+    QCOMPARE(m_connection->error(), EPROTO);
+    QVERIFY(m_connection->hasProtocolError());
+    QCOMPARE(m_connection->protocolError(), WL_DISPLAY_ERROR_INVALID_OBJECT);
 }
 
 QTEST_GUILESS_MAIN(ErrorTest)

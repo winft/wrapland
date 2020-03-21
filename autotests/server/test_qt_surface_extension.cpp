@@ -80,8 +80,10 @@ void TestQtSurfaceExtension::testCloseWindow()
     env.insert(QStringLiteral("WAYLAND_DISPLAY"), s_socketName);
     process.setProcessEnvironment(env);
     process.start(binary, QStringList());
-    QVERIFY(surfaceExtensionSpy.wait());
+
+    QVERIFY(surfaceExtensionSpy.count() == 1 || surfaceExtensionSpy.wait());
     QCOMPARE(surfaceExtensionSpy.count(), 1);
+
     auto *extension = surfaceExtensionSpy.first().first().value<QtExtendedSurfaceInterface*>();
     QVERIFY(extension);
     QSignalSpy surfaceExtensionDestroyedSpy(extension, &QObject::destroyed);

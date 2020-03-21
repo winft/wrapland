@@ -17,9 +17,10 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-
 #include "xdgforeign_interface.h"
+
 #include "xdgforeign_v2_interface_p.h"
+
 #include "display.h"
 #include "global_p.h"
 #include "resource_p.h"
@@ -28,7 +29,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland-xdg-foreign-unstable-v2-server-protocol.h"
 
 #include <QUuid>
-#include <QDebug>
 
 namespace Wrapland
 {
@@ -38,11 +38,12 @@ namespace Server
 XdgForeignInterface::Private::Private(Display *display, XdgForeignInterface *q)
     : q(q)
 {
-    exporter = new XdgExporterUnstableV2Interface(display, q);
-    importer = new XdgImporterUnstableV2Interface(display, q);
+    exporter = new XdgExporterV2Interface(display, q);
+    importer = new XdgImporterV2Interface(display, q);
+    importer->setExporter(exporter);
 
-    connect(importer, &XdgImporterUnstableV2Interface::transientChanged,
-        q, &XdgForeignInterface::transientChanged);
+    connect(importer, &XdgImporterV2Interface::parentChanged,
+            q, &XdgForeignInterface::parentChanged);
 }
 
 XdgForeignInterface::XdgForeignInterface(Display *display, QObject *parent)
@@ -69,9 +70,9 @@ bool XdgForeignInterface::isValid()
     return d->exporter->isValid() && d->importer->isValid();
 }
 
-SurfaceInterface *XdgForeignInterface::transientFor(SurfaceInterface *surface)
+SurfaceInterface *XdgForeignInterface::parentOf(SurfaceInterface *surface)
 {
-    return d->importer->transientFor(surface);
+    return d->importer->parentOf(surface);
 }
 
 }

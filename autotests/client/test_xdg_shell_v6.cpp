@@ -221,6 +221,7 @@ void XdgShellTestV6::testMultipleRoles2()
     zxdg_toplevel_v6_destroy(xdgTopLevelParent);
     zxdg_popup_v6_destroy(xdgPopup2);
     zxdg_surface_v6_destroy(xdgSurface);
+    zxdg_surface_v6_destroy(parentXdgSurface);
 }
 
 

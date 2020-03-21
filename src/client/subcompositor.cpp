@@ -53,11 +53,6 @@ void SubCompositor::release()
     d->subCompositor.release();
 }
 
-void SubCompositor::destroy()
-{
-    d->subCompositor.destroy();
-}
-
 void SubCompositor::setup(wl_subcompositor *subcompositor)
 {
     Q_ASSERT(subcompositor);

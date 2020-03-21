@@ -90,23 +90,6 @@ void ShmPool::release()
     d->offset = 0;
 }
 
-void ShmPool::destroy()
-{
-    for (auto b : d->buffers) {
-        b->d->destroy();
-    }
-    d->buffers.clear();
-    if (d->poolData) {
-        munmap(d->poolData, d->size);
-        d->poolData = nullptr;
-    }
-    d->pool.destroy();
-    d->shm.destroy();
-    d->tmpFile->close();
-    d->valid = false;
-    d->offset = 0;
-}
-
 void ShmPool::setup(wl_shm *shm)
 {
     Q_ASSERT(shm);

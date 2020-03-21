@@ -41,7 +41,6 @@ public:
     zxdg_exporter_v2 *exporterV2() override;
 
     void release() override;
-    void destroy() override;
     bool isValid() override;
 
     WaylandPointer<zxdg_exporter_v2, zxdg_exporter_v2_destroy> exporter;
@@ -59,11 +58,6 @@ zxdg_exporter_v2 *XdgExporterUnstableV2::Private::exporterV2()
 void XdgExporterUnstableV2::Private::release()
 {
     exporter.release();
-}
-
-void XdgExporterUnstableV2::Private::destroy()
-{
-    exporter.destroy();
 }
 
 bool XdgExporterUnstableV2::Private::isValid()
@@ -110,7 +104,6 @@ public:
     zxdg_importer_v2 *importerV2() override;
 
     void release() override;
-    void destroy() override;
     bool isValid() override;
 
     WaylandPointer<zxdg_importer_v2, zxdg_importer_v2_destroy> importer;
@@ -131,11 +124,6 @@ void XdgImporterUnstableV2::Private::release()
     importer.release();
 }
 
-void XdgImporterUnstableV2::Private::destroy()
-{
-    importer.destroy();
-}
-
 bool XdgImporterUnstableV2::Private::isValid()
 {
     return importer.isValid();
@@ -144,8 +132,8 @@ bool XdgImporterUnstableV2::Private::isValid()
 XdgImported *XdgImporterUnstableV2::Private::importTopLevelV2(const QString & handle, QObject *parent)
 {
     Q_ASSERT(isValid());
-    auto p = new XdgImportedUnstableV2(parent);
-    auto w = zxdg_importer_v2_import_toplevel(importer, handle.toUtf8());
+    auto *p = new XdgImportedUnstableV2(parent);
+    auto *w = zxdg_importer_v2_import_toplevel(importer, handle.toUtf8());
     if (queue) {
         queue->addProxy(w);
     }
@@ -180,7 +168,6 @@ public:
     zxdg_exported_v2 *exportedV2() override;
 
     void release() override;
-    void destroy() override;
     bool isValid() override;
 
     WaylandPointer<zxdg_exported_v2, zxdg_exported_v2_destroy> exported;
@@ -199,11 +186,6 @@ zxdg_exported_v2 *XdgExportedUnstableV2::Private::exportedV2()
 void XdgExportedUnstableV2::Private::release()
 {
     exported.release();
-}
-
-void XdgExportedUnstableV2::Private::destroy()
-{
-    exported.destroy();
 }
 
 bool XdgExportedUnstableV2::Private::isValid()
@@ -257,7 +239,6 @@ public:
 
     void setParentOf(Surface *surface) override;
     void release() override;
-    void destroy() override;
     bool isValid() override;
 
     WaylandPointer<zxdg_imported_v2, zxdg_imported_v2_destroy> imported;
@@ -281,11 +262,6 @@ zxdg_imported_v2 *XdgImportedUnstableV2::Private::importedV2()
 void XdgImportedUnstableV2::Private::release()
 {
     imported.release();
-}
-
-void XdgImportedUnstableV2::Private::destroy()
-{
-    imported.destroy();
 }
 
 bool XdgImportedUnstableV2::Private::isValid()

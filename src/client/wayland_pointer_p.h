@@ -55,16 +55,6 @@ public:
         m_pointer = nullptr;
     }
 
-    void destroy() {
-        if (!m_pointer) {
-            return;
-        }
-        if (!m_foreign) {
-            free(m_pointer);
-        }
-        m_pointer = nullptr;
-    }
-
     bool isValid() const {
         return m_pointer != nullptr;
     }

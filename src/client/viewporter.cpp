@@ -57,11 +57,6 @@ void Viewporter::release()
     d->manager.release();
 }
 
-void Viewporter::destroy()
-{
-    d->manager.destroy();
-}
-
 bool Viewporter::isValid() const
 {
     return d->manager.isValid();
@@ -133,11 +128,6 @@ void Viewport::setup(wp_viewport *viewport)
     Q_ASSERT(viewport);
     Q_ASSERT(!d->viewport);
     d->viewport.setup(viewport);
-}
-
-void Viewport::destroy()
-{
-    d->viewport.destroy();
 }
 
 bool Viewport::isValid() const

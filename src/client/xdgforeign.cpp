@@ -60,11 +60,6 @@ void XdgExporter::release()
     d->release();
 }
 
-void XdgExporter::destroy()
-{
-    d->destroy();
-}
-
 XdgExporter::operator zxdg_exporter_v2*() {
     return d->exporterV2();
 }
@@ -122,11 +117,6 @@ void XdgImporter::setup(zxdg_importer_v2 *importer)
 void XdgImporter::release()
 {
     d->release();
-}
-
-void XdgImporter::destroy()
-{
-    d->destroy();
 }
 
 XdgImporter::operator zxdg_importer_v2*() {
@@ -188,11 +178,6 @@ void XdgExported::release()
     d->release();
 }
 
-void XdgExported::destroy()
-{
-    d->destroy();
-}
-
 QString XdgExported::handle() const
 {
     return d->handle;
@@ -239,11 +224,6 @@ void XdgImported::setup(zxdg_imported_v2 *imported)
 void XdgImported::release()
 {
     d->release();
-}
-
-void XdgImported::destroy()
-{
-    d->destroy();
 }
 
 XdgImported::operator zxdg_imported_v2*() {

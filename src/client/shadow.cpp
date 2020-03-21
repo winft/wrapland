@@ -57,11 +57,6 @@ void ShadowManager::release()
     d->manager.release();
 }
 
-void ShadowManager::destroy()
-{
-    d->manager.destroy();
-}
-
 bool ShadowManager::isValid() const
 {
     return d->manager.isValid();
@@ -139,11 +134,6 @@ void Shadow::setup(org_kde_kwin_shadow *shadow)
     Q_ASSERT(shadow);
     Q_ASSERT(!d->shadow);
     d->shadow.setup(shadow);
-}
-
-void Shadow::destroy()
-{
-    d->shadow.destroy();
 }
 
 bool Shadow::isValid() const

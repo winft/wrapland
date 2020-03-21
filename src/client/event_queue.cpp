@@ -34,6 +34,7 @@ public:
     Private(EventQueue *q);
 
     wl_display *display = nullptr;
+    ConnectionThread *connection = nullptr;
     WaylandPointer<wl_event_queue, wl_event_queue_destroy> queue;
 
 private:
@@ -58,13 +59,11 @@ EventQueue::~EventQueue()
 
 void EventQueue::release()
 {
+    if (d->connection) {
+        disconnect(d->connection, &ConnectionThread::eventsRead, this, &EventQueue::dispatch);
+        d->connection = nullptr;
+    }
     d->queue.release();
-    d->display = nullptr;
-}
-
-void EventQueue::destroy()
-{
-    d->queue.destroy();
     d->display = nullptr;
 }
 
@@ -84,6 +83,7 @@ void EventQueue::setup(wl_display *display)
 
 void EventQueue::setup(ConnectionThread *connection)
 {
+    d->connection = connection;
     setup(connection->display());
     connect(connection, &ConnectionThread::eventsRead, this, &EventQueue::dispatch, Qt::QueuedConnection);
 }

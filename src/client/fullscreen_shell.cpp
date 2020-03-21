@@ -102,11 +102,6 @@ void FullscreenShell::release()
     d->shell.release();
 }
 
-void FullscreenShell::destroy()
-{
-    d->shell.destroy();
-}
-
 void FullscreenShell::setup(_wl_fullscreen_shell *shell)
 {
     d->setup(shell);

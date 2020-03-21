@@ -93,7 +93,7 @@ void OutputManagementV1Interface::Private::createConfiguration(wl_client* client
     }
 
     configurationInterfaces[resource] = config;
-    connect(config, &QObject::destroyed, [this, resource] {
+    connect(config, &QObject::destroyed, q, [this, resource] {
         configurationInterfaces.remove(resource);
     });
 }

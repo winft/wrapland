@@ -84,15 +84,15 @@ void TestDataDevice::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    QSignalSpy establishedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
-    QVERIFY(connectedSpy.wait());
+    m_connection->establishConnection();
+    QVERIFY(establishedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
@@ -162,13 +162,12 @@ void TestDataDevice::cleanup()
         delete m_queue;
         m_queue = nullptr;
     }
-    if (m_thread) {
-        m_thread->quit();
-        m_thread->wait();
-        delete m_thread;
-        m_thread = nullptr;
-    }
-    delete m_connection;
+    m_connection->deleteLater();
+    m_thread->quit();
+    m_thread->wait();
+    delete m_thread;
+
+    m_thread = nullptr;
     m_connection = nullptr;
 
     delete m_display;
@@ -262,6 +261,8 @@ void TestDataDevice::testDrag()
     // now we have all we need to start a drag operation
     QSignalSpy dragStartedSpy(deviceInterface, SIGNAL(dragStarted()));
     QVERIFY(dragStartedSpy.isValid());
+    QSignalSpy dragEnteredSpy(dataDevice.data(), &DataDevice::dragEntered);
+    QVERIFY(dragEnteredSpy.isValid());
 
     // first we need to fake the pointer enter
     QFETCH(bool, hasGrab);
@@ -290,6 +291,14 @@ void TestDataDevice::testDrag()
     QCOMPARE(deviceInterface->dragSource(), success ? sourceInterface : nullptr);
     QCOMPARE(deviceInterface->origin(), success ? surfaceInterface : nullptr);
     QVERIFY(!deviceInterface->icon());
+
+    if (success) {
+        // Wait for the drag-enter on itself, otherwise we leak the data offer.
+        // There also seem to be no way to eliminate this issue. If the client closes the connection
+        // at the moment a drag enters (and afterwards a data offer is sent) the memory is lost.
+        // Must this be solved in libwayland?
+        QVERIFY(dragEnteredSpy.count() || dragEnteredSpy.wait());
+    }
 }
 
 void TestDataDevice::testDragInternally_data()
@@ -558,13 +567,17 @@ void TestDataDevice::testReplaceSource()
     // create a second data source and replace previous one
     QScopedPointer<DataSource> dataSource2(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource2->isValid());
+
     dataSource2->offer(QStringLiteral("text/plain"));
+
     QSignalSpy sourceCancelled2Spy(dataSource2.data(), &DataSource::cancelled);
     QVERIFY(sourceCancelled2Spy.isValid());
+
     dataDevice->setSelection(1, dataSource2.data());
     QCOMPARE(selectionOfferedSpy.count(), 1);
+
     QVERIFY(sourceCancelledSpy.wait());
-    QCOMPARE(selectionOfferedSpy.count(), 2);
+    QTRY_COMPARE(selectionOfferedSpy.count(), 2);
     QVERIFY(sourceCancelled2Spy.isEmpty());
 
     // replace the data source with itself, ensure that it did not get cancelled
@@ -598,23 +611,21 @@ void TestDataDevice::testDestroy()
     QScopedPointer<DataDevice> dataDevice(m_dataDeviceManager->getDataDevice(m_seat));
     QVERIFY(dataDevice->isValid());
 
-    connect(m_connection, &ConnectionThread::connectionDied, m_dataDeviceManager, &DataDeviceManager::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_seat, &Seat::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_compositor, &Compositor::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, dataDevice.data(), &DataDevice::destroy);
-    connect(m_connection, &ConnectionThread::connectionDied, m_queue, &EventQueue::destroy);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_dataDeviceManager, &DataDeviceManager::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_seat, &Seat::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_compositor, &Compositor::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, dataDevice.data(), &DataDevice::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
 
-    QSignalSpy connectionDiedSpy(m_connection, SIGNAL(connectionDied()));
-    QVERIFY(connectionDiedSpy.isValid());
     delete m_display;
     m_display = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_VERIFY(!m_connection->established());
 
-    // now the data device should be destroyed;
-    QVERIFY(!dataDevice->isValid());
+    // Now the data device should be destroyed.
+    QTRY_VERIFY(!dataDevice->isValid());
 
-    // calling destroy again should not fail
-    dataDevice->destroy();
+    // Calling destroy again should not fail.
+    dataDevice->release();
 }
 
 QTEST_GUILESS_MAIN(TestDataDevice)

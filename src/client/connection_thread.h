@@ -1,5 +1,6 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -71,19 +72,23 @@ namespace Client
  * thread->start();
  * @endcode
  *
- * To finalize the initialization of the connection one needs to call @link ::initConnection @endlink.
+ * To finalize the initialization of the connection one needs to call
+ * @link ::establishConnection @endlink.
+ *
  * This starts an asynchronous connection initialization. In case the initialization
- * succeeds the signal @link ::connected @endlink will be emitted, otherwise @link ::failed @endlink will
- * be emitted:
+ * succeeds the signal @link ::connected @endlink will be emitted, otherwise @link ::failed @endlink
+ * will be emitted:
  *
  * @code
- * connect(connection, &ConnectionThread::connected, [connection] {
- *     qDebug() << "Successfully connected to Wayland server at socket:" << connection->socketName();
+ * connect(connection, &ConnectionThread::established, [connection] {
+ *     qDebug() << "Successfully established Connection to Wayland server at socket:"
+ *              << connection->socketName();
  * });
  * connect(connection, &ConnectionThread::failed, [connection] {
- *     qDebug() << "Failed to connect to Wayland server at socket:" << connection->socketName();
+ *     qDebug() << "Failed to establish Connection to Wayland server at socket:"
+ *              << connection->socketName();
  * });
- * connection->initConnection();
+ * connection->establishConnection();
  * @endcode
  *
  * This class is also responsible for dispatching events. Whenever new data is available on
@@ -131,12 +136,12 @@ public:
      * @c nullptr.
      *
      * The returned ConnectionThread will be fully setup, which means it manages a wl_display.
-     * There is no need to initConnection and the connected or failed signals won't be emitted.
+     * There is no need to establishConnection and the connected or failed signals won't be emitted.
      * When the created ConnectionThread gets destroyed the managed wl_display won't be disconnected
      * as that's managed by Qt.
      *
      * The returned ConnectionThread is not able to detect (protocol) error. The signal
-     * {@link errorOccurred} won't be emitted, {@link hasError} will return @c false, even if the
+     * {@link errorOccurred} won't be emitted, {@link error} will return @c false, even if the
      * actual connection held by QtWayland is on error. The behavior of QtWayland is to exit the
      * application on error.
      *
@@ -147,7 +152,7 @@ public:
     /**
      * The display this ConnectionThread is connected to.
      * As long as there is no connection this method returns @c null.
-     * @see initConnection
+     * @see establishConnection
      **/
     wl_display *display();
     /**
@@ -156,7 +161,7 @@ public:
     QString socketName() const;
     /**
      * Sets the @p socketName to connect to.
-     * Only applies if called before calling initConnection.
+     * Only applies if called before calling establishConnection.
      * The default socket name is derived from environment variable WAYLAND_DISPLAY
      * and if not set is hard coded to "wayland-0".
      *
@@ -167,7 +172,7 @@ public:
     void setSocketName(const QString &socketName);
     /**
      * Sets the socket @p fd to connect to.
-     * Only applies if called before calling initConnection.
+     * Only applies if called before calling establishConnection.
      * If this method is invoked, the connection will be created on the file descriptor
      * and not on the socket name passed through @link setSocketName @endlink or through the
      * default environment variable WAYLAND_DISPLAY.
@@ -184,20 +189,56 @@ public:
     void roundtrip();
 
     /**
-     * @returns whether the Wayland connection experienced an error
-     * @see errorCode
-     * @see errorOccurred
-     * @since 5.23
-     **/
-    bool hasError() const;
+     * A connection thread can be in the state of having a connection to a server established or
+     * having not a connection established, either because no connection has yet been
+     * initialized or the connection went away again. In the last case it is recommended to check
+     * @ref protocolError afterwards to see if there was a client-side reason for losing the
+     * established connection.
+     *
+     * @return true if the connection to a server is established
+     * @see establishedChanged
+     * @see establishConnection
+     * @see protocolError
+     */
+    bool established() const;
 
     /**
-     * @returns the error code of the last occurred error or @c 0 if the connection doesn't have an error
-     * @see hasError
-     * @see errorOccurred
-     * @since 5.23
-     **/
-    int errorCode() const;
+     * Getter for the error code of the last connection that was established or @c 0 if
+     * never a connection was established or no last error is known.
+     *
+     * Mainly useful after an established connection went down for debugging.
+     *
+     * @returns the error code of the last occurred error if any
+     * @see protocolError
+     * @since 5.18
+     */
+    int error() const;
+
+    /**
+     * Informs if there was a protocol error.
+     *
+     * Mainly useful after an established connection went down for debugging.
+     *
+     * @returns true if there was a protocol error
+     * @see error
+     * @see protocolError
+     * @since 5.18
+     */
+    bool hasProtocolError() const;
+
+    /**
+     * Getter for the protocol error code of the last connection that was established or @c 0 if
+     * never a connection was established or the last established connection is still established
+     * or was closed without a protocol error.
+     *
+     * Mainly useful after an established connection went down for debugging.
+     *
+     * @returns the error code of the last occurred protocol error if any
+     * @see establishedChanged
+     * @see hasProtocolError
+     * @since 5.18
+     */
+    int protocolError() const;
 
     /**
      * @returns all connections created in this application
@@ -205,16 +246,16 @@ public:
      **/
     static QVector<ConnectionThread*> connections();
 
-public Q_SLOTS:
     /**
      * Initializes the connection in an asynchronous way.
      * In case the connection gets established the signal @link ::connected @endlink will be
      * emitted, on failure the signal @link ::failed @endlink will be emitted.
      *
-     * @see connected
+     * @see established
+     * @see establishedChanged
      * @see failed
      **/
-    void initConnection();
+    void establishConnection();
 
     /**
      * Explicitly flush the Wayland display.
@@ -225,50 +266,43 @@ public Q_SLOTS:
 Q_SIGNALS:
     /**
      * Emitted once a connection to a Wayland server is established.
-     * Normally emitted after invoking initConnection(), but might also be
+     * Normally emitted after invoking establishConnection(), but might also be
      * emitted after re-connecting to another server.
-     **/
-    void connected();
+     * @see established
+     * @see failed
+     */
+    void establishedChanged(bool);
+
     /**
-     * Emitted if connecting to a Wayland server failed.
-     **/
+     * Emitted when it was tried to establish a connection to a Wayland server but this failed.
+     * @see establishedChanged
+     * @see establishConnection
+     */
     void failed();
+
     /**
      * Emitted whenever new events are ready to be read.
      **/
     void eventsRead();
-    /**
-     * Emitted if the Wayland server connection dies.
-     * If the socket reappears, it is tried to reconnect.
-     **/
-    void connectionDied();
-    /**
-     * The Wayland connection experienced a fatal error.
-     * The ConnectionThread is no longer valid, no requests may be sent.
-     * This has the same effects as {@link connectionDied}.
-     *
-     * @see hasError
-     * @see errorCode
-     * @since 5.23
-     **/
-    void errorOccurred();
+
 protected:
-    /*
+    /**
      * Creates a connection thread from an existing wl_display object
      * @see ConnectionThread::fromApplication
      */
     explicit ConnectionThread(wl_display *display, QObject *parent);
 
-private Q_SLOTS:
+private:
     /**
      * @internal
      **/
-    void doInitConnection();
+    Q_INVOKABLE void doEstablishConnection();
 
 private:
     class Private;
     QScopedPointer<Private> d;
 };
+
 }
 }
 

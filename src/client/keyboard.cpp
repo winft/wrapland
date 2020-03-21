@@ -94,11 +94,6 @@ void Keyboard::release()
     d->keyboard.release();
 }
 
-void Keyboard::destroy()
-{
-    d->keyboard.destroy();
-}
-
 void Keyboard::setup(wl_keyboard *keyboard)
 {
     d->setup(keyboard);

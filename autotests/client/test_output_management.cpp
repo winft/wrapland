@@ -154,14 +154,14 @@ void TestOutputManagement::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::connected);
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
@@ -199,10 +199,16 @@ void TestOutputManagement::cleanup()
         delete m_outputConfiguration;
         m_outputConfiguration = nullptr;
     }
+    delete m_outputDevice;
+    m_clientOutputs.clear();
     if (m_outputManagement) {
         delete m_outputManagement;
         m_outputManagement = nullptr;
     }
+
+    delete m_announcedSpy;
+    delete m_omSpy;
+
     if (m_registry) {
         delete m_registry;
         m_registry = nullptr;
@@ -229,7 +235,6 @@ void TestOutputManagement::cleanup()
     delete m_display;
     m_display = nullptr;
     m_serverOutputs.clear();
-    m_clientOutputs.clear();
 }
 
 void TestOutputManagement::applyPendingChanges(Wrapland::Server::OutputConfigurationV1Interface *configurationInterface)

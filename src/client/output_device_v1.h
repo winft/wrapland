@@ -217,16 +217,11 @@ public:
     QByteArray uuid() const;
 
     /**
-    * Destroys the data hold by this OutputDeviceV1.
-    * This method is supposed to be used when the connection to the Wayland
-    * server goes away. If the connection is not valid any more, it's not
-    * possible to call release any more as that calls into the Wayland
-    * connection and the call would fail.
-    *
-    * This method is automatically invoked when the Registry which created this
-    * Output gets destroyed.
-    **/
-    void destroy();
+     * Releases the zkwinft_output_device_v1 interface.
+     * After the interface has been released the OutputDeviceV1 instance is no
+     * longer valid and can be setup with another zkwinft_output_device_v1 interface.
+     **/
+    void release();
 
 Q_SIGNALS:
     /**

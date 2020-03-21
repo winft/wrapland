@@ -71,7 +71,7 @@ public:
 
     bool isValid() const;
     void release();
-    void destroy();
+
     bool hasCapabilityArbitraryModes() const;
     bool hasCapabilityCursorPlane() const;
     void setup(_wl_fullscreen_shell *shell);

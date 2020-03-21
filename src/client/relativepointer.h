@@ -89,23 +89,6 @@ public:
      * longer valid and can be setup with another zwp_relative_pointer_manager_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this RelativePointerManagerUnstableV1.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zwp_relative_pointer_manager_v1 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, relativepointermanagerunstablev1, &RelativePointerManagerUnstableV1::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating objects with this RelativePointerManagerUnstableV1.
@@ -169,21 +152,6 @@ public:
      * longer valid and can be setup with another zwp_relative_pointer_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this RelativePointerUnstableV1.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zwp_relative_pointer_v1 interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * RelativePointer gets destroyed.
-     *
-     * @see release
-     **/
-    void destroy();
 
     operator zwp_relative_pointer_v1*();
     operator zwp_relative_pointer_v1*() const;

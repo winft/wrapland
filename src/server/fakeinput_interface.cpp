@@ -36,6 +36,8 @@ class FakeInputInterface::Private : public Global::Private
 {
 public:
     Private(FakeInputInterface *q, Display *d);
+    ~Private() override;
+
     QList<FakeInputDevice*> devices;
 
 private:
@@ -95,10 +97,26 @@ const struct org_kde_kwin_fake_input_interface FakeInputInterface::Private::s_in
 };
 #endif
 
+// TODO: This is currently a hack such that we don't segfault when the interface has been destroyed
+//       by the compositor before shutdown and some clients still need to unbind from it.
+static bool isDestroyed = false;
+
 FakeInputInterface::Private::Private(FakeInputInterface *q, Display *d)
     : Global::Private(d, &org_kde_kwin_fake_input_interface, s_version)
     , q(q)
 {
+    isDestroyed = false;
+}
+
+FakeInputInterface::Private::~Private()
+{
+    for (auto *device : devices) {
+        wl_resource_set_destructor(device->resource(), nullptr);
+        wl_resource_set_user_data(device->resource(), nullptr);
+        delete device;
+    }
+    devices.clear();
+    isDestroyed = true;
 }
 
 void FakeInputInterface::Private::bind(wl_client *client, uint32_t version, uint32_t id)
@@ -118,7 +136,11 @@ void FakeInputInterface::Private::bind(wl_client *client, uint32_t version, uint
 
 void FakeInputInterface::Private::unbind(wl_resource *resource)
 {
+    if (isDestroyed) {
+        return;
+    }
     if (FakeInputDevice *d = device(resource)) {
+        cast(resource)->devices.removeAll(d);
         d->deleteLater();
     }
 }

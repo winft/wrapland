@@ -52,11 +52,6 @@ void Idle::release()
     d->manager.release();
 }
 
-void Idle::destroy()
-{
-    d->manager.destroy();
-}
-
 bool Idle::isValid() const
 {
     return d->manager.isValid();
@@ -157,11 +152,6 @@ IdleTimeout::IdleTimeout(QObject *parent)
 IdleTimeout::~IdleTimeout()
 {
     release();
-}
-
-void IdleTimeout::destroy()
-{
-    d->timeout.destroy();
 }
 
 void IdleTimeout::release()

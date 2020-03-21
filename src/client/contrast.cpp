@@ -57,11 +57,6 @@ void ContrastManager::release()
     d->manager.release();
 }
 
-void ContrastManager::destroy()
-{
-    d->manager.destroy();
-}
-
 bool ContrastManager::isValid() const
 {
     return d->manager.isValid();
@@ -139,11 +134,6 @@ void Contrast::setup(org_kde_kwin_contrast *contrast)
     Q_ASSERT(contrast);
     Q_ASSERT(!d->contrast);
     d->contrast.setup(contrast);
-}
-
-void Contrast::destroy()
-{
-    d->contrast.destroy();
 }
 
 bool Contrast::isValid() const

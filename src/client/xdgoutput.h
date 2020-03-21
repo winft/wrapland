@@ -95,23 +95,6 @@ public:
      * longer valid and can be setup with another zxdg_output_manager_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this XdgOutputManager.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zxdg_output_manager_v1 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, xdgoutputmanager, &XdgOutputManager::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating objects with this XdgOutputManager.
@@ -177,23 +160,6 @@ public:
      * longer valid and can be setup with another zxdg_output_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this XdgOutput.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zxdg_output_v1 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, xdgoutput, &XdgOutput::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     operator zxdg_output_v1*();
     operator zxdg_output_v1*() const;

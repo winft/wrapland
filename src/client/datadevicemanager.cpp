@@ -54,11 +54,6 @@ void DataDeviceManager::release()
     d->manager.release();
 }
 
-void DataDeviceManager::destroy()
-{
-    d->manager.destroy();
-}
-
 bool DataDeviceManager::isValid() const
 {
     return d->manager.isValid();

@@ -86,11 +86,6 @@ void OutputConfigurationV1::release()
     d->outputConfiguration.release();
 }
 
-void OutputConfigurationV1::destroy()
-{
-    d->outputConfiguration.destroy();
-}
-
 void OutputConfigurationV1::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;
