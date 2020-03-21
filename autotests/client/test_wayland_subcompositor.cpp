@@ -151,6 +151,7 @@ void TestSubCompositor::testCast()
 {
     using namespace Wrapland::Client;
     Registry registry;
+    registry.setEventQueue(m_queue);
     QSignalSpy subCompositorSpy(&registry, SIGNAL(subCompositorAnnounced(quint32,quint32)));
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
