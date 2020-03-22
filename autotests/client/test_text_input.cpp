@@ -112,7 +112,7 @@ void TextInputTest::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -120,7 +120,7 @@ void TextInputTest::init()
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new EventQueue(this);
@@ -321,7 +321,7 @@ void TextInputTest::testEnterLeave()
     QSignalSpy unboundSpy(serverSurface, &QObject::destroyed);
     surface.reset();
     QVERIFY(unboundSpy.wait());
-    QVERIFY(leftSpy.wait());
+    QVERIFY(leftSpy.count() == 2 || leftSpy.wait());
     QVERIFY(!textInput->enteredSurface());
 }
 

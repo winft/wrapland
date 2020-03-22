@@ -70,11 +70,6 @@ void ServerSideDecorationPaletteManager::release()
     d->serverdecomanager.release();
 }
 
-void ServerSideDecorationPaletteManager::destroy()
-{
-    d->serverdecomanager.destroy();
-}
-
 ServerSideDecorationPaletteManager::operator org_kde_kwin_server_decoration_palette_manager*() {
     return d->serverdecomanager;
 }
@@ -155,11 +150,6 @@ void ServerSideDecorationPalette::setup(org_kde_kwin_server_decoration_palette *
 void ServerSideDecorationPalette::release()
 {
     d->decoration_palette.release();
-}
-
-void ServerSideDecorationPalette::destroy()
-{
-    d->decoration_palette.destroy();
 }
 
 ServerSideDecorationPalette::operator org_kde_kwin_server_decoration_palette*() {

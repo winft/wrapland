@@ -136,17 +136,28 @@ void ServerSideDecorationManagerInterface::Private::bind(wl_client *client, uint
     c->flush();
 }
 
+// TODO: This is currently a hack such that we don't segfault when the interface has been destroyed
+//       by the compositor before shutdown and some clients still need to unbind from it.
+static bool isDestroyed = false;
+
 void ServerSideDecorationManagerInterface::Private::unbind(wl_resource *resource)
 {
+    if (isDestroyed) {
+        return;
+    }
     cast(resource)->resources.removeAll(resource);
 }
 
 ServerSideDecorationManagerInterface::ServerSideDecorationManagerInterface(Display *display, QObject *parent)
     : Global(new Private(this, display), parent)
 {
+    isDestroyed = false;
 }
 
-ServerSideDecorationManagerInterface::~ServerSideDecorationManagerInterface() = default;
+ServerSideDecorationManagerInterface::~ServerSideDecorationManagerInterface()
+{
+    isDestroyed = true;
+}
 
 ServerSideDecorationManagerInterface::Private *ServerSideDecorationManagerInterface::d_func() const
 {

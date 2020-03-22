@@ -112,11 +112,6 @@ void Pointer::release()
     d->pointer.release();
 }
 
-void Pointer::destroy()
-{
-    d->pointer.destroy();
-}
-
 void Pointer::setup(wl_pointer *pointer)
 {
     d->setup(pointer);

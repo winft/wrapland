@@ -81,11 +81,6 @@ void Compositor::release()
     d->compositor.release();
 }
 
-void Compositor::destroy()
-{
-    d->compositor.destroy();
-}
-
 void Compositor::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;

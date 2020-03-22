@@ -96,11 +96,6 @@ void RemoteAccessManager::release()
     d->ram.release();
 }
 
-void RemoteAccessManager::destroy()
-{
-    d->ram.destroy();
-}
-
 void RemoteAccessManager::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;
@@ -196,11 +191,6 @@ void RemoteBuffer::setup(org_kde_kwin_remote_buffer *remotebuffer)
 void RemoteBuffer::release()
 {
     d->remotebuffer.release();
-}
-
-void RemoteBuffer::destroy()
-{
-    d->remotebuffer.destroy();
 }
 
 RemoteBuffer::operator org_kde_kwin_remote_buffer*() {

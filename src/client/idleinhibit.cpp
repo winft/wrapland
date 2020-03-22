@@ -68,11 +68,6 @@ void IdleInhibitManager::release()
     d->idleinhibitmanager.release();
 }
 
-void IdleInhibitManager::destroy()
-{
-    d->idleinhibitmanager.destroy();
-}
-
 IdleInhibitManager::operator zwp_idle_inhibit_manager_v1*() {
     return d->idleinhibitmanager;
 }
@@ -152,11 +147,6 @@ void IdleInhibitor::setup(zwp_idle_inhibitor_v1 *idleinhibitor)
 void IdleInhibitor::release()
 {
     d->idleinhibitor.release();
-}
-
-void IdleInhibitor::destroy()
-{
-    d->idleinhibitor.destroy();
 }
 
 IdleInhibitor::operator zwp_idle_inhibitor_v1*() {

@@ -32,8 +32,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QRect>
 #include <QHash>
 
-#include <wayland-server.h>
 #include <wayland-plasma-window-management-server-protocol.h>
+
+#include <signal.h>
+#include <wayland-server.h>
 
 namespace Wrapland
 {
@@ -199,12 +201,26 @@ void PlasmaWindowManagementInterface::Private::getWindowCallback(wl_client *clie
     (*it)->d->createResource(resource, id);
 }
 
+// TODO: This is currently a hack such that we don't segfault when the interface has been destroyed
+//       by the compositor before shutdown and some clients still need to unbind from it.
+static bool isDestroyed = false;
+
 PlasmaWindowManagementInterface::PlasmaWindowManagementInterface(Display *display, QObject *parent)
     : Global(new Private(this, display), parent)
 {
+    // Needed because the icon is sent via a pipe and when it closes while being written to would
+    // kill off the compositor.
+    // TODO: Replace the pipe with a Unix domain socket and set on it to ignore the SIGPIPE signal.
+    //       See issue #7.
+    signal(SIGPIPE, SIG_IGN);
+
+    isDestroyed = false;
 }
 
-PlasmaWindowManagementInterface::~PlasmaWindowManagementInterface() = default;
+PlasmaWindowManagementInterface::~PlasmaWindowManagementInterface()
+{
+    isDestroyed = true;
+}
 
 void PlasmaWindowManagementInterface::Private::bind(wl_client *client, uint32_t version, uint32_t id)
 {
@@ -223,6 +239,9 @@ void PlasmaWindowManagementInterface::Private::bind(wl_client *client, uint32_t 
 
 void PlasmaWindowManagementInterface::Private::unbind(wl_resource *resource)
 {
+    if (isDestroyed) {
+        return;
+    }
     auto wm = reinterpret_cast<Private*>(wl_resource_get_user_data(resource));
     wm->resources.removeAll(resource);
 }

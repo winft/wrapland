@@ -225,6 +225,7 @@ void XdgShellTestStable::testMultipleRoles2()
     xdg_toplevel_destroy(xdgTopLevelParent);
     xdg_popup_destroy(xdgPopup2);
     xdg_surface_destroy(xdgSurface);
+    xdg_surface_destroy(parentXdgSurface);
 }
 
 void XdgShellTestStable::testWindowGeometry()

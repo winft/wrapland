@@ -53,11 +53,6 @@ void DpmsManager::release()
     d->manager.release();
 }
 
-void DpmsManager::destroy()
-{
-    d->manager.destroy();
-}
-
 bool DpmsManager::isValid() const
 {
     return d->manager.isValid();
@@ -212,11 +207,6 @@ Dpms::Dpms(const QPointer<Output> &o, QObject *parent)
 Dpms::~Dpms()
 {
     release();
-}
-
-void Dpms::destroy()
-{
-    d->dpms.destroy();
 }
 
 void Dpms::release()

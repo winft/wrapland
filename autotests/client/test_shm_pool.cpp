@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // KWin
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
+#include "../../src/client/event_queue.h"
 #include "../../src/client/surface.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/shm_pool.h"
@@ -55,6 +56,7 @@ private:
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
     Wrapland::Client::ShmPool *m_shmPool;
+    Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
@@ -74,7 +76,7 @@ TestShmPool::TestShmPool(QObject *parent)
 void TestShmPool::init()
 {
     using namespace Wrapland::Server;
-    delete m_display;
+
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
@@ -82,17 +84,22 @@ void TestShmPool::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, SIGNAL(connected()));
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
+    m_queue = new Wrapland::Client::EventQueue(this);
+    m_queue->setup(m_connection);
+
     Wrapland::Client::Registry registry;
+    registry.setEventQueue(m_queue);
+
     QSignalSpy shmSpy(&registry, SIGNAL(shmAnnounced(quint32,quint32)));
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
@@ -115,6 +122,7 @@ void TestShmPool::cleanup()
         delete m_shmPool;
         m_shmPool = nullptr;
     }
+    delete m_queue;
     if (m_thread) {
         m_thread->quit();
         m_thread->wait();
@@ -225,23 +233,21 @@ void TestShmPool::testReuseBuffer()
 void TestShmPool::testDestroy()
 {
     using namespace Wrapland::Client;
-    connect(m_connection, &ConnectionThread::connectionDied, m_shmPool, &ShmPool::destroy);
+    connect(m_connection, &ConnectionThread::establishedChanged, m_shmPool, &ShmPool::release);
     QVERIFY(m_shmPool->isValid());
 
     // let's create one Buffer
     m_shmPool->getBuffer(QSize(10, 10), 8);
 
-    QSignalSpy connectionDiedSpy(m_connection, SIGNAL(connectionDied()));
-    QVERIFY(connectionDiedSpy.isValid());
     delete m_display;
     m_display = nullptr;
-    QVERIFY(connectionDiedSpy.wait());
+    QTRY_VERIFY(!m_connection->established());
 
-    // now the pool should be destroyed;
-    QVERIFY(!m_shmPool->isValid());
+    // Now the pool should be destroyed.
+    QTRY_VERIFY(!m_shmPool->isValid());
 
-    // calling destroy again should not fail
-    m_shmPool->destroy();
+    // Calling release again should not fail.
+    m_shmPool->release();
 }
 
 QTEST_GUILESS_MAIN(TestShmPool)

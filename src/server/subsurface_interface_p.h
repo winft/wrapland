@@ -41,6 +41,7 @@ public:
     using Resource::Private::create;
     void create(ClientConnection *client, quint32 version, quint32 id, SurfaceInterface *surface, SurfaceInterface *parent);
     void commit();
+    void remove();
 
     QPoint pos = QPoint(0, 0);
     QPoint scheduledPos = QPoint();

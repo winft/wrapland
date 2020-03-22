@@ -257,15 +257,6 @@ PlasmaWindowManagement::~PlasmaWindowManagement()
     release();
 }
 
-void PlasmaWindowManagement::destroy()
-{
-    if (!d->wm) {
-        return;
-    }
-    emit interfaceAboutToBeDestroyed();
-    d->wm.destroy();
-}
-
 void PlasmaWindowManagement::release()
 {
     if (!d->wm) {
@@ -775,11 +766,6 @@ PlasmaWindow::PlasmaWindow(PlasmaWindowManagement *parent, org_kde_plasma_window
 PlasmaWindow::~PlasmaWindow()
 {
     release();
-}
-
-void PlasmaWindow::destroy()
-{
-    d->window.destroy();
 }
 
 void PlasmaWindow::release()

@@ -433,12 +433,6 @@ void TextInputUnstableV2::release()
     d->textinputunstablev2.release();
 }
 
-void TextInputUnstableV2::destroy()
-{
-    Q_D();
-    d->textinputunstablev2.destroy();
-}
-
 TextInputUnstableV2::operator zwp_text_input_v2*()
 {
     Q_D();
@@ -457,7 +451,6 @@ public:
     Private() = default;
 
     void release() override;
-    void destroy() override;
     bool isValid() override;
     void setupV2(zwp_text_input_manager_v2 *ti) override;
     TextInput *createTextInput(Seat *seat, QObject *parent = nullptr) override;
@@ -475,11 +468,6 @@ public:
 void TextInputManagerUnstableV2::Private::release()
 {
     textinputmanagerunstablev2.release();
-}
-
-void TextInputManagerUnstableV2::Private::destroy()
-{
-    textinputmanagerunstablev2.destroy();
 }
 
 bool TextInputManagerUnstableV2::Private::isValid()

@@ -40,16 +40,18 @@ class Q_DECL_HIDDEN Surface::Private
 {
 public:
     Private(Surface *q);
+
+    void setup(wl_surface *s);
     void setupFrameCallback();
 
     WaylandPointer<wl_surface, wl_surface_destroy> surface;
-    bool frameCallbackInstalled = false;
+
     QSize size;
     bool foreign = false;
     qint32 scale = 1;
-    QVector<Output *> outputs;
 
-    void setup(wl_surface *s);
+    wl_callback *pendingFrameCallback = nullptr;
+    QVector<Output *> outputs;
 
     static QList<Surface*> s_surfaces;
 private:
@@ -124,12 +126,11 @@ Surface *Surface::fromQtWinId(WId wid)
 
 void Surface::release()
 {
+    if (d->pendingFrameCallback) {
+        wl_callback_destroy(d->pendingFrameCallback);
+        d->pendingFrameCallback = nullptr;
+    }
     d->surface.release();
-}
-
-void Surface::destroy()
-{
-    d->surface.destroy();
 }
 
 void Surface::setup(wl_surface *surface)
@@ -157,7 +158,7 @@ void Surface::Private::frameCallback(void *data, wl_callback *callback, uint32_t
 
 void Surface::Private::handleFrameCallback()
 {
-    frameCallbackInstalled = false;
+    pendingFrameCallback = nullptr;
     emit q->frameRendered();
 }
 
@@ -205,10 +206,9 @@ void Surface::Private::leaveCallback(void *data, wl_surface *surface, wl_output 
 
 void Surface::Private::setupFrameCallback()
 {
-    Q_ASSERT(!frameCallbackInstalled);
-    wl_callback *callback = wl_surface_frame(surface);
-    wl_callback_add_listener(callback, &s_listener, this);
-    frameCallbackInstalled = true;
+    Q_ASSERT(!pendingFrameCallback);
+    pendingFrameCallback = wl_surface_frame(surface);
+    wl_callback_add_listener(pendingFrameCallback, &s_listener, this);
 }
 
 void Surface::setupFrameCallback()

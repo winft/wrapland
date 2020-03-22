@@ -73,15 +73,6 @@ PlasmaShell::~PlasmaShell()
     release();
 }
 
-void PlasmaShell::destroy()
-{
-    if (!d->shell) {
-        return;
-    }
-    emit interfaceAboutToBeDestroyed();
-    d->shell.destroy();
-}
-
 void PlasmaShell::release()
 {
     if (!d->shell) {
@@ -119,7 +110,6 @@ PlasmaShellSurface *PlasmaShell::createSurface(wl_surface *surface, QObject *par
     }
     PlasmaShellSurface *s = new PlasmaShellSurface(parent);
     connect(this, &PlasmaShell::interfaceAboutToBeReleased, s, &PlasmaShellSurface::release);
-    connect(this, &PlasmaShell::interfaceAboutToBeDestroyed, s, &PlasmaShellSurface::destroy);
     auto w = org_kde_plasma_shell_get_surface(d->shell, surface);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -215,11 +205,6 @@ PlasmaShellSurface::~PlasmaShellSurface()
 void PlasmaShellSurface::release()
 {
     d->surface.release();
-}
-
-void PlasmaShellSurface::destroy()
-{
-    d->surface.destroy();
 }
 
 void PlasmaShellSurface::setup(org_kde_plasma_surface *surface)

@@ -65,6 +65,7 @@ class Q_DECL_HIDDEN PlasmaVirtualDesktopManagementInterface::Private : public Gl
 {
 public:
     Private(PlasmaVirtualDesktopManagementInterface *q, Display *d);
+    ~Private() override;
 
     QVector<wl_resource*> resources;
     QList<PlasmaVirtualDesktopInterface*> desktops;
@@ -146,6 +147,14 @@ PlasmaVirtualDesktopManagementInterface::Private::Private(PlasmaVirtualDesktopMa
     : Global::Private(d, &org_kde_plasma_virtual_desktop_management_interface, s_version)
     , q(q)
 {
+}
+
+PlasmaVirtualDesktopManagementInterface::Private::~Private()
+{
+    for (auto *resource : resources) {
+        wl_resource_set_destructor(resource, NULL);
+        wl_resource_set_user_data(resource, NULL);
+    }
 }
 
 void PlasmaVirtualDesktopManagementInterface::Private::bind(wl_client *client, uint32_t version, uint32_t id)

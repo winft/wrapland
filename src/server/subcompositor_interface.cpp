@@ -145,11 +145,17 @@ SubSurfaceInterface::Private::Private(SubSurfaceInterface *q, SubCompositorInter
 
 SubSurfaceInterface::Private::~Private()
 {
+    remove();
+}
+
+void SubSurfaceInterface::Private::remove()
+{
     // no need to notify the surface as it's tracking a QPointer which will be reset automatically
     if (parent) {
         Q_Q(SubSurfaceInterface);
         reinterpret_cast<SurfaceInterface::Private*>(parent->d.data())->removeChild(QPointer<SubSurfaceInterface>(q));
     }
+    parent = nullptr;
 }
 
 void SubSurfaceInterface::Private::create(ClientConnection *client, quint32 version, quint32 id, SurfaceInterface *s, SurfaceInterface *p)
@@ -299,7 +305,11 @@ SubSurfaceInterface::SubSurfaceInterface(SubCompositorInterface *parent, wl_reso
     Q_UNUSED(parent)
 }
 
-SubSurfaceInterface::~SubSurfaceInterface() = default;
+SubSurfaceInterface::~SubSurfaceInterface()
+{
+    Q_D();
+    d->remove();
+}
 
 QPoint SubSurfaceInterface::position() const
 {

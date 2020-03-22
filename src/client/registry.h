@@ -201,23 +201,7 @@ public:
      * longer valid and can be setup with another wl_registry interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this Registry.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new wl_registry interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, registry, &Registry::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
+
     /**
      * Gets the registry from the @p display.
      **/
@@ -1836,9 +1820,9 @@ Q_SIGNALS:
 
 Q_SIGNALS:
     /*
-     * Emitted when the registry has been destroyed rather than released
+     * Emitted when the registry has been released.
      */
-    void registryDestroyed();
+    void registryReleased();
 
 private:
     class Private;

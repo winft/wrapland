@@ -300,8 +300,8 @@ void DataDeviceInterface::updateDragTarget(SurfaceInterface *surface, quint32 se
         return;
     }
     if (d->proxyRemoteSurface && d->proxyRemoteSurface == surface) {
-        // A proxy can not have the remote surface as target.
-        // TODO: do this for all client's surfaces?
+        // A proxy can not have the remote surface as target. All other surfaces even of itself
+        // are fine. Such surfaces get data offers from themselves while a drag is ongoing.
         return;
     }
     auto *source = d->seat->dragSource()->dragSource();

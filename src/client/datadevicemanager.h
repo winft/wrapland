@@ -100,21 +100,6 @@ public:
      * longer valid and can be setup with another wl_data_device_manager interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this DataDeviceManager.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new wl_data_device_manager interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * DataDeviceManager gets destroyed.
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating a DataSource.

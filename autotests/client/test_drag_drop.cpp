@@ -91,7 +91,7 @@ void TestDragAndDrop::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -114,7 +114,7 @@ void TestDragAndDrop::init()
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new EventQueue(this);
@@ -333,8 +333,8 @@ void TestDragAndDrop::testTouchDragAndDrop()
     const qint32 touchId = m_seatInterface->touchDown(QPointF(50,50));
     QVERIFY(sequenceStartedSpy.wait());
 
-    QScopedPointer<TouchPoint> tp(sequenceStartedSpy.first().at(0).value<TouchPoint*>());
-    QVERIFY(!tp.isNull());
+    TouchPoint *tp(sequenceStartedSpy.first().at(0).value<TouchPoint*>());
+    QVERIFY(tp);
     QCOMPARE(tp->time(), quint32(2));
 
     // add some signal spies for client side

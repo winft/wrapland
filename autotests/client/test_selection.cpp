@@ -97,7 +97,7 @@ void SelectionTest::init()
 bool SelectionTest::setupConnection(Connection* c)
 {
     c->connection = new ConnectionThread;
-    QSignalSpy connectedSpy(c->connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(c->connection, &ConnectionThread::establishedChanged);
     if (!connectedSpy.isValid()) {
         return false;
     }
@@ -107,7 +107,7 @@ bool SelectionTest::setupConnection(Connection* c)
     c->connection->moveToThread(c->thread);
     c->thread->start();
 
-    c->connection->initConnection();
+    c->connection->establishConnection();
     if (!connectedSpy.wait(500)) {
         return false;
     }

@@ -89,21 +89,6 @@ public:
     * longer valid and can be setup with another zkwinft_output_management_v1 interface.
     **/
     void release();
-    /**
-    * Destroys the data hold by this OutputManagement.
-    * This method is supposed to be used when the connection to the Wayland
-    * server goes away. If the connection is not valid any more, it's not
-    * possible to call release any more as that calls into the Wayland
-    * connection and the call would fail. This method cleans up the data, so
-    * that the instance can be deleted or setup to a new zkwinft_output_management_v1 interface
-    * once there is a new connection available.
-    *
-    * This method is automatically invoked when the Registry which created this
-    * OutputManagement gets destroyed.
-    *
-    * @see release
-    **/
-    void destroy();
 
     /**
     * Sets the @p queue to use for creating objects with this OutputManagement.

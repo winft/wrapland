@@ -96,21 +96,6 @@ public:
      * longer valid and can be setup with another wp_viewporter interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this Viewporter.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new wp_viewporter interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * Viewporter gets destroyed.
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating a Viewport.
@@ -173,23 +158,7 @@ public:
      * longer valid and can be setup with another wp_viewport interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this Viewport.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new wp_viewport interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, viewport, &Viewport::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
+
     /**
      * @returns @c true if managing a wp_viewport.
      **/

@@ -29,11 +29,13 @@ static const QString s_socketName = QStringLiteral("wrapland-test-xdg_shell-0");
 
 void XdgShellTest::init()
 {
-    delete m_display;
+    Q_ASSERT(!m_display);
     m_display = new Display(this);
     m_display->setSocketName(s_socketName);
+
     m_display->start();
     QVERIFY(m_display->isRunning());
+
     m_display->createShm();
     m_o1Interface = m_display->createOutput(m_display);
     m_o1Interface->addMode(QSize(1024, 768));
@@ -54,7 +56,7 @@ void XdgShellTest::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -62,7 +64,7 @@ void XdgShellTest::init()
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new EventQueue(this);
@@ -129,10 +131,9 @@ void XdgShellTest::init()
 void XdgShellTest::cleanup()
 {
 #define CLEANUP(variable) \
-    if (variable) { \
         delete variable; \
-        variable = nullptr; \
-    }
+        variable = nullptr;
+
     CLEANUP(m_xdgShell)
     CLEANUP(m_compositor)
     CLEANUP(m_shmPool)
@@ -140,10 +141,11 @@ void XdgShellTest::cleanup()
     CLEANUP(m_output2)
     CLEANUP(m_seat)
     CLEANUP(m_queue)
-    if (m_connection) {
-        m_connection->deleteLater();
-        m_connection = nullptr;
-    }
+
+    Q_ASSERT(m_connection);
+    m_connection->deleteLater();
+    m_connection = nullptr;
+
     if (m_thread) {
         m_thread->quit();
         m_thread->wait();
@@ -540,7 +542,9 @@ void XdgShellTest::testConfigureMultipleAcks()
     QVERIFY(serial2 != serial3);
 
     QVERIFY(configureSpy.wait());
-    QCOMPARE(configureSpy.count(), 3);
+    QTRY_COMPARE(configureSpy.count(), 3);
+    QVERIFY(!configureSpy.wait(100));
+
     QCOMPARE(configureSpy.at(0).at(0).toSize(), QSize(10, 20));
     QCOMPARE(configureSpy.at(0).at(1).value<XdgShellSurface::States>(), XdgShellSurface::States());
     QCOMPARE(configureSpy.at(0).at(2).value<quint32>(), serial1);

@@ -180,11 +180,6 @@ DataDevice::~DataDevice()
     release();
 }
 
-void DataDevice::destroy()
-{
-    d->device.destroy();
-}
-
 void DataDevice::release()
 {
     d->device.release();

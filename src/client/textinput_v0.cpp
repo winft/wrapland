@@ -409,12 +409,6 @@ void TextInputUnstableV0::release()
     d->textinputunstablev0.release();
 }
 
-void TextInputUnstableV0::destroy()
-{
-    Q_D();
-    d->textinputunstablev0.destroy();
-}
-
 TextInputUnstableV0::operator wl_text_input*()
 {
     Q_D();
@@ -433,7 +427,6 @@ public:
     Private() = default;
 
     void release() override;
-    void destroy() override;
     bool isValid() override;
     void setupV0(wl_text_input_manager *ti) override;
     TextInput *createTextInput(Seat *seat, QObject *parent = nullptr) override;
@@ -451,11 +444,6 @@ public:
 void TextInputManagerUnstableV0::Private::release()
 {
     textinputmanagerunstablev0.release();
-}
-
-void TextInputManagerUnstableV0::Private::destroy()
-{
-    textinputmanagerunstablev0.destroy();
 }
 
 bool TextInputManagerUnstableV0::Private::isValid()

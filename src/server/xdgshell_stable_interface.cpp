@@ -40,6 +40,7 @@ class XdgShellStableInterface::Private : public XdgShellInterface::Private
 {
 public:
     Private(XdgShellStableInterface *q, Display *d);
+    ~Private() override;
 
     QVector<XdgSurfaceStableInterface*> surfaces;
     QVector<XdgPositionerStableInterface*> positioners;
@@ -329,6 +330,14 @@ XdgShellStableInterface::Private::Private(XdgShellStableInterface *q, Display *d
     : XdgShellInterface::Private(XdgShellInterfaceVersion::Stable, q, d, &xdg_wm_base_interface, 1)
     , q(q)
 {
+}
+
+XdgShellStableInterface::Private::~Private()
+{
+    for (auto *resource : resources) {
+        wl_resource_set_destructor(resource, NULL);
+        wl_resource_set_user_data(resource, NULL);
+    }
 }
 
 void XdgShellStableInterface::Private::bind(wl_client *client, uint32_t version, uint32_t id)

@@ -94,11 +94,6 @@ void Region::release()
     d->region.release();
 }
 
-void Region::destroy()
-{
-    d->region.destroy();
-}
-
 void Region::setup(wl_region *region)
 {
     Q_ASSERT(region);

@@ -63,11 +63,6 @@ void OutputManagementV1::release()
     d->outputManagement.release();
 }
 
-void OutputManagementV1::destroy()
-{
-    d->outputManagement.destroy();
-}
-
 void OutputManagementV1::setEventQueue(EventQueue *queue)
 {
     d->queue = queue;

@@ -102,18 +102,6 @@ public:
      * longer valid and can be setup with another wl_event_queue interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this EventQueue.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new wl_event_queue interface
-     * once there is a new connection available.
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Adds the @p proxy to the EventQueue.

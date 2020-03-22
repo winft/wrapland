@@ -80,7 +80,6 @@ public:
     virtual ~Private() = default;
 
     virtual void release() = 0;
-    virtual void destroy() = 0;
     virtual bool isValid() = 0;
     virtual void setupV0(wl_text_input_manager *textinputmanagerunstablev0) {
         Q_UNUSED(textinputmanagerunstablev0)
@@ -168,23 +167,6 @@ public:
      * longer valid and can be setup with another wl_text_input interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this TextInputUnstableV0.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new wl_text_input interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, textinputunstablev0, &TextInputUnstableV0::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     operator wl_text_input*();
     operator wl_text_input*() const;
@@ -213,23 +195,6 @@ public:
      * longer valid and can be setup with another zwp_text_input_v2 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this TextInputUnstableV2.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zwp_text_input_v2 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, textinputunstablev2, &TextInputUnstableV2::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     operator zwp_text_input_v2*();
     operator zwp_text_input_v2*() const;

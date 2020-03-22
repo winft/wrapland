@@ -67,9 +67,9 @@ void Keystate::setup(org_kde_kwin_keystate* keystate)
     org_kde_kwin_keystate_add_listener(keystate, &Keystate::Private::s_listener, this);
 }
 
-void Keystate::destroy()
+void Keystate::release()
 {
-    d->keystate.destroy();
+    d->keystate.release();
 }
 
 void Keystate::setEventQueue(Wrapland::Client::EventQueue* /*queue*/)

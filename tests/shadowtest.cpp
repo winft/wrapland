@@ -72,8 +72,11 @@ ShadowTest::~ShadowTest()
 
 void ShadowTest::init()
 {
-    connect(m_connectionThreadObject, &ConnectionThread::connected, this,
-        [this] {
+    connect(m_connectionThreadObject, &ConnectionThread::establishedChanged, this,
+        [this] (bool established) {
+            if (!established) {
+                return;
+            }
             m_eventQueue = new EventQueue(this);
             m_eventQueue->setup(m_connectionThreadObject);
 
@@ -85,7 +88,7 @@ void ShadowTest::init()
     m_connectionThreadObject->moveToThread(m_connectionThread);
     m_connectionThread->start();
 
-    m_connectionThreadObject->initConnection();
+    m_connectionThreadObject->establishConnection();
 }
 
 void ShadowTest::setupRegistry(Registry *registry)

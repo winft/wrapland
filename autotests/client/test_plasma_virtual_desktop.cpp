@@ -97,7 +97,7 @@ void TestVirtualDesktop::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::connected);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -105,7 +105,7 @@ void TestVirtualDesktop::init()
     m_connection->moveToThread(m_thread);
     m_thread->start();
 
-    m_connection->initConnection();
+    m_connection->establishConnection();
     QVERIFY(connectedSpy.wait());
 
     m_queue = new Wrapland::Client::EventQueue(this);
@@ -325,8 +325,8 @@ void TestVirtualDesktop::testDestroy()
 
     //test that both server and client desktoip interfaces go away
     desktop1IntDestroyedSpy.wait();
-    desktop1RemovedSpy.wait();
-    desktop1DestroyedSpy.wait();
+    QTRY_COMPARE(desktop1RemovedSpy.count(), 1);
+    QTRY_COMPARE(desktop1DestroyedSpy.count(), 1);
 
     //coherence of order between client and server
     QCOMPARE(m_plasmaVirtualDesktopManagementInterface->desktops().length(), 2);

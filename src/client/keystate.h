@@ -54,7 +54,13 @@ public:
 
     void setEventQueue(EventQueue *queue);
 
-    void destroy();
+    /**
+     * Releases the org_kde_kwin_keystate interface.
+     * After the interface has been released the Keystate instance is no
+     * longer valid and can be setup with another org_kde_kwin_keystate interface.
+     **/
+    void release();
+
     void setup(org_kde_kwin_keystate* keystate);
 
     void fetchStates();

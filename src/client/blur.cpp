@@ -57,11 +57,6 @@ void BlurManager::release()
     d->manager.release();
 }
 
-void BlurManager::destroy()
-{
-    d->manager.destroy();
-}
-
 bool BlurManager::isValid() const
 {
     return d->manager.isValid();
@@ -139,11 +134,6 @@ void Blur::setup(org_kde_kwin_blur *blur)
     Q_ASSERT(blur);
     Q_ASSERT(!d->blur);
     d->blur.setup(blur);
-}
-
-void Blur::destroy()
-{
-    d->blur.destroy();
 }
 
 bool Blur::isValid() const

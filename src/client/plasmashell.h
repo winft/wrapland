@@ -82,24 +82,7 @@ public:
      * @see interfaceAboutToBeReleased
      **/
     void release();
-    /**
-     * Destroys the data held by this PlasmaShell.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. Once the connection becomes invalid, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new org_kde_plasma_shell interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * PlasmaShell gets destroyed.
-     *
-     * Right before the data is destroyed, the signal interfaceAboutToBeDestroyed is emitted.
-     *
-     * @see release
-     * @see interfaceAboutToBeDestroyed
-     **/
-    void destroy();
+
     /**
      * Setup this Shell to manage the @p shell.
      * When using Registry::createShell there is no need to call this
@@ -147,10 +130,6 @@ Q_SIGNALS:
      * This signal is emitted right before the interface is released.
      **/
     void interfaceAboutToBeReleased();
-    /**
-     * This signal is emitted right before the data is destroyed.
-     **/
-    void interfaceAboutToBeDestroyed();
 
     /**
      * The corresponding global for this interface on the Registry got removed.
@@ -200,21 +179,7 @@ public:
      * PlasmaShellSurface gets released.
      **/
     void release();
-    /**
-     * Destroys the data held by this PlasmaShellSurface.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new org_kde_plasma_surface interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the PlasmaShell which created this
-     * PlasmaShellSurface gets destroyed.
-     *
-     * @see release
-     **/
-    void destroy();
+
     /**
      * Setup this PlasmaShellSurface to manage the @p surface.
      * There is normally no need to call this method as it's invoked by

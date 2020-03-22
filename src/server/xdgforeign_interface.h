@@ -17,8 +17,7 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef WRAPLAND_SERVER_XDGFOREIGN_INTERFACE_H
-#define WRAPLAND_SERVER_XDGFOREIGN_INTERFACE_H
+#pragma once
 
 #include "global.h"
 #include "resource.h"
@@ -32,16 +31,16 @@ namespace Server
 
 class Display;
 class SurfaceInterface;
-class XdgExporterUnstableV2Interface;
-class XdgImporterUnstableV2Interface;
+class XdgExporterV2Interface;
+class XdgImporterV2Interface;
 
 /**
  * This class encapsulates the server side logic of the XdgForeign protocol.
  * a process can export a surface to be identifiable by a server-wide unique
  * string handle, and another process can in turn import that surface, and set it
  * as transient parent for one of its own surfaces.
- * This parent relationship is traced by the transientChanged signal and the
- * transientFor method.
+ * This parent relationship is traced by the parentChanged signal and the
+ * parentFor method.
  *
  * @since 5.40
  */
@@ -50,7 +49,7 @@ class WRAPLANDSERVER_EXPORT XdgForeignInterface : public QObject
     Q_OBJECT
 public:
     XdgForeignInterface(Display *display, QObject *parent = nullptr);
-    ~XdgForeignInterface();
+    ~XdgForeignInterface() override;
 
     /**
      * Creates the native zxdg_exporter_v2 and zxdg_importer_v2 interfaces
@@ -64,34 +63,35 @@ public:
     bool isValid();
 
     /**
-     * If a client did import a surface and set one of its own as child of the
-     * imported one, this returns the mapping.
-     * @param surface the child surface we want to search an imported transientParent for.
-     * @returns the transient parent of the surface, if found, nullptr otherwise.
+     * This returns the xdg-foreign parent surface of @param surface, i.e. this returns a valid
+     * surface pointer if:
+     * - the client did import a foreign surface via the xdg-foreign protocol and
+     * - set the foreign surface as the parent of @param surface.
+     *
+     * @param surface that a parent is searched for
+     * @returns the parent if found, nullptr otherwise
      */
-    SurfaceInterface *transientFor(SurfaceInterface *surface);
+    SurfaceInterface* parentOf(SurfaceInterface *surface);
 
 Q_SIGNALS:
     /**
-     * A surface got a new imported transient parent
-     * @param parent is the surface exported by one client and imported into another, which will act as parent.
-     * @param child is the surface that the importer client did set as child of the surface
-     * that it imported.
-     * If one of the two paramenters is nullptr, it means that a previously relation is not
-     * valid anymore and either one of the surfaces has been unmapped, or the parent surface
-     * is not exported anymore.
+     * An inheritance relation between surfaces changed.
+     * @param parent is the surface exported by one client and imported into another, which will act
+     *        as parent.
+     * @param child is the surface that the importer client did set as child of the surface that it
+     *        imported.
+     * If one of the two paramenters is nullptr, it means that a previously relation is not valid
+     * anymore and either one of the surfaces has been unmapped, or the parent surface is not
+     * exported anymore.
      */
-    void transientChanged(Wrapland::Server::SurfaceInterface *child, Wrapland::Server::SurfaceInterface *parent);
+    void parentChanged(Wrapland::Server::SurfaceInterface *parent,
+                       Wrapland::Server::SurfaceInterface *child);
 
 private:
     friend class Display;
-    friend class XdgExporterUnstableV2Interface;
-    friend class XdgImporterUnstableV2Interface;
     class Private;
     Private *d;
 };
 
 }
 }
-
-#endif

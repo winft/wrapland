@@ -77,8 +77,11 @@ WaylandClientTest::~WaylandClientTest()
 
 void WaylandClientTest::init()
 {
-    connect(m_connectionThreadObject, &ConnectionThread::connected, this,
-        [this]() {
+    connect(m_connectionThreadObject, &ConnectionThread::establishedChanged, this,
+        [this] (bool established) {
+            if (!established) {
+                return;
+            }
             // create the event queue for the main gui thread
             m_eventQueue = new EventQueue(this);
             m_eventQueue->setup(m_connectionThreadObject);
@@ -91,7 +94,7 @@ void WaylandClientTest::init()
     m_connectionThreadObject->moveToThread(m_connectionThread);
     m_connectionThread->start();
 
-    m_connectionThreadObject->initConnection();
+    m_connectionThreadObject->establishConnection();
 
     connect(m_timer, &QTimer::timeout, this,
         [this]() {

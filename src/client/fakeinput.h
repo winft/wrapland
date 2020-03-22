@@ -90,21 +90,6 @@ public:
      * longer valid and can be setup with another org_kde_kwin_fake_input interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this FakeInput.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new org_kde_kwin_fake_input interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * FakeInput gets destroyed.
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for bound proxies.

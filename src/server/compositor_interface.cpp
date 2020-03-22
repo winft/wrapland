@@ -33,6 +33,7 @@ class CompositorInterface::Private : public Global::Private
 {
 public:
     Private(CompositorInterface *q, Display *d);
+    ~Private() override;
 
 private:
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
@@ -46,6 +47,8 @@ private:
         return reinterpret_cast<Private*>(wl_resource_get_user_data(r));
     }
 
+    QVector<wl_resource*> resources;
+
     CompositorInterface *q;
     static const struct wl_compositor_interface s_interface;
     static const quint32 s_version;
@@ -57,6 +60,13 @@ CompositorInterface::Private::Private(CompositorInterface *q, Display *d)
     : Global::Private(d, &wl_compositor_interface, s_version)
     , q(q)
 {
+}
+
+CompositorInterface::Private::~Private()
+{
+    while (!resources.isEmpty()) {
+        wl_resource_destroy(resources.takeLast());
+    }
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -82,13 +92,14 @@ void CompositorInterface::Private::bind(wl_client *client, uint32_t version, uin
         return;
     }
     wl_resource_set_implementation(resource, &s_interface, this, unbind);
-    // TODO: should we track?
+    resources << resource;
 }
 
 void CompositorInterface::Private::unbind(wl_resource *resource)
 {
-    Q_UNUSED(resource)
-    // TODO: implement?
+    auto *prv = cast(resource);
+    prv->resources.removeOne(resource);
+    Q_ASSERT(!prv->resources.contains(resource));
 }
 
 void CompositorInterface::Private::createSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id)

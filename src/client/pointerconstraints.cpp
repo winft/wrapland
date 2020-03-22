@@ -70,11 +70,6 @@ void PointerConstraints::release()
     d->pointerconstraints.release();
 }
 
-void PointerConstraints::destroy()
-{
-    d->pointerconstraints.destroy();
-}
-
 PointerConstraints::operator zwp_pointer_constraints_v1*() {
     return d->pointerconstraints;
 }
@@ -226,11 +221,6 @@ void LockedPointer::release()
     d->lockedpointer.release();
 }
 
-void LockedPointer::destroy()
-{
-    d->lockedpointer.destroy();
-}
-
 LockedPointer::operator zwp_locked_pointer_v1*() {
     return d->lockedpointer;
 }
@@ -330,11 +320,6 @@ void ConfinedPointer::setup(zwp_confined_pointer_v1 *confinedpointer)
 void ConfinedPointer::release()
 {
     d->confinedpointer.release();
-}
-
-void ConfinedPointer::destroy()
-{
-    d->confinedpointer.destroy();
 }
 
 ConfinedPointer::operator zwp_confined_pointer_v1*() {

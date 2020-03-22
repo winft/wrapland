@@ -97,22 +97,6 @@ public:
      * longer valid and can be setup with another zwp_pointer_gestures_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this PointerGestures.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zwp_pointer_gestures_v1 interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * PointerGestures gets destroyed.
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating objects with this PointerGestures.
@@ -195,23 +179,6 @@ public:
      * longer valid and can be setup with another zwp_pointer_gesture_swipe_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this PointerSwipeGesture.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zwp_pointer_gesture_swipe_v1 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, pointerswipegesture, &PointerSwipeGesture::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * The number of fingers taking part in this gesture.
@@ -323,23 +290,6 @@ public:
      * longer valid and can be setup with another zwp_pointer_gesture_pinch_v1 interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this PointerPinchGesture.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new zwp_pointer_gesture_pinch_v1 interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, pointerpinchgesture, &PointerPinchGesture::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * The number of fingers taking part in this gesture.

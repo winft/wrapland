@@ -201,21 +201,6 @@ public:
      * longer valid and can be setup with another xdg_shell interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this XdgShell.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new xdg_shell interface
-     * once there is a new connection available.
-     *
-     * This method is automatically invoked when the Registry which created this
-     * XdgShell gets destroyed.
-     *
-     * @see release
-     **/
-    void destroy();
 
     /**
      * Sets the @p queue to use for creating objects with this XdgShell.
@@ -343,23 +328,7 @@ public:
      * longer valid and can be setup with another xdg_surface interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this XdgShellSurface.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new xdg_surface interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, xdgsurfacev5, &XdgShellSurface::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
+
     /**
      * Sets the @p queue to use for bound proxies.
      **/
@@ -561,23 +530,7 @@ public:
      * longer valid and can be setup with another xdg_popup interface.
      **/
     void release();
-    /**
-     * Destroys the data held by this XdgShellPopup.
-     * This method is supposed to be used when the connection to the Wayland
-     * server goes away. If the connection is not valid anymore, it's not
-     * possible to call release anymore as that calls into the Wayland
-     * connection and the call would fail. This method cleans up the data, so
-     * that the instance can be deleted or set up to a new xdg_popup interface
-     * once there is a new connection available.
-     *
-     * It is suggested to connect this method to ConnectionThread::connectionDied:
-     * @code
-     * connect(connection, &ConnectionThread::connectionDied, xdgpopupv5, &XdgShellPopup::destroy);
-     * @endcode
-     *
-     * @see release
-     **/
-    void destroy();
+
     /**
      * Sets the @p queue to use for bound proxies.
      **/
