@@ -2,6 +2,7 @@ stages:
   - Compliance
   - Build
   - Test
+  - Integration
 
 Lint commit messages:
   stage: Compliance
@@ -72,3 +73,19 @@ Sanitizers:
   <<: *common-test
   needs: ['Sanitizers build']
   dependencies: ['Sanitizers build']
+
+
+.trigger-script: &trigger-script
+  script: curl --request POST --form token=${CI_JOB_TOKEN} --form ref=master
+            --form "variables[TRIGGER_TYPE]=wrapland_rebuild"
+            ${CI_API_V4_URL}/projects/${TARGET_ID}/trigger/pipeline
+
+Image trigger:
+  stage: Integration
+  rules:
+    - if: '$CI_PROJECT_NAMESPACE == "kwinft" && $CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
+    - when: never
+  variables:
+    TARGET_ID: 17539846
+  <<: *trigger-script
