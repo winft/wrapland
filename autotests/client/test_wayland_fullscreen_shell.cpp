@@ -102,7 +102,8 @@ void TestWaylandFullscreenShell::testRegistry()
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
     connection.establishConnection();
-    QVERIFY(connectedSpy.wait());
+    QVERIFY(connectedSpy.count() || connectedSpy.wait());
+    QCOMPARE(connectedSpy.count(), 1);
 
     Wrapland::Client::Registry registry;
     QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfaceAnnounced);
@@ -136,7 +137,8 @@ void TestWaylandFullscreenShell::testRegistryCreate()
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
     connection.establishConnection();
-    QVERIFY(connectedSpy.wait());
+     QVERIFY(connectedSpy.count() || connectedSpy.wait());
+     QCOMPARE(connectedSpy.count(), 1);
 
     Wrapland::Client::Registry registry;
     QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfaceAnnounced);

@@ -111,7 +111,7 @@ void TestWaylandOutput::init()
 
     m_connection->establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
-    QVERIFY(connectedSpy.count());
+    QCOMPARE(connectedSpy.count(), 1);
 
     m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());

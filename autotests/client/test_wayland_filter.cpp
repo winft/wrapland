@@ -131,7 +131,8 @@ void TestFilter::testFilter()
     thread->start();
 
     connection->establishConnection();
-    QVERIFY(connectedSpy.wait());
+    QVERIFY(connectedSpy.count() || connectedSpy.wait());
+    QCOMPARE(connectedSpy.count(), 1);
 
     //use low level API as Server::Display::connections only lists connections which have
     //been previous fetched via getConnection()

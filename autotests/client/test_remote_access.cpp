@@ -92,7 +92,8 @@ MockupClient::MockupClient(QObject *parent)
     thread->start();
 
     connection->establishConnection();
-    QVERIFY(connectedSpy.wait());
+    QVERIFY(connectedSpy.count() || connectedSpy.wait());
+    QCOMPARE(connectedSpy.count(), 1);
 
     queue = new EventQueue(this);
     queue->setup(connection);
