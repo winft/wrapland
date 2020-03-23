@@ -41,7 +41,7 @@ Normal build:
 Sanitizers build:
   <<: *common-build
   script:
-    - pacman -Sy extra-cmake-modules clang --noconfirm --needed
+    - pacman -Sy extra-cmake-modules --noconfirm --needed
     - mkdir ci-build && cd ci-build
     - cmake -DECM_ENABLE_SANITIZERS='address;leak;undefined'
       -DCMAKE_CXX_COMPILER=clang++ ../
