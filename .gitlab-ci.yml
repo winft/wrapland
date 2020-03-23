@@ -69,13 +69,19 @@ Sanitizers build:
 
 Autotests:
   <<: *common-test
-  needs: ['Normal build', 'Message lint']
-  dependencies: ['Normal build']
+  needs:
+    - job: Normal build
+      artifacts: true
+    - job: Message lint
+      artifacts: false
 
 Sanitizers:
   <<: *common-test
-  needs: ['Sanitizers build', 'Message lint']
-  dependencies: ['Sanitizers build']
+  needs:
+    - job: Sanitizers build
+      artifacts: true
+    - job: Message lint
+      artifacts: false
 
 
 .trigger-script: &trigger-script
