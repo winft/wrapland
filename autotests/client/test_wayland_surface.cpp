@@ -130,7 +130,8 @@ void TestWaylandSurface::init()
     );*/
 
     m_connection->establishConnection();
-    QVERIFY(connectedSpy.wait());
+    QVERIFY(connectedSpy.count() || connectedSpy.wait());
+    QCOMPARE(connectedSpy.count(), 1);
 
     m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
