@@ -158,7 +158,7 @@ void PlasmaWindowModelTest::init()
 
     m_connection->establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
-    QVERIFY(connectedSpy.count());
+    QCOMPARE(connectedSpy.count(), 1);
 
     m_queue = new Clt::EventQueue(this);
     m_queue->setup(m_connection);
