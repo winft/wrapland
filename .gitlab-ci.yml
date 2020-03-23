@@ -4,7 +4,11 @@ stages:
   - Test
   - Integration
 
-Lint commit messages:
+variables:
+  IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base:latest
+
+
+Message lint:
   stage: Compliance
   image: node:latest
   variables:
@@ -18,9 +22,6 @@ Lint commit messages:
   cache:
     paths:
       - node_modules/
-
-variables:
-  IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base:latest
 
 
 .common-build: &common-build
@@ -68,12 +69,12 @@ Sanitizers build:
 
 Autotests:
   <<: *common-test
-  needs: ['Normal build']
+  needs: ['Normal build', 'Message lint']
   dependencies: ['Normal build']
 
 Sanitizers:
   <<: *common-test
-  needs: ['Sanitizers build']
+  needs: ['Sanitizers build', 'Message lint']
   dependencies: ['Sanitizers build']
 
 
