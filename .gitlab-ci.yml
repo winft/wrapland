@@ -7,10 +7,12 @@ stages:
 Lint commit messages:
   stage: Compliance
   image: node:latest
+  variables:
+    UPSTREAM: https://${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}@${CI_SERVER_HOST}/kwinft/wrapland.git
   script:
     - yarn global add @commitlint/cli
     - yarn add conventional-changelog-conventionalcommits
-    - git remote add _upstream https://${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}@${CI_SERVER_HOST}/kwinft/wrapland.git
+    - git remote add _upstream $UPSTREAM || git remote set-url _upstream $UPSTREAM
     - git fetch -q --depth=1 _upstream master
     - commitlint --verbose --config=ci/commitlint.config.js --from=_upstream/master
   cache:
