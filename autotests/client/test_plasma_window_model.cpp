@@ -607,10 +607,14 @@ void PlasmaWindowModelTest::testGeometry()
 
     // An icon and the geometry will be sent.
     QTRY_COMPARE(dataChangedSpy.count(), 2);
-
-    // The goemetry is sent before the icon (which is always sent in the beginning).
     QCOMPARE(dataChangedSpy.first().first().toModelIndex(), index);
-    QCOMPARE(dataChangedSpy.first().last().value<QVector<int>>(),
+
+    // The icon is received with QtConcurrent in the beginning. So it can arrive before or after
+    // the geometry.
+    const bool last = dataChangedSpy[0].last().value<QVector<int>>()
+                        == QVector<int>{int(Qt::DecorationRole)};
+
+    QCOMPARE(dataChangedSpy[last ? 1 : 0].last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::Geometry)});
 
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::Geometry).toRect(), geom);
@@ -642,10 +646,14 @@ void PlasmaWindowModelTest::testTitle()
 
     // An icon and the title will be sent.
     QTRY_COMPARE(dataChangedSpy.count(), 2);
-
-    // The geometry is sent before the icon (which is always sent in the beginning).
     QCOMPARE(dataChangedSpy.first().first().toModelIndex(), index);
-    QCOMPARE(dataChangedSpy.first().last().value<QVector<int>>(),
+
+    // The icon is received with QtConcurrent in the beginning. So it can arrive before or after
+    // the title.
+    const bool last = dataChangedSpy[0].last().value<QVector<int>>()
+                        == QVector<int>{int(Qt::DecorationRole)};
+
+    QCOMPARE(dataChangedSpy[last ? 1 : 0].last().value<QVector<int>>(),
              QVector<int>{int(Qt::DisplayRole)});
     QCOMPARE(model->data(index, Qt::DisplayRole).toString(), QStringLiteral("foo"));
 }
@@ -672,14 +680,18 @@ void PlasmaWindowModelTest::testAppId()
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::AppId).toString(), QString());
 
     serverWindow->setAppId(QStringLiteral("org.kde.testapp"));
-    QVERIFY(dataChangedSpy.wait());
+    QVERIFY(dataChangedSpy.count() || dataChangedSpy.wait());
 
     // The App Id and the geometry will be sent.
     QTRY_COMPARE(dataChangedSpy.count(), 2);
-
-    // The App Id is sent before the icon (which is always sent in the beginning).
     QCOMPARE(dataChangedSpy.first().first().toModelIndex(), index);
-    QCOMPARE(dataChangedSpy.first().last().value<QVector<int>>(),
+
+    // The icon is received with QtConcurrent in the beginning. So it can arrive before or after
+    // the app id.
+    const bool last = dataChangedSpy[0].last().value<QVector<int>>()
+                        == QVector<int>{int(Qt::DecorationRole)};
+
+    QCOMPARE(dataChangedSpy[last ? 1 : 0].last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::AppId)});
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::AppId).toString(),
              QStringLiteral("org.kde.testapp"));
@@ -733,9 +745,14 @@ void PlasmaWindowModelTest::testVirtualDesktops()
     QCOMPARE(dataChangedSpy.first().first().toModelIndex(), index);
     QCOMPARE(dataChangedSpy.last().first().toModelIndex(), index);
 
-    QCOMPARE(dataChangedSpy.first().last().value<QVector<int>>(),
+    // The icon is received with QtConcurrent in the beginning. So it can arrive before or after
+    // the virtual desktop.
+    const bool last = dataChangedSpy[0].last().value<QVector<int>>()
+                        == QVector<int>{int(Qt::DecorationRole)};
+
+    QCOMPARE(dataChangedSpy[last ? 1 : 0].last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::VirtualDesktops)});
-    QCOMPARE(dataChangedSpy[1].last().value<QVector<int>>(),
+    QCOMPARE(dataChangedSpy[last ? 2 : 1].last().value<QVector<int>>(),
              QVector<int>{int(Clt::PlasmaWindowModel::IsOnAllDesktops)});
 
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::VirtualDesktops).toStringList(),
