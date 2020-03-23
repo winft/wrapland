@@ -102,6 +102,7 @@ void TestWaylandOutput::init()
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
@@ -109,7 +110,8 @@ void TestWaylandOutput::init()
     m_thread->start();
 
     m_connection->establishConnection();
-    QVERIFY(connectedSpy.wait());
+    QVERIFY(connectedSpy.count() || connectedSpy.wait());
+    QVERIFY(connectedSpy.count());
 
     m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
