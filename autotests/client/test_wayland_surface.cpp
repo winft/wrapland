@@ -36,6 +36,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/display.h"
 #include "../../src/server/idleinhibit_interface.h"
 #include "../../src/server/surface_interface.h"
+
+#include "../../server/display.h"
+#include "../../server/output.h"
 // Wayland
 #include <wayland-client-protocol.h>
 
@@ -69,7 +72,7 @@ private Q_SLOTS:
     void testInhibit();
 
 private:
-    Wrapland::Server::Display *m_display;
+    Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::CompositorInterface *m_compositorInterface;
     Wrapland::Server::IdleInhibitManagerInterface *m_idleInhibitInterface;
     Wrapland::Client::ConnectionThread *m_connection;
@@ -96,10 +99,10 @@ void TestWaylandSurface::init()
 {
     using namespace Wrapland::Server;
     delete m_display;
-    m_display = new Display(this);
+    m_display = new D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
+    QVERIFY(m_display->running());
     m_display->createShm();
 
     m_compositorInterface = m_display->createCompositor(m_display);
@@ -1123,26 +1126,26 @@ void TestWaylandSurface::testOutput()
     QSignalSpy outputAnnouncedSpy(&registry, &Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    OutputInterface *serverOutput = m_display->createOutput(m_display);
-    serverOutput->create();
+    Wrapland::Server::Output *serverOutput = m_display->createOutput(m_display);
+//    serverOutput->create();
     QVERIFY(outputAnnouncedSpy.wait());
-    QScopedPointer<Output> clientOutput(registry.createOutput(outputAnnouncedSpy.first().first().value<quint32>(), outputAnnouncedSpy.first().last().value<quint32>()));
+    QScopedPointer<Wrapland::Client::Output> clientOutput(registry.createOutput(outputAnnouncedSpy.first().first().value<quint32>(), outputAnnouncedSpy.first().last().value<quint32>()));
     QVERIFY(clientOutput->isValid());
     m_connection->flush();
     m_display->dispatchEvents();
 
     // now enter it
     QVector<OutputInterface*> outputs;
-    outputs << serverOutput;
+    outputs << serverOutput->legacy;
     serverSurface->setOutputs(outputs);
     QCOMPARE(serverSurface->outputs(), outputs);
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.count(), 1);
-    QCOMPARE(enteredSpy.first().first().value<Output*>(), clientOutput.data());
-    QCOMPARE(s->outputs(), QVector<Output*>{clientOutput.data()});
+    QCOMPARE(enteredSpy.first().first().value<Wrapland::Client::Output*>(), clientOutput.data());
+    QCOMPARE(s->outputs(), QVector<Wrapland::Client::Output*>{clientOutput.data()});
 
     // adding to same should not trigger
-    serverSurface->setOutputs(QVector<OutputInterface*>{serverOutput});
+    serverSurface->setOutputs(QVector<OutputInterface*>{serverOutput->legacy});
 
     // leave again
     serverSurface->setOutputs(QVector<OutputInterface*>());
@@ -1150,15 +1153,15 @@ void TestWaylandSurface::testOutput()
     QVERIFY(leftSpy.wait());
     QCOMPARE(enteredSpy.count(), 1);
     QCOMPARE(leftSpy.count(), 1);
-    QCOMPARE(leftSpy.first().first().value<Output*>(), clientOutput.data());
-    QCOMPARE(s->outputs(), QVector<Output*>());
+    QCOMPARE(leftSpy.first().first().value<Wrapland::Client::Output*>(), clientOutput.data());
+    QCOMPARE(s->outputs(), QVector<Wrapland::Client::Output*>());
 
     // leave again should not trigger
     serverSurface->setOutputs(QVector<OutputInterface*>());
 
     // and enter again, just to verify
-    serverSurface->setOutputs(QVector<OutputInterface*>{serverOutput});
-    QCOMPARE(serverSurface->outputs(), QVector<OutputInterface*>{serverOutput});
+    serverSurface->setOutputs(QVector<OutputInterface*>{serverOutput->legacy});
+    QCOMPARE(serverSurface->outputs(), QVector<OutputInterface*>{serverOutput->legacy});
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.count(), 2);
     QCOMPARE(leftSpy.count(), 1);

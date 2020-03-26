@@ -64,7 +64,6 @@ TestWaylandConnectionThread::TestWaylandConnectionThread(QObject *parent)
 
 void TestWaylandConnectionThread::init()
 {
-    delete m_display;
     m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();

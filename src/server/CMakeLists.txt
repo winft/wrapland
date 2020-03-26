@@ -64,6 +64,14 @@ set(SERVER_LIB_SRCS
     xdgshell_v5_interface.cpp
     xdgshell_v5_interface.cpp
     xdgshell_v6_interface.cpp
+
+    ../../server/client.cpp
+    ../../server/display.cpp
+    ../../server/output.cpp
+    ../../server/wayland/client.cpp
+    ../../server/wayland/display.cpp
+    ../../server/wayland/global.cpp
+    ../../server/wayland/resource.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -313,6 +321,7 @@ set_target_properties(WraplandServer PROPERTIES VERSION   ${WRAPLAND_VERSION_STR
                                                  SOVERSION ${WRAPLAND_SOVERSION}
                                                  EXPORT_NAME WraplandServer
 )
+kde_target_enable_exceptions(WraplandServer PUBLIC)
 
 install(TARGETS WraplandServer EXPORT WraplandTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
 
@@ -370,6 +379,10 @@ set(SERVER_LIB_HEADERS
   xdgforeign_interface.h
   xdgoutput_interface.h
   xdgshell_interface.h
+
+  ../../server/client.h
+  ../../server/display.h
+  ../../server/output.h
 )
 
 install(FILES

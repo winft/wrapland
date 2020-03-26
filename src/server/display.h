@@ -49,6 +49,7 @@ namespace Wrapland
  **/
 namespace Server
 {
+class D_isplay;
 
 class CompositorInterface;
 class DataDeviceManagerInterface;
@@ -107,7 +108,7 @@ class WRAPLANDSERVER_EXPORT Display : public QObject
     Q_PROPERTY(bool automaticSocketNaming READ automaticSocketNaming WRITE setAutomaticSocketNaming NOTIFY automaticSocketNamingChanged)
     Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
 public:
-    explicit Display(QObject *parent = nullptr);
+    explicit Display(QObject *parent = nullptr, bool newInvoked = false);
     virtual ~Display();
 
     /**
@@ -358,6 +359,8 @@ public:
      * @since 5.3
      **/
     void *eglDisplay() const;
+
+    Server::D_isplay* newDisplay;
 
 Q_SIGNALS:
     void socketNameChanged(const QString&);

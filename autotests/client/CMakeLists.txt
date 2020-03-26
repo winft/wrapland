@@ -52,13 +52,24 @@ endif()
 ########################################################
 # Test WaylandOutput
 ########################################################
-set( testWaylandOutput_SRCS
-        test_wayland_output.cpp
+set(testOutput_SRCS output.cpp)
+add_executable(testOutput ${testOutput_SRCS})
+target_link_libraries( testOutput
+    Qt5::Test Qt5::Gui
+    Wrapland::Client Wrapland::Server
+    Wayland::Client Wayland::Server
     )
-add_executable(testWaylandOutput ${testWaylandOutput_SRCS})
-target_link_libraries( testWaylandOutput Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
-add_test(NAME wrapland-testWaylandOutput COMMAND testWaylandOutput)
-ecm_mark_as_test(testWaylandOutput)
+add_test(NAME wrapland-testOutput COMMAND testOutput)
+ecm_mark_as_test(testOutput)
+
+# Legacy
+#set( testWaylandOutput_SRCS
+#        test_wayland_output.cpp
+#    )
+#add_executable(testWaylandOutput ${testWaylandOutput_SRCS})
+#target_link_libraries( testWaylandOutput Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+#add_test(NAME wrapland-testWaylandOutput COMMAND testWaylandOutput)
+#ecm_mark_as_test(testWaylandOutput)
 
 ########################################################
 # Test WaylandShell

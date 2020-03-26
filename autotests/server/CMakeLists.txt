@@ -1,13 +1,20 @@
 ########################################################
 # Test WaylandServerDisplay
 ########################################################
-set( testWaylandServerDisplay_SRCS
-        test_display.cpp
-    )
-add_executable(testWaylandServerDisplay ${testWaylandServerDisplay_SRCS})
-target_link_libraries( testWaylandServerDisplay Qt5::Test Qt5::Gui Wrapland::Server Wayland::Server)
-add_test(NAME wrapland-testWaylandServerDisplay COMMAND testWaylandServerDisplay)
-ecm_mark_as_test(testWaylandServerDisplay)
+set( testServerDisplay_SRCS display.cpp )
+add_executable(testServerDisplay ${testServerDisplay_SRCS})
+target_link_libraries( testServerDisplay Qt5::Test Qt5::Gui Wrapland::Server Wayland::Server)
+add_test(NAME wrapland-testServerDisplay COMMAND testServerDisplay)
+ecm_mark_as_test(testServerDisplay)
+
+# Legacy
+#set( testWaylandServerDisplay_SRCS
+#        test_display.cpp
+#    )
+#add_executable(testWaylandServerDisplay ${testWaylandServerDisplay_SRCS})
+#target_link_libraries( testWaylandServerDisplay Qt5::Test Qt5::Gui Wrapland::Server Wayland::Server)
+#add_test(NAME wrapland-testWaylandServerDisplay COMMAND testWaylandServerDisplay)
+#ecm_mark_as_test(testWaylandServerDisplay)
 
 ########################################################
 # Test WaylandServerSeat

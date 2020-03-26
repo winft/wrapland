@@ -20,6 +20,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Qt
 #include <QtTest>
 // KWin
+#include "../../server/display.h"
+#include "../../server/output.h"
+
 #include "../../src/client/blur.h"
 #include "../../src/client/contrast.h"
 #include "../../src/client/compositor.h"
@@ -111,9 +114,9 @@ private Q_SLOTS:
     void testAnnounceMultipleOutputDeviceV1s();
 
 private:
-    Wrapland::Server::Display *m_display;
+    Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::CompositorInterface *m_compositor;
-    Wrapland::Server::OutputInterface *m_output;
+    Wrapland::Server::Output *m_output;
     Wrapland::Server::OutputDeviceV1Interface *m_outputDevice;
     Wrapland::Server::SeatInterface *m_seat;
     Wrapland::Server::ShellInterface *m_shell;
@@ -161,14 +164,14 @@ TestWaylandRegistry::TestWaylandRegistry(QObject *parent)
 
 void TestWaylandRegistry::init()
 {
-    m_display = new Wrapland::Server::Display();
+    m_display = new Wrapland::Server::D_isplay();
     m_display->setSocketName(s_socketName);
     m_display->start();
     m_display->createShm();
     m_compositor = m_display->createCompositor();
     m_compositor->create();
     m_output = m_display->createOutput();
-    m_output->create();
+//    m_output->create();
     m_seat = m_display->createSeat();
     m_seat->create();
     m_shell = m_display->createShell();
@@ -833,7 +836,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
 
     QSignalSpy outputAnnouncedSpy(&registry, &Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
-    m_display->createOutput()->create();
+    m_display->createOutput();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 2);
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().name, outputAnnouncedSpy.first().first().value<quint32>());
@@ -842,7 +845,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QCOMPARE(registry.interface(Registry::Interface::Output).version, outputAnnouncedSpy.first().last().value<quint32>());
 
     auto output = m_display->createOutput();
-    output->create();
+//    output->create();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 3);
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().name, outputAnnouncedSpy.last().first().value<quint32>());

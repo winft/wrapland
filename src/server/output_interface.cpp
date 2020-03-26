@@ -21,6 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "global_p.h"
 #include "display.h"
 
+#include "../../server/output.h"
+
 #include <QVector>
 
 #include <wayland-server.h>
@@ -152,7 +154,12 @@ OutputInterface::~OutputInterface()
 {
     // Must be called here so SurfaceInterfaces that were entered to the output will leave it
     // before this sub-instance is destroyed.
-    Global::destroy();
+//    Global::destroy();
+
+    Q_EMIT aboutToDestroyGlobal();
+    if (newOutput) {
+        newOutput->legacy = nullptr;
+    }
 }
 
 QSize OutputInterface::pixelSize() const
@@ -487,59 +494,85 @@ OutputInterface::Transform OutputInterface::transform() const
     return d->transform;
 }
 
+OutputInterface::Mode fromOutputMode(Output::Mode mode)
+{
+    OutputInterface::Mode ret;
+    ret.flags = (OutputInterface::ModeFlags)(int)mode.flags;
+    ret.refreshRate = mode.refreshRate;
+    ret.size = mode.size;
+    return ret;
+}
+
 QList< OutputInterface::Mode > OutputInterface::modes() const
 {
-    Q_D();
-    return d->modes;
+    QList< OutputInterface::Mode > ret;
+    for (auto mode : newOutput->modes()) {
+        ret << fromOutputMode(mode);
+    }
+    return ret;
+//    Q_D();
+//    return d->modes;
 }
 
 void OutputInterface::setDpmsMode(OutputInterface::DpmsMode mode)
 {
-    Q_D();
-    if (d->dpms.mode == mode) {
-        return;
-    }
-    d->dpms.mode = mode;
-    emit dpmsModeChanged();
+    newOutput->setDpmsMode((Output::DpmsMode)(int)mode);
+
+//    Q_D();
+//    if (d->dpms.mode == mode) {
+//        return;
+//    }
+//    d->dpms.mode = mode;
+//    emit dpmsModeChanged();
 }
 
 void OutputInterface::setDpmsSupported(bool supported)
 {
-    Q_D();
-    if (d->dpms.supported == supported) {
-        return;
-    }
-    d->dpms.supported = supported;
-    emit dpmsSupportedChanged();
+    newOutput->setDpmsSupported(supported);
+
+//    Q_D();
+//    if (d->dpms.supported == supported) {
+//        return;
+//    }
+//    d->dpms.supported = supported;
+//    emit dpmsSupportedChanged();
 }
 
 OutputInterface::DpmsMode OutputInterface::dpmsMode() const
 {
-    Q_D();
-    return d->dpms.mode;
+    return static_cast<OutputInterface::DpmsMode>((int)newOutput->dpmsMode());
+//    Q_D();
+//    return d->dpms.mode;
 }
 
 bool OutputInterface::isDpmsSupported() const
 {
-    Q_D();
-    return d->dpms.supported;
+    return newOutput->isDpmsSupported();
+//    Q_D();
+//    return d->dpms.supported;
 }
 
 QVector<wl_resource *> OutputInterface::clientResources(ClientConnection *client) const
 {
     Q_D();
     QVector<wl_resource *> ret;
-    for (auto it = d->resources.constBegin(), end = d->resources.constEnd(); it != end; ++it) {
-        if (wl_resource_get_client((*it).resource) == client->client()) {
-            ret << (*it).resource;
-        }
-    }
-    return ret;
+    return newOutput->getResources(client->newClient);
+
+
+//    for (auto it = d->resources.constBegin(), end = d->resources.constEnd(); it != end; ++it) {
+//        if (wl_resource_get_client((*it).resource) == client->client()) {
+//            ret << (*it).resource;
+//        }
+//    }
+//    return ret;
 }
 
 OutputInterface *OutputInterface::get(wl_resource* native)
 {
-    return Private::get(native);
+    auto* output = Server::Output::get(native->data);
+    return output->legacy;
+
+//    return Private::get(native);
 }
 
 OutputInterface::Private *OutputInterface::d_func() const

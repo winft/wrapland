@@ -85,8 +85,8 @@ protected:
     QThread *m_thread = nullptr;
     EventQueue *m_queue = nullptr;
     ShmPool *m_shmPool = nullptr;
-    Output *m_output1 = nullptr;
-    Output *m_output2 = nullptr;
+    Wrapland::Client::Output *m_output1 = nullptr;
+    Wrapland::Client::Output *m_output2 = nullptr;
     Seat *m_seat = nullptr;
 
 private:

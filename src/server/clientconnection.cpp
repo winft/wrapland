@@ -25,6 +25,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Wayland
 #include <wayland-server.h>
 
+// Remodel
+#include "../../server/client.h"
+#include "../../server/display.h"
+
 namespace Wrapland
 {
 namespace Server
@@ -44,7 +48,7 @@ public:
     QString executablePath;
 
 private:
-    static void destroyListenerCallback(wl_listener *listener, void *data);
+//    static void destroyListenerCallback(wl_listener *listener, void *data);
     ClientConnection *q;
     wl_listener listener;
     static QVector<Private*> s_allClients;
@@ -57,38 +61,40 @@ ClientConnection::Private::Private(wl_client *c, Display *display, ClientConnect
     , display(display)
     , q(q)
 {
-    s_allClients << this;
-    listener.notify = destroyListenerCallback;
-    wl_client_add_destroy_listener(c, &listener);
-    wl_client_get_credentials(client, &pid, &user, &group);
-    executablePath = QFileInfo(QStringLiteral("/proc/%1/exe").arg(pid)).symLinkTarget();
+//    s_allClients << this;
+//    listener.notify = destroyListenerCallback;
+//    wl_client_add_destroy_listener(c, &listener);
+//    wl_client_get_credentials(client, &pid, &user, &group);
+//    executablePath = QFileInfo(QStringLiteral("/proc/%1/exe").arg(pid)).symLinkTarget();
 }
 
 ClientConnection::Private::~Private()
 {
-    if (client) {
-        wl_list_remove(&listener.link);
-    }
-    s_allClients.removeAt(s_allClients.indexOf(this));
+//    if (client) {
+//        wl_list_remove(&listener.link);
+//    }
+//    s_allClients.removeAt(s_allClients.indexOf(this));
 }
 
-void ClientConnection::Private::destroyListenerCallback(wl_listener *listener, void *data)
-{
-    Q_UNUSED(listener)
-    wl_client *client = reinterpret_cast<wl_client*>(data);
-    auto it = std::find_if(s_allClients.constBegin(), s_allClients.constEnd(),
-        [client](Private *c) {
-            return c->client == client;
-        }
-    );
-    Q_ASSERT(it != s_allClients.constEnd());
-    auto p = (*it);
-    auto q = p->q;
-    p->client = nullptr;
-    wl_list_remove(&p->listener.link);
-    emit q->disconnected(q);
-    q->deleteLater();
-}
+//void ClientConnection::Private::destroyListenerCallback(wl_listener *listener, void *data)
+//{
+//    Q_UNUSED(listener);
+//    Q_UNUSED(data);
+//    Q_UNUSED(listener)
+//    wl_client *client = reinterpret_cast<wl_client*>(data);
+//    auto it = std::find_if(s_allClients.constBegin(), s_allClients.constEnd(),
+//        [client](Private *c) {
+//            return c->client == client;
+//        }
+//    );
+//    Q_ASSERT(it != s_allClients.constEnd());
+//    auto p = (*it);
+//    auto q = p->q;
+//    p->client = nullptr;
+//    wl_list_remove(&p->listener.link);
+//    emit q->disconnected(q);
+//    q->deleteLater();
+//}
 
 ClientConnection::ClientConnection(wl_client *c, Display *parent)
     : QObject(parent)
@@ -100,6 +106,7 @@ ClientConnection::~ClientConnection() = default;
 
 void ClientConnection::flush()
 {
+//    newClient->flush();
     if (!d->client) {
         return;
     }
@@ -108,14 +115,16 @@ void ClientConnection::flush()
 
 void ClientConnection::destroy()
 {
-    if (!d->client) {
-        return;
-    }
-    wl_client_destroy(d->client);
+    newClient->destroy();
+//    if (!d->client) {
+//        return;
+//    }
+//    wl_client_destroy(d->client);
 }
 
 wl_resource *ClientConnection::createResource(const wl_interface *interface, quint32 version, quint32 id)
 {
+//    return newClient->createResource(interface, version, id);
     if (!d->client) {
         return nullptr;
     }
@@ -124,6 +133,7 @@ wl_resource *ClientConnection::createResource(const wl_interface *interface, qui
 
 wl_resource *ClientConnection::getResource(quint32 id)
 {
+//    return newClient->getResource(id);
     if (!d->client) {
         return nullptr;
     }
@@ -132,42 +142,42 @@ wl_resource *ClientConnection::getResource(quint32 id)
 
 wl_client *ClientConnection::client()
 {
-    return d->client;
+    return newClient->client();
 }
 
 ClientConnection::operator wl_client*()
 {
-    return d->client;
+    return newClient->client();
 }
 
 ClientConnection::operator wl_client*() const
 {
-    return d->client;
+    return newClient->client();
 }
 
 Display *ClientConnection::display()
 {
-    return d->display;
+    return newClient->display()->legacy;
 }
 
 gid_t ClientConnection::groupId() const
 {
-    return d->group;
+    return newClient->groupId();
 }
 
 pid_t ClientConnection::processId() const
 {
-    return d->pid;
+    return newClient->processId();
 }
 
 uid_t ClientConnection::userId() const
 {
-    return d->user;
+    return newClient->userId();
 }
 
 QString ClientConnection::executablePath() const
 {
-    return d->executablePath;
+    return QString::fromStdString(newClient->executablePath());
 }
 
 }

@@ -35,6 +35,7 @@ namespace Wrapland
 {
 namespace Server
 {
+class Output;
 
 class ClientConnection;
 class Display;
@@ -134,6 +135,8 @@ public:
 
     static OutputInterface *get(wl_resource *native);
 
+    Server::Output* newOutput;
+
 Q_SIGNALS:
     void physicalSizeChanged(const QSize&);
     void globalPositionChanged(const QPoint&);
@@ -159,6 +162,9 @@ Q_SIGNALS:
 private:
     friend class Display;
     explicit OutputInterface(Display *display, QObject *parent = nullptr);
+
+    friend class Server::Output;
+
     class Private;
     Private *d_func() const;
 };

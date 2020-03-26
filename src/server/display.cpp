@@ -60,6 +60,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keystate_interface.h"
 #include "linuxdmabuf_v1_interface.h"
 
+//
+// Remodel
+#include "../../server/client.h"
+#include "../../server/display.h"
+#include "../../server/output.h"
+//
+//
+
+
 #include <QCoreApplication>
 #include <QDebug>
 #include <QAbstractEventDispatcher>
@@ -120,153 +129,104 @@ void Display::Private::installSocketNotifier()
     setRunning(true);
 }
 
-Display::Display(QObject *parent)
+Display::Display(QObject *parent, bool newInvoked)
     : QObject(parent)
     , d(new Private(this))
 {
+    if (!newInvoked) {
+        newDisplay = new Server::D_isplay(parent, true);
+        newDisplay->legacy = this;
+    }
 }
 
 Display::~Display()
 {
-    terminate();
-    if (d->display) {
-        wl_display_destroy(d->display);
+    if (newDisplay) {
+        newDisplay->deleteLegacy = false;
+        delete newDisplay;
     }
 }
 
 void Display::Private::flush()
 {
-    if (!display || !loop) {
-        return;
-    }
-    wl_display_flush_clients(display);
+    q->newDisplay->flush();
+//    if (!display || !loop) {
+//        return;
+//    }
+//    wl_display_flush_clients(display);
 }
 
 void Display::Private::dispatch()
 {
-    if (!display || !loop) {
-        return;
-    }
-    if (wl_event_loop_dispatch(loop, 0) != 0) {
-        qCWarning(WRAPLAND_SERVER) << "Error on dispatching Wayland event loop";
-    }
+    q->newDisplay->dispatch();
+//    if (!display || !loop) {
+//        return;
+//    }
+//    if (wl_event_loop_dispatch(loop, 0) != 0) {
+//        qCWarning(WRAPLAND_SERVER) << "Error on dispatching Wayland event loop";
+//    }
 }
 
 void Display::setSocketName(const QString &name)
 {
-    if (d->socketName == name) {
+    std::string stdName = name.toUtf8().constData();
+
+    if (stdName == newDisplay->socketName()) {
         return;
     }
-    d->socketName = name;
-    emit socketNameChanged(d->socketName);
+    newDisplay->setSocketName(stdName);
+    Q_EMIT socketNameChanged(name);
 }
 
 QString Display::socketName() const
 {
-    return d->socketName;
+    return QString::fromStdString(newDisplay->socketName());
 }
 
 void Display::setAutomaticSocketNaming(bool automaticSocketNaming)
 {
-    if (d->automaticSocketNaming == automaticSocketNaming) {
-        return;
-    }
-    d->automaticSocketNaming = automaticSocketNaming;
-    emit automaticSocketNamingChanged(automaticSocketNaming);
+    Q_UNUSED(automaticSocketNaming);
 }
 
 bool Display::automaticSocketNaming() const
 {
-    return d->automaticSocketNaming;
+    return true;
 }
 
 void Display::start(StartMode mode)
 {
-    Q_ASSERT(!d->running);
-    Q_ASSERT(!d->display);
-    d->display = wl_display_create();
-    if (mode == StartMode::ConnectToSocket) {
-        if (d->automaticSocketNaming) {
-            const char *socket = wl_display_add_socket_auto(d->display);
-            if (socket == nullptr) {
-                qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
-                return;
-            }
-
-            const QString newEffectiveSocketName = QString::fromUtf8(socket);
-            if (d->socketName != newEffectiveSocketName) {
-                d->socketName = newEffectiveSocketName;
-                emit socketNameChanged(d->socketName);
-            }
-        } else if (wl_display_add_socket(d->display, qPrintable(d->socketName)) != 0) {
-            qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
-            return;
-        }
-    }
-
-    d->loop = wl_display_get_event_loop(d->display);
-    d->installSocketNotifier();
+    newDisplay->start(mode == StartMode::ConnectToSocket ?
+                          Server::D_isplay::StartMode::ConnectToSocket :
+                          Server::D_isplay::StartMode::ConnectClientsOnly);
 }
 
 void Display::startLoop()
 {
-    Q_ASSERT(!d->running);
-    Q_ASSERT(d->display);
-    d->installSocketNotifier();
+    newDisplay->startLoop();
 }
 
 void Display::dispatchEvents(int msecTimeout)
 {
-    Q_ASSERT(d->display);
-    if (d->running) {
-        d->dispatch();
-    } else if (d->loop) {
-        wl_event_loop_dispatch(d->loop, msecTimeout);
-        wl_display_flush_clients(d->display);
-    }
+    newDisplay->dispatchEvents(msecTimeout);
 }
 
 void Display::terminate()
 {
-    if (!d->running) {
-        return;
-    }
-
-    // That call is not really necessary because we run our own Qt-embedded event loop and do not
-    // call wl_display_run() in the beginning. That being said leave it in here as a reminder that
-    // there is this possibility.
-    wl_display_terminate(d->display);
-
-    // Then we destroy all remaining clients. There might be clients that have established
-    // a connection but not yet interacted with us in any way.
-    wl_display_destroy_clients(d->display);
-
-    // Globals are also destroyed in wl_display_destroy automatically, but we need to remove all
-    // global interfaces first because otherwise they would call back into the Wayland connection
-    // with wl_global_destroy again. Can we do it differently?
-    emit aboutToTerminate();
-
-    wl_display_destroy(d->display);
-
-    d->display = nullptr;
-    d->loop = nullptr;
-    d->setRunning(false);
+    newDisplay->terminate();
 }
 
 void Display::Private::setRunning(bool r)
 {
-    Q_ASSERT(running != r);
-    running = r;
-    emit q->runningChanged(running);
+//    newDisplay->setRunning(r);
+//    Q_ASSERT(running != r);
+//    running = r;
+//    emit q->runningChanged(running);
 }
 
 OutputInterface *Display::createOutput(QObject *parent)
 {
-    OutputInterface *output = new OutputInterface(this, parent);
-    connect(output, &QObject::destroyed, this, [this,output] { d->outputs.removeAll(output); });
-    connect(this, &Display::aboutToTerminate, output, [this,output] { removeOutput(output); });
-    d->outputs << output;
-    return output;
+    auto* output = newDisplay->createOutput(parent);
+    return output->legacy;
 }
 
 CompositorInterface *Display::createCompositor(QObject *parent)
@@ -561,14 +521,12 @@ KeyStateInterface *Display::createKeyStateInterface(QObject *parent)
 
 void Display::createShm()
 {
-    Q_ASSERT(d->display);
-    wl_display_init_shm(d->display);
+    newDisplay->createShm();
 }
 
 void Display::removeOutput(OutputInterface *output)
 {
-    d->outputs.removeAll(output);
-    delete output;
+    newDisplay->removeOutput(output->newOutput);
 }
 
 void Display::removeOutputDevice(OutputDeviceV1Interface *outputDevice)
@@ -579,27 +537,27 @@ void Display::removeOutputDevice(OutputDeviceV1Interface *outputDevice)
 
 quint32 Display::nextSerial()
 {
-    return wl_display_next_serial(d->display);
+    return newDisplay->nextSerial();
 }
 
 quint32 Display::serial()
 {
-    return wl_display_get_serial(d->display);
+    return newDisplay->serial();
 }
 
 bool Display::isRunning() const
 {
-    return d->running;
+    return newDisplay->running();
 }
 
 Display::operator wl_display*()
 {
-    return d->display;
+    return newDisplay->display();
 }
 
 Display::operator wl_display*() const
 {
-    return d->display;
+    return newDisplay->display();
 }
 
 QList<OutputInterface*> Display::outputs() const
@@ -619,59 +577,35 @@ QVector<SeatInterface*> Display::seats() const
 
 ClientConnection *Display::getConnection(wl_client *client)
 {
-    Q_ASSERT(client);
-    auto it = std::find_if(d->clients.constBegin(), d->clients.constEnd(),
-        [client](ClientConnection *c) {
-            return c->client() == client;
-        }
-    );
-    if (it != d->clients.constEnd()) {
-        return *it;
-    }
-    // no ConnectionData yet, create it
-    auto c = new ClientConnection(client, this);
-    d->clients << c;
-    connect(c, &ClientConnection::disconnected, this,
-        [this] (ClientConnection *c) {
-            const int index = d->clients.indexOf(c);
-            Q_ASSERT(index != -1);
-            d->clients.remove(index);
-            Q_ASSERT(d->clients.indexOf(c) == -1);
-            emit clientDisconnected(c);
-        }
-    );
-    emit clientConnected(c);
-    return c;
+    Server::Client* c = newDisplay->getClient(client);
+    return c->legacy;
 }
 
 QVector< ClientConnection* > Display::connections() const
 {
-    return d->clients;
+    QVector< ClientConnection* > ret;
+    for (auto* client : newDisplay->clients()) {
+        ret << client->legacy;
+    }
+    return ret;
 }
 
 ClientConnection *Display::createClient(int fd)
 {
-    Q_ASSERT(fd != -1);
-    Q_ASSERT(d->display);
-    wl_client *c = wl_client_create(d->display, fd);
-    if (!c) {
-        return nullptr;
-    }
-    return getConnection(c);
+    Server::Client* client = newDisplay->createClient(fd);
+    client->legacy = getConnection(client->client());
+    client->legacy->newClient = client;
+    return client->legacy;
 }
 
 void Display::setEglDisplay(void *display)
 {
-    if (d->eglDisplay != EGL_NO_DISPLAY) {
-        qCWarning(WRAPLAND_SERVER) << "EGLDisplay cannot be changed";
-        return;
-    }
-    d->eglDisplay = (EGLDisplay)display;
+    newDisplay->setEglDisplay(display);
 }
 
 void *Display::eglDisplay() const
 {
-    return d->eglDisplay;
+    return newDisplay->eglDisplay();
 }
 
 }
