@@ -127,7 +127,17 @@
 
         <request name="transform">
             <description summary="transform output_device">
-                Sets the transformation for a given output.
+                Sets the transformation for a given output. This transformation is applied onto the
+                geometry.
+
+                As an example assume the transform is normal, the mode of the output is 3840x2160
+                and the geometry is 1080x1920.
+
+                In this case the geometry can be stretched with factor 1.125 to 1215x2160 and placed
+                according to the compositor's internal policy somewhere horizontally on the output.
+
+                But if the transform is set to 90, 270 or the respective flipped values the geometry
+                can be stretched with factor 2 to 3840x2160 and fill the whole area sideways.
             </description>
             <arg name="output_device" type="object" interface="zkwinft_output_device_v1"
                  summary="output device this transformation change applies to"/>
