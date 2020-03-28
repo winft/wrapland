@@ -79,6 +79,10 @@ Sanitizers build:
     # Tests currently can only run in one thread, see issue #3.
     - dbus-run-session ctest --output-on-failure
 
+  # TODO: Remove again when remodel project is ready to be merged back to master.
+  allow_failure: true
+
+
 Autotests:
   <<: *common-test
   needs:
