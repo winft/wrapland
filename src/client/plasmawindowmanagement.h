@@ -316,37 +316,37 @@ public:
      * @returns Whether the window can be set to the shaded state.
      * @see isShaded
      * @see shadeableChanged
-     * @since 5.22
+     * @since 0.0.522
      */
     bool isShadeable() const;
     /**
      * @returns Whether the window is shaded, that is reduced to the window decoration
      * @see shadedChanged
-     * @since 5.22
+     * @since 0.0.522
      */
     bool isShaded() const;
     /**
      * @returns Whether the window can be moved.
      * @see movableChanged
-     * @since 5.22
+     * @since 0.0.522
      */
     bool isMovable() const;
     /**
      * @returns Whether the window can be resized.
      * @see resizableChanged
-     * @since 5.22
+     * @since 0.0.522
      */
     bool isResizable() const;
     /**
      * @returns Whether the virtual desktop can be changed.
      * @see virtualDesktopChangeableChanged
-     * @since 5.22
+     * @since 0.0.522
      */
     bool isVirtualDesktopChangeable() const;
     /**
      * @returns The process id this window belongs to.
      * or 0 if unset
-     * @since 5.35
+     * @since 0.0.535
      */
     quint32 pid() const;
 
@@ -360,24 +360,24 @@ public:
     void requestClose();
     /**
      * Requests to start an interactive window move operation.
-     * @since 5.22
+     * @since 0.0.522
      */
     void requestMove();
     /**
      * Requests to start an interactive resize operation.
-     * @since 5.22
+     * @since 0.0.522
      */
     void requestResize();
 
     /**
      * Requests the window at this model row index have its keep above state toggled.
-     * @since 5.35
+     * @since 0.0.535
      */
     void requestToggleKeepAbove();
 
     /**
      * Requests the window at this model row index have its keep below state toggled.
-     * @since 5.35
+     * @since 0.0.535
      */
     void requestToggleKeepBelow();
 
@@ -406,7 +406,7 @@ public:
 
     /**
      * Requests the window at this model row index have its shaded state toggled.
-     * @since 5.22
+     * @since 0.0.522
      */
     void requestToggleShaded();
 
@@ -425,14 +425,14 @@ public:
      * window is a top level window and is not a transient window.
      *
      * @see parentWindowChanged
-     * @since 5.24
+     * @since 0.0.524
      **/
     QPointer<PlasmaWindow> parentWindow() const;
 
     /**
      * @returns The window geometry in absolute coordinates.
      * @see geometryChanged
-     * @since 5.25
+     * @since 0.0.525
      **/
     QRect geometry() const;
 
@@ -441,14 +441,14 @@ public:
      * The server may or may not consent.
      * A window can enter more than one virtual desktop.
      *
-     * @since 5.52
+     * @since 0.0.552
      */
     void requestEnterVirtualDesktop(const QString &id);
 
     /**
      * Make the window enter a new virtual desktop. If the server consents the request,
      * it will create a new virtual desktop and assign the window to it.
-     * @since 5.52
+     * @since 0.0.552
      */
     void requestEnterNewVirtualDesktop();
 
@@ -457,7 +457,7 @@ public:
      * The server may or may not consent.
      * If it exits all desktops it will be considered on all of them.
      *
-     * @since 5.52
+     * @since 0.0.552
      */
     void requestLeaveVirtualDesktop(const QString &id);
 
@@ -466,7 +466,7 @@ public:
      * When a desktop gets deleted, it will be automatically removed from this list.
      * If this list is empty, assume it's on all desktops.
      *
-     * @since 5.52
+     * @since 0.0.552
      */
     QStringList plasmaVirtualDesktops() const;
 
@@ -559,31 +559,31 @@ Q_SIGNALS:
     /**
      * The shadeable state changed.
      * @see isShadeable
-     * @since 5.22
+     * @since 0.0.522
      */
     void shadeableChanged();
     /**
      * The shaded state changed.
      * @see isShaded
-     * @since 5.22
+     * @since 0.0.522
      */
     void shadedChanged();
     /**
      * The movable state changed.
      * @see isMovable
-     * @since 5.22
+     * @since 0.0.522
      */
     void movableChanged();
     /**
      * The resizable state changed.
      * @see isResizable
-     * @since 5.22
+     * @since 0.0.522
      */
     void resizableChanged();
     /**
      * The virtual desktop changeable state changed.
      * @see virtualDesktopChangeable
-     * @since 5.22
+     * @since 0.0.522
      */
     void virtualDesktopChangeableChanged();
     /**
@@ -595,20 +595,20 @@ Q_SIGNALS:
     /**
      * This signal is emitted whenever the parent window changes.
      * @see parentWindow
-     * @since 5.24
+     * @since 0.0.524
      **/
     void parentWindowChanged();
     /**
      * This signal is emitted whenever the window geometry changes.
      * @see geometry
-     * @since 5.25
+     * @since 0.0.525
      **/
     void geometryChanged();
 
     /**
      * This signal is emitted when the window has entered a new virtual desktop.
      * The window can be on more than one desktop, or none: then is considered on all of them.
-     * @since 5.46
+     * @since 0.0.546
      */
     void plasmaVirtualDesktopEntered(const QString &id);
 
@@ -616,7 +616,7 @@ Q_SIGNALS:
      * This signal is emitted when the window left a virtual desktop.
      * If the window leaves all desktops, it can be considered on all.
      *
-     * @since 5.46
+     * @since 0.0.546
      */
     void plasmaVirtualDesktopLeft(const QString &id);
 

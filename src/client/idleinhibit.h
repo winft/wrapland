@@ -58,7 +58,7 @@ class IdleInhibitor;
  * pointer as it provides matching cast operators.
  *
  * @see Registry
- * @since 5.41
+ * @since 0.0.541
  **/
 class WRAPLANDCLIENT_EXPORT IdleInhibitManager : public QObject
 {
@@ -141,7 +141,7 @@ private:
  *
  * @see IdleInhibitManager
  * @see Surface
- * @since 5.41
+ * @since 0.0.541
  **/
 class WRAPLANDCLIENT_EXPORT IdleInhibitor : public QObject
 {

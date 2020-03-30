@@ -109,9 +109,9 @@ public:
         Desktop, ///< The surface represents a desktop, normally stacked below all other surfaces
         Panel, ///< The surface represents a panel (dock), normally stacked above normal surfaces
         OnScreenDisplay, ///< The surface represents an on screen display, like a volume changed notification
-        Notification, ///< The surface represents a notification @since 5.24
-        ToolTip, ///< The surface represents a tooltip @since 5.24
-        CriticalNotification, ///< The surface represents a critical notification, like battery is running out @since 5.58
+        Notification, ///< The surface represents a notification @since 0.0.524
+        ToolTip, ///< The surface represents a tooltip @since 0.0.524
+        CriticalNotification, ///< The surface represents a critical notification, like battery is running out @since 0.0.558
     };
     /**
      * @returns The requested role, default value is @c Role::Normal.
@@ -142,7 +142,7 @@ public:
     /**
      * @returns true if this window doesn't want to be listed
      * in a window switcher
-     * @since 5.47
+     * @since 0.0.547
      **/
     bool skipSwitcher() const;
 
@@ -153,7 +153,7 @@ public:
      * @see showAutoHidingPanel
      * @see panelAutoHideHideRequested
      * @see panelAutoHideShowRequested
-     * @since 5.28
+     * @since 0.0.528
      **/
     void hideAutoHidingPanel();
 
@@ -163,7 +163,7 @@ public:
      * @see hideAutoHidingPanel
      * @see panelAutoHideHideRequested
      * @see panelAutoHideShowRequested
-     * @see 5.28
+     * @see 0.0.528
      **/
     void showAutoHidingPanel();
 
@@ -173,7 +173,7 @@ public:
      * By default some PlasmaShell roles do not get focus, but the PlasmaShellSurfaceInterface can
      * request that it wants to have focus. The compositor can use this information to
      * pass focus to the surface.
-     * @since 5.28
+     * @since 0.0.528
      **/
     //TODO KF6 rename to something generic
     bool panelTakesFocus() const;
@@ -218,7 +218,7 @@ Q_SIGNALS:
      * @see hideAutoHidingPanel
      * @see showAutoHidingPanel
      * @see panelAutoHideShowRequested
-     * @since 5.28
+     * @since 0.0.528
      **/
     void panelAutoHideHideRequested();
 
@@ -231,14 +231,14 @@ Q_SIGNALS:
      * @see hideAutoHidingPanel
      * @see showAutoHidingPanel
      * @see panelAutoHideHideRequested
-     * @since 5.28
+     * @since 0.0.528
      **/
     void panelAutoHideShowRequested();
 
     /*
      * Emitted when panelTakesFocus changes
      * @see panelTakesFocus
-     * @since 5.66
+     * @since 0.0.566
      */
     void panelTakesFocusChanged();
 

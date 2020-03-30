@@ -43,7 +43,7 @@ class GenericShellSurface;
 /**
  * Enum describing the different InterfaceVersion encapsulated in this implementation.
  *
- * @since 5.25
+ * @since 0.0.525
  **/
 enum class XdgShellInterfaceVersion
 {
@@ -53,19 +53,19 @@ enum class XdgShellInterfaceVersion
     UnstableV5,
     /**
      * zxdg_shell_v6 (unstable v6)
-     * @since 5.39
+     * @since 0.0.539
      **/
     UnstableV6,
     /**
       xdg_wm_base (stable)
-      @since 5.48
+      @since 0.0.548
       */
     Stable
 };
 
 /**
  * Flags describing how a popup should be reposition if constrained
- * @since 5.39
+ * @since 0.0.539
  */
 enum class PositionerConstraint {
     /**
@@ -98,7 +98,7 @@ Q_DECLARE_FLAGS(PositionerConstraints, PositionerConstraint)
 
 /**
  *
- * @since 5.25
+ * @since 0.0.525
  **/
 class WRAPLANDSERVER_EXPORT XdgShellInterface : public Global
 {
@@ -123,7 +123,7 @@ public:
      * Will result in pong being emitted
      *
      * @returns unique identifier for this request
-     * @since 5.39
+     * @since 0.0.539
      */
     quint32 ping(XdgShellSurfaceInterface * surface);
 
@@ -150,7 +150,7 @@ Q_SIGNALS:
      * Emitted whenever a new popup gets created.
      *
      * @param surface The popup xdg shell surface which got created
-     * @since 5.39
+     * @since 0.0.539
      */
     void xdgPopupCreated(Wrapland::Server::XdgShellPopupInterface *surface);
 
@@ -158,7 +158,7 @@ Q_SIGNALS:
      * Emitted in response to a ping request
      *
      * @param serial unique identifier for the request
-     * @since 5.39
+     * @since 0.0.539
      */
     void pongReceived(quint32 serial);
 
@@ -168,7 +168,7 @@ Q_SIGNALS:
      * eventuallt pingTimeout gets emitted
      *
      * @param serial unique identifier for the request
-     * @since 5.39
+     * @since 0.0.539
      */
     void pingDelayed(quint32 serial);
 
@@ -177,7 +177,7 @@ Q_SIGNALS:
      * and the serve gave up on it
      *
      * @param serial unique identifier for the request
-     * @since 5.39
+     * @since 0.0.539
      */
     void pingTimeout(quint32 serial);
 
@@ -192,7 +192,7 @@ private:
 
 /**
  *
- * @since 5.25
+ * @since 0.0.525
  **/
 class WRAPLANDSERVER_EXPORT XdgShellSurfaceInterface : public Resource
 {
@@ -283,19 +283,19 @@ public:
      * The geometry of the window within the buffer
      *
      * If invalid, the geometry of the bufer should be used instead
-     * @since 5.59
+     * @since 0.0.559
      */
     QRect windowGeometry() const;
 
     /**
      * @returns The minimum size for the window specified by the client.
-     * @since 5.65
+     * @since 0.0.565
      */
     QSize minimumSize() const;
 
     /**
      * @returns The maximum size for the window specified by the client.
-     * @since 5.65
+     * @since 0.0.565
      */
     QSize maximumSize() const;
 
@@ -357,20 +357,20 @@ Q_SIGNALS:
 
     /**
      * Emitted whenever the maximum size hint changes
-     * @since 5.39
+     * @since 0.0.539
      */
     void maxSizeChanged(const QSize &size);
 
     /**
      * Emitted whenever the minimum size hint changes
-     * @since 5.39
+     * @since 0.0.539
      */
     void minSizeChanged(const QSize &size);
 
     /**
      * @brief windowGeometryChanged
      * @param windowGeometry the newly changed windowGeometry
-     * @since 5.59
+     * @since 0.0.559
      */
     void windowGeometryChanged(const QRect &windowGeometry);
 
@@ -385,7 +385,7 @@ private:
 
 /**
  *
- * @since 5.25
+ * @since 0.0.525
  **/
 class WRAPLANDSERVER_EXPORT XdgShellPopupInterface : public Resource
 {
@@ -402,7 +402,7 @@ public:
      * Ask the popup surface to configure itself for the given configuration.
      *
      * @arg rect. The position of the surface relative to the transient parent
-     * @since 5.39
+     * @since 0.0.539
      */
     quint32 configure(const QRect &rect);
 
@@ -425,26 +425,26 @@ public:
     /**
      * The size of the surface that is to be positioned.
      *
-     * @since 5.39
+     * @since 0.0.539
      */
     QSize initialSize() const;
 
     /**
      * The area this popup should be positioned around
-     * @since 5.39
+     * @since 0.0.539
      */
     QRect anchorRect() const;
 
     /**
      * Which edge of the anchor should the popup be positioned around
-     * @since 5.39
+     * @since 0.0.539
      */
     Qt::Edges anchorEdge() const;
 
     /**
      * An additional offset that should be applied to the popup from the anchor rect
      *
-     * @since 5.39
+     * @since 0.0.539
      */
     QPoint anchorOffset() const;
 
@@ -453,7 +453,7 @@ public:
      * i.e if the gravity is "bottom", then then the top of top of the popup will be at the anchor edge
      * if the gravity is top, then the bottom of the popup will be at the anchor edge
      *
-     * @since 5.39
+     * @since 0.0.539
      */
 
     //DAVE left + right is illegal, so this is possible a useless return value? Maybe an enum with 9 entries left, topleft, top, ..
@@ -461,7 +461,7 @@ public:
 
     /**
      * Specifies how the compositor should position the popup if it does not fit in the requested position
-     * @since 5.39
+     * @since 0.0.539
      */
     PositionerConstraints constraintAdjustments() const;
 
@@ -475,7 +475,7 @@ public:
     /**
      * @brief windowGeometryChanged
      * @param windowGeometry the newly changed geometry of the window contents within the buffer
-     * @since 5.59
+     * @since 0.0.559
      */
     QRect windowGeometry()const;
 
@@ -484,7 +484,7 @@ Q_SIGNALS:
      * A configure event with @p serial got acknowledged.
      * Note: XdgV6 only
      * @see configure
-     * @since 5.39
+     * @since 0.0.539
      **/
     void configureAcknowledged(quint32 serial);
 
@@ -493,14 +493,14 @@ Q_SIGNALS:
      *
      * @param seat The seat on which an action triggered the popup
      * @param serial The serial of the action on the seat
-     * @since 5.39
+     * @since 0.0.539
      */
     void grabRequested(Wrapland::Server::SeatInterface *seat, quint32 serial);
 
     /**
      * @brief windowGeometryChanged
      * @param windowGeometry the newly changed windowGeometry
-     * @since 5.59
+     * @since 0.0.559
      */
     void windowGeometryChanged(const QRect &windowGeometry);
 

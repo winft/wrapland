@@ -66,7 +66,7 @@ class PointerSwipeGesture;
  * @see Registry
  * @see PointerSwipeGesture
  * @see PointerPinchGesture
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDCLIENT_EXPORT PointerGestures : public QObject
 {
@@ -155,7 +155,7 @@ private:
  *
  * @see PointerGestures
  * @see PointerPinchGesture
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDCLIENT_EXPORT PointerSwipeGesture : public QObject
 {
@@ -266,7 +266,7 @@ private:
  *
  * @see PointerGestures
  * @see PointerSwipeGesture
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDCLIENT_EXPORT PointerPinchGesture : public QObject
 {

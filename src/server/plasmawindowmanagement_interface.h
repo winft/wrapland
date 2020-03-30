@@ -69,7 +69,7 @@ public:
      *
      * @see createWindow
      * @see windows
-     * @since 5.23
+     * @since 0.0.523
      **/
     void unmapWindow(PlasmaWindowInterface *window);
 
@@ -77,13 +77,13 @@ public:
      * Associate a PlasmaVirtualDesktopManagementInterface to this window management.
      * It's necessary to associate one in orderto use the plasma virtual desktop features
      * of PlasmaWindowInterface, as a window must know what are the deasktops available
-     * @since 5.48
+     * @since 0.0.548
      */
     void setPlasmaVirtualDesktopManagementInterface(PlasmaVirtualDesktopManagementInterface *manager);
 
     /**
      * @returns the PlasmaVirtualDesktopManagementInterface associated to this PlasmaWindowManagementInterface
-     * @since 5.48
+     * @since 0.0.548
      */
     PlasmaVirtualDesktopManagementInterface *plasmaVirtualDesktopManagementInterface() const;
 
@@ -124,24 +124,24 @@ public:
     void setSkipTaskbar(bool skip);
     void setSkipSwitcher(bool skip);
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void setShadeable(bool set);
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void setShaded(bool set);
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void setMovable(bool set);
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void setResizable(bool set);
     /**
      * FIXME: still relevant with new desktops?
-     * @since 5.22
+     * @since 0.0.522
      */
     void setVirtualDesktopChangeable(bool set);
 
@@ -165,7 +165,7 @@ public:
      * Sets this PlasmaWindowInterface as a transient window to @p parentWindow.
      * If @p parentWindow is @c nullptr, the PlasmaWindowInterface is a toplevel
      * window and does not have a parent window.
-     * @since 5.24
+     * @since 0.0.524
      **/
     void setParentWindow(PlasmaWindowInterface *parentWindow);
 
@@ -173,7 +173,7 @@ public:
      * Sets the window @p geometry of this PlasmaWindow.
      *
      * @param geometry The geometry in absolute coordinates
-     * @since 5.25
+     * @since 0.0.525
      **/
     void setGeometry(const QRect &geometry);
 
@@ -186,7 +186,7 @@ public:
      * into which the icon will be serialized.
      *
      * @param icon The new icon
-     * @since 5.28
+     * @since 0.0.528
      **/
     void setIcon(const QIcon &icon);
 
@@ -195,14 +195,14 @@ public:
      * an arbitrary subset of virtual desktops.
      * If it's on none it will be considered on all desktops.
      *
-     * @since 5.48
+     * @since 0.0.548
      */
     void addPlasmaVirtualDesktop(const QString &id);
 
     /**
      * Removes a visrtual desktop from a window
      *
-     * @since 5.48
+     * @since 0.0.548
      */
     void removePlasmaVirtualDesktop(const QString &id);
 
@@ -210,18 +210,18 @@ public:
      * The ids of all the desktops currently associated with this window.
      * When a desktop is deleted it will be automatically removed from this list
      *
-     * @since 5.48
+     * @since 0.0.548
      */
     QStringList plasmaVirtualDesktops() const;
 
 Q_SIGNALS:
     void closeRequested();
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void moveRequested();
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void resizeRequested();
     void activeRequested(bool set);
@@ -239,31 +239,31 @@ Q_SIGNALS:
     void skipSwitcherRequested(bool set);
     QRect minimizedGeometriesChanged();
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void shadeableRequested(bool set);
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void shadedRequested(bool set);
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void movableRequested(bool set);
     /**
-     * @since 5.22
+     * @since 0.0.522
      */
     void resizableRequested(bool set);
     /**
      * FIXME: still relevant with new virtual desktops?
-     * @since 5.22
+     * @since 0.0.522
      */
     void virtualDesktopChangeableRequested(bool set);
 
     /**
      * Emitted when the client wishes this window to enter in a new virtual desktop.
      * The server will decide whether to consent this request
-     * @since 5.52
+     * @since 0.0.552
      */
     void enterPlasmaVirtualDesktopRequested(const QString &desktop);
 
@@ -271,14 +271,14 @@ Q_SIGNALS:
      * Emitted when the client wishes this window to enter in
      * a new virtual desktop to be created for it.
      * The server will decide whether to consent this request
-     * @since 5.52
+     * @since 0.0.552
      */
     void enterNewPlasmaVirtualDesktopRequested();
 
     /**
      * Emitted when the client wishes to remove this window from a virtual desktop.
      * The server will decide whether to consent this request
-     * @since 5.52
+     * @since 0.0.552
      */
     void leavePlasmaVirtualDesktopRequested(const QString &desktop);
 

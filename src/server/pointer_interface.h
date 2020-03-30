@@ -61,7 +61,7 @@ public:
 
     /**
      * @returns The PointerInterface for the @p native resource.
-     * @since 5.28
+     * @since 0.0.528
      **/
     static PointerInterface *get(wl_resource *native);
 

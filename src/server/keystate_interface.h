@@ -35,7 +35,7 @@ class Display;
 /**
  * @brief Exposes key states to wayland clients
  *
- * @since 5.58
+ * @since 0.0.558
  **/
 class WRAPLANDSERVER_EXPORT KeyStateInterface : public Global
 {

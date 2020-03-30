@@ -51,24 +51,24 @@ public:
 
     /**
      * @returns The Drag and Drop actions supported by this DataSourceInterface.
-     * @since 5.42
+     * @since 0.0.542
      **/
     DataDeviceManagerInterface::DnDActions supportedDragAndDropActions() const;
 
     /**
      * The user performed the drop action during a drag and drop operation.
-     * @since 5.42
+     * @since 0.0.542
      **/
     void dropPerformed();
     /**
      * The drop destination finished interoperating with this data source.
-     * @since 5.42
+     * @since 0.0.542
      **/
     void dndFinished();
     /**
      * This event indicates the @p action selected by the compositor after matching the
      * source/destination side actions. Only one action (or none) will be offered here.
-     * @since 5.42
+     * @since 0.0.542
      **/
     void dndAction(DataDeviceManagerInterface::DnDAction action);
 
@@ -76,7 +76,7 @@ Q_SIGNALS:
     void mimeTypeOffered(const QString&);
     /**
      * Emitted whenever this DataSourceInterface changes the supported drag and drop actions
-     * @since 5.42
+     * @since 0.0.542
      **/
     void supportedDragAndDropActionsChanged();
 

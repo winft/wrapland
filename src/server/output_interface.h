@@ -128,7 +128,7 @@ public:
 
     /**
      * @returns all wl_resources bound for the @p client
-     * @since 5.27
+     * @since 0.0.527
      **/
     QVector<wl_resource *> clientResources(ClientConnection *client) const;
 

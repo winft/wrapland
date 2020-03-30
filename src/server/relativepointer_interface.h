@@ -46,7 +46,7 @@ enum class RelativePointerInterfaceVersion {
  * interfaces.
  *
  * @see SeatInterface::relativePointerMotion
- * @since 5.28
+ * @since 0.0.528
  **/
 class WRAPLANDSERVER_EXPORT RelativePointerManagerInterface : public Global
 {

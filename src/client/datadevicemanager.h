@@ -65,7 +65,7 @@ class WRAPLANDCLIENT_EXPORT DataDeviceManager : public QObject
 public:
     /**
      * Drag and Drop actions supported by DataSource and DataOffer.
-     * @since 5.42
+     * @since 0.0.542
      **/
     enum class DnDAction {
         None = 0,

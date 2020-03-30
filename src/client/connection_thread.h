@@ -210,7 +210,7 @@ public:
      *
      * @returns the error code of the last occurred error if any
      * @see protocolError
-     * @since 5.18
+     * @since 0.518.0
      */
     int error() const;
 
@@ -222,7 +222,7 @@ public:
      * @returns true if there was a protocol error
      * @see error
      * @see protocolError
-     * @since 5.18
+     * @since 0.518.0
      */
     bool hasProtocolError() const;
 
@@ -236,13 +236,13 @@ public:
      * @returns the error code of the last occurred protocol error if any
      * @see establishedChanged
      * @see hasProtocolError
-     * @since 5.18
+     * @since 0.518.0
      */
     int protocolError() const;
 
     /**
      * @returns all connections created in this application
-     * @since 5.37
+     * @since 0.0.537
      **/
     static QVector<ConnectionThread*> connections();
 

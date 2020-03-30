@@ -49,27 +49,27 @@ public:
 
     /**
      * @returns The Drag and Drop actions supported by this DataOfferInterface.
-     * @since 5.42
+     * @since 0.0.542
      **/
     DataDeviceManagerInterface::DnDActions supportedDragAndDropActions() const;
 
     /**
      * @returns The preferred Drag and Drop action of this DataOfferInterface.
-     * @since 5.42
+     * @since 0.0.542
      **/
     DataDeviceManagerInterface::DnDAction preferredDragAndDropAction() const;
 
     /**
      * This event indicates the @p action selected by the compositor after matching the
      * source/destination side actions. Only one action (or none) will be offered here.
-     * @since 5.42
+     * @since 0.0.542
      **/
     void dndAction(DataDeviceManagerInterface::DnDAction action);
 
 Q_SIGNALS:
     /**
      * Emitted whenever the supported or preferred Drag and Drop actions changed.
-     * @since 5.42
+     * @since 0.0.542
      **/
     void dragAndDropActionsChanged();
 

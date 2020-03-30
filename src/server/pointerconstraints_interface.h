@@ -38,7 +38,7 @@ class SurfaceInterface;
 /**
  * Enum describing the interface versions the PointerConstraintsInterface can support.
  *
- * @since 5.29
+ * @since 0.0.529
  **/
 enum class PointerConstraintsInterfaceVersion {
     /**
@@ -55,7 +55,7 @@ enum class PointerConstraintsInterfaceVersion {
  * @see ConfinedPointerInterface
  * @see LockedPointerInterface
  * @see Display::createPointerConstraints
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDSERVER_EXPORT PointerConstraintsInterface : public Global
 {
@@ -90,7 +90,7 @@ private:
  * While the lock is active the PointerInterface does no longer emit pointer motion
  * events, but still emits relative pointer motion events.
  *
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDSERVER_EXPORT LockedPointerInterface : public Resource
 {
@@ -138,7 +138,7 @@ public:
      * call this function when the aboutToBeUnbound signal has been emitted.
      *
      * @see cursorPositionHintChanged
-     * @since 5.49
+     * @since 0.0.549
      **/
     QPointF cursorPositionHint() const;
 
@@ -176,7 +176,7 @@ Q_SIGNALS:
      * Emitted whenever the cursor position hint changes.
      * This happens when the parent SurfaceInterface gets committed
      * @see cursorPositionHint
-     * @since 5.49
+     * @since 0.0.549
      **/
     void cursorPositionHintChanged();
 
@@ -212,7 +212,7 @@ private:
  * From compositor side the confinement can be deactivated by setting
  * {@link ConfinedPointerInterface::setConfined} to @c false.
  *
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDSERVER_EXPORT ConfinedPointerInterface : public Resource
 {

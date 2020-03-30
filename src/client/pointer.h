@@ -163,19 +163,19 @@ Q_SIGNALS:
     /**
      * Indicates the source of scroll and other axes.
      *
-     * @since 5.59
+     * @since 0.0.559
      **/
     void axisSourceChanged(Wrapland::Client::Pointer::AxisSource source);
     /**
      * Discrete step information for scroll and other axes.
      *
-     * @since 5.59
+     * @since 0.0.559
      **/
     void axisDiscreteChanged(Wrapland::Client::Pointer::Axis axis, qint32 discreteDelta);
     /**
      * Stop notification for scroll and other axes.
      *
-     * @since 5.59
+     * @since 0.0.559
      **/
     void axisStopped(quint32 time, Wrapland::Client::Pointer::Axis axis);
 
@@ -183,7 +183,7 @@ Q_SIGNALS:
      * Indicates the end of a set of events that logically belong together.
      * A client is expected to accumulate the data in all events within the
      * frame before proceeding.
-     * @since 5.45
+     * @since 0.0.545
      **/
     void frame();
 

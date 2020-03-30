@@ -80,14 +80,14 @@ public:
      * used in drag-and-drop, so it must be performed before
      * @link{DataDevice::startDrag}. Attempting to use the source other than
      * for drag-and-drop will raise a protocol error.
-     * @since 5.42
+     * @since 0.0.542
      **/
     void setDragAndDropActions(DataDeviceManager::DnDActions actions);
 
     /**
      * The currently selected drag and drop action by the compositor.
      * @see selectedDragAndDropActionChanged
-     * @since 5.42
+     * @since 0.0.542
      **/
     DataDeviceManager::DnDAction selectedDragAndDropAction() const;
 
@@ -126,7 +126,7 @@ Q_SIGNALS:
      *
      * Note that the DataSource may still be used in the future and
      * should not be destroyed here.
-     * @since 5.42
+     * @since 0.0.542
      **/
     void dragAndDropPerformed();
 
@@ -138,14 +138,14 @@ Q_SIGNALS:
      *
      * If the action used to perform the operation was "move", the
      * source can now delete the transferred data.
-     * @since 5.42
+     * @since 0.0.542
      */
     void dragAndDropFinished();
 
     /**
      * Emitted whenever the selected drag and drop action changes.
      * @see selectedDragAndDropAction
-     * @since 5.42
+     * @since 0.0.542
      **/
     void selectedDragAndDropActionChanged();
 

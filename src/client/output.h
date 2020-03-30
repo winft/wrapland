@@ -200,7 +200,7 @@ public:
 
     /**
      * @returns The Output for the @p native wl_output. @c null if there is no Output for it.
-     * @since 5.27
+     * @since 0.0.527
      **/
     static Output *get(wl_output *native);
 
