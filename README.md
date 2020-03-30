@@ -2,7 +2,9 @@
 
 [![pipeline status][pipe-status-img]][pipe-status-link]
 
-Wrapland is a Qt-style API to interact with the wayland-client and wayland-server API.
+Wrapland is a Qt/C++ library that wraps and mediates the libwayland client and server API for its
+consumers. Wrapland is an independent part of the [KWinFT project][kwinft-project] with the KWinFT
+window manager being Wrapland's first and most prominent user.
 
 ## Introduction
 
@@ -180,4 +182,5 @@ Please make sure that your project is configured with C++11 support:
 
 [pipe-status-img]: https://gitlab.com/kwinft/wrapland/badges/master/pipeline.svg
 [pipe-status-link]: https://gitlab.com/kwinft/wrapland/-/commits/master
+[kwinft-project]: https://gitlab.com/kwinft
 [plasma-schedule]: https://community.kde.org/Schedules/Plasma_5
