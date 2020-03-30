@@ -70,55 +70,47 @@ public:
         IsMinimized,
         IsKeepAbove,
         IsKeepBelow,
-#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 53)
-        /**
-          @deprecated Since 5.53, use VirtualDesktops
-         */
-        VirtualDesktop,
-#else
-        VirtualDesktop_DEPRECATED_DO_NOT_USE,
-#endif
         IsOnAllDesktops,
         IsDemandingAttention,
         SkipTaskbar,
         /**
-        * @since 5.22
+        * @since 0.0.522
         */
         IsShadeable,
         /**
-        * @since 5.22
+        * @since 0.0.522
         */
         IsShaded,
         /**
-        * @since 5.22
+        * @since 0.0.522
         */
         IsMovable,
         /**
-        * @since 5.22
+        * @since 0.0.522
         */
         IsResizable,
         /**
-        * @since 5.22
+        * @since 0.0.522
         */
         IsVirtualDesktopChangeable,
         /**
-        * @since 5.22
+        * @since 0.0.522
         */
         IsCloseable,
         /**
-        * @since 5.25
+        * @since 0.0.525
         */
         Geometry,
         /**
-         * @since 5.35
+         * @since 0.0.535
          */
         Pid,
         /**
-         * @since 5.47
+         * @since 0.0.547
          */
         SkipSwitcher,
         /**
-         * @since 5.53
+         * @since 0.0.553
          */
         VirtualDesktops
     };
@@ -150,30 +142,25 @@ public:
 
     /**
      * Request an interactive move for the window at this model row index.
-     * @since 5.22
+     * @since 0.0.522
      **/
     Q_INVOKABLE void requestMove(int row);
 
     /**
      * Request an interactive resize for the window at this model row index.
-     * @since 5.22
+     * @since 0.0.522
      **/
     Q_INVOKABLE void requestResize(int row);
 
     /**
-     * Request the window at this model row index be moved to this virtual desktop.
-     **/
-    Q_INVOKABLE void requestVirtualDesktop(int row, quint32 desktop);
-
-    /**
      * Requests the window at this model row index have its keep above state toggled.
-     * @since 5.35
+     * @since 0.0.535
      */
     Q_INVOKABLE void requestToggleKeepAbove(int row);
 
     /**
      * Requests the window at this model row index have its keep above state toggled.
-     * @since 5.35
+     * @since 0.0.535
      */
     Q_INVOKABLE void requestToggleKeepBelow(int row);
 
@@ -196,7 +183,7 @@ public:
 
     /**
      * Requests the window at this model row index have its shaded state toggled.
-     * @since 5.22
+     * @since 0.0.522
      */
     Q_INVOKABLE void requestToggleShaded(int row);
 

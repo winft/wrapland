@@ -289,19 +289,14 @@ set_source_files_properties(${SERVER_GENERATED_SRCS} PROPERTIES SKIP_AUTOMOC ON)
 
 add_library(WraplandServer ${SERVER_LIB_SRCS})
 add_library(Wrapland::Server ALIAS WraplandServer)
+
 ecm_generate_export_header(WraplandServer
     BASE_NAME
         WraplandServer
     EXPORT_FILE_NAME
         Wrapland/Server/wraplandserver_export.h
-    GROUP_BASE_NAME KF
     VERSION ${PROJECT_VERSION}
-    DEPRECATED_BASE_VERSION 0
-    DEPRECATION_VERSIONS 5.5 5.28 5.50 5.52
 )
-# TODO: add support for EXCLUDE_DEPRECATED_BEFORE_AND_AT to all Wrapland libs
-# needs fixing of undeprecated API being still implemented using own deprecated API
-
 
 target_include_directories(WraplandServer INTERFACE
     "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/Wrapland/Server>")

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(Wrapland)
-set(PROJECT_VERSION "5.17.80")
-set(PROJECT_VERSION_MAJOR 5)
+set(PROJECT_VERSION "0.517.90")
+set(PROJECT_VERSION_MAJOR 0)
 
 # ECM setup
 include(FeatureSummary)
@@ -28,7 +28,7 @@ add_feature_info(QCH ${BUILD_QCH} "API documentation in QCH format (for e.g. Qt 
 ecm_setup_version(PROJECT VARIABLE_PREFIX WRAPLAND
                         VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/wrapland_version.h"
                         PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/WraplandConfigVersion.cmake"
-                        SOVERSION 5)
+                        SOVERSION 0)
 
 # Dependencies
 set(REQUIRED_QT_VERSION 5.12.0)

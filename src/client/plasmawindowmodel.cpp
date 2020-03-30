@@ -117,10 +117,6 @@ void PlasmaWindowModel::Private::addWindow(PlasmaWindow *window)
         [window, this] { this->dataChanged(window, IsKeepBelow); }
     );
 
-    QObject::connect(window, &PlasmaWindow::virtualDesktopChanged, q,
-        [window, this] { this->dataChanged(window, VirtualDesktop); }
-    );
-
     QObject::connect(window, &PlasmaWindow::onAllDesktopsChanged, q,
         [window, this] { this->dataChanged(window, IsOnAllDesktops); }
     );
@@ -257,8 +253,6 @@ QVariant PlasmaWindowModel::data(const QModelIndex &index, int role) const
         return window->isKeepAbove();
     } else if (role == IsKeepBelow) {
         return window->isKeepBelow();
-    } else if (role == VirtualDesktop) {
-        return window->virtualDesktop();
     } else if (role == IsOnAllDesktops) {
         return window->isOnAllDesktops();
     } else if (role == IsDemandingAttention) {
@@ -323,13 +317,6 @@ Q_INVOKABLE void PlasmaWindowModel::requestResize(int row)
 {
     if (row >= 0 && row < d->windows.count()) {
         d->windows.at(row)->requestResize();
-    }
-}
-
-Q_INVOKABLE void PlasmaWindowModel::requestVirtualDesktop(int row, quint32 desktop)
-{
-    if (row >= 0 && row < d->windows.count()) {
-        d->windows.at(row)->requestVirtualDesktop(desktop);
     }
 }
 

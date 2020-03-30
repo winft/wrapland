@@ -38,7 +38,7 @@ class TextInputInterface;
 /**
  * Enum describing the different InterfaceVersion encapsulated in this implementation
  *
- * @since 5.23
+ * @since 0.0.523
  **/
 enum class TextInputInterfaceVersion {
     /**
@@ -63,7 +63,7 @@ enum class TextInputInterfaceVersion {
  *
  * To create a TextInputManagerInterface use {@link Display::createTextInputManager}
  *
- * @since 5.23
+ * @since 0.0.523
  **/
 class WRAPLANDSERVER_EXPORT TextInputManagerInterface : public Global
 {
@@ -100,7 +100,7 @@ private:
  *
  * @see TextInputManagerInterface
  * @see SeatInterface
- * @since 5.23
+ * @since 0.0.523
  **/
 class WRAPLANDSERVER_EXPORT TextInputInterface : public Resource
 {

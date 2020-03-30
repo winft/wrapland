@@ -55,7 +55,7 @@ class PlasmaVirtualDesktop;
  *
  * The PlasmaVirtualDesktopManagement can be used as a drop-in replacement for any org_kde_plasma_virtual_desktop_management
  * pointer as it provides matching cast operators.
- * @since 5.52
+ * @since 0.0.552
  *
  * @see Registry
  **/
@@ -128,7 +128,7 @@ public:
 
     /**
      * @returns How many rows the virtual desktops should be laid out into
-     * @since 5.55
+     * @since 0.0.555
      */
     quint32 rows() const;
 
@@ -150,7 +150,7 @@ Q_SIGNALS:
 
     /**
      * Emitted when the number of rows of virtual desktops has been changed by the server
-     * @since 5.55
+     * @since 0.0.555
      */
     void rowsChanged(quint32 rows);
 

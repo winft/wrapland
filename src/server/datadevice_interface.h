@@ -89,7 +89,7 @@ public:
     void updateDragTarget(SurfaceInterface *surface, quint32 serial);
     /**
      * Mark this DataDeviceInterface as being a proxy device for @p remote.
-     * @since 5.56
+     * @since 0.0.556
      **/
     void updateProxy(SurfaceInterface *remote);
 

@@ -36,7 +36,7 @@ namespace Server
 *
 * Users of this class must implement the virtual @method allowInterface method.
 *
-* @since 5.FIXME
+* @since 0.0.5FIXME
 */
 class WRAPLANDSERVER_EXPORT FilteredDisplay : public Display
 {

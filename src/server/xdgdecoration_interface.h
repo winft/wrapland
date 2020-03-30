@@ -37,7 +37,7 @@ class XdgShellSurfaceInterface;
 
 /**
  * @brief The XdgDecorationManagerInterface class
- * @since 5.54
+ * @since 0.0.554
  */
 class WRAPLANDSERVER_EXPORT XdgDecorationManagerInterface : public Global
 {
@@ -54,7 +54,7 @@ private:
 
 /**
  * @brief The XdgDecorationInterface class
- * @since 5.54
+ * @since 0.0.554
  */
 class WRAPLANDSERVER_EXPORT XdgDecorationInterface : public Resource
 {

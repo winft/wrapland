@@ -35,7 +35,7 @@ class Display;
 /**
  * Enum describing the interface versions the IdleInhibitManagerInterface can support.
  *
- * @since 5.41
+ * @since 0.0.541
  **/
 enum class IdleInhibitManagerInterfaceVersion {
     /**
@@ -49,7 +49,7 @@ enum class IdleInhibitManagerInterfaceVersion {
  * SurfaceInterface. Whether a SurfaceInterface inhibits idle is exposes through
  * @link{SurfaceInterface::inhibitsIdle}.
  *
- * @since 5.41
+ * @since 0.0.541
  **/
 class WRAPLANDSERVER_EXPORT IdleInhibitManagerInterface : public Global
 {

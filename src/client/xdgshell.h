@@ -54,7 +54,7 @@ class XdgShellSurface;
  * Builder class describing how a popup should be positioned
  * when created
  *
- * @since 5.39
+ * @since 0.0.539
  */
 class WRAPLANDCLIENT_EXPORT XdgPositioner
 {
@@ -163,7 +163,7 @@ private:
  * pointer as it provides matching cast operators.
  *
  * @see Registry
- * @since 5.25
+ * @since 0.0.525
  **/
 class WRAPLANDCLIENT_EXPORT XdgShell : public QObject
 {
@@ -225,13 +225,13 @@ public:
     /**
      * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the given @p positioner.
      * This method is only valid for Xdgv6 onwards.
-     * @since 5.39
+     * @since 0.0.539
      **/
     XdgShellPopup *createPopup(Surface *surface, XdgShellSurface *parentSurface, const XdgPositioner &positioner, QObject *parent = nullptr);
 
     /**
      * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the given @p positioner.
-     * @since 5.39
+     * @since 0.0.539
      **/
     XdgShellPopup *createPopup(Surface *surface, XdgShellPopup *parentSurface, const XdgPositioner &positioner, QObject *parent = nullptr);
 
@@ -267,7 +267,7 @@ private:
 
 /**
  *
- * @since 5.25
+ * @since 0.0.525
  **/
 class WRAPLANDCLIENT_EXPORT XdgShellSurface : public QObject
 {
@@ -427,19 +427,19 @@ public:
 
     /**
      * Set this surface to have a given maximum size
-     * @since 5.39
+     * @since 0.0.539
      */
     void setMaxSize(const QSize &size);
 
     /**
      * Set this surface to have a given minimum size
-     * @since 5.39
+     * @since 0.0.539
      */
     void setMinSize(const QSize &size);
 
     /**
      * Sets the position of the window contents within the buffer
-     * @since 5.59
+     * @since 0.0.559
      */
     void setWindowGeometry(const QRect &windowGeometry);
 
@@ -486,7 +486,7 @@ private:
  * that will be dismissed when the user dismisses the popup. This can
  * be done by the user clicking outside the surface, using the keyboard,
  * or even locking the screen through closing the lid or a timeout.
- * @since 5.25
+ * @since 0.0.525
  **/
 class WRAPLANDCLIENT_EXPORT XdgShellPopup : public QObject
 {
@@ -499,16 +499,15 @@ public:
      * When using XdgShell::createXdgShellPopup there is no need to call this
      * method.
      *
-     * @deprecated Since 5.49. This was for XDGShellV5, this is now deprecated
+     * @deprecated Since 0.0.549. This was for XDGShellV5, this is now deprecated
      **/
-    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 49, "Use XDGShell version >5")
     void setup(xdg_popup *xdgpopupv5);
 
     /**
      * Setup this XdgShellPopup to manage the @p xdgpopupv6 on associated @p xdgsurfacev6
      * When using XdgShell::createXdgShellPopup there is no need to call this
      * method.
-     * @since 5.39
+     * @since 0.0.539
      **/
     void setup(zxdg_surface_v6 *xdgsurfacev6, zxdg_popup_v6 *xdgpopup6);
 
@@ -516,7 +515,7 @@ public:
      * Setup this XdgShellPopup to manage the @p xdgpopupv on associated @p xdgsurface
      * When using XdgShell::createXdgShellPopup there is no need to call this
      * method.
-     * @since 5.XDGSTABLE
+     * @since 0.0.5XDGSTABLE
      **/
     void setup(xdg_surface *xdgsurface, xdg_popup *xdgpopup);
 
@@ -542,7 +541,7 @@ public:
 
     /**
      * Requests a grab on this popup
-     * @since 5.39
+     * @since 0.0.539
      */
     void requestGrab(Seat *seat, quint32 serial);
 
@@ -552,13 +551,13 @@ public:
      * must make an ackConfigure request sometime before the commit
      * request, passing along the @p serial of the configure event.
      * @see configureRequested
-     * @since 5.56
+     * @since 0.0.556
      **/
     void ackConfigure(quint32 serial);
 
     /**
      * Sets the position of the window contents within the buffer
-     * @since 5.59
+     * @since 0.0.559
      */
     void setWindowGeometry(const QRect &windowGeometry);
 
@@ -582,7 +581,7 @@ Q_SIGNALS:
     /**
      * Emitted when the server has configured the popup with the final location of @p relativePosition
      * This is emitted for V6 surfaces only
-     * @since 5.39
+     * @since 0.0.539
      **/
     void configureRequested(const QRect &relativePosition, quint32 serial);
 

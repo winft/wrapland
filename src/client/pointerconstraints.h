@@ -64,7 +64,7 @@ class Pointer;
  * pointer as it provides matching cast operators.
  *
  * @see Registry
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDCLIENT_EXPORT PointerConstraints : public QObject
 {
@@ -239,7 +239,7 @@ private:
  * deleted.
  *
  * @see PointerConstraints::lockedPointer
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDCLIENT_EXPORT LockedPointer : public QObject
 {
@@ -340,7 +340,7 @@ private:
  * emitted. The ConfinedPointer object is at this point defunct and should
  * be deleted.
  * @see PointerConstraints::confinePointer
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDCLIENT_EXPORT ConfinedPointer : public QObject
 {

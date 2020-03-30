@@ -70,7 +70,7 @@ public:
      * @see uninhibit
      * @see isInhibited
      * @see inhibitedChanged
-     * @since 5.41
+     * @since 0.0.541
      **/
     void inhibit();
 
@@ -81,7 +81,7 @@ public:
      * @see inhibit
      * @see isInhibited
      * @see inhibitedChanged
-     * @since 5.41
+     * @since 0.0.541
      **/
     void uninhibit();
 
@@ -90,7 +90,7 @@ public:
      * @see inhibit
      * @see uninhibit
      * @see inhibitedChanged
-     * @since 5.41
+     * @since 0.0.541
      **/
     bool isInhibited() const;
 
@@ -99,7 +99,7 @@ public:
      * This means the same action is performed as if the user interacted with
      * an input device on the SeatInterface.
      * Idle timeouts are resumed and the idle time gets restarted.
-     * @since 5.42
+     * @since 0.0.542
      **/
     void simulateUserActivity();
 
@@ -109,7 +109,7 @@ Q_SIGNALS:
      * @see inhibit
      * @see uninhibit
      * @see isInhibited
-     * @since 5.41
+     * @since 0.0.541
      **/
     void inhibitedChanged();
 

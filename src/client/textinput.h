@@ -49,7 +49,7 @@ class Seat;
  * @li wl_text_input
  * @li zwp_text_input_v2
  *
- * @since 5.23
+ * @since 0.0.523
  **/
 class WRAPLANDCLIENT_EXPORT TextInput : public QObject
 {
@@ -426,7 +426,7 @@ protected:
  *
  * The only task of a TextInputManager is to create TextInput for a given Seat.
  *
- * @since 5.23
+ * @since 0.0.523
  **/
 class WRAPLANDCLIENT_EXPORT TextInputManager : public QObject
 {

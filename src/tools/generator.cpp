@@ -433,7 +433,7 @@ void Generator::startGenerateServerHeaderFile()
 "/**\n"
 " * Enum describing the interface versions the %1 can support.\n"
 " *\n"
-" * @since 5.XX\n"
+" * @since 0.0.5XX\n"
 " **/\n"
 "enum class %1Version {\n"
 "    /**\n"

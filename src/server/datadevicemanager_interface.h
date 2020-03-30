@@ -46,7 +46,7 @@ public:
 
     /**
      * Drag and Drop actions supported by the DataSourceInterface.
-     * @since 5.XX
+     * @since 0.0.5XX
      **/
     enum class DnDAction {
         None = 0,

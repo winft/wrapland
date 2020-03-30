@@ -121,7 +121,7 @@ public:
     /**
      * Request an absolute pointer motion to @p pos position.
      *
-     * @since 5.54
+     * @since 0.0.554
      **/
     void requestPointerMoveAbsolute(const QPointF &pos);
     /**
@@ -166,7 +166,7 @@ public:
      * @param pos The global position of the touch point
      * @see requestTouchMotion
      * @see requestTouchUp
-     * @since 5.23
+     * @since 0.0.523
      **/
     void requestTouchDown(quint32 id, const QPointF &pos);
     /**
@@ -174,24 +174,24 @@ public:
      * @param id The id to identify the touch point
      * @param pos The global position of the touch point
      * @see requestTouchDown
-     * @since 5.23
+     * @since 0.0.523
      **/
     void requestTouchMotion(quint32 id, const QPointF &pos);
     /**
      * Requests a touch up of the touch point identified by @p id.
      * @param id The id to identify the touch point
-     * @since 5.23
+     * @since 0.0.523
      **/
     void requestTouchUp(quint32 id);
     /**
      * Requests to cancel the current touch event sequence.
-     * @since 5.23
+     * @since 0.0.523
      **/
     void requestTouchCancel();
     /**
      * Requests a touch frame. This allows to manipulate multiple touch points in one
      * event and notify that the set of touch events for the current frame are finished.
-     * @since 5.23
+     * @since 0.0.523
      **/
     void requestTouchFrame();
 
@@ -199,14 +199,14 @@ public:
      * Request a keyboard key press.
      * @param linuxButton The button code as defined in linux/input-event-codes.h
      *
-     * @since 5.63
+     * @since 0.0.563
      **/
     void requestKeyboardKeyPress(quint32 linuxKey);
     /**
      * Request a keyboard button release.
      * @param linuxButton The button code as defined in linux/input-event-codes.h
      *
-     * @since 5.63
+     * @since 0.0.563
      **/
     void requestKeyboardKeyRelease(quint32 linuxKey);
 

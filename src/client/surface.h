@@ -146,13 +146,13 @@ public:
     /**
      * Mark @p rect in buffer coordinates as damaged for the next frame.
      * @see damage
-     * @since 5.59
+     * @since 0.0.559
      **/
     void damageBuffer(const QRect &rect);
     /**
      * Mark @p region in buffer coordinates as damaged for the next frame.
      * @see damage
-     * @since 5.59
+     * @since 0.0.559
      **/
     void damageBuffer(const QRegion &region);
     /**
@@ -217,13 +217,13 @@ public:
      *
      * @see scale
      * @see commit
-     * @since 5.22
+     * @since 0.0.522
      **/
     void setScale(qint32 scale);
     /**
      * @returns The current scale factor, if not explicitly set it's @c 1.
      * @see setScale
-     * @since 5.22
+     * @since 0.0.522
      **/
     qint32 scale() const;
 
@@ -240,7 +240,7 @@ public:
      * @returns All Outputs the Surface is on, may be none.
      * @see outputEntered
      * @see outputLeft
-     * @since 5.27
+     * @since 0.0.527
      **/
     QVector<Output *> outputs() const;
 
@@ -272,7 +272,7 @@ Q_SIGNALS:
      * @param o The Output the Surface intersects with
      * @see outputLeft
      * @see outputs
-     * @since 5.27
+     * @since 0.0.527
      **/
     void outputEntered(Wrapland::Client::Output *o);
 
@@ -283,7 +283,7 @@ Q_SIGNALS:
      * @param o The Output the Surface no longer intersects with
      * @see outputEntered
      * @see outputs
-     * @since 5.27
+     * @since 0.0.527
      **/
     void outputLeft(Wrapland::Client::Output *o);
 
