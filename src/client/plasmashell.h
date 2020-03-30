@@ -210,9 +210,9 @@ public:
         Desktop, ///< The Surface represents a desktop, normally stacked below all other surfaces
         Panel, ///< The Surface represents a panel (dock), normally stacked above normal surfaces
         OnScreenDisplay, ///< The Surface represents an on screen display, like a volume changed notification
-        Notification, ///< The Surface represents a notification @since 5.24
-        ToolTip, ///< The Surface represents a tooltip @since 5.24
-        CriticalNotification, ///< The Surface represents a critical notification, like battery is running out @since 5.58
+        Notification, ///< The Surface represents a notification @since 0.0.524
+        ToolTip, ///< The Surface represents a tooltip @since 0.0.524
+        CriticalNotification, ///< The Surface represents a critical notification, like battery is running out @since 0.0.558
     };
     /**
      * Changes the requested Role to @p role.
@@ -256,7 +256,7 @@ public:
     /**
      * Setting this bit on a window will indicate it does not prefer
      * to be included in a window switcher.
-     * @since 5.47
+     * @since 0.0.547
      */
     void setSkipSwitcher(bool skip);
 
@@ -271,7 +271,7 @@ public:
      * @see autoHidePanelHidden
      * @see autoHidePanelShown
      * @see requestShowAutoHidingPanel
-     * @since 5.28
+     * @since 0.0.528
      **/
     void requestHideAutoHidingPanel();
 
@@ -284,7 +284,7 @@ public:
      * @see autoHidePanelHidden
      * @see autoHidePanelShown
      * @see requestHideAutoHidingPanel
-     * @since 5.28
+     * @since 0.0.528
      **/
     void requestShowAutoHidingPanel();
 
@@ -295,7 +295,7 @@ public:
      * can be instructed to also pass focus.
      *
      * @param takesFocus Set to @c true if the surface should gain focus.
-     * @since 5.28
+     * @since 0.0.528
      **/
     //KF6 TODO rename to make it generic
     void setPanelTakesFocus(bool takesFocus);
@@ -306,7 +306,7 @@ Q_SIGNALS:
      * @see requestHideAutoHidingPanel
      * @see autoHidePanelShown
      * @see requestShowAutoHidingPanel
-     * @since 5.28
+     * @since 0.0.528
      **/
     void autoHidePanelHidden();
 
@@ -315,7 +315,7 @@ Q_SIGNALS:
      * @see requestHideAutoHidingPanel
      * @see autoHidePanelHidden
      * @see requestShowAutoHidingPanel
-     * @since 5.28
+     * @since 0.0.528
      **/
     void autoHidePanelShown();
 

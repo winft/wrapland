@@ -102,16 +102,8 @@ public:
     QRegion damage() const;
     QRegion opaque() const;
     QRegion input() const;
-#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 5)
     /**
-     * Use Surface::inputIsInfinite instead.
-     * @deprecated Since 5.5, use inputIsInfinite
-     */
-    WRAPLANDSERVER_DEPRECATED_VERSION(5, 5, "Use SurfaceInterface::inputIsInfinite()")
-    bool inputIsInfitine() const;
-#endif
-    /**
-     * Replaces Surface::inputIsInfitine instead.
+     *
      * @since 5.5
      */
     bool inputIsInfinite() const;
@@ -169,7 +161,7 @@ public:
 
     /**
      * @returns The Viewport for this Surface.
-     * @since 5.18
+     * @since 0.518.0
      **/
     QPointer<ViewportInterface> viewport() const;
 
@@ -180,7 +172,7 @@ public:
      * mapped if it has a BufferInterface attached and the parent SurfaceInterface is mapped.
      *
      * @returns Whether the SurfaceInterface is currently mapped
-     * @since 5.22
+     * @since 0.0.522
      **/
     bool isMapped() const;
 
@@ -200,7 +192,7 @@ public:
      * @returns Combined damage since last call to resetTrackedDamage
      * @see damage
      * @see resetTrackedDamage
-     * @since 5.22
+     * @since 0.0.522
      **/
     QRegion trackedDamage() const;
 
@@ -208,7 +200,7 @@ public:
      * Reset the damage tracking. The compositor should invoke this method once it updated
      * it's internal state and processed the current damage.
      * @see trackedDamage
-     * @since 5.22
+     * @since 0.0.522
      **/
     void resetTrackedDamage();
 
@@ -222,7 +214,7 @@ public:
      *
      * @param position The position in surface-local coordinates
      * @returns Child surface at the given @p position or surface itself at the position, might be @c nullptr
-     * @since 5.22
+     * @since 0.0.522
      **/
     SurfaceInterface *surfaceAt(const QPointF &position);
 
@@ -237,7 +229,7 @@ public:
      *
      * @param position The position in surface-local coordinates
      * @returns Input receiving child surface at the given @p position or surface itself at the position, might be @c nullptr
-     * @since 5.52
+     * @since 0.0.552
      **/
     SurfaceInterface *inputSurfaceAt(const QPointF &position);
 
@@ -248,35 +240,35 @@ public:
      * an OutputInterface by e.g. getting (un)mapped, resized, moved, etc.
      *
      * @see outputs
-     * @since 5.27
+     * @since 0.0.527
      **/
     void setOutputs(const QVector<OutputInterface *> &outputs);
 
     /**
      * @returns All OutputInterfaces the SurfaceInterface is on.
      * @see setOutputs
-     * @since 5.27
+     * @since 0.0.527
      **/
     QVector<OutputInterface *> outputs() const;
 
     /**
      * Pointer confinement installed on this SurfaceInterface.
      * @see pointerConstraintsChanged
-     * @since 5.29
+     * @since 0.0.529
      **/
     QPointer<ConfinedPointerInterface> confinedPointer() const;
 
     /**
      * Pointer lock installed on this SurfaceInterface.
      * @see pointerConstraintsChanged
-     * @since 5.29
+     * @since 0.0.529
      **/
     QPointer<LockedPointerInterface> lockedPointer() const;
 
     /**
      * @returns Whether this SurfaceInterface wants idle to be inhibited on the Output it is shown
      * @see inhibitsIdleChanged
-     * @since 5.41
+     * @since 0.0.541
      **/
     bool inhibitsIdle() const;
 
@@ -296,18 +288,18 @@ public:
      *
      * Setting a data proxy is only allowed when the client owning this surface
      * has not created a data device itself.
-     * @since 5.56
+     * @since 0.0.556
      **/
     void setDataProxy(SurfaceInterface *surface);
     /**
      * Returns the data proxy of this SurfaceInterface or null if there
      * is none set.
-     * @since 5.56
+     * @since 0.0.556
      **/
     SurfaceInterface* dataProxy() const;
     /**
      * Returns the source rectangle. If none is set the returned rectangle is not valid.
-     * @since 5.18
+     * @since 0.518.0
      **/
     QRectF sourceRectangle() const;
 
@@ -350,12 +342,12 @@ Q_SIGNALS:
      **/
     void contrastChanged();
     /**
-     * @since 5.18
+     * @since 0.518.0
      **/
     void sourceRectangleChanged();
     /**
      * Emitted whenever the tree of sub-surfaces changes in a way which requires a repaint.
-     * @since 5.22
+     * @since 0.0.522
      **/
     void subSurfaceTreeChanged();
 
@@ -367,14 +359,14 @@ Q_SIGNALS:
      *
      * @see confinedPointer
      * @see lockedPointer
-     * @since 5.29
+     * @since 0.0.529
      **/
     void pointerConstraintsChanged();
 
     /**
      * Emitted whenever the SurfaceInterface starts/ends to inhibit idle.
      * @see inhibitsIdle
-     * @since 5.41
+     * @since 0.0.541
      **/
     void inhibitsIdleChanged();
 
@@ -383,7 +375,7 @@ Q_SIGNALS:
      *
      * This signal is emitted after all the relevant damage and xyzChanged signals
      * for this commit are emitted.
-     * @since 5.54
+     * @since 0.0.554
      **/
     void committed();
 

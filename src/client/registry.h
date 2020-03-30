@@ -172,25 +172,25 @@ public:
         OutputManagementV1, ///< Refers to the zkwinft_output_management_v1 interface
         OutputDeviceV1,     ///< Refers to the zkwinft_output_device_v1 interface
         ServerSideDecorationManager, ///< Refers to org_kde_kwin_server_decoration_manager
-        TextInputManagerUnstableV0, ///< Refers to wl_text_input_manager, @since 5.23
-        TextInputManagerUnstableV2, ///< Refers to zwp_text_input_manager_v2, @since 5.23
-        XdgShellUnstableV5, ///< Refers to xdg_shell (unstable version 5), @since 5.25
-        RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since 5.28
-        PointerGesturesUnstableV1, ///< Refers to zwp_pointer_gestures_v1, @since 5.29
-        PointerConstraintsUnstableV1, ///< Refers to zwp_pointer_constraints_v1, @since 5.29
-        XdgExporterUnstableV2, ///< refers to zxdg_exporter_v2, @since 5.40
-        XdgImporterUnstableV2, ///< refers to zxdg_importer_v2, @since 5.40
-        XdgShellUnstableV6, ///< Refers to zxdg_shell_v6 (unstable version 6), @since 5.39
-        IdleInhibitManagerUnstableV1, ///< Refers to zwp_idle_inhibit_manager_v1 (unstable version 1), @since 5.41
-        AppMenu, ///Refers to org_kde_kwin_appmenu @since 5.42
-        ServerSideDecorationPalette, ///Refers to org_kde_kwin_server_decoration_palette_manager @since 5.42
-        RemoteAccessManager, ///< Refers to org_kde_kwin_remote_access_manager interface, @since 5.45
-        PlasmaVirtualDesktopManagement, ///< Refers to org_kde_plasma_virtual_desktop_management interface @since 5.52
-        XdgOutputUnstableV1, ///refers to zxdg_output_v1, @since 5.47
-        XdgShellStable, ///refers to xdg_wm_base @since 5.48
-        XdgDecorationUnstableV1, ///refers to zxdg_decoration_manager_v1, @since 5.54
-        Keystate,///<refers to org_kwin_keystate, @since 5.57
-        Viewporter, ///< Refers to wp_viewporter, @since 5.18
+        TextInputManagerUnstableV0, ///< Refers to wl_text_input_manager, @since 0.0.523
+        TextInputManagerUnstableV2, ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
+        XdgShellUnstableV5, ///< Refers to xdg_shell (unstable version 5), @since 0.0.525
+        RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since 0.0.528
+        PointerGesturesUnstableV1, ///< Refers to zwp_pointer_gestures_v1, @since 0.0.529
+        PointerConstraintsUnstableV1, ///< Refers to zwp_pointer_constraints_v1, @since 0.0.529
+        XdgExporterUnstableV2, ///< refers to zxdg_exporter_v2, @since 0.0.540
+        XdgImporterUnstableV2, ///< refers to zxdg_importer_v2, @since 0.0.540
+        XdgShellUnstableV6, ///< Refers to zxdg_shell_v6 (unstable version 6), @since 0.0.539
+        IdleInhibitManagerUnstableV1, ///< Refers to zwp_idle_inhibit_manager_v1 (unstable version 1), @since 0.0.541
+        AppMenu, ///Refers to org_kde_kwin_appmenu @since 0.0.542
+        ServerSideDecorationPalette, ///Refers to org_kde_kwin_server_decoration_palette_manager @since 0.0.542
+        RemoteAccessManager, ///< Refers to org_kde_kwin_remote_access_manager interface, @since 0.0.545
+        PlasmaVirtualDesktopManagement, ///< Refers to org_kde_plasma_virtual_desktop_management interface @since 0.0.552
+        XdgOutputUnstableV1, ///refers to zxdg_output_v1, @since 0.0.547
+        XdgShellStable, ///refers to xdg_wm_base @since 0.0.548
+        XdgDecorationUnstableV1, ///refers to zxdg_decoration_manager_v1, @since 0.0.554
+        Keystate,///<refers to org_kwin_keystate, @since 0.0.557
+        Viewporter, ///< Refers to wp_viewporter, @since 0.518.0
     };
     explicit Registry(QObject *parent = nullptr);
     virtual ~Registry();
@@ -395,7 +395,7 @@ public:
      *
      * Prefer using createPlasmaShell instead.
      * @see createPlasmaShell
-     * @since 5.52
+     * @since 0.0.552
      **/
     org_kde_plasma_virtual_desktop_management *bindPlasmaVirtualDesktopManagement(uint32_t name, uint32_t version) const;
     /**
@@ -405,7 +405,7 @@ public:
      *
      * Prefer using createPlasmaWindowManagement instead.
      * @see createPlasmaWindowManagement
-     * @since 5.46
+     * @since 0.0.546
      **/
     org_kde_plasma_window_management *bindPlasmaWindowManagement(uint32_t name, uint32_t version) const;
     /**
@@ -435,7 +435,7 @@ public:
      *
      * Prefer using createRemoteAccessManager instead.
      * @see createRemoteAccessManager
-     * @since 5.45
+     * @since 0.0.545
      **/
     org_kde_kwin_remote_access_manager *bindRemoteAccessManager(uint32_t name, uint32_t version) const;
     /**
@@ -515,7 +515,7 @@ public:
      *
      * Prefer using createTextInputManager instead.
      * @see createTextInputManager
-     * @since 5.23
+     * @since 0.0.523
      **/
     wl_text_input_manager *bindTextInputManagerUnstableV0(uint32_t name, uint32_t version) const;
     /**
@@ -525,7 +525,7 @@ public:
      *
      * Prefer using createTextInputManager instead.
      * @see createTextInputManager
-     * @since 5.23
+     * @since 0.0.523
      **/
     zwp_text_input_manager_v2 *bindTextInputManagerUnstableV2(uint32_t name, uint32_t version) const;
     /**
@@ -535,7 +535,7 @@ public:
      *
      * Prefer using createViewporter instead.
      * @see createViewporter
-     * @since 5.18
+     * @since 0.518.0
      **/
     wp_viewporter *bindViewporter(uint32_t name, uint32_t version) const;
     /**
@@ -545,7 +545,7 @@ public:
      *
      * Prefer using createXdgShell instead.
      * @see createXdgShell
-     * @since 5.25
+     * @since 0.0.525
      **/
     xdg_shell *bindXdgShellUnstableV5(uint32_t name, uint32_t version) const;
     /**
@@ -555,7 +555,7 @@ public:
      *
      * Prefer using createXdgShell instead.
      * @see createXdgShell
-     * @since 5.39
+     * @since 0.0.539
      **/
     zxdg_shell_v6 *bindXdgShellUnstableV6(uint32_t name, uint32_t version) const;
     /**
@@ -565,7 +565,7 @@ public:
      *
      * Prefer using createXdgShell instead.
      * @see createXdgShell
-     * @since 5.39
+     * @since 0.0.539
      **/
     xdg_wm_base *bindXdgShellStable(uint32_t name, uint32_t version) const;
     /**
@@ -575,7 +575,7 @@ public:
      *
      * Prefer using createRelativePointerManager instead.
      * @see createRelativePointerManager
-     * @since 5.28
+     * @since 0.0.528
      **/
     zwp_relative_pointer_manager_v1 *bindRelativePointerManagerUnstableV1(uint32_t name, uint32_t version) const;
     /**
@@ -585,7 +585,7 @@ public:
      *
      * Prefer using createPointerGestures instead.
      * @see createPointerGestures
-     * @since 5.29
+     * @since 0.0.529
      **/
     zwp_pointer_gestures_v1 *bindPointerGesturesUnstableV1(uint32_t name, uint32_t version) const;
     /**
@@ -595,7 +595,7 @@ public:
      *
      * Prefer using createPointerConstraints instead.
      * @see createPointerConstraints
-     * @since 5.29
+     * @since 0.0.529
      **/
     zwp_pointer_constraints_v1 *bindPointerConstraintsUnstableV1(uint32_t name, uint32_t version) const;
 
@@ -606,7 +606,7 @@ public:
      * @c null will be returned.
      *
      * Prefer using createXdgExporter
-     * @since 5.40
+     * @since 0.0.540
      */
     zxdg_exporter_v2 *bindXdgExporterUnstableV2(uint32_t name, uint32_t version) const;
 
@@ -617,7 +617,7 @@ public:
      * @c null will be returned.
      *
      * Prefer using createXdgImporter
-     * @since 5.40
+     * @since 0.0.540
      */
     zxdg_importer_v2 *bindXdgImporterUnstableV2(uint32_t name, uint32_t version) const;
 
@@ -627,7 +627,7 @@ public:
      * @c null will be returned.
      *
      * Prefer using createIdleInhibitManager
-     * @since 5.41
+     * @since 0.0.541
      */
     zwp_idle_inhibit_manager_v1 *bindIdleInhibitManagerUnstableV1(uint32_t name, uint32_t version) const;
 
@@ -638,7 +638,7 @@ public:
      *
      * Prefer using createAppMenuManager instead.
      * @see createAppMenuManager
-     * @since 5.42
+     * @since 0.0.542
      **/
     org_kde_kwin_appmenu_manager *bindAppMenuManager(uint32_t name, uint32_t version) const;
 
@@ -649,7 +649,7 @@ public:
      *
      * Prefer using createServerSideDecorationPaletteManager instead.
      * @see createServerSideDecorationPaletteManager
-     * @since 5.42
+     * @since 0.0.542
      **/
     org_kde_kwin_server_decoration_palette_manager *bindServerSideDecorationPaletteManager(uint32_t name, uint32_t version) const;
 
@@ -660,7 +660,7 @@ public:
      *
      * Prefer using createXdgOutputManager instead.
      * @see createXdgOutputManager
-     * @since 5.47
+     * @since 0.0.547
      **/
     zxdg_output_manager_v1 *bindXdgOutputUnstableV1(uint32_t name, uint32_t version) const;
 
@@ -671,7 +671,7 @@ public:
      *
      * Prefer using createXdgDecorationManager instead.
      * @see createXdgDecorationManager
-     * @since 5.54
+     * @since 0.0.554
      **/
     zxdg_decoration_manager_v1 *bindXdgDecorationUnstableV1(uint32_t name, uint32_t version) const;
 
@@ -862,7 +862,7 @@ public:
      * @param parent The parent for PlasmaShell
      *
      * @returns The created PlasmaShell.
-     * @since 5.52
+     * @since 0.0.552
      **/
     PlasmaVirtualDesktopManagement *createPlasmaVirtualDesktopManagement(quint32 name, quint32 version, QObject *parent = nullptr);
     /**
@@ -926,7 +926,7 @@ public:
      * @param parent The parent for RemoteAccessManager
      *
      * @returns The created RemoteAccessManager.
-     * @since 5.45
+     * @since 0.0.545
      **/
     RemoteAccessManager *createRemoteAccessManager(quint32 name, quint32 version, QObject *parent = nullptr);
     /**
@@ -1057,7 +1057,7 @@ public:
      * @param parent The parent for the TextInputManager
      *
      * @returns The created TextInputManager
-     * @since 5.23
+     * @since 0.0.523
      **/
     TextInputManager *createTextInputManager(quint32 name, quint32 version, QObject *parent = nullptr);
     /**
@@ -1073,7 +1073,7 @@ public:
      * @param parent The parent for the Viewporter
      *
      * @returns The created Viewporter
-     * @since 5.18
+     * @since 0.518.0
      **/
     Viewporter *createViewporter(quint32 name, quint32 version, QObject *parent = nullptr);
     /**
@@ -1091,7 +1091,7 @@ public:
      * @param parent The parent for the XdgShell
      *
      * @returns The created XdgShell
-     * @since 5.25
+     * @since 0.0.525
      **/
     XdgShell *createXdgShell(quint32 name, quint32 version, QObject *parent = nullptr);
     /**
@@ -1109,7 +1109,7 @@ public:
      * @param parent The parent for the RelativePointerManager
      *
      * @returns The created RelativePointerManager
-     * @since 5.28
+     * @since 0.0.528
      **/
     RelativePointerManager *createRelativePointerManager(quint32 name, quint32 version, QObject *parent = nullptr);
     /**
@@ -1127,7 +1127,7 @@ public:
      * @param parent The parent for the PointerGestures
      *
      * @returns The created PointerGestures
-     * @since 5.29
+     * @since 0.0.529
      **/
     PointerGestures *createPointerGestures(quint32 name, quint32 version, QObject *parent = nullptr);
     /**
@@ -1145,7 +1145,7 @@ public:
      * @param parent The parent for the PointerConstraints
      *
      * @returns The created PointerConstraints
-     * @since 5.29
+     * @since 0.0.529
      **/
     PointerConstraints *createPointerConstraints(quint32 name, quint32 version, QObject *parent = nullptr);
 
@@ -1160,7 +1160,7 @@ public:
      * otherwise @c null will be returned.
      *
      * @returns The created XdgExporter
-     * @since 5.40
+     * @since 0.0.540
      */
     XdgExporter *createXdgExporter(quint32 name, quint32 version, QObject *parent = nullptr);
 
@@ -1175,7 +1175,7 @@ public:
      * otherwise @c null will be returned.
      *
      * @returns The created XdgImporter
-     * @since 5.40
+     * @since 0.0.540
      */
     XdgImporter *createXdgImporter(quint32 name, quint32 version, QObject *parent = nullptr);
 
@@ -1190,7 +1190,7 @@ public:
      * otherwise @c null will be returned.
      *
      * @returns The created IdleInhibitManager
-     * @since 5.41
+     * @since 0.0.541
      */
     IdleInhibitManager *createIdleInhibitManager(quint32 name, quint32 version, QObject *parent = nullptr);
 
@@ -1207,7 +1207,7 @@ public:
      * @param parent The parent for AppMenuManager
      *
      * @returns The created AppMenuManager.
-     * @since 5.42
+     * @since 0.0.542
      **/
     AppMenuManager *createAppMenuManager(quint32 name, quint32 version, QObject *parent = nullptr);
 
@@ -1224,7 +1224,7 @@ public:
      * @param parent The parent for ServerSideDecorationPaletteManager
      *
      * @returns The created ServerSideDecorationPaletteManager.
-     * @since 5.42
+     * @since 0.0.542
      **/
     ServerSideDecorationPaletteManager *createServerSideDecorationPaletteManager(quint32 name, quint32 version, QObject *parent = nullptr);
 
@@ -1241,7 +1241,7 @@ public:
      * @param parent The parent for XdgOuptutManager
      *
      * @returns The created XdgOuptutManager.
-     * @since 5.47
+     * @since 0.0.547
      **/
     XdgOutputManager *createXdgOutputManager(quint32 name, quint32 version, QObject *parent = nullptr);
 
@@ -1258,7 +1258,7 @@ public:
      * @param parent The parent for XdgDecorationManager
      *
      * @returns The created XdgDecorationManager.
-     * @since 5.54
+     * @since 0.0.554
      **/
     XdgDecorationManager *createXdgDecorationManager(quint32 name, quint32 version, QObject *parent = nullptr);
 
@@ -1355,7 +1355,7 @@ Q_SIGNALS:
      * Emitted whenever a org_kde_plasma_virtual_desktop_management interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.52
+     * @since 0.0.552
      **/
     void plasmaVirtualDesktopManagementAnnounced(quint32 name, quint32 version);
     /**
@@ -1376,7 +1376,7 @@ Q_SIGNALS:
      * Emitted whenever a org_kde_kwin_remote_access_manager interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.45
+     * @since 0.0.545
      **/
     void remoteAccessManagerAnnounced(quint32 name, quint32 version);
     /**
@@ -1432,35 +1432,35 @@ Q_SIGNALS:
      * Emitted whenever a wl_text_input_manager interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.23
+     * @since 0.0.523
      **/
     void textInputManagerUnstableV0Announced(quint32 name, quint32 version);
     /**
      * Emitted whenever a zwp_text_input_manager_v2 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.23
+     * @since 0.0.523
      **/
     void textInputManagerUnstableV2Announced(quint32 name, quint32 version);
     /**
      * Emitted whenever a wp_viewporter interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.18
+     * @since 0.518.0
      **/
     void viewporterAnnounced(quint32 name, quint32 version);
     /**
      * Emitted whenever a xdg_shell (unstable version 5) interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.25
+     * @since 0.0.525
      **/
     void xdgShellUnstableV5Announced(quint32 name, quint32 version);
     /**
      * Emitted whenever a zxdg_shell_v6 (unstable version 6) interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.25
+     * @since 0.0.525
      **/
     void xdgShellUnstableV6Announced(quint32 name, quint32 version);
 
@@ -1468,21 +1468,21 @@ Q_SIGNALS:
      * Emitted whenever a zwp_relative_pointer_manager_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.28
+     * @since 0.0.528
      **/
     void relativePointerManagerUnstableV1Announced(quint32 name, quint32 version);
     /**
      * Emitted whenever a zwp_pointer_gestures_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.29
+     * @since 0.0.529
      **/
     void pointerGesturesUnstableV1Announced(quint32 name, quint32 version);
     /**
      * Emitted whenever a zwp_pointer_constraints_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.29
+     * @since 0.0.529
      **/
     void pointerConstraintsUnstableV1Announced(quint32 name, quint32 version);
 
@@ -1490,7 +1490,7 @@ Q_SIGNALS:
      * Emitted whenever a zxdg_exporter_v2 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.40
+     * @since 0.0.540
      */
     void exporterUnstableV2Announced(quint32 name, quint32 version);
 
@@ -1498,7 +1498,7 @@ Q_SIGNALS:
      * Emitted whenever a zxdg_importer_v2 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.40
+     * @since 0.0.540
      */
     void importerUnstableV2Announced(quint32 name, quint32 version);
 
@@ -1506,7 +1506,7 @@ Q_SIGNALS:
      * Emitted whenever a zwp_idle_inhibit_manager_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.41
+     * @since 0.0.541
      */
     void idleInhibitManagerUnstableV1Announced(quint32 name, quint32 version);
 
@@ -1514,7 +1514,7 @@ Q_SIGNALS:
      * Emitted whenever a org_kde_kwin_appmenu_manager interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.42
+     * @since 0.0.542
      */
     void appMenuAnnounced(quint32 name, quint32 version);
 
@@ -1522,7 +1522,7 @@ Q_SIGNALS:
      * Emitted whenever a org_kde_kwin_server_decoration_palette_manager interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.42
+     * @since 0.0.542
      */
     void serverSideDecorationPaletteManagerAnnounced(quint32 name, quint32 version);
 
@@ -1530,7 +1530,7 @@ Q_SIGNALS:
      * Emitted whenever a zxdg_output_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.47
+     * @since 0.0.547
      */
     void xdgOutputAnnounced(quint32 name, quint32 version);
 
@@ -1538,7 +1538,7 @@ Q_SIGNALS:
      * Emitted whenever a xdg_wm_base (stable xdg shell) interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.48
+     * @since 0.0.548
      **/
     void xdgShellStableAnnounced(quint32 name, quint32 version);
 
@@ -1546,7 +1546,7 @@ Q_SIGNALS:
      * Emitted whenever a zxdg_decoration_manager_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
-     * @since 5.54
+     * @since 0.0.554
      **/
     void xdgDecorationAnnounced(quint32 name, quint32 version);
 
@@ -1615,7 +1615,7 @@ Q_SIGNALS:
     /**
      * Emitted whenever a org_kde_plasma_virtual_desktop_management interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.52
+     * @since 0.0.552
      **/
     void plasmaVirtualDesktopManagementRemoved(quint32 name);
     /**
@@ -1633,7 +1633,7 @@ Q_SIGNALS:
     /**
      * Emitted whenever a org_kde_kwin_remote_access_manager interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.45
+     * @since 0.0.545
      **/
     void remoteAccessManagerRemoved(quint32 name);
     /**
@@ -1681,104 +1681,104 @@ Q_SIGNALS:
     /**
      * Emitted whenever a wl_text_input_manager interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.23
+     * @since 0.0.523
      **/
     void textInputManagerUnstableV0Removed(quint32 name);
     /**
      * Emitted whenever a zwp_text_input_manager_v2 interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.23
+     * @since 0.0.523
      **/
     void textInputManagerUnstableV2Removed(quint32 name);
     /**
      * Emitted whenever a wp_viewporter interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.18
+     * @since 0.518.0
      **/
     void viewporterRemoved(quint32 name);
     /**
      * Emitted whenever an xdg_shell (unstable version 5) interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.25
+     * @since 0.0.525
      **/
     void xdgShellUnstableV5Removed(quint32 name);
     /**
      * Emitted whenever an xdg_shell (unstable version 5) interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.25
+     * @since 0.0.525
      **/
     void xdgShellUnstableV6Removed(quint32 name);
     /**
      * Emitted whenever a zwp_relative_pointer_manager_v1 interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.28
+     * @since 0.0.528
      **/
     void relativePointerManagerUnstableV1Removed(quint32 name);
     /**
      * Emitted whenever a zwp_pointer_gestures_v1 interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.29
+     * @since 0.0.529
      **/
     void pointerGesturesUnstableV1Removed(quint32 name);
     /**
      * Emitted whenever a zwp_pointer_constraints_v1 interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.29
+     * @since 0.0.529
      **/
     void pointerConstraintsUnstableV1Removed(quint32 name);
 
     /**
      * Emitted whenever a zxdg_exporter_v2 interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.40
+     * @since 0.0.540
      **/
     void exporterUnstableV2Removed(quint32 name);
 
     /**
      * Emitted whenever a zxdg_importer_v2 interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.40
+     * @since 0.0.540
      **/
     void importerUnstableV2Removed(quint32 name);
 
     /**
      * Emitted whenever a zwp_idle_inhibit_manager_v1 interface gets removed.
      * @param name The name of the removed interface
-     * @since 5.41
+     * @since 0.0.541
      **/
     void idleInhibitManagerUnstableV1Removed(quint32 name);
 
     /**
      * Emitted whenever a org_kde_kwin_appmenu_manager gets removed.
      * @param name The name of the removed interface
-     * @since 5.42
+     * @since 0.0.542
      **/
     void appMenuRemoved(quint32 name);
 
     /**
      * Emitted whenever a org_kde_kwin_server_decoration_palette_manager gets removed.
      * @param name The name of the removed interface
-     * @since 5.42
+     * @since 0.0.542
      **/
     void serverSideDecorationPaletteManagerRemoved(quint32 name);
 
     /**
      * Emitted whenever a zxdg_output_v1 gets removed.
      * @param name The name of the removed interface
-     * @since 5.47
+     * @since 0.0.547
      **/
     void xdgOutputRemoved(quint32 name);
     /**
      * Emitted whenever an xdg_wm_base (stable xdgshell) interface gets removed.
      * @param name The name for the removed interface
-     * @since 5.48
+     * @since 0.0.548
      **/
     void xdgShellStableRemoved(quint32 name);
 
     /**
      * Emitted whenever a zxdg_decoration_manager_v1 gets removed.
      * @param name The name of the removed interface
-     * @since 5.54
+     * @since 0.0.554
      **/
     void xdgDecorationRemoved(quint32 name);
 

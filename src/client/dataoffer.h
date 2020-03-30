@@ -73,27 +73,27 @@ public:
      *
      * After this operation it is only allowed to release the DataOffer.
      *
-     * @since 5.42
+     * @since 0.0.542
      **/
     void dragAndDropFinished();
 
     /**
      * The actions offered by the DataSource.
-     * @since 5.42
+     * @since 0.0.542
      * @see sourceDragAndDropActionsChanged
      **/
     DataDeviceManager::DnDActions sourceDragAndDropActions() const;
 
     /**
      * Sets the @p supported and @p preferred Drag and Drop actions.
-     * @since 5.42
+     * @since 0.0.542
      **/
     void setDragAndDropActions(DataDeviceManager::DnDActions supported, DataDeviceManager::DnDAction preferred);
 
     /**
      * The currently selected drag and drop action by the compositor.
      * @see selectedDragAndDropActionChanged
-     * @since 5.42
+     * @since 0.0.542
      **/
     DataDeviceManager::DnDAction selectedDragAndDropAction() const;
 
@@ -106,13 +106,13 @@ Q_SIGNALS:
      * Emitted whenever the @link{sourceDragAndDropActions} changed, e.g. on enter or when
      * the DataSource changes the supported actions.
      * @see sourceDragAndDropActions
-     * @since 5.42
+     * @since 0.0.542
      **/
     void sourceDragAndDropActionsChanged();
     /**
      * Emitted whenever the selected drag and drop action changes.
      * @see selectedDragAndDropAction
-     * @since 5.42
+     * @since 0.0.542
      **/
     void selectedDragAndDropActionChanged();
 

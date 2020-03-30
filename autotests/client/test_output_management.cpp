@@ -520,23 +520,7 @@ void TestOutputManagement::testExampleConfig()
 //    QVERIFY(configAppliedSpy.isValid());
 //    QVERIFY(configAppliedSpy.wait(200));
 
-//#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 50)
-//    QCOMPARE(output->scale(), 2); //test backwards compatibility
-//#endif
 //    QCOMPARE(wl_fixed_from_double(output->scaleF()), wl_fixed_from_double(2.3));
-
-//#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 50)
-//    config->setScale(output, 3);
-//    config->apply();
-
-//    QVERIFY(configAppliedSpy.isValid());
-//    QVERIFY(configAppliedSpy.wait(200));
-
-//    //will be setApplied using the connect above
-
-//    QCOMPARE(output->scale(), 3);
-//    QCOMPARE(output->scaleF(), 3.0); //test forward compatibility
-//#endif
 //}
 
 

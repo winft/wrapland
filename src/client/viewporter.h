@@ -65,7 +65,7 @@ class Surface;
  * pointer as it provides matching cast operators.
  *
  * @see Registry
- * @since 5.66
+ * @since 0.0.566
  **/
 class WRAPLANDCLIENT_EXPORT Viewporter : public QObject
 {
@@ -124,7 +124,7 @@ Q_SIGNALS:
      * This signal gets only emitted if the Compositor got created by
      * Registry::createViewporter
      *
-     * @since 5.66
+     * @since 0.0.566
      **/
     void removed();
 

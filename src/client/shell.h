@@ -226,7 +226,7 @@ public:
      * @param grabSerial The serial of the implicit grab
      * @param offset The offset of this Surface in the parent coordinate system
      * @param flags The flags for the transient
-     * @since 5.33
+     * @since 0.0.533
      **/
     void setTransientPopup(Surface *parent, Seat *grabbedSeat, quint32 grabSerial, const QPoint &offset = QPoint(), TransientFlags flags = TransientFlag::Default);
 
@@ -257,7 +257,7 @@ public:
      * This string may be used to identify the surface in a task bar, window list, or other user
      * interface elements provided by the compositor.
      *
-     * @since 5.55
+     * @since 0.0.555
      **/
     void setTitle(const QString &title);
 
@@ -268,7 +268,7 @@ public:
      * A common convention is to use the file name (or the full path if it is a non-standard location)
      * of the application's .desktop file as the class.
      *
-     * @since 5.55
+     * @since 0.0.555
      **/
     void setWindowClass(const QByteArray &windowClass);
 
@@ -279,7 +279,7 @@ public:
      *
      * The returned ShellSurface will be fully setup, but won't be released. It gets automatically
      * destroyed together with the @p window.
-     * @since 5.28
+     * @since 0.0.528
      **/
     static ShellSurface *fromWindow(QWindow *window);
 
@@ -291,13 +291,13 @@ public:
      * The returned ShellSurface will be fully setup, but won't be released. It gets automatically
      * destroyed together with the QWindow corresponding
      * the @p wid.
-     * @since 5.28
+     * @since 0.0.528
      **/
     static ShellSurface *fromQtWinId(WId wid);
 
     /**
      * @returns The Surface referencing the @p native wl_surface or @c null if there is no such Surface.
-     * @since 5.28
+     * @since 0.0.528
      **/
     static ShellSurface *get(wl_shell_surface *native);
 
@@ -317,7 +317,7 @@ Q_SIGNALS:
      * when the user clicks a surface that doesn't belong to the client owning
      * the popup surface.
      * @see setTransientPopup
-     * @since 5.33
+     * @since 0.0.533
      **/
     void popupDone();
 

@@ -58,7 +58,7 @@ class RelativePointer;
  * pointer as it provides matching cast operators.
  *
  * @see Registry
- * @since 5.28
+ * @since 0.0.528
  **/
 class WRAPLANDCLIENT_EXPORT RelativePointerManager : public QObject
 {
@@ -128,7 +128,7 @@ private:
  * relative pointer events. It shares the same focus as Pointer of the same Seat
  * and will only emit events when it has focus.
  *
- * @since 5.28
+ * @since 0.0.528
  **/
 class WRAPLANDCLIENT_EXPORT RelativePointer : public QObject
 {

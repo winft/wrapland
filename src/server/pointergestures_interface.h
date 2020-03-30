@@ -32,7 +32,7 @@ namespace Server
 /**
  * Enum describing the interface versions the PointerGesturesInterface can support.
  *
- * @since 5.29
+ * @since 0.0.529
  **/
 enum class PointerGesturesInterfaceVersion {
     /**
@@ -48,7 +48,7 @@ enum class PointerGesturesInterfaceVersion {
  * reported to the SeatInterface.
  *
  * @see Display::createPointerGestures
- * @since 5.29
+ * @since 0.0.529
  **/
 class WRAPLANDSERVER_EXPORT PointerGesturesInterface : public Global
 {

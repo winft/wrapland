@@ -116,7 +116,7 @@ Q_SIGNALS:
     /**
      * Request an absolute pointer motion to @p pos.
      *
-     * @since 5.54
+     * @since 0.0.554
      **/
     void pointerMotionAbsoluteRequested(const QPointF &pos);
     /**
@@ -134,43 +134,43 @@ Q_SIGNALS:
     /**
      * Requests a touch down at @p pos and identified by @p id.
      *
-     * @since 5.23
+     * @since 0.0.523
      **/
     void touchDownRequested(quint32 id, const QPointF &pos);
     /**
      * Requests a touch motion by @p pos and identified by @p id.
      *
-     * @since 5.23
+     * @since 0.0.523
      **/
     void touchMotionRequested(quint32 id, const QPointF &pos);
     /**
      * Requests a touch up identified by @p id.
      *
-     * @since 5.23
+     * @since 0.0.523
      **/
     void touchUpRequested(quint32 id);
     /**
      * Requests a touch cancel event.
      *
-     * @since 5.23
+     * @since 0.0.523
      **/
     void touchCancelRequested();
     /**
      * Requests a touch frame event.
      *
-     * @since 5.23
+     * @since 0.0.523
      **/
     void touchFrameRequested();
      /**
      * Requests a keyboard key pressed for @p key.
      *
-     * @since 5.63
+     * @since 0.0.563
      **/
     void keyboardKeyPressRequested(quint32 key);
     /**
      * Requests a keyboard key release for @p key.
      *
-     * @since 5.63
+     * @since 0.0.563
      **/
     void keyboardKeyReleaseRequested(quint32 key);
 

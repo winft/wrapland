@@ -44,7 +44,7 @@ class XdgOutputInterface;
 
 /**
  * Global manager for XdgOutputs
- * @since 5.47
+ * @since 0.0.547
  */
 class WRAPLANDSERVER_EXPORT XdgOutputManagerInterface : public Global
 {
@@ -70,7 +70,7 @@ private:
  * Extension to Output
  * Users should set all relevant values on creation and on future changes.
  * done() should be explicitly called after change batches including initial setting.
- * @since 5.47
+ * @since 0.0.547
  */
 class WRAPLANDSERVER_EXPORT XdgOutputInterface : public QObject
 {

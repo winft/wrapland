@@ -239,7 +239,7 @@ public:
      * compositor to send the popupDone event appropriately.
      *
      * @see isPopup
-     * @since 5.33
+     * @since 0.0.533
      **/
     void popupDone();
 

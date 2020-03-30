@@ -238,6 +238,7 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 
 add_library(WraplandClient ${CLIENT_LIB_SRCS})
 add_library(Wrapland::Client ALIAS WraplandClient)
+
 ecm_generate_export_header(WraplandClient
     BASE_NAME
         WraplandClient
@@ -245,12 +246,7 @@ ecm_generate_export_header(WraplandClient
         Wrapland/Client/wraplandclient_export.h
     GROUP_BASE_NAME KF
     VERSION ${PROJECT_VERSION}
-    DEPRECATED_BASE_VERSION 0
-    DEPRECATION_VERSIONS 5.49 5.50 5.52 5.53
 )
-# TODO: add support for EXCLUDE_DEPRECATED_BEFORE_AND_AT to all Wrapland libs
-# needs fixing of undeprecated API being still implemented using own deprecated API
-
 
 target_include_directories(WraplandClient INTERFACE
     "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/Wrapland/Client>")

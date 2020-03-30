@@ -78,7 +78,7 @@ Q_SIGNALS:
     /**
      * This signal is emitted when the client unbound this Resource.
      * The Resource will be deleted in the next event cycle after this event.
-     * @since 5.24
+     * @since 0.0.524
      **/
     void unbound();
     /**
@@ -88,7 +88,7 @@ Q_SIGNALS:
      * getting destroyed.
      *
      * @see unbound
-     * @since 5.37
+     * @since 0.0.537
      **/
     void aboutToBeUnbound();
 

@@ -40,7 +40,7 @@ class ViewportInterface;
  *
  * @see ViewportInterface
  * @see SurfaceInterface
- * @since 5.18
+ * @since 0.518.0
  **/
 class WRAPLANDSERVER_EXPORT ViewporterInterface : public Global
 {

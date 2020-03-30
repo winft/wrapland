@@ -61,7 +61,7 @@ class TextInputInterface;
  * wheel but the scroll event is not caused by a rotation but a
  * (usually sideways) tilt of the wheel.
  *
- * @since 5.59
+ * @since 0.0.559
  **/
 enum class PointerAxisSource {
     Unknown,
@@ -132,7 +132,7 @@ class WRAPLANDSERVER_EXPORT SeatInterface : public Global
     Q_PROPERTY(bool keyboard READ hasKeyboard WRITE setHasKeyboard NOTIFY hasKeyboardChanged)
     /**
      * Whether the SeatInterface supports a touch device.
-     * @deprecated Since 5.5, use touch
+     * @deprecated Since 0.0.55, use touch
      **/
     Q_PROPERTY(bool tourch READ hasTouch WRITE setHasTouch NOTIFY hasTouchChanged)
     /**
@@ -396,7 +396,7 @@ public:
      * @param delta The length of a vector along the specified axis @p orientation.
      * @param discreteDelta The number of discrete steps, e.g. mouse wheel clicks.
      * @param source Describes how the axis event was physically generated.
-     * @since 5.59
+     * @since 0.0.559
      * @todo Drop V5 suffix with KF6.
      **/
     void pointerAxisV5(Qt::Orientation orientation, qreal delta, qint32 discreteDelta, PointerAxisSource source);
@@ -442,7 +442,7 @@ public:
      * @param deltaNonAccelerated non-accelerated motion vector
      * @param microseconds timestamp with microseconds granularity
      * @see setPointerPos
-     * @since 5.28
+     * @since 0.0.528
      **/
     void relativePointerMotion(const QSizeF &delta, const QSizeF &deltaNonAccelerated, quint64 microseconds);
 
@@ -466,7 +466,7 @@ public:
      * @see endPointerSwipeGesture
      * @see cancelPointerSwipeGesture
      * @see startPointerPinchGesture
-     * @since 5.29
+     * @since 0.0.529
      **/
     void startPointerSwipeGesture(quint32 fingerCount);
 
@@ -477,7 +477,7 @@ public:
      * @see startPointerSwipeGesture
      * @see endPointerSwipeGesture
      * @see cancelPointerSwipeGesture
-     * @since 5.29
+     * @since 0.0.529
      **/
     void updatePointerSwipeGesture(const QSizeF &delta);
 
@@ -486,7 +486,7 @@ public:
      * @see startPointerSwipeGesture
      * @see updatePointerSwipeGesture
      * @see cancelPointerSwipeGesture
-     * @see 5.29
+     * @see 0.0.529
      **/
     void endPointerSwipeGesture();
 
@@ -495,7 +495,7 @@ public:
      * @see startPointerSwipeGesture
      * @see updatePointerSwipeGesture
      * @see endPointerSwipeGesture
-     * @since 5.29
+     * @since 0.0.529
      **/
     void cancelPointerSwipeGesture();
 
@@ -519,7 +519,7 @@ public:
      * @see endPointerPinchGesture
      * @see cancelPointerPinchGesture
      * @see startPointerSwipeGesture
-     * @since 5.29
+     * @since 0.0.529
      **/
     void startPointerPinchGesture(quint32 fingerCount);
 
@@ -533,7 +533,7 @@ public:
      * @see startPointerPinchGesture
      * @see endPointerPinchGesture
      * @see cancelPointerPinchGesture
-     * @since 5.29
+     * @since 0.0.529
      **/
     void updatePointerPinchGesture(const QSizeF &delta, qreal scale, qreal rotation);
 
@@ -542,7 +542,7 @@ public:
      * @see startPointerPinchGesture
      * @see updatePointerPinchGesture
      * @see cancelPointerPinchGesture
-     * @since 5.29
+     * @since 0.0.529
      **/
     void endPointerPinchGesture();
 
@@ -551,7 +551,7 @@ public:
      * @see startPointerPinchGesture
      * @see updatePointerPinchGesture
      * @see endPointerPinchGesture
-     * @since 5.29
+     * @since 0.0.529
      **/
     void cancelPointerPinchGesture();
     ///@}
@@ -634,7 +634,7 @@ public:
     /**
      * @returns true if there is a touch sequence going on associated with a touch
      * down of the given @p serial.
-     * @since 5.XX
+     * @since 0.0.5XX
      **/
     bool hasImplicitTouchGrab(quint32 serial) const;
     ///@}
@@ -659,13 +659,13 @@ public:
      * @see focusedTextInput
      * @see focusedTextInputChanged
      * @see setFocusedKeyboardSurface
-     * @since 5.23
+     * @since 0.0.523
      **/
     void setFocusedTextInputSurface(SurfaceInterface *surface);
     /**
      * @returns The SurfaceInterface which is currently focused for text input.
      * @see setFocusedTextInputSurface
-     * @since 5.23
+     * @since 0.0.523
      **/
     SurfaceInterface *focusedTextInputSurface() const;
     /**
@@ -678,14 +678,14 @@ public:
      *
      * @see focusedTextInputChanged
      * @see focusedTextInputSurface
-     * @since 5.23
+     * @since 0.0.523
      **/
     TextInputInterface *focusedTextInput() const;
     ///@}
 
     /**
      * @returns The DataDeviceInterface holding the current clipboard selection.
-     * @since 5.24
+     * @since 0.0.524
      * @see selectionChanged
      * @see setSelection
      **/
@@ -701,7 +701,7 @@ public:
      * @param dataDevice Sets the current clipboard selection.
      * @see selection
      * @see selectionChanged
-     * @since 5.24
+     * @since 0.0.524
      **/
     void setSelection(DataDeviceInterface *dataDevice);
 
@@ -728,7 +728,7 @@ Q_SIGNALS:
 
     /**
      * Emitted whenever the selection changes
-     * @since 5.56
+     * @since 0.0.556
      * @see selection
      * @see setSelection
      **/
@@ -755,7 +755,7 @@ Q_SIGNALS:
     /**
      * Emitted whenever the focused text input changed.
      * @see focusedTextInput
-     * @since 5.23
+     * @since 0.0.523
      **/
     void focusedTextInputChanged();
 

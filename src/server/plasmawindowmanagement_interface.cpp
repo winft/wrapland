@@ -79,7 +79,6 @@ public:
     void setPid(quint32 pid);
     void setThemedIconName(const QString &iconName);
     void setIcon(const QIcon &icon);
-    void setVirtualDesktop(quint32 desktop);
     void unmap();
     void setState(org_kde_plasma_window_management_state flag, bool set);
     void setParentWindow(PlasmaWindowInterface *parent);
@@ -510,17 +509,6 @@ void PlasmaWindowInterface::Private::setTitle(const QString &title)
     }
 }
 
-void PlasmaWindowInterface::Private::setVirtualDesktop(quint32 desktop)
-{
-    if (m_virtualDesktop == desktop) {
-        return;
-    }
-    m_virtualDesktop = desktop;
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        org_kde_plasma_window_send_virtual_desktop_changed(*it, m_virtualDesktop);
-    }
-}
-
 void PlasmaWindowInterface::Private::unmap()
 {
     unmapped = true;
@@ -631,8 +619,7 @@ void PlasmaWindowInterface::Private::requestResizeCallback(wl_client *client, wl
 void PlasmaWindowInterface::Private::setVirtualDesktopCallback(wl_client *client, wl_resource *resource, uint32_t number)
 {
     Q_UNUSED(client)
-    Private *p = cast(resource);
-    emit p->q->virtualDesktopRequested(number);
+    Q_UNUSED(resource)
 }
 
 void PlasmaWindowInterface::Private::setStateCallback(wl_client *client, wl_resource *resource, uint32_t flags, uint32_t state)
@@ -757,11 +744,6 @@ void PlasmaWindowInterface::setTitle(const QString &title)
     d->setTitle(title);
 }
 
-void PlasmaWindowInterface::setVirtualDesktop(quint32 desktop)
-{
-    d->setVirtualDesktop(desktop);
-}
-
 void PlasmaWindowInterface::unmap()
 {
     d->wm->unmapWindow(this);
@@ -872,11 +854,6 @@ void PlasmaWindowInterface::setSkipTaskbar(bool set)
 void PlasmaWindowInterface::setSkipSwitcher(bool skip)
 {
     d->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_SKIPSWITCHER, skip);
-}
-
-void PlasmaWindowInterface::setThemedIconName(const QString &iconName)
-{
-    d->setThemedIconName(iconName);
 }
 
 void PlasmaWindowInterface::setIcon(const QIcon &icon)

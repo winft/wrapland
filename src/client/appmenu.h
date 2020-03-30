@@ -58,7 +58,7 @@ class AppMenu;
  * pointer as it provides matching cast operators.
  *
  * @see Registry
- * @since 5.42
+ * @since 0.0.542
  **/
 class WRAPLANDCLIENT_EXPORT AppMenuManager : public QObject
 {
@@ -120,7 +120,7 @@ private:
 
 /**
  *
- * @since 5.42
+ * @since 0.0.542
  **/
 class WRAPLANDCLIENT_EXPORT AppMenu : public QObject
 {

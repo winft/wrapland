@@ -42,7 +42,7 @@ class XdgImporterV2Interface;
  * This parent relationship is traced by the parentChanged signal and the
  * parentFor method.
  *
- * @since 5.40
+ * @since 0.0.540
  */
 class WRAPLANDSERVER_EXPORT XdgForeignInterface : public QObject
 {

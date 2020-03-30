@@ -121,7 +121,7 @@ public:
      * If automaticSocketNaming is true, the manually set socketName is ignored
      * and it will use wl_display_add_socket_auto on start to get a free socket with
      * a filename "wayland-%d" instead. The effective socket is written into socketName.
-     * @since 5.55
+     * @since 0.0.555
      **/
     void setAutomaticSocketNaming(bool automaticSocketNaming);
     bool automaticSocketNaming() const;
@@ -207,7 +207,7 @@ public:
     SlideManagerInterface *createSlideManager(QObject *parent = nullptr);
     DpmsManagerInterface *createDpmsManager(QObject *parent = nullptr);
 
-    /** @since 5.60 */
+    /** @since 0.0.560 */
     KeyStateInterface *createKeyStateInterface(QObject *parent = nullptr);
 
     /**
@@ -217,14 +217,14 @@ public:
     /**
      * Create the text input manager in interface @p version.
      * @returns The created manager object
-     * @since 5.23
+     * @since 0.0.523
      **/
     TextInputManagerInterface *createTextInputManager(const TextInputInterfaceVersion &version, QObject *parent = nullptr);
 
     /**
      * Creates the XdgShell in interface @p version.
      *
-     * @since 5.25
+     * @since 0.0.525
      **/
     XdgShellInterface *createXdgShell(const XdgShellInterfaceVersion &version, QObject *parent = nullptr);
 
@@ -232,7 +232,7 @@ public:
      * Creates the RelativePointerManagerInterface in interface @p version
      *
      * @returns The created manager object
-     * @since 5.28
+     * @since 0.0.528
      **/
     RelativePointerManagerInterface *createRelativePointerManager(const RelativePointerInterfaceVersion &version, QObject *parent = nullptr);
 
@@ -240,7 +240,7 @@ public:
      * Creates the PointerGesturesInterface in interface @p version
      *
      * @returns The created manager object
-     * @since 5.29
+     * @since 0.0.529
      **/
     PointerGesturesInterface *createPointerGestures(const PointerGesturesInterfaceVersion &version, QObject *parent = nullptr);
 
@@ -248,7 +248,7 @@ public:
      * Creates the PointerConstraintsInterface in interface @p version
      *
      * @returns The created manager object
-     * @since 5.29
+     * @since 0.0.529
      **/
     PointerConstraintsInterface *createPointerConstraints(const PointerConstraintsInterfaceVersion &version, QObject *parent = nullptr);
 
@@ -256,7 +256,7 @@ public:
      * Creates the XdgForeignInterface in interface @p version
      *
      * @returns The created manager object
-     * @since 5.40
+     * @since 0.0.540
      **/
     XdgForeignInterface *createXdgForeignInterface(QObject *parent = nullptr);
 
@@ -264,7 +264,7 @@ public:
      * Creates the IdleInhibitManagerInterface in interface @p version.
      *
      * @returns The created manager object
-     * @since 5.41
+     * @since 0.0.541
      **/
     IdleInhibitManagerInterface *createIdleInhibitManager(const IdleInhibitManagerInterfaceVersion &version, QObject *parent = nullptr);
 
@@ -272,7 +272,7 @@ public:
      * Creates the AppMenuManagerInterface in interface @p version.
      *
      * @returns The created manager object
-     * @since 5.42
+     * @since 0.0.542
      **/
     AppMenuManagerInterface *createAppMenuManagerInterface(QObject *parent = nullptr);
 
@@ -280,7 +280,7 @@ public:
      * Creates the ServerSideDecorationPaletteManagerInterface in interface @p version.
      *
      * @returns The created manager object
-     * @since 5.42
+     * @since 0.0.542
      **/
     ServerSideDecorationPaletteManagerInterface *createServerSideDecorationPaletteManager(QObject *parent = nullptr);
 
@@ -295,7 +295,7 @@ public:
      * Creates the ViewporterInterface
      *
      * @return the created viewporter
-     * @since 5.18
+     * @since 0.518.0
      */
     ViewporterInterface *createViewporterInterface(QObject *parent = nullptr);
 
@@ -303,7 +303,7 @@ public:
      * Creates the XdgOutputManagerInterface
      *
      * @return the created manager
-     * @since 5.47
+     * @since 0.0.547
      */
     XdgOutputManagerInterface *createXdgOutputManager(QObject *parent = nullptr);
 
@@ -312,7 +312,7 @@ public:
      * Creates the PlasmaVirtualDesktopManagementInterface in interface @p version.
      *
      * @returns The created manager object
-     * @since 5.52
+     * @since 0.0.552
      **/
     PlasmaVirtualDesktopManagementInterface *createPlasmaVirtualDesktopManagement(QObject *parent = nullptr);
 
@@ -321,7 +321,7 @@ public:
      * @arg shellInterface A created XdgShellInterface based on XDG_WM_BASE
      *
      * @return the created manager
-     * @since 5.54
+     * @since 0.0.554
      */
     XdgDecorationManagerInterface *createXdgDecorationManager(XdgShellInterface *shellInterface, QObject *parent = nullptr);
 
@@ -329,7 +329,7 @@ public:
      * Creates the EglStreamControllerInterface
      *
      * @return the created EGL Stream controller
-     * @since 5.58
+     * @since 0.0.558
      */
     EglStreamControllerInterface *createEglStreamControllerInterface(QObject *parent = nullptr);
 
