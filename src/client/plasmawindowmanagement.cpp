@@ -437,13 +437,9 @@ void PlasmaWindow::Private::pidChangedCallback(void *data, org_kde_plasma_window
 
 void PlasmaWindow::Private::virtualDesktopChangedCallback(void *data, org_kde_plasma_window *window, int32_t number)
 {
+    Q_UNUSED(data)
     Q_UNUSED(window)
-    Private *p = cast(data);
-    if (p->desktop == static_cast<quint32>(number)) {
-        return;
-    }
-    p->desktop = number;
-    emit p->q->virtualDesktopChanged();
+    Q_UNUSED(number)
 }
 
 void PlasmaWindow::Private::unmappedCallback(void *data, org_kde_plasma_window *window)
@@ -803,11 +799,6 @@ QString PlasmaWindow::title() const
     return d->title;
 }
 
-quint32 PlasmaWindow::virtualDesktop() const
-{
-    return d->desktop;
-}
-
 bool PlasmaWindow::isActive() const
 {
     return d->active;
@@ -934,11 +925,6 @@ void PlasmaWindow::requestMove()
 void PlasmaWindow::requestResize()
 {
     org_kde_plasma_window_request_resize(d->window);
-}
-
-void PlasmaWindow::requestVirtualDesktop(quint32 desktop)
-{
-    org_kde_plasma_window_set_virtual_desktop(d->window, desktop);
 }
 
 void PlasmaWindow::requestToggleKeepAbove()

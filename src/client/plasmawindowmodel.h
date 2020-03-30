@@ -70,14 +70,6 @@ public:
         IsMinimized,
         IsKeepAbove,
         IsKeepBelow,
-#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 53)
-        /**
-          @deprecated Since 5.53, use VirtualDesktops
-         */
-        VirtualDesktop,
-#else
-        VirtualDesktop_DEPRECATED_DO_NOT_USE,
-#endif
         IsOnAllDesktops,
         IsDemandingAttention,
         SkipTaskbar,
@@ -159,11 +151,6 @@ public:
      * @since 5.22
      **/
     Q_INVOKABLE void requestResize(int row);
-
-    /**
-     * Request the window at this model row index be moved to this virtual desktop.
-     **/
-    Q_INVOKABLE void requestVirtualDesktop(int row, quint32 desktop);
 
     /**
      * Requests the window at this model row index have its keep above state toggled.

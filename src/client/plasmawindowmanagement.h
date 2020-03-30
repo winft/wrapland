@@ -236,15 +236,6 @@ public:
      * @see appIdChanged
      **/
     QString appId() const;
-#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 52)
-    /**
-     * @returns the id of the virtual desktop this PlasmaWindow is on
-     * @see virtualDesktopChanged
-     * @deprecated: Since 5.52, use plasmaVirtualDesktops instead
-     **/
-    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 52, "Use PlasmaWindow::plasmaVirtualDesktops()")
-    quint32 virtualDesktop() const;
-#endif
     /**
      * @returns Whether the window is currently the active Window.
      * @see activeChanged
@@ -277,7 +268,7 @@ public:
     bool isMaximized() const;
     /**
      * @returns Whether the window is shown on all desktops.
-     * @see virtualDesktop
+     * @see plasmaVirtualDesktops
      * @see onAllDesktopsChanged
      **/
     bool isOnAllDesktops() const;
@@ -377,14 +368,6 @@ public:
      * @since 5.22
      */
     void requestResize();
-#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 52)
-    /**
-     * Requests to send the window to virtual @p desktop.
-     * @deprecated: Since 5.52, use requestEnterVirtualDesktop instead
-     **/
-    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 52, "Use PlasmaWindow::requestEnterVirtualDesktop(const QString &)")
-    void requestVirtualDesktop(quint32 desktop);
-#endif
 
     /**
      * Requests the window at this model row index have its keep above state toggled.
@@ -498,14 +481,6 @@ Q_SIGNALS:
      * @see appId
      **/
     void appIdChanged();
-#if WRAPLANDCLIENT_ENABLE_DEPRECATED_SINCE(5, 52)
-    /**
-     * The virtual desktop changed.
-     * @deprecated Since 5.52, use plasmaVirtualDesktopEntered and plasmaVirtualDesktopLeft instead
-     **/
-    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 52, "Use PlasmaWindow::plasmaVirtualDesktopEntered(const QString &) and PlasmaWindow::plasmaVirtualDesktopLeft(const QString &)")
-    void virtualDesktopChanged();
-#endif
     /**
      * The window became active or inactive.
      * @see isActive

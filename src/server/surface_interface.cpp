@@ -828,11 +828,6 @@ QRegion SurfaceInterface::input() const
     return d->current.input;
 }
 
-bool SurfaceInterface::inputIsInfitine() const
-{
-    return inputIsInfinite();
-}
-
 bool SurfaceInterface::inputIsInfinite() const
 {
     Q_D();

@@ -102,16 +102,8 @@ public:
     QRegion damage() const;
     QRegion opaque() const;
     QRegion input() const;
-#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 5)
     /**
-     * Use Surface::inputIsInfinite instead.
-     * @deprecated Since 5.5, use inputIsInfinite
-     */
-    WRAPLANDSERVER_DEPRECATED_VERSION(5, 5, "Use SurfaceInterface::inputIsInfinite()")
-    bool inputIsInfitine() const;
-#endif
-    /**
-     * Replaces Surface::inputIsInfitine instead.
+     *
      * @since 5.5
      */
     bool inputIsInfinite() const;

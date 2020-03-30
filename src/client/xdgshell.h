@@ -501,7 +501,6 @@ public:
      *
      * @deprecated Since 5.49. This was for XDGShellV5, this is now deprecated
      **/
-    WRAPLANDCLIENT_DEPRECATED_VERSION(5, 49, "Use XDGShell version >5")
     void setup(xdg_popup *xdgpopupv5);
 
     /**

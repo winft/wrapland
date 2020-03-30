@@ -109,13 +109,6 @@ public:
     void setTitle(const QString &title);
     void setAppId(const QString &appId);
     void setPid(quint32 pid);
-#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 52)
-    /**
-     * @deprecated Since 5.52, use addPlasmaVirtualDesktop and removePlasmaVirtualDesktop
-     */
-    WRAPLANDSERVER_DEPRECATED_VERSION(5, 52, "Use PlasmaWindowManagementInterface::addPlasmaVirtualDesktop(const QString&) and PlasmaWindowManagementInterface::removePlasmaVirtualDesktop(const QString&)")
-    void setVirtualDesktop(quint32 desktop);
-#endif
     void setActive(bool set);
     void setMinimized(bool set);
     void setMaximized(bool set);
@@ -130,13 +123,6 @@ public:
     void setFullscreenable(bool set);
     void setSkipTaskbar(bool skip);
     void setSkipSwitcher(bool skip);
-#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 28)
-    /**
-     * @deprecated since 5.28 use setIcon
-     **/
-    WRAPLANDSERVER_DEPRECATED_VERSION(5, 28, "Use PlasmaWindowManagementInterface::setIcon(const QIcon&)")
-    void setThemedIconName(const QString &iconName);
-#endif
     /**
      * @since 5.22
      */
@@ -238,13 +224,6 @@ Q_SIGNALS:
      * @since 5.22
      */
     void resizeRequested();
-#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 52)
-    /**
-     * @deprecated Since 5.52, use enterPlasmaVirtualDesktopRequested and leavePlasmaVirtualDesktopRequested instead
-     */
-    WRAPLANDSERVER_DEPRECATED_VERSION(5, 52, "Use PlasmaWindowManagementInterface::enterPlasmaVirtualDesktopRequested(const QString&) and PlasmaWindowManagementInterface::leavePlasmaVirtualDesktopRequested(const QString&)")
-    void virtualDesktopRequested(quint32 desktop);
-#endif
     void activeRequested(bool set);
     void minimizedRequested(bool set);
     void maximizedRequested(bool set);

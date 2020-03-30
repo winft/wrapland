@@ -305,8 +305,6 @@ void PlasmaWindowModelTest::testRoleNames_data()
             << int(Clt::PlasmaWindowModel::IsKeepAbove) << QByteArrayLiteral("IsKeepAbove");
     QTest::newRow("IsKeepBelow")
             << int(Clt::PlasmaWindowModel::IsKeepBelow) << QByteArrayLiteral("IsKeepBelow");
-    QTest::newRow("VirtualDesktop")
-            << int(Clt::PlasmaWindowModel::VirtualDesktop) << QByteArrayLiteral("VirtualDesktop");
     QTest::newRow("IsOnAllDesktops")
             << int(Clt::PlasmaWindowModel::IsOnAllDesktops) << QByteArrayLiteral("IsOnAllDesktops");
     QTest::newRow("IsDemandingAttention")
@@ -428,8 +426,6 @@ void PlasmaWindowModelTest::testDefaultData_data()
             << int(Clt::PlasmaWindowModel::IsKeepAbove) << QVariant(false);
     QTest::newRow("IsKeepBelow")
             << int(Clt::PlasmaWindowModel::IsKeepBelow) << QVariant(false);
-    QTest::newRow("VirtualDesktop")
-            << int(Clt::PlasmaWindowModel::VirtualDesktop) << QVariant(0);
     QTest::newRow("IsOnAllDesktops")
             << int(Clt::PlasmaWindowModel::IsOnAllDesktops) << QVariant(true);
     QTest::newRow("IsDemandingAttention")
@@ -810,9 +806,6 @@ void PlasmaWindowModelTest::testRequests()
     QVERIFY(moveRequestedSpy.isValid());
     QSignalSpy resizeRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::resizeRequested);
     QVERIFY(resizeRequestedSpy.isValid());
-    QSignalSpy virtualDesktopRequestedSpy(serverWindow,
-                                          &Srv::PlasmaWindowInterface::virtualDesktopRequested);
-    QVERIFY(virtualDesktopRequestedSpy.isValid());
     QSignalSpy keepAboveRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::keepAboveRequested);
     QVERIFY(keepAboveRequestedSpy.isValid());
     QSignalSpy keepBelowRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::keepBelowRequested);
@@ -827,7 +820,6 @@ void PlasmaWindowModelTest::testRequests()
     // First let's use some invalid row numbers.
     model->requestActivate(-1);
     model->requestClose(-1);
-    model->requestVirtualDesktop(-1, 1);
     model->requestToggleKeepAbove(-1);
     model->requestToggleKeepBelow(-1);
     model->requestToggleMinimized(-1);
@@ -836,7 +828,6 @@ void PlasmaWindowModelTest::testRequests()
     model->requestClose(1);
     model->requestMove(1);
     model->requestResize(1);
-    model->requestVirtualDesktop(1, 1);
     model->requestToggleKeepAbove(1);
     model->requestToggleKeepBelow(1);
     model->requestToggleMinimized(1);
@@ -849,7 +840,6 @@ void PlasmaWindowModelTest::testRequests()
     QVERIFY(closeRequestedSpy.isEmpty());
     QVERIFY(moveRequestedSpy.isEmpty());
     QVERIFY(resizeRequestedSpy.isEmpty());
-    QVERIFY(virtualDesktopRequestedSpy.isEmpty());
     QVERIFY(minimizedRequestedSpy.isEmpty());
     QVERIFY(maximizeRequestedSpy.isEmpty());
     QVERIFY(shadeRequestedSpy.isEmpty());
@@ -863,7 +853,6 @@ void PlasmaWindowModelTest::testRequests()
     QCOMPARE(closeRequestedSpy.count(), 0);
     QCOMPARE(moveRequestedSpy.count(), 0);
     QCOMPARE(resizeRequestedSpy.count(), 0);
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 0);
     QCOMPARE(minimizedRequestedSpy.count(), 0);
     QCOMPARE(maximizeRequestedSpy.count(), 0);
     QCOMPARE(shadeRequestedSpy.count(), 0);
@@ -874,7 +863,6 @@ void PlasmaWindowModelTest::testRequests()
     QCOMPARE(closeRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.count(), 0);
     QCOMPARE(resizeRequestedSpy.count(), 0);
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 0);
     QCOMPARE(minimizedRequestedSpy.count(), 0);
     QCOMPARE(maximizeRequestedSpy.count(), 0);
     QCOMPARE(shadeRequestedSpy.count(), 0);
@@ -885,7 +873,6 @@ void PlasmaWindowModelTest::testRequests()
     QCOMPARE(closeRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.count(), 1);
     QCOMPARE(resizeRequestedSpy.count(), 0);
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 0);
     QCOMPARE(minimizedRequestedSpy.count(), 0);
     QCOMPARE(maximizeRequestedSpy.count(), 0);
     QCOMPARE(shadeRequestedSpy.count(), 0);
@@ -896,15 +883,10 @@ void PlasmaWindowModelTest::testRequests()
     QCOMPARE(closeRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.count(), 1);
     QCOMPARE(resizeRequestedSpy.count(), 1);
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 0);
     QCOMPARE(minimizedRequestedSpy.count(), 0);
     QCOMPARE(maximizeRequestedSpy.count(), 0);
     QCOMPARE(shadeRequestedSpy.count(), 0);
     // Virtual desktop
-    model->requestVirtualDesktop(0, 1);
-    QVERIFY(virtualDesktopRequestedSpy.wait());
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 1);
-    QCOMPARE(virtualDesktopRequestedSpy.first().first().toUInt(), 1u);
     QCOMPARE(activateRequestedSpy.count(), 1);
     QCOMPARE(closeRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.count(), 1);
@@ -921,7 +903,6 @@ void PlasmaWindowModelTest::testRequests()
     QCOMPARE(closeRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.count(), 1);
     QCOMPARE(resizeRequestedSpy.count(), 1);
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 1);
     QCOMPARE(maximizeRequestedSpy.count(), 0);
     QCOMPARE(shadeRequestedSpy.count(), 0);
     // Keep below
@@ -933,7 +914,6 @@ void PlasmaWindowModelTest::testRequests()
     QCOMPARE(closeRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.count(), 1);
     QCOMPARE(resizeRequestedSpy.count(), 1);
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 1);
     QCOMPARE(maximizeRequestedSpy.count(), 0);
     QCOMPARE(shadeRequestedSpy.count(), 0);
     // Minimize
@@ -945,7 +925,6 @@ void PlasmaWindowModelTest::testRequests()
     QCOMPARE(closeRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.count(), 1);
     QCOMPARE(resizeRequestedSpy.count(), 1);
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 1);
     QCOMPARE(maximizeRequestedSpy.count(), 0);
     QCOMPARE(shadeRequestedSpy.count(), 0);
     // Maximize
@@ -956,7 +935,6 @@ void PlasmaWindowModelTest::testRequests()
     QCOMPARE(activateRequestedSpy.count(), 1);
     QCOMPARE(closeRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.count(), 1);
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 1);
     QCOMPARE(minimizedRequestedSpy.count(), 1);
     QCOMPARE(shadeRequestedSpy.count(), 0);
     // Shade
@@ -968,7 +946,6 @@ void PlasmaWindowModelTest::testRequests()
     QCOMPARE(closeRequestedSpy.count(), 1);
     QCOMPARE(moveRequestedSpy.count(), 1);
     QCOMPARE(resizeRequestedSpy.count(), 1);
-    QCOMPARE(virtualDesktopRequestedSpy.count(), 1);
     QCOMPARE(minimizedRequestedSpy.count(), 1);
     QCOMPARE(maximizeRequestedSpy.count(), 1);
 
@@ -1139,12 +1116,6 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy_data()
             << &Clt::PlasmaWindow::appIdChanged
             << QVariant::fromValue(&Srv::PlasmaWindowInterface::setAppId)
             << QVariant(QStringLiteral("foo"));
-#if WRAPLANDSERVER_ENABLE_DEPRECATED_SINCE(5, 28)
-    QTest::newRow("iconname" )
-            << &Clt::PlasmaWindow::iconChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setThemedIconName)
-            << QVariant(QStringLiteral("foo"));
-#endif
 
     // Disable the icon test for now. Our way of providing icons is fundamentally wrong and the
     // whole concept needs to be redone so it works on all setups and in particular in a CI setting.
@@ -1156,10 +1127,6 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy_data()
             << QVariant::fromValue(QIcon::fromTheme(QStringLiteral("foo")));
 #endif
 
-    QTest::newRow("vd")
-            << &Clt::PlasmaWindow::virtualDesktopChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setVirtualDesktop)
-            << QVariant(2u);
     QTest::newRow("unmapped")
             << &Clt::PlasmaWindow::unmapped
             << QVariant::fromValue(&Srv::PlasmaWindowInterface::unmap)
