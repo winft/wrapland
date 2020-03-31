@@ -2390,13 +2390,13 @@ void TestWaylandSeat::testTouch()
     m_seatInterface->touchUp(0);
     m_seatInterface->touchFrame();
     QVERIFY(frameEndedSpy.wait());
-    QCOMPARE(sequenceStartedSpy.count(), 1);
-    QCOMPARE(sequenceEndedSpy.count(), 1);
+    QTRY_COMPARE(sequenceStartedSpy.count(), 1);
+    QTRY_COMPARE(sequenceEndedSpy.count(), 1);
     QCOMPARE(sequenceCanceledSpy.count(), 0);
     QCOMPARE(frameEndedSpy.count(), 6);
-    QCOMPARE(pointAddedSpy.count(), 2);
+    QTRY_COMPARE(pointAddedSpy.count(), 2);
     QCOMPARE(pointMovedSpy.count(), 1);
-    QCOMPARE(pointRemovedSpy.count(), 3);
+    QTRY_COMPARE(pointRemovedSpy.count(), 3);
     QCOMPARE(touch->sequence().count(), 3);
     QVERIFY(!touch->sequence().at(0)->isDown());
     QVERIFY(!touch->sequence().at(1)->isDown());
@@ -2410,7 +2410,7 @@ void TestWaylandSeat::testTouch()
     m_seatInterface->touchFrame();
     m_seatInterface->cancelTouchSequence();
     QVERIFY(sequenceCanceledSpy.wait());
-    QCOMPARE(sequenceStartedSpy.count(), 2);
+    QTRY_COMPARE(sequenceStartedSpy.count(), 2);
     QCOMPARE(sequenceEndedSpy.count(), 1);
     QCOMPARE(sequenceCanceledSpy.count(), 1);
     QCOMPARE(frameEndedSpy.count(), 7);
