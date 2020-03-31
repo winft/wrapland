@@ -293,8 +293,7 @@ void RemoteAccessTest::testSendReleaseMultiple()
     QVERIFY(paramsObtainedSpy1.size() == 1 || paramsObtainedSpy1.wait());
     QCOMPARE(paramsObtainedSpy1.size(), 1);
 
-    QVERIFY(paramsObtainedSpy2.size() == 1 || paramsObtainedSpy2.wait());
-    QCOMPARE(paramsObtainedSpy2.size(), 1);
+    QTRY_COMPARE(paramsObtainedSpy2.size(), 1);
 
     // release
     QSignalSpy bufferReleasedSpy(m_remoteAccessInterface, &RemoteAccessManagerInterface::bufferReleased);
