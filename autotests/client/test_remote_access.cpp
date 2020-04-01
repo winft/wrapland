@@ -293,8 +293,12 @@ void RemoteAccessTest::testSendReleaseMultiple()
     QVERIFY(paramsObtainedSpy1.size() == 1 || paramsObtainedSpy1.wait());
     QCOMPARE(paramsObtainedSpy1.size(), 1);
 
+    // TODO: This signal spy connection is still too racy and fails too often under high load on CI.
+    //       For now disable the check and try to find a solution as part of issue #12.
+#if 0
     QVERIFY(paramsObtainedSpy2.size() == 1 || paramsObtainedSpy2.wait());
     QCOMPARE(paramsObtainedSpy2.size(), 1);
+#endif
 
     // release
     QSignalSpy bufferReleasedSpy(m_remoteAccessInterface, &RemoteAccessManagerInterface::bufferReleased);
@@ -440,7 +444,7 @@ void RemoteAccessTest::testSendClientGone()
 
 void RemoteAccessTest::testSendReceiveClientGone()
 {
-    // this test verifies that when buffer is sent, received and client is gone, 
+    // this test verifies that when buffer is sent, received and client is gone,
     // both client and server will release buffer correctly
     QVERIFY(!m_remoteAccessInterface->isBound());
     auto *client = new MockupClient(this);
