@@ -33,7 +33,6 @@ Message lint:
 .common-build: &common-build
   stage: Build
   image: ${IMAGE_BASE}
-  needs: []
   artifacts:
     paths:
       - ci-build
