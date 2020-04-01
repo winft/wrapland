@@ -11,7 +11,7 @@ function set_cmake_version {
 git checkout master
 
 # Something like: wrapland@0.5XX.0-beta.0
-LAST_TAG=$(git describe --abbrev=0 $(git rev-list --tags --branches="master" --max-count=1))
+LAST_TAG=$(git describe --abbrev=0)
 LAST_BETA_VERSION=$(echo $LAST_TAG | sed -e 's,wrapland@\(\),\1,g')
 
 echo "Last beta version was: $LAST_BETA_VERSION"
