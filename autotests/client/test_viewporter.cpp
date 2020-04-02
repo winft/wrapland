@@ -314,6 +314,13 @@ void TestViewporter::testDestinationSize()
     QVERIFY(sizeChangedSpy.wait());
     QCOMPARE(sizeChangedSpy.count(), 2);
     QCOMPARE(serverSurface->size(), QSize(400, 200));
+
+    // Destroy the viewport and check that the size is reset.
+    vp.reset();
+    s->commit(Surface::CommitFlag::None);
+    QVERIFY(sizeChangedSpy.wait());
+    QCOMPARE(sizeChangedSpy.count(), 3);
+    QCOMPARE(serverSurface->size(), image.size());
 }
 
 void TestViewporter::testSourceRectangle()
@@ -367,6 +374,13 @@ void TestViewporter::testSourceRectangle()
     QCOMPARE(sourceRectangleChangedSpy.count(), 1);
     QCOMPARE(serverSurface->size(), rect.size());
     QCOMPARE(serverSurface->sourceRectangle(), rect);
+
+    // Destroy the viewport and check that the size is reset.
+    vp.reset();
+    s->commit(Surface::CommitFlag::None);
+    QVERIFY(sizeChangedSpy.wait());
+    QCOMPARE(sizeChangedSpy.count(), 3);
+    QCOMPARE(serverSurface->size(), image.size());
 }
 
 void TestViewporter::testDestinationSizeAndSourceRectangle()
@@ -428,6 +442,13 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
                 - rect.topLeft()).manhattanLength() < 0.01);
     QVERIFY((serverSurface->sourceRectangle().bottomRight()
                 - rect.bottomRight()).manhattanLength() < 0.01);
+
+    // Destroy the viewport and check that the size is reset.
+    vp.reset();
+    s->commit(Surface::CommitFlag::None);
+    QVERIFY(sizeChangedSpy.wait());
+    QCOMPARE(sizeChangedSpy.count(), 3);
+    QCOMPARE(serverSurface->size(), image.size());
 }
 
 void TestViewporter::testDataError_data()
