@@ -35,6 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_configuration_v1.h"
 #include "output_management_v1.h"
 #include "output_device_v1.h"
+#include "wlr_output_manager_v1.h"
 #include "plasmashell.h"
 #include "plasmavirtualdesktop.h"
 #include "plasmawindowmanagement.h"
@@ -75,6 +76,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-shadow-client-protocol.h>
 #include <wayland-output-management-v1-client-protocol.h>
 #include <wayland-output-device-v1-client-protocol.h>
+#include <wayland-wlr-output-management-v1-client-protocol.h>
 #include <wayland-blur-client-protocol.h>
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
@@ -227,6 +229,13 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &zkwinft_output_device_v1_interface,
         &Registry::outputDeviceV1Announced,
         &Registry::outputDeviceV1Removed
+    }},
+    {Registry::Interface::WlrOutputManagerV1, {
+        1,
+        QByteArrayLiteral("zwlr_output_manager_v1"),
+        &zwlr_output_manager_v1_interface,
+        &Registry::wlrOutputManagerV1Announced,
+        &Registry::wlrOutputManagerV1Removed
     }},
     {Registry::Interface::Shadow, {
         2,
@@ -689,6 +698,7 @@ BIND(RemoteAccessManager, org_kde_kwin_remote_access_manager)
 BIND(FakeInput, org_kde_kwin_fake_input)
 BIND(OutputManagementV1, zkwinft_output_management_v1)
 BIND(OutputDeviceV1, zkwinft_output_device_v1)
+BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
 BIND(ServerSideDecorationManager, org_kde_kwin_server_decoration_manager)
 BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
@@ -756,6 +766,7 @@ CREATE(RemoteAccessManager)
 CREATE(FakeInput)
 CREATE(OutputManagementV1)
 CREATE(OutputDeviceV1)
+CREATE(WlrOutputManagerV1)
 CREATE(ShadowManager)
 CREATE(BlurManager)
 CREATE(ContrastManager)
