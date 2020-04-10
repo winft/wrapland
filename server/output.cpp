@@ -42,7 +42,7 @@ namespace Server
 const quint32 Output::Private::s_version = 3;
 
 Output::Private::Private(Output* q, D_isplay* display)
-    : Wayland::Global(display, &wl_output_interface, &s_interface)
+    : Wayland::Global<Output>(q, display, &wl_output_interface, &s_interface)
     , displayHandle(display)
     , q_ptr(q)
 {
@@ -470,7 +470,7 @@ bool Output::isDpmsSupported() const
 
 Output* Output::get(void* data)
 {
-    auto resource = reinterpret_cast<Wayland::Resource*>(data);
+    auto resource = reinterpret_cast<Wayland::Resource<Output, Wayland::Global<Output>>*>(data);
     auto outputPriv = static_cast<Output::Private*>(resource->global());
     return outputPriv->q_ptr;
 }

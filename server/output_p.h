@@ -31,7 +31,7 @@ class D_isplay;
 
 using Sender = std::function<void(wl_resource*)>;
 
-class Output::Private : public Wayland::Global
+class Output::Private : public Wayland::Global<Output>
 {
 public:
     Private(Output* q, D_isplay* display);

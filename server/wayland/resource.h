@@ -21,6 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QDebug>
 
+#include "client.h"
+
 #include <cstdint>
 #include <functional>
 #include <wayland-server.h>
@@ -33,40 +35,90 @@ namespace Wrapland
 {
 namespace Server
 {
-class Client;
 
 namespace Wayland
 {
 
 class Client;
-class Global;
 
+template<typename Handle, typename GlobalHandle = void>
 class Resource
 {
 public:
-    Resource(Resource* parent, uint32_t id, const wl_interface* interface, const void* impl);
+    using ResourceType = Resource<Handle, GlobalHandle>;
+
+    Resource(Resource* parent, uint32_t id, const wl_interface* interface, const void* impl)
+        : Resource(parent->client(), parent->version(), id, interface, impl)
+    {
+    }
 
     Resource(Server::Client* client,
              uint32_t version,
              uint32_t id,
              const wl_interface* interface,
-             const void* impl);
+             const void* impl)
+        : Resource(Client::getInternal(client), version, id, interface, impl)
+    {
+    }
 
     Resource(Client* client,
              uint32_t version,
              uint32_t id,
              const wl_interface* interface,
-             const void* impl);
+             const void* impl)
+        : m_client{client}
+        , m_version{version}
+        , m_id{id}
+    {
+        m_resource = m_client->createResource(interface, m_version, id);
 
-    virtual ~Resource();
+        wl_resource_set_user_data(m_resource, this);
+        if (impl) {
+            wl_resource_set_implementation(m_resource, impl, this, unbind);
+        }
+    }
 
-    Client* client() const;
-    uint32_t id() const;
-    uint32_t version() const;
-    wl_resource* resource() const;
+    virtual ~Resource() = default;
 
-    Global* global() const;
-    void setGlobal(Global* global);
+    wl_resource* resource() const
+    {
+        return m_resource;
+    }
+
+    GlobalHandle* global() const
+    {
+        return m_global;
+    }
+
+    void setGlobal(GlobalHandle* global)
+    {
+        m_global = global;
+    }
+
+    Client* client() const
+    {
+        return m_client;
+    }
+
+    uint32_t version() const
+    {
+        return m_version;
+    }
+
+    uint32_t id() const
+    {
+        return m_resource ? wl_resource_get_id(m_resource) : 0;
+    }
+
+    void flush()
+    {
+        m_client->flush();
+    }
+
+    static ResourceType* internalResource(wl_resource* wlResource)
+    {
+        return reinterpret_cast<Resource*>(wlResource->data);
+    }
 
     template<typename T>
     static T* fromResource(wl_resource* resource)
@@ -88,21 +140,46 @@ public:
         }
     }
 
-    void flush();
+    static void destroyCallback(wl_client* client, wl_resource* wlResource)
+    {
+        Q_UNUSED(client);
 
-    static void destroyCallback(wl_client* client, wl_resource* wlResource);
+        auto resource = internalResource(wlResource);
 
-    static Resource* internalResource(wl_resource* wlResource);
+        resource->unbindGlobal();
+        wl_resource_destroy(resource->resource());
+        delete resource;
+    }
+
+    Handle* handle()
+    {
+        return m_handle;
+    }
 
 private:
-    static void unbind(wl_resource* wlResource);
-    void unbindGlobal();
+    static void unbind(wl_resource* wlResource)
+    {
+        auto* resource = reinterpret_cast<Resource*>(wlResource->data);
+        resource->unbindGlobal();
+        delete resource;
+    }
+
+    void unbindGlobal()
+    {
+        if constexpr (!std::is_same_v<GlobalHandle, void>) {
+            if (m_global) {
+                m_global->unbind(this);
+            }
+        }
+    }
+
     Client* m_client;
     uint32_t m_version;
     uint32_t m_id;
     wl_resource* m_resource;
 
-    Global* m_global = nullptr;
+    Handle* m_handle;
+    GlobalHandle* m_global = nullptr;
 
     wl_interface* m_interface;
     void* m_implementation;

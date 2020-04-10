@@ -70,8 +70,6 @@ set(SERVER_LIB_SRCS
     ../../server/output.cpp
     ../../server/wayland/client.cpp
     ../../server/wayland/display.cpp
-    ../../server/wayland/global.cpp
-    ../../server/wayland/resource.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
