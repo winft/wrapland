@@ -30,6 +30,13 @@ namespace Wrapland
 namespace Server
 {
 
+template<typename Priv>
+class DisplayCast
+{
+public:
+    Priv* priv;
+};
+
 class D_isplay::Private : public Wayland::Display
 {
 public:

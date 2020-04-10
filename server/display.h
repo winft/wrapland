@@ -43,10 +43,6 @@ namespace Wrapland
 {
 namespace Server
 {
-namespace Wayland
-{
-class Display;
-}
 
 class Client;
 class Display;
@@ -226,7 +222,6 @@ Q_SIGNALS:
 private:
     Client* createClientInternal(wl_client* wlClient);
 
-    friend class Wayland::Display;
     class Private;
     Private* d_ptr;
 };

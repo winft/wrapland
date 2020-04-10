@@ -82,6 +82,8 @@ public:
     static Display* backendCast(Server::D_isplay* display);
 
 private:
+    static std::vector<Display*> s_displays;
+
     void addSocket();
     wl_display* m_display = nullptr;
     wl_event_loop* m_loop = nullptr;

@@ -47,18 +47,25 @@ namespace Server
 namespace Wayland
 {
 
+std::vector<Display*> Display::s_displays;
+
 Display* Display::backendCast(Server::D_isplay* display)
 {
-    return static_cast<Display*>(display->d_ptr);
+    return *std::find_if(s_displays.cbegin(), s_displays.cend(), [display](Display* backend) {
+        return backend->handle() == display;
+    });
 }
 
 Display::Display(Server::D_isplay* parent)
     : m_handle(parent)
 {
+    s_displays.push_back(this);
 }
 
 Display::~Display()
 {
+    s_displays.erase(std::remove(s_displays.begin(), s_displays.end(), this), s_displays.end());
+
     terminate();
     if (m_display) {
         wl_display_destroy(m_display);
