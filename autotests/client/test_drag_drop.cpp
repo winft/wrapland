@@ -147,7 +147,7 @@ void TestDragAndDrop::init()
 
 #undef CREATE
 
-    QSignalSpy pointerSpy(m_seat, &Seat::hasPointerChanged);
+    QSignalSpy pointerSpy(m_seat, &Wrapland::Client::Seat::hasPointerChanged);
     QVERIFY(pointerSpy.isValid());
     QVERIFY(pointerSpy.wait());
     m_pointer = m_seat->createPointer(m_seat);

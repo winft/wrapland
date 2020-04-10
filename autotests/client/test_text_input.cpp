@@ -82,7 +82,7 @@ private:
     ConnectionThread *m_connection = nullptr;
     QThread *m_thread = nullptr;
     EventQueue *m_queue = nullptr;
-    Seat *m_seat = nullptr;
+    Wrapland::Client::Seat *m_seat = nullptr;
     Keyboard *m_keyboard = nullptr;
     Compositor *m_compositor = nullptr;
     TextInputManager *m_textInputManagerV0 = nullptr;
@@ -140,7 +140,7 @@ void TextInputTest::init()
                                  registry.interface(Registry::Interface::Seat).version,
                                  this);
     QVERIFY(m_seat->isValid());
-    QSignalSpy hasKeyboardSpy(m_seat, &Seat::hasKeyboardChanged);
+    QSignalSpy hasKeyboardSpy(m_seat, &Wrapland::Client::Seat::hasKeyboardChanged);
     QVERIFY(hasKeyboardSpy.isValid());
     QVERIFY(hasKeyboardSpy.wait());
     m_keyboard = m_seat->createKeyboard(this);

@@ -28,6 +28,7 @@ namespace Wrapland
 {
 namespace Server
 {
+class Seat;
 
 class SeatInterface;
 class SurfaceInterface;
@@ -56,6 +57,8 @@ private:
     void repeatInfo(qint32 charactersPerSecond, qint32 delay);
     friend class SeatInterface;
     explicit KeyboardInterface(SeatInterface *parent, wl_resource *parentResource);
+
+    friend class Seat;
 
     class Private;
     Private *d_func() const;

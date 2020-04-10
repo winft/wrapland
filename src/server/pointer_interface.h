@@ -28,6 +28,7 @@ namespace Wrapland
 {
 namespace Server
 {
+class Seat;
 
 class Cursor;
 class PointerGesturesUnstableV1Interface;
@@ -84,6 +85,8 @@ private:
     explicit PointerInterface(SeatInterface *parent, wl_resource *parentResource);
     class Private;
     Private *d_func() const;
+
+    friend class Seat;
 };
 
 /**

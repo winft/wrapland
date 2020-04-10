@@ -212,7 +212,6 @@ private:
     static void bind(wl_client* wlClient, void* data, uint32_t version, uint32_t id)
     {
         auto global = reinterpret_cast<Global*>(data);
-
         auto getClient = [&global, &wlClient] { return global->display()->getClient(wlClient); };
 
         auto bindToGlobal

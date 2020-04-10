@@ -53,7 +53,7 @@ private:
     ConnectionThread *m_connection = nullptr;
     QThread *m_thread = nullptr;
     EventQueue *m_queue = nullptr;
-    Seat *m_seat = nullptr;
+    Wrapland::Client::Seat *m_seat = nullptr;
     Idle *m_idle = nullptr;
 };
 

@@ -68,6 +68,7 @@ set(SERVER_LIB_SRCS
     ../../server/display.cpp
     ../../server/dpms.cpp
     ../../server/output.cpp
+    ../../server/seat.cpp
     ../../server/wayland/client.cpp
     ../../server/wayland/display.cpp
 )
@@ -361,7 +362,6 @@ set(SERVER_LIB_HEADERS
   relativepointer_interface.h
   remote_access_interface.h
   resource.h
-  seat_interface.h
   server_decoration_interface.h
   server_decoration_palette_interface.h
   shadow_interface.h
@@ -381,6 +381,7 @@ set(SERVER_LIB_HEADERS
   ../../server/display.h
   ../../server/dpms.h
   ../../server/output.h
+  ../../server/seat.h
 )
 
 install(FILES

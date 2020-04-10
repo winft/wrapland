@@ -39,6 +39,8 @@ public:
     }
 
     std::vector<Output*> outputs;
+    std::vector<Seat*> seats;
+
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 
 private:

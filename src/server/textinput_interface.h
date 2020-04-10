@@ -29,6 +29,7 @@ namespace Wrapland
 {
 namespace Server
 {
+class Seat;
 
 class Display;
 class SeatInterface;
@@ -421,6 +422,8 @@ private:
     friend class TextInputManagerUnstableV0Interface;
     friend class TextInputManagerUnstableV2Interface;
     friend class SeatInterface;
+
+    friend class Seat;
 
     Private *d_func() const;
 };

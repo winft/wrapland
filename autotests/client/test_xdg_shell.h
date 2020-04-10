@@ -87,7 +87,7 @@ protected:
     ShmPool *m_shmPool = nullptr;
     Wrapland::Client::Output *m_output1 = nullptr;
     Wrapland::Client::Output *m_output2 = nullptr;
-    Seat *m_seat = nullptr;
+    Wrapland::Client::Seat *m_seat = nullptr;
 
 private:
     XdgShellInterfaceVersion m_version;

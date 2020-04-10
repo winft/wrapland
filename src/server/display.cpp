@@ -63,7 +63,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Remodel
 #include "../../server/client.h"
 #include "../../server/display.h"
+
 #include "../../server/output.h"
+#include "../../server/seat.h"
 //
 //
 
@@ -260,11 +262,11 @@ OutputManagementV1Interface *Display::createOutputManagementV1(QObject *parent)
 
 SeatInterface *Display::createSeat(QObject *parent)
 {
-    SeatInterface *seat = new SeatInterface(this, parent);
-    connect(seat, &QObject::destroyed, this, [this, seat] { d->seats.removeAll(seat); });
-    connect(this, &Display::aboutToTerminate, seat, [this,seat] { delete seat; });
-    d->seats << seat;
-    return seat;
+    auto seat = newDisplay->createSeat(parent);
+    auto legacy = seat->legacy;
+
+    d->seats << legacy;
+    return legacy;
 }
 
 SubCompositorInterface *Display::createSubCompositor(QObject *parent)

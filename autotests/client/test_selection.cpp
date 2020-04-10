@@ -59,7 +59,7 @@ private:
         QThread *thread = nullptr;
         EventQueue *queue = nullptr;
         Compositor *compositor = nullptr;
-        Seat *seat = nullptr;
+        Wrapland::Client::Seat *seat = nullptr;
         DataDeviceManager *ddm = nullptr;
         Keyboard *keyboard = nullptr;
         DataDevice *dataDevice = nullptr;
@@ -148,7 +148,7 @@ bool SelectionTest::setupConnection(Connection* c)
     if (!c->seat->isValid()) {
         return false;
     }
-    QSignalSpy keyboardSpy(c->seat, &Seat::hasKeyboardChanged);
+    QSignalSpy keyboardSpy(c->seat, &Wrapland::Client::Seat::hasKeyboardChanged);
     if (!keyboardSpy.isValid()) {
         return false;
     }

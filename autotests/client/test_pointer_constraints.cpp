@@ -66,7 +66,7 @@ private:
     QThread *m_thread = nullptr;
     EventQueue *m_queue = nullptr;
     Compositor *m_compositor = nullptr;
-    Seat *m_seat = nullptr;
+    Wrapland::Client::Seat *m_seat = nullptr;
     Pointer *m_pointer = nullptr;
     PointerConstraints *m_pointerConstraints = nullptr;
 };
@@ -129,7 +129,7 @@ void TestPointerConstraints::init()
     m_seat = registry.createSeat(registry.interface(Registry::Interface::Seat).name, registry.interface(Registry::Interface::Seat).version, this);
     QVERIFY(m_seat);
     QVERIFY(m_seat->isValid());
-    QSignalSpy pointerChangedSpy(m_seat, &Seat::hasPointerChanged);
+    QSignalSpy pointerChangedSpy(m_seat, &Wrapland::Client::Seat::hasPointerChanged);
     QVERIFY(pointerChangedSpy.isValid());
     QVERIFY(pointerChangedSpy.wait());
     m_pointer = m_seat->createPointer(this);

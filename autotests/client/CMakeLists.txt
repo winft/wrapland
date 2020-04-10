@@ -97,14 +97,26 @@ ecm_mark_as_test(testWaylandSurface)
 # Test WaylandSeat
 ########################################################
 if (HAVE_LINUX_INPUT_H)
-    set( testWaylandSeat_SRCS
-            test_wayland_seat.cpp
-        )
-    add_executable(testWaylandSeat ${testWaylandSeat_SRCS})
-    target_link_libraries( testWaylandSeat Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
-    add_test(NAME wrapland-testWaylandSeat COMMAND testWaylandSeat)
-    ecm_mark_as_test(testWaylandSeat)
+    set( testSeat_SRCS seat.cpp )
+    add_executable(testSeat ${testSeat_SRCS})
+    target_link_libraries( testSeat
+        Qt5::Test Qt5::Gui
+        Wrapland::Client Wrapland::Server
+        Wayland::Client Wayland::Server)
+    add_test(NAME wrapland-testSeat COMMAND testSeat)
+    ecm_mark_as_test(testSeat)
 endif()
+
+#Legacy
+#if (HAVE_LINUX_INPUT_H)
+#    set( testWaylandSeat_SRCS
+#            test_wayland_seat.cpp
+#        )
+#    add_executable(testWaylandSeat ${testWaylandSeat_SRCS})
+#    target_link_libraries( testWaylandSeat Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+#    add_test(NAME wrapland-testWaylandSeat COMMAND testWaylandSeat)
+#    ecm_mark_as_test(testWaylandSeat)
+#endif()
 
 ########################################################
 # Test ShmPool

@@ -53,6 +53,7 @@ class Display;
 
 class DpmsManager;
 class Output;
+class Seat;
 
 //
 // Legacy
@@ -68,7 +69,6 @@ class FakeInputInterface;
 class PlasmaShellInterface;
 class PlasmaWindowManagementInterface;
 class QtSurfaceExtensionInterface;
-class SeatInterface;
 class ShadowManagerInterface;
 class BlurManagerInterface;
 class ContrastManagerInterface;
@@ -137,6 +137,9 @@ public:
     void removeOutput(Output* output);
     std::vector<Output*>& outputs() const;
 
+    Seat* createSeat(QObject* parent = nullptr);
+    std::vector<Seat*>& seats() const;
+
     //
     // Legacy
     void setSocketName(const QString& name);
@@ -148,9 +151,7 @@ public:
     CompositorInterface* createCompositor(QObject* parent = nullptr);
     void createShm();
     ShellInterface* createShell(QObject* parent = nullptr);
-    SeatInterface* createSeat(QObject* parent = nullptr);
 
-    QVector<SeatInterface*> seats() const;
     SubCompositorInterface* createSubCompositor(QObject* parent = nullptr);
     DataDeviceManagerInterface* createDataDeviceManager(QObject* parent = nullptr);
     OutputManagementV1Interface* createOutputManagementV1(QObject* parent = nullptr);

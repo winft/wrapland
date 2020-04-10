@@ -30,6 +30,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_interface.h"
 #include "touch_interface.h"
 
+#include "../../server/seat.h"
+
 struct wl_client;
 struct wl_resource;
 
@@ -37,6 +39,7 @@ namespace Wrapland
 {
 namespace Server
 {
+class Seat;
 
 class DataDeviceInterface;
 class Display;
@@ -63,13 +66,13 @@ class TextInputInterface;
  *
  * @since 0.0.559
  **/
-enum class PointerAxisSource {
-    Unknown,
-    Wheel,
-    Finger,
-    Continuous,
-    WheelTilt
-};
+//enum class PointerAxisSource {
+//    Unknown,
+//    Wheel,
+//    Finger,
+//    Continuous,
+//    WheelTilt
+//};
 
 /**
  * @brief Represents a Seat on the Wayland Display.
@@ -707,6 +710,8 @@ public:
 
     static SeatInterface *get(wl_resource *native);
 
+    Server::Seat* newSeat;
+
 Q_SIGNALS:
     void nameChanged(const QString&);
     void hasPointerChanged(bool);
@@ -760,6 +765,8 @@ Q_SIGNALS:
     void focusedTextInputChanged();
 
 private:
+    friend class Server::Seat;
+
     friend class Display;
     friend class DataDeviceManagerInterface;
     friend class TextInputManagerUnstableV0Interface;

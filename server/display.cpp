@@ -27,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "dpms.h"
 #include "output.h"
+#include "seat.h"
 
 // Legacy
 #include "../src/server/display.h"
@@ -54,7 +55,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/qtsurfaceextension_interface.h"
 #include "../src/server/relativepointer_interface_p.h"
 #include "../src/server/remote_access_interface.h"
-#include "../src/server/seat_interface.h"
 #include "../src/server/server_decoration_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
 #include "../src/server/shadow_interface.h"
@@ -198,9 +198,11 @@ OutputManagementV1Interface* D_isplay::createOutputManagementV1(QObject* parent)
     return legacy->createOutputManagementV1(parent);
 }
 
-SeatInterface* D_isplay::createSeat(QObject* parent)
+Seat* D_isplay::createSeat(QObject* parent)
 {
-    return legacy->createSeat(parent);
+    auto seat = new Seat(this, parent);
+    d_ptr->seats.push_back(seat);
+    return seat;
 }
 
 SubCompositorInterface* D_isplay::createSubCompositor(QObject* parent)
@@ -404,6 +406,11 @@ D_isplay::operator wl_display*() const
 std::vector<Output*>& D_isplay::outputs() const
 {
     return d_ptr->outputs;
+}
+
+std::vector<Seat*>& D_isplay::seats() const
+{
+    return d_ptr->seats;
 }
 
 Client* D_isplay::getClient(wl_client* wlClient)
