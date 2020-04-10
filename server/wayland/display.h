@@ -75,11 +75,16 @@ public:
 
     void setupClient(Client* client);
 
+    static Client* castClient(Server::Client* client);
+
     std::vector<Client*> const& clients() const;
 
     Server::D_isplay* handle() const;
 
     static Display* backendCast(Server::D_isplay* display);
+
+protected:
+    virtual Client* castClientImpl(Server::Client* client) = 0;
 
 private:
     static std::vector<Display*> s_displays;

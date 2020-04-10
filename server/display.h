@@ -220,8 +220,6 @@ Q_SIGNALS:
     void clientDisconnected(Wrapland::Server::Client*);
 
 private:
-    Client* createClientInternal(wl_client* wlClient);
-
     class Private;
     Private* d_ptr;
 };

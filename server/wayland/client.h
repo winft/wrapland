@@ -62,8 +62,6 @@ public:
     operator wl_client*() const;
     void destroy();
 
-    static Client* getInternal(Server::Client* client);
-
 private:
     static void destroyListenerCallback(wl_listener* listener, void* data);
     static std::vector<Client*> allClients;

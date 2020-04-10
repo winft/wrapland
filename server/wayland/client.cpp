@@ -150,11 +150,6 @@ std::string Client::executablePath() const
     return m_executablePath;
 }
 
-Client* Client::getInternal(Server::Client* client)
-{
-    return client->d_ptr;
-}
-
 }
 }
 }

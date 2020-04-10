@@ -86,9 +86,9 @@ namespace Wrapland
 namespace Server
 {
 
-Client* D_isplay::createClientInternal(wl_client* wlClient)
+Wayland::Client* D_isplay::Private::castClientImpl(Server::Client* client)
 {
-    return new Server::Client(wlClient, this);
+    return client->d_ptr;
 }
 
 D_isplay::D_isplay(QObject* parent, bool legacyInvoked)

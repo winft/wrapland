@@ -45,6 +45,8 @@ public:
     {
     }
 
+    Wayland::Client* castClientImpl(Server::Client* client) override;
+
     std::vector<Output*> outputs;
     std::vector<Seat*> seats;
 

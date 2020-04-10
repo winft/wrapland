@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 
 #include "client.h"
+#include "display.h"
 
 #include <cstdint>
 #include <functional>
@@ -57,7 +58,7 @@ public:
              uint32_t id,
              const wl_interface* interface,
              const void* impl)
-        : Resource(Client::getInternal(client), version, id, interface, impl)
+        : Resource(Display::castClient(client), version, id, interface, impl)
     {
     }
 

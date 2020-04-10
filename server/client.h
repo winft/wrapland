@@ -37,11 +37,6 @@ namespace Server
 
 class D_isplay;
 
-namespace Wayland
-{
-class Client;
-}
-
 //
 // Legacy
 class ClientConnection;
@@ -83,7 +78,6 @@ Q_SIGNALS:
 private:
     Client(wl_client* wlClient, D_isplay* display);
     friend class D_isplay;
-    friend class Wayland::Client;
 
     class Private;
     Private* d_ptr;

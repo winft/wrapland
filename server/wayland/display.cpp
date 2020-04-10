@@ -56,6 +56,11 @@ Display* Display::backendCast(Server::D_isplay* display)
     });
 }
 
+Client* Display::castClient(Server::Client* client)
+{
+    return backendCast(client->display())->castClientImpl(client);
+}
+
 Display::Display(Server::D_isplay* parent)
     : m_handle(parent)
 {
