@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2015  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,12 +17,11 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_DPMS_INTERFACE_P_H
-#define WAYLAND_SERVER_DPMS_INTERFACE_P_H
+#pragma once
 
-#include "dpms_interface.h"
-#include "global_p.h"
-#include "resource_p.h"
+#include "dpms.h"
+#include "wayland/global.h"
+#include "wayland/resource.h"
 
 #include <wayland-dpms-server-protocol.h>
 
@@ -31,31 +30,28 @@ namespace Wrapland
 namespace Server
 {
 
-class OutputInterface;
+class Output;
 
-class DpmsManagerInterface::Private : public Global::Private
+class DpmsManager::Private : public Wayland::Global<DpmsManager>
 {
 public:
-    Private(DpmsManagerInterface *q, Display *d);
+    Private(D_isplay* display, DpmsManager* q);
 
 private:
-    static void getDpmsCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *output);
-    static Private *cast(wl_resource *r) {
-        return reinterpret_cast<Private*>(wl_resource_get_user_data(r));
-    }
-    void bind(wl_client *client, uint32_t version, uint32_t id) override;
+    static void
+    getDpmsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id, wl_resource* output);
 
-    DpmsManagerInterface *q;
     static const struct org_kde_kwin_dpms_manager_interface s_interface;
-    static const quint32 s_version;
+    static const quint32 s_version = 1;
 };
 
-class DpmsInterface : public Resource
+using Sender = std::function<void(wl_resource*)>;
+
+class Dpms : public QObject
 {
-    Q_OBJECT
 public:
-    explicit DpmsInterface(OutputInterface *output, wl_resource *parentResource, DpmsManagerInterface *manager);
-    virtual ~DpmsInterface();
+    Dpms(Client* client, uint32_t version, uint32_t id, Output* output);
+    ~Dpms() override;
 
     void sendSupported();
     void sendMode();
@@ -63,22 +59,24 @@ public:
 
 private:
     class Private;
-    Private *d_func() const;
+    Private* d_ptr;
 };
 
-class DpmsInterface::Private : public Resource::Private
+class Dpms::Private : public Wayland::Resource<Dpms>
 {
 public:
-    explicit Private(DpmsInterface *q, DpmsManagerInterface *g, wl_resource *parentResource, OutputInterface *output);
+    Private(Client* client, uint32_t version, uint32_t id, Output* output);
 
-    OutputInterface *output;
+    Output* output;
+
+    Sender doneFunctor();
+    Sender modeFunctor();
+    Sender supportedFunctor();
 
 private:
-    static void setCallback(wl_client *client, wl_resource *resource, uint32_t mode);
+    static void setCallback(wl_client* client, wl_resource* wlResource, uint32_t mode);
     static const struct org_kde_kwin_dpms_interface s_interface;
 };
 
 }
 }
-
-#endif

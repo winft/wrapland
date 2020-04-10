@@ -19,8 +19,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 // Qt
 #include <QtTest>
-// KWin
+
 #include "../../server/display.h"
+
+#include "../../server/dpms.h"
 #include "../../server/output.h"
 
 #include "../../src/client/blur.h"
@@ -44,7 +46,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/compositor_interface.h"
 #include "../../src/server/datadevicemanager_interface.h"
 #include "../../src/server/display.h"
-#include "../../src/server/dpms_interface.h"
 #include "../../src/server/idleinhibit_interface.h"
 #include "../../src/server/output_interface.h"
 #include "../../src/server/seat_interface.h"
@@ -190,7 +191,7 @@ void TestWaylandRegistry::init()
     m_contrast = m_display->createContrastManager(this);
     m_contrast->create();
     m_display->createSlideManager(this)->create();
-    m_display->createDpmsManager()->create();
+    m_display->createDpmsManager();
     m_serverSideDecorationManager = m_display->createServerSideDecorationManager();
     m_serverSideDecorationManager->create();
     m_textInputManagerV0 = m_display->createTextInputManager(Wrapland::Server::TextInputInterfaceVersion::UnstableV0);

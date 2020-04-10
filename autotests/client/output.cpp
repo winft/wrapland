@@ -26,8 +26,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 
 #include "../../server/display.h"
+#include "../../server/dpms.h"
 #include "../../server/output.h"
-#include "../../src/server/dpms_interface.h"
 
 #include <wayland-client-protocol.h>
 
@@ -506,8 +506,7 @@ void TestOutput::testDpms_data()
 
 void TestOutput::testDpms()
 {
-    auto* serverDpmsManager = m_display->createDpmsManager();
-    serverDpmsManager->create();
+    m_display->createDpmsManager();
 
     // set Dpms on the Output
     QSignalSpy serverDpmsSupportedChangedSpy(m_serverOutput, &Srv::Output::dpmsSupportedChanged);
@@ -609,7 +608,7 @@ void TestOutput::testDpmsRequestMode()
     // server side.
 
     // Setup code
-    m_display->createDpmsManager()->create();
+    m_display->createDpmsManager();
 
     // set Dpms on the Output
     QSignalSpy serverDpmsSupportedChangedSpy(m_serverOutput, &Srv::Output::dpmsSupportedChanged);

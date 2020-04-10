@@ -21,7 +21,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "compositor_interface.h"
 #include "datadevicemanager_interface.h"
-#include "dpms_interface.h"
 #include "output_configuration_v1_interface.h"
 #include "output_management_v1_interface.h"
 #include "output_device_v1_interface.h"
@@ -350,13 +349,6 @@ SlideManagerInterface *Display::createSlideManager(QObject *parent)
     auto b = new SlideManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
-}
-
-DpmsManagerInterface *Display::createDpmsManager(QObject *parent)
-{
-    auto d = new DpmsManagerInterface(this, parent);
-    connect(this, &Display::aboutToTerminate, d, [this, d] { delete d; });
-    return d;
 }
 
 ServerSideDecorationManagerInterface *Display::createServerSideDecorationManager(QObject *parent)

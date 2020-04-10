@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2015  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,20 +17,20 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_DPMS_INTERFACE_H
-#define WAYLAND_SERVER_DPMS_INTERFACE_H
+#pragma once
 
 #include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
-#include "global.h"
+
+#include <memory>
 
 namespace Wrapland
 {
 namespace Server
 {
 
-class Display;
+class D_isplay;
 
 /**
  * @brief Global for server side Display Power Management Signaling interface.
@@ -58,26 +58,27 @@ class Display;
  * To connect to Dpms change requests use:
  * @code
  * connect(output, &OutputInterface::dpmsModeRequested,
- *         [] (Wrapland::Server::OutputInterface::DpmsMode requestedMode) { qDebug() << "Mode change requested"; });
+ *         [] (Wrapland::Server::OutputInterface::DpmsMode requestedMode) {
+ *             qDebug() << "Mode change requested";
+ *         });
  * @endcode
  *
- * @see Display
- * @see OutputInterface
- * @since 5.5
+ * @see Output
+ * @since 0.5XX.0
  **/
-class WRAPLANDSERVER_EXPORT DpmsManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT DpmsManager : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~DpmsManagerInterface();
+    ~DpmsManager() override;
 
 private:
-    explicit DpmsManagerInterface(Display *display, QObject *parent = nullptr);
-    friend class Display;
+    explicit DpmsManager(D_isplay* display, QObject* parent = nullptr);
+    friend class D_isplay;
+
     class Private;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }
 }
-
-#endif

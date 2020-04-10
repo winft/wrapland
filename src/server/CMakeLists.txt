@@ -11,7 +11,6 @@ set(SERVER_LIB_SRCS
     dataoffer_interface.cpp
     datasource_interface.cpp
     display.cpp
-    dpms_interface.cpp
     eglstream_controller_interface.cpp
     fakeinput_interface.cpp
     filtered_display.cpp
@@ -67,6 +66,7 @@ set(SERVER_LIB_SRCS
 
     ../../server/client.cpp
     ../../server/display.cpp
+    ../../server/dpms.cpp
     ../../server/output.cpp
     ../../server/wayland/client.cpp
     ../../server/wayland/display.cpp
@@ -336,7 +336,6 @@ set(SERVER_LIB_HEADERS
   dataoffer_interface.h
   datasource_interface.h
   display.h
-  dpms_interface.h
   eglstream_controller_interface.h
   fakeinput_interface.h
   filtered_display.h
@@ -380,6 +379,7 @@ set(SERVER_LIB_HEADERS
 
   ../../server/client.h
   ../../server/display.h
+  ../../server/dpms.h
   ../../server/output.h
 )
 

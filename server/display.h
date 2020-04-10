@@ -51,6 +51,7 @@ class Display;
 class Client;
 class Display;
 
+class DpmsManager;
 class Output;
 
 //
@@ -59,7 +60,6 @@ class ClientConnection;
 
 class CompositorInterface;
 class DataDeviceManagerInterface;
-class DpmsManagerInterface;
 class IdleInterface;
 enum class IdleInhibitManagerInterfaceVersion;
 class RemoteAccessManagerInterface;
@@ -164,7 +164,7 @@ public:
     BlurManagerInterface* createBlurManager(QObject* parent = nullptr);
     ContrastManagerInterface* createContrastManager(QObject* parent = nullptr);
     SlideManagerInterface* createSlideManager(QObject* parent = nullptr);
-    DpmsManagerInterface* createDpmsManager(QObject* parent = nullptr);
+    DpmsManager* createDpmsManager(QObject* parent = nullptr);
 
     KeyStateInterface* createKeyStateInterface(QObject* parent = nullptr);
 

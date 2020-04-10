@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/client.h"
 #include "wayland/display.h"
 
+#include "dpms.h"
 #include "output.h"
 
 // Legacy
@@ -35,7 +36,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/compositor_interface.h"
 #include "../src/server/contrast_interface.h"
 #include "../src/server/datadevicemanager_interface.h"
-#include "../src/server/dpms_interface.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
 #include "../src/server/idle_interface.h"
@@ -263,9 +263,9 @@ SlideManagerInterface* D_isplay::createSlideManager(QObject* parent)
     return legacy->createSlideManager(parent);
 }
 
-DpmsManagerInterface* D_isplay::createDpmsManager(QObject* parent)
+DpmsManager* D_isplay::createDpmsManager(QObject* parent)
 {
-    return legacy->createDpmsManager(parent);
+    return new DpmsManager(this, parent);
 }
 
 ServerSideDecorationManagerInterface* D_isplay::createServerSideDecorationManager(QObject* parent)
