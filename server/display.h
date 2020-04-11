@@ -46,6 +46,7 @@ namespace Server
 
 class Client;
 class Display;
+class Private;
 
 class DpmsManager;
 class Output;
@@ -220,7 +221,7 @@ Q_SIGNALS:
     void clientDisconnected(Wrapland::Server::Client*);
 
 private:
-    class Private;
+    friend class Private;
     Private* d_ptr;
 };
 

@@ -86,9 +86,24 @@ namespace Wrapland
 namespace Server
 {
 
-Wayland::Client* D_isplay::Private::castClientImpl(Server::Client* client)
+Private* Private::castDisplay(D_isplay* display)
+{
+    return display->d_ptr;
+}
+
+Wayland::Client* Private::castClientImpl(Server::Client* client)
 {
     return client->d_ptr;
+}
+
+Client* Private::createClientHandle(wl_client* wlClient)
+{
+    if (auto* client = getClient(wlClient)) {
+        return client->handle();
+    }
+    auto* clientHandle = new Client(wlClient, q_ptr);
+    setupClient(clientHandle->d_ptr);
+    return clientHandle;
 }
 
 D_isplay::D_isplay(QObject* parent, bool legacyInvoked)
@@ -415,12 +430,7 @@ std::vector<Seat*>& D_isplay::seats() const
 
 Client* D_isplay::getClient(wl_client* wlClient)
 {
-    if (auto* client = d_ptr->getClient(wlClient)) {
-        return client->handle();
-    }
-    auto* clientHandle = new Client(wlClient, this);
-    d_ptr->setupClient(clientHandle->d_ptr);
-    return clientHandle;
+    return d_ptr->createClientHandle(wlClient);
 }
 
 std::vector<Client*> D_isplay::clients() const

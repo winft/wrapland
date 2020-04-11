@@ -87,8 +87,6 @@ protected:
     virtual Client* castClientImpl(Server::Client* client) = 0;
 
 private:
-    static std::vector<Display*> s_displays;
-
     void addSocket();
     wl_display* m_display = nullptr;
     wl_event_loop* m_loop = nullptr;

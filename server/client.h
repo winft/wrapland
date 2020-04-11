@@ -77,7 +77,7 @@ Q_SIGNALS:
 
 private:
     Client(wl_client* wlClient, D_isplay* display);
-    friend class D_isplay;
+    friend class Private;
 
     class Private;
     Private* d_ptr;

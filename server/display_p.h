@@ -30,21 +30,16 @@ namespace Wrapland
 namespace Server
 {
 
-template<typename Priv>
-class DisplayCast
-{
-public:
-    Priv* priv;
-};
-
-class D_isplay::Private : public Wayland::Display
+class Private : public Wayland::Display
 {
 public:
     Private(D_isplay* display)
         : Wayland::Display(display)
+        , q_ptr(display)
     {
     }
 
+    Client* createClientHandle(wl_client* wlClient);
     Wayland::Client* castClientImpl(Server::Client* client) override;
 
     std::vector<Output*> outputs;
@@ -52,8 +47,11 @@ public:
 
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 
+    static Private* castDisplay(D_isplay* display);
+
 private:
     friend class Wayland::Display;
+    D_isplay* q_ptr;
 };
 
 }
