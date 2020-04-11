@@ -19,7 +19,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
+#include "capsule.h"
+
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -36,11 +39,12 @@ namespace Server
 {
 class Client;
 class D_isplay;
-class G_lobal;
 
 namespace Wayland
 {
 class Client;
+
+using GlobalCapsule = Capsule<wl_global>;
 
 class Display
 {
@@ -50,8 +54,8 @@ public:
 
     void setSocketName(const std::string& name);
 
-    void addGlobal(Server::G_lobal* global);
-    void removeGlobal(Server::G_lobal* global);
+    void addGlobal(GlobalCapsule* capsule);
+    void removeGlobal(GlobalCapsule* capsule);
 
     wl_display* display() const;
     std::string socketName() const;
@@ -94,7 +98,7 @@ private:
 
     bool m_running = false;
 
-    std::vector<Server::G_lobal*> m_globals;
+    std::vector<GlobalCapsule*> m_globals;
     std::vector<Client*> m_clients;
 
     Server::D_isplay* m_handle;

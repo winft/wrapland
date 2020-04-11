@@ -64,6 +64,9 @@ Display::Display(Server::D_isplay* parent)
 
 Display::~Display()
 {
+    for (auto capsule : m_globals) {
+        capsule->release();
+    }
     terminate();
     if (m_display) {
         wl_display_destroy(m_display);
@@ -96,14 +99,14 @@ void Display::setRunning(bool running)
     m_running = running;
 }
 
-void Display::addGlobal(Server::G_lobal* global)
+void Display::addGlobal(GlobalCapsule* capsule)
 {
-    m_globals.push_back(global);
+    m_globals.push_back(capsule);
 }
 
-void Display::removeGlobal(Server::G_lobal* global)
+void Display::removeGlobal(GlobalCapsule* capsule)
 {
-    m_globals.erase(std::remove(m_globals.begin(), m_globals.end(), global), m_globals.end());
+    m_globals.erase(std::remove(m_globals.begin(), m_globals.end(), capsule), m_globals.end());
 }
 
 void Display::addSocket()

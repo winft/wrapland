@@ -22,18 +22,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 
 #include "display.h"
+
+#include "capsule.h"
 #include "resource.h"
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <vector>
 
 #include <wayland-server.h>
-
-struct wl_client;
-struct wl_interface;
-struct wl_global;
-struct wl_resource;
 
 namespace Wrapland
 {
@@ -45,7 +43,6 @@ class D_isplay;
 namespace Wayland
 {
 class Client;
-class Display;
 
 template<typename Handle>
 class Global
@@ -55,20 +52,19 @@ public:
 
     virtual ~Global()
     {
+        m_display->removeGlobal(m_capsule.get());
         for (auto bind : m_binds) {
             bind->setGlobal(nullptr);
         }
         remove();
     }
 
-    Global global();
-
     void create()
     {
-        Q_ASSERT(!m_global);
+        Q_ASSERT(!m_capsule->valid());
 
-        wl_display* wlDisplay = *display()->handle();
-        m_global = wl_global_create(wlDisplay, m_interface, version(), this, bind);
+        m_capsule->create(
+            wl_global_create(*display()->handle(), m_interface, version(), this, bind));
     }
 
     virtual uint32_t version() const
@@ -93,12 +89,12 @@ public:
 
     operator wl_global*() const
     {
-        return m_global;
+        return *m_capsule;
     }
 
     operator wl_global*()
     {
-        return m_global;
+        return *m_capsule;
     }
 
     static Handle* fromResource(wl_resource* wlResource)
@@ -161,24 +157,26 @@ protected:
            const wl_interface* interface,
            void const* implementation)
         : m_handle(handle)
-        , m_display(Wayland::Display::backendCast(display))
+        , m_display(Display::backendCast(display))
         , m_interface(interface)
         , m_implementation(implementation)
-        , m_global(nullptr)
+        , m_capsule{new GlobalCapsule(wl_global_destroy)}
     {
+        m_display->addGlobal(m_capsule.get());
+
         // TODO: allow to create and destroy Globals while keeping the object existing (but always
         //       create on ctor call?).
     }
 
     void remove()
     {
-        if (!m_global) {
+        if (!m_capsule->valid()) {
             return;
         }
-        wl_global_remove(m_global);
+        wl_global_remove(*m_capsule);
 
         // TODO: call destroy with timer.
-        destroy(m_global);
+        destroy(std::move(m_capsule));
     }
 
     static void resourceDestroyCallback(wl_client* wlClient, wl_resource* wlResource)
@@ -194,9 +192,9 @@ protected:
     }
 
 private:
-    static void destroy(wl_global* global)
+    static void destroy(std::unique_ptr<GlobalCapsule> global)
     {
-        wl_global_destroy(global);
+        global.reset();
     }
 
     Resource<Handle, Global<Handle>>* findBind(Client* client)
@@ -243,8 +241,8 @@ private:
     Display* m_display;
     wl_interface const* m_interface;
     void const* m_implementation;
-    wl_global* m_global;
 
+    std::unique_ptr<GlobalCapsule> m_capsule;
     std::vector<GlobalResource*> m_binds;
 };
 
