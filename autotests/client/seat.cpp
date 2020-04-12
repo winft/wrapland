@@ -41,15 +41,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/clientconnection.h"
 #include "../../src/server/compositor_interface.h"
 #include "../../src/server/datadevicemanager_interface.h"
-#include "../../src/server/keyboard_interface.h"
-#include "../../src/server/pointer_interface.h"
-#include "../../src/server/pointergestures_interface.h"
-#include "../../src/server/relativepointer_interface.h"
 #include "../../src/server/seat_interface.h"
 #include "../../src/server/subcompositor_interface.h"
 #include "../../src/server/surface_interface.h"
 
+#include "../../server/client.h"
 #include "../../server/display.h"
+#include "../../server/keyboard.h"
+#include "../../server/pointer.h"
+#include "../../server/pointer_gestures_v1.h"
+#include "../../server/relative_pointer_v1.h"
 #include "../../server/seat.h"
 
 #include <QtTest>
@@ -110,8 +111,8 @@ private:
     Srv::CompositorInterface* m_compositorInterface;
     Srv::Seat* m_serverSeat;
     Srv::SubCompositorInterface* m_subCompositorInterface;
-    Srv::RelativePointerManagerInterface* m_relativePointerManagerInterface;
-    Srv::PointerGesturesInterface* m_pointerGesturesInterface;
+    Srv::RelativePointerManagerV1* m_relativePointerManagerServer;
+    Srv::PointerGesturesV1* m_pointerGesturesInterface;
     Clt::ConnectionThread* m_connection;
     Clt::Compositor* m_compositor;
     Clt::Seat* m_seat;
@@ -131,7 +132,7 @@ TestSeat::TestSeat(QObject* parent)
     , m_compositorInterface(nullptr)
     , m_serverSeat(nullptr)
     , m_subCompositorInterface(nullptr)
-    , m_relativePointerManagerInterface(nullptr)
+    , m_relativePointerManagerServer(nullptr)
     , m_pointerGesturesInterface(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
@@ -143,6 +144,8 @@ TestSeat::TestSeat(QObject* parent)
     , m_queue(nullptr)
     , m_thread(nullptr)
 {
+    qRegisterMetaType<Wrapland::Server::Keyboard*>();
+    qRegisterMetaType<Wrapland::Server::Pointer*>();
 }
 
 void TestSeat::init()
@@ -162,17 +165,11 @@ void TestSeat::init()
     m_subCompositorInterface->create();
     QVERIFY(m_subCompositorInterface->isValid());
 
-    m_relativePointerManagerInterface = m_display->createRelativePointerManager(
-        Srv::RelativePointerInterfaceVersion::UnstableV1, m_display);
-    QVERIFY(m_relativePointerManagerInterface);
-    m_relativePointerManagerInterface->create();
-    QVERIFY(m_relativePointerManagerInterface->isValid());
+    m_relativePointerManagerServer = m_display->createRelativePointerManager(m_display);
+    QVERIFY(m_relativePointerManagerServer);
 
-    m_pointerGesturesInterface = m_display->createPointerGestures(
-        Srv::PointerGesturesInterfaceVersion::UnstableV1, m_display);
+    m_pointerGesturesInterface = m_display->createPointerGestures(m_display);
     QVERIFY(m_pointerGesturesInterface);
-    m_pointerGesturesInterface->create();
-    QVERIFY(m_pointerGesturesInterface->isValid());
 
     // Setup connection.
     m_connection = new Clt::ConnectionThread;
@@ -284,8 +281,8 @@ void TestSeat::cleanup()
     delete m_subCompositorInterface;
     m_subCompositorInterface = nullptr;
 
-    delete m_relativePointerManagerInterface;
-    m_relativePointerManagerInterface = nullptr;
+    delete m_relativePointerManagerServer;
+    m_relativePointerManagerServer = nullptr;
 
     delete m_pointerGesturesInterface;
     m_pointerGesturesInterface = nullptr;
@@ -399,7 +396,7 @@ void TestSeat::testPointer()
     m_serverSeat->setPointerPos(QPoint(20, 18));
     m_serverSeat->setFocusedPointerSurface(serverSurface, QPoint(10, 15));
     QCOMPARE(focusedPointerChangedSpy.count(), 1);
-    QVERIFY(!focusedPointerChangedSpy.first().first().value<Srv::PointerInterface*>());
+    QVERIFY(!focusedPointerChangedSpy.first().first().value<Srv::Pointer*>());
 
     // No pointer yet.
     QVERIFY(m_serverSeat->focusedPointerSurface());
@@ -421,17 +418,17 @@ void TestSeat::testPointer()
     // Once the pointer is created it should be set as the focused pointer.
     QVERIFY(pointerCreatedSpy.wait());
     QVERIFY(m_serverSeat->focusedPointer());
-    QCOMPARE(pointerCreatedSpy.first().first().value<Srv::PointerInterface*>(),
+    QCOMPARE(pointerCreatedSpy.first().first().value<Srv::Pointer*>(),
              m_serverSeat->focusedPointer());
     QCOMPARE(focusedPointerChangedSpy.count(), 2);
-    QCOMPARE(focusedPointerChangedSpy.last().first().value<Srv::PointerInterface*>(),
+    QCOMPARE(focusedPointerChangedSpy.last().first().value<Srv::Pointer*>(),
              m_serverSeat->focusedPointer());
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 1);
 
     m_serverSeat->setFocusedPointerSurface(nullptr);
     QCOMPARE(focusedPointerChangedSpy.count(), 3);
-    QVERIFY(!focusedPointerChangedSpy.last().first().value<Srv::PointerInterface*>());
+    QVERIFY(!focusedPointerChangedSpy.last().first().value<Srv::Pointer*>());
     serverSurface->client()->flush();
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 2);
@@ -469,8 +466,7 @@ void TestSeat::testPointer()
     QCOMPARE(p->enteredSurface(), s);
     QCOMPARE(cp.enteredSurface(), s);
     QCOMPARE(focusedPointerChangedSpy.count(), 4);
-    QCOMPARE(focusedPointerChangedSpy.last().first().value<Srv::PointerInterface*>(),
-             serverPointer);
+    QCOMPARE(focusedPointerChangedSpy.last().first().value<Srv::Pointer*>(), serverPointer);
 
     // Test motion.
     m_serverSeat->setTimestamp(1);
@@ -512,6 +508,7 @@ void TestSeat::testPointer()
     m_serverSeat->setTimestamp(4);
     m_serverSeat->pointerButtonPressed(1);
     QVERIFY(buttonSpy.wait());
+    QTRY_COMPARE(buttonSpy.count(), 1);
     QTRY_COMPARE(frameSpy.count(), 8);
     QCOMPARE(buttonSpy.at(0).at(0).value<quint32>(), m_display->serial());
     m_serverSeat->setTimestamp(5);
@@ -593,15 +590,12 @@ void TestSeat::testPointer()
     QCOMPARE(relativeMotionSpy.last().at(2).value<quint64>(), quint64(1));
 
     // Destroy the focused pointer.
-    QSignalSpy unboundSpy(serverPointer, &Srv::Resource::unbound);
+    QSignalSpy unboundSpy(serverPointer, &Srv::Pointer::resourceDestroyed);
     QVERIFY(unboundSpy.isValid());
-    QSignalSpy destroyedSpy(serverPointer, &Srv::Resource::destroyed);
-    QVERIFY(destroyedSpy.isValid());
 
     delete p;
     QVERIFY(unboundSpy.wait());
     QCOMPARE(unboundSpy.count(), 1);
-    QCOMPARE(destroyedSpy.count(), 0);
 
     // Now test that calling into the methods in Seat does not crash.
     // The focused pointer must be null now since it got destroyed.
@@ -627,13 +621,6 @@ void TestSeat::testPointer()
     m_serverSeat->setFocusedPointerSurface(serverSurface);
     QCOMPARE(focusedPointerChangedSpy.count(), 9);
 
-    QCOMPARE(m_serverSeat->focusedPointerSurface(), serverSurface);
-    QVERIFY(!m_serverSeat->focusedPointer());
-
-    // And now destroy.
-    QVERIFY(destroyedSpy.wait());
-    QCOMPARE(unboundSpy.count(), 1);
-    QCOMPARE(destroyedSpy.count(), 1);
     QCOMPARE(m_serverSeat->focusedPointerSurface(), serverSurface);
     QVERIFY(!m_serverSeat->focusedPointer());
 
@@ -711,7 +698,7 @@ void TestSeat::testPointerTransformation()
     // Once the pointer is created it should be set as the focused pointer.
     QVERIFY(pointerCreatedSpy.wait());
     QVERIFY(m_serverSeat->focusedPointer());
-    QCOMPARE(pointerCreatedSpy.first().first().value<Srv::PointerInterface*>(),
+    QCOMPARE(pointerCreatedSpy.first().first().value<Srv::Pointer*>(),
              m_serverSeat->focusedPointer());
 
     m_serverSeat->setFocusedPointerSurface(nullptr);
@@ -1491,8 +1478,7 @@ void TestSeat::testCursor()
     QVERIFY(m_serverSeat->focusedPointer());
     QVERIFY(!m_serverSeat->focusedPointer()->cursor());
 
-    QSignalSpy cursorChangedSpy(m_serverSeat->focusedPointer(),
-                                &Srv::PointerInterface::cursorChanged);
+    QSignalSpy cursorChangedSpy(m_serverSeat->focusedPointer(), &Srv::Pointer::cursorChanged);
     QVERIFY(cursorChangedSpy.isValid());
     // Just remove the pointer.
     p->setCursor(nullptr);
@@ -1596,7 +1582,7 @@ void TestSeat::testCursorDamage()
 
     // Create a signal spy for the cursor changed signal.
     auto pointer = m_serverSeat->focusedPointer();
-    QSignalSpy cursorChangedSpy(pointer, &Srv::PointerInterface::cursorChanged);
+    QSignalSpy cursorChangedSpy(pointer, &Srv::Pointer::cursorChanged);
     QVERIFY(cursorChangedSpy.isValid());
 
     // Now let's set the cursor.
@@ -1813,15 +1799,12 @@ void TestSeat::testKeyboard()
     QCOMPARE(m_serverSeat->focusedKeyboard(), serverKeyboard);
 
     // Delete the Keyboard.
-    QSignalSpy unboundSpy(serverKeyboard, &Srv::Resource::unbound);
-    QVERIFY(unboundSpy.isValid());
-    QSignalSpy destroyedSpy(serverKeyboard, &Srv::Resource::destroyed);
+    QSignalSpy destroyedSpy(serverKeyboard, &Srv::Keyboard::destroyed);
     QVERIFY(destroyedSpy.isValid());
 
     delete keyboard;
-    QVERIFY(unboundSpy.wait());
-    QCOMPARE(unboundSpy.count(), 1);
-    QCOMPARE(destroyedSpy.count(), 0);
+    QVERIFY(destroyedSpy.wait());
+    QCOMPARE(destroyedSpy.count(), 1);
 
     // Verify that calling into the Keyboard related functionality doesn't crash.
     m_serverSeat->setTimestamp(9);
@@ -1836,9 +1819,6 @@ void TestSeat::testKeyboard()
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedKeyboardSurface(), serverSurface);
     QVERIFY(!m_serverSeat->focusedKeyboard());
-
-    QVERIFY(destroyedSpy.wait());
-    QCOMPARE(destroyedSpy.count(), 1);
 
     // Create a second Keyboard to verify that repeat info is announced properly.
     auto* keyboard2 = m_seat->createKeyboard(m_seat);
@@ -1861,7 +1841,7 @@ void TestSeat::testKeyboard()
     serverKeyboard = m_serverSeat->focusedKeyboard();
 
     QVERIFY(serverKeyboard);
-    QSignalSpy keyboard2DestroyedSpy(serverKeyboard, &QObject::destroyed);
+    QSignalSpy keyboard2DestroyedSpy(serverKeyboard, &Srv::Keyboard::destroyed);
     QVERIFY(keyboard2DestroyedSpy.isValid());
 
     delete keyboard2;
@@ -1953,7 +1933,7 @@ void TestSeat::testDestroy()
     m_compositorInterface = nullptr;
     m_serverSeat = nullptr;
     m_subCompositorInterface = nullptr;
-    m_relativePointerManagerInterface = nullptr;
+    m_relativePointerManagerServer = nullptr;
     m_pointerGesturesInterface = nullptr;
     QTRY_COMPARE(connectionDiedSpy.count(), 1);
 
@@ -2479,13 +2459,13 @@ void TestSeat::testDisconnect()
     QScopedPointer<Clt::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(!keyboard.isNull());
     QVERIFY(keyboardCreatedSpy.wait());
-    auto serverKeyboard = keyboardCreatedSpy.first().first().value<Srv::KeyboardInterface*>();
+    auto serverKeyboard = keyboardCreatedSpy.first().first().value<Srv::Keyboard*>();
     QVERIFY(serverKeyboard);
 
     QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
     QVERIFY(!pointer.isNull());
     QVERIFY(pointerCreatedSpy.wait());
-    auto serverPointer = pointerCreatedSpy.first().first().value<Srv::PointerInterface*>();
+    auto serverPointer = pointerCreatedSpy.first().first().value<Srv::Pointer*>();
     QVERIFY(serverPointer);
 
     QScopedPointer<Clt::Touch> touch(m_seat->createTouch());
@@ -2501,8 +2481,7 @@ void TestSeat::testDisconnect()
     QVERIFY(pointerDestroyedSpy.isValid());
     QSignalSpy touchDestroyedSpy(serverTouch, &QObject::destroyed);
     QVERIFY(touchDestroyedSpy.isValid());
-    QSignalSpy clientDisconnectedSpy(serverKeyboard->client(),
-                                     &Srv::ClientConnection::disconnected);
+    QSignalSpy clientDisconnectedSpy(serverKeyboard->client(), &Srv::Client::disconnected);
     QVERIFY(clientDisconnectedSpy.isValid());
 
     keyboard->release();

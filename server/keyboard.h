@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,56 +17,53 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_KEYBOARD_INTERFACE_H
-#define WAYLAND_SERVER_KEYBOARD_INTERFACE_H
+#pragma once
+
+#include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
-
-#include "resource.h"
 
 namespace Wrapland
 {
 namespace Server
 {
+class Client;
 class Seat;
 
-class SeatInterface;
 class SurfaceInterface;
 
-/**
- * @brief Resource for the wl_keyboard interface.
- *
- **/
-class WRAPLANDSERVER_EXPORT KeyboardInterface : public Resource
+class WRAPLANDSERVER_EXPORT Keyboard : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~KeyboardInterface();
+    ~Keyboard() override;
 
-    /**
-     * @returns the focused SurfaceInterface on this keyboard resource, if any.
-     **/
-    SurfaceInterface *focusedSurface() const;
+    Client* client() const;
+    SurfaceInterface* focusedSurface() const;
+
+Q_SIGNALS:
+    void resourceDestroyed();
 
 private:
-    void setFocusedSurface(SurfaceInterface *surface, quint32 serial);
+    void setFocusedSurface(quint32 serial, SurfaceInterface* surface);
     void setKeymap(int fd, quint32 size);
-    void updateModifiers(quint32 depressed, quint32 latched, quint32 locked, quint32 group, quint32 serial);
-    void keyPressed(quint32 key, quint32 serial);
-    void keyReleased(quint32 key, quint32 serial);
+    void updateModifiers(quint32 serial,
+                         quint32 depressed,
+                         quint32 latched,
+                         quint32 locked,
+                         quint32 group);
+    void keyPressed(quint32 serial, quint32 key);
+    void keyReleased(quint32 serial, quint32 key);
     void repeatInfo(qint32 charactersPerSecond, qint32 delay);
-    friend class SeatInterface;
-    explicit KeyboardInterface(SeatInterface *parent, wl_resource *parentResource);
 
     friend class Seat;
+    Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
     class Private;
-    Private *d_func() const;
+    Private* d_ptr;
 };
 
 }
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::KeyboardInterface*)
-
-#endif
+Q_DECLARE_METATYPE(Wrapland::Server::Keyboard*)

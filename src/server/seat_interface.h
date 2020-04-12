@@ -26,8 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
-#include "keyboard_interface.h"
-#include "pointer_interface.h"
 #include "touch_interface.h"
 
 #include "../../server/seat.h"
@@ -206,12 +204,12 @@ public:
      * @see dragSurfaceChanged
      **/
     SurfaceInterface *dragSurface() const;
-    /**
-     * @returns The PointerInterface which triggered the drag operation
-     * @since 5.6
-     * @see isDragPointer
-     **/
-    PointerInterface *dragPointer() const;
+//    /**
+//     * @returns The PointerInterface which triggered the drag operation
+//     * @since 5.6
+//     * @see isDragPointer
+//     **/
+//    PointerInterface *dragPointer() const;
     /**
      * @returns The DataDeviceInterface which started the drag and drop operation.
      * @see isDrag
@@ -307,11 +305,11 @@ public:
      * @see setFocusedPointerSurface
      **/
     SurfaceInterface *focusedPointerSurface() const;
-    /**
-     * @returns The PointerInterface belonging to the focused pointer surface, if any.
-     * @see setFocusedPointerSurface
-     **/
-    PointerInterface *focusedPointer() const;
+//    /**
+//     * @returns The PointerInterface belonging to the focused pointer surface, if any.
+//     * @see setFocusedPointerSurface
+//     **/
+//    PointerInterface *focusedPointer() const;
     /**
      * Updates the global position of the currently focused pointer surface.
      *
@@ -616,7 +614,7 @@ public:
      **/
     void setFocusedKeyboardSurface(SurfaceInterface *surface);
     SurfaceInterface *focusedKeyboardSurface() const;
-    KeyboardInterface *focusedKeyboard() const;
+//    KeyboardInterface *focusedKeyboard() const;
     ///@}
 
     /**
@@ -721,15 +719,15 @@ Q_SIGNALS:
     void touchMoved(qint32 id, quint32 serial, const QPointF &globalPosition);
     void timestampChanged(quint32);
 
-    void pointerCreated(Wrapland::Server::PointerInterface*);
-    void keyboardCreated(Wrapland::Server::KeyboardInterface*);
+//    void pointerCreated(Wrapland::Server::PointerInterface*);
+//    void keyboardCreated(Wrapland::Server::KeyboardInterface*);
     void touchCreated(Wrapland::Server::TouchInterface*);
 
-    /**
-     * Emitted whenever the focused pointer changes
-     * @since 5.6
-     **/
-    void focusedPointerChanged(Wrapland::Server::PointerInterface*);
+//    /**
+//     * Emitted whenever the focused pointer changes
+//     * @since 5.6
+//     **/
+//    void focusedPointerChanged(Wrapland::Server::PointerInterface*);
 
     /**
      * Emitted whenever the selection changes

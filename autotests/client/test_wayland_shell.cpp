@@ -713,7 +713,7 @@ void TestWaylandShell::testMove()
     QSignalSpy moveRequestedSpy(serverSurface, &ShellSurfaceInterface::moveRequested);
     QVERIFY(moveRequestedSpy.isValid());
 
-    QSignalSpy pointerButtonChangedSpy(m_pointer, &Pointer::buttonStateChanged);
+    QSignalSpy pointerButtonChangedSpy(m_pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(pointerButtonChangedSpy.isValid());
 
     m_serverSeat->setFocusedPointerSurface(serverSurface->surface());
@@ -775,7 +775,7 @@ void TestWaylandShell::testResize()
     QSignalSpy resizeRequestedSpy(serverSurface, &ShellSurfaceInterface::resizeRequested);
     QVERIFY(resizeRequestedSpy.isValid());
 
-    QSignalSpy pointerButtonChangedSpy(m_pointer, &Pointer::buttonStateChanged);
+    QSignalSpy pointerButtonChangedSpy(m_pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(pointerButtonChangedSpy.isValid());
 
     m_serverSeat->setFocusedPointerSurface(serverSurface->surface());

@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright 2016  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,10 +17,9 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef WRAPLAND_SERVER_RELATIVE_POINTER_INTERFACE_H
-#define WRAPLAND_SERVER_RELATIVE_POINTER_INTERFACE_H
+#pragma once
 
-#include "global.h"
+#include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
@@ -29,45 +28,21 @@ namespace Wrapland
 namespace Server
 {
 
-class Display;
+class D_isplay;
 
-enum class RelativePointerInterfaceVersion {
-    /**
-     * zwp_relative_pointer_manager_v1 and zwp_relative_pointer_v1
-     **/
-    UnstableV1
-};
-
-/**
- * Manager object to create relative pointer interfaces.
- *
- * Once created the interaction happens through the SeatInterface class
- * which automatically delegates relative motion events to the created relative pointer
- * interfaces.
- *
- * @see SeatInterface::relativePointerMotion
- * @since 0.0.528
- **/
-class WRAPLANDSERVER_EXPORT RelativePointerManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT RelativePointerManagerV1 : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~RelativePointerManagerInterface();
-
-    /**
-     * @returns The interface version used by this RelativePointerManagerInterface
-     **/
-    RelativePointerInterfaceVersion interfaceVersion() const;
-
-protected:
-    class Private;
-    explicit RelativePointerManagerInterface(Private *d, QObject *parent = nullptr);
+    ~RelativePointerManagerV1() override;
 
 private:
-    Private *d_func() const;
+    friend class D_isplay;
+    explicit RelativePointerManagerV1(D_isplay* display, QObject* parent = nullptr);
+
+    class Private;
+    Private* d_ptr;
 };
 
 }
 }
-
-#endif

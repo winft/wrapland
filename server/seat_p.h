@@ -58,8 +58,8 @@ public:
     Sender capabilitiesFunctor();
     Sender nameFunctor();
 
-    QVector<PointerInterface*> pointersForSurface(SurfaceInterface* surface) const;
-    QVector<KeyboardInterface*> keyboardsForSurface(SurfaceInterface* surface) const;
+    QVector<Pointer*> pointersForSurface(SurfaceInterface* surface) const;
+    QVector<Keyboard*> keyboardsForSurface(SurfaceInterface* surface) const;
     QVector<TouchInterface*> touchsForSurface(SurfaceInterface* surface) const;
     DataDeviceInterface* dataDeviceForSurface(SurfaceInterface* surface) const;
     TextInputInterface* textInputForSurface(SurfaceInterface* surface) const;
@@ -74,15 +74,15 @@ public:
     bool touch = false;
     QList<wl_resource*> resources;
     quint32 timestamp = 0;
-    QVector<PointerInterface*> pointers;
-    QVector<KeyboardInterface*> keyboards;
+    QVector<Pointer*> pointers;
+    QVector<Keyboard*> keyboards;
     QVector<TouchInterface*> touchs;
     QVector<DataDeviceInterface*> dataDevices;
     QVector<TextInputInterface*> textInputs;
     DataDeviceInterface* currentSelection = nullptr;
 
     // Pointer related members
-    struct Pointer {
+    struct SeatPointer {
         enum class State {
             Released,
             Pressed,
@@ -92,7 +92,7 @@ public:
         QPointF pos;
         struct Focus {
             SurfaceInterface* surface = nullptr;
-            QVector<PointerInterface*> pointers;
+            QVector<Pointer*> pointers;
             QMetaObject::Connection destroyConnection;
             QPointF offset = QPointF();
             QMatrix4x4 transformation;
@@ -101,13 +101,13 @@ public:
         Focus focus;
         QPointer<SurfaceInterface> gestureSurface;
     };
-    Pointer globalPointer;
+    SeatPointer globalPointer;
 
     void updatePointerButtonSerial(quint32 button, quint32 serial);
-    void updatePointerButtonState(quint32 button, Pointer::State state);
+    void updatePointerButtonState(quint32 button, SeatPointer::State state);
 
     // Keyboard related members
-    struct Keyboard {
+    struct SeatKeyboard {
         enum class State {
             Released,
             Pressed,
@@ -129,7 +129,7 @@ public:
         Modifiers modifiers;
         struct Focus {
             SurfaceInterface* surface = nullptr;
-            QVector<KeyboardInterface*> keyboards;
+            QVector<Keyboard*> keyboards;
             QMetaObject::Connection destroyConnection;
             quint32 serial = 0;
             DataDeviceInterface* selection = nullptr;
@@ -141,9 +141,9 @@ public:
             qint32 delay = 0;
         } keyRepeat;
     };
-    Keyboard keys;
+    SeatKeyboard keys;
 
-    bool updateKey(quint32 key, Keyboard::State state);
+    bool updateKey(quint32 key, SeatKeyboard::State state);
 
     struct TextInput {
         struct Focus {
@@ -180,7 +180,7 @@ public:
         DataDeviceInterface* source = nullptr;
         DataDeviceInterface* target = nullptr;
         SurfaceInterface* surface = nullptr;
-        PointerInterface* sourcePointer = nullptr;
+        Pointer* sourcePointer = nullptr;
         TouchInterface* sourceTouch = nullptr;
         QMatrix4x4 transformation;
         QMetaObject::Connection destroyConnection;

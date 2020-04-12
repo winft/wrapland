@@ -32,14 +32,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_interface.h"
 #include "plasmashell_interface.h"
 #include "plasmawindowmanagement_interface.h"
-#include "pointerconstraints_interface_p.h"
-#include "pointergestures_interface_p.h"
+//#include "pointerconstraints_interface_p.h"
+//#include "pointergestures_interface_p.h"
 #include "qtsurfaceextension_interface.h"
 #include "seat_interface.h"
 #include "shadow_interface.h"
 #include "blur_interface.h"
 #include "contrast_interface.h"
-#include "relativepointer_interface_p.h"
+//#include "relativepointer_interface_p.h"
 #include "server_decoration_interface.h"
 #include "slide_interface.h"
 #include "shell_interface.h"
@@ -395,41 +395,50 @@ XdgShellInterface *Display::createXdgShell(const XdgShellInterfaceVersion &versi
     return x;
 }
 
-RelativePointerManagerInterface *Display::createRelativePointerManager(const RelativePointerInterfaceVersion &version, QObject *parent)
-{
-    RelativePointerManagerInterface *r = nullptr;
-    switch (version) {
-    case RelativePointerInterfaceVersion::UnstableV1:
-        r = new RelativePointerManagerUnstableV1Interface(this, parent);
-        break;
-    }
-    connect(this, &Display::aboutToTerminate, r, [r] { delete r; });
-    return r;
-}
+//RelativePointerManagerInterface *Display::createRelativePointerManager(const RelativePointerInterfaceVersion &version, QObject *parent)
+//{
+//    return nullptr;
+//    return newDisplay->createRelativePointerManager(parent);
 
-PointerGesturesInterface *Display::createPointerGestures(const PointerGesturesInterfaceVersion &version, QObject *parent)
-{
-    PointerGesturesInterface *p = nullptr;
-    switch (version) {
-    case PointerGesturesInterfaceVersion::UnstableV1:
-        p = new PointerGesturesUnstableV1Interface(this, parent);
-        break;
-    }
-    connect(this, &Display::aboutToTerminate, p, [p] { delete p; });
-    return p;
-}
+//    RelativePointerManagerInterface *r = nullptr;
+//    switch (version) {
+//    case RelativePointerInterfaceVersion::UnstableV1:
+//        r = new RelativePointerManagerUnstableV1Interface(this, parent);
+//        break;
+//    }
+//    connect(this, &Display::aboutToTerminate, r, [r] { delete r; });
+//    return r;
+//}
 
-PointerConstraintsInterface *Display::createPointerConstraints(const PointerConstraintsInterfaceVersion &version, QObject *parent)
-{
-    PointerConstraintsInterface *p = nullptr;
-    switch (version) {
-    case PointerConstraintsInterfaceVersion::UnstableV1:
-        p = new PointerConstraintsUnstableV1Interface(this, parent);
-        break;
-    }
-    connect(this, &Display::aboutToTerminate, p, [p] { delete p; });
-    return p;
-}
+//PointerGesturesInterface *Display::createPointerGestures(const PointerGesturesInterfaceVersion &version, QObject *parent)
+//{
+//    return nullptr;
+//    return newDisplay->createPointerGestures(parent)->legacy;
+
+//    PointerGesturesInterface *p = nullptr;
+//    switch (version) {
+//    case PointerGesturesInterfaceVersion::UnstableV1:
+//        p = new PointerGesturesUnstableV1Interface(this, parent);
+//        break;
+//    }
+//    connect(this, &Display::aboutToTerminate, p, [p] { delete p; });
+//    return p;
+//}
+
+//PointerConstraintsInterface *Display::createPointerConstraints(const PointerConstraintsInterfaceVersion &version, QObject *parent)
+//{
+//    return nullptr;
+//    return newDisplay->createPointerConstraints(parent);
+
+//    PointerConstraintsInterface *p = nullptr;
+//    switch (version) {
+//    case PointerConstraintsInterfaceVersion::UnstableV1:
+//        p = new PointerConstraintsUnstableV1Interface(this, parent);
+//        break;
+//    }
+//    connect(this, &Display::aboutToTerminate, p, [p] { delete p; });
+//    return p;
+//}
 
 XdgForeignInterface *Display::createXdgForeignInterface(QObject *parent)
 {

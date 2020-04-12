@@ -48,8 +48,12 @@ class Resource
 public:
     using ResourceType = Resource<Handle, GlobalHandle>;
 
-    Resource(Resource* parent, uint32_t id, const wl_interface* interface, const void* impl)
-        : Resource(parent->client(), parent->version(), id, interface, impl)
+    Resource(Resource* parent,
+             uint32_t id,
+             const wl_interface* interface,
+             const void* impl,
+             Handle* handle)
+        : Resource(parent->client(), parent->version(), id, interface, impl, handle)
     {
     }
 
@@ -57,8 +61,9 @@ public:
              uint32_t version,
              uint32_t id,
              const wl_interface* interface,
-             const void* impl)
-        : Resource(Display::castClient(client), version, id, interface, impl)
+             const void* impl,
+             Handle* handle)
+        : Resource(Display::castClient(client), version, id, interface, impl, handle)
     {
     }
 
@@ -66,16 +71,18 @@ public:
              uint32_t version,
              uint32_t id,
              const wl_interface* interface,
-             const void* impl)
+             const void* impl,
+             Handle* handle)
         : m_client{client}
         , m_version{version}
         , m_id{id}
+        , m_handle{handle}
     {
         m_resource = m_client->createResource(interface, m_version, id);
 
         wl_resource_set_user_data(m_resource, this);
         if (impl) {
-            wl_resource_set_implementation(m_resource, impl, this, unbind);
+            wl_resource_set_implementation(m_resource, impl, this, destroy);
         }
     }
 
@@ -116,15 +123,9 @@ public:
         m_client->flush();
     }
 
-    static ResourceType* internalResource(wl_resource* wlResource)
+    static ResourceType* fromResource(wl_resource* resource)
     {
-        return reinterpret_cast<Resource*>(wlResource->data);
-    }
-
-    template<typename T>
-    static T* fromResource(wl_resource* resource)
-    {
-        return reinterpret_cast<T*>(wl_resource_get_user_data(resource));
+        return reinterpret_cast<ResourceType*>(wl_resource_get_user_data(resource));
     }
 
     template<typename F>
@@ -141,15 +142,10 @@ public:
         }
     }
 
-    static void destroyCallback(wl_client* client, wl_resource* wlResource)
+    static void destroyCallback([[maybe_unused]] wl_client* client, wl_resource* wlResource)
     {
-        Q_UNUSED(client);
-
-        auto resource = internalResource(wlResource);
-
-        resource->unbindGlobal();
+        auto resource = fromResource(wlResource);
         wl_resource_destroy(resource->resource());
-        delete resource;
     }
 
     Handle* handle()
@@ -158,16 +154,20 @@ public:
     }
 
 private:
-    static void unbind(wl_resource* wlResource)
+    static void destroy(wl_resource* wlResource)
     {
-        auto* resource = reinterpret_cast<Resource*>(wlResource->data);
-        resource->unbindGlobal();
+        auto resource = reinterpret_cast<Resource*>(wlResource->data);
+
+        resource->onDestroy();
         delete resource;
     }
 
-    void unbindGlobal()
+    void onDestroy()
     {
-        if constexpr (!std::is_same_v<GlobalHandle, void>) {
+        if constexpr (std::is_same_v<GlobalHandle, void>) {
+            Q_EMIT m_handle->resourceDestroyed();
+            delete m_handle;
+        } else {
             if (m_global) {
                 m_global->unbind(this);
             }

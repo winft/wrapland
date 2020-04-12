@@ -22,10 +22,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "datadevice_interface.h"
 #include "datasource_interface.h"
-#include "keyboard_interface.h"
-#include "keyboard_interface_p.h"
-#include "pointer_interface.h"
-#include "pointer_interface_p.h"
 #include "surface_interface.h"
 #include "textinput_interface_p.h"
 
@@ -259,17 +255,17 @@ namespace {
 
 }
 
-QVector<PointerInterface *> SeatInterface::Private::pointersForSurface(SurfaceInterface *surface) const
-{
-    return q->newSeat->d_ptr->pointersForSurface(surface);
+//QVector<PointerInterface *> SeatInterface::Private::pointersForSurface(SurfaceInterface *surface) const
+//{
+//    return q->newSeat->d_ptr->pointersForSurface(surface);
 //    return interfacesForSurface(surface, pointers);
-}
+//}
 
-QVector<KeyboardInterface *> SeatInterface::Private::keyboardsForSurface(SurfaceInterface *surface) const
-{
-    return q->newSeat->d_ptr->keyboardsForSurface(surface);
-//    return interfacesForSurface(surface, keyboards);
-}
+//QVector<KeyboardInterface *> SeatInterface::Private::keyboardsForSurface(SurfaceInterface *surface) const
+//{
+//    return q->newSeat->d_ptr->keyboardsForSurface(surface);
+////    return interfacesForSurface(surface, keyboards);
+//}
 
 QVector<TouchInterface *> SeatInterface::Private::touchsForSurface(SurfaceInterface *surface) const
 {
@@ -813,15 +809,15 @@ void SeatInterface::setFocusedPointerSurface(SurfaceInterface *surface, const QM
 //    }
 }
 
-PointerInterface *SeatInterface::focusedPointer() const
-{
-    return newSeat->focusedPointer();
+//PointerInterface *SeatInterface::focusedPointer() const
+//{
+//    return newSeat->focusedPointer();
 //    Q_D();
 //    if (d->globalPointer.focus.pointers.isEmpty()) {
 //        return nullptr;
 //    }
 //    return d->globalPointer.focus.pointers.first();
-}
+//}
 
 void SeatInterface::setFocusedPointerSurfacePosition(const QPointF &surfacePosition)
 {
@@ -1372,15 +1368,15 @@ QVector< quint32 > SeatInterface::pressedKeys() const
 //    return keys;
 }
 
-KeyboardInterface *SeatInterface::focusedKeyboard() const
-{
-    return newSeat->focusedKeyboard();
-//    Q_D();
-//    if (d->keys.focus.keyboards.isEmpty()) {
-//        return nullptr;
-//    }
-//    return d->keys.focus.keyboards.first();
-}
+//KeyboardInterface *SeatInterface::focusedKeyboard() const
+//{
+//    return newSeat->focusedKeyboard();
+////    Q_D();
+////    if (d->keys.focus.keyboards.isEmpty()) {
+////        return nullptr;
+////    }
+////    return d->keys.focus.keyboards.first();
+//}
 
 void SeatInterface::cancelTouchSequence()
 {
@@ -1634,16 +1630,16 @@ SurfaceInterface *SeatInterface::dragSurface() const
 //    return d->drag.surface;
 }
 
-PointerInterface *SeatInterface::dragPointer() const
-{
-    return newSeat->dragPointer();
+//PointerInterface *SeatInterface::dragPointer() const
+//{
+//    return newSeat->dragPointer();
 //    Q_D();
 //    if (d->drag.mode != Private::Drag::Mode::Pointer) {
 //        return nullptr;
 //    }
 
 //    return d->drag.sourcePointer;
-}
+//}
 
 DataDeviceInterface *SeatInterface::dragSource() const
 {

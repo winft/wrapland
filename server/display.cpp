@@ -27,6 +27,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "dpms.h"
 #include "output.h"
+#include "pointer.h"
+#include "pointer_constraints_v1.h"
+#include "pointer_gestures_v1.h"
+#include "relative_pointer_v1.h"
 #include "seat.h"
 
 // Legacy
@@ -50,10 +54,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/plasmashell_interface.h"
 #include "../src/server/plasmavirtualdesktop_interface.h"
 #include "../src/server/plasmawindowmanagement_interface.h"
-#include "../src/server/pointerconstraints_interface_p.h"
-#include "../src/server/pointergestures_interface_p.h"
 #include "../src/server/qtsurfaceextension_interface.h"
-#include "../src/server/relativepointer_interface_p.h"
 #include "../src/server/remote_access_interface.h"
 #include "../src/server/server_decoration_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
@@ -302,24 +303,19 @@ XdgShellInterface* D_isplay::createXdgShell(const XdgShellInterfaceVersion& vers
     return legacy->createXdgShell(version, parent);
 }
 
-RelativePointerManagerInterface*
-D_isplay::createRelativePointerManager(const RelativePointerInterfaceVersion& version,
-                                       QObject* parent)
+RelativePointerManagerV1* D_isplay::createRelativePointerManager(QObject* parent)
 {
-    return legacy->createRelativePointerManager(version, parent);
+    return new RelativePointerManagerV1(this, parent);
 }
 
-PointerGesturesInterface*
-D_isplay::createPointerGestures(const PointerGesturesInterfaceVersion& version, QObject* parent)
+PointerGesturesV1* D_isplay::createPointerGestures(QObject* parent)
 {
-    return legacy->createPointerGestures(version, parent);
+    return new PointerGesturesV1(this, parent);
 }
 
-PointerConstraintsInterface*
-D_isplay::createPointerConstraints(const PointerConstraintsInterfaceVersion& version,
-                                   QObject* parent)
+PointerConstraintsV1* D_isplay::createPointerConstraints(QObject* parent)
 {
-    return legacy->createPointerConstraints(version, parent);
+    return new PointerConstraintsV1(this, parent);
 }
 
 XdgForeignInterface* D_isplay::createXdgForeignInterface(QObject* parent)

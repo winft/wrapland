@@ -62,6 +62,11 @@ Client::~Client()
     allClients.erase(std::remove(allClients.begin(), allClients.end(), this), allClients.end());
 }
 
+Display* Client::display() const
+{
+    return Display::backendCast(q_ptr->display());
+}
+
 Server::Client* Client::handle() const
 {
     return q_ptr;

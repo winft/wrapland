@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright 2016  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,10 +17,9 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef WRAPLAND_SERVER_POINTERGESTURES_INTERFACE_H
-#define WRAPLAND_SERVER_POINTERGESTURES_INTERFACE_H
+#pragma once
 
-#include "global.h"
+#include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
@@ -28,48 +27,21 @@ namespace Wrapland
 {
 namespace Server
 {
+class D_isplay;
 
-/**
- * Enum describing the interface versions the PointerGesturesInterface can support.
- *
- * @since 0.0.529
- **/
-enum class PointerGesturesInterfaceVersion {
-    /**
-     * zwp_pointer_gestures_v1, zwp_pointer_gesture_swipe_v1 and zwp_pointer_gesture_pinch_v1
-     **/
-    UnstableV1
-};
-
-/**
- * Manager object for the PointerGestures.
- *
- * Creates and manages pointer swipe and pointer pinch gestures which are
- * reported to the SeatInterface.
- *
- * @see Display::createPointerGestures
- * @since 0.0.529
- **/
-class WRAPLANDSERVER_EXPORT PointerGesturesInterface : public Global
+class WRAPLANDSERVER_EXPORT PointerGesturesV1 : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~PointerGesturesInterface();
-
-    /**
-     * @returns The interface version used by this PointerGesturesInterface
-     **/
-    PointerGesturesInterfaceVersion interfaceVersion() const;
-
-protected:
-    class Private;
-    explicit PointerGesturesInterface(Private *d, QObject *parent = nullptr);
+    ~PointerGesturesV1() override;
 
 private:
-    Private *d_func() const;
+    friend class D_isplay;
+    explicit PointerGesturesV1(D_isplay* display, QObject* parent = nullptr);
+
+    class Private;
+    Private* d_ptr;
 };
 
 }
 }
-
-#endif

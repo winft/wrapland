@@ -26,8 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Server/wraplandserver_export.h>
 
 #include "global.h"
-#include "keyboard_interface.h"
-#include "pointer_interface.h"
 #include "touch_interface.h"
 
 struct wl_client;
@@ -40,6 +38,8 @@ namespace Server
 
 class DataDeviceInterface;
 class D_isplay;
+class Keyboard;
+class Pointer;
 class SurfaceInterface;
 class TextInputInterface;
 
@@ -75,7 +75,7 @@ public:
     bool isDragTouch() const;
     QMatrix4x4 dragSurfaceTransformation() const;
     SurfaceInterface* dragSurface() const;
-    PointerInterface* dragPointer() const;
+    Pointer* dragPointer() const;
     DataDeviceInterface* dragSource() const;
     void setDragTarget(SurfaceInterface* surface,
                        const QPointF& globalPosition,
@@ -89,7 +89,7 @@ public:
                                   const QPointF& surfacePosition = QPoint());
     void setFocusedPointerSurface(SurfaceInterface* surface, const QMatrix4x4& transformation);
     SurfaceInterface* focusedPointerSurface() const;
-    PointerInterface* focusedPointer() const;
+    Pointer* focusedPointer() const;
     void setFocusedPointerSurfacePosition(const QPointF& surfacePosition);
     QPointF focusedPointerSurfacePosition() const;
     void setFocusedPointerSurfaceTransformation(const QMatrix4x4& transformation);
@@ -138,7 +138,7 @@ public:
     qint32 keyRepeatDelay() const;
     void setFocusedKeyboardSurface(SurfaceInterface* surface);
     SurfaceInterface* focusedKeyboardSurface() const;
-    KeyboardInterface* focusedKeyboard() const;
+    Keyboard* focusedKeyboard() const;
 
     void setFocusedTouchSurface(SurfaceInterface* surface,
                                 const QPointF& surfacePosition = QPointF());
@@ -175,11 +175,11 @@ Q_SIGNALS:
     void touchMoved(qint32 id, quint32 serial, const QPointF& globalPosition);
     void timestampChanged(quint32);
 
-    void pointerCreated(Wrapland::Server::PointerInterface*);
-    void keyboardCreated(Wrapland::Server::KeyboardInterface*);
+    void pointerCreated(Wrapland::Server::Pointer*);
+    void keyboardCreated(Wrapland::Server::Keyboard*);
     void touchCreated(Wrapland::Server::TouchInterface*);
 
-    void focusedPointerChanged(Wrapland::Server::PointerInterface*);
+    void focusedPointerChanged(Wrapland::Server::Pointer*);
 
     void selectionChanged(DataDeviceInterface*);
     void dragStarted();

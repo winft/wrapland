@@ -44,6 +44,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/subcompositor.h"
 #include "../../src/client/xdgshell.h"
+
 #include "../../src/server/compositor_interface.h"
 #include "../../src/server/datadevicemanager_interface.h"
 #include "../../src/server/display.h"
@@ -57,11 +58,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/subcompositor_interface.h"
 #include "../../src/server/output_management_v1_interface.h"
 #include "../../src/server/output_device_v1_interface.h"
-#include "../../src/server/pointerconstraints_interface.h"
-#include "../../src/server/pointergestures_interface.h"
 #include "../../src/server/textinput_interface.h"
 #include "../../src/server/xdgshell_interface.h"
-#include "../../src/server/relativepointer_interface.h"
 // Wayland
 #include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
@@ -128,9 +126,9 @@ private:
     Wrapland::Server::TextInputManagerInterface *m_textInputManagerV0;
     Wrapland::Server::TextInputManagerInterface *m_textInputManagerV2;
     Wrapland::Server::XdgShellInterface *m_xdgShellUnstableV5;
-    Wrapland::Server::RelativePointerManagerInterface *m_relativePointerV1;
-    Wrapland::Server::PointerGesturesInterface *m_pointerGesturesV1;
-    Wrapland::Server::PointerConstraintsInterface *m_pointerConstraintsV1;
+    Wrapland::Server::RelativePointerManagerV1* m_relativePointerV1;
+    Wrapland::Server::PointerGesturesV1* m_pointerGesturesV1;
+    Wrapland::Server::PointerConstraintsV1* m_pointerConstraintsV1;
     Wrapland::Server::BlurManagerInterface *m_blur;
     Wrapland::Server::ContrastManagerInterface *m_contrast;
     Wrapland::Server::IdleInhibitManagerInterface *m_idleInhibit;
@@ -202,15 +200,9 @@ void TestWaylandRegistry::init()
     m_xdgShellUnstableV5 = m_display->createXdgShell(Wrapland::Server::XdgShellInterfaceVersion::UnstableV5);
     m_xdgShellUnstableV5->create();
     QCOMPARE(m_xdgShellUnstableV5->interfaceVersion(), Wrapland::Server::XdgShellInterfaceVersion::UnstableV5);
-    m_relativePointerV1 = m_display->createRelativePointerManager(Wrapland::Server::RelativePointerInterfaceVersion::UnstableV1);
-    m_relativePointerV1->create();
-    QCOMPARE(m_relativePointerV1->interfaceVersion(), Wrapland::Server::RelativePointerInterfaceVersion::UnstableV1);
-    m_pointerGesturesV1 = m_display->createPointerGestures(Wrapland::Server::PointerGesturesInterfaceVersion::UnstableV1);
-    m_pointerGesturesV1->create();
-    QCOMPARE(m_pointerGesturesV1->interfaceVersion(), Wrapland::Server::PointerGesturesInterfaceVersion::UnstableV1);
-    m_pointerConstraintsV1 = m_display->createPointerConstraints(Wrapland::Server::PointerConstraintsInterfaceVersion::UnstableV1);
-    m_pointerConstraintsV1->create();
-    QCOMPARE(m_pointerConstraintsV1->interfaceVersion(), Wrapland::Server::PointerConstraintsInterfaceVersion::UnstableV1);
+    m_relativePointerV1 = m_display->createRelativePointerManager();
+    m_pointerGesturesV1 = m_display->createPointerGestures();
+    m_pointerConstraintsV1 = m_display->createPointerConstraints();
     m_idleInhibit = m_display->createIdleInhibitManager(Wrapland::Server::IdleInhibitManagerInterfaceVersion::UnstableV1);
     m_idleInhibit->create();
     QCOMPARE(m_idleInhibit->interfaceVersion(), Wrapland::Server::IdleInhibitManagerInterfaceVersion::UnstableV1);

@@ -73,8 +73,8 @@ const struct org_kde_kwin_dpms_interface Dpms::Private::s_interface = {
     destroyCallback,
 };
 
-Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, Output* output)
-    : Wayland::Resource<Dpms>(client, version, id, &org_kde_kwin_dpms_interface, &s_interface)
+Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, Output* output, Dpms* q)
+    : Wayland::Resource<Dpms>(client, version, id, &org_kde_kwin_dpms_interface, &s_interface, q)
     , output(output)
 {
 }
@@ -99,7 +99,7 @@ void Dpms::Private::setCallback(wl_client* client, wl_resource* wlResource, uint
     default:
         return;
     }
-    emit fromResource<Private>(wlResource)->output->dpmsModeRequested(dpmsMode);
+    Q_EMIT static_cast<Private*>(fromResource(wlResource))->output->dpmsModeRequested(dpmsMode);
 }
 
 Sender Dpms::Private::doneFunctor()
@@ -141,7 +141,7 @@ Sender Dpms::Private::supportedFunctor()
 }
 
 Dpms::Dpms(Client* client, uint32_t version, uint32_t id, Output* output)
-    : d_ptr(new Private(client, version, id, output))
+    : d_ptr(new Private(client, version, id, output, this))
 {
     connect(output, &Output::dpmsSupportedChanged, this, [this] {
         sendSupported();

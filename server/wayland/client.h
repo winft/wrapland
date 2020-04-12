@@ -51,6 +51,7 @@ public:
     wl_resource* createResource(const wl_interface* interface, uint32_t version, uint32_t id);
     wl_resource* getResource(uint32_t id);
 
+    Display* display() const;
     Server::Client* handle() const;
 
     pid_t processId() const;

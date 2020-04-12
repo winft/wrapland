@@ -32,7 +32,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/datadevicemanager_interface.h"
 #include "../../src/server/datasource_interface.h"
 #include "../../src/server/compositor_interface.h"
-#include "../../src/server/pointer_interface.h"
 #include "../../src/server/surface_interface.h"
 
 #include "../../server/display.h"
@@ -223,7 +222,7 @@ void TestDataDevice::testDrag()
 {
     using namespace Wrapland::Client;
     using namespace Wrapland::Server;
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
+    QScopedPointer<Wrapland::Client::Pointer> pointer(m_seat->createPointer());
 
     QSignalSpy dataDeviceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataDeviceCreated(Wrapland::Server::DataDeviceInterface*)));
     QVERIFY(dataDeviceCreatedSpy.isValid());
@@ -316,7 +315,7 @@ void TestDataDevice::testDragInternally()
 {
     using namespace Wrapland::Client;
     using namespace Wrapland::Server;
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
+    QScopedPointer<Wrapland::Client::Pointer> pointer(m_seat->createPointer());
 
     QSignalSpy dataDeviceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataDeviceCreated(Wrapland::Server::DataDeviceInterface*)));
     QVERIFY(dataDeviceCreatedSpy.isValid());
@@ -383,7 +382,7 @@ void TestDataDevice::testSetSelection()
 {
     using namespace Wrapland::Client;
     using namespace Wrapland::Server;
-    QScopedPointer<Pointer> pointer(m_seat->createPointer());
+    QScopedPointer<Wrapland::Client::Pointer> pointer(m_seat->createPointer());
 
     QSignalSpy dataDeviceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataDeviceCreated(Wrapland::Server::DataDeviceInterface*)));
     QVERIFY(dataDeviceCreatedSpy.isValid());
@@ -481,7 +480,7 @@ void TestDataDevice::testSendSelectionOnSeat()
     QVERIFY(dataDeviceCreatedSpy.wait());
     auto serverDataDevice = dataDeviceCreatedSpy.first().first().value<DataDeviceInterface*>();
     QVERIFY(serverDataDevice);
-    QScopedPointer<Keyboard> keyboard(m_seat->createKeyboard());
+    QScopedPointer<Wrapland::Client::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(keyboard->isValid());
     QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
@@ -538,7 +537,7 @@ void TestDataDevice::testReplaceSource()
     QVERIFY(dataDeviceCreatedSpy.wait());
     auto serverDataDevice = dataDeviceCreatedSpy.first().first().value<DataDeviceInterface*>();
     QVERIFY(serverDataDevice);
-    QScopedPointer<Keyboard> keyboard(m_seat->createKeyboard());
+    QScopedPointer<Wrapland::Client::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(keyboard->isValid());
     QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());

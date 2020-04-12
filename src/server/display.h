@@ -78,12 +78,12 @@ class TextInputManagerInterface;
 class XdgShellV5Interface;
 enum class XdgShellInterfaceVersion;
 class XdgShellInterface;
-enum class RelativePointerInterfaceVersion;
-class RelativePointerManagerInterface;
-enum class PointerGesturesInterfaceVersion;
-class PointerGesturesInterface;
-enum class PointerConstraintsInterfaceVersion;
-class PointerConstraintsInterface;
+//enum class RelativePointerInterfaceVersion;
+//class RelativePointerManagerInterface;
+//enum class PointerGesturesInterfaceVersion;
+//class PointerGesturesInterface;
+//enum class PointerConstraintsInterfaceVersion;
+//class PointerConstraintsInterface;
 class XdgForeignInterface;
 class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
@@ -227,29 +227,29 @@ public:
      **/
     XdgShellInterface *createXdgShell(const XdgShellInterfaceVersion &version, QObject *parent = nullptr);
 
-    /**
-     * Creates the RelativePointerManagerInterface in interface @p version
-     *
-     * @returns The created manager object
-     * @since 0.0.528
-     **/
-    RelativePointerManagerInterface *createRelativePointerManager(const RelativePointerInterfaceVersion &version, QObject *parent = nullptr);
+//    /**
+//     * Creates the RelativePointerManagerInterface in interface @p version
+//     *
+//     * @returns The created manager object
+//     * @since 0.0.528
+//     **/
+//    RelativePointerManagerInterface *createRelativePointerManager(const RelativePointerInterfaceVersion &version, QObject *parent = nullptr);
 
-    /**
-     * Creates the PointerGesturesInterface in interface @p version
-     *
-     * @returns The created manager object
-     * @since 0.0.529
-     **/
-    PointerGesturesInterface *createPointerGestures(const PointerGesturesInterfaceVersion &version, QObject *parent = nullptr);
+//    /**
+//     * Creates the PointerGesturesInterface in interface @p version
+//     *
+//     * @returns The created manager object
+//     * @since 0.0.529
+//     **/
+//    PointerGesturesInterface *createPointerGestures(const PointerGesturesInterfaceVersion &version, QObject *parent = nullptr);
 
-    /**
-     * Creates the PointerConstraintsInterface in interface @p version
-     *
-     * @returns The created manager object
-     * @since 0.0.529
-     **/
-    PointerConstraintsInterface *createPointerConstraints(const PointerConstraintsInterfaceVersion &version, QObject *parent = nullptr);
+//    /**
+//     * Creates the PointerConstraintsInterface in interface @p version
+//     *
+//     * @returns The created manager object
+//     * @since 0.0.529
+//     **/
+//    PointerConstraintsInterface *createPointerConstraints(const PointerConstraintsInterfaceVersion &version, QObject *parent = nullptr);
 
     /**
      * Creates the XdgForeignInterface in interface @p version

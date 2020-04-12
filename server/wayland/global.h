@@ -181,7 +181,7 @@ protected:
 
     static void resourceDestroyCallback(wl_client* wlClient, wl_resource* wlResource)
     {
-        Resource<Handle, Global<Handle>>::destroyCallback(wlClient, wlResource);
+        GlobalResource::destroyCallback(wlClient, wlResource);
     }
 
     virtual void bindInit(Wayland::Client* client, uint32_t version, uint32_t id)
@@ -197,7 +197,7 @@ private:
         global.reset();
     }
 
-    Resource<Handle, Global<Handle>>* findBind(Client* client)
+    GlobalResource* findBind(Client* client)
     {
         for (auto* bind : m_binds) {
             if (bind->client() == client) {
@@ -231,7 +231,8 @@ private:
 
     void bind(Client* client, uint32_t version, uint32_t id)
     {
-        auto resource = new GlobalResource(client, version, id, m_interface, m_implementation);
+        auto resource
+            = new GlobalResource(client, version, id, m_interface, m_implementation, m_handle);
         resource->setGlobal(this);
         m_binds.push_back(resource);
         bindInit(client, version, id);

@@ -81,12 +81,9 @@ class TextInputManagerInterface;
 class XdgShellV5Interface;
 enum class XdgShellInterfaceVersion;
 class XdgShellInterface;
-enum class RelativePointerInterfaceVersion;
-class RelativePointerManagerInterface;
-enum class PointerGesturesInterfaceVersion;
-class PointerGesturesInterface;
-enum class PointerConstraintsInterfaceVersion;
-class PointerConstraintsInterface;
+class RelativePointerManagerV1;
+class PointerGesturesV1;
+class PointerConstraintsV1;
 class XdgForeignInterface;
 class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
@@ -172,14 +169,11 @@ public:
                                                       QObject* parent = nullptr);
     XdgShellInterface* createXdgShell(const XdgShellInterfaceVersion& version,
                                       QObject* parent = nullptr);
-    RelativePointerManagerInterface*
-    createRelativePointerManager(const RelativePointerInterfaceVersion& version,
-                                 QObject* parent = nullptr);
-    PointerGesturesInterface* createPointerGestures(const PointerGesturesInterfaceVersion& version,
-                                                    QObject* parent = nullptr);
-    PointerConstraintsInterface*
-    createPointerConstraints(const PointerConstraintsInterfaceVersion& version,
-                             QObject* parent = nullptr);
+
+    RelativePointerManagerV1* createRelativePointerManager(QObject* parent = nullptr);
+    PointerGesturesV1* createPointerGestures(QObject* parent = nullptr);
+    PointerConstraintsV1* createPointerConstraints(QObject* parent = nullptr);
+
     XdgForeignInterface* createXdgForeignInterface(QObject* parent = nullptr);
 
     IdleInhibitManagerInterface*

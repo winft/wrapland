@@ -36,13 +36,13 @@ namespace Server
 class BlurManagerInterface;
 class BlurInterface;
 class BufferInterface;
-class ConfinedPointerInterface;
+class ConfinedPointerV1;
 class ContrastInterface;
 class ContrastManagerInterface;
 class CompositorInterface;
 class IdleInhibitManagerUnstableV1Interface;
-class LockedPointerInterface;
-class PointerConstraintsUnstableV1Interface;
+class LockedPointerV1;
+class PointerConstraintsV1;
 class ShadowManagerInterface;
 class ShadowInterface;
 class SlideInterface;
@@ -256,14 +256,14 @@ public:
      * @see pointerConstraintsChanged
      * @since 0.0.529
      **/
-    QPointer<ConfinedPointerInterface> confinedPointer() const;
+    QPointer<ConfinedPointerV1> confinedPointer() const;
 
     /**
      * Pointer lock installed on this SurfaceInterface.
      * @see pointerConstraintsChanged
      * @since 0.0.529
      **/
-    QPointer<LockedPointerInterface> lockedPointer() const;
+    QPointer<LockedPointerV1> lockedPointer() const;
 
     /**
      * @returns Whether this SurfaceInterface wants idle to be inhibited on the Output it is shown
@@ -387,7 +387,7 @@ private:
     friend class SlideManagerInterface;
     friend class ContrastManagerInterface;
     friend class IdleInhibitManagerUnstableV1Interface;
-    friend class PointerConstraintsUnstableV1Interface;
+    friend class PointerConstraintsV1;
     friend class SurfaceRole;
     friend class ViewporterInterface;
 

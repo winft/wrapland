@@ -23,12 +23,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "clientconnection.h"
 #include "compositor_interface.h"
 #include "idleinhibit_interface_p.h"
-#include "pointerconstraints_interface_p.h"
 #include "region_interface.h"
 #include "subcompositor_interface.h"
 #include "subsurface_interface_p.h"
 #include "surfacerole_p.h"
 #include "viewporter_interface.h"
+
+#include "../../server/pointer_constraints_v1.h"
+#include "../../server/pointer_constraints_v1_p.h"
 
 #include <wayland-viewporter-server-protocol.h>
 // Qt
@@ -215,11 +217,11 @@ void SurfaceInterface::Private::installViewport(ViewportInterface *vp)
     );
 }
 
-void SurfaceInterface::Private::installPointerConstraint(LockedPointerInterface *lock)
+void SurfaceInterface::Private::installPointerConstraint(LockedPointerV1 *lock)
 {
     Q_ASSERT(lockedPointer.isNull());
     Q_ASSERT(confinedPointer.isNull());
-    lockedPointer = QPointer<LockedPointerInterface>(lock);
+    lockedPointer = QPointer<LockedPointerV1>(lock);
 
     auto cleanUp = [this]() {
         lockedPointer.clear();
@@ -230,8 +232,8 @@ void SurfaceInterface::Private::installPointerConstraint(LockedPointerInterface 
         emit q_func()->pointerConstraintsChanged();
     };
 
-    if (lock->lifeTime() == LockedPointerInterface::LifeTime::OneShot) {
-        constrainsOneShotConnection = QObject::connect(lock, &LockedPointerInterface::lockedChanged, q_func(),
+    if (lock->lifeTime() == LockedPointerV1::LifeTime::OneShot) {
+        constrainsOneShotConnection = QObject::connect(lock, &LockedPointerV1::lockedChanged, q_func(),
             [this, cleanUp] {
                 if (lockedPointer.isNull() || lockedPointer->isLocked()) {
                     return;
@@ -240,7 +242,7 @@ void SurfaceInterface::Private::installPointerConstraint(LockedPointerInterface 
             }
         );
     }
-    constrainsUnboundConnection = QObject::connect(lock, &LockedPointerInterface::unbound, q_func(),
+    constrainsUnboundConnection = QObject::connect(lock, &QObject::destroyed, q_func(),
         [this, cleanUp] {
             if (lockedPointer.isNull()) {
                 return;
@@ -251,11 +253,11 @@ void SurfaceInterface::Private::installPointerConstraint(LockedPointerInterface 
     emit q_func()->pointerConstraintsChanged();
 }
 
-void SurfaceInterface::Private::installPointerConstraint(ConfinedPointerInterface *confinement)
+void SurfaceInterface::Private::installPointerConstraint(ConfinedPointerV1 *confinement)
 {
     Q_ASSERT(lockedPointer.isNull());
     Q_ASSERT(confinedPointer.isNull());
-    confinedPointer = QPointer<ConfinedPointerInterface>(confinement);
+    confinedPointer = QPointer<ConfinedPointerV1>(confinement);
 
     auto cleanUp = [this]() {
         confinedPointer.clear();
@@ -266,8 +268,8 @@ void SurfaceInterface::Private::installPointerConstraint(ConfinedPointerInterfac
         emit q_func()->pointerConstraintsChanged();
     };
 
-    if (confinement->lifeTime() == ConfinedPointerInterface::LifeTime::OneShot) {
-        constrainsOneShotConnection = QObject::connect(confinement, &ConfinedPointerInterface::confinedChanged, q_func(),
+    if (confinement->lifeTime() == ConfinedPointerV1::LifeTime::OneShot) {
+        constrainsOneShotConnection = QObject::connect(confinement, &ConfinedPointerV1::confinedChanged, q_func(),
             [this, cleanUp] {
                 if (confinedPointer.isNull() || confinedPointer->isConfined()) {
                     return;
@@ -276,7 +278,7 @@ void SurfaceInterface::Private::installPointerConstraint(ConfinedPointerInterfac
             }
         );
     }
-    constrainsUnboundConnection = QObject::connect(confinement, &ConfinedPointerInterface::unbound, q_func(),
+    constrainsUnboundConnection = QObject::connect(confinement, &QObject::destroyed, q_func(),
         [this, cleanUp] {
             if (confinedPointer.isNull()) {
                 return;
@@ -525,10 +527,10 @@ void SurfaceInterface::Private::swapStates(State *source, State *target, bool em
     soureRectangleContainCheck(buffer, target->transform, target->scale, target->sourceRectangle);
 
     if (!lockedPointer.isNull()) {
-        lockedPointer->d_func()->commit();
+        lockedPointer->d_ptr->commit();
     }
     if (!confinedPointer.isNull()) {
-        confinedPointer->d_func()->commit();
+        confinedPointer->d_ptr->commit();
     }
 
     *source = State{};
@@ -1054,13 +1056,13 @@ SurfaceInterface *SurfaceInterface::inputSurfaceAt(const QPointF &position)
     return nullptr;
 }
 
-QPointer<LockedPointerInterface> SurfaceInterface::lockedPointer() const
+QPointer<LockedPointerV1> SurfaceInterface::lockedPointer() const
 {
     Q_D();
     return d->lockedPointer;
 }
 
-QPointer<ConfinedPointerInterface> SurfaceInterface::confinedPointer() const
+QPointer<ConfinedPointerV1> SurfaceInterface::confinedPointer() const
 {
     Q_D();
     return d->confinedPointer;

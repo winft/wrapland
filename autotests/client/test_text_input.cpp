@@ -83,7 +83,7 @@ private:
     QThread *m_thread = nullptr;
     EventQueue *m_queue = nullptr;
     Wrapland::Client::Seat *m_seat = nullptr;
-    Keyboard *m_keyboard = nullptr;
+    Wrapland::Client::Keyboard *m_keyboard = nullptr;
     Compositor *m_compositor = nullptr;
     TextInputManager *m_textInputManagerV0 = nullptr;
     TextInputManager *m_textInputManagerV2 = nullptr;

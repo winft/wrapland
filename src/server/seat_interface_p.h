@@ -45,8 +45,8 @@ public:
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
     void sendCapabilities(wl_resource *r);
     void sendName(wl_resource *r);
-    QVector<PointerInterface *> pointersForSurface(SurfaceInterface *surface) const;
-    QVector<KeyboardInterface *> keyboardsForSurface(SurfaceInterface *surface) const;
+//    QVector<PointerInterface *> pointersForSurface(SurfaceInterface *surface) const;
+//    QVector<KeyboardInterface *> keyboardsForSurface(SurfaceInterface *surface) const;
     QVector<TouchInterface *> touchsForSurface(SurfaceInterface *surface) const;
     DataDeviceInterface *dataDeviceForSurface(SurfaceInterface *surface) const;
     TextInputInterface *textInputForSurface(SurfaceInterface *surface) const;
@@ -61,8 +61,8 @@ public:
     bool touch = false;
     QList<wl_resource*> resources;
     quint32 timestamp = 0;
-    QVector<PointerInterface*> pointers;
-    QVector<KeyboardInterface*> keyboards;
+//    QVector<PointerInterface*> pointers;
+//    QVector<KeyboardInterface*> keyboards;
     QVector<TouchInterface*> touchs;
     QVector<DataDeviceInterface*> dataDevices;
     QVector<TextInputInterface*> textInputs;
@@ -79,7 +79,7 @@ public:
         QPointF pos;
         struct Focus {
             SurfaceInterface *surface = nullptr;
-            QVector<PointerInterface *> pointers;
+//            QVector<PointerInterface *> pointers;
             QMetaObject::Connection destroyConnection;
             QPointF offset = QPointF();
             QMatrix4x4 transformation;
@@ -115,7 +115,7 @@ public:
         Modifiers modifiers;
         struct Focus {
             SurfaceInterface *surface = nullptr;
-            QVector<KeyboardInterface*> keyboards;
+//            QVector<KeyboardInterface*> keyboards;
             QMetaObject::Connection destroyConnection;
             quint32 serial = 0;
             DataDeviceInterface *selection = nullptr;
@@ -165,7 +165,7 @@ public:
         DataDeviceInterface *source = nullptr;
         DataDeviceInterface *target = nullptr;
         SurfaceInterface *surface = nullptr;
-        PointerInterface *sourcePointer = nullptr;
+//        PointerInterface *sourcePointer = nullptr;
         TouchInterface *sourceTouch = nullptr;
         QMatrix4x4 transformation;
         QMetaObject::Connection destroyConnection;

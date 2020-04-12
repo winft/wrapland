@@ -18,7 +18,6 @@ set(SERVER_LIB_SRCS
     idle_interface.cpp
     idleinhibit_interface.cpp
     idleinhibit_interface_v1.cpp
-    keyboard_interface.cpp
     keystate_interface.cpp
     linuxdmabuf_v1_interface.cpp
     output_interface.cpp
@@ -29,15 +28,8 @@ set(SERVER_LIB_SRCS
     plasmashell_interface.cpp
     plasmavirtualdesktop_interface.cpp
     plasmawindowmanagement_interface.cpp
-    pointer_interface.cpp
-    pointerconstraints_interface.cpp
-    pointerconstraints_interface_v1.cpp
-    pointergestures_interface.cpp
-    pointergestures_interface_v1.cpp
     qtsurfaceextension_interface.cpp
     region_interface.cpp
-    relativepointer_interface.cpp
-    relativepointer_interface_v1.cpp
     remote_access_interface.cpp
     resource.cpp
     seat_interface.cpp
@@ -68,9 +60,15 @@ set(SERVER_LIB_SRCS
     ../../server/display.cpp
     ../../server/dpms.cpp
     ../../server/output.cpp
+    ../../server/pointer.cpp
+    ../../server/pointer_constraints_v1.cpp
+    ../../server/pointer_gestures_v1.cpp
+    ../../server/relative_pointer_v1.cpp
     ../../server/seat.cpp
     ../../server/wayland/client.cpp
     ../../server/wayland/display.cpp
+
+    ../../server/keyboard.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -343,7 +341,6 @@ set(SERVER_LIB_HEADERS
   global.h
   idle_interface.h
   idleinhibit_interface.h
-  keyboard_interface.h
   keystate_interface.h
   linuxdmabuf_v1_interface.h
   output_interface.h
@@ -354,12 +351,8 @@ set(SERVER_LIB_HEADERS
   plasmashell_interface.h
   plasmavirtualdesktop_interface.h
   plasmawindowmanagement_interface.h
-  pointer_interface.h
-  pointerconstraints_interface.h
-  pointergestures_interface.h
   qtsurfaceextension_interface.h
   region_interface.h
-  relativepointer_interface.h
   remote_access_interface.h
   resource.h
   server_decoration_interface.h
@@ -380,7 +373,12 @@ set(SERVER_LIB_HEADERS
   ../../server/client.h
   ../../server/display.h
   ../../server/dpms.h
+  ../../server/keyboard.h
   ../../server/output.h
+  ../../server/pointer.h
+  ../../server/pointer_constraints_v1.h
+  ../../server/pointer_gestures_v1.h
+  ../../server/relative_pointer_v1.h
   ../../server/seat.h
 )
 

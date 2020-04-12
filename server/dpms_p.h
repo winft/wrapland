@@ -49,6 +49,7 @@ using Sender = std::function<void(wl_resource*)>;
 
 class Dpms : public QObject
 {
+    Q_OBJECT
 public:
     Dpms(Client* client, uint32_t version, uint32_t id, Output* output);
     ~Dpms() override;
@@ -56,6 +57,9 @@ public:
     void sendSupported();
     void sendMode();
     void sendDone();
+
+Q_SIGNALS:
+    void resourceDestroyed();
 
 private:
     class Private;
@@ -65,7 +69,7 @@ private:
 class Dpms::Private : public Wayland::Resource<Dpms>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Output* output);
+    Private(Client* client, uint32_t version, uint32_t id, Output* output, Dpms* q);
 
     Output* output;
 
