@@ -129,6 +129,18 @@ add_test(NAME wrapland-testOutputDevice COMMAND testOutputDevice)
 ecm_mark_as_test(testOutputDevice)
 
 ########################################################
+# Test wlroots based OutputManagement
+########################################################
+set( test_wlr_output_management_SRCS
+        test_wlr_output_management.cpp
+    )
+add_executable(testWlrOutputManagement ${test_wlr_output_management_SRCS})
+target_link_libraries( testWlrOutputManagement
+    Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testWlrOutputManagement COMMAND testWlrOutputManagement)
+ecm_mark_as_test(testWlrOutputManagement)
+
+########################################################
 # Test Compositor
 ########################################################
 set( testCompositor_SRCS
