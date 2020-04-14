@@ -76,10 +76,8 @@ private:
     int32_t toTransform() const;
     int32_t toSubPixel() const;
 
-    Sender modeFunctor(int32_t flags, const Mode& mode);
-    Sender geometryFunctor();
-    Sender scaleFunctor();
-    Sender doneFunctor();
+    std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
+    geometryArgs() const;
 
     int32_t getFlags(const Mode& mode);
 

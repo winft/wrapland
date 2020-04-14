@@ -151,44 +151,36 @@ bool Seat::Private::updateKey(quint32 key, SeatKeyboard::State state)
 
 void Seat::Private::sendName(Wayland::Client* client)
 {
-    send(client, nameFunctor(), WL_SEAT_NAME_SINCE_VERSION);
+    send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(client, name.c_str());
 }
 void Seat::Private::sendName()
 {
-    send(nameFunctor(), WL_SEAT_NAME_SINCE_VERSION);
+    send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(name.c_str());
 }
 
-Sender Seat::Private::nameFunctor()
+uint32_t Seat::Private::getCapabilities() const
 {
-    return [this](wl_resource* resource) { wl_seat_send_name(resource, name.c_str()); };
+    uint32_t capabilities = 0;
+    if (pointer) {
+        capabilities |= WL_SEAT_CAPABILITY_POINTER;
+    }
+    if (keyboard) {
+        capabilities |= WL_SEAT_CAPABILITY_KEYBOARD;
+    }
+    if (touch) {
+        capabilities |= WL_SEAT_CAPABILITY_TOUCH;
+    }
+    return capabilities;
 }
 
 void Seat::Private::sendCapabilities(Wayland::Client* client)
 {
-    send(client, capabilitiesFunctor());
+    send<wl_seat_send_capabilities>(client, getCapabilities());
 }
 
 void Seat::Private::sendCapabilities()
 {
-    send(capabilitiesFunctor());
-}
-
-Sender Seat::Private::capabilitiesFunctor()
-{
-    return [this](wl_resource* resource) {
-        uint32_t capabilities = 0;
-        if (pointer) {
-            capabilities |= WL_SEAT_CAPABILITY_POINTER;
-        }
-        if (keyboard) {
-            capabilities |= WL_SEAT_CAPABILITY_KEYBOARD;
-        }
-        if (touch) {
-            capabilities |= WL_SEAT_CAPABILITY_TOUCH;
-        }
-
-        wl_seat_send_capabilities(resource, capabilities);
-    };
+    send<wl_seat_send_capabilities>(getCapabilities());
 }
 
 Seat::Private* Seat::Private::cast(wl_resource* r)

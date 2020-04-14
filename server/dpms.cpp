@@ -102,44 +102,6 @@ void Dpms::Private::setCallback(wl_client* client, wl_resource* wlResource, uint
     Q_EMIT static_cast<Private*>(fromResource(wlResource))->output->dpmsModeRequested(dpmsMode);
 }
 
-Sender Dpms::Private::doneFunctor()
-{
-    return [](wl_resource* resource) { org_kde_kwin_dpms_send_done(resource); };
-}
-
-Sender Dpms::Private::modeFunctor()
-{
-    return [this](wl_resource* resource) {
-        org_kde_kwin_dpms_mode mode;
-
-        switch (output->dpmsMode()) {
-        case Output::DpmsMode::On:
-            mode = ORG_KDE_KWIN_DPMS_MODE_ON;
-            break;
-        case Output::DpmsMode::Standby:
-            mode = ORG_KDE_KWIN_DPMS_MODE_STANDBY;
-            break;
-        case Output::DpmsMode::Suspend:
-            mode = ORG_KDE_KWIN_DPMS_MODE_SUSPEND;
-            break;
-        case Output::DpmsMode::Off:
-            mode = ORG_KDE_KWIN_DPMS_MODE_OFF;
-            break;
-        default:
-            Q_UNREACHABLE();
-        }
-
-        org_kde_kwin_dpms_send_mode(resource, mode);
-    };
-}
-
-Sender Dpms::Private::supportedFunctor()
-{
-    return [this](wl_resource* resource) {
-        org_kde_kwin_dpms_send_supported(resource, output->isDpmsSupported());
-    };
-}
-
 Dpms::Dpms(Client* client, uint32_t version, uint32_t id, Output* output)
     : d_ptr(new Private(client, version, id, output, this))
 {
@@ -157,17 +119,36 @@ Dpms::~Dpms() = default;
 
 void Dpms::sendSupported()
 {
-    d_ptr->send(d_ptr->supportedFunctor());
+    d_ptr->send<org_kde_kwin_dpms_send_supported>(d_ptr->output->isDpmsSupported());
 }
 
 void Dpms::sendMode()
 {
-    d_ptr->send(d_ptr->modeFunctor());
+    org_kde_kwin_dpms_mode mode;
+
+    switch (d_ptr->output->dpmsMode()) {
+    case Output::DpmsMode::On:
+        mode = ORG_KDE_KWIN_DPMS_MODE_ON;
+        break;
+    case Output::DpmsMode::Standby:
+        mode = ORG_KDE_KWIN_DPMS_MODE_STANDBY;
+        break;
+    case Output::DpmsMode::Suspend:
+        mode = ORG_KDE_KWIN_DPMS_MODE_SUSPEND;
+        break;
+    case Output::DpmsMode::Off:
+        mode = ORG_KDE_KWIN_DPMS_MODE_OFF;
+        break;
+    default:
+        Q_UNREACHABLE();
+    }
+
+    d_ptr->send<org_kde_kwin_dpms_send_mode>(mode);
 }
 
 void Dpms::sendDone()
 {
-    d_ptr->send(d_ptr->doneFunctor());
+    d_ptr->send<org_kde_kwin_dpms_send_done>();
     d_ptr->flush();
 }
 

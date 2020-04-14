@@ -300,42 +300,44 @@ int32_t Output::Private::getFlags(const Mode& mode)
 
 void Output::Private::sendMode(Wayland::Client* client, const Mode& mode)
 {
-    send(client, modeFunctor(getFlags(mode), mode));
+    send<wl_output_send_mode>(
+        client, getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
 }
 
 void Output::Private::sendMode(const Mode& mode)
 {
-    send(modeFunctor(getFlags(mode), mode));
+    send<wl_output_send_mode>(
+        getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
 }
 
 void Output::Private::sendGeometry(Wayland::Client* client)
 {
-    send(client, geometryFunctor());
+    send<wl_output_send_geometry>(client, geometryArgs());
 }
 
 void Output::Private::sendGeometry()
 {
-    send(geometryFunctor());
+    send<wl_output_send_geometry>(geometryArgs());
 }
 
 void Output::Private::sendScale(Wayland::Client* client)
 {
-    send(client, scaleFunctor(), 2);
+    send<wl_output_send_scale, 2>(client, scale);
 }
 
 void Output::Private::sendScale()
 {
-    send(scaleFunctor(), 2);
+    send<wl_output_send_scale, 2>(scale);
 }
 
 void Output::Private::sendDone(Wayland::Client* client)
 {
-    send(client, doneFunctor(), 2);
+    send<wl_output_send_done, 2>(client);
 }
 
 void Output::Private::sendDone()
 {
-    send(doneFunctor(), 2);
+    send<wl_output_send_done>();
 }
 
 void Output::Private::updateGeometry()
@@ -344,37 +346,17 @@ void Output::Private::updateGeometry()
     sendDone();
 }
 
-Sender Output::Private::modeFunctor(int32_t flags, const Mode& mode)
+std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
+Output::Private::geometryArgs() const
 {
-    return [this, flags, &mode](wl_resource* resource) {
-        wl_output_send_mode(
-            resource, flags, mode.size.width(), mode.size.height(), mode.refreshRate);
-    };
-}
-
-Sender Output::Private::geometryFunctor()
-{
-    return [this](wl_resource* resource) {
-        wl_output_send_geometry(resource,
-                                globalPosition.x(),
-                                globalPosition.y(),
-                                physicalSize.width(),
-                                physicalSize.height(),
-                                toSubPixel(),
-                                manufacturer.c_str(),
-                                model.c_str(),
-                                toTransform());
-    };
-}
-
-Sender Output::Private::scaleFunctor()
-{
-    return [this](wl_resource* resource) { wl_output_send_scale(resource, this->scale); };
-}
-
-Sender Output::Private::doneFunctor()
-{
-    return [](wl_resource* resource) { wl_output_send_done(resource); };
+    return std::make_tuple(globalPosition.x(),
+                           globalPosition.y(),
+                           physicalSize.width(),
+                           physicalSize.height(),
+                           toSubPixel(),
+                           manufacturer.c_str(),
+                           model.c_str(),
+                           toTransform());
 }
 
 #define SETTER(setterName, type, argumentName)                                                     \

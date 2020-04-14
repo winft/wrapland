@@ -110,16 +110,13 @@ void RelativePointerV1::relativeMotion(quint64 microseconds,
                                        const QSizeF& delta,
                                        const QSizeF& deltaNonAccelerated)
 {
-    d_ptr->send([microseconds, &delta, &deltaNonAccelerated](wl_resource* wlResource) {
-        zwp_relative_pointer_v1_send_relative_motion(
-            wlResource,
-            (microseconds >> 32),
-            microseconds,
-            wl_fixed_from_double(delta.width()),
-            wl_fixed_from_double(delta.height()),
-            wl_fixed_from_double(deltaNonAccelerated.width()),
-            wl_fixed_from_double(deltaNonAccelerated.height()));
-    });
+    d_ptr->send<zwp_relative_pointer_v1_send_relative_motion>(
+        (microseconds >> 32),
+        microseconds,
+        wl_fixed_from_double(delta.width()),
+        wl_fixed_from_double(delta.height()),
+        wl_fixed_from_double(deltaNonAccelerated.width()),
+        wl_fixed_from_double(deltaNonAccelerated.height()));
 }
 
 }

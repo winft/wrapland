@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cstdint>
 #include <functional>
+#include <tuple>
 #include <wayland-server.h>
 
 struct wl_client;
@@ -128,18 +129,25 @@ public:
         return reinterpret_cast<ResourceType*>(wl_resource_get_user_data(resource));
     }
 
-    template<typename F>
-    void send(F&& sendFunction)
+    template<auto sender, uint32_t minVersion = 0, typename... Args>
+    void send(Args&&... args)
     {
-        sendFunction(m_resource);
+        if constexpr (minVersion <= 1) {
+            sender(m_resource, args...);
+        } else {
+            if (m_version >= minVersion) {
+                sender(m_resource, args...);
+            }
+        }
     }
 
-    template<typename F>
-    void send(F&& sendFunction, uint32_t minVersion)
+    // We only support std::tuple but since it's just internal API that should be well enough.
+    template<auto sender, uint32_t minVersion = 0, typename... Args>
+    void send(std::tuple<Args...>&& tuple)
     {
-        if (m_version >= minVersion) {
-            sendFunction(m_resource);
-        }
+        constexpr auto size = std::tuple_size_v<std::decay_t<decltype(tuple)>>;
+        constexpr auto indices = std::make_index_sequence<size>{};
+        sendTuple<sender, minVersion>(std::forward<decltype(tuple)>(tuple), indices);
     }
 
     static void destroyCallback([[maybe_unused]] wl_client* client, wl_resource* wlResource)
@@ -172,6 +180,12 @@ private:
                 m_global->unbind(this);
             }
         }
+    }
+
+    template<auto sender, uint32_t minVersion, typename Tuple, std::size_t... Indices>
+    void sendTuple(Tuple&& tuple, std::index_sequence<Indices...>)
+    {
+        send<sender, minVersion>(std::get<Indices>(tuple)...);
     }
 
     Client* m_client;

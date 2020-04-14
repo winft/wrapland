@@ -29,6 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 #include <wayland-server.h>
@@ -103,28 +104,22 @@ public:
         return resource->global()->handle();
     }
 
-    template<typename F>
-    void send(Client* client, F&& sendFunction, uint32_t minVersion = 0)
+    template<auto sender, uint32_t minVersion = 0, typename... Args>
+    void send(Client* client, Args&&... args)
     {
         auto bind = findBind(client);
+        assert(bind);
 
-        if (bind) {
-            bind->send(std::forward<F>(sendFunction), minVersion);
-        }
+        // See Vandevoorde et al.: C++ Templates - The Complete Guide p.79
+        // or https://stackoverflow.com/a/4942746.
+        bind->template send<sender, minVersion>(std::forward<Args>(args)...);
     }
 
-    template<typename F>
-    void send(F&& sendFunction, uint32_t minVersion = 0)
+    template<auto sender, uint32_t minVersion = 0, typename... Args>
+    void send(Args&&... args)
     {
-        if (minVersion <= 1) {
-            // Available for all binds.
-            for (auto bind : m_binds) {
-                bind->send(std::forward<F>(sendFunction));
-            }
-        } else {
-            for (auto bind : m_binds) {
-                bind->send(std::forward<F>(sendFunction), minVersion);
-            }
+        for (auto bind : m_binds) {
+            bind->template send<sender, minVersion>(std::forward<Args>(args)...);
         }
     }
 

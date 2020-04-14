@@ -122,35 +122,24 @@ void PointerSwipeGestureV1::start(quint32 serial, quint32 fingerCount)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send([serial, fingerCount, seat](wl_resource* wlResource) {
-        zwp_pointer_gesture_swipe_v1_send_begin(wlResource,
-                                                serial,
-                                                seat->timestamp(),
-                                                seat->focusedPointerSurface()->resource(),
-                                                fingerCount);
-    });
+    d_ptr->send<zwp_pointer_gesture_swipe_v1_send_begin>(
+        serial, seat->timestamp(), seat->focusedPointerSurface()->resource(), fingerCount);
 }
 
 void PointerSwipeGestureV1::update(const QSizeF& delta)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send([delta, seat](wl_resource* wlResource) {
-        zwp_pointer_gesture_swipe_v1_send_update(wlResource,
-                                                 seat->timestamp(),
-                                                 wl_fixed_from_double(delta.width()),
-                                                 wl_fixed_from_double(delta.height()));
-    });
+    d_ptr->send<zwp_pointer_gesture_swipe_v1_send_update>(seat->timestamp(),
+                                                          wl_fixed_from_double(delta.width()),
+                                                          wl_fixed_from_double(delta.height()));
 }
 
 void PointerSwipeGestureV1::end(quint32 serial, bool cancel)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send([serial, cancel, seat](wl_resource* wlResource) {
-        zwp_pointer_gesture_swipe_v1_send_end(
-            wlResource, serial, seat->timestamp(), uint32_t(cancel));
-    });
+    d_ptr->send<zwp_pointer_gesture_swipe_v1_send_end>(serial, seat->timestamp(), uint32_t(cancel));
 }
 
 void PointerSwipeGestureV1::cancel(quint32 serial)
@@ -203,37 +192,26 @@ void PointerPinchGestureV1::start(quint32 serial, quint32 fingerCount)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send([serial, fingerCount, seat](wl_resource* wlResource) {
-        zwp_pointer_gesture_pinch_v1_send_begin(wlResource,
-                                                serial,
-                                                seat->timestamp(),
-                                                seat->focusedPointerSurface()->resource(),
-                                                fingerCount);
-    });
+    d_ptr->send<zwp_pointer_gesture_pinch_v1_send_begin>(
+        serial, seat->timestamp(), seat->focusedPointerSurface()->resource(), fingerCount);
 }
 
 void PointerPinchGestureV1::update(const QSizeF& delta, qreal scale, qreal rotation)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send([delta, scale, rotation, seat](wl_resource* wlResource) {
-        zwp_pointer_gesture_pinch_v1_send_update(wlResource,
-                                                 seat->timestamp(),
-                                                 wl_fixed_from_double(delta.width()),
-                                                 wl_fixed_from_double(delta.height()),
-                                                 wl_fixed_from_double(scale),
-                                                 wl_fixed_from_double(rotation));
-    });
+    d_ptr->send<zwp_pointer_gesture_pinch_v1_send_update>(seat->timestamp(),
+                                                          wl_fixed_from_double(delta.width()),
+                                                          wl_fixed_from_double(delta.height()),
+                                                          wl_fixed_from_double(scale),
+                                                          wl_fixed_from_double(rotation));
 }
 
 void PointerPinchGestureV1::end(quint32 serial, bool cancel)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send([serial, cancel, seat](wl_resource* wlResource) {
-        zwp_pointer_gesture_pinch_v1_send_end(
-            wlResource, serial, seat->timestamp(), uint32_t(cancel));
-    });
+    d_ptr->send<zwp_pointer_gesture_pinch_v1_send_end>(serial, seat->timestamp(), uint32_t(cancel));
 }
 
 void PointerPinchGestureV1::cancel(quint32 serial)

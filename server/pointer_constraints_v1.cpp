@@ -191,9 +191,9 @@ void LockedPointerV1::Private::commit()
 void LockedPointerV1::Private::update()
 {
     if (locked) {
-        send([](wl_resource* wlResource) { zwp_locked_pointer_v1_send_locked(wlResource); });
+        send<zwp_locked_pointer_v1_send_locked>();
     } else {
-        send([](wl_resource* wlResource) { zwp_locked_pointer_v1_send_unlocked(wlResource); });
+        send<zwp_locked_pointer_v1_send_unlocked>();
     }
 }
 
@@ -277,9 +277,9 @@ void ConfinedPointerV1::Private::setRegionCallback([[maybe_unused]] wl_client* w
 void ConfinedPointerV1::Private::update()
 {
     if (confined) {
-        send([](wl_resource* wlResource) { zwp_confined_pointer_v1_send_confined(wlResource); });
+        send<zwp_confined_pointer_v1_send_confined>();
     } else {
-        send([](wl_resource* wlResource) { zwp_confined_pointer_v1_send_unconfined(wlResource); });
+        send<zwp_confined_pointer_v1_send_unconfined>();
     }
 }
 

@@ -62,18 +62,6 @@ void Pointer::Private::setCursor(quint32 serial, SurfaceInterface* surface, cons
     }
 }
 
-Sender
-Pointer::Private::enterFunctor(quint32 serial, SurfaceInterface* surface, const QPointF& position)
-{
-    return [serial, surface, position](wl_resource* resource) {
-        wl_pointer_send_enter(resource,
-                              serial,
-                              surface->resource(),
-                              wl_fixed_from_double(position.x()),
-                              wl_fixed_from_double(position.y()));
-    };
-}
-
 namespace
 {
 QPointF surfacePosition(SurfaceInterface* surface)
@@ -94,14 +82,10 @@ void Pointer::Private::sendEnter(quint32 serial,
         return;
     }
     const QPointF adjustedPos = parentSurfacePosition - surfacePosition(surface);
-    send(enterFunctor(serial, surface, adjustedPos));
-}
-
-Sender Pointer::Private::leaveFunctor(quint32 serial, SurfaceInterface* surface)
-{
-    return [serial, surface](wl_resource* resource) {
-        wl_pointer_send_leave(resource, serial, surface->resource());
-    };
+    send<wl_pointer_send_enter>(serial,
+                                surface->resource(),
+                                wl_fixed_from_double(adjustedPos.x()),
+                                wl_fixed_from_double(adjustedPos.y()));
 }
 
 void Pointer::Private::sendLeave(quint32 serial, SurfaceInterface* surface)
@@ -112,42 +96,26 @@ void Pointer::Private::sendLeave(quint32 serial, SurfaceInterface* surface)
     if (!surface->resource()) {
         return;
     }
-    send(leaveFunctor(serial, surface));
-}
-
-Sender Pointer::Private::motionFunctor(const QPointF& position)
-{
-    return [this, position](wl_resource* resource) {
-        wl_pointer_send_motion(resource,
-                               seat->timestamp(),
-                               wl_fixed_from_double(position.x()),
-                               wl_fixed_from_double(position.y()));
-    };
+    send<wl_pointer_send_leave>(serial, surface->resource());
 }
 
 void Pointer::Private::sendMotion(const QPointF& position)
 {
-    send(motionFunctor(position));
+    send<wl_pointer_send_motion>(
+        seat->timestamp(), wl_fixed_from_double(position.x()), wl_fixed_from_double(position.y()));
 }
 
 void Pointer::Private::sendAxis(Qt::Orientation orientation, quint32 delta)
 {
     const auto wlOrientation = (orientation == Qt::Vertical) ? WL_POINTER_AXIS_VERTICAL_SCROLL
                                                              : WL_POINTER_AXIS_HORIZONTAL_SCROLL;
-    auto axisFunctor = [this, wlOrientation, delta](wl_resource* resource) {
-        wl_pointer_send_axis(resource, seat->timestamp(), wlOrientation, wl_fixed_from_int(delta));
-    };
-    send(axisFunctor);
-}
 
-Sender Pointer::Private::frameFunctor()
-{
-    return [](wl_resource* resource) { wl_pointer_send_frame(resource); };
+    send<wl_pointer_send_axis>(seat->timestamp(), wlOrientation, wl_fixed_from_int(delta));
 }
 
 void Pointer::Private::sendFrame()
 {
-    send(frameFunctor(), WL_POINTER_FRAME_SINCE_VERSION);
+    send<wl_pointer_send_frame, WL_POINTER_FRAME_SINCE_VERSION>();
 }
 
 void Pointer::Private::registerRelativePointer(RelativePointerV1* relativePointer)
@@ -350,10 +318,8 @@ void Pointer::buttonPressed(quint32 serial, quint32 button)
 {
     Q_ASSERT(d_ptr->focusedSurface);
 
-    d_ptr->send([this, serial, button](wl_resource* wlResource) {
-        wl_pointer_send_button(
-            wlResource, serial, d_ptr->seat->timestamp(), button, WL_POINTER_BUTTON_STATE_PRESSED);
-    });
+    d_ptr->send<wl_pointer_send_button>(
+        serial, d_ptr->seat->timestamp(), button, WL_POINTER_BUTTON_STATE_PRESSED);
     d_ptr->sendFrame();
 }
 
@@ -361,10 +327,8 @@ void Pointer::buttonReleased(quint32 serial, quint32 button)
 {
     Q_ASSERT(d_ptr->focusedSurface);
 
-    d_ptr->send([this, serial, button](wl_resource* wlResource) {
-        wl_pointer_send_button(
-            wlResource, serial, d_ptr->seat->timestamp(), button, WL_POINTER_BUTTON_STATE_RELEASED);
-    });
+    d_ptr->send<wl_pointer_send_button>(
+        serial, d_ptr->seat->timestamp(), button, WL_POINTER_BUTTON_STATE_RELEASED);
     d_ptr->sendFrame();
 }
 
@@ -378,52 +342,43 @@ void Pointer::axis(Qt::Orientation orientation,
     const auto wlOrientation = (orientation == Qt::Vertical) ? WL_POINTER_AXIS_VERTICAL_SCROLL
                                                              : WL_POINTER_AXIS_HORIZONTAL_SCROLL;
 
-    d_ptr->send(
-        [this, source](wl_resource* wlResource) {
-            if (source == PointerAxisSource::Unknown) {
-                return;
-            }
+    auto getWlSource = [source] {
+        wl_pointer_axis_source wlSource;
+        switch (source) {
+        case PointerAxisSource::Wheel:
+            wlSource = WL_POINTER_AXIS_SOURCE_WHEEL;
+            break;
+        case PointerAxisSource::Finger:
+            wlSource = WL_POINTER_AXIS_SOURCE_FINGER;
+            break;
+        case PointerAxisSource::Continuous:
+            wlSource = WL_POINTER_AXIS_SOURCE_CONTINUOUS;
+            break;
+        case PointerAxisSource::WheelTilt:
+            wlSource = WL_POINTER_AXIS_SOURCE_WHEEL_TILT;
+            break;
+        default:
+            Q_UNREACHABLE();
+            break;
+        }
+        return wlSource;
+    };
 
-            wl_pointer_axis_source wlSource;
-            switch (source) {
-            case PointerAxisSource::Wheel:
-                wlSource = WL_POINTER_AXIS_SOURCE_WHEEL;
-                break;
-            case PointerAxisSource::Finger:
-                wlSource = WL_POINTER_AXIS_SOURCE_FINGER;
-                break;
-            case PointerAxisSource::Continuous:
-                wlSource = WL_POINTER_AXIS_SOURCE_CONTINUOUS;
-                break;
-            case PointerAxisSource::WheelTilt:
-                wlSource = WL_POINTER_AXIS_SOURCE_WHEEL_TILT;
-                break;
-            default:
-                Q_UNREACHABLE();
-                break;
-            }
-            wl_pointer_send_axis_source(wlResource, wlSource);
-        },
-        WL_POINTER_AXIS_SOURCE_SINCE_VERSION);
+    if (source != PointerAxisSource::Unknown) {
+        d_ptr->send<wl_pointer_send_axis_source, WL_POINTER_AXIS_SOURCE_SINCE_VERSION>(
+            getWlSource());
+    }
 
     if (delta != 0.0) {
         if (discreteDelta) {
-            d_ptr->send(
-                [this, wlOrientation, discreteDelta](wl_resource* wlResource) {
-                    wl_pointer_send_axis_discrete(wlResource, wlOrientation, discreteDelta);
-                },
-                WL_POINTER_AXIS_DISCRETE_SINCE_VERSION);
+            d_ptr->send<wl_pointer_send_axis_discrete, WL_POINTER_AXIS_DISCRETE_SINCE_VERSION>(
+                wlOrientation, discreteDelta);
         }
-        d_ptr->send([this, wlOrientation, delta](wl_resource* wlResource) {
-            wl_pointer_send_axis(
-                wlResource, d_ptr->seat->timestamp(), wlOrientation, wl_fixed_from_double(delta));
-        });
+        d_ptr->send<wl_pointer_send_axis>(
+            d_ptr->seat->timestamp(), wlOrientation, wl_fixed_from_double(delta));
     } else {
-        d_ptr->send(
-            [this, wlOrientation](wl_resource* wlResource) {
-                wl_pointer_send_axis_stop(wlResource, d_ptr->seat->timestamp(), wlOrientation);
-            },
-            WL_POINTER_AXIS_STOP_SINCE_VERSION);
+        d_ptr->send<wl_pointer_send_axis_stop, WL_POINTER_AXIS_STOP_SINCE_VERSION>(
+            d_ptr->seat->timestamp(), wlOrientation);
     }
 
     d_ptr->sendFrame();

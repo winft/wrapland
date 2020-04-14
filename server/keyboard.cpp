@@ -59,9 +59,7 @@ void Keyboard::Private::focusChildSurface(quint32 serial,
 void Keyboard::Private::sendLeave(quint32 serial, SurfaceInterface* surface)
 {
     if (surface && surface->resource()) {
-        send([serial, surface](wl_resource* wlResource) {
-            wl_keyboard_send_leave(wlResource, serial, surface->resource());
-        });
+        send<wl_keyboard_send_leave>(serial, surface->resource());
     }
 }
 
@@ -74,9 +72,7 @@ void Keyboard::Private::sendEnter(quint32 serial, SurfaceInterface* surface)
         uint32_t* k = reinterpret_cast<uint32_t*>(wl_array_add(&keys, sizeof(uint32_t)));
         *k = *it;
     }
-    send([serial, surface, keysPtr = &keys](wl_resource* wlResource) {
-        wl_keyboard_send_enter(wlResource, serial, surface->resource(), keysPtr);
-    });
+    send<wl_keyboard_send_enter>(serial, surface->resource(), &keys);
     wl_array_release(&keys);
 
     sendModifiers();
@@ -84,9 +80,7 @@ void Keyboard::Private::sendEnter(quint32 serial, SurfaceInterface* surface)
 
 void Keyboard::Private::sendKeymap(int fd, quint32 size)
 {
-    send([fd, size](wl_resource* wlResource) {
-        wl_keyboard_send_keymap(wlResource, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, fd, size);
-    });
+    send<wl_keyboard_send_keymap>(WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, fd, size);
 }
 
 void Keyboard::Private::sendModifiers(quint32 serial,
@@ -95,9 +89,7 @@ void Keyboard::Private::sendModifiers(quint32 serial,
                                       quint32 locked,
                                       quint32 group)
 {
-    send([serial, depressed, latched, locked, group](wl_resource* wlResource) {
-        wl_keyboard_send_modifiers(wlResource, serial, depressed, latched, locked, group);
-    });
+    send<wl_keyboard_send_modifiers>(serial, depressed, latched, locked, group);
 }
 
 void Keyboard::Private::sendModifiers()
@@ -147,19 +139,15 @@ void Keyboard::setFocusedSurface(quint32 serial, SurfaceInterface* surface)
 void Keyboard::keyPressed(quint32 serial, quint32 key)
 {
     Q_ASSERT(d_ptr->focusedSurface);
-    d_ptr->send([serial, this, key](wl_resource* wlResource) {
-        wl_keyboard_send_key(
-            wlResource, serial, d_ptr->seat->timestamp(), key, WL_KEYBOARD_KEY_STATE_PRESSED);
-    });
+    d_ptr->send<wl_keyboard_send_key>(
+        serial, d_ptr->seat->timestamp(), key, WL_KEYBOARD_KEY_STATE_PRESSED);
 }
 
 void Keyboard::keyReleased(quint32 serial, quint32 key)
 {
     Q_ASSERT(d_ptr->focusedSurface);
-    d_ptr->send([serial, this, key](wl_resource* wlResource) {
-        wl_keyboard_send_key(
-            wlResource, serial, d_ptr->seat->timestamp(), key, WL_KEYBOARD_KEY_STATE_RELEASED);
-    });
+    d_ptr->send<wl_keyboard_send_key>(
+        serial, d_ptr->seat->timestamp(), key, WL_KEYBOARD_KEY_STATE_RELEASED);
 }
 
 void Keyboard::updateModifiers(quint32 serial,
@@ -174,11 +162,8 @@ void Keyboard::updateModifiers(quint32 serial,
 
 void Keyboard::repeatInfo(qint32 charactersPerSecond, qint32 delay)
 {
-    d_ptr->send(
-        [charactersPerSecond, delay](wl_resource* wlResource) {
-            wl_keyboard_send_repeat_info(wlResource, charactersPerSecond, delay);
-        },
-        WL_KEYBOARD_REPEAT_INFO_SINCE_VERSION);
+    d_ptr->send<wl_keyboard_send_repeat_info, WL_KEYBOARD_REPEAT_INFO_SINCE_VERSION>(
+        charactersPerSecond, delay);
 }
 
 SurfaceInterface* Keyboard::focusedSurface() const

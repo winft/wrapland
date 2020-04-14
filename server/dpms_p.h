@@ -73,10 +73,6 @@ public:
 
     Output* output;
 
-    Sender doneFunctor();
-    Sender modeFunctor();
-    Sender supportedFunctor();
-
 private:
     static void setCallback(wl_client* client, wl_resource* wlResource, uint32_t mode);
     static const struct org_kde_kwin_dpms_interface s_interface;

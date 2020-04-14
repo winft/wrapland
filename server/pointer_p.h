@@ -34,8 +34,6 @@ class PointerPinchGestureV1;
 class PointerSwipeGestureV1;
 class RelativePointerV1;
 
-using Sender = std::function<void(wl_resource*)>;
-
 class Cursor::Private
 {
 public:
@@ -73,12 +71,6 @@ public:
     void sendMotion(const QPointF& position);
     void sendAxis(Qt::Orientation orientation, quint32 delta);
     void sendFrame();
-
-    Sender enterFunctor(quint32 serial, SurfaceInterface* surface, const QPointF& position);
-    Sender leaveFunctor(quint32 serial, SurfaceInterface* surface);
-    Sender motionFunctor(const QPointF& position);
-    Sender axisFunctor(Qt::Orientation orientation, quint32 delta);
-    Sender frameFunctor();
 
     void registerRelativePointer(RelativePointerV1* relativePointer);
     void registerSwipeGesture(PointerSwipeGestureV1* gesture);

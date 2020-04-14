@@ -55,8 +55,7 @@ public:
     void sendName();
     void sendName(Wayland::Client* client);
 
-    Sender capabilitiesFunctor();
-    Sender nameFunctor();
+    uint32_t getCapabilities() const;
 
     QVector<Pointer*> pointersForSurface(SurfaceInterface* surface) const;
     QVector<Keyboard*> keyboardsForSurface(SurfaceInterface* surface) const;
