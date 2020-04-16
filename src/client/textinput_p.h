@@ -70,7 +70,7 @@ public:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 class Q_DECL_HIDDEN TextInputManager::Private

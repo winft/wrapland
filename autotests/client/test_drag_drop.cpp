@@ -223,7 +223,7 @@ void TestDragAndDrop::testPointerDragAndDrop()
     using namespace Wrapland::Server;
     using namespace Wrapland::Client;
     // first create a window
-    QScopedPointer<Surface> s(createSurface());
+    std::unique_ptr<Surface> s(createSurface());
     auto serverSurface = getServerSurface();
     QVERIFY(serverSurface);
 
@@ -253,7 +253,7 @@ void TestDragAndDrop::testPointerDragAndDrop()
     QSignalSpy dragStartedSpy(m_seatInterface, &SeatInterface::dragStarted);
     QVERIFY(dragStartedSpy.isValid());
     m_dataSource->setDragAndDropActions(DataDeviceManager::DnDAction::Copy | DataDeviceManager::DnDAction::Move);
-    m_dataDevice->startDrag(buttonPressSpy.first().first().value<quint32>(), m_dataSource, s.data());
+    m_dataDevice->startDrag(buttonPressSpy.first().first().value<quint32>(), m_dataSource, s.get());
     QVERIFY(dragStartedSpy.wait());
     QCOMPARE(m_seatInterface->dragSurface(), serverSurface);
     QCOMPARE(m_seatInterface->dragSurfaceTransformation(), QMatrix4x4());
@@ -263,7 +263,7 @@ void TestDragAndDrop::testPointerDragAndDrop()
     QCOMPARE(dragEnteredSpy.count(), 1);
     QCOMPARE(dragEnteredSpy.first().first().value<quint32>(), m_display->serial());
     QCOMPARE(dragEnteredSpy.first().last().toPointF(), QPointF(0, 0));
-    QCOMPARE(m_dataDevice->dragSurface().data(), s.data());
+    QCOMPARE(m_dataDevice->dragSurface().data(), s.get());
     auto offer = m_dataDevice->dragOffer();
     QVERIFY(offer);
     QCOMPARE(offer->selectedDragAndDropAction(), DataDeviceManager::DnDAction::None);
@@ -316,7 +316,7 @@ void TestDragAndDrop::testTouchDragAndDrop()
     using namespace Wrapland::Server;
     using namespace Wrapland::Client;
     // first create a window
-    QScopedPointer<Surface> s(createSurface());
+    std::unique_ptr<Surface> s(createSurface());
     s->setSize(QSize(100,100));
     auto serverSurface = getServerSurface();
     QVERIFY(serverSurface);
@@ -352,7 +352,7 @@ void TestDragAndDrop::testTouchDragAndDrop()
     QSignalSpy dragStartedSpy(m_seatInterface, &SeatInterface::dragStarted);
     QVERIFY(dragStartedSpy.isValid());
     m_dataSource->setDragAndDropActions(DataDeviceManager::DnDAction::Copy | DataDeviceManager::DnDAction::Move);
-    m_dataDevice->startDrag(tp->downSerial(), m_dataSource, s.data());
+    m_dataDevice->startDrag(tp->downSerial(), m_dataSource, s.get());
     QVERIFY(dragStartedSpy.wait());
     QCOMPARE(m_seatInterface->dragSurface(), serverSurface);
     QCOMPARE(m_seatInterface->dragSurfaceTransformation(), QMatrix4x4());
@@ -362,7 +362,7 @@ void TestDragAndDrop::testTouchDragAndDrop()
     QCOMPARE(dragEnteredSpy.count(), 1);
     QCOMPARE(dragEnteredSpy.first().first().value<quint32>(), m_display->serial());
     QCOMPARE(dragEnteredSpy.first().last().toPointF(), QPointF(0, 0));
-    QCOMPARE(m_dataDevice->dragSurface().data(), s.data());
+    QCOMPARE(m_dataDevice->dragSurface().data(), s.get());
     auto offer = m_dataDevice->dragOffer();
     QVERIFY(offer);
     QCOMPARE(offer->selectedDragAndDropAction(), DataDeviceManager::DnDAction::None);
@@ -416,7 +416,7 @@ void TestDragAndDrop::testDragAndDropWithCancelByDestroyDataSource()
     using namespace Wrapland::Server;
     using namespace Wrapland::Client;
     // first create a window
-    QScopedPointer<Surface> s(createSurface());
+    std::unique_ptr<Surface> s(createSurface());
     auto serverSurface = getServerSurface();
     QVERIFY(serverSurface);
 
@@ -446,7 +446,7 @@ void TestDragAndDrop::testDragAndDropWithCancelByDestroyDataSource()
     QSignalSpy dragStartedSpy(m_seatInterface, &SeatInterface::dragStarted);
     QVERIFY(dragStartedSpy.isValid());
     m_dataSource->setDragAndDropActions(DataDeviceManager::DnDAction::Copy | DataDeviceManager::DnDAction::Move);
-    m_dataDevice->startDrag(buttonPressSpy.first().first().value<quint32>(), m_dataSource, s.data());
+    m_dataDevice->startDrag(buttonPressSpy.first().first().value<quint32>(), m_dataSource, s.get());
     QVERIFY(dragStartedSpy.wait());
     QCOMPARE(m_seatInterface->dragSurface(), serverSurface);
     QCOMPARE(m_seatInterface->dragSurfaceTransformation(), QMatrix4x4());
@@ -456,7 +456,7 @@ void TestDragAndDrop::testDragAndDropWithCancelByDestroyDataSource()
     QCOMPARE(dragEnteredSpy.count(), 1);
     QCOMPARE(dragEnteredSpy.first().first().value<quint32>(), m_display->serial());
     QCOMPARE(dragEnteredSpy.first().last().toPointF(), QPointF(0, 0));
-    QCOMPARE(m_dataDevice->dragSurface().data(), s.data());
+    QCOMPARE(m_dataDevice->dragSurface().data(), s.get());
     auto offer = m_dataDevice->dragOffer();
     QVERIFY(offer);
     QCOMPARE(offer->selectedDragAndDropAction(), DataDeviceManager::DnDAction::None);
@@ -508,7 +508,7 @@ void TestDragAndDrop::testPointerEventsIgnored()
     using namespace Wrapland::Server;
     using namespace Wrapland::Client;
     // first create a window
-    QScopedPointer<Surface> s(createSurface());
+    std::unique_ptr<Surface> s(createSurface());
     auto serverSurface = getServerSurface();
     QVERIFY(serverSurface);
 
@@ -548,7 +548,7 @@ void TestDragAndDrop::testPointerEventsIgnored()
     m_seatInterface->pointerButtonPressed(1);
     QVERIFY(buttonSpy.wait());
     QCOMPARE(buttonSpy.count(), 1);
-    m_dataDevice->startDrag(buttonSpy.first().first().value<quint32>(), m_dataSource, s.data());
+    m_dataDevice->startDrag(buttonSpy.first().first().value<quint32>(), m_dataSource, s.get());
     QVERIFY(dragEnteredSpy.wait());
 
     // now simulate all the possible pointer interactions

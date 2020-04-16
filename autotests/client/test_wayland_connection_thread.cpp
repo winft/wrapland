@@ -81,15 +81,15 @@ void TestWaylandConnectionThread::cleanup()
 void TestWaylandConnectionThread::testInitConnectionNoThread()
 {
     QVERIFY(Cnt::ConnectionThread::connections().isEmpty());
-    QScopedPointer<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
-    QVERIFY(Cnt::ConnectionThread::connections().contains(connection.data()));
+    std::unique_ptr<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
+    QVERIFY(Cnt::ConnectionThread::connections().contains(connection.get()));
 
     QCOMPARE(connection->socketName(), QStringLiteral("wayland-0"));
     connection->setSocketName(s_socketName);
     QCOMPARE(connection->socketName(), s_socketName);
 
-    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::establishedChanged);
-    QSignalSpy failedSpy(connection.data(), &Cnt::ConnectionThread::failed);
+    QSignalSpy connectedSpy(connection.get(), &Cnt::ConnectionThread::establishedChanged);
+    QSignalSpy failedSpy(connection.get(), &Cnt::ConnectionThread::failed);
     connection->establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
@@ -102,11 +102,11 @@ void TestWaylandConnectionThread::testInitConnectionNoThread()
 
 void TestWaylandConnectionThread::testConnectionFailure()
 {
-    QScopedPointer<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
+    std::unique_ptr<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
     connection->setSocketName(QStringLiteral("kwin-test-socket-does-not-exist"));
 
-    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::establishedChanged);
-    QSignalSpy failedSpy(connection.data(), &Cnt::ConnectionThread::failed);
+    QSignalSpy connectedSpy(connection.get(), &Cnt::ConnectionThread::establishedChanged);
+    QSignalSpy failedSpy(connection.get(), &Cnt::ConnectionThread::failed);
     connection->establishConnection();
     QVERIFY(failedSpy.wait());
     QCOMPARE(connectedSpy.count(), 0);
@@ -160,16 +160,16 @@ void TestWaylandConnectionThread::testConnectionThread()
     QVERIFY(eventsSpy.isValid());
 
     wl_display *display = connection->display();
-    QScopedPointer<Cnt::EventQueue> queue(new Cnt::EventQueue);
+    std::unique_ptr<Cnt::EventQueue> queue(new Cnt::EventQueue);
     queue->setup(display);
     QVERIFY(queue->isValid());
 
     connect(connection, &Cnt::ConnectionThread::eventsRead,
-            queue.data(), &Cnt::EventQueue::dispatch,
+            queue.get(), &Cnt::EventQueue::dispatch,
             Qt::QueuedConnection);
 
     wl_registry *registry = wl_display_get_registry(display);
-    wl_proxy_set_queue((wl_proxy*)registry, *(queue.data()));
+    wl_proxy_set_queue((wl_proxy*)registry, *(queue.get()));
 
     wl_registry_add_listener(registry, &s_registryListener, this);
     wl_display_flush(display);
@@ -190,9 +190,9 @@ void TestWaylandConnectionThread::testConnectionThread()
 
 void TestWaylandConnectionThread::testConnectionDying()
 {
-    QScopedPointer<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
+    std::unique_ptr<Cnt::ConnectionThread> connection(new Cnt::ConnectionThread);
 
-    QSignalSpy connectedSpy(connection.data(), &Cnt::ConnectionThread::establishedChanged);
+    QSignalSpy connectedSpy(connection.get(), &Cnt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
 
     connection->setSocketName(s_socketName);
@@ -246,13 +246,13 @@ void TestWaylandConnectionThread::testConnectFd()
     QCOMPARE(connectedSpy.count(), 1);
 
     // Create the Registry.
-    QScopedPointer<Cnt::Registry> registry(new Cnt::Registry);
-    QSignalSpy announcedSpy(registry.data(), &Cnt::Registry::interfacesAnnounced);
+    std::unique_ptr<Cnt::Registry> registry(new Cnt::Registry);
+    QSignalSpy announcedSpy(registry.get(), &Cnt::Registry::interfacesAnnounced);
     QVERIFY(announcedSpy.isValid());
     registry->create(connection);
-    QScopedPointer<Cnt::EventQueue> queue(new Cnt::EventQueue);
+    std::unique_ptr<Cnt::EventQueue> queue(new Cnt::EventQueue);
     queue->setup(connection);
-    registry->setEventQueue(queue.data());
+    registry->setEventQueue(queue.get());
     registry->setup();
     QVERIFY(announcedSpy.wait());
 
@@ -293,13 +293,13 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
     QCOMPARE(connectedSpy.count(), 1);
 
     // Create the Registry.
-    QScopedPointer<Cnt::Registry> registry(new Cnt::Registry);
-    QSignalSpy announcedSpy(registry.data(), &Cnt::Registry::interfacesAnnounced);
+    std::unique_ptr<Cnt::Registry> registry(new Cnt::Registry);
+    QSignalSpy announcedSpy(registry.get(), &Cnt::Registry::interfacesAnnounced);
     QVERIFY(announcedSpy.isValid());
     registry->create(connection);
-    QScopedPointer<Cnt::EventQueue> queue(new Cnt::EventQueue);
+    std::unique_ptr<Cnt::EventQueue> queue(new Cnt::EventQueue);
     queue->setup(connection);
-    registry->setEventQueue(queue.data());
+    registry->setEventQueue(queue.get());
     registry->setup();
     QVERIFY(announcedSpy.wait());
 

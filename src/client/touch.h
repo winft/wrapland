@@ -22,7 +22,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QPoint>
-
+//STD
+#include <memory>
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_touch;
@@ -87,7 +88,7 @@ private:
     friend class Touch;
     explicit TouchPoint();
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -170,7 +171,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

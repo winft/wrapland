@@ -21,7 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_SERVER_DECORATION_H
 
 #include <QObject>
-
+//STD
+#include <memory>
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_server_decoration_manager;
@@ -117,7 +118,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -210,7 +211,7 @@ private:
     friend class ServerSideDecorationManager;
     explicit ServerSideDecoration(QObject *parent = nullptr);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 

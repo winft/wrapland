@@ -207,9 +207,9 @@ void TestXdgDecoration::testDecoration()
     QSignalSpy decorationCreatedSpy(m_xdgDecorationManagerInterface, &XdgDecorationManagerInterface::xdgDecorationInterfaceCreated);
 
     // create shell surface and deco object
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
-    QScopedPointer<XdgShellSurface> shellSurface(m_xdgShell->createSurface(surface.data()));
-    QScopedPointer<XdgDecoration> decoration(m_xdgDecorationManager->getToplevelDecoration(shellSurface.data()));
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<XdgShellSurface> shellSurface(m_xdgShell->createSurface(surface.get()));
+    std::unique_ptr<XdgDecoration> decoration(m_xdgDecorationManager->getToplevelDecoration(shellSurface.get()));
 
     //and receive all these on the "server"
     QVERIFY(surfaceCreatedSpy.count() || surfaceCreatedSpy.wait());
@@ -224,7 +224,7 @@ void TestXdgDecoration::testDecoration()
     QCOMPARE(decorationIface->surface(), shellSurfaceIface);
     QCOMPARE(decorationIface->requestedMode(), XdgDecorationInterface::Mode::Undefined);
 
-    QSignalSpy clientConfiguredSpy(decoration.data(), &XdgDecoration::modeChanged);
+    QSignalSpy clientConfiguredSpy(decoration.get(), &XdgDecoration::modeChanged);
     QSignalSpy modeRequestedSpy(decorationIface, &XdgDecorationInterface::modeRequested);
 
     //server configuring a client

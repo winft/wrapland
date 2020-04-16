@@ -21,7 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_TEXTINPUT_H
 
 #include <QObject>
-
+//STD
+#include <memory>
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_text_input;
@@ -410,7 +411,7 @@ Q_SIGNALS:
 
 protected:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
     explicit TextInput(Private *p, QObject *parent = nullptr);
 };
 
@@ -504,7 +505,7 @@ protected:
     class Private;
     explicit TextInputManager(Private *p, QObject *parent = nullptr);
 
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }
