@@ -172,7 +172,7 @@ void Shadow::attach##__PART__(Buffer *buffer) \
 } \
 void Shadow::attach##__PART__(Buffer::Ptr buffer) \
 { \
-    attach##__PART__(buffer.toStrongRef().data()); \
+    attach##__PART__(buffer.lock().get()); \
 }
 
 attach(Left, left)

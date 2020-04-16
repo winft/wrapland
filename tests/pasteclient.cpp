@@ -187,7 +187,7 @@ void PasteClient::setupRegistry(Registry *registry)
 void PasteClient::render()
 {
     const QSize &size = m_shellSurface->size();
-    auto buffer = m_shm->getBuffer(size, size.width() * 4).toStrongRef();
+    auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::blue);

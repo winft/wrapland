@@ -175,7 +175,7 @@ void XdgForeignTest::setupRegistry(Registry *registry)
 void XdgForeignTest::render()
 {
     QSize size = m_shellSurface->size().isValid() ? m_shellSurface->size() : QSize(500, 500);
-    auto buffer = m_shm->getBuffer(size, size.width() * 4).toStrongRef();
+    auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
     image.fill(QColor(255, 255, 255, 255));
@@ -186,7 +186,7 @@ void XdgForeignTest::render()
     buffer->setUsed(false);
     
     size = m_childShellSurface->size().isValid() ? m_childShellSurface->size() : QSize(200, 200);
-    buffer = m_shm->getBuffer(size, size.width() * 4).toStrongRef();
+    buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     image = QImage(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
     image.fill(QColor(255, 0, 0, 255));

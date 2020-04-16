@@ -44,7 +44,7 @@ public:
     Private(ShmPool *q);
     bool createPool();
     bool resizePool(int32_t newSize);
-    QList<QSharedPointer<Buffer>>::iterator getBuffer(const QSize &size, int32_t stride, Buffer::Format format);
+    QList<std::shared_ptr<Buffer>>::iterator getBuffer(const QSize &size, int32_t stride, Buffer::Format format);
     WaylandPointer<wl_shm, wl_shm_destroy> shm;
     WaylandPointer<wl_shm_pool, wl_shm_pool_destroy> pool;
     void *poolData = nullptr;
@@ -52,7 +52,7 @@ public:
     QScopedPointer<QTemporaryFile> tmpFile;
     bool valid = false;
     int offset = 0;
-    QList<QSharedPointer<Buffer>> buffers;
+    QList<std::shared_ptr<Buffer>> buffers;
     EventQueue *queue = nullptr;
 private:
     ShmPool *q;
@@ -170,12 +170,12 @@ static Buffer::Format toBufferFormat(const QImage &image)
 Buffer::Ptr ShmPool::createBuffer(const QImage& image)
 {
     if (image.isNull() || !d->valid) {
-        return QWeakPointer<Buffer>();
+        return std::weak_ptr<Buffer>();
     }
     auto format = toBufferFormat(image);
     auto it = d->getBuffer(image.size(), image.bytesPerLine(), format);
     if (it == d->buffers.end()) {
-        return QWeakPointer<Buffer>();
+        return std::weak_ptr<Buffer>();
     }
     if (format == Buffer::Format::ARGB32 && image.format() != QImage::Format_ARGB32_Premultiplied) {
         auto imageCopy = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
@@ -183,20 +183,20 @@ Buffer::Ptr ShmPool::createBuffer(const QImage& image)
     } else {
         (*it)->copy(image.bits());
     }
-    return QWeakPointer<Buffer>(*it);
+    return std::weak_ptr<Buffer>(*it);
 }
 
 Buffer::Ptr ShmPool::createBuffer(const QSize &size, int32_t stride, const void *src, Buffer::Format format)
 {
     if (size.isEmpty() || !d->valid) {
-        return QWeakPointer<Buffer>();
+        return std::weak_ptr<Buffer>();
     }
     auto it = d->getBuffer(size, stride, format);
     if (it == d->buffers.end()) {
-        return QWeakPointer<Buffer>();
+        return std::weak_ptr<Buffer>();
     }
     (*it)->copy(src);
-    return QWeakPointer<Buffer>(*it);
+    return std::weak_ptr<Buffer>(*it);
 }
 
 namespace {
@@ -216,12 +216,12 @@ Buffer::Ptr ShmPool::getBuffer(const QSize &size, int32_t stride, Buffer::Format
 {
     auto it = d->getBuffer(size, stride, format);
     if (it == d->buffers.end()) {
-        return QWeakPointer<Buffer>();
+        return std::weak_ptr<Buffer>();
     }
-    return QWeakPointer<Buffer>(*it);
+    return std::weak_ptr<Buffer>(*it);
 }
 
-QList<QSharedPointer<Buffer>>::iterator ShmPool::Private::getBuffer(const QSize &s, int32_t stride, Buffer::Format format)
+QList<std::shared_ptr<Buffer>>::iterator ShmPool::Private::getBuffer(const QSize &s, int32_t stride, Buffer::Format format)
 {
     for (auto it = buffers.begin(); it != buffers.end(); ++it) {
         auto buffer = *it;
@@ -251,7 +251,7 @@ QList<QSharedPointer<Buffer>>::iterator ShmPool::Private::getBuffer(const QSize 
     }
     Buffer *buffer = new Buffer(q, native, s, stride, offset, format);
     offset += byteCount;
-    auto it = buffers.insert(buffers.end(), QSharedPointer<Buffer>(buffer));
+    auto it = buffers.insert(buffers.end(), std::shared_ptr<Buffer>(buffer));
     return it;
 }
 
