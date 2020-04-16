@@ -188,7 +188,7 @@ void XdgTest::createPopup()
 void XdgTest::render()
 {
     const QSize &size = m_xdgShellSurface->size().isValid() ? m_xdgShellSurface->size() : QSize(500, 500);
-    auto buffer = m_shm->getBuffer(size, size.width() * 4).toStrongRef();
+    auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
     image.fill(QColor(255, 255, 255, 255));
@@ -207,7 +207,7 @@ void XdgTest::render()
 void XdgTest::renderPopup()
 {
     QSize size(200,200);
-    auto buffer = m_shm->getBuffer(size, size.width() * 4).toStrongRef();
+    auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
     image.fill(QColor(0, 0, 255, 255));

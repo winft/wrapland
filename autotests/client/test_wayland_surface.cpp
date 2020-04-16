@@ -395,12 +395,12 @@ void TestWaylandSurface::testAttachBuffer()
     QImage blue(24, 24, QImage::Format_ARGB32_Premultiplied);
     blue.fill(QColor(0, 0, 255, 128));
 
-    QSharedPointer<Wrapland::Client::Buffer> blackBufferPtr = m_shm->createBuffer(black).toStrongRef();
+    std::shared_ptr<Wrapland::Client::Buffer> blackBufferPtr = m_shm->createBuffer(black).lock();
     QVERIFY(blackBufferPtr);
-    wl_buffer *blackBuffer = *(blackBufferPtr.data());
-    QSharedPointer<Wrapland::Client::Buffer> redBuffer = m_shm->createBuffer(red).toStrongRef();
+    wl_buffer *blackBuffer = *(blackBufferPtr.get());
+    std::shared_ptr<Wrapland::Client::Buffer> redBuffer = m_shm->createBuffer(red).lock();
     QVERIFY(redBuffer);
-    QSharedPointer<Wrapland::Client::Buffer> blueBuffer = m_shm->createBuffer(blue).toStrongRef();
+    std::shared_ptr<Wrapland::Client::Buffer> blueBuffer = m_shm->createBuffer(blue).lock();
     QVERIFY(blueBuffer);
 
     QCOMPARE(blueBuffer->format(), Wrapland::Client::Buffer::Format::ARGB32);
@@ -409,7 +409,7 @@ void TestWaylandSurface::testAttachBuffer()
     QVERIFY(!blueBuffer->isUsed());
     QCOMPARE(blueBuffer->stride(), blue.bytesPerLine());
 
-    s->attachBuffer(redBuffer.data());
+    s->attachBuffer(redBuffer.get());
     s->attachBuffer(blackBuffer);
     s->damage(QRect(0, 0, 24, 24));
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
@@ -448,12 +448,12 @@ void TestWaylandSurface::testAttachBuffer()
     }
     buffer2->unref();
     QVERIFY(buffer2->isReferenced());
-    QVERIFY(!redBuffer.data()->isReleased());
+    QVERIFY(!redBuffer.get()->isReleased());
 
     // render another frame
     blueBuffer->setUsed(true);
     QVERIFY(blueBuffer->isUsed());
-    s->attachBuffer(blueBuffer.data());
+    s->attachBuffer(blueBuffer.get());
     s->damage(QRect(0, 0, 24, 24));
     QSignalSpy frameRenderedSpy(s, SIGNAL(frameRendered()));
     QVERIFY(frameRenderedSpy.isValid());
@@ -465,10 +465,10 @@ void TestWaylandSurface::testAttachBuffer()
     delete buffer2;
     // TODO: we should have a signal on when the Buffer gets released
     QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents);
-    if (!redBuffer.data()->isReleased()) {
+    if (!redBuffer.get()->isReleased()) {
         QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents);
     }
-    QVERIFY(redBuffer.data()->isReleased());
+    QVERIFY(redBuffer.get()->isReleased());
 
     Wrapland::Server::BufferInterface *buffer3 = serverSurface->buffer();
     buffer3->ref();
@@ -783,9 +783,9 @@ void TestWaylandSurface::testScale()
     //attach a buffer of 100x100, our scale is 4, so this should be a size of 25x25
     QImage red(100, 100, QImage::Format_ARGB32_Premultiplied);
     red.fill(QColor(255, 0, 0, 128));
-    QSharedPointer<Buffer> redBuffer = m_shm->createBuffer(red).toStrongRef();
+    std::shared_ptr<Buffer> redBuffer = m_shm->createBuffer(red).lock();
     QVERIFY(redBuffer);
-    s->attachBuffer(redBuffer.data());
+    s->attachBuffer(redBuffer.get());
     s->damage(QRect(0,0, 25,25));
     s->commit(Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
@@ -808,9 +808,9 @@ void TestWaylandSurface::testScale()
     //set scale and size in one commit, buffer is 50x50 at scale 2 so size should be 25x25
     QImage blue(50, 50, QImage::Format_ARGB32_Premultiplied);
     red.fill(QColor(255, 0, 0, 128));
-    QSharedPointer<Buffer> blueBuffer = m_shm->createBuffer(blue).toStrongRef();
+    std::shared_ptr<Buffer> blueBuffer = m_shm->createBuffer(blue).lock();
     QVERIFY(blueBuffer);
-    s->attachBuffer(blueBuffer.data());
+    s->attachBuffer(blueBuffer.get());
     s->setScale(2);
     s->commit(Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
