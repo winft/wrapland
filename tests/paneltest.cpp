@@ -129,7 +129,7 @@ void PanelTest::showTooltip(const QPointF &pos)
 
     if (!m_tooltip.visible) {
         const QSize size(100, 50);
-        auto buffer = m_shm->getBuffer(size, size.width() * 4).toStrongRef();
+        auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
         buffer->setUsed(true);
         QImage image(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
         image.fill(Qt::red);
@@ -342,7 +342,7 @@ void PanelTest::setupRegistry(Registry *registry)
 void PanelTest::render()
 {
     const QSize &size = m_shellSurface->size().isValid() ? m_shellSurface->size() : QSize(300, 20);
-    auto buffer = m_shm->getBuffer(size, size.width() * 4).toStrongRef();
+    auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::blue);

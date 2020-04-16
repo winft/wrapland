@@ -20,7 +20,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef WAYLAND_SHM_POOL_H
 #define WAYLAND_SHM_POOL_H
 
+//QT
 #include <QObject>
+
+// C++ STD
+#include <memory>
 
 #include "buffer.h"
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -68,7 +72,7 @@ class EventQueue;
  * The ownership of a Buffer stays with ShmPool. The ShmPool might destroy the
  * Buffer at any given time. Because of that ShmPool only provides QWeakPointer
  * for Buffers. Users should always check whether the pointer is still valid and
- * only promote to a QSharedPointer for a short time, e.g. to set new data.
+ * only promote to a std::shared_ptr for a short time, e.g. to set new data.
  *
  * The ShmPool can provide Buffers for different purposes. One can create a Buffer
  * from an existing QImage. This will use a Buffer with same size, stride and image
@@ -99,7 +103,7 @@ class EventQueue;
  *     qDebug() << "Didn't get a valid Buffer";
  *     return;
  * }
- * QImage image(buffer.toStrongRef()->address(), size.width(), size.height(), stride, QImage::Format_RGB32);
+ * QImage image(buffer.lock()->address(), size.width(), size.height(), stride, QImage::Format_RGB32);
  * image.fill(Qt::black);
  * @endcode
  *
@@ -117,7 +121,7 @@ class EventQueue;
  * is shared for example with a QImage as the memory buffer for a QImage must remain valid
  * throughout the life time of the QImage:
  * @code
- * buffer.toStrongRef()->setUsed(true);
+ * buffer.lock()->setUsed(true);
  * @endcode
  *
  * This is also important for the case that the shared memory pool needs to be resized.
