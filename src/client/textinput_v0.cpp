@@ -394,7 +394,7 @@ TextInputUnstableV0::~TextInputUnstableV0()
 
 TextInputUnstableV0::Private *TextInputUnstableV0::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 void TextInputUnstableV0::setup(wl_text_input *textinputunstablev0)
@@ -458,7 +458,7 @@ TextInputManagerUnstableV0::TextInputManagerUnstableV0(QObject *parent)
 
 TextInputManagerUnstableV0::Private *TextInputManagerUnstableV0::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 TextInputManagerUnstableV0::~TextInputManagerUnstableV0()

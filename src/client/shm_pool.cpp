@@ -49,7 +49,7 @@ public:
     WaylandPointer<wl_shm_pool, wl_shm_pool_destroy> pool;
     void *poolData = nullptr;
     int32_t size = 1024;
-    QScopedPointer<QTemporaryFile> tmpFile;
+    std::unique_ptr<QTemporaryFile> tmpFile;
     bool valid = false;
     int offset = 0;
     QList<std::shared_ptr<Buffer>> buffers;

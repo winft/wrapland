@@ -96,8 +96,8 @@ private:
 #define SURFACE \
     QSignalSpy xdgSurfaceCreatedSpy(m_xdgShellInterface, &XdgShellInterface::surfaceCreated); \
     QVERIFY(xdgSurfaceCreatedSpy.isValid()); \
-    QScopedPointer<Surface> surface(m_compositor->createSurface()); \
-    QScopedPointer<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.data())); \
+    std::unique_ptr<Surface> surface(m_compositor->createSurface()); \
+    std::unique_ptr<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get())); \
     QCOMPARE(xdgSurface->size(), QSize()); \
     QVERIFY(xdgSurfaceCreatedSpy.wait()); \
     auto serverXdgSurface = xdgSurfaceCreatedSpy.first().first().value<XdgShellSurfaceInterface*>(); \

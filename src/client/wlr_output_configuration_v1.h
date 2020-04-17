@@ -233,7 +233,7 @@ private:
     friend class WlrOutputManagerV1;
 
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

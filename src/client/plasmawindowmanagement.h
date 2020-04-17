@@ -23,6 +23,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QIcon>
 #include <QSize>
+//STD
+#include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
 
@@ -188,7 +190,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -624,7 +626,7 @@ private:
     friend class PlasmaWindowManagement;
     explicit PlasmaWindow(PlasmaWindowManagement *parent, org_kde_plasma_window *dataOffer, quint32 internalId);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

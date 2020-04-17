@@ -58,8 +58,8 @@ public:
 
     QString socketName;
     QDir runtimeDir;
-    QScopedPointer<QSocketNotifier> socketNotifier;
-    QScopedPointer<QFileSystemWatcher> socketWatcher;
+    std::unique_ptr<QSocketNotifier> socketNotifier;
+    std::unique_ptr<QFileSystemWatcher> socketWatcher;
 
     bool foreign = false;
     QMetaObject::Connection eventDispatcherConnection;
@@ -139,7 +139,7 @@ void ConnectionThread::Private::setupSocketNotifier()
 {
     const int fd = wl_display_get_fd(display);
     socketNotifier.reset(new QSocketNotifier(fd, QSocketNotifier::Read));
-    QObject::connect(socketNotifier.data(), &QSocketNotifier::activated, q,
+    QObject::connect(socketNotifier.get(), &QSocketNotifier::activated, q,
         [this](int count) {
             Q_UNUSED(count)
             if (!established) {

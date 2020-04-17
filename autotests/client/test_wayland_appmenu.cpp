@@ -161,7 +161,7 @@ void TestAppmenu::testCreateAndSet()
     QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
@@ -169,7 +169,7 @@ void TestAppmenu::testCreateAndSet()
 
     QVERIFY(!m_appmenuManagerInterface->appMenuForSurface(serverSurface));
 
-    auto appmenu = m_appmenuManager->create(surface.data(), surface.data());
+    auto appmenu = m_appmenuManager->create(surface.get(), surface.get());
     QVERIFY(appMenuCreated.wait());
     auto appMenuInterface = appMenuCreated.first().first().value<Wrapland::Server::AppMenuInterface*>();
     QCOMPARE(m_appmenuManagerInterface->appMenuForSurface(serverSurface), appMenuInterface);

@@ -121,7 +121,7 @@ Q_SIGNALS:
 protected:
     class Private;
     explicit XdgExporter(Private *p, QObject *parent = nullptr);
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -209,7 +209,7 @@ Q_SIGNALS:
 protected:
     class Private;
     explicit XdgImporter(Private *p, QObject *parent = nullptr);
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 class WRAPLANDCLIENT_EXPORT XdgExported : public QObject
@@ -256,7 +256,7 @@ protected:
     friend class XdgExporter;
     class Private;
     explicit XdgExported(Private *p, QObject *parent = nullptr);
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 class WRAPLANDCLIENT_EXPORT XdgImported : public QObject
@@ -306,7 +306,7 @@ protected:
     friend class XdgImporter;
     class Private;
     explicit XdgImported(Private *p, QObject *parent = nullptr);
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 

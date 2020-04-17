@@ -191,22 +191,22 @@ EventQueue *TextInputManager::eventQueue()
 
 TextInputManager::operator wl_text_input_manager*()
 {
-    return *(d.data());
+    return *(d.get());
 }
 
 TextInputManager::operator wl_text_input_manager*() const
 {
-    return *(d.data());
+    return *(d.get());
 }
 
 TextInputManager::operator zwp_text_input_manager_v2*()
 {
-    return *(d.data());
+    return *(d.get());
 }
 
 TextInputManager::operator zwp_text_input_manager_v2*() const
 {
-    return *(d.data());
+    return *(d.get());
 }
 
 bool TextInputManager::isValid() const

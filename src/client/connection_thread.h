@@ -24,6 +24,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QVector>
 
+//STD
+#include <memory>
+
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_display;
@@ -300,7 +303,7 @@ private:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

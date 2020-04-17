@@ -655,13 +655,13 @@ void TestWindowManagement::testGeometry()
     QCOMPARE(m_window->geometry(), QRect(0, 0, 35, 45));
 
     // Let's bind a second PlasmaWindowManagement to verify the initial setting.
-    QScopedPointer<Clt::PlasmaWindowManagement>
+    std::unique_ptr<Clt::PlasmaWindowManagement>
             pm(m_registry->createPlasmaWindowManagement(
                 m_registry->interface(Clt::Registry::Interface::PlasmaWindowManagement).name,
                 m_registry->interface(Clt::Registry::Interface::PlasmaWindowManagement).version));
 
-    QVERIFY(!pm.isNull());
-    QSignalSpy windowAddedSpy(pm.data(), &Clt::PlasmaWindowManagement::windowCreated);
+    QVERIFY(pm != nullptr);
+    QSignalSpy windowAddedSpy(pm.get(), &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowAddedSpy.isValid());
     QVERIFY(windowAddedSpy.wait());
 
@@ -740,13 +740,13 @@ void TestWindowManagement::testPid()
     QVERIFY(m_window->pid() == 1337);
 
     // Test server not setting a PID for whatever reason.
-    QScopedPointer<Srv::PlasmaWindowInterface>
+    std::unique_ptr<Srv::PlasmaWindowInterface>
             newWindowInterface(m_windowManagementInterface->createWindow(this));
 
     QSignalSpy windowSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowSpy.wait());
 
-    QScopedPointer<Clt::PlasmaWindow>
+    std::unique_ptr<Clt::PlasmaWindow>
             newWindow( windowSpy.first().first().value<Clt::PlasmaWindow *>());
     QVERIFY(newWindow);
     QVERIFY(newWindow->pid() == 0);

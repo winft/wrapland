@@ -44,11 +44,11 @@ void XdgShellTestV5::testPopup()
 
     QVERIFY(xdgPopupSpy.isValid());
 
-    QScopedPointer<Surface> popupSurface(m_compositor->createSurface());
+    std::unique_ptr<Surface> popupSurface(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
 
     // TODO: proper serial
-    QScopedPointer<XdgShellPopup> xdgPopup(m_xdgShell->createPopup(popupSurface.data(), surface.data(), m_seat, 120, QPoint(10, 20)));
+    std::unique_ptr<XdgShellPopup> xdgPopup(m_xdgShell->createPopup(popupSurface.get(), surface.get(), m_seat, 120, QPoint(10, 20)));
     QVERIFY(xdgPopupSpy.wait());
     QCOMPARE(xdgPopupSpy.count(), 1);
     QCOMPARE(xdgPopupSpyNew.count(), 1);
@@ -64,8 +64,8 @@ void XdgShellTestV5::testPopup()
     QCOMPARE(serverXdgPopup->transientOffset(), QPoint(10, 20));
 
     // now also a popup for the popup
-    QScopedPointer<Surface> popup2Surface(m_compositor->createSurface());
-    QScopedPointer<XdgShellPopup> xdgPopup2(m_xdgShell->createPopup(popup2Surface.data(), popupSurface.data(), m_seat, 121, QPoint(5, 7)));
+    std::unique_ptr<Surface> popup2Surface(m_compositor->createSurface());
+    std::unique_ptr<XdgShellPopup> xdgPopup2(m_xdgShell->createPopup(popup2Surface.get(), popupSurface.get(), m_seat, 121, QPoint(5, 7)));
     QVERIFY(xdgPopupSpy.wait());
     QCOMPARE(xdgPopupSpy.count(), 2);
     QCOMPARE(xdgPopupSpy.last().at(1).value<SeatInterface*>(), m_seatInterface);
@@ -77,7 +77,7 @@ void XdgShellTestV5::testPopup()
     QCOMPARE(serverXdgPopup2->transientFor().data(), serverXdgPopup->surface());
     QCOMPARE(serverXdgPopup2->transientOffset(), QPoint(5, 7));
 
-    QSignalSpy popup2DoneSpy(xdgPopup2.data(), &XdgShellPopup::popupDone);
+    QSignalSpy popup2DoneSpy(xdgPopup2.get(), &XdgShellPopup::popupDone);
     QVERIFY(popup2DoneSpy.isValid());
     serverXdgPopup2->popupDone();
     QVERIFY(popup2DoneSpy.wait());

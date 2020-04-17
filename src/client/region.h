@@ -21,6 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_REGION_H
 
 #include <QObject>
+//STD
+#include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
 
@@ -95,7 +97,7 @@ public:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

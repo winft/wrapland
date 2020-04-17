@@ -160,13 +160,13 @@ void TestContrast::testCreate()
     QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
     QSignalSpy contrastChanged(serverSurface, SIGNAL(contrastChanged()));
 
-    auto *contrast = m_contrastManager->createContrast(surface.data(), surface.data());
+    auto *contrast = m_contrastManager->createContrast(surface.get(), surface.get());
     contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast));
 
     contrast->setContrast(0.2);
@@ -194,15 +194,15 @@ void TestContrast::testSurfaceDestroy()
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &Wrapland::Server::CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
     QSignalSpy contrastChanged(serverSurface, &Wrapland::Server::SurfaceInterface::contrastChanged);
     QVERIFY(contrastChanged.isValid());
 
-    QScopedPointer<Wrapland::Client::Contrast> contrast(m_contrastManager->createContrast(surface.data()));
-    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast.data()));
+    std::unique_ptr<Wrapland::Client::Contrast> contrast(m_contrastManager->createContrast(surface.get()));
+    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast.get()));
     contrast->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 

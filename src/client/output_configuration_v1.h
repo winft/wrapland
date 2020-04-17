@@ -27,6 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QPoint>
 #include <QVector>
+//STD
+#include <memory>
 
 class QRectF;
 struct zkwinft_output_management_v1;
@@ -214,7 +216,7 @@ private:
     friend class OutputManagementV1;
     explicit OutputConfigurationV1(QObject *parent = nullptr);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 
