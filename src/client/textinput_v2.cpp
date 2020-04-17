@@ -418,7 +418,7 @@ TextInputUnstableV2::~TextInputUnstableV2()
 
 TextInputUnstableV2::Private *TextInputUnstableV2::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 void TextInputUnstableV2::setup(zwp_text_input_v2 *textinputunstablev2)

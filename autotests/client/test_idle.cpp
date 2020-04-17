@@ -140,11 +140,11 @@ void IdleTest::testTimeout()
 {
     // this test verifies the basic functionality of a timeout, that it gets fired
     // and that it resumes from idle, etc.
-    QScopedPointer<IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
+    std::unique_ptr<IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
     QVERIFY(timeout->isValid());
-    QSignalSpy idleSpy(timeout.data(), &IdleTimeout::idle);
+    QSignalSpy idleSpy(timeout.get(), &IdleTimeout::idle);
     QVERIFY(idleSpy.isValid());
-    QSignalSpy resumedFormIdleSpy(timeout.data(), &IdleTimeout::resumeFromIdle);
+    QSignalSpy resumedFormIdleSpy(timeout.get(), &IdleTimeout::resumeFromIdle);
     QVERIFY(resumedFormIdleSpy.isValid());
 
     // we requested a timeout of 1 msec, but the minimum the server sets is 5 sec
@@ -165,11 +165,11 @@ void IdleTest::testTimeout()
 void IdleTest::testSimulateUserActivity()
 {
     // this test verifies that simulate user activity doesn't fire the timer
-    QScopedPointer<IdleTimeout> timeout(m_idle->getTimeout(6000, m_seat));
+    std::unique_ptr<IdleTimeout> timeout(m_idle->getTimeout(6000, m_seat));
     QVERIFY(timeout->isValid());
-    QSignalSpy idleSpy(timeout.data(), &IdleTimeout::idle);
+    QSignalSpy idleSpy(timeout.get(), &IdleTimeout::idle);
     QVERIFY(idleSpy.isValid());
-    QSignalSpy resumedFormIdleSpy(timeout.data(), &IdleTimeout::resumeFromIdle);
+    QSignalSpy resumedFormIdleSpy(timeout.get(), &IdleTimeout::resumeFromIdle);
     QVERIFY(resumedFormIdleSpy.isValid());
     m_connection->flush();
 
@@ -193,11 +193,11 @@ void IdleTest::testSimulateUserActivity()
 void IdleTest::testServerSimulateUserActivity()
 {
     // this test verifies that simulate user activity doesn't fire the timer
-    QScopedPointer<IdleTimeout> timeout(m_idle->getTimeout(6000, m_seat));
+    std::unique_ptr<IdleTimeout> timeout(m_idle->getTimeout(6000, m_seat));
     QVERIFY(timeout->isValid());
-    QSignalSpy idleSpy(timeout.data(), &IdleTimeout::idle);
+    QSignalSpy idleSpy(timeout.get(), &IdleTimeout::idle);
     QVERIFY(idleSpy.isValid());
-    QSignalSpy resumedFormIdleSpy(timeout.data(), &IdleTimeout::resumeFromIdle);
+    QSignalSpy resumedFormIdleSpy(timeout.get(), &IdleTimeout::resumeFromIdle);
     QVERIFY(resumedFormIdleSpy.isValid());
     m_connection->flush();
 
@@ -245,11 +245,11 @@ void IdleTest::testIdleInhibitBlocksTimeout()
     QCOMPARE(m_idleInterface->isInhibited(), false);
     m_idleInterface->inhibit();
 
-    QScopedPointer<IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
+    std::unique_ptr<IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
     QVERIFY(timeout->isValid());
-    QSignalSpy idleSpy(timeout.data(), &IdleTimeout::idle);
+    QSignalSpy idleSpy(timeout.get(), &IdleTimeout::idle);
     QVERIFY(idleSpy.isValid());
-    QSignalSpy resumedFormIdleSpy(timeout.data(), &IdleTimeout::resumeFromIdle);
+    QSignalSpy resumedFormIdleSpy(timeout.get(), &IdleTimeout::resumeFromIdle);
     QVERIFY(resumedFormIdleSpy.isValid());
 
     // we requested a timeout of 1 msec, but the minimum the server sets is 5 sec

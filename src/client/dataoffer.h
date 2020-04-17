@@ -21,6 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_DATAOFFER_H
 
 #include <QObject>
+//STD
+#include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
 
@@ -120,7 +122,7 @@ private:
     friend class DataDevice;
     explicit DataOffer(DataDevice *parent, wl_data_offer *dataOffer);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

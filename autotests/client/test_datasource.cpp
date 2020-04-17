@@ -136,7 +136,7 @@ void TestDataSource::testOffer()
     QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
-    QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
+    std::unique_ptr<DataSource> dataSource(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource->isValid());
 
     QVERIFY(dataSourceCreatedSpy.wait());
@@ -199,10 +199,10 @@ void TestDataSource::testTargetAccepts()
     QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
-    QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
+    std::unique_ptr<DataSource> dataSource(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource->isValid());
 
-    QSignalSpy targetAcceptsSpy(dataSource.data(), SIGNAL(targetAccepts(QString)));
+    QSignalSpy targetAcceptsSpy(dataSource.get(), SIGNAL(targetAccepts(QString)));
     QVERIFY(targetAcceptsSpy.isValid());
 
     QVERIFY(dataSourceCreatedSpy.wait());
@@ -224,10 +224,10 @@ void TestDataSource::testRequestSend()
     QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
-    QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
+    std::unique_ptr<DataSource> dataSource(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource->isValid());
 
-    QSignalSpy sendRequestedSpy(dataSource.data(), SIGNAL(sendDataRequested(QString,qint32)));
+    QSignalSpy sendRequestedSpy(dataSource.get(), SIGNAL(sendDataRequested(QString,qint32)));
     QVERIFY(sendRequestedSpy.isValid());
 
     const QString plain = QStringLiteral("text/plain");
@@ -256,7 +256,7 @@ void TestDataSource::testRequestSendOnUnbound()
     QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, &DataDeviceManagerInterface::dataSourceCreated);
     QVERIFY(dataSourceCreatedSpy.isValid());
 
-    QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
+    std::unique_ptr<DataSource> dataSource(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource->isValid());
     QVERIFY(dataSourceCreatedSpy.wait());
     QCOMPARE(dataSourceCreatedSpy.count(), 1);
@@ -278,9 +278,9 @@ void TestDataSource::testCancel()
     QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
-    QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
+    std::unique_ptr<DataSource> dataSource(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource->isValid());
-    QSignalSpy cancelledSpy(dataSource.data(), SIGNAL(cancelled()));
+    QSignalSpy cancelledSpy(dataSource.get(), SIGNAL(cancelled()));
     QVERIFY(cancelledSpy.isValid());
 
     QVERIFY(dataSourceCreatedSpy.wait());
@@ -300,7 +300,7 @@ void TestDataSource::testServerGet()
     QSignalSpy dataSourceCreatedSpy(m_dataDeviceManagerInterface, SIGNAL(dataSourceCreated(Wrapland::Server::DataSourceInterface*)));
     QVERIFY(dataSourceCreatedSpy.isValid());
 
-    QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
+    std::unique_ptr<DataSource> dataSource(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource->isValid());
 
     QVERIFY(!DataSourceInterface::get(nullptr));
@@ -315,12 +315,12 @@ void TestDataSource::testDestroy()
 {
     using namespace Wrapland::Client;
 
-    QScopedPointer<DataSource> dataSource(m_dataDeviceManager->createDataSource());
+    std::unique_ptr<DataSource> dataSource(m_dataDeviceManager->createDataSource());
     QVERIFY(dataSource->isValid());
 
     connect(m_connection, &ConnectionThread::establishedChanged, m_dataDeviceManager, &DataDeviceManager::release);
     connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
-    connect(m_connection, &ConnectionThread::establishedChanged, dataSource.data(), &DataSource::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, dataSource.get(), &DataSource::release);
 
     delete m_display;
     m_display = nullptr;

@@ -22,7 +22,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QSize>
-
+//STD
+#include <memory>
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_surface;
@@ -143,7 +144,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -322,7 +323,7 @@ Q_SIGNALS:
 private:
     friend class PlasmaShell;
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

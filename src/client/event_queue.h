@@ -21,6 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_EVENT_QUEUE_H
 
 #include <QObject>
+//STD
+#include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
 
@@ -129,7 +131,7 @@ public Q_SLOTS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 template <typename wl_interface>

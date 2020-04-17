@@ -74,27 +74,27 @@ EventQueue *XdgShell::eventQueue()
 }
 
 XdgShell::operator xdg_shell*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShell::operator xdg_shell*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShell::operator zxdg_shell_v6*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShell::operator zxdg_shell_v6*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShell::operator xdg_wm_base*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShell::operator xdg_wm_base*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 
@@ -173,35 +173,35 @@ EventQueue *XdgShellSurface::eventQueue()
 }
 
 XdgShellSurface::operator xdg_surface*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellSurface::operator xdg_surface*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellSurface::operator xdg_toplevel*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellSurface::operator xdg_toplevel*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellSurface::operator zxdg_surface_v6*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellSurface::operator zxdg_surface_v6*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellSurface::operator zxdg_toplevel_v6*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellSurface::operator zxdg_toplevel_v6*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 bool XdgShellSurface::isValid() const
@@ -361,35 +361,35 @@ void XdgShellPopup::setWindowGeometry(const QRect &windowGeometry)
 }
 
 XdgShellPopup::operator xdg_surface*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellPopup::operator xdg_surface*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellPopup::operator xdg_popup*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellPopup::operator xdg_popup*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellPopup::operator zxdg_surface_v6*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellPopup::operator zxdg_surface_v6*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellPopup::operator zxdg_popup_v6*() {
-    return *(d.data());
+    return *(d.get());
 }
 
 XdgShellPopup::operator zxdg_popup_v6*() const {
-    return *(d.data());
+    return *(d.get());
 }
 
 bool XdgShellPopup::isValid() const

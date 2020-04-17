@@ -21,7 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_PLASMAVIRTUALDESKTOP_H
 
 #include <QObject>
-
+//STD
+#include <memory>
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_plasma_virtual_desktop_management;
@@ -165,7 +166,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 class WRAPLANDCLIENT_EXPORT PlasmaVirtualDesktop : public QObject
@@ -253,7 +254,7 @@ private:
     friend class PlasmaVirtualDesktopManagement;
     explicit PlasmaVirtualDesktop(QObject *parent = nullptr);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 

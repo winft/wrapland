@@ -173,15 +173,15 @@ void XdgShellTest::testCreateSurface()
     QVERIFY(xdgSurfaceCreatedSpy.isValid());
 
     // create surface
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
-    QVERIFY(!surface.isNull());
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    QVERIFY(surface != nullptr);
     QVERIFY(surfaceCreatedSpy.wait());
     auto serverSurface = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
     QVERIFY(serverSurface);
 
     // create shell surface
-    QScopedPointer<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.data()));
-    QVERIFY(!xdgSurface.isNull());
+    std::unique_ptr<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get()));
+    QVERIFY(xdgSurface != nullptr);
     QVERIFY(xdgSurfaceCreatedSpy.wait());
     // verify base things
     auto serverXdgSurface = xdgSurfaceCreatedSpy.first().first().value<XdgShellSurfaceInterface*>();
@@ -276,8 +276,8 @@ void XdgShellTest::testFullscreen()
     // this test verifies going to/from fullscreen
     QSignalSpy xdgSurfaceCreatedSpy(m_xdgShellInterface, &XdgShellInterface::surfaceCreated);
     QVERIFY(xdgSurfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
-    QScopedPointer<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.data()));
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get()));
     QVERIFY(xdgSurfaceCreatedSpy.wait());
     auto serverXdgSurface = xdgSurfaceCreatedSpy.first().first().value<XdgShellSurfaceInterface*>();
     QVERIFY(serverXdgSurface);
@@ -387,8 +387,8 @@ void XdgShellTest::testTransient()
 {
     // this test verifies that setting the transient for works
     SURFACE
-    QScopedPointer<Surface> surface2(m_compositor->createSurface());
-    QScopedPointer<XdgShellSurface> xdgSurface2(m_xdgShell->createSurface(surface2.data()));
+    std::unique_ptr<Surface> surface2(m_compositor->createSurface());
+    std::unique_ptr<XdgShellSurface> xdgSurface2(m_xdgShell->createSurface(surface2.get()));
     QVERIFY(xdgSurfaceCreatedSpy.wait());
     auto serverXdgSurface2 = xdgSurfaceCreatedSpy.last().first().value<XdgShellSurfaceInterface*>();
     QVERIFY(serverXdgSurface2);
@@ -399,7 +399,7 @@ void XdgShellTest::testTransient()
     // now make xdsgSurface2 a transient for xdgSurface
     QSignalSpy transientForSpy(serverXdgSurface2, &XdgShellSurfaceInterface::transientForChanged);
     QVERIFY(transientForSpy.isValid());
-    xdgSurface2->setTransientFor(xdgSurface.data());
+    xdgSurface2->setTransientFor(xdgSurface.get());
 
     QVERIFY(transientForSpy.wait());
     QCOMPARE(transientForSpy.count(), 1);
@@ -445,7 +445,7 @@ void XdgShellTest::testClose()
     // this test verifies that a close request is sent to the client
     SURFACE
 
-    QSignalSpy closeSpy(xdgSurface.data(), &XdgShellSurface::closeRequested);
+    QSignalSpy closeSpy(xdgSurface.get(), &XdgShellSurface::closeRequested);
     QVERIFY(closeSpy.isValid());
 
     serverXdgSurface->close();
@@ -499,7 +499,7 @@ void XdgShellTest::testConfigureStates()
     // this test verifies that configure states works
     SURFACE
 
-    QSignalSpy configureSpy(xdgSurface.data(), &XdgShellSurface::configureRequested);
+    QSignalSpy configureSpy(xdgSurface.get(), &XdgShellSurface::configureRequested);
     QVERIFY(configureSpy.isValid());
 
     QFETCH(XdgShellSurfaceInterface::States, serverStates);
@@ -525,9 +525,9 @@ void XdgShellTest::testConfigureMultipleAcks()
     // this test verifies that with multiple configure requests the last acknowledged one acknowledges all
     SURFACE
 
-    QSignalSpy configureSpy(xdgSurface.data(), &XdgShellSurface::configureRequested);
+    QSignalSpy configureSpy(xdgSurface.get(), &XdgShellSurface::configureRequested);
     QVERIFY(configureSpy.isValid());
-    QSignalSpy sizeChangedSpy(xdgSurface.data(), &XdgShellSurface::sizeChanged);
+    QSignalSpy sizeChangedSpy(xdgSurface.get(), &XdgShellSurface::sizeChanged);
     QVERIFY(sizeChangedSpy.isValid());
     QSignalSpy ackSpy(serverXdgSurface, &XdgShellSurfaceInterface::configureAcknowledged);
     QVERIFY(ackSpy.isValid());

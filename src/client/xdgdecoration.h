@@ -21,7 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_XDG_DECORATION_UNSTABLE_V1_H
 
 #include <QObject>
-
+//STD
+#include <memory>
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct zxdg_decoration_manager_v1;
@@ -117,7 +118,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 class WRAPLANDCLIENT_EXPORT XdgDecoration : public QObject
@@ -176,7 +177,7 @@ private:
     friend class XdgDecorationManager;
     explicit XdgDecoration(QObject *parent = nullptr);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 

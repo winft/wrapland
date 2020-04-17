@@ -158,13 +158,13 @@ void TestBlur::testCreate()
     QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
     QSignalSpy blurChanged(serverSurface, SIGNAL(blurChanged()));
 
-    auto *blur = m_blurManager->createBlur(surface.data(), surface.data());
+    auto *blur = m_blurManager->createBlur(surface.get(), surface.get());
     blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur));
     blur->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
@@ -184,15 +184,15 @@ void TestBlur::testSurfaceDestroy()
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &Wrapland::Server::CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
     QSignalSpy blurChanged(serverSurface, &Wrapland::Server::SurfaceInterface::blurChanged);
     QVERIFY(blurChanged.isValid());
 
-    QScopedPointer<Wrapland::Client::Blur> blur(m_blurManager->createBlur(surface.data()));
-    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur.data()));
+    std::unique_ptr<Wrapland::Client::Blur> blur(m_blurManager->createBlur(surface.get()));
+    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur.get()));
     blur->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 

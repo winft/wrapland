@@ -45,8 +45,8 @@ void XdgShellTestV6::testMaxSize()
     // this test verifies changing the window maxSize
     QSignalSpy xdgSurfaceCreatedSpy(m_xdgShellInterface, &XdgShellInterface::surfaceCreated);
     QVERIFY(xdgSurfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
-    QScopedPointer<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.data()));
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get()));
     QVERIFY(xdgSurfaceCreatedSpy.wait());
     auto serverXdgSurface = xdgSurfaceCreatedSpy.first().first().value<XdgShellSurfaceInterface*>();
     QVERIFY(serverXdgSurface);
@@ -103,16 +103,16 @@ void XdgShellTestV6::testPopup()
     QSignalSpy xdgTopLevelCreatedSpy(m_xdgShellInterface, &XdgShellInterface::surfaceCreated);
     QSignalSpy xdgPopupCreatedSpy(m_xdgShellInterface, &XdgShellInterface::xdgPopupCreated);
 
-    QScopedPointer<Surface> parentSurface(m_compositor->createSurface());
-    QScopedPointer<XdgShellSurface> xdgParentSurface(m_xdgShell->createSurface(parentSurface.data()));
+    std::unique_ptr<Surface> parentSurface(m_compositor->createSurface());
+    std::unique_ptr<XdgShellSurface> xdgParentSurface(m_xdgShell->createSurface(parentSurface.get()));
 
     QVERIFY(xdgTopLevelCreatedSpy.wait());
     auto serverXdgTopLevel = xdgTopLevelCreatedSpy.first().first().value<XdgShellSurfaceInterface*>();
 
     QFETCH(XdgPositioner, positioner);
 
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
-    QScopedPointer<XdgShellPopup> xdgSurface(m_xdgShell->createPopup(surface.data(), xdgParentSurface.data(), positioner));
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<XdgShellPopup> xdgSurface(m_xdgShell->createPopup(surface.get(), xdgParentSurface.get(), positioner));
     QVERIFY(xdgPopupCreatedSpy.wait());
     auto serverXdgPopup = xdgPopupCreatedSpy.first().first().value<XdgShellPopupInterface*>();
     QVERIFY(serverXdgPopup);
@@ -133,8 +133,8 @@ void XdgShellTestV6::testMinSize()
     // this test verifies changing the window minSize
     QSignalSpy xdgSurfaceCreatedSpy(m_xdgShellInterface, &XdgShellInterface::surfaceCreated);
     QVERIFY(xdgSurfaceCreatedSpy.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
-    QScopedPointer<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.data()));
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get()));
     QVERIFY(xdgSurfaceCreatedSpy.wait());
     auto serverXdgSurface = xdgSurfaceCreatedSpy.first().first().value<XdgShellSurfaceInterface*>();
     QVERIFY(serverXdgSurface);
@@ -167,10 +167,10 @@ void XdgShellTestV6::testMultipleRoles1()
     QVERIFY(xdgSurfaceCreatedSpy.isValid());
     QVERIFY(xdgPopupCreatedSpy.isValid());
 
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
     //This is testing we work when a client does something stupid
     //we can't use Wrapland API here because by design that stops you from doing anything stupid
-    auto xdgSurface = zxdg_shell_v6_get_xdg_surface(*m_xdgShell, *surface.data());
+    auto xdgSurface = zxdg_shell_v6_get_xdg_surface(*m_xdgShell, *surface.get());
 
     //create a top level
     auto xdgTopLevel1 = zxdg_surface_v6_get_toplevel(xdgSurface);
@@ -194,15 +194,15 @@ void XdgShellTestV6::testMultipleRoles2()
     QVERIFY(xdgSurfaceCreatedSpy.isValid());
     QVERIFY(xdgPopupCreatedSpy.isValid());
 
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
-    QScopedPointer<Surface> parentSurface(m_compositor->createSurface());
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Surface> parentSurface(m_compositor->createSurface());
 
-    auto parentXdgSurface = zxdg_shell_v6_get_xdg_surface(*m_xdgShell, *parentSurface.data());
+    auto parentXdgSurface = zxdg_shell_v6_get_xdg_surface(*m_xdgShell, *parentSurface.get());
     auto xdgTopLevelParent = zxdg_surface_v6_get_toplevel(parentXdgSurface);
     QVERIFY(xdgSurfaceCreatedSpy.wait());
 
 
-    auto xdgSurface = zxdg_shell_v6_get_xdg_surface(*m_xdgShell, *surface.data());
+    auto xdgSurface = zxdg_shell_v6_get_xdg_surface(*m_xdgShell, *surface.get());
     //create a top level
     auto xdgTopLevel1 = zxdg_surface_v6_get_toplevel(xdgSurface);
     QVERIFY(xdgSurfaceCreatedSpy.wait());

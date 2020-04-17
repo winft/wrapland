@@ -23,6 +23,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QSize>
 #include <QRect>
+//STD
+#include <memory>
 #include <Wrapland/Client/wraplandclient_export.h>
 
 //This is a mix of structs for both xdgshell unstable v5 AND xdg wm base stable
@@ -138,7 +140,7 @@ public:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -262,7 +264,7 @@ protected:
     explicit XdgShell(Private *p, QObject *parent = nullptr);
 
 private:
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -477,7 +479,7 @@ protected:
     explicit XdgShellSurface(Private *p, QObject *parent = nullptr);
 
 private:
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -591,7 +593,7 @@ protected:
     explicit XdgShellPopup(Private *p, QObject *parent = nullptr);
 
 private:
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

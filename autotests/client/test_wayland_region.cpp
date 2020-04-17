@@ -143,7 +143,7 @@ void TestRegion::testCreate()
     QSignalSpy regionCreatedSpy(m_compositorInterface, SIGNAL(regionCreated(Wrapland::Server::RegionInterface*)));
     QVERIFY(regionCreatedSpy.isValid());
 
-    QScopedPointer<Region> region(m_compositor->createRegion());
+    std::unique_ptr<Region> region(m_compositor->createRegion());
     QCOMPARE(region->region(), QRegion());
 
     QVERIFY(regionCreatedSpy.wait());
@@ -161,7 +161,7 @@ void TestRegion::testCreateWithRegion()
     QSignalSpy regionCreatedSpy(m_compositorInterface, SIGNAL(regionCreated(Wrapland::Server::RegionInterface*)));
     QVERIFY(regionCreatedSpy.isValid());
 
-    QScopedPointer<Region> region(m_compositor->createRegion(QRegion(0, 0, 10, 20), nullptr));
+    std::unique_ptr<Region> region(m_compositor->createRegion(QRegion(0, 0, 10, 20), nullptr));
     QCOMPARE(region->region(), QRegion(0, 0, 10, 20));
 
     QVERIFY(regionCreatedSpy.wait());
@@ -196,7 +196,7 @@ void TestRegion::testAdd()
     QSignalSpy regionCreatedSpy(m_compositorInterface, SIGNAL(regionCreated(Wrapland::Server::RegionInterface*)));
     QVERIFY(regionCreatedSpy.isValid());
 
-    QScopedPointer<Region> region(m_compositor->createRegion());
+    std::unique_ptr<Region> region(m_compositor->createRegion());
     QVERIFY(regionCreatedSpy.wait());
     auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::RegionInterface*>();
 
@@ -263,9 +263,9 @@ void TestRegion::testRemove()
 void TestRegion::testDestroy()
 {
     using namespace Wrapland::Client;
-    QScopedPointer<Region> region(m_compositor->createRegion());
+    std::unique_ptr<Region> region(m_compositor->createRegion());
 
-    connect(m_connection, &ConnectionThread::establishedChanged, region.data(), &Region::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, region.get(), &Region::release);
     connect(m_connection, &ConnectionThread::establishedChanged,
             m_compositor, &Compositor::release);
     connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
@@ -287,8 +287,8 @@ void TestRegion::testDisconnect()
     // this test verifies that the server side correctly tears down the resources when the client disconnects
     using namespace Wrapland::Client;
     using namespace Wrapland::Server;
-    QScopedPointer<Region> r(m_compositor->createRegion());
-    QVERIFY(!r.isNull());
+    std::unique_ptr<Region> r(m_compositor->createRegion());
+    QVERIFY(r != nullptr);
     QVERIFY(r->isValid());
     QSignalSpy regionCreatedSpy(m_compositorInterface, &CompositorInterface::regionCreated);
     QVERIFY(regionCreatedSpy.isValid());

@@ -20,7 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QGuiApplication>
 #include <QPainter>
 #include <QRasterWindow>
-
+//STD
+#include <memory>
 class Window : public QRasterWindow
 {
     Q_OBJECT
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
     qputenv("QT_QPA_PLATFORM", QByteArrayLiteral("wayland"));
     QGuiApplication app(argc, argv);
 
-    QScopedPointer<Window> w(new Window);
+    std::unique_ptr<Window> w(new Window);
     w->show();
 
     return app.exec();
