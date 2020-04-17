@@ -121,13 +121,13 @@ void TestFilter::testFilter()
     QFETCH(bool, accessAllowed);
 
   // setup connection
-    QScopedPointer<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread());
-    QSignalSpy connectedSpy(connection.data(), &ConnectionThread::establishedChanged);
+    std::unique_ptr<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread());
+    QSignalSpy connectedSpy(connection.get(), &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketName(s_socketName);
 
-    QScopedPointer<QThread> thread(new QThread(this));
-    connection->moveToThread(thread.data());
+    std::unique_ptr<QThread> thread(new QThread(this));
+    connection->moveToThread(thread.get());
     thread->start();
 
     connection->establishConnection();
@@ -144,7 +144,7 @@ void TestFilter::testFilter()
     }
 
     Wrapland::Client::EventQueue queue;
-    queue.setup(connection.data());
+    queue.setup(connection.get());
 
     Registry registry;
     QSignalSpy registryDoneSpy(&registry, &Registry::interfacesAnnounced);

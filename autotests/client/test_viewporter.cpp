@@ -196,7 +196,7 @@ void TestViewporter::testViewportExists()
     // Create surface.
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QScopedPointer<Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverSurface
@@ -206,7 +206,7 @@ void TestViewporter::testViewportExists()
     // Create viewport.
     QSignalSpy serverViewportCreated(m_viewporterInterface, &ViewporterInterface::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    QScopedPointer<Viewport> vp1(m_viewporter->createViewport(s.data(), this));
+    std::unique_ptr<Viewport> vp1(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     ViewportInterface *serverViewport
@@ -216,7 +216,7 @@ void TestViewporter::testViewportExists()
     // Create second viewport with error.
     QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
-    QScopedPointer<Viewport> vp2(m_viewporter->createViewport(s.data(), this));
+    std::unique_ptr<Viewport> vp2(m_viewporter->createViewport(s.get(), this));
     QVERIFY(errorSpy.wait());
 }
 
@@ -229,7 +229,7 @@ void TestViewporter::testWithoutBuffer()
     // Create surface.
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QScopedPointer<Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverSurface
@@ -239,7 +239,7 @@ void TestViewporter::testWithoutBuffer()
     // Create viewport.
     QSignalSpy serverViewportCreated(m_viewporterInterface, &ViewporterInterface::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    QScopedPointer<Viewport> vp(m_viewporter->createViewport(s.data(), this));
+    std::unique_ptr<Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     ViewportInterface *serverViewport
@@ -279,7 +279,7 @@ void TestViewporter::testDestinationSize()
     // Create surface.
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QScopedPointer<Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverSurface
@@ -289,7 +289,7 @@ void TestViewporter::testDestinationSize()
     // Create viewport.
     QSignalSpy serverViewportCreated(m_viewporterInterface, &ViewporterInterface::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    QScopedPointer<Viewport> vp(m_viewporter->createViewport(s.data(), this));
+    std::unique_ptr<Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     ViewportInterface *serverViewport
@@ -332,7 +332,7 @@ void TestViewporter::testSourceRectangle()
     // Create surface.
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QScopedPointer<Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverSurface
@@ -342,7 +342,7 @@ void TestViewporter::testSourceRectangle()
     // Create viewport.
     QSignalSpy serverViewportCreated(m_viewporterInterface, &ViewporterInterface::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    QScopedPointer<Viewport> vp(m_viewporter->createViewport(s.data(), this));
+    std::unique_ptr<Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     ViewportInterface *serverViewport
@@ -393,7 +393,7 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     // Create surface.
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QScopedPointer<Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverSurface
@@ -403,7 +403,7 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     // Create viewport.
     QSignalSpy serverViewportCreated(m_viewporterInterface, &ViewporterInterface::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    QScopedPointer<Viewport> vp(m_viewporter->createViewport(s.data(), this));
+    std::unique_ptr<Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     ViewportInterface *serverViewport
@@ -472,7 +472,7 @@ void TestViewporter::testDataError()
     // Create surface.
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QScopedPointer<Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverSurface
@@ -482,7 +482,7 @@ void TestViewporter::testDataError()
     // Create viewport.
     QSignalSpy serverViewportCreated(m_viewporterInterface, &ViewporterInterface::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    QScopedPointer<Viewport> vp(m_viewporter->createViewport(s.data(), this));
+    std::unique_ptr<Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     ViewportInterface *serverViewport
@@ -529,7 +529,7 @@ void TestViewporter::testBufferSizeChange()
     // Create surface.
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QScopedPointer<Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverSurface
@@ -539,7 +539,7 @@ void TestViewporter::testBufferSizeChange()
     // Create viewport.
     QSignalSpy serverViewportCreated(m_viewporterInterface, &ViewporterInterface::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    QScopedPointer<Viewport> vp(m_viewporter->createViewport(s.data(), this));
+    std::unique_ptr<Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     ViewportInterface *serverViewport
@@ -619,7 +619,7 @@ void TestViewporter::testDestinationSizeChange()
     // Create surface.
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QScopedPointer<Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverSurface
@@ -629,7 +629,7 @@ void TestViewporter::testDestinationSizeChange()
     // Create viewport.
     QSignalSpy serverViewportCreated(m_viewporterInterface, &ViewporterInterface::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    QScopedPointer<Viewport> vp(m_viewporter->createViewport(s.data(), this));
+    std::unique_ptr<Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     ViewportInterface *serverViewport
@@ -728,7 +728,7 @@ void TestViewporter::testNoSurface()
     // Create surface.
     QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     SurfaceInterface *serverSurface
@@ -738,7 +738,7 @@ void TestViewporter::testNoSurface()
     // Create viewport.
     QSignalSpy serverViewportCreated(m_viewporterInterface, &ViewporterInterface::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    QScopedPointer<Viewport> vp(m_viewporter->createViewport(surface.data(), this));
+    std::unique_ptr<Viewport> vp(m_viewporter->createViewport(surface.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     ViewportInterface *serverViewport

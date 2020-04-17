@@ -652,9 +652,9 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     connection.flush();
     m_display->dispatchEvents();
 
-    QScopedPointer<Compositor> compositor(registry.createCompositor(registry.interface(Registry::Interface::Compositor).name,
+    std::unique_ptr<Compositor> compositor(registry.createCompositor(registry.interface(Registry::Interface::Compositor).name,
                                              registry.interface(Registry::Interface::Compositor).version));
-    QScopedPointer<Surface> surface(compositor->createSurface());
+    std::unique_ptr<Surface> surface(compositor->createSurface());
     QVERIFY(surface);
 
     //remove blur
@@ -666,7 +666,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QVERIFY(blurRemovedSpy.count() == 0);
 
     //use the in the client
-    auto *blur = blurManager->createBlur(surface.data(), nullptr);
+    auto *blur = blurManager->createBlur(surface.get(), nullptr);
 
     //now process events,
     QVERIFY(blurRemovedSpy.wait());
@@ -681,7 +681,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QVERIFY(contrastRemovedSpy.count() == 0);
 
     //use the in the client
-    auto *contrast = contrastManager->createContrast(surface.data(), nullptr);
+    auto *contrast = contrastManager->createContrast(surface.get(), nullptr);
 
     //now process events,
     QVERIFY(contrastRemovedSpy.wait());
@@ -716,7 +716,7 @@ void TestWaylandRegistry::testDestroy()
 
     //create some arbitrary Interface
     shellAnnouncedSpy.wait();
-    QScopedPointer<Shell>
+    std::unique_ptr<Shell>
             shell(registry.createShell(registry.interface(Registry::Interface::Shell).name,
                                        registry.interface(Registry::Interface::Shell).version,
                                        &registry));

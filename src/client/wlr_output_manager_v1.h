@@ -21,7 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QSize>
-
+#include <QVector>
+//STD
+#include <memory>
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct zwlr_output_head_v1;
@@ -131,7 +133,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 class WRAPLANDCLIENT_EXPORT WlrOutputModeV1 : public QObject
@@ -155,7 +157,7 @@ private:
     friend class WlrOutputHeadV1;
 
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 class WRAPLANDCLIENT_EXPORT WlrOutputHeadV1 : public QObject
@@ -199,7 +201,7 @@ private:
     friend class WlrOutputManagerV1;
 
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

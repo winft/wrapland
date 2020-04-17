@@ -39,7 +39,7 @@ public:
     void setup(wl_data_device *d);
 
     WaylandPointer<wl_data_device, wl_data_device_release> device;
-    QScopedPointer<DataOffer> selectionOffer;
+    std::unique_ptr<DataOffer> selectionOffer;
     struct Drag {
         QPointer<DataOffer> offer;
         QPointer<Surface> surface;
@@ -150,7 +150,7 @@ void DataDevice::Private::selection(wl_data_offer *id)
     Q_ASSERT(*lastOffer == id);
     selectionOffer.reset(lastOffer);
     lastOffer = nullptr;
-    emit q->selectionOffered(selectionOffer.data());
+    emit q->selectionOffered(selectionOffer.get());
 }
 
 DataDevice::Private::Private(DataDevice *q)
@@ -231,7 +231,7 @@ void DataDevice::clearSelection(quint32 serial)
 
 DataOffer *DataDevice::offeredSelection() const
 {
-    return d->selectionOffer.data();
+    return d->selectionOffer.get();
 }
 
 QPointer<Surface> DataDevice::dragSurface() const

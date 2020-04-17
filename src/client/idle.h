@@ -21,7 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_IDLE_H
 
 #include <QObject>
-
+//STD
+#include <memory>
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_kwin_idle;
@@ -133,7 +134,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -215,7 +216,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

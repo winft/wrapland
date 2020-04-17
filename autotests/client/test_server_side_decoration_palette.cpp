@@ -158,7 +158,7 @@ void TestServerSideDecorationPalette::testCreateAndSet()
     QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
@@ -166,7 +166,7 @@ void TestServerSideDecorationPalette::testCreateAndSet()
 
     QVERIFY(!m_paletteManagerInterface->paletteForSurface(serverSurface));
 
-    auto palette = m_paletteManager->create(surface.data(), surface.data());
+    auto palette = m_paletteManager->create(surface.get(), surface.get());
     QVERIFY(paletteCreatedSpy.wait());
     auto paletteInterface = paletteCreatedSpy.first().first().value<Wrapland::Server::ServerSideDecorationPaletteInterface*>();
     QCOMPARE(m_paletteManagerInterface->paletteForSurface(serverSurface), paletteInterface);

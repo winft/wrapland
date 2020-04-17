@@ -265,7 +265,7 @@ void Surface::attachBuffer(Buffer *buffer, const QPoint &offset)
 
 void Surface::attachBuffer(Buffer::Ptr buffer, const QPoint &offset)
 {
-    attachBuffer(buffer.toStrongRef().data(), offset);
+    attachBuffer(buffer.lock().get(), offset);
 }
 
 void Surface::setInputRegion(const Region *region)

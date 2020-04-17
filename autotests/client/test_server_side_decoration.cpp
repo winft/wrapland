@@ -181,16 +181,16 @@ void TestServerSideDecoration::testCreate()
     QSignalSpy decorationCreated(m_serverSideDecorationManagerInterface, &ServerSideDecorationManagerInterface::decorationCreated);
     QVERIFY(decorationCreated.isValid());
 
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<SurfaceInterface*>();
     QVERIFY(!ServerSideDecorationInterface::get(serverSurface));
 
     // create server side deco
-    QScopedPointer<ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.data()));
+    std::unique_ptr<ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.get()));
     QCOMPARE(serverSideDecoration->mode(), ServerSideDecoration::Mode::None);
-    QSignalSpy modeChangedSpy(serverSideDecoration.data(), &ServerSideDecoration::modeChanged);
+    QSignalSpy modeChangedSpy(serverSideDecoration.get(), &ServerSideDecoration::modeChanged);
     QVERIFY(modeChangedSpy.isValid());
 
     QVERIFY(decorationCreated.wait());
@@ -254,10 +254,10 @@ void TestServerSideDecoration::testRequest()
     QVERIFY(decorationCreated.isValid());
 
     // create server side deco
-    QScopedPointer<Surface> surface(m_compositor->createSurface());
-    QScopedPointer<ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.data()));
+    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.get()));
     QCOMPARE(serverSideDecoration->mode(), ServerSideDecoration::Mode::None);
-    QSignalSpy modeChangedSpy(serverSideDecoration.data(), &ServerSideDecoration::modeChanged);
+    QSignalSpy modeChangedSpy(serverSideDecoration.get(), &ServerSideDecoration::modeChanged);
     QVERIFY(modeChangedSpy.isValid());
     QVERIFY(decorationCreated.wait());
 
@@ -302,11 +302,11 @@ void TestServerSideDecoration::testSurfaceDestroy()
     QSignalSpy decorationCreated(m_serverSideDecorationManagerInterface, &ServerSideDecorationManagerInterface::decorationCreated);
     QVERIFY(decorationCreated.isValid());
 
-    QScopedPointer<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<SurfaceInterface*>();
-    QScopedPointer<ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.data()));
+    std::unique_ptr<ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.get()));
     QCOMPARE(serverSideDecoration->mode(), ServerSideDecoration::Mode::None);
     QVERIFY(decorationCreated.wait());
     auto serverDeco = decorationCreated.first().first().value<ServerSideDecorationInterface*>();

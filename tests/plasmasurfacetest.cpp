@@ -157,7 +157,7 @@ void PlasmaSurfaceTest::setupRegistry(Registry *registry)
 void PlasmaSurfaceTest::render()
 {
     const QSize &size = m_shellSurface->size().isValid() ? m_shellSurface->size() : QSize(300, 200);
-    auto buffer = m_shm->getBuffer(size, size.width() * 4).toStrongRef();
+    auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
     image.fill(QColor(255, 255, 255, 128));

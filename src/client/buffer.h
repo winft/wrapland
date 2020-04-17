@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSize>
 #include <QScopedPointer>
 #include <QWeakPointer>
+#include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
 
@@ -108,7 +109,7 @@ public:
     operator wl_buffer*();
     operator wl_buffer*() const;
 
-    typedef QWeakPointer<Buffer> Ptr;
+    typedef std::weak_ptr<Buffer> Ptr;
 
     /**
      * Helper method to get the id for a provided native buffer.
@@ -120,7 +121,7 @@ private:
     friend class ShmPool;
     explicit Buffer(ShmPool *parent, wl_buffer *buffer, const QSize &size, int32_t stride, size_t offset, Format format);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

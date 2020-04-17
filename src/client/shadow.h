@@ -131,7 +131,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 /**
@@ -205,7 +205,7 @@ private:
     friend class ShadowManager;
     explicit Shadow(QObject *parent = nullptr);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

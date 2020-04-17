@@ -144,10 +144,10 @@ void TestXdgOutput::testChanges()
     output.setup(registry.bindOutput(announced.first().first().value<quint32>(), announced.first().last().value<quint32>()));
     QVERIFY(outputChanged.wait());
 
-    QScopedPointer<Wrapland::Client::XdgOutputManager> xdgOutputManager(registry.createXdgOutputManager(xdgOutputAnnounced.first().first().value<quint32>(), xdgOutputAnnounced.first().last().value<quint32>(), this));
+    std::unique_ptr<Wrapland::Client::XdgOutputManager> xdgOutputManager(registry.createXdgOutputManager(xdgOutputAnnounced.first().first().value<quint32>(), xdgOutputAnnounced.first().last().value<quint32>(), this));
 
-    QScopedPointer<Wrapland::Client::XdgOutput> xdgOutput(xdgOutputManager->getXdgOutput(&output, this));
-    QSignalSpy xdgOutputChanged(xdgOutput.data(), SIGNAL(changed()));
+    std::unique_ptr<Wrapland::Client::XdgOutput> xdgOutput(xdgOutputManager->getXdgOutput(&output, this));
+    QSignalSpy xdgOutputChanged(xdgOutput.get(), SIGNAL(changed()));
 
     //check details are sent on client bind
     QVERIFY(xdgOutputChanged.wait());
