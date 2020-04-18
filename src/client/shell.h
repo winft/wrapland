@@ -159,10 +159,7 @@ private:
 class WRAPLANDCLIENT_EXPORT ShellSurface : public QObject
 {
     Q_OBJECT
-    /**
-     * The size of the ShellSurface.
-     **/
-    Q_PROPERTY(QSize size READ size WRITE setSize NOTIFY sizeChanged)
+
 public:
     explicit ShellSurface(QObject *parent);
     virtual ~ShellSurface();

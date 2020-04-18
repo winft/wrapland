@@ -67,24 +67,6 @@ class Touch;
 class WRAPLANDCLIENT_EXPORT Seat : public QObject
 {
     Q_OBJECT
-    /**
-     * The seat has pointer devices. Default value is @c false.
-     **/
-    Q_PROPERTY(bool keyboard READ hasKeyboard NOTIFY hasKeyboardChanged)
-    /**
-     * The seat has pointer devices. Default value is @c false.
-     **/
-    Q_PROPERTY(bool pointer READ hasPointer NOTIFY hasPointerChanged)
-    /**
-     * The seat has touch devices. Default value is @c false.
-     **/
-    Q_PROPERTY(bool touch READ hasTouch NOTIFY hasTouchChanged)
-    /**
-     * In a multiseat configuration this can be used by the client to help identify
-     * which physical devices the seat represents.
-     * Based on the seat configuration used by the compositor.
-     **/
-    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
 public:
     explicit Seat(QObject *parent = nullptr);
     virtual ~Seat();
