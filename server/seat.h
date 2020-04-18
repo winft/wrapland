@@ -36,7 +36,7 @@ namespace Wrapland
 namespace Server
 {
 
-class DataDeviceInterface;
+class DataDevice;
 class D_isplay;
 class Keyboard;
 class Pointer;
@@ -76,7 +76,7 @@ public:
     QMatrix4x4 dragSurfaceTransformation() const;
     SurfaceInterface* dragSurface() const;
     Pointer* dragPointer() const;
-    DataDeviceInterface* dragSource() const;
+    DataDevice* dragSource() const;
     void setDragTarget(SurfaceInterface* surface,
                        const QPointF& globalPosition,
                        const QMatrix4x4& inputTransformation);
@@ -158,8 +158,8 @@ public:
     SurfaceInterface* focusedTextInputSurface() const;
     TextInputInterface* focusedTextInput() const;
 
-    DataDeviceInterface* selection() const;
-    void setSelection(DataDeviceInterface* dataDevice);
+    DataDevice* selection() const;
+    void setSelection(DataDevice* dataDevice);
 
     // legacy
     SeatInterface* legacy;
@@ -167,7 +167,7 @@ public:
     //
 
 Q_SIGNALS:
-    void nameChanged(const std::string&);
+    void nameChanged(std::string);
     void hasPointerChanged(bool);
     void hasKeyboardChanged(bool);
     void hasTouchChanged(bool);
@@ -181,7 +181,7 @@ Q_SIGNALS:
 
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 
-    void selectionChanged(DataDeviceInterface*);
+    void selectionChanged(DataDevice*);
     void dragStarted();
     void dragEnded();
     void dragSurfaceChanged();
@@ -189,10 +189,10 @@ Q_SIGNALS:
 
 private:
     friend class D_isplay;
+    friend class DataDeviceManager;
 
     // legacy
     friend class SeatInterface;
-    friend class DataDeviceManagerInterface;
     friend class TextInputManagerUnstableV0Interface;
     friend class TextInputManagerUnstableV2Interface;
 

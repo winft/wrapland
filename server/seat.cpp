@@ -21,6 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat_p.h"
 
 #include "client.h"
+#include "data_device.h"
+#include "data_source.h"
 #include "display.h"
 #include "keyboard.h"
 #include "keyboard_p.h"
@@ -28,8 +30,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_p.h"
 
 // legacy
-#include "datadevice_interface.h"
-#include "datasource_interface.h"
 #include "seat_interface.h"
 #include "surface_interface.h"
 #include "textinput_interface_p.h"
@@ -89,12 +89,6 @@ Seat::Seat(D_isplay* display, QObject* parent)
 
 Seat::~Seat()
 {
-    // Need to unset all focused surfaces.
-    setFocusedKeyboardSurface(nullptr);
-    setFocusedTextInputSurface(nullptr);
-    setFocusedTouchSurface(nullptr);
-    setFocusedPointerSurface(nullptr);
-
     if (legacy) {
         delete legacy;
     }
@@ -183,11 +177,6 @@ void Seat::Private::sendCapabilities()
     send<wl_seat_send_capabilities>(getCapabilities());
 }
 
-Seat::Private* Seat::Private::cast(wl_resource* r)
-{
-    return r ? reinterpret_cast<Seat::Private*>(wl_resource_get_user_data(r)) : nullptr;
-}
-
 namespace
 {
 
@@ -204,6 +193,10 @@ static T* interfaceForSurface(SurfaceInterface* surface, const QVector<T*>& inte
                 return (*it);
             }
         } else if constexpr (std::is_same_v<T, Keyboard>) {
+            if ((*it)->client()->legacy == surface->client()) {
+                return (*it);
+            }
+        } else if constexpr (std::is_same_v<T, DataDevice>) {
             if ((*it)->client()->legacy == surface->client()) {
                 return (*it);
             }
@@ -279,7 +272,7 @@ QVector<TouchInterface*> Seat::Private::touchsForSurface(SurfaceInterface* surfa
     return interfacesForSurface(surface, touchs);
 }
 
-DataDeviceInterface* Seat::Private::dataDeviceForSurface(SurfaceInterface* surface) const
+DataDevice* Seat::Private::dataDeviceForSurface(SurfaceInterface* surface) const
 {
     return interfaceForSurface(surface, dataDevices);
 }
@@ -289,34 +282,34 @@ TextInputInterface* Seat::Private::textInputForSurface(SurfaceInterface* surface
     return interfaceForSurface(surface, textInputs);
 }
 
-void Seat::Private::registerDataDevice(DataDeviceInterface* dataDevice)
+void Seat::Private::cleanupDataDevice(DataDevice* dataDevice)
 {
-    Q_ASSERT(dataDevice->seat() == q_ptr->legacy);
+    dataDevices.removeOne(dataDevice);
+    if (keys.focus.selection == dataDevice) {
+        keys.focus.selection = nullptr;
+    }
+    if (currentSelection == dataDevice) {
+        // current selection is cleared
+        currentSelection = nullptr;
+        Q_EMIT q_ptr->selectionChanged(nullptr);
+        if (keys.focus.selection) {
+            keys.focus.selection->sendClearSelection();
+        }
+    }
+}
+
+void Seat::Private::registerDataDevice(DataDevice* dataDevice)
+{
     dataDevices << dataDevice;
-    auto dataDeviceCleanup = [this, dataDevice] {
-        dataDevices.removeOne(dataDevice);
-        if (keys.focus.selection == dataDevice) {
-            keys.focus.selection = nullptr;
-        }
-        if (currentSelection == dataDevice) {
-            // current selection is cleared
-            currentSelection = nullptr;
-            Q_EMIT q_ptr->selectionChanged(nullptr);
-            Q_EMIT q_ptr->legacy->selectionChanged(nullptr);
-            if (keys.focus.selection) {
-                keys.focus.selection->sendClearSelection();
-            }
-        }
-    };
-    QObject::connect(dataDevice, &QObject::destroyed, q_ptr, dataDeviceCleanup);
-    QObject::connect(dataDevice, &Resource::unbound, q_ptr, dataDeviceCleanup);
-    QObject::connect(dataDevice, &DataDeviceInterface::selectionChanged, q_ptr, [this, dataDevice] {
+    auto dataDeviceCleanup = [this, dataDevice] { cleanupDataDevice(dataDevice); };
+    QObject::connect(dataDevice, &DataDevice::resourceDestroyed, q_ptr, dataDeviceCleanup);
+    QObject::connect(dataDevice, &DataDevice::selectionChanged, q_ptr, [this, dataDevice] {
         updateSelection(dataDevice, true);
     });
-    QObject::connect(dataDevice, &DataDeviceInterface::selectionCleared, q_ptr, [this, dataDevice] {
+    QObject::connect(dataDevice, &DataDevice::selectionCleared, q_ptr, [this, dataDevice] {
         updateSelection(dataDevice, false);
     });
-    QObject::connect(dataDevice, &DataDeviceInterface::dragStarted, q_ptr, [this, dataDevice] {
+    QObject::connect(dataDevice, &DataDevice::dragStarted, q_ptr, [this, dataDevice] {
         const auto dragSerial = dataDevice->dragImplicitGrabSerial();
         auto* dragSurface = dataDevice->origin();
         if (q_ptr->hasImplicitPointerGrab(dragSerial)) {
@@ -347,7 +340,7 @@ void Seat::Private::registerDataDevice(DataDeviceInterface* dataDevice)
         });
         if (dataDevice->dragSource()) {
             drag.dragSourceDestroyConnection = QObject::connect(
-                dataDevice->dragSource(), &Resource::aboutToBeUnbound, q_ptr, [this] {
+                dataDevice->dragSource(), &DataSource::resourceDestroyed, q_ptr, [this] {
                     const auto serial = display()->handle()->nextSerial();
                     if (drag.target) {
                         drag.target->updateDragTarget(nullptr, serial);
@@ -369,7 +362,7 @@ void Seat::Private::registerDataDevice(DataDeviceInterface* dataDevice)
     // Is the new DataDevice for the current keyoard focus?
     if (keys.focus.surface && !keys.focus.selection) {
         // Same client?
-        if (keys.focus.surface->client() == dataDevice->client()) {
+        if (keys.focus.surface->client() == dataDevice->client()->legacy) {
             keys.focus.selection = dataDevice;
             if (currentSelection && currentSelection->selection()) {
                 dataDevice->sendSelection(currentSelection);
@@ -423,7 +416,7 @@ void Seat::Private::endDrag(quint32 serial)
     Q_EMIT q_ptr->legacy->dragEnded();
 }
 
-void Seat::Private::cancelPreviousSelection(DataDeviceInterface* dataDevice)
+void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice)
 {
     if (!currentSelection) {
         return;
@@ -437,10 +430,10 @@ void Seat::Private::cancelPreviousSelection(DataDeviceInterface* dataDevice)
     }
 }
 
-void Seat::Private::updateSelection(DataDeviceInterface* dataDevice, bool set)
+void Seat::Private::updateSelection(DataDevice* dataDevice, bool set)
 {
     bool selChanged = currentSelection != dataDevice;
-    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client())) {
+    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client()->legacy)) {
         // cancel the previous selection
         cancelPreviousSelection(dataDevice);
         // new selection on a data device belonging to current keyboard focus
@@ -460,7 +453,6 @@ void Seat::Private::updateSelection(DataDeviceInterface* dataDevice, bool set)
     }
     if (selChanged) {
         Q_EMIT q_ptr->selectionChanged(currentSelection);
-        Q_EMIT q_ptr->legacy->selectionChanged(currentSelection);
     }
 }
 
@@ -1445,7 +1437,7 @@ void Seat::touchMove(qint32 id, const QPointF& globalPosition)
 
     if (id == 0 && d_ptr->globalTouch.focus.touchs.isEmpty()) {
         // Client did not bind touch, fall back to emulating with pointer events.
-        forEachInterface<Pointer>(focusedTouchSurface(), d_ptr->pointers, [this, pos](Pointer* p) {
+        forEachInterface<Pointer>(focusedTouchSurface(), d_ptr->pointers, [pos](Pointer* p) {
             p->d_ptr->sendMotion(pos);
         });
     }
@@ -1473,10 +1465,9 @@ void Seat::touchUp(qint32 id)
     if (id == 0 && d_ptr->globalTouch.focus.touchs.isEmpty()) {
         // Client did not bind touch, fall back to emulating with pointer events.
         const quint32 serial = d_ptr->display()->handle()->nextSerial();
-        forEachInterface<Pointer>(
-            focusedTouchSurface(), d_ptr->pointers, [this, serial](Pointer* p) {
-                p->buttonReleased(serial, BTN_LEFT);
-            });
+        forEachInterface<Pointer>(focusedTouchSurface(), d_ptr->pointers, [serial](Pointer* p) {
+            p->buttonReleased(serial, BTN_LEFT);
+        });
     }
 #endif
 
@@ -1547,7 +1538,7 @@ Pointer* Seat::dragPointer() const
     return d_ptr->drag.sourcePointer;
 }
 
-DataDeviceInterface* Seat::dragSource() const
+DataDevice* Seat::dragSource() const
 {
     return d_ptr->drag.source;
 }
@@ -1598,12 +1589,12 @@ TextInputInterface* Seat::focusedTextInput() const
     return d_ptr->textInput.focus.textInput;
 }
 
-DataDeviceInterface* Seat::selection() const
+DataDevice* Seat::selection() const
 {
     return d_ptr->currentSelection;
 }
 
-void Seat::setSelection(DataDeviceInterface* dataDevice)
+void Seat::setSelection(DataDevice* dataDevice)
 {
     if (d_ptr->currentSelection == dataDevice) {
         return;
@@ -1619,7 +1610,6 @@ void Seat::setSelection(DataDeviceInterface* dataDevice)
         }
     }
     Q_EMIT selectionChanged(dataDevice);
-    Q_EMIT legacy->selectionChanged(dataDevice);
 }
 
 }

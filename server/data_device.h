@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,58 +17,64 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_DATA_DEVICE_MANAGER_INTERFACE_H
-#define WAYLAND_SERVER_DATA_DEVICE_MANAGER_INTERFACE_H
+#pragma once
 
 #include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
-#include "global.h"
-#include "datadevice_interface.h"
+
+#include "resource.h"
 
 namespace Wrapland
 {
 namespace Server
 {
+class Client;
+class DataDeviceManager;
+class DataSource;
+class Seat;
+class SurfaceInterface;
 
-class Display;
-class DataSourceInterface;
-
-/**
- * @brief Represents the Global for wl_data_device_manager interface.
- *
- **/
-class WRAPLANDSERVER_EXPORT DataDeviceManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT DataDevice : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~DataDeviceManagerInterface();
+    ~DataDevice() override;
 
-    /**
-     * Drag and Drop actions supported by the DataSourceInterface.
-     * @since 0.0.5XX
-     **/
-    enum class DnDAction {
-        None = 0,
-        Copy = 1 << 0,
-        Move = 1 << 1,
-        Ask = 1 << 2
-    };
-    Q_DECLARE_FLAGS(DnDActions, DnDAction)
+    Seat* seat() const;
+    Client* client() const;
+
+    DataSource* dragSource() const;
+    SurfaceInterface* origin() const;
+    SurfaceInterface* icon() const;
+
+    quint32 dragImplicitGrabSerial() const;
+
+    DataSource* selection() const;
+
+    void sendSelection(DataDevice* other);
+    void sendClearSelection();
+
+    void drop();
+
+    void updateDragTarget(SurfaceInterface* surface, quint32 serial);
+    void updateProxy(SurfaceInterface* remote);
 
 Q_SIGNALS:
-    void dataSourceCreated(Wrapland::Server::DataSourceInterface*);
-    void dataDeviceCreated(Wrapland::Server::DataDeviceInterface*);
+    void dragStarted();
+    void selectionChanged(Wrapland::Server::DataSource*);
+    void selectionCleared();
+    void resourceDestroyed();
 
 private:
-    explicit DataDeviceManagerInterface(Display *display, QObject *parent = nullptr);
-    friend class Display;
+    friend class DataDeviceManager;
+    explicit DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
+
     class Private;
+    Private* d_ptr;
 };
 
 }
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::DataDeviceManagerInterface::DnDActions)
-
-#endif
+Q_DECLARE_METATYPE(Wrapland::Server::DataDevice*)

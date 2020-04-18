@@ -52,7 +52,7 @@ namespace Server
 class D_isplay;
 
 class CompositorInterface;
-class DataDeviceManagerInterface;
+//class DataDeviceManagerInterface;
 class IdleInterface;
 enum class IdleInhibitManagerInterfaceVersion;
 class RemoteAccessManagerInterface;
@@ -193,7 +193,7 @@ public:
      **/
     QVector<SeatInterface*> seats() const;
     SubCompositorInterface *createSubCompositor(QObject *parent = nullptr);
-    DataDeviceManagerInterface *createDataDeviceManager(QObject *parent = nullptr);
+//    DataDeviceManagerInterface *createDataDeviceManager(QObject *parent = nullptr);
     OutputManagementV1Interface *createOutputManagementV1(QObject *parent = nullptr);
     PlasmaShellInterface *createPlasmaShell(QObject *parent = nullptr);
     PlasmaWindowManagementInterface *createPlasmaWindowManagement(QObject *parent = nullptr);

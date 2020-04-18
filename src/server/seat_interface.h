@@ -39,7 +39,7 @@ namespace Server
 {
 class Seat;
 
-class DataDeviceInterface;
+//class DataDeviceInterface;
 class Display;
 class SurfaceInterface;
 class TextInputInterface;
@@ -210,12 +210,12 @@ public:
 //     * @see isDragPointer
 //     **/
 //    PointerInterface *dragPointer() const;
-    /**
-     * @returns The DataDeviceInterface which started the drag and drop operation.
-     * @see isDrag
-     * @since 5.6
-     **/
-    DataDeviceInterface *dragSource() const;
+//    /**
+//     * @returns The DataDeviceInterface which started the drag and drop operation.
+//     * @see isDrag
+//     * @since 5.6
+//     **/
+//    DataDeviceInterface *dragSource() const;
     /**
      * Sets the current drag target to @p surface.
      *
@@ -684,27 +684,27 @@ public:
     TextInputInterface *focusedTextInput() const;
     ///@}
 
-    /**
-     * @returns The DataDeviceInterface holding the current clipboard selection.
-     * @since 0.0.524
-     * @see selectionChanged
-     * @see setSelection
-     **/
-    DataDeviceInterface *selection() const;
-    /**
-     * This method allows to manually set the @p dataDevice for the current clipboard selection.
-     * The clipboard selection is handled automatically in SeatInterface.
-     * If a DataDeviceInterface belonging to the current focused KeyboardInterface
-     * sets a selection, the current clipboard selection will be updated automatically.
-     * With this method it's possible to override the automatic clipboard update for
-     * e.g. the case of a clipboard manager.
-     *
-     * @param dataDevice Sets the current clipboard selection.
-     * @see selection
-     * @see selectionChanged
-     * @since 0.0.524
-     **/
-    void setSelection(DataDeviceInterface *dataDevice);
+//    /**
+//     * @returns The DataDeviceInterface holding the current clipboard selection.
+//     * @since 0.0.524
+//     * @see selectionChanged
+//     * @see setSelection
+//     **/
+//    DataDeviceInterface *selection() const;
+//    /**
+//     * This method allows to manually set the @p dataDevice for the current clipboard selection.
+//     * The clipboard selection is handled automatically in SeatInterface.
+//     * If a DataDeviceInterface belonging to the current focused KeyboardInterface
+//     * sets a selection, the current clipboard selection will be updated automatically.
+//     * With this method it's possible to override the automatic clipboard update for
+//     * e.g. the case of a clipboard manager.
+//     *
+//     * @param dataDevice Sets the current clipboard selection.
+//     * @see selection
+//     * @see selectionChanged
+//     * @since 0.0.524
+//     **/
+//    void setSelection(DataDeviceInterface *dataDevice);
 
     static SeatInterface *get(wl_resource *native);
 
@@ -735,7 +735,7 @@ Q_SIGNALS:
      * @see selection
      * @see setSelection
      **/
-    void selectionChanged(DataDeviceInterface*);
+//    void selectionChanged(DataDeviceInterface*);
 
     /**
      * Emitted when a drag'n'drop operation is started
@@ -766,7 +766,7 @@ private:
     friend class Server::Seat;
 
     friend class Display;
-    friend class DataDeviceManagerInterface;
+//    friend class DataDeviceManagerInterface;
     friend class TextInputManagerUnstableV0Interface;
     friend class TextInputManagerUnstableV2Interface;
     explicit SeatInterface(Display *display, QObject *parent);

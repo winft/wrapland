@@ -20,8 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat_interface.h"
 #include "seat_interface_p.h"
 #include "display.h"
-#include "datadevice_interface.h"
-#include "datasource_interface.h"
+//#include "datadevice_interface.h"
+//#include "datasource_interface.h"
 #include "surface_interface.h"
 #include "textinput_interface_p.h"
 
@@ -273,11 +273,11 @@ QVector<TouchInterface *> SeatInterface::Private::touchsForSurface(SurfaceInterf
 //    return interfacesForSurface(surface, touchs);
 }
 
-DataDeviceInterface *SeatInterface::Private::dataDeviceForSurface(SurfaceInterface *surface) const
-{
-    return q->newSeat->d_ptr->dataDeviceForSurface(surface);
+//DataDeviceInterface *SeatInterface::Private::dataDeviceForSurface(SurfaceInterface *surface) const
+//{
+//    return q->newSeat->d_ptr->dataDeviceForSurface(surface);
 //    return interfaceForSurface(surface, dataDevices);
-}
+//}
 
 TextInputInterface *SeatInterface::Private::textInputForSurface(SurfaceInterface *surface) const
 {
@@ -285,9 +285,9 @@ TextInputInterface *SeatInterface::Private::textInputForSurface(SurfaceInterface
 //    return interfaceForSurface(surface, textInputs);
 }
 
-void SeatInterface::Private::registerDataDevice(DataDeviceInterface *dataDevice)
-{
-    q->newSeat->d_ptr->registerDataDevice(dataDevice);
+//void SeatInterface::Private::registerDataDevice(DataDeviceInterface *dataDevice)
+//{
+//    q->newSeat->d_ptr->registerDataDevice(dataDevice);
 //    Q_ASSERT(dataDevice->seat() == q);
 //    dataDevices << dataDevice;
 //    auto dataDeviceCleanup = [this, dataDevice] {
@@ -377,7 +377,7 @@ void SeatInterface::Private::registerDataDevice(DataDeviceInterface *dataDevice)
 //            }
 //        }
 //    }
-}
+//}
 
 
 void SeatInterface::Private::registerTextInput(TextInputInterface *ti)
@@ -407,9 +407,9 @@ void SeatInterface::Private::registerTextInput(TextInputInterface *ti)
 //    );
 }
 
-void SeatInterface::Private::endDrag(quint32 serial)
-{
-    q->newSeat->d_ptr->endDrag(serial);
+//void SeatInterface::Private::endDrag(quint32 serial)
+//{
+//    q->newSeat->d_ptr->endDrag(serial);
 //    auto target = drag.target;
 //    QObject::disconnect(drag.destroyConnection);
 //    QObject::disconnect(drag.dragSourceDestroyConnection);
@@ -423,11 +423,12 @@ void SeatInterface::Private::endDrag(quint32 serial)
 //    drag = Drag();
 //    emit q->dragSurfaceChanged();
 //    emit q->dragEnded();
-}
+//}
 
-void SeatInterface::Private::cancelPreviousSelection(DataDeviceInterface *dataDevice)
-{
-    q->newSeat->d_ptr->cancelPreviousSelection(dataDevice);
+//void SeatInterface::Private::cancelPreviousSelection(DataDeviceInterface *dataDevice)
+//{
+//    q->newSeat->d_ptr->cancelPreviousSelection(dataDevice);
+
 //    if (!currentSelection) {
 //        return;
 //    }
@@ -438,11 +439,12 @@ void SeatInterface::Private::cancelPreviousSelection(DataDeviceInterface *dataDe
 //            s->cancel();
 //        }
 //    }
-}
+//}
 
-void SeatInterface::Private::updateSelection(DataDeviceInterface *dataDevice, bool set)
-{
-    q->newSeat->d_ptr->updateSelection(dataDevice, set);
+//void SeatInterface::Private::updateSelection(DataDeviceInterface *dataDevice, bool set)
+//{
+//    q->newSeat->d_ptr->updateSelection(dataDevice, set);
+
 //    bool selChanged = currentSelection != dataDevice;
 //    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client())) {
 //        // cancel the previous selection
@@ -465,7 +467,7 @@ void SeatInterface::Private::updateSelection(DataDeviceInterface *dataDevice, bo
 //    if (selChanged) {
 //        emit q->selectionChanged(currentSelection);
 //    }
-}
+//}
 
 void SeatInterface::setHasKeyboard(bool has)
 {
@@ -1641,12 +1643,13 @@ SurfaceInterface *SeatInterface::dragSurface() const
 //    return d->drag.sourcePointer;
 //}
 
-DataDeviceInterface *SeatInterface::dragSource() const
-{
-    return newSeat->dragSource();
+//DataDeviceInterface *SeatInterface::dragSource() const
+//{
+//    return nullptr;
+//    return newSeat->dragSource();
 //    Q_D();
 //    return d->drag.source;
-}
+//}
 
 void SeatInterface::setFocusedTextInputSurface(SurfaceInterface *surface)
 {
@@ -1699,16 +1702,17 @@ TextInputInterface *SeatInterface::focusedTextInput() const
 //    return d->textInput.focus.textInput;
 }
 
-DataDeviceInterface *SeatInterface::selection() const
-{
-    return newSeat->selection();
+//DataDeviceInterface *SeatInterface::selection() const
+//{
+//    return nullptr;
+//    return newSeat->selection();
 //    Q_D();
 //    return d->currentSelection;
-}
+//}
 
-void SeatInterface::setSelection(DataDeviceInterface *dataDevice)
-{
-    newSeat->setSelection(dataDevice);
+//void SeatInterface::setSelection(DataDeviceInterface *dataDevice)
+//{
+//    newSeat->setSelection(dataDevice);
 //    Q_D();
 //    if (d->currentSelection == dataDevice) {
 //        return;
@@ -1724,7 +1728,7 @@ void SeatInterface::setSelection(DataDeviceInterface *dataDevice)
 //        }
 //    }
 //    emit selectionChanged(dataDevice);
-}
+//}
 
 }
 }

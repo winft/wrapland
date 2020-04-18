@@ -40,12 +40,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/buffer_interface.h"
 #include "../../src/server/clientconnection.h"
 #include "../../src/server/compositor_interface.h"
-#include "../../src/server/datadevicemanager_interface.h"
 #include "../../src/server/seat_interface.h"
 #include "../../src/server/subcompositor_interface.h"
 #include "../../src/server/surface_interface.h"
 
 #include "../../server/client.h"
+#include "../../server/data_device.h"
+#include "../../server/data_device_manager.h"
 #include "../../server/display.h"
 #include "../../server/keyboard.h"
 #include "../../server/pointer.h"
@@ -144,6 +145,7 @@ TestSeat::TestSeat(QObject* parent)
     , m_queue(nullptr)
     , m_thread(nullptr)
 {
+    qRegisterMetaType<Wrapland::Server::DataDevice*>();
     qRegisterMetaType<Wrapland::Server::Keyboard*>();
     qRegisterMetaType<Wrapland::Server::Pointer*>();
 }
@@ -1951,8 +1953,7 @@ void TestSeat::testDestroy()
 
 void TestSeat::testSelection()
 {
-    QScopedPointer<Srv::DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
-    ddmi->create();
+    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
 
     Clt::Registry registry;
     QSignalSpy dataDeviceManagerSpy(&registry, &Clt::Registry::dataDeviceManagerAnnounced);
@@ -2079,9 +2080,8 @@ void TestSeat::testSelectionNoDataSource()
     // a DataDevice which doesn't have a DataSource yet.
 
     // First create the DataDevice.
-    QScopedPointer<Srv::DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
-    ddmi->create();
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManagerInterface::dataDeviceCreated);
+    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::dataDeviceCreated);
     QVERIFY(ddiCreatedSpy.isValid());
 
     Clt::Registry registry;
@@ -2100,8 +2100,11 @@ void TestSeat::testSelectionNoDataSource()
 
     QScopedPointer<Clt::DataDevice> dd(ddm->getDataDevice(m_seat));
     QVERIFY(dd->isValid());
+
     QVERIFY(ddiCreatedSpy.wait());
-    auto* ddi = ddiCreatedSpy.first().first().value<Srv::DataDeviceInterface*>();
+    QCOMPARE(ddiCreatedSpy.count(), 1);
+
+    auto ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
     QVERIFY(ddi);
 
     // Now create a surface and pass it keyboard focus.
@@ -2111,7 +2114,7 @@ void TestSeat::testSelectionNoDataSource()
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(!m_serverSeat->selection());
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedKeyboardSurface(), serverSurface);
@@ -2127,9 +2130,8 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     // To properly test the functionality this test requires a second client.
 
     // Create the DataDeviceManager.
-    QScopedPointer<Srv::DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
-    ddmi->create();
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManagerInterface::dataDeviceCreated);
+    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::dataDeviceCreated);
     QVERIFY(ddiCreatedSpy.isValid());
 
     // Create a second Wayland client connection to use it for setSelection.
@@ -2170,7 +2172,7 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     // Now create our first datadevice.
     QScopedPointer<Clt::DataDevice> dd1(ddm1->getDataDevice(seat.data()));
     QVERIFY(ddiCreatedSpy.wait());
-    auto* ddi = ddiCreatedSpy.first().first().value<Srv::DataDeviceInterface*>();
+    auto* ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
     QVERIFY(ddi);
     m_serverSeat->setSelection(ddi);
 

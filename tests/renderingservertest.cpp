@@ -17,12 +17,13 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
+#include "../server/display.h"
+#include "../server/data_device_manager.h"
+#include "../server/output.h"
+#include "../server/seat.h"
+
 #include "../src/server/buffer_interface.h"
 #include "../src/server/compositor_interface.h"
-#include "../src/server/datadevicemanager_interface.h"
-#include "../src/server/display.h"
-#include "../src/server/output_interface.h"
-#include "../src/server/seat_interface.h"
 #include "../src/server/shell_interface.h"
 
 #include <QApplication>
@@ -93,7 +94,7 @@ public:
 
     void surfaceCreated(Wrapland::Server::ShellSurfaceInterface *surface);
 
-    void setSeat(const QPointer<Wrapland::Server::SeatInterface> &seat);
+    void setSeat(const QPointer<Wrapland::Server::Seat> &seat);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -107,7 +108,7 @@ protected:
 private:
     void updateFocus();
     QList<Wrapland::Server::ShellSurfaceInterface*> m_stackingOrder;
-    QPointer<Wrapland::Server::SeatInterface> m_seat;
+    QPointer<Wrapland::Server::Seat> m_seat;
 };
 
 CompositorWindow::CompositorWindow(QWidget *parent)
@@ -165,7 +166,7 @@ void CompositorWindow::updateFocus()
     m_seat->setFocusedKeyboardSurface((*it)->surface());
 }
 
-void CompositorWindow::setSeat(const QPointer< Wrapland::Server::SeatInterface > &seat)
+void CompositorWindow::setSeat(const QPointer< Wrapland::Server::Seat > &seat)
 {
     m_seat = seat;
 }
@@ -259,25 +260,24 @@ int main(int argc, char **argv)
     parser.addOption(xwaylandOption);
     parser.process(app);
 
-    Display display;
+    D_isplay display;
     display.start();
-    DataDeviceManagerInterface *ddm = display.createDataDeviceManager();
-    ddm->create();
+
+    display.createDataDeviceManager();
     CompositorInterface *compositor = display.createCompositor(&display);
     compositor->create();
     ShellInterface *shell = display.createShell();
     shell->create();
     display.createShm();
-    OutputInterface *output = display.createOutput(&display);
+    auto output = display.createOutput(&display);
     output->setPhysicalSize(QSize(269, 202));
     const QSize windowSize(1024, 768);
     output->addMode(windowSize);
-    output->create();
-    SeatInterface *seat = display.createSeat();
+
+    auto seat = display.createSeat();
     seat->setHasKeyboard(true);
     seat->setHasPointer(true);
-    seat->setName(QStringLiteral("testSeat0"));
-    seat->create();
+    seat->setName("testSeat0");
 
     CompositorWindow compositorWindow;
     compositorWindow.setSeat(seat);

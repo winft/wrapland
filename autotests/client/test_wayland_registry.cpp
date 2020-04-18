@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/display.h"
 
+#include "../../server/data_device_manager.h"
 #include "../../server/dpms.h"
 #include "../../server/output.h"
 #include "../../server/seat.h"
@@ -46,7 +47,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/xdgshell.h"
 
 #include "../../src/server/compositor_interface.h"
-#include "../../src/server/datadevicemanager_interface.h"
 #include "../../src/server/display.h"
 #include "../../src/server/idleinhibit_interface.h"
 #include "../../src/server/output_interface.h"
@@ -120,7 +120,7 @@ private:
     Wrapland::Server::Seat* m_seat;
     Wrapland::Server::ShellInterface *m_shell;
     Wrapland::Server::SubCompositorInterface *m_subcompositor;
-    Wrapland::Server::DataDeviceManagerInterface *m_dataDeviceManager;
+    Wrapland::Server::DataDeviceManager* m_dataDeviceManager;
     Wrapland::Server::OutputManagementV1Interface *m_outputManagement;
     Wrapland::Server::ServerSideDecorationManagerInterface *m_serverSideDecorationManager;
     Wrapland::Server::TextInputManagerInterface *m_textInputManagerV0;
@@ -170,14 +170,12 @@ void TestWaylandRegistry::init()
     m_compositor = m_display->createCompositor();
     m_compositor->create();
     m_output = m_display->createOutput();
-//    m_output->create();
     m_seat = m_display->createSeat();
     m_shell = m_display->createShell();
     m_shell->create();
     m_subcompositor = m_display->createSubCompositor();
     m_subcompositor->create();
     m_dataDeviceManager = m_display->createDataDeviceManager();
-    m_dataDeviceManager->create();
     m_outputManagement = m_display->createOutputManagementV1();
     m_outputManagement->create();
     m_outputDevice = m_display->createOutputDeviceV1();

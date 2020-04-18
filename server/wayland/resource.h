@@ -76,7 +76,6 @@ public:
              Handle* handle)
         : m_client{client}
         , m_version{version}
-        , m_id{id}
         , m_handle{handle}
     {
         m_resource = m_client->createResource(interface, m_version, id);
@@ -164,7 +163,7 @@ public:
 private:
     static void destroy(wl_resource* wlResource)
     {
-        auto resource = reinterpret_cast<Resource*>(wlResource->data);
+        auto resource = fromResource(wlResource);
 
         resource->onDestroy();
         delete resource;
@@ -190,7 +189,6 @@ private:
 
     Client* m_client;
     uint32_t m_version;
-    uint32_t m_id;
     wl_resource* m_resource;
 
     Handle* m_handle;

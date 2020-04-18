@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/client.h"
 #include "wayland/display.h"
 
+#include "data_device_manager.h"
 #include "dpms.h"
 #include "output.h"
 #include "pointer.h"
@@ -40,7 +41,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/blur_interface.h"
 #include "../src/server/compositor_interface.h"
 #include "../src/server/contrast_interface.h"
-#include "../src/server/datadevicemanager_interface.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
 #include "../src/server/idle_interface.h"
@@ -226,9 +226,9 @@ SubCompositorInterface* D_isplay::createSubCompositor(QObject* parent)
     return legacy->createSubCompositor(parent);
 }
 
-DataDeviceManagerInterface* D_isplay::createDataDeviceManager(QObject* parent)
+DataDeviceManager* D_isplay::createDataDeviceManager(QObject* parent)
 {
-    return legacy->createDataDeviceManager(parent);
+    return new DataDeviceManager(this, parent);
 }
 
 PlasmaShellInterface* D_isplay::createPlasmaShell(QObject* parent)
