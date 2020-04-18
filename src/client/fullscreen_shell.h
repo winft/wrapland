@@ -65,8 +65,8 @@ class Output;
 class WRAPLANDCLIENT_EXPORT FullscreenShell : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool capabilityArbitraryModes READ hasCapabilityArbitraryModes NOTIFY capabilityArbitraryModesChanged)
-    Q_PROPERTY(bool capabilityCursorPlane READ hasCapabilityCursorPlane NOTIFY capabilityCursorPlaneChanged)
+    
+    
 public:
     explicit FullscreenShell(QObject *parent = nullptr);
     virtual ~FullscreenShell();
