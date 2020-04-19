@@ -51,8 +51,8 @@ class TextInputInterface::Private : public Resource::Private
 public:
     ~Private();
 
-    virtual void sendEnter(SurfaceInterface *surface, quint32 serial) = 0;
-    virtual void sendLeave(quint32 serial, SurfaceInterface *surface) = 0;
+    virtual void sendEnter(Surface *surface, quint32 serial) = 0;
+    virtual void sendLeave(quint32 serial, Surface *surface) = 0;
 
     virtual void preEdit(const QByteArray &text, const QByteArray &commit) = 0;
     virtual void commit(const QByteArray &text) = 0;
@@ -74,7 +74,7 @@ public:
     TextInputInterface::ContentHints contentHints = TextInputInterface::ContentHint::None;
     TextInputInterface::ContentPurpose contentPurpose = TextInputInterface::ContentPurpose::Normal;
     SeatInterface *seat = nullptr;
-    QPointer<SurfaceInterface> surface;
+    QPointer<Surface> surface;
     bool enabled = false;
     QByteArray surroundingText;
     qint32 surroundingTextCursorPosition = 0;
@@ -109,7 +109,7 @@ Q_SIGNALS:
     /**
      * @internal
      **/
-    void requestActivate(Wrapland::Server::SeatInterface *seat, Wrapland::Server::SurfaceInterface *surface);
+    void requestActivate(Wrapland::Server::SeatInterface *seat, Wrapland::Server::Surface *surface);
 
 private:
     explicit TextInputUnstableV0Interface(TextInputManagerUnstableV0Interface *parent, wl_resource *parentResource);

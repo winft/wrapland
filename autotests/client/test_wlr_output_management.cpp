@@ -24,9 +24,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/wlr_output_manager_v1.h"
 #include "../../src/client/wlr_output_configuration_v1.h"
 
-#include "../../src/server/display.h"
+#include "../../server/compositor.h"
+#include "../../server/display.h"
+
 #include "../../src/server/shell_interface.h"
-#include "../../src/server/compositor_interface.h"
 #include "../../src/server/output_configuration_v1_interface.h"
 #include "../../src/server/output_device_v1_interface.h"
 #include "../../src/server/output_management_v1_interface.h"
@@ -48,7 +49,7 @@ private Q_SLOTS:
     void cleanup();
 
 private:
-    Srv::Display *m_display;
+    Srv::D_isplay *m_display;
     Srv::OutputManagementV1Interface *m_outputManagementInterface;
     QList<Srv::OutputDeviceV1Interface *> m_serverOutputs;
 
@@ -84,16 +85,12 @@ TestWlrOutputManagement::TestWlrOutputManagement(QObject *parent)
 
 void TestWlrOutputManagement::init()
 {
-    delete m_display;
-    m_display = new Srv::Display(this);
+    m_display = new Srv::D_isplay(this);
     m_display->setSocketName(s_socketName);
-    m_display->start();
-    QVERIFY(m_display->isRunning());
 
     auto shell = m_display->createShell(this);
     shell->create();
-    auto comp = m_display->createCompositor(this);
-    comp->create();
+    m_display->createCompositor(this);
 
     auto outputDeviceInterface = m_display->createOutputDeviceV1(this);
 

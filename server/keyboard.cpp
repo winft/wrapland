@@ -22,7 +22,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "display.h"
 #include "seat_interface.h"
-#include "surface_interface.h"
+#include "surface.h"
+#include "surface_p.h"
 
 #include <QVector>
 
@@ -45,8 +46,7 @@ const struct wl_keyboard_interface Keyboard::Private::s_interface {
     destroyCallback,
 };
 
-void Keyboard::Private::focusChildSurface(quint32 serial,
-                                          const QPointer<SurfaceInterface>& childSurface)
+void Keyboard::Private::focusChildSurface(quint32 serial, const QPointer<Surface>& childSurface)
 {
     if (focusedChildSurface == childSurface) {
         return;
@@ -56,14 +56,14 @@ void Keyboard::Private::focusChildSurface(quint32 serial,
     sendEnter(serial, focusedChildSurface.data());
 }
 
-void Keyboard::Private::sendLeave(quint32 serial, SurfaceInterface* surface)
+void Keyboard::Private::sendLeave(quint32 serial, Surface* surface)
 {
-    if (surface && surface->resource()) {
-        send<wl_keyboard_send_leave>(serial, surface->resource());
+    if (surface && surface->d_ptr->resource()) {
+        send<wl_keyboard_send_leave>(serial, surface->d_ptr->resource());
     }
 }
 
-void Keyboard::Private::sendEnter(quint32 serial, SurfaceInterface* surface)
+void Keyboard::Private::sendEnter(quint32 serial, Surface* surface)
 {
     wl_array keys;
     wl_array_init(&keys);
@@ -72,7 +72,7 @@ void Keyboard::Private::sendEnter(quint32 serial, SurfaceInterface* surface)
         uint32_t* k = reinterpret_cast<uint32_t*>(wl_array_add(&keys, sizeof(uint32_t)));
         *k = *it;
     }
-    send<wl_keyboard_send_enter>(serial, surface->resource(), &keys);
+    send<wl_keyboard_send_enter>(serial, surface->d_ptr->resource(), &keys);
     wl_array_release(&keys);
 
     sendModifiers();
@@ -114,7 +114,7 @@ void Keyboard::setKeymap(int fd, quint32 size)
     d_ptr->sendKeymap(fd, size);
 }
 
-void Keyboard::setFocusedSurface(quint32 serial, SurfaceInterface* surface)
+void Keyboard::setFocusedSurface(quint32 serial, Surface* surface)
 {
     d_ptr->sendLeave(serial, d_ptr->focusedChildSurface);
     disconnect(d_ptr->destroyConnection);
@@ -124,13 +124,13 @@ void Keyboard::setFocusedSurface(quint32 serial, SurfaceInterface* surface)
         return;
     }
     d_ptr->destroyConnection
-        = connect(d_ptr->focusedSurface, &Resource::aboutToBeUnbound, this, [this] {
+        = connect(d_ptr->focusedSurface, &Surface::resourceDestroyed, this, [this] {
               d_ptr->sendLeave(d_ptr->client()->display()->handle()->nextSerial(),
                                d_ptr->focusedSurface);
               d_ptr->focusedSurface = nullptr;
               d_ptr->focusedChildSurface.clear();
           });
-    d_ptr->focusedChildSurface = QPointer<SurfaceInterface>(surface);
+    d_ptr->focusedChildSurface = QPointer<Surface>(surface);
 
     d_ptr->sendEnter(serial, d_ptr->focusedSurface);
     d_ptr->client()->flush();
@@ -166,7 +166,7 @@ void Keyboard::repeatInfo(qint32 charactersPerSecond, qint32 delay)
         charactersPerSecond, delay);
 }
 
-SurfaceInterface* Keyboard::focusedSurface() const
+Surface* Keyboard::focusedSurface() const
 {
     return d_ptr->focusedSurface;
 }

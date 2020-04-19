@@ -20,8 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "touch.h"
 
 #include "seat.h"
-
-#include "../src/server/surface_interface.h"
+#include "surface.h"
 
 #include "wayland/client.h"
 #include "wayland/display.h"

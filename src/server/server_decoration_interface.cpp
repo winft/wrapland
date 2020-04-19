@@ -22,7 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "global_p.h"
 #include "logging.h"
 #include "resource_p.h"
-#include "surface_interface.h"
+
+#include "../../server/surface.h"
+#include "../../server/wayland/resource.h"
 
 #include <QVector>
 
@@ -73,10 +75,10 @@ void ServerSideDecorationManagerInterface::Private::createCallback(wl_client *cl
 
 void ServerSideDecorationManagerInterface::Private::create(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface)
 {
-    SurfaceInterface *s = SurfaceInterface::get(surface);
+    auto s = Wayland::Resource<Surface>::fromResource(surface)->handle();
     if (!s) {
         // TODO: send error?
-        qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationInterface requested for non existing SurfaceInterface";
+        qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationInterface requested for non existing Surface";
         return;
     }
     ServerSideDecorationInterface *decoration = new ServerSideDecorationInterface(q, s, resource);
@@ -177,13 +179,13 @@ void ServerSideDecorationManagerInterface::setDefaultMode(Mode mode)
 class ServerSideDecorationInterface::Private : public Resource::Private
 {
 public:
-    Private(ServerSideDecorationInterface *q, ServerSideDecorationManagerInterface *c, SurfaceInterface *surface,  wl_resource *parentResource);
+    Private(ServerSideDecorationInterface *q, ServerSideDecorationManagerInterface *c, Surface *surface,  wl_resource *parentResource);
     ~Private();
 
     ServerSideDecorationManagerInterface::Mode mode = ServerSideDecorationManagerInterface::Mode::None;
-    SurfaceInterface *surface;
+    Surface *surface;
 
-    static ServerSideDecorationInterface *get(SurfaceInterface *s);
+    static ServerSideDecorationInterface *get(Surface *s);
 
 private:
     static void requestModeCallback(wl_client *client, wl_resource *resource, uint32_t mode);
@@ -226,7 +228,7 @@ void ServerSideDecorationInterface::Private::requestModeCallback(wl_client *clie
     emit cast<Private>(resource)->q_func()->modeRequested(m);
 }
 
-ServerSideDecorationInterface *ServerSideDecorationInterface::Private::get(SurfaceInterface *s)
+ServerSideDecorationInterface *ServerSideDecorationInterface::Private::get(Surface *s)
 {
     auto it = std::find_if(s_all.constBegin(), s_all.constEnd(), [s] (Private *p) { return p->surface == s; });
     if (it == s_all.constEnd()) {
@@ -235,7 +237,7 @@ ServerSideDecorationInterface *ServerSideDecorationInterface::Private::get(Surfa
     return (*it)->q_func();
 }
 
-ServerSideDecorationInterface::Private::Private(ServerSideDecorationInterface *q, ServerSideDecorationManagerInterface *c, SurfaceInterface *surface, wl_resource *parentResource)
+ServerSideDecorationInterface::Private::Private(ServerSideDecorationInterface *q, ServerSideDecorationManagerInterface *c, Surface *surface, wl_resource *parentResource)
     : Resource::Private(q, c, parentResource, &org_kde_kwin_server_decoration_interface, &s_interface)
     , surface(surface)
 {
@@ -247,7 +249,7 @@ ServerSideDecorationInterface::Private::~Private()
     s_all.removeAll(this);
 }
 
-ServerSideDecorationInterface::ServerSideDecorationInterface(ServerSideDecorationManagerInterface *parent, SurfaceInterface *surface, wl_resource *parentResource)
+ServerSideDecorationInterface::ServerSideDecorationInterface(ServerSideDecorationManagerInterface *parent, Surface *surface, wl_resource *parentResource)
     : Resource(new Private(this, parent, surface, parentResource))
 {
 }
@@ -268,7 +270,7 @@ ServerSideDecorationManagerInterface::Mode ServerSideDecorationInterface::mode()
     return d->mode;
 }
 
-SurfaceInterface *ServerSideDecorationInterface::surface() const
+Surface *ServerSideDecorationInterface::surface() const
 {
     Q_D();
     return d->surface;
@@ -279,7 +281,7 @@ ServerSideDecorationInterface::Private *ServerSideDecorationInterface::d_func() 
     return reinterpret_cast<ServerSideDecorationInterface::Private*>(d.data());
 }
 
-ServerSideDecorationInterface *ServerSideDecorationInterface::get(SurfaceInterface *s)
+ServerSideDecorationInterface *ServerSideDecorationInterface::get(Surface *s)
 {
     return Private::get(s);
 }

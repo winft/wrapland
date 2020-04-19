@@ -1,5 +1,6 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2014 Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,23 +18,25 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// KWin
+
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
-#include "../../src/server/display.h"
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/region_interface.h"
+
+#include "../../server/client.h"
+#include "../../server/compositor.h"
+#include "../../server/display.h"
+#include "../../server/region.h"
 
 class TestRegion : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestRegion(QObject *parent = nullptr);
+    explicit TestRegion(QObject* parent = nullptr);
+
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -47,20 +50,20 @@ private Q_SLOTS:
     void testDisconnect();
 
 private:
-    Wrapland::Server::Display *m_display;
-    Wrapland::Server::CompositorInterface *m_compositorInterface;
-    Wrapland::Client::ConnectionThread *m_connection;
-    Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::EventQueue *m_queue;
-    QThread *m_thread;
+    Wrapland::Server::D_isplay* m_display;
+    Wrapland::Server::Compositor* m_serverCompositor;
+    Wrapland::Client::ConnectionThread* m_connection;
+    Wrapland::Client::Compositor* m_compositor;
+    Wrapland::Client::EventQueue* m_queue;
+    QThread* m_thread;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-region-0");
 
-TestRegion::TestRegion(QObject *parent)
+TestRegion::TestRegion(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
-    , m_compositorInterface(nullptr)
+    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_queue(nullptr)
@@ -70,14 +73,11 @@ TestRegion::TestRegion(QObject *parent)
 
 void TestRegion::init()
 {
-    using namespace Wrapland::Server;
-    delete m_display;
-    m_display = new Display(this);
+    m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
-    // setup connection
+    // Setup connection.
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
@@ -96,7 +96,7 @@ void TestRegion::init()
     QVERIFY(m_queue->isValid());
 
     Wrapland::Client::Registry registry;
-    QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32,quint32)));
+    QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32, quint32)));
     QVERIFY(compositorSpy.isValid());
     QVERIFY(!registry.eventQueue());
     registry.setEventQueue(m_queue);
@@ -105,12 +105,12 @@ void TestRegion::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_compositorInterface = m_display->createCompositor(m_display);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    m_serverCompositor = m_display->createCompositor(m_display);
 
     QVERIFY(compositorSpy.wait());
-    m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
+    m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
+                                             compositorSpy.first().last().value<quint32>(),
+                                             this);
 }
 
 void TestRegion::cleanup()
@@ -138,72 +138,67 @@ void TestRegion::cleanup()
 
 void TestRegion::testCreate()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QSignalSpy regionCreatedSpy(m_compositorInterface, SIGNAL(regionCreated(Wrapland::Server::RegionInterface*)));
+    QSignalSpy regionCreatedSpy(m_serverCompositor,
+                                SIGNAL(regionCreated(Wrapland::Server::Region*)));
     QVERIFY(regionCreatedSpy.isValid());
 
-    std::unique_ptr<Region> region(m_compositor->createRegion());
+    std::unique_ptr<Wrapland::Client::Region> region(m_compositor->createRegion());
     QCOMPARE(region->region(), QRegion());
 
     QVERIFY(regionCreatedSpy.wait());
     QCOMPARE(regionCreatedSpy.count(), 1);
-    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::RegionInterface*>();
+    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::Region*>();
     QVERIFY(serverRegion);
     QCOMPARE(serverRegion->region(), QRegion());
-    QCOMPARE(serverRegion->global(), m_compositorInterface);
 }
 
 void TestRegion::testCreateWithRegion()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QSignalSpy regionCreatedSpy(m_compositorInterface, SIGNAL(regionCreated(Wrapland::Server::RegionInterface*)));
+    QSignalSpy regionCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::regionCreated);
     QVERIFY(regionCreatedSpy.isValid());
 
-    std::unique_ptr<Region> region(m_compositor->createRegion(QRegion(0, 0, 10, 20), nullptr));
+    std::unique_ptr<Wrapland::Client::Region> region(
+        m_compositor->createRegion(QRegion(0, 0, 10, 20), nullptr));
     QCOMPARE(region->region(), QRegion(0, 0, 10, 20));
 
     QVERIFY(regionCreatedSpy.wait());
     QCOMPARE(regionCreatedSpy.count(), 1);
-    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::RegionInterface*>();
+    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::Region*>();
     QVERIFY(serverRegion);
     QCOMPARE(serverRegion->region(), QRegion(0, 0, 10, 20));
-    QVERIFY(serverRegion->parentResource());
 }
 
 void TestRegion::testCreateUniquePtr()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QSignalSpy regionCreatedSpy(m_compositorInterface, SIGNAL(regionCreated(Wrapland::Server::RegionInterface*)));
+    QSignalSpy regionCreatedSpy(m_serverCompositor,
+                                SIGNAL(regionCreated(Wrapland::Server::Region*)));
     QVERIFY(regionCreatedSpy.isValid());
 
-    std::unique_ptr<Region> region(m_compositor->createRegion(QRegion(0, 0, 10, 20)));
+    std::unique_ptr<Wrapland::Client::Region> region(
+        m_compositor->createRegion(QRegion(0, 0, 10, 20)));
     QCOMPARE(region->region(), QRegion(0, 0, 10, 20));
 
     QVERIFY(regionCreatedSpy.wait());
     QCOMPARE(regionCreatedSpy.count(), 1);
-    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::RegionInterface*>();
+    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::Region*>();
     QVERIFY(serverRegion);
     QCOMPARE(serverRegion->region(), QRegion(0, 0, 10, 20));
 }
 
 void TestRegion::testAdd()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QSignalSpy regionCreatedSpy(m_compositorInterface, SIGNAL(regionCreated(Wrapland::Server::RegionInterface*)));
+    QSignalSpy regionCreatedSpy(m_serverCompositor,
+                                SIGNAL(regionCreated(Wrapland::Server::Region*)));
     QVERIFY(regionCreatedSpy.isValid());
 
-    std::unique_ptr<Region> region(m_compositor->createRegion());
+    std::unique_ptr<Wrapland::Client::Region> region(m_compositor->createRegion());
     QVERIFY(regionCreatedSpy.wait());
-    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::RegionInterface*>();
+    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::Region*>();
 
     QSignalSpy regionChangedSpy(serverRegion, SIGNAL(regionChanged(QRegion)));
     QVERIFY(regionChangedSpy.isValid());
 
-    // adding a QRect
+    // Adding a QRect.
     region->add(QRect(0, 0, 10, 20));
     QCOMPARE(region->region(), QRegion(0, 0, 10, 20));
 
@@ -212,7 +207,7 @@ void TestRegion::testAdd()
     QCOMPARE(regionChangedSpy.last().first().value<QRegion>(), QRegion(0, 0, 10, 20));
     QCOMPARE(serverRegion->region(), QRegion(0, 0, 10, 20));
 
-    // adding a QRegion
+    // Adding a QRegion.
     region->add(QRegion(5, 5, 10, 50));
     QRegion compareRegion(0, 0, 10, 20);
     compareRegion = compareRegion.united(QRect(5, 5, 10, 50));
@@ -226,19 +221,19 @@ void TestRegion::testAdd()
 
 void TestRegion::testRemove()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QSignalSpy regionCreatedSpy(m_compositorInterface, SIGNAL(regionCreated(Wrapland::Server::RegionInterface*)));
+    QSignalSpy regionCreatedSpy(m_serverCompositor,
+                                SIGNAL(regionCreated(Wrapland::Server::Region*)));
     QVERIFY(regionCreatedSpy.isValid());
 
-    std::unique_ptr<Region> region(m_compositor->createRegion(QRegion(0, 0, 100, 200)));
+    std::unique_ptr<Wrapland::Client::Region> region(
+        m_compositor->createRegion(QRegion(0, 0, 100, 200)));
     QVERIFY(regionCreatedSpy.wait());
-    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::RegionInterface*>();
+    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::Region*>();
 
-    QSignalSpy regionChangedSpy(serverRegion, SIGNAL(regionChanged(QRegion)));
+    QSignalSpy regionChangedSpy(serverRegion, &Wrapland::Server::Region::regionChanged);
     QVERIFY(regionChangedSpy.isValid());
 
-    // subtract a QRect
+    // Subtract a QRect.
     region->subtract(QRect(0, 0, 10, 20));
     QRegion compareRegion(0, 0, 100, 200);
     compareRegion = compareRegion.subtracted(QRect(0, 0, 10, 20));
@@ -249,7 +244,7 @@ void TestRegion::testRemove()
     QCOMPARE(regionChangedSpy.last().first().value<QRegion>(), compareRegion);
     QCOMPARE(serverRegion->region(), compareRegion);
 
-    // subtracting a QRegion
+    // Subtracting a QRegion.
     region->subtract(QRegion(5, 5, 10, 50));
     compareRegion = compareRegion.subtracted(QRect(5, 5, 10, 50));
     QCOMPARE(region->region(), compareRegion);
@@ -262,13 +257,20 @@ void TestRegion::testRemove()
 
 void TestRegion::testDestroy()
 {
-    using namespace Wrapland::Client;
-    std::unique_ptr<Region> region(m_compositor->createRegion());
+    std::unique_ptr<Wrapland::Client::Region> region(m_compositor->createRegion());
 
-    connect(m_connection, &ConnectionThread::establishedChanged, region.get(), &Region::release);
-    connect(m_connection, &ConnectionThread::establishedChanged,
-            m_compositor, &Compositor::release);
-    connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
+    connect(m_connection,
+            &Wrapland::Client::ConnectionThread::establishedChanged,
+            region.get(),
+            &Wrapland::Client::Region::release);
+    connect(m_connection,
+            &Wrapland::Client::ConnectionThread::establishedChanged,
+            m_compositor,
+            &Wrapland::Client::Compositor::release);
+    connect(m_connection,
+            &Wrapland::Client::ConnectionThread::establishedChanged,
+            m_queue,
+            &Wrapland::Client::EventQueue::release);
     QVERIFY(region->isValid());
 
     delete m_display;
@@ -284,19 +286,19 @@ void TestRegion::testDestroy()
 
 void TestRegion::testDisconnect()
 {
-    // this test verifies that the server side correctly tears down the resources when the client disconnects
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    std::unique_ptr<Region> r(m_compositor->createRegion());
+    // This test verifies that the server side correctly tears down the resources when the client
+    // disconnects.
+    std::unique_ptr<Wrapland::Client::Region> r(m_compositor->createRegion());
     QVERIFY(r != nullptr);
     QVERIFY(r->isValid());
-    QSignalSpy regionCreatedSpy(m_compositorInterface, &CompositorInterface::regionCreated);
+    QSignalSpy regionCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::regionCreated);
     QVERIFY(regionCreatedSpy.isValid());
     QVERIFY(regionCreatedSpy.wait());
-    auto serverRegion = regionCreatedSpy.first().first().value<RegionInterface*>();
+    auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::Region*>();
 
-    // destroy client
-    QSignalSpy clientDisconnectedSpy(serverRegion->client(), &ClientConnection::disconnected);
+    // Destroy client.
+    QSignalSpy clientDisconnectedSpy(serverRegion->client(),
+                                     &Wrapland::Server::Client::disconnected);
     QVERIFY(clientDisconnectedSpy.isValid());
     QSignalSpy regionDestroyedSpy(serverRegion, &QObject::destroyed);
     QVERIFY(regionDestroyedSpy.isValid());
@@ -317,4 +319,4 @@ void TestRegion::testDisconnect()
 }
 
 QTEST_GUILESS_MAIN(TestRegion)
-#include "test_wayland_region.moc"
+#include "region.moc"

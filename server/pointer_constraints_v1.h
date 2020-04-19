@@ -33,7 +33,6 @@ namespace Server
 class Client;
 class D_isplay;
 class Pointer;
-class SurfaceInterface;
 
 class WRAPLANDSERVER_EXPORT PointerConstraintsV1 : public QObject
 {
@@ -74,7 +73,7 @@ Q_SIGNALS:
 
 private:
     friend class PointerConstraintsV1;
-    friend class SurfaceInterface;
+    friend class Surface;
     LockedPointerV1(Client* client,
                     uint32_t version,
                     uint32_t id,
@@ -107,7 +106,7 @@ Q_SIGNALS:
 
 private:
     friend class PointerConstraintsV1;
-    friend class SurfaceInterface;
+    friend class Surface;
     ConfinedPointerV1(Client* client,
                       uint32_t version,
                       uint32_t id,

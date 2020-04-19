@@ -22,16 +22,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "display.h"
 #include "pointer_p.h"
+#include "region.h"
+#include "surface.h"
+#include "surface_p.h"
 
 #include "wayland/client.h"
 #include "wayland/display.h"
 #include "wayland/global.h"
 #include "wayland/resource.h"
-
-// legacy
-#include "region_interface.h"
-#include "surface_interface.h"
-#include "surface_interface_p.h"
 
 #include <functional>
 
@@ -92,17 +90,16 @@ void PointerConstraintsV1::Private::createConstraint(wl_client* wlClient,
                                                      uint32_t lifetime)
 {
     auto client = display()->handle()->getClient(wlClient);
-    auto surface = SurfaceInterface::get(wlSurface);
-    auto pointer = Wayland::Resource<Pointer::Private>::fromResource(wlPointer)->handle();
+    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto pointer = Wayland::Resource<Pointer>::fromResource(wlPointer)->handle();
 
     if (!surface || !pointer) {
         // send error?
         return;
     }
     if (!surface->lockedPointer().isNull() || !surface->confinedPointer().isNull()) {
-        wl_resource_post_error(surface->resource(),
-                               ZWP_POINTER_CONSTRAINTS_V1_ERROR_ALREADY_CONSTRAINED,
-                               "Surface already constrained");
+        surface->d_ptr->postError(ZWP_POINTER_CONSTRAINTS_V1_ERROR_ALREADY_CONSTRAINED,
+                                  "Surface already constrained");
         return;
     }
 
@@ -118,10 +115,10 @@ void PointerConstraintsV1::Private::createConstraint(wl_client* wlClient,
         break;
     }
 
-    auto region = RegionInterface::get(wlRegion);
+    auto region = Wayland::Resource<Region>::fromResource(wlRegion)->handle();
     constraint->d_ptr->region = region ? region->region() : QRegion();
 
-    surface->d_func()->installPointerConstraint(constraint);
+    surface->d_ptr->installPointerConstraint(constraint);
 }
 
 PointerConstraintsV1::PointerConstraintsV1(D_isplay* display, QObject* parent)
@@ -169,7 +166,7 @@ void LockedPointerV1::Private::setRegionCallback([[maybe_unused]] wl_client* wlC
 {
     auto priv = fromResource(wlResource)->handle()->d_ptr;
 
-    auto region = RegionInterface::get(wlRegion);
+    auto region = Wayland::Resource<Region>::fromResource(wlRegion)->handle();
     priv->pendingRegion = region ? region->region() : QRegion();
     priv->regionIsSet = true;
 }
@@ -269,7 +266,7 @@ void ConfinedPointerV1::Private::setRegionCallback([[maybe_unused]] wl_client* w
                                                    wl_resource* wlRegion)
 {
     auto priv = fromResource(wlResource);
-    auto region = RegionInterface::get(wlRegion);
+    auto region = Wayland::Resource<Region>::fromResource(wlRegion)->handle();
 
     priv->handle()->d_ptr->pendingRegion = region ? region->region() : QRegion();
     priv->handle()->d_ptr->regionIsSet = true;

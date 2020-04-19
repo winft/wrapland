@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,62 +17,45 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_REGION_INTERFACE_H
-#define WAYLAND_SERVER_REGION_INTERFACE_H
+#pragma once
 
 #include <QObject>
 #include <QRegion>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include "resource.h"
-
 namespace Wrapland
 {
 namespace Server
 {
-class CompositorInterface;
+class Client;
+class Compositor;
 
-/**
- * @brief Resource for the wl_region.
- *
- * A RegionInterface gets created by the CompositorInterface and represents
- * a QRegion.
- *
- * @see CompositorInterface
- **/
-class WRAPLANDSERVER_EXPORT RegionInterface : public Resource
+class WRAPLANDSERVER_EXPORT Region : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~RegionInterface();
+    ~Region() override;
 
-    /**
-     * @returns the data of the region as a QRegion.
-     **/
     QRegion region() const;
 
-    /**
-     * @returns The RegionInterface for the @p native resource.
-     **/
-    static RegionInterface *get(wl_resource *native);
+    Client* client() const;
+
+    // legacy?
+    static Region* get(void* native);
 
 Q_SIGNALS:
-    /**
-     * Emitted whenever the region changes.
-     **/
     void regionChanged(const QRegion&);
+    void resourceDestroyed();
 
 private:
-    friend class CompositorInterface;
-    explicit RegionInterface(CompositorInterface *parent, wl_resource *parentResource);
+    friend class Compositor;
+    Region(Client* client, uint32_t version, uint32_t id);
 
     class Private;
-    Private *d_func() const;
+    Private* d_ptr;
 };
 
 }
 }
-Q_DECLARE_METATYPE(Wrapland::Server::RegionInterface*)
-
-#endif
+Q_DECLARE_METATYPE(Wrapland::Server::Region*)

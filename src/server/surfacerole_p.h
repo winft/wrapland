@@ -28,18 +28,18 @@ namespace Wrapland
 namespace Server
 {
 
-class SurfaceInterface;
+class Surface;
 
 class SurfaceRole
 {
 public:
-    explicit SurfaceRole(SurfaceInterface *surface);
+    explicit SurfaceRole(Surface *surface);
     virtual ~SurfaceRole();
 
     virtual void commit() = 0;
 
 private:
-    QPointer<SurfaceInterface> m_surface;
+    QPointer<Surface> m_surface;
 
     Q_DISABLE_COPY(SurfaceRole)
 };

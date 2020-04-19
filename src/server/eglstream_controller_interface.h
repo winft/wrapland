@@ -21,7 +21,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_SERVER_EGLSTREAM_CONTROLLER_INTERFACE_H
 
 #include "global.h"
-#include "surface_interface.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>
 #include <wayland-util.h>
@@ -31,8 +30,8 @@ namespace Wrapland
 {
 namespace Server
 {
-
 class Display;
+class Surface;
 
 /**
  * @brief Represents the Global for the wl_eglstream_controller interface.
@@ -53,7 +52,7 @@ Q_SIGNALS:
     /**
      * Emitted when a new stream attach request is received.
      */
-    void streamConsumerAttached(SurfaceInterface *surface, void *eglStream, wl_array *attribs);
+    void streamConsumerAttached(Surface *surface, void *eglStream, wl_array *attribs);
 private:
     explicit EglStreamControllerInterface(Display *display, QObject *parent = nullptr);
     

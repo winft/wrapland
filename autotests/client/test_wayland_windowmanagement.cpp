@@ -27,11 +27,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
 
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/display.h"
+#include "../../server/compositor.h"
+#include "../../server/display.h"
+#include "../../server/region.h"
+#include "../../server/surface.h"
+
 #include "../../src/server/plasmawindowmanagement_interface.h"
-#include "../../src/server/region_interface.h"
-#include "../../src/server/surface_interface.h"
 
 #include <wayland-plasma-window-management-client-protocol.h>
 
@@ -85,11 +86,11 @@ private Q_SLOTS:
     void testPid();
 
 private:
-    Srv::Display *m_display;
-    Srv::CompositorInterface *m_compositorInterface;
+    Srv::D_isplay *m_display;
+    Srv::Compositor *m_serverCompositor;
     Srv::PlasmaWindowManagementInterface *m_windowManagementInterface;
     Srv::PlasmaWindowInterface *m_windowInterface;
-    Srv::SurfaceInterface *m_surfaceInterface = nullptr;
+    Srv::Surface *m_serverSurface = nullptr;
 
     Clt::Surface *m_surface = nullptr;
     Clt::ConnectionThread *m_connection;
@@ -106,7 +107,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-wayland-window
 TestWindowManagement::TestWindowManagement(QObject *parent)
     : QObject(parent)
     , m_display(nullptr)
-    , m_compositorInterface(nullptr)
+    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_queue(nullptr)
@@ -119,10 +120,9 @@ void TestWindowManagement::init()
     qRegisterMetaType<Srv::PlasmaWindowManagementInterface::ShowingDesktopState>
             ("ShowingDesktopState");
 
-    m_display = new Srv::Display(this);
+    m_display = new Srv::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     // Setup connection.
     m_connection = new Clt::ConnectionThread;
@@ -157,9 +157,7 @@ void TestWindowManagement::init()
     QVERIFY(m_registry->isValid());
     m_registry->setup();
 
-    m_compositorInterface = m_display->createCompositor(m_display);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    m_serverCompositor = m_display->createCompositor(m_display);
 
     QVERIFY(compositorSpy.wait());
     m_compositor =
@@ -185,16 +183,16 @@ void TestWindowManagement::init()
     QVERIFY(windowSpy.wait());
     m_window = windowSpy.first().first().value<Clt::PlasmaWindow *>();
 
-    QSignalSpy serverSurfaceCreated(m_compositorInterface,
-                                    &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     m_surface = m_compositor->createSurface(this);
     QVERIFY(m_surface);
 
     QVERIFY(serverSurfaceCreated.wait());
-    m_surfaceInterface = serverSurfaceCreated.first().first().value<Srv::SurfaceInterface*>();
-    QVERIFY(m_surfaceInterface);
+    m_serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    QVERIFY(m_serverSurface);
 }
 
 void TestWindowManagement::cleanup()
@@ -239,8 +237,8 @@ void TestWindowManagement::cleanup()
     delete m_windowInterface;
     m_windowInterface = nullptr;
 
-    delete m_surfaceInterface;
-    m_surfaceInterface = nullptr;
+    delete m_serverSurface;
+    m_serverSurface = nullptr;
 
     delete m_display;
     m_display = nullptr;

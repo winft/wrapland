@@ -36,7 +36,7 @@ namespace Server
 class Display;
 class OutputInterface;
 class SeatInterface;
-class SurfaceInterface;
+class Surface;
 class XdgTopLevelStableInterface;
 class XdgPopupStableInterface;
 class XdgPositionerStableInterface;
@@ -77,12 +77,12 @@ class XdgSurfaceStableInterface : public Wrapland::Server::Resource
     Q_OBJECT
 public:
     virtual ~XdgSurfaceStableInterface();
-    SurfaceInterface* surface() const;
+    Surface* surface() const;
     XdgTopLevelStableInterface* topLevel() const;
     XdgPopupStableInterface *popup() const;
 
 private:
-    explicit XdgSurfaceStableInterface(XdgShellStableInterface *parent, SurfaceInterface *surface, wl_resource *parentResource);
+    explicit XdgSurfaceStableInterface(XdgShellStableInterface *parent, Surface *surface, wl_resource *parentResource);
     friend class XdgShellStableInterface;
 
     class Private;
@@ -97,7 +97,7 @@ public:
     virtual ~XdgTopLevelStableInterface();
 
 private:
-    explicit XdgTopLevelStableInterface(XdgShellStableInterface *parent, SurfaceInterface *surface, wl_resource *parentResource);
+    explicit XdgTopLevelStableInterface(XdgShellStableInterface *parent, Surface *surface, wl_resource *parentResource);
     friend class XdgShellStableInterface;
     friend class XdgSurfaceStableInterface;
 
@@ -112,7 +112,7 @@ public:
     virtual ~XdgPopupStableInterface();
 
 private:
-    explicit XdgPopupStableInterface(XdgShellStableInterface *parent, SurfaceInterface *surface, wl_resource *parentResource);
+    explicit XdgPopupStableInterface(XdgShellStableInterface *parent, Surface *surface, wl_resource *parentResource);
     friend class XdgShellStableInterface;
     friend class XdgSurfaceStableInterface;
     friend class GenericShellSurface<XdgPopupStableInterface>;

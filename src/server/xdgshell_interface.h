@@ -34,7 +34,7 @@ namespace Server
 
 class OutputInterface;
 class SeatInterface;
-class SurfaceInterface;
+class Surface;
 class XdgShellPopupInterface;
 class XdgShellSurfaceInterface;
 template <typename T>
@@ -251,9 +251,9 @@ public:
     bool isConfigurePending() const;
 
     /**
-     * @return The SurfaceInterface this XdgSurfaceV5Interface got created for.
+     * @return The Surface this XdgSurfaceV5Interface got created for.
      **/
-    SurfaceInterface *surface() const;
+    Surface *surface() const;
 
     /**
      * @returns The title of this surface.
@@ -394,9 +394,9 @@ public:
     virtual ~XdgShellPopupInterface();
 
     /**
-     * @return The SurfaceInterface this XdgShellPopupInterface got created for.
+     * @return The Surface this XdgShellPopupInterface got created for.
      **/
-    SurfaceInterface *surface() const;
+    Surface *surface() const;
 
     /*
      * Ask the popup surface to configure itself for the given configuration.
@@ -410,10 +410,10 @@ public:
      * @returns the parent surface.
      * @see transientOffset
      **/
-    QPointer<SurfaceInterface> transientFor() const;
+    QPointer<Surface> transientFor() const;
 
     /**
-     * The offset of the Surface in the coordinate system of the SurfaceInterface this surface is a transient for.
+     * The offset of the Surface in the coordinate system of the Surface this surface is a transient for.
      *
      * For XDG V6 this returns the point on the anchorRect defined by the anchor edge.
      *

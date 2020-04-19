@@ -21,9 +21,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/data_device_manager.h"
 #include "../server/output.h"
 #include "../server/seat.h"
+#include "../server/compositor.h"
+#include "../server/surface.h"
 
 #include "../src/server/buffer_interface.h"
-#include "../src/server/compositor_interface.h"
 #include "../src/server/shell_interface.h"
 
 #include <QApplication>
@@ -137,7 +138,7 @@ void CompositorWindow::surfaceCreated(Wrapland::Server::ShellSurfaceInterface *s
             }
         }
     );
-    connect(surface->surface(), &SurfaceInterface::damaged, this, static_cast<void (CompositorWindow::*)()>(&CompositorWindow::update));
+    connect(surface->surface(), &Wrapland::Server::Surface::damaged, this, static_cast<void (CompositorWindow::*)()>(&CompositorWindow::update));
     connect(surface, &ShellSurfaceInterface::destroyed, this,
         [surface, this] {
             m_stackingOrder.removeAll(surface);
@@ -264,8 +265,8 @@ int main(int argc, char **argv)
     display.start();
 
     display.createDataDeviceManager();
-    CompositorInterface *compositor = display.createCompositor(&display);
-    compositor->create();
+    auto compositor = display.createCompositor(&display);
+
     ShellInterface *shell = display.createShell();
     shell->create();
     display.createShm();

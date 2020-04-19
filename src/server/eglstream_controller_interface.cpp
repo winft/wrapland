@@ -22,6 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "logging.h"
 
+#include "../../server/surface.h"
+#include "../../server/wayland/resource.h"
+
 #include <wayland-util.h>
 #include <QLibrary>
 
@@ -56,7 +59,7 @@ void EglStreamControllerInterface::Private::attachStreamConsumerAttribs(wl_clien
 {
     Q_UNUSED(client);
     Private *p = reinterpret_cast<Private *>(wl_resource_get_user_data(resource));
-    emit p->q->streamConsumerAttached(SurfaceInterface::get(surface), eglStream, attribs);
+    emit p->q->streamConsumerAttached(Wayland::Resource<Surface>::fromResource(surface)->handle(), eglStream, attribs);
 }
 
 EglStreamControllerInterface::Private::Private(EglStreamControllerInterface *q, Display *display)

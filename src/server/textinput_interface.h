@@ -33,7 +33,7 @@ class Seat;
 
 class Display;
 class SeatInterface;
-class SurfaceInterface;
+class Surface;
 class TextInputInterface;
 
 /**
@@ -96,7 +96,7 @@ private:
  *
  * A TextInputInterface gets created by the {@link TextInputManagerInterface}. The individual
  * instances are not exposed directly. The SeatInterface provides access to the currently active
- * TextInputInterface. This is evaluated automatically based on which SurfaceInterface has
+ * TextInputInterface. This is evaluated automatically based on which Surface has
  * keyboard focus.
  *
  * @see TextInputManagerInterface
@@ -277,10 +277,10 @@ public:
      * @see isEnabled
      * @see enabledChanged
      **/
-    QPointer<SurfaceInterface> surface() const;
+    QPointer<Surface> surface() const;
 
     /**
-     * @return Whether the TextInputInterface is currently enabled for a SurfaceInterface.
+     * @return Whether the TextInputInterface is currently enabled for a Surface.
      * @see surface
      * @see enabledChanged
      **/
@@ -355,7 +355,7 @@ public:
      * Informs the client about changes in the visibility of the input panel (virtual keyboard).
      *
      * The @p overlappedSurfaceArea defines the area overlapped by the input panel (virtual keyboard)
-     * on the SurfaceInterface having the text focus in surface local coordinates.
+     * on the Surface having the text focus in surface local coordinates.
      *
      * @param visible Whether the input panel is currently visible
      * @param overlappedSurfaceArea The overlapping area in surface local coordinates
@@ -408,7 +408,7 @@ Q_SIGNALS:
      **/
     void surroundingTextChanged();
     /**
-     * Emitted whenever this TextInputInterface gets enabled or disabled for a SurfaceInterface.
+     * Emitted whenever this TextInputInterface gets enabled or disabled for a Surface.
      * @see isEnabled
      * @see surface
      **/

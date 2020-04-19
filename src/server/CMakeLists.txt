@@ -4,7 +4,6 @@ set(SERVER_LIB_SRCS
     blur_interface.cpp
     buffer_interface.cpp
     clientconnection.cpp
-    compositor_interface.cpp
     contrast_interface.cpp
     display.cpp
     eglstream_controller_interface.cpp
@@ -25,7 +24,6 @@ set(SERVER_LIB_SRCS
     plasmavirtualdesktop_interface.cpp
     plasmawindowmanagement_interface.cpp
     qtsurfaceextension_interface.cpp
-    region_interface.cpp
     remote_access_interface.cpp
     resource.cpp
     seat_interface.cpp
@@ -34,16 +32,12 @@ set(SERVER_LIB_SRCS
     shadow_interface.cpp
     shell_interface.cpp
     slide_interface.cpp
-    subcompositor_interface.cpp
-    surface_interface.cpp
     surfacerole.cpp
     textinput_interface.cpp
     textinput_interface_v0.cpp
     textinput_interface_v2.cpp
     viewporter_interface.cpp
     xdgdecoration_interface.cpp
-    xdgforeign_interface.cpp
-    xdgforeign_v2_interface.cpp
     xdgoutput_interface.cpp
     xdgshell_interface.cpp
     xdgshell_stable_interface.cpp
@@ -51,6 +45,12 @@ set(SERVER_LIB_SRCS
     xdgshell_v5_interface.cpp
     xdgshell_v6_interface.cpp
 
+    ../../server/compositor.cpp
+    ../../server/region.cpp
+    ../../server/subcompositor.cpp
+    ../../server/surface.cpp
+    ../../server/xdg_foreign.cpp
+    ../../server/xdg_foreign_v2.cpp
 
     ../../server/client.cpp
     ../../server/data_device.cpp
@@ -329,7 +329,6 @@ set(SERVER_LIB_HEADERS
   blur_interface.h
   buffer_interface.h
   clientconnection.h
-  compositor_interface.h
   contrast_interface.h
   display.h
   eglstream_controller_interface.h
@@ -349,7 +348,6 @@ set(SERVER_LIB_HEADERS
   plasmavirtualdesktop_interface.h
   plasmawindowmanagement_interface.h
   qtsurfaceextension_interface.h
-  region_interface.h
   remote_access_interface.h
   resource.h
   server_decoration_interface.h
@@ -357,14 +355,18 @@ set(SERVER_LIB_HEADERS
   shadow_interface.h
   shell_interface.h
   slide_interface.h
-  subcompositor_interface.h
-  surface_interface.h
   textinput_interface.h
   viewporter_interface.h
   xdgdecoration_interface.h
-  xdgforeign_interface.h
   xdgoutput_interface.h
   xdgshell_interface.h
+
+  ../../server/xdg_foreign.h
+  ../../server/region.h
+  ../../server/region.h
+  ../../server/surface.h
+  ../../server/compositor.h
+  ../../server/subcompositor.h
 
   ../../server/client.h
   ../../server/data_device.h

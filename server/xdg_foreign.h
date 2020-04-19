@@ -19,8 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
-#include "global.h"
-#include "resource.h"
+#include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
@@ -29,38 +28,17 @@ namespace Wrapland
 namespace Server
 {
 
-class Display;
-class SurfaceInterface;
-class XdgExporterV2Interface;
-class XdgImporterV2Interface;
+class D_isplay;
+class Surface;
+class XdgExporterV2;
+class XdgImporterV2;
 
-/**
- * This class encapsulates the server side logic of the XdgForeign protocol.
- * a process can export a surface to be identifiable by a server-wide unique
- * string handle, and another process can in turn import that surface, and set it
- * as transient parent for one of its own surfaces.
- * This parent relationship is traced by the parentChanged signal and the
- * parentFor method.
- *
- * @since 0.0.540
- */
-class WRAPLANDSERVER_EXPORT XdgForeignInterface : public QObject
+class WRAPLANDSERVER_EXPORT XdgForeign : public QObject
 {
     Q_OBJECT
 public:
-    XdgForeignInterface(Display *display, QObject *parent = nullptr);
-    ~XdgForeignInterface() override;
-
-    /**
-     * Creates the native zxdg_exporter_v2 and zxdg_importer_v2 interfaces
-     * and announces them to the client.
-     */
-    void create();
-
-    /**
-     * @returns true if theimporter and exporter are valid and functional
-     */
-    bool isValid();
+    XdgForeign(D_isplay* display, QObject* parent = nullptr);
+    ~XdgForeign() override;
 
     /**
      * This returns the xdg-foreign parent surface of @param surface, i.e. this returns a valid
@@ -71,7 +49,7 @@ public:
      * @param surface that a parent is searched for
      * @returns the parent if found, nullptr otherwise
      */
-    SurfaceInterface* parentOf(SurfaceInterface *surface);
+    Surface* parentOf(Surface* surface);
 
 Q_SIGNALS:
     /**
@@ -84,13 +62,12 @@ Q_SIGNALS:
      * anymore and either one of the surfaces has been unmapped, or the parent surface is not
      * exported anymore.
      */
-    void parentChanged(Wrapland::Server::SurfaceInterface *parent,
-                       Wrapland::Server::SurfaceInterface *child);
+    void parentChanged(Wrapland::Server::Surface* parent, Wrapland::Server::Surface* child);
 
 private:
-    friend class Display;
+    friend class D_isplay;
     class Private;
-    Private *d;
+    Private* d_ptr;
 };
 
 }

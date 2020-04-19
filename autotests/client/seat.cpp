@@ -39,12 +39,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../src/server/buffer_interface.h"
 #include "../../src/server/clientconnection.h"
-#include "../../src/server/compositor_interface.h"
 #include "../../src/server/seat_interface.h"
-#include "../../src/server/subcompositor_interface.h"
-#include "../../src/server/surface_interface.h"
 
 #include "../../server/client.h"
+#include "../../server/compositor.h"
 #include "../../server/data_device.h"
 #include "../../server/data_device_manager.h"
 #include "../../server/display.h"
@@ -53,6 +51,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/pointer_gestures_v1.h"
 #include "../../server/relative_pointer_v1.h"
 #include "../../server/seat.h"
+#include "../../server/subcompositor.h"
+#include "../../server/surface.h"
 #include "../../server/touch.h"
 
 #include <QtTest>
@@ -110,9 +110,9 @@ private Q_SLOTS:
 
 private:
     Srv::D_isplay* m_display;
-    Srv::CompositorInterface* m_compositorInterface;
+    Srv::Compositor* m_serverCompositor;
     Srv::Seat* m_serverSeat;
-    Srv::SubCompositorInterface* m_subCompositorInterface;
+    Srv::Subcompositor* m_serverSubcompositor;
     Srv::RelativePointerManagerV1* m_relativePointerManagerServer;
     Srv::PointerGesturesV1* m_pointerGesturesInterface;
     Clt::ConnectionThread* m_connection;
@@ -131,9 +131,9 @@ static const QString s_socketName = QStringLiteral("wrapland-test-wayland-seat-0
 TestSeat::TestSeat(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
-    , m_compositorInterface(nullptr)
+    , m_serverCompositor(nullptr)
     , m_serverSeat(nullptr)
-    , m_subCompositorInterface(nullptr)
+    , m_serverSubcompositor(nullptr)
     , m_relativePointerManagerServer(nullptr)
     , m_pointerGesturesInterface(nullptr)
     , m_connection(nullptr)
@@ -159,15 +159,11 @@ void TestSeat::init()
     m_display->start();
     m_display->createShm();
 
-    m_compositorInterface = m_display->createCompositor(m_display);
-    QVERIFY(m_compositorInterface);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    m_serverCompositor = m_display->createCompositor(m_display);
+    QVERIFY(m_serverCompositor);
 
-    m_subCompositorInterface = m_display->createSubCompositor(m_display);
-    QVERIFY(m_subCompositorInterface);
-    m_subCompositorInterface->create();
-    QVERIFY(m_subCompositorInterface->isValid());
+    m_serverSubcompositor = m_display->createSubCompositor(m_display);
+    QVERIFY(m_serverSubcompositor);
 
     m_relativePointerManagerServer = m_display->createRelativePointerManager(m_display);
     QVERIFY(m_relativePointerManagerServer);
@@ -276,14 +272,14 @@ void TestSeat::cleanup()
         m_thread = nullptr;
     }
 
-    delete m_compositorInterface;
-    m_compositorInterface = nullptr;
+    delete m_serverCompositor;
+    m_serverCompositor = nullptr;
 
     delete m_serverSeat;
     m_serverSeat = nullptr;
 
-    delete m_subCompositorInterface;
-    m_subCompositorInterface = nullptr;
+    delete m_serverSubcompositor;
+    m_serverSubcompositor = nullptr;
 
     delete m_relativePointerManagerServer;
     m_relativePointerManagerServer = nullptr;
@@ -385,13 +381,12 @@ void TestSeat::testPointer()
     m_serverSeat->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     auto s = m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
 
-    Srv::SurfaceInterface* serverSurface
-        = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    Srv::Surface* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     QSignalSpy focusedPointerChangedSpy(m_serverSeat, &Srv::Seat::focusedPointerChanged);
@@ -675,13 +670,13 @@ void TestSeat::testPointerTransformation()
     m_serverSeat->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
 
     auto s = m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     m_serverSeat->setPointerPos(QPoint(20, 18));
@@ -797,12 +792,12 @@ void TestSeat::testPointerButton()
     m_serverSeat->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     QScopedPointer<Clt::Pointer> p(m_seat->createPointer());
@@ -879,7 +874,7 @@ void TestSeat::testPointerSubSurfaceTree()
     // Create a sub surface tree.
     // Parent surface (100, 100) with one sub surface taking the half of it's size (50, 100)
     // which has two further children (50, 50) which are overlapping.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QScopedPointer<Clt::Surface> parentSurface(m_compositor->createSurface());
     QScopedPointer<Clt::Surface> childSurface(m_compositor->createSurface());
@@ -909,7 +904,7 @@ void TestSeat::testPointerSubSurfaceTree()
     render(parentSurface.data(), QSize(100, 100));
 
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface->isMapped());
 
     // Send in pointer events.
@@ -1007,12 +1002,12 @@ void TestSeat::testPointerSwipeGesture()
     QVERIFY(cancelledSpy.isValid());
 
     // Now create a surface.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
     m_serverSeat->setFocusedPointerSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedPointerSurface(), serverSurface);
@@ -1129,12 +1124,12 @@ void TestSeat::testPointerPinchGesture()
     QVERIFY(cancelledSpy.isValid());
 
     // Now create a surface.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
 
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
     m_serverSeat->setFocusedPointerSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedPointerSurface(), serverSurface);
@@ -1234,12 +1229,12 @@ void TestSeat::testPointerAxis()
     QVERIFY(pointer);
 
     // Now create a surface.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
 
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
     m_serverSeat->setFocusedPointerSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedPointerSurface(), serverSurface);
@@ -1363,7 +1358,7 @@ void TestSeat::testKeyboardSubSurfaceTreeFromPointer()
     // Create a sub surface tree.
     // Parent surface (100, 100) with one sub surface taking the half of it's size (50, 100)
     // which has two further children (50, 50) which are overlapping.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
 
     QScopedPointer<Clt::Surface> parentSurface(m_compositor->createSurface());
@@ -1394,7 +1389,7 @@ void TestSeat::testKeyboardSubSurfaceTreeFromPointer()
     render(parentSurface.data(), QSize(100, 100));
 
     QVERIFY(surfaceCreatedSpy.wait());
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface->isMapped());
 
     // Pass keyboard focus to the main surface.
@@ -1457,11 +1452,11 @@ void TestSeat::testCursor()
     m_serverSeat->setHasPointer(true);
     QVERIFY(pointerSpy.wait());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     QScopedPointer<Clt::Pointer> p(m_seat->createPointer());
@@ -1573,11 +1568,11 @@ void TestSeat::testCursorDamage()
 
     QVERIFY(enteredSpy.isValid());
     // Create surface.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Send enter to the surface.
@@ -1619,11 +1614,11 @@ void TestSeat::testKeyboard()
     QVERIFY(keyboardSpy.wait());
 
     // Create the surface.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     auto* s = m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
@@ -1795,7 +1790,7 @@ void TestSeat::testKeyboard()
     QScopedPointer<Clt::Surface> s2(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
     QCOMPARE(surfaceCreatedSpy.count(), 2);
-    serverSurface = surfaceCreatedSpy.last().first().value<Srv::SurfaceInterface*>();
+    serverSurface = surfaceCreatedSpy.last().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
@@ -1934,9 +1929,9 @@ void TestSeat::testDestroy()
 
     delete m_display;
     m_display = nullptr;
-    m_compositorInterface = nullptr;
+    m_serverCompositor = nullptr;
     m_serverSeat = nullptr;
-    m_subCompositorInterface = nullptr;
+    m_serverSubcompositor = nullptr;
     m_relativePointerManagerServer = nullptr;
     m_pointerGesturesInterface = nullptr;
     QTRY_COMPARE(connectionDiedSpy.count(), 1);
@@ -1978,13 +1973,13 @@ void TestSeat::testSelection()
     QSignalSpy selectionClearedSpy(dd1.data(), &Clt::DataDevice::selectionCleared);
     QVERIFY(selectionClearedSpy.isValid());
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(!m_serverSeat->selection());
 
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
@@ -2110,13 +2105,13 @@ void TestSeat::testSelectionNoDataSource()
     QVERIFY(ddi);
 
     // Now create a surface and pass it keyboard focus.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(!m_serverSeat->selection());
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedKeyboardSurface(), serverSurface);
@@ -2180,12 +2175,12 @@ void TestSeat::testDataDeviceForKeyboardSurface()
 
     // Switch to other client.
     // Create a surface and pass it keyboard focus.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QScopedPointer<Clt::Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedKeyboardSurface(), serverSurface);
 
@@ -2232,11 +2227,11 @@ void TestSeat::testTouch()
     QVERIFY(touchSpy.wait());
 
     // Create the surface.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     auto* s = m_compositor->createSurface(m_compositor);
     QVERIFY(surfaceCreatedSpy.wait());
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     m_serverSeat->setFocusedTouchSurface(serverSurface);
@@ -2524,18 +2519,18 @@ void TestSeat::testPointerEnterOnUnboundSurface()
     QVERIFY(!pointer.isNull());
 
     // Create the surface.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &Srv::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QScopedPointer<Clt::Surface> s(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Unbind the surface again.
     QSignalSpy serverPointerChangedSpy(m_serverSeat, &Srv::Seat::focusedPointerChanged);
     QVERIFY(serverPointerChangedSpy.isValid());
-    QSignalSpy surfaceUnboundSpy(serverSurface, &Srv::SurfaceInterface::unbound);
+    QSignalSpy surfaceUnboundSpy(serverSurface, &Srv::Surface::resourceDestroyed);
     QVERIFY(surfaceUnboundSpy.isValid());
     s.reset();
     QVERIFY(surfaceUnboundSpy.wait());

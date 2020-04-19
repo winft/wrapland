@@ -22,7 +22,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "global_p.h"
 #include "resource_p.h"
-#include "surface_interface_p.h"
+
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
+#include "../../server/wayland/resource.h"
 
 #include <wayland-server.h>
 #include <wayland-shadow-server-protocol.h>
@@ -101,7 +104,7 @@ void ShadowManagerInterface::Private::createCallback(wl_client *client, wl_resou
 
 void ShadowManagerInterface::Private::createShadow(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface)
 {
-    SurfaceInterface *s = SurfaceInterface::get(surface);
+    auto s = Wayland::Resource<Surface>::fromResource(surface)->handle();
     if (!s) {
         return;
     }
@@ -113,18 +116,18 @@ void ShadowManagerInterface::Private::createShadow(wl_client *client, wl_resourc
         delete shadow;
         return;
     }
-    s->d_func()->setShadow(QPointer<ShadowInterface>(shadow));
+    s->d_ptr->setShadow(QPointer<ShadowInterface>(shadow));
 }
 
 void ShadowManagerInterface::Private::unsetCallback(wl_client *client, wl_resource *resource, wl_resource *surface)
 {
     Q_UNUSED(client)
     Q_UNUSED(resource)
-    SurfaceInterface *s = SurfaceInterface::get(surface);
+    auto s = Wayland::Resource<Surface>::fromResource(surface)->handle();
     if (!s) {
         return;
     }
-    s->d_func()->setShadow(QPointer<ShadowInterface>());
+    s->d_ptr->setShadow(QPointer<ShadowInterface>());
 }
 
 ShadowManagerInterface::ShadowManagerInterface(Display *display, QObject *parent)

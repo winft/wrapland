@@ -51,7 +51,7 @@ namespace Server
 {
 class D_isplay;
 
-class CompositorInterface;
+//class CompositorInterface;
 //class DataDeviceManagerInterface;
 class IdleInterface;
 enum class IdleInhibitManagerInterfaceVersion;
@@ -72,7 +72,7 @@ class OutputManagementV1Interface;
 class ServerSideDecorationManagerInterface;
 class SlideManagerInterface;
 class ShellInterface;
-class SubCompositorInterface;
+//class SubCompositorInterface;
 enum class TextInputInterfaceVersion;
 class TextInputManagerInterface;
 class XdgShellV5Interface;
@@ -84,7 +84,7 @@ class XdgShellInterface;
 //class PointerGesturesInterface;
 //enum class PointerConstraintsInterfaceVersion;
 //class PointerConstraintsInterface;
-class XdgForeignInterface;
+//class XdgForeignInterface;
 class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
 class PlasmaVirtualDesktopManagementInterface;
@@ -183,7 +183,7 @@ public:
     void removeOutputDevice(OutputDeviceV1Interface *outputDevice);
     QList<OutputDeviceV1Interface*> outputDevices() const;
 
-    CompositorInterface *createCompositor(QObject *parent = nullptr);
+//    CompositorInterface *createCompositor(QObject *parent = nullptr);
     void createShm();
     ShellInterface *createShell(QObject *parent = nullptr);
     SeatInterface *createSeat(QObject *parent = nullptr);
@@ -192,7 +192,7 @@ public:
      * @since 5.6
      **/
     QVector<SeatInterface*> seats() const;
-    SubCompositorInterface *createSubCompositor(QObject *parent = nullptr);
+//    SubCompositorInterface *createSubCompositor(QObject *parent = nullptr);
 //    DataDeviceManagerInterface *createDataDeviceManager(QObject *parent = nullptr);
     OutputManagementV1Interface *createOutputManagementV1(QObject *parent = nullptr);
     PlasmaShellInterface *createPlasmaShell(QObject *parent = nullptr);
@@ -251,13 +251,13 @@ public:
 //     **/
 //    PointerConstraintsInterface *createPointerConstraints(const PointerConstraintsInterfaceVersion &version, QObject *parent = nullptr);
 
-    /**
-     * Creates the XdgForeignInterface in interface @p version
-     *
-     * @returns The created manager object
-     * @since 0.0.540
-     **/
-    XdgForeignInterface *createXdgForeignInterface(QObject *parent = nullptr);
+//    /**
+//     * Creates the XdgForeignInterface in interface @p version
+//     *
+//     * @returns The created manager object
+//     * @since 0.0.540
+//     **/
+//    XdgForeignInterface *createXdgForeignInterface(QObject *parent = nullptr);
 
     /**
      * Creates the IdleInhibitManagerInterface in interface @p version.
