@@ -86,6 +86,16 @@ public:
         }
     }
 
+    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
+    Resource(Client* client,
+             uint32_t version,
+             uint32_t id,
+             const wl_interface* interface,
+             const void* impl)
+        : Resource(client, version, id, interface, impl, nullptr)
+    {
+    }
+
     virtual ~Resource() = default;
 
     wl_resource* resource() const
@@ -93,11 +103,13 @@ public:
         return m_resource;
     }
 
+    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
     GlobalHandle* global() const
     {
         return m_global;
     }
 
+    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
     void setGlobal(GlobalHandle* global)
     {
         m_global = global;
@@ -155,6 +167,7 @@ public:
         wl_resource_destroy(resource->resource());
     }
 
+    template<typename = std::enable_if<std::is_same_v<GlobalHandle, void>>>
     Handle* handle()
     {
         return m_handle;

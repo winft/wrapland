@@ -226,8 +226,7 @@ private:
 
     void bind(Client* client, uint32_t version, uint32_t id)
     {
-        auto resource
-            = new GlobalResource(client, version, id, m_interface, m_implementation, m_handle);
+        auto resource = new GlobalResource(client, version, id, m_interface, m_implementation);
         resource->setGlobal(this);
         m_binds.push_back(resource);
         bindInit(client, version, id);
