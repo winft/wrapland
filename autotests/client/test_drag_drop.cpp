@@ -147,7 +147,7 @@ void TestDragAndDrop::init()
 
 #undef CREATE
 
-    QSignalSpy pointerSpy(m_seat, &Seat::hasPointerChanged);
+    QSignalSpy pointerSpy(m_seat, &Wrapland::Client::Seat::hasPointerChanged);
     QVERIFY(pointerSpy.isValid());
     QVERIFY(pointerSpy.wait());
     m_pointer = m_seat->createPointer(m_seat);
@@ -231,7 +231,7 @@ void TestDragAndDrop::testPointerDragAndDrop()
     QVERIFY(dataSourceSelectedActionChangedSpy.isValid());
 
     // now we need to pass pointer focus to the Surface and simulate a button press
-    QSignalSpy buttonPressSpy(m_pointer, &Pointer::buttonStateChanged);
+    QSignalSpy buttonPressSpy(m_pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(buttonPressSpy.isValid());
     m_seatInterface->setFocusedPointerSurface(serverSurface);
     m_seatInterface->setTimestamp(2);
@@ -244,7 +244,7 @@ void TestDragAndDrop::testPointerDragAndDrop()
     QVERIFY(dragEnteredSpy.isValid());
     QSignalSpy dragMotionSpy(m_dataDevice, &DataDevice::dragMotion);
     QVERIFY(dragMotionSpy.isValid());
-    QSignalSpy pointerMotionSpy(m_pointer, &Pointer::motion);
+    QSignalSpy pointerMotionSpy(m_pointer, &Wrapland::Client::Pointer::motion);
     QVERIFY(pointerMotionSpy.isValid());
     QSignalSpy sourceDropSpy(m_dataSource, &DataSource::dragAndDropPerformed);
     QVERIFY(sourceDropSpy.isValid());
@@ -424,7 +424,7 @@ void TestDragAndDrop::testDragAndDropWithCancelByDestroyDataSource()
     QVERIFY(dataSourceSelectedActionChangedSpy.isValid());
 
     // now we need to pass pointer focus to the Surface and simulate a button press
-    QSignalSpy buttonPressSpy(m_pointer, &Pointer::buttonStateChanged);
+    QSignalSpy buttonPressSpy(m_pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(buttonPressSpy.isValid());
     m_seatInterface->setFocusedPointerSurface(serverSurface);
     m_seatInterface->setTimestamp(2);
@@ -437,7 +437,7 @@ void TestDragAndDrop::testDragAndDropWithCancelByDestroyDataSource()
     QVERIFY(dragEnteredSpy.isValid());
     QSignalSpy dragMotionSpy(m_dataDevice, &DataDevice::dragMotion);
     QVERIFY(dragMotionSpy.isValid());
-    QSignalSpy pointerMotionSpy(m_pointer, &Pointer::motion);
+    QSignalSpy pointerMotionSpy(m_pointer, &Wrapland::Client::Pointer::motion);
     QVERIFY(pointerMotionSpy.isValid());
     QSignalSpy dragLeftSpy(m_dataDevice, &DataDevice::dragLeft);
     QVERIFY(dragLeftSpy.isValid());
@@ -516,15 +516,15 @@ void TestDragAndDrop::testPointerEventsIgnored()
     m_seatInterface->setFocusedPointerSurface(serverSurface);
 
     // create signal spies for all the pointer events
-    QSignalSpy pointerEnteredSpy(m_pointer, &Pointer::entered);
+    QSignalSpy pointerEnteredSpy(m_pointer, &Wrapland::Client::Pointer::entered);
     QVERIFY(pointerEnteredSpy.isValid());
-    QSignalSpy pointerLeftSpy(m_pointer, &Pointer::left);
+    QSignalSpy pointerLeftSpy(m_pointer, &Wrapland::Client::Pointer::left);
     QVERIFY(pointerLeftSpy.isValid());
-    QSignalSpy pointerMotionSpy(m_pointer, &Pointer::motion);
+    QSignalSpy pointerMotionSpy(m_pointer, &Wrapland::Client::Pointer::motion);
     QVERIFY(pointerMotionSpy.isValid());
-    QSignalSpy axisSpy(m_pointer, &Pointer::axisChanged);
+    QSignalSpy axisSpy(m_pointer, &Wrapland::Client::Pointer::axisChanged);
     QVERIFY(axisSpy.isValid());
-    QSignalSpy buttonSpy(m_pointer, &Pointer::buttonStateChanged);
+    QSignalSpy buttonSpy(m_pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(buttonSpy.isValid());
     QSignalSpy dragEnteredSpy(m_dataDevice, &DataDevice::dragEntered);
     QVERIFY(dragEnteredSpy.isValid());

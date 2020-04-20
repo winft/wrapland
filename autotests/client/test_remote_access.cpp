@@ -73,7 +73,7 @@ public:
     EventQueue *queue = nullptr;
     Registry *registry = nullptr;
     RemoteAccessManager *remoteAccess = nullptr;
-    Output *outputs[2] = {nullptr};
+    Wrapland::Client::Output *outputs[2] = {nullptr};
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-remote-access-0");

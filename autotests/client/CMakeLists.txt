@@ -52,13 +52,24 @@ endif()
 ########################################################
 # Test WaylandOutput
 ########################################################
-set( testWaylandOutput_SRCS
-        test_wayland_output.cpp
+set(testOutput_SRCS output.cpp)
+add_executable(testOutput ${testOutput_SRCS})
+target_link_libraries( testOutput
+    Qt5::Test Qt5::Gui
+    Wrapland::Client Wrapland::Server
+    Wayland::Client Wayland::Server
     )
-add_executable(testWaylandOutput ${testWaylandOutput_SRCS})
-target_link_libraries( testWaylandOutput Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
-add_test(NAME wrapland-testWaylandOutput COMMAND testWaylandOutput)
-ecm_mark_as_test(testWaylandOutput)
+add_test(NAME wrapland-testOutput COMMAND testOutput)
+ecm_mark_as_test(testOutput)
+
+# Legacy
+#set( testWaylandOutput_SRCS
+#        test_wayland_output.cpp
+#    )
+#add_executable(testWaylandOutput ${testWaylandOutput_SRCS})
+#target_link_libraries( testWaylandOutput Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+#add_test(NAME wrapland-testWaylandOutput COMMAND testWaylandOutput)
+#ecm_mark_as_test(testWaylandOutput)
 
 ########################################################
 # Test WaylandShell
@@ -86,14 +97,26 @@ ecm_mark_as_test(testWaylandSurface)
 # Test WaylandSeat
 ########################################################
 if (HAVE_LINUX_INPUT_H)
-    set( testWaylandSeat_SRCS
-            test_wayland_seat.cpp
-        )
-    add_executable(testWaylandSeat ${testWaylandSeat_SRCS})
-    target_link_libraries( testWaylandSeat Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
-    add_test(NAME wrapland-testWaylandSeat COMMAND testWaylandSeat)
-    ecm_mark_as_test(testWaylandSeat)
+    set( testSeat_SRCS seat.cpp )
+    add_executable(testSeat ${testSeat_SRCS})
+    target_link_libraries( testSeat
+        Qt5::Test Qt5::Gui
+        Wrapland::Client Wrapland::Server
+        Wayland::Client Wayland::Server)
+    add_test(NAME wrapland-testSeat COMMAND testSeat)
+    ecm_mark_as_test(testSeat)
 endif()
+
+#Legacy
+#if (HAVE_LINUX_INPUT_H)
+#    set( testWaylandSeat_SRCS
+#            test_wayland_seat.cpp
+#        )
+#    add_executable(testWaylandSeat ${testWaylandSeat_SRCS})
+#    target_link_libraries( testWaylandSeat Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+#    add_test(NAME wrapland-testWaylandSeat COMMAND testWaylandSeat)
+#    ecm_mark_as_test(testWaylandSeat)
+#endif()
 
 ########################################################
 # Test ShmPool

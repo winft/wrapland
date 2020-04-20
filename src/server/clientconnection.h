@@ -34,6 +34,12 @@ namespace Wrapland
 {
 namespace Server
 {
+namespace Wayland
+{
+class Client;
+}
+
+class Client;
 
 class Display;
 
@@ -141,6 +147,8 @@ public:
      **/
     void destroy();
 
+    Server::Client* newClient = nullptr;
+
 Q_SIGNALS:
     /**
      * Signal emitted when the ClientConnection got disconnected from the server.
@@ -149,6 +157,11 @@ Q_SIGNALS:
 
 private:
     friend class Display;
+
+    // Remodel
+    friend class Client;
+    friend class Wayland::Client;
+
     explicit ClientConnection(wl_client *c, Display *parent);
     class Private;
     QScopedPointer<Private> d;

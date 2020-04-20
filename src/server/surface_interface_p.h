@@ -86,8 +86,8 @@ public:
     void setSlide(const QPointer<SlideInterface> &slide);
     void setSourceRectangle(const QRectF &source);
     void setDestinationSize(const QSize &dest);
-    void installPointerConstraint(LockedPointerInterface *lock);
-    void installPointerConstraint(ConfinedPointerInterface *confinement);
+    void installPointerConstraint(LockedPointerV1 *lock);
+    void installPointerConstraint(ConfinedPointerV1 *confinement);
     void installIdleInhibitor(IdleInhibitorInterface *inhibitor);
     void installViewport(ViewportInterface *vp);
 
@@ -111,8 +111,8 @@ public:
 
     QVector<OutputInterface *> outputs;
 
-    QPointer<LockedPointerInterface> lockedPointer;
-    QPointer<ConfinedPointerInterface> confinedPointer;
+    QPointer<LockedPointerV1> lockedPointer;
+    QPointer<ConfinedPointerV1> confinedPointer;
     QPointer<ViewportInterface> viewport;
     QHash<OutputInterface*, QMetaObject::Connection> outputDestroyedConnections;
     QVector<IdleInhibitorInterface*> idleInhibitors;

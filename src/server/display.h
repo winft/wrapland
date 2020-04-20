@@ -49,10 +49,10 @@ namespace Wrapland
  **/
 namespace Server
 {
+class D_isplay;
 
 class CompositorInterface;
 class DataDeviceManagerInterface;
-class DpmsManagerInterface;
 class IdleInterface;
 enum class IdleInhibitManagerInterfaceVersion;
 class RemoteAccessManagerInterface;
@@ -78,12 +78,12 @@ class TextInputManagerInterface;
 class XdgShellV5Interface;
 enum class XdgShellInterfaceVersion;
 class XdgShellInterface;
-enum class RelativePointerInterfaceVersion;
-class RelativePointerManagerInterface;
-enum class PointerGesturesInterfaceVersion;
-class PointerGesturesInterface;
-enum class PointerConstraintsInterfaceVersion;
-class PointerConstraintsInterface;
+//enum class RelativePointerInterfaceVersion;
+//class RelativePointerManagerInterface;
+//enum class PointerGesturesInterfaceVersion;
+//class PointerGesturesInterface;
+//enum class PointerConstraintsInterfaceVersion;
+//class PointerConstraintsInterface;
 class XdgForeignInterface;
 class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
@@ -107,7 +107,7 @@ class WRAPLANDSERVER_EXPORT Display : public QObject
     Q_PROPERTY(bool automaticSocketNaming READ automaticSocketNaming WRITE setAutomaticSocketNaming NOTIFY automaticSocketNamingChanged)
     Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
 public:
-    explicit Display(QObject *parent = nullptr);
+    explicit Display(QObject *parent = nullptr, bool newInvoked = false);
     virtual ~Display();
 
     /**
@@ -205,7 +205,6 @@ public:
     BlurManagerInterface *createBlurManager(QObject *parent = nullptr);
     ContrastManagerInterface *createContrastManager(QObject *parent = nullptr);
     SlideManagerInterface *createSlideManager(QObject *parent = nullptr);
-    DpmsManagerInterface *createDpmsManager(QObject *parent = nullptr);
 
     /** @since 0.0.560 */
     KeyStateInterface *createKeyStateInterface(QObject *parent = nullptr);
@@ -228,29 +227,29 @@ public:
      **/
     XdgShellInterface *createXdgShell(const XdgShellInterfaceVersion &version, QObject *parent = nullptr);
 
-    /**
-     * Creates the RelativePointerManagerInterface in interface @p version
-     *
-     * @returns The created manager object
-     * @since 0.0.528
-     **/
-    RelativePointerManagerInterface *createRelativePointerManager(const RelativePointerInterfaceVersion &version, QObject *parent = nullptr);
+//    /**
+//     * Creates the RelativePointerManagerInterface in interface @p version
+//     *
+//     * @returns The created manager object
+//     * @since 0.0.528
+//     **/
+//    RelativePointerManagerInterface *createRelativePointerManager(const RelativePointerInterfaceVersion &version, QObject *parent = nullptr);
 
-    /**
-     * Creates the PointerGesturesInterface in interface @p version
-     *
-     * @returns The created manager object
-     * @since 0.0.529
-     **/
-    PointerGesturesInterface *createPointerGestures(const PointerGesturesInterfaceVersion &version, QObject *parent = nullptr);
+//    /**
+//     * Creates the PointerGesturesInterface in interface @p version
+//     *
+//     * @returns The created manager object
+//     * @since 0.0.529
+//     **/
+//    PointerGesturesInterface *createPointerGestures(const PointerGesturesInterfaceVersion &version, QObject *parent = nullptr);
 
-    /**
-     * Creates the PointerConstraintsInterface in interface @p version
-     *
-     * @returns The created manager object
-     * @since 0.0.529
-     **/
-    PointerConstraintsInterface *createPointerConstraints(const PointerConstraintsInterfaceVersion &version, QObject *parent = nullptr);
+//    /**
+//     * Creates the PointerConstraintsInterface in interface @p version
+//     *
+//     * @returns The created manager object
+//     * @since 0.0.529
+//     **/
+//    PointerConstraintsInterface *createPointerConstraints(const PointerConstraintsInterfaceVersion &version, QObject *parent = nullptr);
 
     /**
      * Creates the XdgForeignInterface in interface @p version
@@ -358,6 +357,8 @@ public:
      * @since 5.3
      **/
     void *eglDisplay() const;
+
+    Server::D_isplay* newDisplay;
 
 Q_SIGNALS:
     void socketNameChanged(const QString&);

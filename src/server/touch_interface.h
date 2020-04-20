@@ -28,6 +28,7 @@ namespace Wrapland
 {
 namespace Server
 {
+class Seat;
 
 class SeatInterface;
 
@@ -51,6 +52,8 @@ private:
     explicit TouchInterface(SeatInterface *parent, wl_resource *parentResource);
     class Private;
     Private *d_func() const;
+
+    friend class Seat;
 };
 
 }

@@ -17,21 +17,18 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// KWin
+
+#include "../../server/display.h"
+#include "../../server/output.h"
+
+
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
-#include "../../src/client/dpms.h"
 #include "../../src/client/output.h"
 #include "../../src/client/xdgoutput.h"
 #include "../../src/client/registry.h"
-#include "../../src/server/display.h"
-#include "../../src/server/dpms_interface.h"
-#include "../../src/server/output_interface.h"
 #include "../../src/server/xdgoutput_interface.h"
-
-// Wayland
 
 class TestXdgOutput : public QObject
 {
@@ -43,8 +40,8 @@ private Q_SLOTS:
     void cleanup();
     void testChanges();
 private:
-    Wrapland::Server::Display *m_display;
-    Wrapland::Server::OutputInterface *m_serverOutput;
+    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Output* m_serverOutput;
     Wrapland::Server::XdgOutputManagerInterface *m_serverXdgOutputManager;
     Wrapland::Server::XdgOutputInterface *m_serverXdgOutput;
     Wrapland::Client::ConnectionThread *m_connection;
@@ -67,19 +64,17 @@ void TestXdgOutput::init()
 {
     using namespace Wrapland::Server;
     delete m_display;
-    m_display = new Display(this);
+    m_display = new D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     m_serverOutput = m_display->createOutput(this);
-    m_serverOutput->addMode(QSize(1920, 1080), OutputInterface::ModeFlags(OutputInterface::ModeFlag::Preferred));
+    m_serverOutput->addMode(QSize(1920, 1080), Output::ModeFlags(Output::ModeFlag::Preferred));
     m_serverOutput->setCurrentMode(QSize(1920, 1080));
-    m_serverOutput->create();
 
     m_serverXdgOutputManager = m_display->createXdgOutputManager(this);
     m_serverXdgOutputManager->create();
-    m_serverXdgOutput =  m_serverXdgOutputManager->createXdgOutput(m_serverOutput, this);
+    m_serverXdgOutput =  m_serverXdgOutputManager->createXdgOutput(m_serverOutput->legacy, this);
     m_serverXdgOutput->setLogicalSize(QSize(1280, 720)); //a 1.5 scale factor
     m_serverXdgOutput->setLogicalPosition(QPoint(11,12)); //not a sensible value for one monitor, but works for this test
     m_serverXdgOutput->done();

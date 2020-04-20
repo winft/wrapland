@@ -11,7 +11,6 @@ set(SERVER_LIB_SRCS
     dataoffer_interface.cpp
     datasource_interface.cpp
     display.cpp
-    dpms_interface.cpp
     eglstream_controller_interface.cpp
     fakeinput_interface.cpp
     filtered_display.cpp
@@ -19,7 +18,6 @@ set(SERVER_LIB_SRCS
     idle_interface.cpp
     idleinhibit_interface.cpp
     idleinhibit_interface_v1.cpp
-    keyboard_interface.cpp
     keystate_interface.cpp
     linuxdmabuf_v1_interface.cpp
     output_interface.cpp
@@ -30,15 +28,8 @@ set(SERVER_LIB_SRCS
     plasmashell_interface.cpp
     plasmavirtualdesktop_interface.cpp
     plasmawindowmanagement_interface.cpp
-    pointer_interface.cpp
-    pointerconstraints_interface.cpp
-    pointerconstraints_interface_v1.cpp
-    pointergestures_interface.cpp
-    pointergestures_interface_v1.cpp
     qtsurfaceextension_interface.cpp
     region_interface.cpp
-    relativepointer_interface.cpp
-    relativepointer_interface_v1.cpp
     remote_access_interface.cpp
     resource.cpp
     seat_interface.cpp
@@ -64,6 +55,21 @@ set(SERVER_LIB_SRCS
     xdgshell_v5_interface.cpp
     xdgshell_v5_interface.cpp
     xdgshell_v6_interface.cpp
+
+    ../../server/client.cpp
+    ../../server/display.cpp
+    ../../server/dpms.cpp
+    ../../server/output.cpp
+    ../../server/pointer.cpp
+    ../../server/pointer_constraints_v1.cpp
+    ../../server/pointer_gestures_v1.cpp
+    ../../server/relative_pointer_v1.cpp
+    ../../server/seat.cpp
+    ../../server/keystate.cpp
+    ../../server/wayland/client.cpp
+    ../../server/wayland/display.cpp
+
+    ../../server/keyboard.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -313,6 +319,7 @@ set_target_properties(WraplandServer PROPERTIES VERSION   ${WRAPLAND_VERSION_STR
                                                  SOVERSION ${WRAPLAND_SOVERSION}
                                                  EXPORT_NAME WraplandServer
 )
+kde_target_enable_exceptions(WraplandServer PUBLIC)
 
 install(TARGETS WraplandServer EXPORT WraplandTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
 
@@ -329,14 +336,12 @@ set(SERVER_LIB_HEADERS
   dataoffer_interface.h
   datasource_interface.h
   display.h
-  dpms_interface.h
   eglstream_controller_interface.h
   fakeinput_interface.h
   filtered_display.h
   global.h
   idle_interface.h
   idleinhibit_interface.h
-  keyboard_interface.h
   keystate_interface.h
   linuxdmabuf_v1_interface.h
   output_interface.h
@@ -347,15 +352,10 @@ set(SERVER_LIB_HEADERS
   plasmashell_interface.h
   plasmavirtualdesktop_interface.h
   plasmawindowmanagement_interface.h
-  pointer_interface.h
-  pointerconstraints_interface.h
-  pointergestures_interface.h
   qtsurfaceextension_interface.h
   region_interface.h
-  relativepointer_interface.h
   remote_access_interface.h
   resource.h
-  seat_interface.h
   server_decoration_interface.h
   server_decoration_palette_interface.h
   shadow_interface.h
@@ -370,6 +370,17 @@ set(SERVER_LIB_HEADERS
   xdgforeign_interface.h
   xdgoutput_interface.h
   xdgshell_interface.h
+
+  ../../server/client.h
+  ../../server/display.h
+  ../../server/dpms.h
+  ../../server/keyboard.h
+  ../../server/output.h
+  ../../server/pointer.h
+  ../../server/pointer_constraints_v1.h
+  ../../server/pointer_gestures_v1.h
+  ../../server/relative_pointer_v1.h
+  ../../server/seat.h
 )
 
 install(FILES

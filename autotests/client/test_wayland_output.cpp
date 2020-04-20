@@ -243,23 +243,23 @@ void TestWaylandOutput::testModeChanges()
     wl_display_flush(m_connection->display());
     QVERIFY(outputChanged.wait());
     QCOMPARE(modeAddedSpy.count(), 3);
-    QCOMPARE(modeAddedSpy.at(0).first().value<Output::Mode>().size, QSize(800, 600));
-    QCOMPARE(modeAddedSpy.at(0).first().value<Output::Mode>().refreshRate, 60000);
-    QCOMPARE(modeAddedSpy.at(0).first().value<Output::Mode>().flags, Output::Mode::Flags(Output::Mode::Flag::Preferred));
-    QCOMPARE(modeAddedSpy.at(0).first().value<Output::Mode>().output, QPointer<Output>(&output));
-    QCOMPARE(modeAddedSpy.at(1).first().value<Output::Mode>().size, QSize(1280, 1024));
-    QCOMPARE(modeAddedSpy.at(1).first().value<Output::Mode>().refreshRate, 90000);
-    QCOMPARE(modeAddedSpy.at(1).first().value<Output::Mode>().flags, Output::Mode::Flags(Output::Mode::Flag::None));
-    QCOMPARE(modeAddedSpy.at(1).first().value<Output::Mode>().output, QPointer<Output>(&output));
-    QCOMPARE(modeAddedSpy.at(2).first().value<Output::Mode>().size, QSize(1024, 768));
-    QCOMPARE(modeAddedSpy.at(2).first().value<Output::Mode>().refreshRate, 60000);
-    QCOMPARE(modeAddedSpy.at(2).first().value<Output::Mode>().flags, Output::Mode::Flags(Output::Mode::Flag::Current));
-    QCOMPARE(modeAddedSpy.at(2).first().value<Output::Mode>().output, QPointer<Output>(&output));
-    const QList<Output::Mode> &modes = output.modes();
+    QCOMPARE(modeAddedSpy.at(0).first().value<Wrapland::Client::Output::Mode>().size, QSize(800, 600));
+    QCOMPARE(modeAddedSpy.at(0).first().value<Wrapland::Client::Output::Mode>().refreshRate, 60000);
+    QCOMPARE(modeAddedSpy.at(0).first().value<Wrapland::Client::Output::Mode>().flags, Wrapland::Client::Output::Mode::Flags(Wrapland::Client::Output::Mode::Flag::Preferred));
+    QCOMPARE(modeAddedSpy.at(0).first().value<Wrapland::Client::Output::Mode>().output, QPointer<Wrapland::Client::Output>(&output));
+    QCOMPARE(modeAddedSpy.at(1).first().value<Wrapland::Client::Output::Mode>().size, QSize(1280, 1024));
+    QCOMPARE(modeAddedSpy.at(1).first().value<Wrapland::Client::Output::Mode>().refreshRate, 90000);
+    QCOMPARE(modeAddedSpy.at(1).first().value<Wrapland::Client::Output::Mode>().flags, Wrapland::Client::Output::Mode::Flags(Wrapland::Client::Output::Mode::Flag::None));
+    QCOMPARE(modeAddedSpy.at(1).first().value<Wrapland::Client::Output::Mode>().output, QPointer<Wrapland::Client::Output>(&output));
+    QCOMPARE(modeAddedSpy.at(2).first().value<Wrapland::Client::Output::Mode>().size, QSize(1024, 768));
+    QCOMPARE(modeAddedSpy.at(2).first().value<Wrapland::Client::Output::Mode>().refreshRate, 60000);
+    QCOMPARE(modeAddedSpy.at(2).first().value<Wrapland::Client::Output::Mode>().flags, Wrapland::Client::Output::Mode::Flags(Wrapland::Client::Output::Mode::Flag::Current));
+    QCOMPARE(modeAddedSpy.at(2).first().value<Wrapland::Client::Output::Mode>().output, QPointer<Wrapland::Client::Output>(&output));
+    const QList<Wrapland::Client::Output::Mode> &modes = output.modes();
     QCOMPARE(modes.size(), 3);
-    QCOMPARE(modes.at(0), modeAddedSpy.at(0).first().value<Output::Mode>());
-    QCOMPARE(modes.at(1), modeAddedSpy.at(1).first().value<Output::Mode>());
-    QCOMPARE(modes.at(2), modeAddedSpy.at(2).first().value<Output::Mode>());
+    QCOMPARE(modes.at(0), modeAddedSpy.at(0).first().value<Wrapland::Client::Output::Mode>());
+    QCOMPARE(modes.at(1), modeAddedSpy.at(1).first().value<Wrapland::Client::Output::Mode>());
+    QCOMPARE(modes.at(2), modeAddedSpy.at(2).first().value<Wrapland::Client::Output::Mode>());
 
     QCOMPARE(output.pixelSize(), QSize(1024, 768));
 
@@ -274,25 +274,25 @@ void TestWaylandOutput::testModeChanges()
     }
     QCOMPARE(modeChangedSpy.size(), 2);
     // the one which lost the current flag
-    QCOMPARE(modeChangedSpy.first().first().value<Output::Mode>().size, QSize(1024, 768));
-    QCOMPARE(modeChangedSpy.first().first().value<Output::Mode>().refreshRate, 60000);
-    QCOMPARE(modeChangedSpy.first().first().value<Output::Mode>().flags, Output::Mode::Flags());
+    QCOMPARE(modeChangedSpy.first().first().value<Wrapland::Client::Output::Mode>().size, QSize(1024, 768));
+    QCOMPARE(modeChangedSpy.first().first().value<Wrapland::Client::Output::Mode>().refreshRate, 60000);
+    QCOMPARE(modeChangedSpy.first().first().value<Wrapland::Client::Output::Mode>().flags, Wrapland::Client::Output::Mode::Flags());
     // the one which got the current flag
-    QCOMPARE(modeChangedSpy.last().first().value<Output::Mode>().size, QSize(800, 600));
-    QCOMPARE(modeChangedSpy.last().first().value<Output::Mode>().refreshRate, 60000);
-    QCOMPARE(modeChangedSpy.last().first().value<Output::Mode>().flags, Output::Mode::Flags(Output::Mode::Flag::Current | Output::Mode::Flag::Preferred));
+    QCOMPARE(modeChangedSpy.last().first().value<Wrapland::Client::Output::Mode>().size, QSize(800, 600));
+    QCOMPARE(modeChangedSpy.last().first().value<Wrapland::Client::Output::Mode>().refreshRate, 60000);
+    QCOMPARE(modeChangedSpy.last().first().value<Wrapland::Client::Output::Mode>().flags, Wrapland::Client::Output::Mode::Flags(Wrapland::Client::Output::Mode::Flag::Current | Wrapland::Client::Output::Mode::Flag::Preferred));
     QVERIFY(!outputChanged.isEmpty());
     QCOMPARE(output.pixelSize(), QSize(800, 600));
-    const QList<Output::Mode> &modes2 = output.modes();
+    const QList<Wrapland::Client::Output::Mode> &modes2 = output.modes();
     QCOMPARE(modes2.at(0).size, QSize(1280, 1024));
     QCOMPARE(modes2.at(0).refreshRate, 90000);
-    QCOMPARE(modes2.at(0).flags, Output::Mode::Flag::None);
+    QCOMPARE(modes2.at(0).flags, Wrapland::Client::Output::Mode::Flag::None);
     QCOMPARE(modes2.at(1).size, QSize(1024, 768));
     QCOMPARE(modes2.at(1).refreshRate, 60000);
-    QCOMPARE(modes2.at(1).flags, Output::Mode::Flag::None);
+    QCOMPARE(modes2.at(1).flags, Wrapland::Client::Output::Mode::Flag::None);
     QCOMPARE(modes2.at(2).size, QSize(800, 600));
     QCOMPARE(modes2.at(2).refreshRate, 60000);
-    QCOMPARE(modes2.at(2).flags, Output::Mode::Flag::Current | Output::Mode::Flag::Preferred);
+    QCOMPARE(modes2.at(2).flags, Wrapland::Client::Output::Mode::Flag::Current | Wrapland::Client::Output::Mode::Flag::Preferred);
 
     // change once more
     outputChanged.clear();
@@ -305,13 +305,13 @@ void TestWaylandOutput::testModeChanges()
     }
     QCOMPARE(modeChangedSpy.size(), 2);
     // the one which lost the current flag
-    QCOMPARE(modeChangedSpy.first().first().value<Output::Mode>().size, QSize(800, 600));
-    QCOMPARE(modeChangedSpy.first().first().value<Output::Mode>().refreshRate, 60000);
-    QCOMPARE(modeChangedSpy.first().first().value<Output::Mode>().flags, Output::Mode::Flags(Output::Mode::Flag::Preferred));
+    QCOMPARE(modeChangedSpy.first().first().value<Wrapland::Client::Output::Mode>().size, QSize(800, 600));
+    QCOMPARE(modeChangedSpy.first().first().value<Wrapland::Client::Output::Mode>().refreshRate, 60000);
+    QCOMPARE(modeChangedSpy.first().first().value<Wrapland::Client::Output::Mode>().flags, Wrapland::Client::Output::Mode::Flags(Wrapland::Client::Output::Mode::Flag::Preferred));
     // the one which got the current flag
-    QCOMPARE(modeChangedSpy.last().first().value<Output::Mode>().size, QSize(1280, 1024));
-    QCOMPARE(modeChangedSpy.last().first().value<Output::Mode>().refreshRate, 90000);
-    QCOMPARE(modeChangedSpy.last().first().value<Output::Mode>().flags, Output::Mode::Flags(Output::Mode::Flag::Current));
+    QCOMPARE(modeChangedSpy.last().first().value<Wrapland::Client::Output::Mode>().size, QSize(1280, 1024));
+    QCOMPARE(modeChangedSpy.last().first().value<Wrapland::Client::Output::Mode>().refreshRate, 90000);
+    QCOMPARE(modeChangedSpy.last().first().value<Wrapland::Client::Output::Mode>().flags, Wrapland::Client::Output::Mode::Flags(Wrapland::Client::Output::Mode::Flag::Current));
     QVERIFY(!outputChanged.isEmpty());
     QCOMPARE(output.pixelSize(), QSize(1280, 1024));
 }
@@ -363,11 +363,11 @@ void TestWaylandOutput::testSubPixel_data()
     QTest::addColumn<Wrapland::Client::Output::SubPixel>("expected");
     QTest::addColumn<Wrapland::Server::OutputInterface::SubPixel>("actual");
 
-    QTest::newRow("none") << Output::SubPixel::None << OutputInterface::SubPixel::None;
-    QTest::newRow("horizontal/rgb") << Output::SubPixel::HorizontalRGB << OutputInterface::SubPixel::HorizontalRGB;
-    QTest::newRow("horizontal/bgr") << Output::SubPixel::HorizontalBGR << OutputInterface::SubPixel::HorizontalBGR;
-    QTest::newRow("vertical/rgb") << Output::SubPixel::VerticalRGB << OutputInterface::SubPixel::VerticalRGB;
-    QTest::newRow("vertical/bgr") << Output::SubPixel::VerticalBGR << OutputInterface::SubPixel::VerticalBGR;
+    QTest::newRow("none") << Wrapland::Client::Output::SubPixel::None << OutputInterface::SubPixel::None;
+    QTest::newRow("horizontal/rgb") << Wrapland::Client::Output::SubPixel::HorizontalRGB << OutputInterface::SubPixel::HorizontalRGB;
+    QTest::newRow("horizontal/bgr") << Wrapland::Client::Output::SubPixel::HorizontalBGR << OutputInterface::SubPixel::HorizontalBGR;
+    QTest::newRow("vertical/rgb") << Wrapland::Client::Output::SubPixel::VerticalRGB << OutputInterface::SubPixel::VerticalRGB;
+    QTest::newRow("vertical/bgr") << Wrapland::Client::Output::SubPixel::VerticalBGR << OutputInterface::SubPixel::VerticalBGR;
 }
 
 void TestWaylandOutput::testSubPixel()
@@ -412,7 +412,7 @@ void TestWaylandOutput::testSubPixel()
     if (outputChanged.isEmpty()) {
         QVERIFY(outputChanged.wait());
     }
-    QCOMPARE(output.subPixel(), Output::SubPixel::Unknown);
+    QCOMPARE(output.subPixel(), Wrapland::Client::Output::SubPixel::Unknown);
 }
 
 void TestWaylandOutput::testTransform_data()
@@ -422,13 +422,13 @@ void TestWaylandOutput::testTransform_data()
     QTest::addColumn<Wrapland::Client::Output::Transform>("expected");
     QTest::addColumn<Wrapland::Server::OutputInterface::Transform>("actual");
 
-    QTest::newRow("90")          << Output::Transform::Rotated90  << OutputInterface::Transform::Rotated90;
-    QTest::newRow("180")         << Output::Transform::Rotated180 << OutputInterface::Transform::Rotated180;
-    QTest::newRow("270")         << Output::Transform::Rotated270 << OutputInterface::Transform::Rotated270;
-    QTest::newRow("Flipped")     << Output::Transform::Flipped    << OutputInterface::Transform::Flipped;
-    QTest::newRow("Flipped 90")  << Output::Transform::Flipped90  << OutputInterface::Transform::Flipped90;
-    QTest::newRow("Flipped 180") << Output::Transform::Flipped180 << OutputInterface::Transform::Flipped180;
-    QTest::newRow("Flipped 280") << Output::Transform::Flipped270 << OutputInterface::Transform::Flipped270;
+    QTest::newRow("90")          << Wrapland::Client::Output::Transform::Rotated90  << OutputInterface::Transform::Rotated90;
+    QTest::newRow("180")         << Wrapland::Client::Output::Transform::Rotated180 << OutputInterface::Transform::Rotated180;
+    QTest::newRow("270")         << Wrapland::Client::Output::Transform::Rotated270 << OutputInterface::Transform::Rotated270;
+    QTest::newRow("Flipped")     << Wrapland::Client::Output::Transform::Flipped    << OutputInterface::Transform::Flipped;
+    QTest::newRow("Flipped 90")  << Wrapland::Client::Output::Transform::Flipped90  << OutputInterface::Transform::Flipped90;
+    QTest::newRow("Flipped 180") << Wrapland::Client::Output::Transform::Flipped180 << OutputInterface::Transform::Flipped180;
+    QTest::newRow("Flipped 280") << Wrapland::Client::Output::Transform::Flipped270 << OutputInterface::Transform::Flipped270;
 }
 
 void TestWaylandOutput::testTransform()
@@ -472,7 +472,7 @@ void TestWaylandOutput::testTransform()
     if (outputChanged.isEmpty()) {
         QVERIFY(outputChanged.wait());
     }
-    QCOMPARE(output->transform(), Output::Transform::Normal);
+    QCOMPARE(output->transform(), Wrapland::Client::Output::Transform::Normal);
 }
 
 void TestWaylandOutput::testDpms_data()
@@ -516,7 +516,7 @@ void TestWaylandOutput::testDpms()
     QVERIFY(announced.wait());
     QCOMPARE(dpmsAnnouncedSpy.count(), 1);
 
-    Output *output = registry.createOutput(registry.interface(Registry::Interface::Output).name, registry.interface(Registry::Interface::Output).version, &registry);
+    auto* output = registry.createOutput(registry.interface(Registry::Interface::Output).name, registry.interface(Registry::Interface::Output).version, &registry);
 
     DpmsManager *dpmsManager = registry.createDpmsManager(dpmsAnnouncedSpy.first().first().value<quint32>(), dpmsAnnouncedSpy.first().last().value<quint32>(), &registry);
     QVERIFY(dpmsManager->isValid());
@@ -611,7 +611,7 @@ void TestWaylandOutput::testDpmsRequestMode()
     QVERIFY(announced.wait());
     QCOMPARE(dpmsAnnouncedSpy.count(), 1);
 
-    Output *output = registry.createOutput(registry.interface(Registry::Interface::Output).name, registry.interface(Registry::Interface::Output).version, &registry);
+    auto* output = registry.createOutput(registry.interface(Registry::Interface::Output).name, registry.interface(Registry::Interface::Output).version, &registry);
 
     DpmsManager *dpmsManager = registry.createDpmsManager(dpmsAnnouncedSpy.first().first().value<quint32>(), dpmsAnnouncedSpy.first().last().value<quint32>(), &registry);
     QVERIFY(dpmsManager->isValid());

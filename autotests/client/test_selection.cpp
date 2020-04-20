@@ -59,9 +59,9 @@ private:
         QThread *thread = nullptr;
         EventQueue *queue = nullptr;
         Compositor *compositor = nullptr;
-        Seat *seat = nullptr;
+        Wrapland::Client::Seat *seat = nullptr;
         DataDeviceManager *ddm = nullptr;
-        Keyboard *keyboard = nullptr;
+        Wrapland::Client::Keyboard *keyboard = nullptr;
         DataDevice *dataDevice = nullptr;
     };
     bool setupConnection(Connection *c);
@@ -148,7 +148,7 @@ bool SelectionTest::setupConnection(Connection* c)
     if (!c->seat->isValid()) {
         return false;
     }
-    QSignalSpy keyboardSpy(c->seat, &Seat::hasKeyboardChanged);
+    QSignalSpy keyboardSpy(c->seat, &Wrapland::Client::Seat::hasKeyboardChanged);
     if (!keyboardSpy.isValid()) {
         return false;
     }
@@ -216,7 +216,7 @@ void SelectionTest::testClearOnEnter()
     // this test verifies that the selection is cleared prior to keyboard enter if there is no current selection
     QSignalSpy selectionClearedClient1Spy(m_client1.dataDevice, &DataDevice::selectionCleared);
     QVERIFY(selectionClearedClient1Spy.isValid());
-    QSignalSpy keyboardEnteredClient1Spy(m_client1.keyboard, &Keyboard::entered);
+    QSignalSpy keyboardEnteredClient1Spy(m_client1.keyboard, &Wrapland::Client::Keyboard::entered);
     QVERIFY(keyboardEnteredClient1Spy.isValid());
 
     // now create a Surface
@@ -242,7 +242,7 @@ void SelectionTest::testClearOnEnter()
     QVERIFY(selectionOfferedClient2Spy.isValid());
     QSignalSpy selectionClearedClient2Spy(m_client2.dataDevice, &DataDevice::selectionCleared);
     QVERIFY(selectionClearedClient2Spy.isValid());
-    QSignalSpy keyboardEnteredClient2Spy(m_client2.keyboard, &Keyboard::entered);
+    QSignalSpy keyboardEnteredClient2Spy(m_client2.keyboard, &Wrapland::Client::Keyboard::entered);
     QVERIFY(keyboardEnteredClient2Spy.isValid());
     std::unique_ptr<Surface> s2(m_client2.compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());

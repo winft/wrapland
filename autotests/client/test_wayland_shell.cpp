@@ -28,13 +28,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/shell.h"
 #include "../../src/client/surface.h"
 #include "../../src/client/registry.h"
+
 #include "../../src/server/buffer_interface.h"
+#include "../../src/server/clientconnection.h"
 #include "../../src/server/compositor_interface.h"
-#include "../../src/server/display.h"
-#include "../../src/server/seat_interface.h"
 #include "../../src/server/shell_interface.h"
 #include "../../src/server/surface_interface.h"
-// Wayland
+
+#include "../../server/display.h"
+#include "../../server/seat.h"
+
 #include <wayland-client-protocol.h>
 
 Q_DECLARE_METATYPE(Qt::Edges)
@@ -69,10 +72,10 @@ private Q_SLOTS:
     void testClientDisconnecting();
 
 private:
-    Wrapland::Server::Display *m_display;
+    Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::CompositorInterface *m_compositorInterface;
     Wrapland::Server::ShellInterface *m_shellInterface;
-    Wrapland::Server::SeatInterface *m_seatInterface;
+    Wrapland::Server::Seat* m_serverSeat;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
     Wrapland::Client::Shell *m_shell;
@@ -89,7 +92,7 @@ TestWaylandShell::TestWaylandShell(QObject *parent)
     , m_display(nullptr)
     , m_compositorInterface(nullptr)
     , m_shellInterface(nullptr)
-    , m_seatInterface(nullptr)
+    , m_serverSeat(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_shell(nullptr)
@@ -109,10 +112,9 @@ void TestWaylandShell::init()
 {
     using namespace Wrapland::Server;
     delete m_display;
-    m_display = new Display(this);
+    m_display = new D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     m_compositorInterface = m_display->createCompositor(m_display);
     QVERIFY(m_compositorInterface);
@@ -124,11 +126,9 @@ void TestWaylandShell::init()
     m_shellInterface->create();
     QVERIFY(m_shellInterface->isValid());
 
-    m_seatInterface = m_display->createSeat(m_display);
-    QVERIFY(m_seatInterface);
-    m_seatInterface->setHasPointer(true);
-    m_seatInterface->create();
-    QVERIFY(m_seatInterface->isValid());
+    m_serverSeat = m_display->createSeat(m_display);
+    QVERIFY(m_serverSeat);
+    m_serverSeat->setHasPointer(true);
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -177,7 +177,7 @@ void TestWaylandShell::init()
     QVERIFY(!seatAnnouncedSpy.isEmpty());
     m_seat = registry.createSeat(seatAnnouncedSpy.first().first().value<quint32>(), seatAnnouncedSpy.first().last().value<quint32>(), this);
     QVERIFY(seatAnnouncedSpy.isValid());
-    QSignalSpy hasPointerSpy(m_seat, &Seat::hasPointerChanged);
+    QSignalSpy hasPointerSpy(m_seat, &Wrapland::Client::Seat::hasPointerChanged);
     QVERIFY(hasPointerSpy.isValid());
     QVERIFY(hasPointerSpy.wait());
     QVERIFY(hasPointerSpy.first().first().toBool());
@@ -218,8 +218,8 @@ void TestWaylandShell::cleanup()
         m_thread = nullptr;
     }
 
-    delete m_seatInterface;
-    m_seatInterface = nullptr;
+    delete m_serverSeat;
+    m_serverSeat = nullptr;
 
     delete m_shellInterface;
     m_shellInterface = nullptr;
@@ -662,7 +662,7 @@ void TestWaylandShell::testDestroy()
     m_display = nullptr;
     m_compositorInterface = nullptr;
     m_shellInterface = nullptr;
-    m_seatInterface = nullptr;
+    m_serverSeat = nullptr;
     QTRY_VERIFY(!m_connection->established());
 
     QTRY_VERIFY(!m_shell->isValid());
@@ -713,11 +713,11 @@ void TestWaylandShell::testMove()
     QSignalSpy moveRequestedSpy(serverSurface, &ShellSurfaceInterface::moveRequested);
     QVERIFY(moveRequestedSpy.isValid());
 
-    QSignalSpy pointerButtonChangedSpy(m_pointer, &Pointer::buttonStateChanged);
+    QSignalSpy pointerButtonChangedSpy(m_pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(pointerButtonChangedSpy.isValid());
 
-    m_seatInterface->setFocusedPointerSurface(serverSurface->surface());
-    m_seatInterface->pointerButtonPressed(Qt::LeftButton);
+    m_serverSeat->setFocusedPointerSurface(serverSurface->surface());
+    m_serverSeat->pointerButtonPressed(Qt::LeftButton);
     QVERIFY(pointerButtonChangedSpy.wait());
 
     qDebug() << "XXX TestWaylandShell::testMove1" << serverSurface;
@@ -725,8 +725,8 @@ void TestWaylandShell::testMove()
     surface->requestMove(m_seat, pointerButtonChangedSpy.first().first().value<quint32>());
     QVERIFY(moveRequestedSpy.wait());
     QCOMPARE(moveRequestedSpy.count(), 1);
-    QCOMPARE(moveRequestedSpy.first().at(0).value<SeatInterface*>(), m_seatInterface);
-    QCOMPARE(moveRequestedSpy.first().at(1).value<quint32>(), m_seatInterface->pointerButtonSerial(Qt::LeftButton));
+    QCOMPARE(moveRequestedSpy.first().at(0).value<SeatInterface*>(), m_serverSeat->legacy);
+    QCOMPARE(moveRequestedSpy.first().at(1).value<quint32>(), m_serverSeat->pointerButtonSerial(Qt::LeftButton));
 
     qDebug() << "XXX TestWaylandShell::testMove2" << serverSurface;
 }
@@ -775,19 +775,19 @@ void TestWaylandShell::testResize()
     QSignalSpy resizeRequestedSpy(serverSurface, &ShellSurfaceInterface::resizeRequested);
     QVERIFY(resizeRequestedSpy.isValid());
 
-    QSignalSpy pointerButtonChangedSpy(m_pointer, &Pointer::buttonStateChanged);
+    QSignalSpy pointerButtonChangedSpy(m_pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(pointerButtonChangedSpy.isValid());
 
-    m_seatInterface->setFocusedPointerSurface(serverSurface->surface());
-    m_seatInterface->pointerButtonPressed(Qt::LeftButton);
+    m_serverSeat->setFocusedPointerSurface(serverSurface->surface());
+    m_serverSeat->pointerButtonPressed(Qt::LeftButton);
     QVERIFY(pointerButtonChangedSpy.wait());
 
     QFETCH(Qt::Edges, resizeEdge);
     surface->requestResize(m_seat, pointerButtonChangedSpy.first().first().value<quint32>(), resizeEdge);
     QVERIFY(resizeRequestedSpy.wait());
     QCOMPARE(resizeRequestedSpy.count(), 1);
-    QCOMPARE(resizeRequestedSpy.first().at(0).value<SeatInterface*>(), m_seatInterface);
-    QCOMPARE(resizeRequestedSpy.first().at(1).value<quint32>(), m_seatInterface->pointerButtonSerial(Qt::LeftButton));
+    QCOMPARE(resizeRequestedSpy.first().at(0).value<SeatInterface*>(), m_serverSeat->legacy);
+    QCOMPARE(resizeRequestedSpy.first().at(1).value<quint32>(), m_serverSeat->pointerButtonSerial(Qt::LeftButton));
     QTEST(resizeRequestedSpy.first().at(2).value<Qt::Edges>(), "expectedEdge");
 }
 

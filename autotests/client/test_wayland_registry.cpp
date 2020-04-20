@@ -19,7 +19,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 // Qt
 #include <QtTest>
-// KWin
+
+#include "../../server/display.h"
+
+#include "../../server/dpms.h"
+#include "../../server/output.h"
+#include "../../server/seat.h"
+
 #include "../../src/client/blur.h"
 #include "../../src/client/contrast.h"
 #include "../../src/client/compositor.h"
@@ -38,13 +44,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/subcompositor.h"
 #include "../../src/client/xdgshell.h"
+
 #include "../../src/server/compositor_interface.h"
 #include "../../src/server/datadevicemanager_interface.h"
 #include "../../src/server/display.h"
-#include "../../src/server/dpms_interface.h"
 #include "../../src/server/idleinhibit_interface.h"
 #include "../../src/server/output_interface.h"
-#include "../../src/server/seat_interface.h"
 #include "../../src/server/shell_interface.h"
 #include "../../src/server/blur_interface.h"
 #include "../../src/server/contrast_interface.h"
@@ -53,11 +58,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/subcompositor_interface.h"
 #include "../../src/server/output_management_v1_interface.h"
 #include "../../src/server/output_device_v1_interface.h"
-#include "../../src/server/pointerconstraints_interface.h"
-#include "../../src/server/pointergestures_interface.h"
 #include "../../src/server/textinput_interface.h"
 #include "../../src/server/xdgshell_interface.h"
-#include "../../src/server/relativepointer_interface.h"
 // Wayland
 #include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
@@ -111,11 +113,11 @@ private Q_SLOTS:
     void testAnnounceMultipleOutputDeviceV1s();
 
 private:
-    Wrapland::Server::Display *m_display;
+    Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::CompositorInterface *m_compositor;
-    Wrapland::Server::OutputInterface *m_output;
+    Wrapland::Server::Output *m_output;
     Wrapland::Server::OutputDeviceV1Interface *m_outputDevice;
-    Wrapland::Server::SeatInterface *m_seat;
+    Wrapland::Server::Seat* m_seat;
     Wrapland::Server::ShellInterface *m_shell;
     Wrapland::Server::SubCompositorInterface *m_subcompositor;
     Wrapland::Server::DataDeviceManagerInterface *m_dataDeviceManager;
@@ -124,9 +126,9 @@ private:
     Wrapland::Server::TextInputManagerInterface *m_textInputManagerV0;
     Wrapland::Server::TextInputManagerInterface *m_textInputManagerV2;
     Wrapland::Server::XdgShellInterface *m_xdgShellUnstableV5;
-    Wrapland::Server::RelativePointerManagerInterface *m_relativePointerV1;
-    Wrapland::Server::PointerGesturesInterface *m_pointerGesturesV1;
-    Wrapland::Server::PointerConstraintsInterface *m_pointerConstraintsV1;
+    Wrapland::Server::RelativePointerManagerV1* m_relativePointerV1;
+    Wrapland::Server::PointerGesturesV1* m_pointerGesturesV1;
+    Wrapland::Server::PointerConstraintsV1* m_pointerConstraintsV1;
     Wrapland::Server::BlurManagerInterface *m_blur;
     Wrapland::Server::ContrastManagerInterface *m_contrast;
     Wrapland::Server::IdleInhibitManagerInterface *m_idleInhibit;
@@ -161,16 +163,15 @@ TestWaylandRegistry::TestWaylandRegistry(QObject *parent)
 
 void TestWaylandRegistry::init()
 {
-    m_display = new Wrapland::Server::Display();
+    m_display = new Wrapland::Server::D_isplay();
     m_display->setSocketName(s_socketName);
     m_display->start();
     m_display->createShm();
     m_compositor = m_display->createCompositor();
     m_compositor->create();
     m_output = m_display->createOutput();
-    m_output->create();
+//    m_output->create();
     m_seat = m_display->createSeat();
-    m_seat->create();
     m_shell = m_display->createShell();
     m_shell->create();
     m_subcompositor = m_display->createSubCompositor();
@@ -187,7 +188,7 @@ void TestWaylandRegistry::init()
     m_contrast = m_display->createContrastManager(this);
     m_contrast->create();
     m_display->createSlideManager(this)->create();
-    m_display->createDpmsManager()->create();
+    m_display->createDpmsManager();
     m_serverSideDecorationManager = m_display->createServerSideDecorationManager();
     m_serverSideDecorationManager->create();
     m_textInputManagerV0 = m_display->createTextInputManager(Wrapland::Server::TextInputInterfaceVersion::UnstableV0);
@@ -199,15 +200,9 @@ void TestWaylandRegistry::init()
     m_xdgShellUnstableV5 = m_display->createXdgShell(Wrapland::Server::XdgShellInterfaceVersion::UnstableV5);
     m_xdgShellUnstableV5->create();
     QCOMPARE(m_xdgShellUnstableV5->interfaceVersion(), Wrapland::Server::XdgShellInterfaceVersion::UnstableV5);
-    m_relativePointerV1 = m_display->createRelativePointerManager(Wrapland::Server::RelativePointerInterfaceVersion::UnstableV1);
-    m_relativePointerV1->create();
-    QCOMPARE(m_relativePointerV1->interfaceVersion(), Wrapland::Server::RelativePointerInterfaceVersion::UnstableV1);
-    m_pointerGesturesV1 = m_display->createPointerGestures(Wrapland::Server::PointerGesturesInterfaceVersion::UnstableV1);
-    m_pointerGesturesV1->create();
-    QCOMPARE(m_pointerGesturesV1->interfaceVersion(), Wrapland::Server::PointerGesturesInterfaceVersion::UnstableV1);
-    m_pointerConstraintsV1 = m_display->createPointerConstraints(Wrapland::Server::PointerConstraintsInterfaceVersion::UnstableV1);
-    m_pointerConstraintsV1->create();
-    QCOMPARE(m_pointerConstraintsV1->interfaceVersion(), Wrapland::Server::PointerConstraintsInterfaceVersion::UnstableV1);
+    m_relativePointerV1 = m_display->createRelativePointerManager();
+    m_pointerGesturesV1 = m_display->createPointerGestures();
+    m_pointerConstraintsV1 = m_display->createPointerConstraints();
     m_idleInhibit = m_display->createIdleInhibitManager(Wrapland::Server::IdleInhibitManagerInterfaceVersion::UnstableV1);
     m_idleInhibit->create();
     QCOMPARE(m_idleInhibit->interfaceVersion(), Wrapland::Server::IdleInhibitManagerInterfaceVersion::UnstableV1);
@@ -833,7 +828,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
 
     QSignalSpy outputAnnouncedSpy(&registry, &Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
-    m_display->createOutput()->create();
+    m_display->createOutput();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 2);
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().name, outputAnnouncedSpy.first().first().value<quint32>());
@@ -842,7 +837,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QCOMPARE(registry.interface(Registry::Interface::Output).version, outputAnnouncedSpy.first().last().value<quint32>());
 
     auto output = m_display->createOutput();
-    output->create();
+//    output->create();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 3);
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().name, outputAnnouncedSpy.last().first().value<quint32>());
