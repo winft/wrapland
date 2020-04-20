@@ -60,7 +60,7 @@ public:
 
     QVector<Pointer*> pointersForSurface(SurfaceInterface* surface) const;
     QVector<Keyboard*> keyboardsForSurface(SurfaceInterface* surface) const;
-    QVector<TouchInterface*> touchsForSurface(SurfaceInterface* surface) const;
+    QVector<Touch*> touchsForSurface(SurfaceInterface* surface) const;
     DataDevice* dataDeviceForSurface(SurfaceInterface* surface) const;
     TextInputInterface* textInputForSurface(SurfaceInterface* surface) const;
     void registerDataDevice(DataDevice* dataDevice);
@@ -76,7 +76,7 @@ public:
     quint32 timestamp = 0;
     QVector<Pointer*> pointers;
     QVector<Keyboard*> keyboards;
-    QVector<TouchInterface*> touchs;
+    QVector<Touch*> touchs;
     QVector<DataDevice*> dataDevices;
     QVector<TextInputInterface*> textInputs;
     DataDevice* currentSelection = nullptr;
@@ -157,10 +157,10 @@ public:
     TextInput textInput;
 
     // Touch related members
-    struct Touch {
+    struct SeatTouch {
         struct Focus {
             SurfaceInterface* surface = nullptr;
-            QVector<TouchInterface*> touchs;
+            QVector<Touch*> touchs;
             QMetaObject::Connection destroyConnection;
             QPointF offset = QPointF();
             QPointF firstTouchPos;
@@ -168,7 +168,7 @@ public:
         Focus focus;
         QMap<qint32, quint32> ids;
     };
-    Touch globalTouch;
+    SeatTouch globalTouch;
 
     struct Drag {
         enum class Mode {
@@ -181,7 +181,7 @@ public:
         DataDevice* target = nullptr;
         SurfaceInterface* surface = nullptr;
         Pointer* sourcePointer = nullptr;
-        TouchInterface* sourceTouch = nullptr;
+        Touch* sourceTouch = nullptr;
         QMatrix4x4 transformation;
         QMetaObject::Connection destroyConnection;
         QMetaObject::Connection dragSourceDestroyConnection;

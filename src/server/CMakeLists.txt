@@ -40,7 +40,6 @@ set(SERVER_LIB_SRCS
     textinput_interface.cpp
     textinput_interface_v0.cpp
     textinput_interface_v2.cpp
-    touch_interface.cpp
     viewporter_interface.cpp
     xdgdecoration_interface.cpp
     xdgforeign_interface.cpp
@@ -61,6 +60,7 @@ set(SERVER_LIB_SRCS
     ../../server/display.cpp
     ../../server/dpms.cpp
     ../../server/output.cpp
+    ../../server/touch.cpp
     ../../server/pointer.cpp
     ../../server/pointer_constraints_v1.cpp
     ../../server/pointer_gestures_v1.cpp
@@ -360,7 +360,6 @@ set(SERVER_LIB_HEADERS
   subcompositor_interface.h
   surface_interface.h
   textinput_interface.h
-  touch_interface.h
   viewporter_interface.h
   xdgdecoration_interface.h
   xdgforeign_interface.h
@@ -375,6 +374,7 @@ set(SERVER_LIB_HEADERS
   ../../server/display.h
   ../../server/dpms.h
   ../../server/keyboard.h
+  ../../server/touch.h
   ../../server/output.h
   ../../server/pointer.h
   ../../server/pointer_constraints_v1.h

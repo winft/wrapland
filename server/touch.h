@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2015  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,48 +17,49 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_TOUCH_INTERFACE_H
-#define WAYLAND_SERVER_TOUCH_INTERFACE_H
+#pragma once
+
+#include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
-
-#include "resource.h"
 
 namespace Wrapland
 {
 namespace Server
 {
+class Client;
 class Seat;
-
-class SeatInterface;
 
 /**
  * @brief Resource for the wl_touch interface.
  *
  **/
-class WRAPLANDSERVER_EXPORT TouchInterface : public Resource
+class WRAPLANDSERVER_EXPORT Touch : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~TouchInterface();
+    ~Touch() override;
+
+    Client* client() const;
+
+Q_SIGNALS:
+    void resourceDestroyed();
 
 private:
-    void down(qint32 id, quint32 serial, const QPointF &localPos);
+    void down(qint32 id, quint32 serial, const QPointF& localPos);
     void up(qint32 id, quint32 serial);
     void frame();
     void cancel();
-    void move(qint32 id, const QPointF &localPos);
-    friend class SeatInterface;
-    explicit TouchInterface(SeatInterface *parent, wl_resource *parentResource);
-    class Private;
-    Private *d_func() const;
+    void move(qint32 id, const QPointF& localPos);
 
     friend class Seat;
+
+    Touch(Client* client, uint32_t version, uint32_t id, Seat* seat);
+    class Private;
+    Private* d_ptr;
 };
 
 }
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::TouchInterface*)
-
-#endif
+Q_DECLARE_METATYPE(Wrapland::Server::Touch*)

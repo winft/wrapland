@@ -53,6 +53,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/pointer_gestures_v1.h"
 #include "../../server/relative_pointer_v1.h"
 #include "../../server/seat.h"
+#include "../../server/touch.h"
 
 #include <QtTest>
 
@@ -148,6 +149,7 @@ TestSeat::TestSeat(QObject* parent)
     qRegisterMetaType<Wrapland::Server::DataDevice*>();
     qRegisterMetaType<Wrapland::Server::Keyboard*>();
     qRegisterMetaType<Wrapland::Server::Pointer*>();
+    qRegisterMetaType<Wrapland::Server::Touch*>();
 }
 
 void TestSeat::init()
@@ -2249,8 +2251,7 @@ void TestSeat::testTouch()
     QVERIFY(touchCreatedSpy.wait());
     auto serverTouch = m_serverSeat->focusedTouch();
     QVERIFY(serverTouch);
-    QCOMPARE(touchCreatedSpy.first().first().value<Srv::TouchInterface*>(),
-             m_serverSeat->focusedTouch());
+    QCOMPARE(touchCreatedSpy.first().first().value<Srv::Touch*>(), m_serverSeat->focusedTouch());
 
     QSignalSpy sequenceStartedSpy(touch, &Clt::Touch::sequenceStarted);
     QVERIFY(sequenceStartedSpy.isValid());
@@ -2412,26 +2413,21 @@ void TestSeat::testTouch()
     QCOMPARE(touch->sequence().first()->position(), QPointF(0, 0));
 
     // Destroy touch on client side.
-    QSignalSpy unboundSpy(serverTouch, &Srv::TouchInterface::unbound);
-    QVERIFY(unboundSpy.isValid());
-    QSignalSpy destroyedSpy(serverTouch, &Srv::TouchInterface::destroyed);
+    QSignalSpy destroyedSpy(serverTouch, &Srv::Touch::resourceDestroyed);
     QVERIFY(destroyedSpy.isValid());
+
     delete touch;
-    QVERIFY(unboundSpy.wait());
-    QCOMPARE(unboundSpy.count(), 1);
-    QCOMPARE(destroyedSpy.count(), 0);
-    QVERIFY(!serverTouch->resource());
+    QVERIFY(destroyedSpy.wait());
+    QCOMPARE(destroyedSpy.count(), 1);
 
     // Try to call into all the methods of the touch interface, should not crash.
-    QCOMPARE(m_serverSeat->focusedTouch(), serverTouch);
+    QCOMPARE(m_serverSeat->focusedTouch(), nullptr);
     m_serverSeat->setTimestamp(8);
     QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 0);
     m_serverSeat->touchFrame();
     m_serverSeat->touchMove(0, QPointF(0, 0));
     QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 1);
     m_serverSeat->cancelTouchSequence();
-    QVERIFY(destroyedSpy.wait());
-    QCOMPARE(destroyedSpy.count(), 1);
 
     // Should have unset the focused touch.
     QVERIFY(!m_serverSeat->focusedTouch());
@@ -2473,7 +2469,7 @@ void TestSeat::testDisconnect()
     QScopedPointer<Clt::Touch> touch(m_seat->createTouch());
     QVERIFY(!touch.isNull());
     QVERIFY(touchCreatedSpy.wait());
-    auto serverTouch = touchCreatedSpy.first().first().value<Srv::TouchInterface*>();
+    auto serverTouch = touchCreatedSpy.first().first().value<Srv::Touch*>();
     QVERIFY(serverTouch);
 
     // Setup destroys.

@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
-#include "touch_interface.h"
+//#include "touch_interface.h"
 
 #include "../../server/seat.h"
 
@@ -131,15 +131,15 @@ class WRAPLANDSERVER_EXPORT SeatInterface : public Global
      * Whether the SeatInterface supports a keyboard device.
      **/
     Q_PROPERTY(bool keyboard READ hasKeyboard WRITE setHasKeyboard NOTIFY hasKeyboardChanged)
-    /**
-     * Whether the SeatInterface supports a touch device.
-     * @deprecated Since 0.0.55, use touch
-     **/
-    Q_PROPERTY(bool tourch READ hasTouch WRITE setHasTouch NOTIFY hasTouchChanged)
-    /**
-     * Whether the SeatInterface supports a touch device.
-     **/
-    Q_PROPERTY(bool touch READ hasTouch WRITE setHasTouch NOTIFY hasTouchChanged)
+//    /**
+//     * Whether the SeatInterface supports a touch device.
+//     * @deprecated Since 0.0.55, use touch
+//     **/
+//    Q_PROPERTY(bool tourch READ hasTouch WRITE setHasTouch NOTIFY hasTouchChanged)
+//    /**
+//     * Whether the SeatInterface supports a touch device.
+//     **/
+//    Q_PROPERTY(bool touch READ hasTouch WRITE setHasTouch NOTIFY hasTouchChanged)
     /**
      * The global pointer position.
      **/
@@ -621,23 +621,23 @@ public:
      * @name  touch related methods
      **/
     ///@{
-    void setFocusedTouchSurface(SurfaceInterface *surface, const QPointF &surfacePosition = QPointF());
-    SurfaceInterface *focusedTouchSurface() const;
-    TouchInterface *focusedTouch() const;
-    void setFocusedTouchSurfacePosition(const QPointF &surfacePosition);
-    QPointF focusedTouchSurfacePosition() const;
-    qint32 touchDown(const QPointF &globalPosition);
-    void touchUp(qint32 id);
-    void touchMove(qint32 id, const QPointF &globalPosition);
-    void touchFrame();
-    void cancelTouchSequence();
-    bool isTouchSequence() const;
+//    void setFocusedTouchSurface(SurfaceInterface *surface, const QPointF &surfacePosition = QPointF());
+//    SurfaceInterface *focusedTouchSurface() const;
+//    TouchInterface *focusedTouch() const;
+//    void setFocusedTouchSurfacePosition(const QPointF &surfacePosition);
+//    QPointF focusedTouchSurfacePosition() const;
+//    qint32 touchDown(const QPointF &globalPosition);
+//    void touchUp(qint32 id);
+//    void touchMove(qint32 id, const QPointF &globalPosition);
+//    void touchFrame();
+//    void cancelTouchSequence();
+//    bool isTouchSequence() const;
     /**
      * @returns true if there is a touch sequence going on associated with a touch
      * down of the given @p serial.
      * @since 0.0.5XX
      **/
-    bool hasImplicitTouchGrab(quint32 serial) const;
+//    bool hasImplicitTouchGrab(quint32 serial) const;
     ///@}
 
     /**
@@ -714,14 +714,14 @@ Q_SIGNALS:
     void nameChanged(const QString&);
     void hasPointerChanged(bool);
     void hasKeyboardChanged(bool);
-    void hasTouchChanged(bool);
+//    void hasTouchChanged(bool);
     void pointerPosChanged(const QPointF &pos);
-    void touchMoved(qint32 id, quint32 serial, const QPointF &globalPosition);
+//    void touchMoved(qint32 id, quint32 serial, const QPointF &globalPosition);
     void timestampChanged(quint32);
 
 //    void pointerCreated(Wrapland::Server::PointerInterface*);
 //    void keyboardCreated(Wrapland::Server::KeyboardInterface*);
-    void touchCreated(Wrapland::Server::TouchInterface*);
+//    void touchCreated(Wrapland::Server::TouchInterface*);
 
 //    /**
 //     * Emitted whenever the focused pointer changes

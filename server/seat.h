@@ -26,7 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Server/wraplandserver_export.h>
 
 #include "global.h"
-#include "touch_interface.h"
 
 struct wl_client;
 struct wl_resource;
@@ -38,10 +37,16 @@ namespace Server
 
 class DataDevice;
 class D_isplay;
+
 class Keyboard;
 class Pointer;
+class Touch;
+
 class SurfaceInterface;
 class TextInputInterface;
+
+// legacy
+class SeatInterface;
 
 enum class PointerAxisSource {
     Unknown,
@@ -143,7 +148,7 @@ public:
     void setFocusedTouchSurface(SurfaceInterface* surface,
                                 const QPointF& surfacePosition = QPointF());
     SurfaceInterface* focusedTouchSurface() const;
-    TouchInterface* focusedTouch() const;
+    Touch* focusedTouch() const;
     void setFocusedTouchSurfacePosition(const QPointF& surfacePosition);
     QPointF focusedTouchSurfacePosition() const;
     qint32 touchDown(const QPointF& globalPosition);
@@ -177,7 +182,7 @@ Q_SIGNALS:
 
     void pointerCreated(Wrapland::Server::Pointer*);
     void keyboardCreated(Wrapland::Server::Keyboard*);
-    void touchCreated(Wrapland::Server::TouchInterface*);
+    void touchCreated(Wrapland::Server::Touch*);
 
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 

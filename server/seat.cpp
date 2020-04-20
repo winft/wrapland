@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keyboard_p.h"
 #include "pointer.h"
 #include "pointer_p.h"
+#include "touch.h"
 
 // legacy
 #include "seat_interface.h"
@@ -200,6 +201,10 @@ static T* interfaceForSurface(SurfaceInterface* surface, const QVector<T*>& inte
             if ((*it)->client()->legacy == surface->client()) {
                 return (*it);
             }
+        } else if constexpr (std::is_same_v<T, Touch>) {
+            if ((*it)->client()->legacy == surface->client()) {
+                return (*it);
+            }
         } else {
             // TODO: remove when all in new model
             if ((*it)->client() == surface->client()) {
@@ -224,6 +229,10 @@ static QVector<T*> interfacesForSurface(SurfaceInterface* surface, const QVector
                 ret << *it;
             }
         } else if constexpr (std::is_same_v<T, Keyboard>) {
+            if ((*it)->client()->legacy == surface->client()) {
+                ret << *it;
+            }
+        } else if constexpr (std::is_same_v<T, Touch>) {
             if ((*it)->client()->legacy == surface->client()) {
                 ret << *it;
             }
@@ -267,7 +276,7 @@ QVector<Keyboard*> Seat::Private::keyboardsForSurface(SurfaceInterface* surface)
     return interfacesForSurface(surface, keyboards);
 }
 
-QVector<TouchInterface*> Seat::Private::touchsForSurface(SurfaceInterface* surface) const
+QVector<Touch*> Seat::Private::touchsForSurface(SurfaceInterface* surface) const
 {
     return interfacesForSurface(surface, touchs);
 }
@@ -483,7 +492,6 @@ void Seat::setHasTouch(bool has)
     }
     d_ptr->touch = has;
     Q_EMIT hasTouchChanged(d_ptr->touch);
-    Q_EMIT legacy->hasTouchChanged(d_ptr->touch);
 }
 
 void Seat::setName(const std::string& name)
@@ -580,14 +588,9 @@ void Seat::Private::getTouchCallback(wl_client* wlClient, wl_resource* wlResourc
 void Seat::Private::getTouch(Client* client, uint32_t id, wl_resource* resource)
 {
     // TODO: only create if seat has touch?
-    auto touch = new TouchInterface(q_ptr->legacy, resource);
-
-    touch->create(client->legacy, qMin(wl_resource_get_version(resource), s_touchVersion), id);
-    if (!touch->resource()) {
-        wl_resource_post_no_memory(resource);
-        delete touch;
-        return;
-    }
+    auto touch
+        = new Touch(client, qMin(wl_resource_get_version(resource), s_touchVersion), id, q_ptr);
+    // TODO: check for error
 
     touchs << touch;
 
@@ -603,7 +606,6 @@ void Seat::Private::getTouch(Client* client, uint32_t id, wl_resource* resource)
         globalTouch.focus.touchs.removeOne(touch);
     });
     Q_EMIT q_ptr->touchCreated(touch);
-    Q_EMIT q_ptr->legacy->touchCreated(touch);
 }
 
 std::string Seat::name() const
@@ -1326,7 +1328,7 @@ void Seat::cancelTouchSequence()
     d_ptr->globalTouch.ids.clear();
 }
 
-TouchInterface* Seat::focusedTouch() const
+Touch* Seat::focusedTouch() const
 {
     if (d_ptr->globalTouch.focus.touchs.isEmpty()) {
         return nullptr;
@@ -1360,7 +1362,7 @@ void Seat::setFocusedTouchSurface(SurfaceInterface* surface, const QPointF& surf
     if (d_ptr->globalTouch.focus.surface) {
         disconnect(d_ptr->globalTouch.focus.destroyConnection);
     }
-    d_ptr->globalTouch.focus = Private::Touch::Focus();
+    d_ptr->globalTouch.focus = Private::SeatTouch::Focus();
     d_ptr->globalTouch.focus.surface = surface;
     d_ptr->globalTouch.focus.offset = surfacePosition;
     d_ptr->globalTouch.focus.touchs = d_ptr->touchsForSurface(surface);
@@ -1376,7 +1378,7 @@ void Seat::setFocusedTouchSurface(SurfaceInterface* surface, const QPointF& surf
                           (*it)->cancel();
                       }
                   }
-                  d_ptr->globalTouch.focus = Private::Touch::Focus();
+                  d_ptr->globalTouch.focus = Private::SeatTouch::Focus();
               });
     }
 }
@@ -1442,7 +1444,6 @@ void Seat::touchMove(qint32 id, const QPointF& globalPosition)
         });
     }
     Q_EMIT touchMoved(id, d_ptr->globalTouch.ids[id], globalPosition);
-    Q_EMIT legacy->touchMoved(id, d_ptr->globalTouch.ids[id], globalPosition);
 }
 
 void Seat::touchUp(qint32 id)

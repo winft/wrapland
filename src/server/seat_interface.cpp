@@ -267,11 +267,11 @@ namespace {
 ////    return interfacesForSurface(surface, keyboards);
 //}
 
-QVector<TouchInterface *> SeatInterface::Private::touchsForSurface(SurfaceInterface *surface) const
-{
-    return q->newSeat->d_ptr->touchsForSurface(surface);
+//QVector<TouchInterface *> SeatInterface::Private::touchsForSurface(SurfaceInterface *surface) const
+//{
+//    return q->newSeat->d_ptr->touchsForSurface(surface);
 //    return interfacesForSurface(surface, touchs);
-}
+//}
 
 //DataDeviceInterface *SeatInterface::Private::dataDeviceForSurface(SurfaceInterface *surface) const
 //{
@@ -644,7 +644,8 @@ bool SeatInterface::hasKeyboard() const
 
 bool SeatInterface::hasTouch() const
 {
-    return newSeat->hasTouch();
+    return false;
+//    return newSeat->hasTouch();
 //    Q_D();
 //    return d->touch;
 }
@@ -1380,9 +1381,9 @@ QVector< quint32 > SeatInterface::pressedKeys() const
 ////    return d->keys.focus.keyboards.first();
 //}
 
-void SeatInterface::cancelTouchSequence()
-{
-    newSeat->cancelTouchSequence();
+//void SeatInterface::cancelTouchSequence()
+//{
+//    newSeat->cancelTouchSequence();
 //    Q_D();
 //    for (auto it = d->globalTouch.focus.touchs.constBegin(), end = d->globalTouch.focus.touchs.constEnd(); it != end; ++it) {
 //        (*it)->cancel();
@@ -1398,42 +1399,42 @@ void SeatInterface::cancelTouchSequence()
 //        d->endDrag(0);
 //    }
 //    d->globalTouch.ids.clear();
-}
+//}
 
-TouchInterface *SeatInterface::focusedTouch() const
-{
-    return newSeat->focusedTouch();
+//TouchInterface *SeatInterface::focusedTouch() const
+//{
+//    return newSeat->focusedTouch();
 //    Q_D();
 //    if (d->globalTouch.focus.touchs.isEmpty()) {
 //        return nullptr;
 //    }
 //    return d->globalTouch.focus.touchs.first();
-}
+//}
 
-SurfaceInterface *SeatInterface::focusedTouchSurface() const
-{
-    return newSeat->focusedTouchSurface();
+//SurfaceInterface *SeatInterface::focusedTouchSurface() const
+//{
+//    return newSeat->focusedTouchSurface();
 //    Q_D();
 //    return d->globalTouch.focus.surface;
-}
+//}
 
-QPointF SeatInterface::focusedTouchSurfacePosition() const
-{
-    return newSeat->focusedTouchSurfacePosition();
+//QPointF SeatInterface::focusedTouchSurfacePosition() const
+//{
+//    return newSeat->focusedTouchSurfacePosition();
 //    Q_D();
 //    return d->globalTouch.focus.offset;
-}
+//}
 
-bool SeatInterface::isTouchSequence() const
-{
-    return newSeat->isTouchSequence();
+//bool SeatInterface::isTouchSequence() const
+//{
+//    return newSeat->isTouchSequence();
 //    Q_D();
 //    return !d->globalTouch.ids.isEmpty();
-}
+//}
 
-void SeatInterface::setFocusedTouchSurface(SurfaceInterface *surface, const QPointF &surfacePosition)
-{
-    newSeat->setFocusedTouchSurface(surface,surfacePosition);
+//void SeatInterface::setFocusedTouchSurface(SurfaceInterface *surface, const QPointF &surfacePosition)
+//{
+//    newSeat->setFocusedTouchSurface(surface,surfacePosition);
 //    if (isTouchSequence()) {
 //        // changing surface not allowed during a touch sequence
 //        return;
@@ -1461,18 +1462,18 @@ void SeatInterface::setFocusedTouchSurface(SurfaceInterface *surface, const QPoi
 //            }
 //        );
 //    }
-}
+//}
 
-void SeatInterface::setFocusedTouchSurfacePosition(const QPointF &surfacePosition)
-{
-    newSeat->setFocusedTouchSurfacePosition(surfacePosition);
+//void SeatInterface::setFocusedTouchSurfacePosition(const QPointF &surfacePosition)
+//{
+//    newSeat->setFocusedTouchSurfacePosition(surfacePosition);
 //    Q_D();
 //    d->globalTouch.focus.offset = surfacePosition;
-}
+//}
 
-qint32 SeatInterface::touchDown(const QPointF &globalPosition)
-{
-    return newSeat->touchDown(globalPosition);
+//qint32 SeatInterface::touchDown(const QPointF &globalPosition)
+//{
+//    return newSeat->touchDown(globalPosition);
 //    Q_D();
 //    const qint32 id = d->globalTouch.ids.isEmpty() ? 0 : d->globalTouch.ids.lastKey() + 1;
 //    const qint32 serial = display()->nextSerial();
@@ -1506,11 +1507,11 @@ qint32 SeatInterface::touchDown(const QPointF &globalPosition)
 
 //    d->globalTouch.ids[id] = serial;
 //    return id;
-}
+//}
 
-void SeatInterface::touchMove(qint32 id, const QPointF &globalPosition)
-{
-    newSeat->touchMove(id, globalPosition);
+//void SeatInterface::touchMove(qint32 id, const QPointF &globalPosition)
+//{
+//    newSeat->touchMove(id, globalPosition);
 //    Q_D();
 //    Q_ASSERT(d->globalTouch.ids.contains(id));
 //    const auto pos = globalPosition - d->globalTouch.focus.offset;
@@ -1532,11 +1533,11 @@ void SeatInterface::touchMove(qint32 id, const QPointF &globalPosition)
 //        );
 //    }
 //    emit touchMoved(id, d->globalTouch.ids[id], globalPosition);
-}
+//}
 
-void SeatInterface::touchUp(qint32 id)
-{
-    newSeat->touchUp(id);
+//void SeatInterface::touchUp(qint32 id)
+//{
+//    newSeat->touchUp(id);
 //    Q_D();
 //    Q_ASSERT(d->globalTouch.ids.contains(id));
 //    const qint32 serial = display()->nextSerial();
@@ -1562,41 +1563,41 @@ void SeatInterface::touchUp(qint32 id)
 //#endif
 
 //    d->globalTouch.ids.remove(id);
-}
+//}
 
-void SeatInterface::touchFrame()
-{
-    newSeat->touchFrame();
+//void SeatInterface::touchFrame()
+//{
+//    newSeat->touchFrame();
 //    Q_D();
 //    for (auto it = d->globalTouch.focus.touchs.constBegin(), end = d->globalTouch.focus.touchs.constEnd(); it != end; ++it) {
 //        (*it)->frame();
 //    }
-}
+//}
 
-bool SeatInterface::hasImplicitTouchGrab(quint32 serial) const
-{
-    return newSeat->hasImplicitTouchGrab(serial);
+//bool SeatInterface::hasImplicitTouchGrab(quint32 serial) const
+//{
+//    return newSeat->hasImplicitTouchGrab(serial);
 //    Q_D();
 //    if (!d->globalTouch.focus.surface) {
 //        // origin surface has been destroyed
 //        return false;
 //    }
 //    return d->globalTouch.ids.key(serial, -1) != -1;
-}
+//}
 
-bool SeatInterface::isDrag() const
-{
-    return newSeat->isDrag();
+//bool SeatInterface::isDrag() const
+//{
+//    return newSeat->isDrag();
 //    Q_D();
 //    return d->drag.mode != Private::Drag::Mode::None;
-}
+//}
 
-bool SeatInterface::isDragPointer() const
-{
-    return newSeat->isDragPointer();
+//bool SeatInterface::isDragPointer() const
+//{
+//    return newSeat->isDragPointer();
 //    Q_D();
 //    return d->drag.mode == Private::Drag::Mode::Pointer;
-}
+//}
 
 bool SeatInterface::isDragTouch() const
 {
