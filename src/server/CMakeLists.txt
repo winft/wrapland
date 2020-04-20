@@ -65,6 +65,7 @@ set(SERVER_LIB_SRCS
     ../../server/pointer_gestures_v1.cpp
     ../../server/relative_pointer_v1.cpp
     ../../server/seat.cpp
+    ../../server/keystate.cpp
     ../../server/wayland/client.cpp
     ../../server/wayland/display.cpp
 
