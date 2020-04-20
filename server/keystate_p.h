@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2019 Aleix Pol Gonzalez <aleixpol@kde.org>
+Copyright 2020 Adrien Faveraux <ad1rie3@hotmail.fr>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -18,54 +18,30 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
-#ifndef WRAPLAND_KEYSTATE_INTERFACE_H
-#define WRAPLAND_KEYSTATE_INTERFACE_H
+#pragma once
 
-#include <Wrapland/Server/wraplandserver_export.h>
-#include "global.h"
-#include "resource.h"
+#include "keystate.h"
+#include "wayland/global.h"
+#include "wayland/resource.h"
 
 namespace Wrapland
 {
 namespace Server
 {
 
-class Display;
-
-/**
- * @brief Exposes key states to wayland clients
- *
- * @since 0.0.558
- **/
-class WRAPLANDSERVER_EXPORT KeyStateInterface : public Global
+class KeyState;
+class KeyState::Private : public Wayland::Global<KeyState>
 {
-    Q_OBJECT
 public:
-    virtual ~KeyStateInterface();
+    Private(D_isplay* d, KeyState* q);
+    ~Private() override;
+    static void fetchStatesCallback(struct wl_client* client, struct wl_resource* resource);
 
-    enum class Key {
-        CapsLock = 0,
-        NumLock = 1,
-        ScrollLock = 2,
-    };
-    Q_ENUM(Key);
-    enum State {
-        Unlocked = 0,
-        Latched = 1,
-        Locked = 2,
-    };
-    Q_ENUM(State)
-
-    void setState(Key k, State s);
-
-private:
-    explicit KeyStateInterface(Display *display, QObject *parent = nullptr);
-    friend class Display;
-
-    class Private;
+    static const quint32 s_version = 1;
+    QVector<wl_resource*> m_resources;
+    QVector<State> m_keyStates = QVector<State>(3, Unlocked);
+    static const struct org_kde_kwin_keystate_interface s_interface;
 };
 
 }
 }
-
-#endif

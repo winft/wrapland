@@ -47,7 +47,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/fakeinput_interface.h"
 #include "../src/server/idle_interface.h"
 #include "../src/server/idleinhibit_interface_p.h"
-#include "../src/server/keystate_interface.h"
 #include "../src/server/linuxdmabuf_v1_interface.h"
 #include "../src/server/output_configuration_v1_interface.h"
 #include "../src/server/output_device_v1_interface.h"
@@ -70,6 +69,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/xdgshell_stable_interface_p.h"
 #include "../src/server/xdgshell_v5_interface_p.h"
 #include "../src/server/xdgshell_v6_interface_p.h"
+#include "keystate.h"
 //
 //
 
@@ -373,9 +373,9 @@ EglStreamControllerInterface* D_isplay::createEglStreamControllerInterface(QObje
     return legacy->createEglStreamControllerInterface(parent);
 }
 
-KeyStateInterface* D_isplay::createKeyStateInterface(QObject* parent)
+KeyState* D_isplay::createKeyState(QObject* parent)
 {
-    return legacy->createKeyStateInterface(parent);
+    return new KeyState(this, parent);
 }
 
 void D_isplay::createShm()

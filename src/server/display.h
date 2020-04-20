@@ -92,7 +92,7 @@ class ViewporterInterface;
 class XdgOutputManagerInterface;
 class XdgDecorationManagerInterface;
 class EglStreamControllerInterface;
-class KeyStateInterface;
+//class KeyState;
 class LinuxDmabufUnstableV1Interface;
 
 /**
@@ -207,7 +207,7 @@ public:
     SlideManagerInterface *createSlideManager(QObject *parent = nullptr);
 
     /** @since 0.0.560 */
-    KeyStateInterface *createKeyStateInterface(QObject *parent = nullptr);
+    //KeyState *createKeyState(QObject *parent = nullptr);
 
     /**
      * @since 5.6

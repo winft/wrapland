@@ -55,7 +55,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdgoutput_interface.h"
 #include "xdgdecoration_interface.h"
 #include "eglstream_controller_interface.h"
-#include "keystate_interface.h"
+//#include "../../server/keystate.h"
 #include "linuxdmabuf_v1_interface.h"
 
 //
@@ -513,14 +513,14 @@ EglStreamControllerInterface *Display::createEglStreamControllerInterface(QObjec
     connect(this, &Display::aboutToTerminate, e, [e] { delete e; });
     return e;
 }
-
-KeyStateInterface *Display::createKeyStateInterface(QObject *parent)
+/*
+KeyState *Display::createKeyState(QObject *parent)
 {
-    auto d = new KeyStateInterface(this, parent);
+    auto d = new KeyState(this, parent);
     connect(this, &Display::aboutToTerminate, d, [d] { delete d; });
     return d;
 }
-
+*/
 void Display::createShm()
 {
     newDisplay->createShm();
