@@ -19,7 +19,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include "idleinhibit_interface_p.h"
 #include "display.h"
-#include "surface_interface_p.h"
+
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
+#include "../../server/wayland/resource.h"
 
 namespace Wrapland
 {
@@ -68,7 +71,7 @@ void IdleInhibitManagerUnstableV1Interface::Private::destroyCallback(wl_client *
 
 void IdleInhibitManagerUnstableV1Interface::Private::createInhibitorCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface)
 {
-    auto s = SurfaceInterface::get(surface);
+    auto s = Wayland::Resource<Surface>::fromResource(surface)->handle();
     if (!s) {
         // send error?
         return;
@@ -76,7 +79,7 @@ void IdleInhibitManagerUnstableV1Interface::Private::createInhibitorCallback(wl_
     auto q = cast(resource);
     auto inhibitor = new IdleInhibitorInterface(q->q, resource);
     inhibitor->d_func()->create(q->display->getConnection(client), version, id);
-    s->d_func()->installIdleInhibitor(inhibitor);
+    s->d_ptr->installIdleInhibitor(inhibitor);
 }
 
 void IdleInhibitManagerUnstableV1Interface::Private::bind(wl_client *client, uint32_t version, uint32_t id)

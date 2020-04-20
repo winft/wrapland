@@ -22,7 +22,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "global_p.h"
 #include "resource_p.h"
 #include "display.h"
-#include "surface_interface.h"
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
 
 #include <QTimer>
 
@@ -43,7 +44,7 @@ public:
 private:
     static void createSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface);
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
-    void createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource);
+    void createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource);
 
     ShellInterface *q;
     static const struct wl_shell_interface s_interface;
@@ -68,7 +69,7 @@ const struct wl_shell_interface ShellInterface::Private::s_interface = {
 class ShellSurfaceInterface::Private : public Resource::Private, public GenericShellSurface<ShellSurfaceInterface>
 {
 public:
-    Private(ShellSurfaceInterface *q, ShellInterface *shell, SurfaceInterface *surface, wl_resource *parentResource);
+    Private(ShellSurfaceInterface *q, ShellInterface *shell, Surface *surface, wl_resource *parentResource);
     void ping();
 
     void commit() override;
@@ -83,7 +84,7 @@ public:
     };
     WindowMode windowMode = WindowMode::Toplevel;
     QPoint transientOffset;
-    QPointer<SurfaceInterface> transientFor;
+    QPointer<Surface> transientFor;
     bool acceptsKeyboardFocus = true;
     void setWindowMode(WindowMode newWindowMode);
 
@@ -130,10 +131,12 @@ void ShellInterface::Private::bind(wl_client *client, uint32_t version, uint32_t
 void ShellInterface::Private::createSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface)
 {
     auto s = reinterpret_cast<ShellInterface::Private*>(wl_resource_get_user_data(resource));
-    s->createSurface(client, wl_resource_get_version(resource), id, SurfaceInterface::get(surface), resource);
+    auto _surface = Surface::Private::fromResource(surface)->handle();
+
+    s->createSurface(client, wl_resource_get_version(resource), id, _surface, resource);
 }
 
-void ShellInterface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource)
+void ShellInterface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource)
 {
     auto it = std::find_if(surfaces.constBegin(), surfaces.constEnd(),
         [surface](ShellSurfaceInterface *s) {
@@ -141,7 +144,7 @@ void ShellInterface::Private::createSurface(wl_client *client, uint32_t version,
         }
     );
     if (it != surfaces.constEnd()) {
-        wl_resource_post_error(surface->resource(), WL_SHELL_ERROR_ROLE, "ShellSurface already created");
+        wl_resource_post_error(surface->d_ptr->resource(), WL_SHELL_ERROR_ROLE, "ShellSurface already created");
         return;
     }
     ShellSurfaceInterface *shellSurface = new ShellSurfaceInterface(q, surface, parentResource);
@@ -158,7 +161,7 @@ void ShellInterface::Private::createSurface(wl_client *client, uint32_t version,
 /*********************************
  * ShellSurfaceInterface
  *********************************/
-ShellSurfaceInterface::Private::Private(ShellSurfaceInterface *q, ShellInterface *shell, SurfaceInterface *surface, wl_resource *parentResource)
+ShellSurfaceInterface::Private::Private(ShellSurfaceInterface *q, ShellInterface *shell, Surface *surface, wl_resource *parentResource)
     : Resource::Private(q, shell, parentResource, &wl_shell_surface_interface, &s_interface)
     , GenericShellSurface<Wrapland::Server::ShellSurfaceInterface>(q, surface)
     , pingTimer(new QTimer)
@@ -182,7 +185,7 @@ const struct wl_shell_surface_interface ShellSurfaceInterface::Private::s_interf
 };
 #endif
 
-ShellSurfaceInterface::ShellSurfaceInterface(ShellInterface *shell, SurfaceInterface *parent, wl_resource *parentResource)
+ShellSurfaceInterface::ShellSurfaceInterface(ShellInterface *shell, Surface *parent, wl_resource *parentResource)
     : Resource(new Private(this, shell, parent, parentResource))
 {
     Q_D();
@@ -191,7 +194,7 @@ ShellSurfaceInterface::ShellSurfaceInterface(ShellInterface *shell, SurfaceInter
         Q_D();
         d->surface = nullptr;
     };
-    connect(parent, &Resource::unbound, this, unsetSurface);
+    connect(parent, &Surface::resourceDestroyed, this, unsetSurface);
     connect(parent, &QObject::destroyed, this, unsetSurface);
 }
 
@@ -313,12 +316,12 @@ void ShellSurfaceInterface::Private::setTransientCallback(wl_client *client, wl_
     Q_UNUSED(flags)
     auto s = cast<Private>(resource);
     Q_ASSERT(client == *s->client);
-    auto surface = SurfaceInterface::get(parent);
+    auto surface = Surface::Private::fromResource(parent)->handle();
     if (surface && s->surface == surface) {
-        wl_resource_post_error(surface->resource(), WL_SHELL_ERROR_ROLE, "Cannot be a transient to itself");
+        wl_resource_post_error(surface->d_ptr->resource(), WL_SHELL_ERROR_ROLE, "Cannot be a transient to itself");
         return;
     }
-    s->transientFor = QPointer<SurfaceInterface>(surface);
+    s->transientFor = QPointer<Surface>(surface);
     s->transientOffset = QPoint(x, y);
     emit s->q_func()->transientChanged(!s->transientFor.isNull());
     emit s->q_func()->transientOffsetChanged(s->transientOffset);
@@ -379,7 +382,7 @@ void ShellSurfaceInterface::Private::setPopupCallback(wl_client *client, wl_reso
     auto s = cast<Private>(resource);
     Q_ASSERT(client == *s->client);
     // TODO: what about seat and serial?
-    s->transientFor = QPointer<SurfaceInterface>(SurfaceInterface::get(parent));
+    s->transientFor = QPointer<Surface>(Surface::Private::fromResource(parent)->handle());
     s->transientOffset = QPoint(x, y);
     s->setWindowMode(WindowMode::Popup);
     emit s->q_func()->transientChanged(!s->transientFor.isNull());
@@ -399,7 +402,7 @@ void ShellSurfaceInterface::Private::setMaximizedCallback(wl_client *client, wl_
     s->setWindowMode(WindowMode::Maximized);
 }
 
-SurfaceInterface *ShellSurfaceInterface::surface() const {
+Surface *ShellSurfaceInterface::surface() const {
     Q_D();
     return d->surface;
 }
@@ -466,7 +469,7 @@ void ShellSurfaceInterface::popupDone()
     }
 }
 
-QPointer< SurfaceInterface > ShellSurfaceInterface::transientFor() const
+QPointer< Surface > ShellSurfaceInterface::transientFor() const
 {
     Q_D();
     return d->transientFor;

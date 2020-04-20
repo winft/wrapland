@@ -19,11 +19,14 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "contrast_interface.h"
-#include "region_interface.h"
 #include "display.h"
 #include "global_p.h"
 #include "resource_p.h"
-#include "surface_interface_p.h"
+
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
+#include "../../server/wayland/resource.h"
+#include "../../server/region.h"
 
 #include <wayland-server.h>
 #include <wayland-contrast-server-protocol.h>
@@ -101,7 +104,7 @@ void ContrastManagerInterface::Private::createCallback(wl_client *client, wl_res
 
 void ContrastManagerInterface::Private::createContrast(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface)
 {
-    SurfaceInterface *s = SurfaceInterface::get(surface);
+    auto s = Wayland::Resource<Surface>::fromResource(surface)->handle();
     if (!s) {
         return;
     }
@@ -113,18 +116,18 @@ void ContrastManagerInterface::Private::createContrast(wl_client *client, wl_res
         delete contrast;
         return;
     }
-    s->d_func()->setContrast(QPointer<ContrastInterface>(contrast));
+    s->d_ptr->setContrast(QPointer<ContrastInterface>(contrast));
 }
 
 void ContrastManagerInterface::Private::unsetCallback(wl_client *client, wl_resource *resource, wl_resource *surface)
 {
     Q_UNUSED(client)
     Q_UNUSED(resource)
-    SurfaceInterface *s = SurfaceInterface::get(surface);
+    auto s = Wayland::Resource<Surface>::fromResource(surface)->handle();
     if (!s) {
         return;
     }
-    s->d_func()->setContrast(QPointer<ContrastInterface>());
+    s->d_ptr->setContrast(QPointer<ContrastInterface>());
 }
 
 ContrastManagerInterface::ContrastManagerInterface(Display *display, QObject *parent)
@@ -194,7 +197,7 @@ void ContrastInterface::Private::setRegionCallback(wl_client *client, wl_resourc
 {
     Q_UNUSED(client)
     Private *p = cast<Private>(resource);
-    RegionInterface *r = RegionInterface::get(region);
+    Region* r = Region::get(region);
     if (r) {
         p->pendingRegion = r->region();
     } else {

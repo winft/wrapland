@@ -17,64 +17,46 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#include "xdgforeign_interface.h"
+#include "xdg_foreign.h"
 
-#include "xdgforeign_v2_interface_p.h"
+#include "xdg_foreign_v2_p.h"
 
 #include "display.h"
-#include "global_p.h"
-#include "resource_p.h"
-#include "surface_interface_p.h"
+#include "surface_p.h"
 
 #include "wayland-xdg-foreign-unstable-v2-server-protocol.h"
-
-#include <QUuid>
 
 namespace Wrapland
 {
 namespace Server
 {
 
-XdgForeignInterface::Private::Private(Display *display, XdgForeignInterface *q)
-    : q(q)
+XdgForeign::Private::Private(D_isplay* display, XdgForeign* q)
 {
-    exporter = new XdgExporterV2Interface(display, q);
-    importer = new XdgImporterV2Interface(display, q);
+    exporter = new XdgExporterV2(display, q);
+    importer = new XdgImporterV2(display, q);
     importer->setExporter(exporter);
 
-    connect(importer, &XdgImporterV2Interface::parentChanged,
-            q, &XdgForeignInterface::parentChanged);
+    connect(importer, &XdgImporterV2::parentChanged, q, &XdgForeign::parentChanged);
 }
 
-XdgForeignInterface::XdgForeignInterface(Display *display, QObject *parent)
-    : QObject(parent),
-      d(new Private(display, this))
+XdgForeign::XdgForeign(D_isplay* display, QObject* parent)
+    : QObject(parent)
+    , d_ptr(new Private(display, this))
 {
 }
 
-XdgForeignInterface::~XdgForeignInterface()
+XdgForeign::~XdgForeign()
 {
-    delete d->exporter;
-    delete d->importer;
-    delete d;
+    delete d_ptr->exporter;
+    delete d_ptr->importer;
+    delete d_ptr;
 }
 
-void XdgForeignInterface::create()
+Surface* XdgForeign::parentOf(Surface* surface)
 {
-    d->exporter->create();
-    d->importer->create();
-}
-
-bool XdgForeignInterface::isValid()
-{
-    return d->exporter->isValid() && d->importer->isValid();
-}
-
-SurfaceInterface *XdgForeignInterface::parentOf(SurfaceInterface *surface)
-{
-    return d->importer->parentOf(surface);
+    return d_ptr->importer->parentOf(surface);
 }
 
 }
 }
-

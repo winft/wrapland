@@ -35,7 +35,7 @@ class Output::Private : public Wayland::Global<Output>
 {
 public:
     Private(Output* q, D_isplay* display);
-    ~Private();
+    ~Private() override;
 
     void bindInit(Wayland::Client* client, uint32_t version, uint32_t id) override;
     uint32_t version() const override;

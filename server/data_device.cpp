@@ -25,7 +25,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_source_p.h"
 
 #include "seat.h"
-#include "surface_interface.h"
+#include "surface.h"
+#include "surface_p.h"
 
 #include "wayland/resource.h"
 
@@ -46,14 +47,14 @@ public:
 
     Seat* seat;
     DataSource* source = nullptr;
-    SurfaceInterface* surface = nullptr;
-    SurfaceInterface* icon = nullptr;
+    Surface* surface = nullptr;
+    Surface* icon = nullptr;
 
     DataSource* selection = nullptr;
     QMetaObject::Connection selectionDestroyedConnection;
 
     struct Drag {
-        SurfaceInterface* surface = nullptr;
+        Surface* surface = nullptr;
         QMetaObject::Connection destroyConnection;
         QMetaObject::Connection posConnection;
         QMetaObject::Connection sourceActionConnection;
@@ -62,7 +63,7 @@ public:
     };
     Drag drag;
 
-    QPointer<SurfaceInterface> proxyRemoteSurface;
+    QPointer<Surface> proxyRemoteSurface;
 
 private:
     static void startDragCallback(wl_client* wlClient,
@@ -76,10 +77,7 @@ private:
                                      wl_resource* wlSource,
                                      uint32_t serial);
 
-    void startDrag(DataSource* dataSource,
-                   SurfaceInterface* origin,
-                   SurfaceInterface* icon,
-                   quint32 serial);
+    void startDrag(DataSource* dataSource, Surface* origin, Surface* icon, quint32 serial);
     void setSelection(wl_resource* sourceResource);
 
     static const struct wl_data_device_interface s_interface;
@@ -115,15 +113,15 @@ void DataDevice::Private::startDragCallback([[maybe_unused]] wl_client* wlClient
 {
     auto priv = static_cast<Private*>(fromResource(wlResource));
     auto source = wlSource ? Resource<DataSource>::fromResource(wlSource)->handle() : nullptr;
-    auto origin = SurfaceInterface::get(wlOrigin);
-    auto icon = SurfaceInterface::get(wlIcon);
+    auto origin = Resource<Surface>::fromResource(wlOrigin)->handle();
+    auto icon = Resource<Surface>::fromResource(wlIcon)->handle();
 
     priv->startDrag(source, origin, icon, serial);
 }
 
 void DataDevice::Private::startDrag(DataSource* dataSource,
-                                    SurfaceInterface* origin,
-                                    SurfaceInterface* _icon,
+                                    Surface* origin,
+                                    Surface* _icon,
                                     quint32 serial)
 {
     // TODO: verify serial
@@ -247,12 +245,12 @@ DataSource* DataDevice::dragSource() const
     return d_ptr->source;
 }
 
-SurfaceInterface* DataDevice::icon() const
+Surface* DataDevice::icon() const
 {
     return d_ptr->icon;
 }
 
-SurfaceInterface* DataDevice::origin() const
+Surface* DataDevice::origin() const
 {
     return d_ptr->proxyRemoteSurface ? d_ptr->proxyRemoteSurface.data() : d_ptr->surface;
 }
@@ -299,10 +297,10 @@ void DataDevice::drop()
     d_ptr->client()->flush();
 }
 
-void DataDevice::updateDragTarget(SurfaceInterface* surface, quint32 serial)
+void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
 {
     if (d_ptr->drag.surface) {
-        if (d_ptr->resource() && d_ptr->drag.surface->resource()) {
+        if (d_ptr->resource() && d_ptr->drag.surface->d_ptr->resource()) {
             d_ptr->send<wl_data_device_send_leave>();
         }
         if (d_ptr->drag.posConnection) {
@@ -377,7 +375,7 @@ void DataDevice::updateDragTarget(SurfaceInterface* surface, quint32 serial)
     // TODO: handle touch position
     const QPointF pos = d_ptr->seat->dragSurfaceTransformation().map(d_ptr->seat->pointerPos());
     d_ptr->send<wl_data_device_send_enter>(serial,
-                                           surface->resource(),
+                                           surface->d_ptr->resource(),
                                            wl_fixed_from_double(pos.x()),
                                            wl_fixed_from_double(pos.y()),
                                            offer ? offer->d_ptr->resource() : nullptr);
@@ -431,7 +429,7 @@ quint32 DataDevice::dragImplicitGrabSerial() const
     return d_ptr->drag.serial;
 }
 
-void DataDevice::updateProxy(SurfaceInterface* remote)
+void DataDevice::updateProxy(Surface* remote)
 {
     // TODO: connect destroy signal?
     d_ptr->proxyRemoteSurface = remote;

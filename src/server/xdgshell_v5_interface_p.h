@@ -36,7 +36,7 @@ namespace Server
 class Display;
 class OutputInterface;
 class SeatInterface;
-class SurfaceInterface;
+class Surface;
 class XdgPopupV5Interface;
 class XdgSurfaceV5Interface;
 template <typename T>
@@ -69,7 +69,7 @@ public:
     virtual ~XdgSurfaceV5Interface();
 
 private:
-    explicit XdgSurfaceV5Interface(XdgShellV5Interface *parent, SurfaceInterface *surface, wl_resource *parentResource);
+    explicit XdgSurfaceV5Interface(XdgShellV5Interface *parent, Surface *surface, wl_resource *parentResource);
     friend class XdgShellV5Interface;
 
     class Private;
@@ -82,7 +82,7 @@ public:
     virtual ~XdgPopupV5Interface();
 
 private:
-    explicit XdgPopupV5Interface(XdgShellV5Interface *parent, SurfaceInterface *surface, wl_resource *parentResource);
+    explicit XdgPopupV5Interface(XdgShellV5Interface *parent, Surface *surface, wl_resource *parentResource);
     friend class XdgShellV5Interface;
     friend class GenericShellSurface<XdgPopupV5Interface>;
 

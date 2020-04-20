@@ -27,10 +27,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/shm_pool.h"
+
 #include "../../src/server/buffer_interface.h"
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/display.h"
-#include "../../src/server/surface_interface.h"
+#include "../../server/compositor.h"
+#include "../../server/display.h"
+#include "../../server/surface.h"
 
 class TestShmPool : public QObject
 {
@@ -51,8 +52,8 @@ private Q_SLOTS:
     void testDestroy();
 
 private:
-    Wrapland::Server::Display *m_display;
-    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Compositor *m_serverCompositor;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
     Wrapland::Client::ShmPool *m_shmPool;
@@ -65,7 +66,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-wayland-surfac
 TestShmPool::TestShmPool(QObject *parent)
     : QObject(parent)
     , m_display(nullptr)
-    , m_compositorInterface(nullptr)
+    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_shmPool(nullptr)
@@ -75,12 +76,9 @@ TestShmPool::TestShmPool(QObject *parent)
 
 void TestShmPool::init()
 {
-    using namespace Wrapland::Server;
-
-    m_display = new Display(this);
+    m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;

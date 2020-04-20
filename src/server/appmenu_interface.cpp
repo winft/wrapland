@@ -18,8 +18,12 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include "appmenu_interface.h"
+
 #include "display.h"
-#include "surface_interface.h"
+
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
+
 #include "global_p.h"
 #include "resource_p.h"
 #include "logging.h"
@@ -66,10 +70,10 @@ void AppMenuManagerInterface::Private::createCallback(wl_client *client, wl_reso
     auto p = reinterpret_cast<Private*>(wl_resource_get_user_data(resource));
     Q_ASSERT(p);
 
-    SurfaceInterface *s = SurfaceInterface::get(surface);
+    Surface *s = Surface::Private::fromResource(surface)->handle();
     if (!s) {
         // TODO: send error?
-        qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationInterface requested for non existing SurfaceInterface";
+        qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationInterface requested for non existing Surface";
         return;
     }
     auto appmenu = new AppMenuInterface(p->q, s, resource);
@@ -111,11 +115,11 @@ void AppMenuManagerInterface::Private::unbind(wl_resource *resource)
 class AppMenuInterface::Private : public Resource::Private
 {
 public:
-    Private(AppMenuInterface *q, AppMenuManagerInterface *c, SurfaceInterface *surface, wl_resource *parentResource);
+    Private(AppMenuInterface *q, AppMenuManagerInterface *c, Surface *surface, wl_resource *parentResource);
     ~Private();
 
 
-    SurfaceInterface *surface;
+    Surface *surface;
     InterfaceAddress address;
 private:
     static void setAddressCallback(wl_client *client, wl_resource *resource, const char * service_name, const char * object_path);
@@ -123,7 +127,7 @@ private:
     AppMenuInterface *q_func() {
         return reinterpret_cast<AppMenuInterface *>(q);
     }
-    static AppMenuInterface *get(SurfaceInterface *s);
+    static AppMenuInterface *get(Surface *s);
     static const struct org_kde_kwin_appmenu_interface s_interface;
 };
 
@@ -149,7 +153,7 @@ void AppMenuInterface::Private::setAddressCallback(wl_client *client, wl_resourc
     emit p->q_func()->addressChanged(p->address);
 }
 
-AppMenuInterface::Private::Private(AppMenuInterface *q, AppMenuManagerInterface *c, SurfaceInterface *s, wl_resource *parentResource)
+AppMenuInterface::Private::Private(AppMenuInterface *q, AppMenuManagerInterface *c, Surface *s, wl_resource *parentResource)
     : Resource::Private(q, c, parentResource, &org_kde_kwin_appmenu_interface, &s_interface),
     surface(s)
 {
@@ -177,7 +181,7 @@ AppMenuManagerInterface::Private *AppMenuManagerInterface::d_func() const
     return reinterpret_cast<AppMenuManagerInterface::Private*>(d.data());
 }
 
-AppMenuInterface* AppMenuManagerInterface::appMenuForSurface(SurfaceInterface *surface)
+AppMenuInterface* AppMenuManagerInterface::appMenuForSurface(Surface *surface)
 {
     Q_D();
     for (AppMenuInterface* menu: d->appmenus) {
@@ -188,7 +192,7 @@ AppMenuInterface* AppMenuManagerInterface::appMenuForSurface(SurfaceInterface *s
     return nullptr;
 }
 
-AppMenuInterface::AppMenuInterface(AppMenuManagerInterface *parent, SurfaceInterface *s, wl_resource *parentResource):
+AppMenuInterface::AppMenuInterface(AppMenuManagerInterface *parent, Surface *s, wl_resource *parentResource):
     Resource(new Private(this, parent, s, parentResource))
 {
 }
@@ -206,7 +210,7 @@ AppMenuInterface::InterfaceAddress AppMenuInterface::address() const {
     return d->address;
 }
 
-SurfaceInterface* AppMenuInterface::surface() const {
+Surface* AppMenuInterface::surface() const {
     Q_D();
     return d->surface;
 }

@@ -26,7 +26,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "resource_p.h"
 #include "output_interface.h"
 #include "seat_interface.h"
-#include "surface_interface.h"
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
 
 #include "../compat/wayland-xdg-shell-v5-server-protocol.h"
 
@@ -44,8 +45,8 @@ public:
     QVector<XdgSurfaceV5Interface*> surfaces;
 
 private:
-    void createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource);
-    void createPopup(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, SurfaceInterface *parent, SeatInterface *seat, quint32 serial, const QPoint &pos, wl_resource *parentResource);
+    void createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource);
+    void createPopup(wl_client *client, uint32_t version, uint32_t id, Surface *surface, Surface *parent, SeatInterface *seat, quint32 serial, const QPoint &pos, wl_resource *parentResource);
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
     quint32 ping(XdgShellSurfaceInterface * surface) override;
 
@@ -70,7 +71,7 @@ private:
 class XdgPopupV5Interface::Private : public XdgShellPopupInterface::Private
 {
 public:
-    Private(XdgPopupV5Interface *q, XdgShellV5Interface *c, SurfaceInterface *surface, wl_resource *parentResource);
+    Private(XdgPopupV5Interface *q, XdgShellV5Interface *c, Surface *surface, wl_resource *parentResource);
     ~Private();
 
     QRect windowGeometry() const override;
@@ -116,10 +117,10 @@ void XdgShellV5Interface::Private::useUnstableVersionCallback(wl_client *client,
 void XdgShellV5Interface::Private::getXdgSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource * surface)
 {
     auto s = cast(resource);
-    s->createSurface(client, wl_resource_get_version(resource), id, SurfaceInterface::get(surface), resource);
+    s->createSurface(client, wl_resource_get_version(resource), id, Surface::Private::fromResource(surface)->handle(), resource);
 }
 
-void XdgShellV5Interface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource)
+void XdgShellV5Interface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource)
 {
     auto it = std::find_if(surfaces.constBegin(), surfaces.constEnd(),
         [surface](XdgSurfaceV5Interface *s) {
@@ -127,7 +128,7 @@ void XdgShellV5Interface::Private::createSurface(wl_client *client, uint32_t ver
         }
     );
     if (it != surfaces.constEnd()) {
-        wl_resource_post_error(surface->resource(), ZXDG_SHELL_V5_ERROR_ROLE, "ShellSurface already created");
+        wl_resource_post_error(surface->d_ptr->resource(), ZXDG_SHELL_V5_ERROR_ROLE, "ShellSurface already created");
         return;
     }
     XdgSurfaceV5Interface *shellSurface = new XdgSurfaceV5Interface(q, surface, parentResource);
@@ -144,14 +145,15 @@ void XdgShellV5Interface::Private::createSurface(wl_client *client, uint32_t ver
 void XdgShellV5Interface::Private::getXdgPopupCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource * surface, wl_resource * parent, wl_resource * seat, uint32_t serial, int32_t x, int32_t y)
 {
     auto s = cast(resource);
-    s->createPopup(client, wl_resource_get_version(resource), id, SurfaceInterface::get(surface), SurfaceInterface::get(parent), SeatInterface::get(seat), serial, QPoint(x, y), resource);
+    s->createPopup(client, wl_resource_get_version(resource), id, Surface::Private::fromResource(surface)->handle(),
+                   Surface::Private::fromResource(parent)->handle(), SeatInterface::get(seat), serial, QPoint(x, y), resource);
 }
 
-void XdgShellV5Interface::Private::createPopup(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, SurfaceInterface *parent, SeatInterface *seat, quint32 serial, const QPoint &pos, wl_resource *parentResource)
+void XdgShellV5Interface::Private::createPopup(wl_client *client, uint32_t version, uint32_t id, Surface *surface, Surface *parent, SeatInterface *seat, quint32 serial, const QPoint &pos, wl_resource *parentResource)
 {
     XdgPopupV5Interface *popupSurface = new XdgPopupV5Interface(q, surface, parentResource);
     auto d = popupSurface->d_func();
-    d->parent = QPointer<SurfaceInterface>(parent);
+    d->parent = QPointer<Surface>(parent);
     d->anchorRect = QRect(pos, QSize(0,0));
     //default open like a normal popup
     d->anchorEdge = Qt::BottomEdge;
@@ -252,7 +254,7 @@ XdgShellV5Interface::Private *XdgShellV5Interface::d_func() const
 class XdgSurfaceV5Interface::Private : public XdgShellSurfaceInterface::Private
 {
 public:
-    Private(XdgSurfaceV5Interface *q, XdgShellV5Interface *c, SurfaceInterface *surface, wl_resource *parentResource);
+    Private(XdgSurfaceV5Interface *q, XdgShellV5Interface *c, Surface *surface, wl_resource *parentResource);
     ~Private();
 
     QRect windowGeometry() const override;
@@ -435,7 +437,7 @@ void XdgSurfaceV5Interface::Private::setMinimizedCallback(wl_client *client, wl_
     s->q_func()->minimizeRequested();
 }
 
-XdgSurfaceV5Interface::Private::Private(XdgSurfaceV5Interface *q, XdgShellV5Interface *c, SurfaceInterface *surface, wl_resource *parentResource)
+XdgSurfaceV5Interface::Private::Private(XdgSurfaceV5Interface *q, XdgShellV5Interface *c, Surface *surface, wl_resource *parentResource)
     : XdgShellSurfaceInterface::Private(XdgShellInterfaceVersion::UnstableV5, q, c, surface, parentResource, &zxdg_surface_v5_interface, &s_interface)
 {
 }
@@ -516,7 +518,7 @@ const struct zxdg_popup_v5_interface XdgPopupV5Interface::Private::s_interface =
 };
 #endif
 
-XdgPopupV5Interface::Private::Private(XdgPopupV5Interface *q, XdgShellV5Interface *c, SurfaceInterface *surface, wl_resource *parentResource)
+XdgPopupV5Interface::Private::Private(XdgPopupV5Interface *q, XdgShellV5Interface *c, Surface *surface, wl_resource *parentResource)
     : XdgShellPopupInterface::Private(XdgShellInterfaceVersion::UnstableV5, q, c, surface, parentResource, &zxdg_popup_v5_interface, &s_interface)
 {
 }
@@ -549,14 +551,14 @@ XdgShellV5Interface::XdgShellV5Interface(Display *display, QObject *parent)
 
 XdgShellV5Interface::~XdgShellV5Interface() = default;
 
-XdgSurfaceV5Interface::XdgSurfaceV5Interface(XdgShellV5Interface *parent, SurfaceInterface *surface, wl_resource *parentResource)
+XdgSurfaceV5Interface::XdgSurfaceV5Interface(XdgShellV5Interface *parent, Surface *surface, wl_resource *parentResource)
     : Wrapland::Server::XdgShellSurfaceInterface(new Private(this, parent, surface, parentResource))
 {
 }
 
 XdgSurfaceV5Interface::~XdgSurfaceV5Interface() = default;
 
-XdgPopupV5Interface::XdgPopupV5Interface(XdgShellV5Interface *parent, SurfaceInterface *surface, wl_resource *parentResource)
+XdgPopupV5Interface::XdgPopupV5Interface(XdgShellV5Interface *parent, Surface *surface, wl_resource *parentResource)
     : XdgShellPopupInterface(new Private(this, parent, surface, parentResource))
 {
 }

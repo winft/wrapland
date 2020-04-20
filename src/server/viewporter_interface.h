@@ -30,16 +30,16 @@ namespace Server
 {
 
 class Display;
-class SurfaceInterface;
+class Surface;
 class ViewportInterface;
 
 /**
  * @brief Represents the Global for wp_viewporter interface.
  *
- * This class creates ViewportInterfaces and attaches them to SurfaceInterfaces.
+ * This class creates ViewportInterfaces and attaches them to Surfaces.
  *
  * @see ViewportInterface
- * @see SurfaceInterface
+ * @see Surface
  * @since 0.518.0
  **/
 class WRAPLANDSERVER_EXPORT ViewporterInterface : public Global
@@ -76,7 +76,7 @@ Q_SIGNALS:
 
 private:
     explicit ViewportInterface(ViewporterInterface *viewporter, wl_resource *parentResource,
-                               SurfaceInterface *surface);
+                               Surface *surface);
     friend class ViewporterInterface;
 
     class Private;

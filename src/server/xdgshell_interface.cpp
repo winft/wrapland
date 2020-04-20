@@ -84,7 +84,7 @@ XdgShellInterface::Private *XdgShellInterface::d_func() const
     return reinterpret_cast<Private*>(d.data());
 }
 
-XdgShellSurfaceInterface::Private::Private(XdgShellInterfaceVersion interfaceVersion, XdgShellSurfaceInterface *q, Global *c, SurfaceInterface *surface, wl_resource *parentResource, const wl_interface *interface, const void *implementation)
+XdgShellSurfaceInterface::Private::Private(XdgShellInterfaceVersion interfaceVersion, XdgShellSurfaceInterface *q, Global *c, Surface *surface, wl_resource *parentResource, const wl_interface *interface, const void *implementation)
     : Resource::Private(q, c, parentResource, interface, implementation)
     , GenericShellSurface<XdgShellSurfaceInterface>(q, surface)
     , interfaceVersion(interfaceVersion)
@@ -118,7 +118,7 @@ bool XdgShellSurfaceInterface::isConfigurePending() const
     return !d->configureSerials.isEmpty();
 }
 
-SurfaceInterface *XdgShellSurfaceInterface::surface() const
+Surface *XdgShellSurfaceInterface::surface() const
 {
     Q_D();
     return d->surface;
@@ -177,7 +177,7 @@ XdgShellSurfaceInterface::Private *XdgShellSurfaceInterface::d_func() const
     return reinterpret_cast<Private*>(d.data());
 }
 
-XdgShellPopupInterface::Private::Private(XdgShellInterfaceVersion interfaceVersion, XdgShellPopupInterface *q, XdgShellInterface *c, SurfaceInterface *surface, wl_resource *parentResource, const wl_interface *interface, const void *implementation)
+XdgShellPopupInterface::Private::Private(XdgShellInterfaceVersion interfaceVersion, XdgShellPopupInterface *q, XdgShellInterface *c, Surface *surface, wl_resource *parentResource, const wl_interface *interface, const void *implementation)
     : Resource::Private(q, c, parentResource, interface, implementation)
     , GenericShellSurface<XdgShellPopupInterface>(q, surface)
     , interfaceVersion(interfaceVersion)
@@ -193,13 +193,13 @@ XdgShellPopupInterface::XdgShellPopupInterface(Private *p)
 
 XdgShellPopupInterface::~XdgShellPopupInterface() = default;
 
-SurfaceInterface *XdgShellPopupInterface::surface() const
+Surface *XdgShellPopupInterface::surface() const
 {
     Q_D();
     return d->surface;
 }
 
-QPointer<SurfaceInterface> XdgShellPopupInterface::transientFor() const
+QPointer<Surface> XdgShellPopupInterface::transientFor() const
 {
     Q_D();
     return d->parent;

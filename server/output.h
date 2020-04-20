@@ -150,6 +150,7 @@ Q_SIGNALS:
 
 private:
     friend class D_isplay;
+    friend class Surface;
 
     explicit Output(Wrapland::Server::D_isplay* display, QObject* parent = nullptr);
 

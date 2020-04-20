@@ -46,8 +46,8 @@ enum class IdleInhibitManagerInterfaceVersion {
 
 /**
  * The IdleInhibitorManagerInterface is used by clients to inhibit idle on a
- * SurfaceInterface. Whether a SurfaceInterface inhibits idle is exposes through
- * @link{SurfaceInterface::inhibitsIdle}.
+ * Surface. Whether a Surface inhibits idle is exposes through
+ * @link{Surface::inhibitsIdle}.
  *
  * @since 0.0.541
  **/

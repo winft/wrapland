@@ -38,7 +38,7 @@ namespace Server
 
 class Display;
 class SeatInterface;
-class SurfaceInterface;
+class Surface;
 class ShellSurfaceInterface;
 template <typename T>
 class GenericShellSurface;
@@ -102,21 +102,21 @@ class WRAPLANDSERVER_EXPORT ShellSurfaceInterface : public Resource
      **/
     Q_PROPERTY(bool maximized READ isMaximized NOTIFY maximizedChanged)
     /**
-     * Whether the ShellSurfaceInterface is a popup for another SurfaceInterface.
+     * Whether the ShellSurfaceInterface is a popup for another Surface.
      *
      * Popup implies transient.
      * @since 5.5
      **/
     Q_PROPERTY(bool popup READ isPopup NOTIFY popupChanged)
     /**
-     * Whether the ShellSurfaceInterface is a transient for another SurfaceInterface.
+     * Whether the ShellSurfaceInterface is a transient for another Surface.
      *
      * Popup implies transient.
      * @since 5.5
      **/
     Q_PROPERTY(bool transient READ isTransient NOTIFY transientChanged)
     /**
-     * Offset of the upper left corner in the parent SurfaceInterface's coordinate system.
+     * Offset of the upper left corner in the parent Surface's coordinate system.
      * @since 5.5
      **/
     Q_PROPERTY(QPoint transientOffset READ transientOffset NOTIFY transientOffsetChanged)
@@ -158,14 +158,14 @@ public:
      **/
     bool isPinged() const;
     /**
-     * Requests that the ShellSurfaceInterface resizes the SurfaceInterface to @p size.
+     * Requests that the ShellSurfaceInterface resizes the Surface to @p size.
      **/
     void requestSize(const QSize &size);
 
     /**
-     * @return The SurfaceInterface this ShellSurfaceInterface got created for.
+     * @return The Surface this ShellSurfaceInterface got created for.
      **/
-    SurfaceInterface *surface() const;
+    Surface *surface() const;
     /**
      * @returns The ShellInterface which created this ShellSurfaceInterface.
      **/
@@ -185,7 +185,7 @@ public:
      **/
     bool isPopup() const;
     /**
-     * @returns @c true if the ShellSurfaceInterface is a transient or popup for another SurfaceInterface.
+     * @returns @c true if the ShellSurfaceInterface is a transient or popup for another Surface.
      * @see isPopup
      * @see transientOffset
      * @see transientFor
@@ -194,7 +194,7 @@ public:
     bool isTransient() const;
     /**
      * In case the ShellSurfaceInterface is a transient this is the offset of the ShellSurfaceInterface
-     * in the coordinate system of the SurfaceInterface this surface is a transient for.
+     * in the coordinate system of the Surface this surface is a transient for.
      *
      * @returns offset in parent coordinate system.
      * @see isTransient
@@ -203,11 +203,11 @@ public:
      **/
     QPoint transientOffset() const;
     /**
-     * The SurfaceInterface for which this ShellSurfaceInterface is a transient.
+     * The Surface for which this ShellSurfaceInterface is a transient.
      * This is only relevant if the ShellSurfaceInterface is either a transient or a
      * popup.
      *
-     * The transientOffset is in the local coordinate system of the SurfaceInterface
+     * The transientOffset is in the local coordinate system of the Surface
      * returned by this method.
      *
      * @returns The SurfaceInterface for which this Surface is a transient
@@ -216,7 +216,7 @@ public:
      * @see transientOffset
      * @since 5.5
      **/
-    QPointer<SurfaceInterface> transientFor() const;
+    QPointer<Surface> transientFor() const;
 
     /**
      * Whether the ShellSurfaceInterface can accept keyboard focus.
@@ -306,7 +306,7 @@ Q_SIGNALS:
 
 private:
     friend class ShellInterface;
-    explicit ShellSurfaceInterface(ShellInterface *shell, SurfaceInterface *parent, wl_resource *parentResource);
+    explicit ShellSurfaceInterface(ShellInterface *shell, Surface *parent, wl_resource *parentResource);
     friend class GenericShellSurface<ShellSurfaceInterface>;
     class Private;
     Private *d_func() const;

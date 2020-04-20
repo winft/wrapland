@@ -21,7 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "resource_p.h"
 #include "seat_interface_p.h"
-#include "surface_interface.h"
+
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
 
 #include <wayland-text-server-protocol.h>
 
@@ -36,11 +38,11 @@ public:
     Private(TextInputInterface *q, TextInputManagerUnstableV0Interface *c, wl_resource *parentResource);
     ~Private();
 
-    void activate(SeatInterface *seat, SurfaceInterface *surface);
+    void activate(SeatInterface *seat, Surface *surface);
     void deactivate();
 
-    void sendEnter(SurfaceInterface *surface, quint32 serial) override;
-    void sendLeave(quint32 serial, SurfaceInterface *surface) override;
+    void sendEnter(Surface *surface, quint32 serial) override;
+    void sendLeave(quint32 serial, Surface *surface) override;
     void preEdit(const QByteArray &text, const QByteArray &commit) override;
     void commit(const QByteArray &text) override;
     void deleteSurroundingText(quint32 beforeLength, quint32 afterLength) override;
@@ -91,9 +93,9 @@ const struct wl_text_input_interface TextInputUnstableV0Interface::Private::s_in
 };
 #endif
 
-void TextInputUnstableV0Interface::Private::activate(SeatInterface *seat, SurfaceInterface *s)
+void TextInputUnstableV0Interface::Private::activate(SeatInterface *seat, Surface *s)
 {
-    surface = QPointer<SurfaceInterface>(s);
+    surface = QPointer<Surface>(s);
     enabled = true;
     emit q_func()->enabledChanged();
     emit q_func()->requestActivate(seat, surface);
@@ -106,16 +108,16 @@ void TextInputUnstableV0Interface::Private::deactivate()
     emit q_func()->enabledChanged();
 }
 
-void TextInputUnstableV0Interface::Private::sendEnter(SurfaceInterface *surface, quint32 serial)
+void TextInputUnstableV0Interface::Private::sendEnter(Surface *surface, quint32 serial)
 {
     Q_UNUSED(serial)
     if (!resource) {
         return;
     }
-    wl_text_input_send_enter(resource, surface->resource());
+    wl_text_input_send_enter(resource, surface->d_ptr->resource());
 }
 
-void TextInputUnstableV0Interface::Private::sendLeave(quint32 serial, SurfaceInterface *surface)
+void TextInputUnstableV0Interface::Private::sendLeave(quint32 serial, Surface *surface)
 {
     Q_UNUSED(serial)
     Q_UNUSED(surface)
@@ -233,7 +235,7 @@ void TextInputUnstableV0Interface::Private::activateCallback(wl_client *client, 
 {
     auto p = cast<Private>(resource);
     Q_ASSERT(*p->client == client);
-    p->activate(SeatInterface::get(seat), SurfaceInterface::get(surface));
+    p->activate(SeatInterface::get(seat), Surface::Private::fromResource(surface)->handle());
 }
 
 void TextInputUnstableV0Interface::Private::deactivateCallback(wl_client *client, wl_resource *resource, wl_resource *seat)

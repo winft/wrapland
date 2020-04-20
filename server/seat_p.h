@@ -58,11 +58,11 @@ public:
 
     uint32_t getCapabilities() const;
 
-    QVector<Pointer*> pointersForSurface(SurfaceInterface* surface) const;
-    QVector<Keyboard*> keyboardsForSurface(SurfaceInterface* surface) const;
-    QVector<Touch*> touchsForSurface(SurfaceInterface* surface) const;
-    DataDevice* dataDeviceForSurface(SurfaceInterface* surface) const;
-    TextInputInterface* textInputForSurface(SurfaceInterface* surface) const;
+    QVector<Pointer*> pointersForSurface(Surface* surface) const;
+    QVector<Keyboard*> keyboardsForSurface(Surface* surface) const;
+    QVector<Touch*> touchsForSurface(Surface* surface) const;
+    DataDevice* dataDeviceForSurface(Surface* surface) const;
+    TextInputInterface* textInputForSurface(Surface* surface) const;
     void registerDataDevice(DataDevice* dataDevice);
     void registerTextInput(TextInputInterface* textInput);
     void endDrag(quint32 serial);
@@ -91,7 +91,7 @@ public:
         QHash<quint32, State> buttonStates;
         QPointF pos;
         struct Focus {
-            SurfaceInterface* surface = nullptr;
+            Surface* surface = nullptr;
             QVector<Pointer*> pointers;
             QMetaObject::Connection destroyConnection;
             QPointF offset = QPointF();
@@ -99,7 +99,7 @@ public:
             quint32 serial = 0;
         };
         Focus focus;
-        QPointer<SurfaceInterface> gestureSurface;
+        QPointer<Surface> gestureSurface;
     };
     SeatPointer globalPointer;
 
@@ -128,7 +128,7 @@ public:
         };
         Modifiers modifiers;
         struct Focus {
-            SurfaceInterface* surface = nullptr;
+            Surface* surface = nullptr;
             QVector<Keyboard*> keyboards;
             QMetaObject::Connection destroyConnection;
             quint32 serial = 0;
@@ -147,7 +147,7 @@ public:
 
     struct TextInput {
         struct Focus {
-            SurfaceInterface* surface = nullptr;
+            Surface* surface = nullptr;
             QMetaObject::Connection destroyConnection;
             quint32 serial = 0;
             TextInputInterface* textInput = nullptr;
@@ -159,7 +159,7 @@ public:
     // Touch related members
     struct SeatTouch {
         struct Focus {
-            SurfaceInterface* surface = nullptr;
+            Surface* surface = nullptr;
             QVector<Touch*> touchs;
             QMetaObject::Connection destroyConnection;
             QPointF offset = QPointF();
@@ -179,7 +179,7 @@ public:
         Mode mode = Mode::None;
         DataDevice* source = nullptr;
         DataDevice* target = nullptr;
-        SurfaceInterface* surface = nullptr;
+        Surface* surface = nullptr;
         Pointer* sourcePointer = nullptr;
         Touch* sourceTouch = nullptr;
         QMatrix4x4 transformation;

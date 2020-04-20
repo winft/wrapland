@@ -30,14 +30,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/surface_interface.h"
-
+#include "../../server/compositor.h"
 #include "../../server/data_device.h"
 #include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
 #include "../../server/seat.h"
+#include "../../server/surface.h"
 
 #include <wayland-client.h>
 
@@ -63,7 +62,7 @@ private Q_SLOTS:
 private:
     Wrapland::Server::D_isplay* m_display = nullptr;
     Wrapland::Server::DataDeviceManager* m_serverDataDeviceManager = nullptr;
-    Wrapland::Server::CompositorInterface* m_compositorInterface = nullptr;
+    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
     Wrapland::Server::Seat* m_serverSeat = nullptr;
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
     Wrapland::Client::DataDeviceManager* m_dataDeviceManager = nullptr;
@@ -136,9 +135,7 @@ void TestDataDevice::init()
     QVERIFY(pointerChangedSpy.isValid());
     QVERIFY(pointerChangedSpy.wait());
 
-    m_compositorInterface = m_display->createCompositor(m_display);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    m_serverCompositor = m_display->createCompositor(m_display);
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
@@ -253,8 +250,8 @@ void TestDataDevice::testDrag()
         = dataSourceCreatedSpy.first().first().value<Wrapland::Server::DataSource*>();
     QVERIFY(sourceInterface);
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface,
-                                 SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor,
+                                 SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(surfaceCreatedSpy.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -262,8 +259,7 @@ void TestDataDevice::testDrag()
 
     QVERIFY(surfaceCreatedSpy.wait());
     QCOMPARE(surfaceCreatedSpy.count(), 1);
-    auto surfaceInterface
-        = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto surfaceInterface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
 
     // now we have all we need to start a drag operation
     QSignalSpy dragStartedSpy(serverDevice, SIGNAL(dragStarted()));
@@ -338,8 +334,8 @@ void TestDataDevice::testDragInternally()
     auto serverDevice = dataDeviceCreatedSpy.first().first().value<Wrapland::Server::DataDevice*>();
     QVERIFY(serverDevice);
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface,
-                                 SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor,
+                                 SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(surfaceCreatedSpy.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -347,8 +343,7 @@ void TestDataDevice::testDragInternally()
 
     QVERIFY(surfaceCreatedSpy.wait());
     QCOMPARE(surfaceCreatedSpy.count(), 1);
-    auto surfaceInterface
-        = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto surfaceInterface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
 
     std::unique_ptr<Wrapland::Client::Surface> iconSurface(m_compositor->createSurface());
     QVERIFY(iconSurface->isValid());
@@ -356,7 +351,7 @@ void TestDataDevice::testDragInternally()
     QVERIFY(surfaceCreatedSpy.wait());
     QCOMPARE(surfaceCreatedSpy.count(), 2);
     auto iconSurfaceInterface
-        = surfaceCreatedSpy.last().first().value<Wrapland::Server::SurfaceInterface*>();
+        = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
 
     // now we have all we need to start a drag operation
     QSignalSpy dragStartedSpy(serverDevice, &Wrapland::Server::DataDevice::dragStarted);
@@ -509,16 +504,14 @@ void TestDataDevice::testSendSelectionOnSeat()
     QVERIFY(serverDataDevice);
     std::unique_ptr<Wrapland::Client::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(keyboard->isValid());
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface,
-                                 &Wrapland::Server::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto serverSurface
-        = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
 
@@ -576,15 +569,13 @@ void TestDataDevice::testReplaceSource()
     QVERIFY(serverDataDevice);
     std::unique_ptr<Wrapland::Client::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(keyboard->isValid());
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface,
-                                 &Wrapland::Server::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto serverSurface
-        = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
 

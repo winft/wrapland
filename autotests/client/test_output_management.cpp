@@ -26,9 +26,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/output_management_v1.h"
 #include "../../src/client/output.h"
 #include "../../src/client/registry.h"
-#include "../../src/server/display.h"
+
+#include "../../server/display.h"
+#include "../../server/compositor.h"
+
 #include "../../src/server/shell_interface.h"
-#include "../../src/server/compositor_interface.h"
 #include "../../src/server/output_configuration_v1_interface.h"
 #include "../../src/server/output_device_v1_interface.h"
 #include "../../src/server/output_management_v1_interface.h"
@@ -66,7 +68,7 @@ private:
     void testEnable();
     void applyPendingChanges(Wrapland::Server::OutputConfigurationV1Interface *configurationInterface);
 
-    Wrapland::Server::Display *m_display;
+    Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::OutputManagementV1Interface *m_outputManagementInterface;
     QList<Wrapland::Server::OutputDeviceV1Interface *> m_serverOutputs;
 
@@ -105,15 +107,13 @@ void TestOutputManagement::init()
     using namespace Wrapland::Server;
 
     delete m_display;
-    m_display = new Display(this);
+    m_display = new D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     auto shell = m_display->createShell(this);
     shell->create();
-    auto comp = m_display->createCompositor(this);
-    comp->create();
+    m_display->createCompositor(this);
 
     auto outputDeviceInterface = m_display->createOutputDeviceV1(this);
 

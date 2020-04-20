@@ -27,8 +27,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/xdgshell.h"
 #include "../../src/client/xdgdecoration.h"
 #include "../../src/client/surface.h"
-#include "../../src/server/display.h"
-#include "../../src/server/compositor_interface.h"
+
+#include "../../server/display.h"
+#include "../../server/compositor.h"
+
 #include "../../src/server/xdgshell_interface.h"
 #include "../../src/server/xdgdecoration_interface.h"
 
@@ -45,8 +47,8 @@ private Q_SLOTS:
     void testDecoration();
 
 private:
-    Wrapland::Server::Display *m_display = nullptr;
-    Wrapland::Server::CompositorInterface *m_compositorInterface = nullptr;
+    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Compositor *m_serverCompositor = nullptr;
     Wrapland::Server::XdgShellInterface *m_xdgShellInterface = nullptr;
     Wrapland::Server::XdgDecorationManagerInterface *m_xdgDecorationManagerInterface = nullptr;
 
@@ -76,10 +78,9 @@ void TestXdgDecoration::init()
     qRegisterMetaType<XdgDecorationInterface::Mode>();
 
     delete m_display;
-    m_display = new Display(this);
+    m_display = new D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -112,9 +113,7 @@ void TestXdgDecoration::init()
     QVERIFY(m_registry->isValid());
     m_registry->setup();
 
-    m_compositorInterface = m_display->createCompositor(m_display);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    m_serverCompositor = m_display->createCompositor(m_display);
 
     QVERIFY(compositorSpy.wait());
     m_compositor = m_registry->createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
@@ -202,12 +201,12 @@ void TestXdgDecoration::testDecoration()
     QFETCH(Wrapland::Server::XdgDecorationInterface::Mode, setModeExp);
 
 
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QSignalSpy shellSurfaceCreatedSpy(m_xdgShellInterface, &XdgShellInterface::surfaceCreated);
     QSignalSpy decorationCreatedSpy(m_xdgDecorationManagerInterface, &XdgDecorationManagerInterface::xdgDecorationInterfaceCreated);
 
     // create shell surface and deco object
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     std::unique_ptr<XdgShellSurface> shellSurface(m_xdgShell->createSurface(surface.get()));
     std::unique_ptr<XdgDecoration> decoration(m_xdgDecorationManager->getToplevelDecoration(shellSurface.get()));
 

@@ -42,7 +42,7 @@ class Keyboard;
 class Pointer;
 class Touch;
 
-class SurfaceInterface;
+class Surface;
 class TextInputInterface;
 
 // legacy
@@ -79,21 +79,19 @@ public:
     bool isDragPointer() const;
     bool isDragTouch() const;
     QMatrix4x4 dragSurfaceTransformation() const;
-    SurfaceInterface* dragSurface() const;
+    Surface* dragSurface() const;
     Pointer* dragPointer() const;
     DataDevice* dragSource() const;
-    void setDragTarget(SurfaceInterface* surface,
+    void setDragTarget(Surface* surface,
                        const QPointF& globalPosition,
                        const QMatrix4x4& inputTransformation);
-    void setDragTarget(SurfaceInterface* surface,
-                       const QMatrix4x4& inputTransformation = QMatrix4x4());
+    void setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation = QMatrix4x4());
 
     void setPointerPos(const QPointF& pos);
     QPointF pointerPos() const;
-    void setFocusedPointerSurface(SurfaceInterface* surface,
-                                  const QPointF& surfacePosition = QPoint());
-    void setFocusedPointerSurface(SurfaceInterface* surface, const QMatrix4x4& transformation);
-    SurfaceInterface* focusedPointerSurface() const;
+    void setFocusedPointerSurface(Surface* surface, const QPointF& surfacePosition = QPoint());
+    void setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transformation);
+    Surface* focusedPointerSurface() const;
     Pointer* focusedPointer() const;
     void setFocusedPointerSurfacePosition(const QPointF& surfacePosition);
     QPointF focusedPointerSurfacePosition() const;
@@ -141,13 +139,12 @@ public:
     QVector<quint32> pressedKeys() const;
     qint32 keyRepeatRate() const;
     qint32 keyRepeatDelay() const;
-    void setFocusedKeyboardSurface(SurfaceInterface* surface);
-    SurfaceInterface* focusedKeyboardSurface() const;
+    void setFocusedKeyboardSurface(Surface* surface);
+    Surface* focusedKeyboardSurface() const;
     Keyboard* focusedKeyboard() const;
 
-    void setFocusedTouchSurface(SurfaceInterface* surface,
-                                const QPointF& surfacePosition = QPointF());
-    SurfaceInterface* focusedTouchSurface() const;
+    void setFocusedTouchSurface(Surface* surface, const QPointF& surfacePosition = QPointF());
+    Surface* focusedTouchSurface() const;
     Touch* focusedTouch() const;
     void setFocusedTouchSurfacePosition(const QPointF& surfacePosition);
     QPointF focusedTouchSurfacePosition() const;
@@ -159,8 +156,8 @@ public:
     bool isTouchSequence() const;
     bool hasImplicitTouchGrab(quint32 serial) const;
 
-    void setFocusedTextInputSurface(SurfaceInterface* surface);
-    SurfaceInterface* focusedTextInputSurface() const;
+    void setFocusedTextInputSurface(Surface* surface);
+    Surface* focusedTextInputSurface() const;
     TextInputInterface* focusedTextInput() const;
 
     DataDevice* selection() const;

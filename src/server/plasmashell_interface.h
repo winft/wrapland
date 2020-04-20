@@ -36,13 +36,13 @@ namespace Server
 {
 
 class Display;
-class SurfaceInterface;
+class Surface;
 class PlasmaShellSurfaceInterface;
 
 /**
  * @brief Global for the org_kde_plasma_shell interface.
  *
- * The PlasmaShellInterface allows to add additional information to a SurfaceInterface.
+ * The PlasmaShellInterface allows to add additional information to a Surface.
  * It goes beyond what a ShellSurfaceInterface provides and is adjusted toward the needs
  * of the Plasma desktop.
  *
@@ -83,9 +83,9 @@ public:
     virtual ~PlasmaShellSurfaceInterface();
 
     /**
-     * @returns the SurfaceInterface this PlasmaShellSurfaceInterface got created for
+     * @returns the Surface this PlasmaShellSurfaceInterface got created for
      **/
-    SurfaceInterface *surface() const;
+    Surface *surface() const;
     /**
      * @returns The PlasmaShellInterface which created this PlasmaShellSurfaceInterface.
      **/
@@ -244,7 +244,7 @@ Q_SIGNALS:
 
 private:
     friend class PlasmaShellInterface;
-    explicit PlasmaShellSurfaceInterface(PlasmaShellInterface *shell, SurfaceInterface *parent, wl_resource *parentResource);
+    explicit PlasmaShellSurfaceInterface(PlasmaShellInterface *shell, Surface *parent, wl_resource *parentResource);
     class Private;
     Private *d_func() const;
 };

@@ -20,13 +20,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Qt
 #include <QtTest>
 #include <QProcess>
-// WaylandServer
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/display.h"
-#include "../../src/server/output_interface.h"
+
+#include "../../server/compositor.h"
+#include "../../server/display.h"
+#include "../../server/output.h"
+#include "../../server/seat.h"
+
 #include "../../src/server/qtsurfaceextension_interface.h"
-#include "../../src/server/seat_interface.h"
 #include "../../src/server/shell_interface.h"
+#include "../../src/server/clientconnection.h"
 
 using namespace Wrapland::Server;
 
@@ -45,25 +47,27 @@ void TestQtSurfaceExtension::testCloseWindow()
     // this test verifies that we can close windows through the Qt surface extension interface
     // for this we start a dummy server, launch a QtWayland powered application, wait for the
     // window it opens, close it and verify that the process terminates
-    Display display;
+    D_isplay display;
     display.setSocketName(s_socketName);
     display.start();
     display.createShm();
-    SeatInterface *seat = display.createSeat();
+
+    Seat* seat = display.createSeat();
     seat->setHasKeyboard(true);
     seat->setHasPointer(true);
     seat->setHasTouch(true);
-    seat->create();
-    CompositorInterface *compositor = display.createCompositor();
-    compositor->create();
+
+    Compositor *compositor = display.createCompositor();
+
     ShellInterface *shell = display.createShell();
     shell->create();
-    OutputInterface *output = display.createOutput();
-    output->setManufacturer(QStringLiteral("org.kde"));
-    output->setModel(QStringLiteral("QtSurfaceExtensionTestCase"));
-    output->addMode(QSize(1280, 1024), OutputInterface::ModeFlag::Preferred | OutputInterface::ModeFlag::Current);
+
+    Output *output = display.createOutput();
+    output->setManufacturer("org.kde");
+    output->setModel("QtSurfaceExtensionTestCase");
+    output->addMode(QSize(1280, 1024), Output::ModeFlag::Preferred | Output::ModeFlag::Current);
     output->setPhysicalSize(QSize(1280, 1024) / 3.8);
-    output->create();
+
     // surface extension
     QtSurfaceExtensionInterface *surfaceExtension = display.createQtSurfaceExtension();
     surfaceExtension->create();

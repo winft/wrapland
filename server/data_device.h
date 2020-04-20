@@ -33,7 +33,7 @@ class Client;
 class DataDeviceManager;
 class DataSource;
 class Seat;
-class SurfaceInterface;
+class Surface;
 
 class WRAPLANDSERVER_EXPORT DataDevice : public QObject
 {
@@ -45,8 +45,8 @@ public:
     Client* client() const;
 
     DataSource* dragSource() const;
-    SurfaceInterface* origin() const;
-    SurfaceInterface* icon() const;
+    Surface* origin() const;
+    Surface* icon() const;
 
     quint32 dragImplicitGrabSerial() const;
 
@@ -57,8 +57,8 @@ public:
 
     void drop();
 
-    void updateDragTarget(SurfaceInterface* surface, quint32 serial);
-    void updateProxy(SurfaceInterface* remote);
+    void updateDragTarget(Surface* surface, quint32 serial);
+    void updateProxy(Surface* remote);
 
 Q_SIGNALS:
     void dragStarted();

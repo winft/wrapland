@@ -18,9 +18,12 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "buffer_interface.h"
-#include "display.h"
 #include "logging.h"
-#include "surface_interface.h"
+
+#include "../../server/client.h"
+#include "../../server/display.h"
+#include "../../server/surface.h"
+
 #include "linuxdmabuf_v1_interface.h"
 // Wayland
 #include <wayland-server.h>
@@ -44,14 +47,14 @@ eglQueryWaylandBufferWL_func eglQueryWaylandBufferWL = nullptr;
 class BufferInterface::Private
 {
 public:
-    Private(BufferInterface *q, wl_resource *resource, SurfaceInterface *parent);
+    Private(BufferInterface *q, wl_resource *resource, Surface *parent);
     ~Private();
     QImage::Format format() const;
     QImage createImage();
     wl_resource *buffer;
     wl_shm_buffer *shmBuffer;
     LinuxDmabufBuffer *dmabufBuffer;
-    SurfaceInterface *surface;
+    Surface *surface;
     int refCount;
     QSize size;
     bool alpha;
@@ -104,7 +107,7 @@ void BufferInterface::Private::imageBufferCleanupHandler(void *info)
     wl_shm_buffer_end_access(p->shmBuffer);
 }
 
-BufferInterface::Private::Private(BufferInterface *q, wl_resource *resource, SurfaceInterface *parent)
+BufferInterface::Private::Private(BufferInterface *q, wl_resource *resource, Surface *parent)
     : buffer(resource)
     , shmBuffer(wl_shm_buffer_get(resource))
     , dmabufBuffer(nullptr)
@@ -171,7 +174,7 @@ BufferInterface::Private::Private(BufferInterface *q, wl_resource *resource, Sur
         }
         size = dmabufBuffer->size();
     } else if (parent) {
-        EGLDisplay eglDisplay = parent->global()->display()->eglDisplay();
+        EGLDisplay eglDisplay = parent->client()->display()->eglDisplay();
         static bool resolved = false;
         using namespace EGL;
         if (!resolved && eglDisplay != EGL_NO_DISPLAY) {
@@ -222,9 +225,9 @@ BufferInterface *BufferInterface::get(wl_resource *r)
     return new BufferInterface(r, nullptr);
 }
 
-BufferInterface::BufferInterface(wl_resource *resource, SurfaceInterface *parent)
+BufferInterface::BufferInterface(wl_resource *resource, Surface *parent)
     : QObject()
-    , d(new Private(this, resource, parent))
+//    , d(new Private(this, resource, parent)) // TODO
 {
 }
 
@@ -310,7 +313,7 @@ bool BufferInterface::isReferenced() const
     return d->refCount > 0;
 }
 
-SurfaceInterface *BufferInterface::surface() const
+Surface *BufferInterface::surface() const
 {
     return d->surface;
 }

@@ -32,7 +32,7 @@ class Seat;
 
 class Cursor;
 class Seat;
-class SurfaceInterface;
+class Surface;
 
 enum class PointerAxisSource;
 
@@ -43,7 +43,7 @@ public:
     ~Pointer() override;
 
     Seat* seat() const;
-    SurfaceInterface* focusedSurface() const;
+    Surface* focusedSurface() const;
 
     Cursor* cursor() const;
     Client* client() const;
@@ -57,7 +57,7 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    void setFocusedSurface(quint32 serial, SurfaceInterface* surface);
+    void setFocusedSurface(quint32 serial, Surface* surface);
     void buttonPressed(quint32 serial, quint32 button);
     void buttonReleased(quint32 serial, quint32 button);
     void
@@ -88,7 +88,7 @@ public:
 
     Pointer* pointer() const;
 
-    QPointer<SurfaceInterface> surface() const;
+    QPointer<Surface> surface() const;
 
 Q_SIGNALS:
     void hotspotChanged();

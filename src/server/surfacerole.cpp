@@ -19,25 +19,25 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 
 #include "surfacerole_p.h"
-#include "surface_interface_p.h"
-#include "surface_interface.h"
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
 
 namespace Wrapland
 {
 namespace Server
 {
 
-SurfaceRole::SurfaceRole(SurfaceInterface *surface)
+SurfaceRole::SurfaceRole(Surface *surface)
     : m_surface(surface)
 {
-    m_surface->d_func()->role = this;
+    m_surface->d_ptr->role = this;
 }
 
 SurfaceRole::~SurfaceRole()
 {
     // Lifetime of the surface role is not bounded to the associated surface.
     if (m_surface) {
-        m_surface->d_func()->role = nullptr;
+        m_surface->d_ptr->role = nullptr;
     }
 }
 

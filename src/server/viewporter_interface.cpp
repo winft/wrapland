@@ -22,7 +22,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "global_p.h"
 #include "resource_p.h"
-#include "surface_interface_p.h"
+
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
+#include "../../server/wayland/resource.h"
 
 #include <wayland-server.h>
 #include <wayland-viewporter-server-protocol.h>
@@ -115,13 +118,13 @@ void ViewporterInterface::Private::getViewportCallback(wl_client *client, wl_res
 void ViewporterInterface::Private::getViewport(wl_client *client, wl_resource *resource,
                                                uint32_t id, wl_resource *surface)
 {
-    auto *surfaceInterface = SurfaceInterface::get(surface);
+    auto surfaceInterface = Wayland::Resource<Surface>::fromResource(surface)->handle();
     if (!surfaceInterface) {
         // TODO: send error msg?
         return;
     }
 
-    if (!surfaceInterface->d_func()->viewport.isNull()) {
+    if (!surfaceInterface->d_ptr->viewport.isNull()) {
         // Surface already has a viewport. That's a protocol error.
         wl_resource_post_error(resource, WP_VIEWPORTER_ERROR_VIEWPORT_EXISTS,
                                "Surface already has viewport");
@@ -135,7 +138,7 @@ void ViewporterInterface::Private::getViewport(wl_client *client, wl_resource *r
         delete viewport;
         return;
     }
-    surfaceInterface->d_func()->installViewport(viewport);
+    surfaceInterface->d_ptr->installViewport(viewport);
 
     Q_EMIT q->viewportCreated(viewport);
 }
@@ -151,10 +154,10 @@ class ViewportInterface::Private : public Resource::Private
 {
 public:
     Private(ViewportInterface *q, ViewporterInterface *viewporter, wl_resource *parentResource,
-            SurfaceInterface *_surface);
+            Surface *_surface);
     ~Private() override;
 
-    SurfaceInterface *surface;
+    Surface *surface;
 
 private:
     ViewportInterface *q_func() {
@@ -231,7 +234,7 @@ void ViewportInterface::Private::setDestination(int width, int height)
 }
 
 ViewportInterface::Private::Private(ViewportInterface *q, ViewporterInterface *viewporter,
-                                    wl_resource *parentResource, SurfaceInterface *_surface)
+                                    wl_resource *parentResource, Surface *_surface)
     : Resource::Private(q, viewporter, parentResource, &wp_viewport_interface, &s_interface)
     , surface(_surface)
 {
@@ -240,10 +243,10 @@ ViewportInterface::Private::Private(ViewportInterface *q, ViewporterInterface *v
 ViewportInterface::Private::~Private() = default;
 
 ViewportInterface::ViewportInterface(ViewporterInterface *viewporter, wl_resource *parentResource,
-                                     SurfaceInterface *surface)
+                                     Surface *surface)
     : Resource(new Private(this, viewporter, parentResource, surface))
 {
-    connect(surface, &SurfaceInterface::unbound, this, [this] {
+    connect(surface, &Surface::resourceDestroyed, this, [this] {
         d_func()->surface = nullptr;
     });
 }
