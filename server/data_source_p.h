@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2016  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,49 +17,37 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef TESTSERVER_H
-#define TESTSERVER_H
+#include "data_source.h"
 
-#include <QHash>
-#include <QObject>
-#include <QPointF>
-#include <QVector>
+#include "wayland/resource.h"
 
-class QElapsedTimer;
-class QTimer;
+#include <wayland-server.h>
 
 namespace Wrapland
 {
 namespace Server
 {
-class D_isplay;
-class Seat;
-class ShellInterface;
-class ShellSurfaceInterface;
-}
-}
 
-class TestServer : public QObject
+class DataSource::Private : public Wayland::Resource<DataSource>
 {
-    Q_OBJECT
 public:
-    explicit TestServer(QObject *parent);
-    virtual ~TestServer();
+    Private(Client* client, uint32_t version, uint32_t id, DataSource* q);
+    ~Private();
 
-    void init();
-    void startTestApp(const QString &app, const QStringList &arguments);
+    std::vector<std::string> mimeTypes;
+    DataDeviceManager::DnDActions supportedDnDActions = DataDeviceManager::DnDAction::None;
+
+    DataSource* q_ptr;
 
 private:
-    void repaint();
+    void offer(std::string mimeType);
 
-    Wrapland::Server::D_isplay *m_display = nullptr;
-    Wrapland::Server::ShellInterface *m_shell = nullptr;
-    Wrapland::Server::Seat *m_seat = nullptr;
-    QVector<Wrapland::Server::ShellSurfaceInterface*> m_shellSurfaces;
-    QTimer *m_repaintTimer;
-    QScopedPointer<QElapsedTimer> m_timeSinceStart;
-    QPointF m_cursorPos;
-    QHash<qint32, qint32> m_touchIdMapper;
+    static void offerCallback(wl_client* wlClient, wl_resource* wlResource, const char* mimeType);
+    static void
+    setActionsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t dnd_actions);
+
+    const static struct wl_data_source_interface s_interface;
 };
 
-#endif
+}
+}

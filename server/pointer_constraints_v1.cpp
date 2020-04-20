@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_constraints_v1_p.h"
 
 #include "display.h"
+#include "pointer_p.h"
 
 #include "wayland/client.h"
 #include "wayland/display.h"
@@ -92,7 +93,7 @@ void PointerConstraintsV1::Private::createConstraint(wl_client* wlClient,
 {
     auto client = display()->handle()->getClient(wlClient);
     auto surface = SurfaceInterface::get(wlSurface);
-    auto pointer = Global<Pointer>::fromResource(wlPointer);
+    auto pointer = Wayland::Resource<Pointer::Private>::fromResource(wlPointer)->handle();
 
     if (!surface || !pointer) {
         // send error?

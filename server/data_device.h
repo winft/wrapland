@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2015  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,9 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_TOUCH_INTERFACE_H
-#define WAYLAND_SERVER_TOUCH_INTERFACE_H
+#pragma once
+
+#include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
@@ -28,37 +29,52 @@ namespace Wrapland
 {
 namespace Server
 {
+class Client;
+class DataDeviceManager;
+class DataSource;
 class Seat;
+class SurfaceInterface;
 
-class SeatInterface;
-
-/**
- * @brief Resource for the wl_touch interface.
- *
- **/
-class WRAPLANDSERVER_EXPORT TouchInterface : public Resource
+class WRAPLANDSERVER_EXPORT DataDevice : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~TouchInterface();
+    ~DataDevice() override;
+
+    Seat* seat() const;
+    Client* client() const;
+
+    DataSource* dragSource() const;
+    SurfaceInterface* origin() const;
+    SurfaceInterface* icon() const;
+
+    quint32 dragImplicitGrabSerial() const;
+
+    DataSource* selection() const;
+
+    void sendSelection(DataDevice* other);
+    void sendClearSelection();
+
+    void drop();
+
+    void updateDragTarget(SurfaceInterface* surface, quint32 serial);
+    void updateProxy(SurfaceInterface* remote);
+
+Q_SIGNALS:
+    void dragStarted();
+    void selectionChanged(Wrapland::Server::DataSource*);
+    void selectionCleared();
+    void resourceDestroyed();
 
 private:
-    void down(qint32 id, quint32 serial, const QPointF &localPos);
-    void up(qint32 id, quint32 serial);
-    void frame();
-    void cancel();
-    void move(qint32 id, const QPointF &localPos);
-    friend class SeatInterface;
-    explicit TouchInterface(SeatInterface *parent, wl_resource *parentResource);
-    class Private;
-    Private *d_func() const;
+    friend class DataDeviceManager;
+    explicit DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
-    friend class Seat;
+    class Private;
+    Private* d_ptr;
 };
 
 }
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::TouchInterface*)
-
-#endif
+Q_DECLARE_METATYPE(Wrapland::Server::DataDevice*)

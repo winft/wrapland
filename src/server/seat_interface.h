@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 #include "global.h"
-#include "touch_interface.h"
+//#include "touch_interface.h"
 
 #include "../../server/seat.h"
 
@@ -39,7 +39,7 @@ namespace Server
 {
 class Seat;
 
-class DataDeviceInterface;
+//class DataDeviceInterface;
 class Display;
 class SurfaceInterface;
 class TextInputInterface;
@@ -131,15 +131,15 @@ class WRAPLANDSERVER_EXPORT SeatInterface : public Global
      * Whether the SeatInterface supports a keyboard device.
      **/
     Q_PROPERTY(bool keyboard READ hasKeyboard WRITE setHasKeyboard NOTIFY hasKeyboardChanged)
-    /**
-     * Whether the SeatInterface supports a touch device.
-     * @deprecated Since 0.0.55, use touch
-     **/
-    Q_PROPERTY(bool tourch READ hasTouch WRITE setHasTouch NOTIFY hasTouchChanged)
-    /**
-     * Whether the SeatInterface supports a touch device.
-     **/
-    Q_PROPERTY(bool touch READ hasTouch WRITE setHasTouch NOTIFY hasTouchChanged)
+//    /**
+//     * Whether the SeatInterface supports a touch device.
+//     * @deprecated Since 0.0.55, use touch
+//     **/
+//    Q_PROPERTY(bool tourch READ hasTouch WRITE setHasTouch NOTIFY hasTouchChanged)
+//    /**
+//     * Whether the SeatInterface supports a touch device.
+//     **/
+//    Q_PROPERTY(bool touch READ hasTouch WRITE setHasTouch NOTIFY hasTouchChanged)
     /**
      * The global pointer position.
      **/
@@ -210,12 +210,12 @@ public:
 //     * @see isDragPointer
 //     **/
 //    PointerInterface *dragPointer() const;
-    /**
-     * @returns The DataDeviceInterface which started the drag and drop operation.
-     * @see isDrag
-     * @since 5.6
-     **/
-    DataDeviceInterface *dragSource() const;
+//    /**
+//     * @returns The DataDeviceInterface which started the drag and drop operation.
+//     * @see isDrag
+//     * @since 5.6
+//     **/
+//    DataDeviceInterface *dragSource() const;
     /**
      * Sets the current drag target to @p surface.
      *
@@ -621,23 +621,23 @@ public:
      * @name  touch related methods
      **/
     ///@{
-    void setFocusedTouchSurface(SurfaceInterface *surface, const QPointF &surfacePosition = QPointF());
-    SurfaceInterface *focusedTouchSurface() const;
-    TouchInterface *focusedTouch() const;
-    void setFocusedTouchSurfacePosition(const QPointF &surfacePosition);
-    QPointF focusedTouchSurfacePosition() const;
-    qint32 touchDown(const QPointF &globalPosition);
-    void touchUp(qint32 id);
-    void touchMove(qint32 id, const QPointF &globalPosition);
-    void touchFrame();
-    void cancelTouchSequence();
-    bool isTouchSequence() const;
+//    void setFocusedTouchSurface(SurfaceInterface *surface, const QPointF &surfacePosition = QPointF());
+//    SurfaceInterface *focusedTouchSurface() const;
+//    TouchInterface *focusedTouch() const;
+//    void setFocusedTouchSurfacePosition(const QPointF &surfacePosition);
+//    QPointF focusedTouchSurfacePosition() const;
+//    qint32 touchDown(const QPointF &globalPosition);
+//    void touchUp(qint32 id);
+//    void touchMove(qint32 id, const QPointF &globalPosition);
+//    void touchFrame();
+//    void cancelTouchSequence();
+//    bool isTouchSequence() const;
     /**
      * @returns true if there is a touch sequence going on associated with a touch
      * down of the given @p serial.
      * @since 0.0.5XX
      **/
-    bool hasImplicitTouchGrab(quint32 serial) const;
+//    bool hasImplicitTouchGrab(quint32 serial) const;
     ///@}
 
     /**
@@ -684,27 +684,27 @@ public:
     TextInputInterface *focusedTextInput() const;
     ///@}
 
-    /**
-     * @returns The DataDeviceInterface holding the current clipboard selection.
-     * @since 0.0.524
-     * @see selectionChanged
-     * @see setSelection
-     **/
-    DataDeviceInterface *selection() const;
-    /**
-     * This method allows to manually set the @p dataDevice for the current clipboard selection.
-     * The clipboard selection is handled automatically in SeatInterface.
-     * If a DataDeviceInterface belonging to the current focused KeyboardInterface
-     * sets a selection, the current clipboard selection will be updated automatically.
-     * With this method it's possible to override the automatic clipboard update for
-     * e.g. the case of a clipboard manager.
-     *
-     * @param dataDevice Sets the current clipboard selection.
-     * @see selection
-     * @see selectionChanged
-     * @since 0.0.524
-     **/
-    void setSelection(DataDeviceInterface *dataDevice);
+//    /**
+//     * @returns The DataDeviceInterface holding the current clipboard selection.
+//     * @since 0.0.524
+//     * @see selectionChanged
+//     * @see setSelection
+//     **/
+//    DataDeviceInterface *selection() const;
+//    /**
+//     * This method allows to manually set the @p dataDevice for the current clipboard selection.
+//     * The clipboard selection is handled automatically in SeatInterface.
+//     * If a DataDeviceInterface belonging to the current focused KeyboardInterface
+//     * sets a selection, the current clipboard selection will be updated automatically.
+//     * With this method it's possible to override the automatic clipboard update for
+//     * e.g. the case of a clipboard manager.
+//     *
+//     * @param dataDevice Sets the current clipboard selection.
+//     * @see selection
+//     * @see selectionChanged
+//     * @since 0.0.524
+//     **/
+//    void setSelection(DataDeviceInterface *dataDevice);
 
     static SeatInterface *get(wl_resource *native);
 
@@ -714,14 +714,14 @@ Q_SIGNALS:
     void nameChanged(const QString&);
     void hasPointerChanged(bool);
     void hasKeyboardChanged(bool);
-    void hasTouchChanged(bool);
+//    void hasTouchChanged(bool);
     void pointerPosChanged(const QPointF &pos);
-    void touchMoved(qint32 id, quint32 serial, const QPointF &globalPosition);
+//    void touchMoved(qint32 id, quint32 serial, const QPointF &globalPosition);
     void timestampChanged(quint32);
 
 //    void pointerCreated(Wrapland::Server::PointerInterface*);
 //    void keyboardCreated(Wrapland::Server::KeyboardInterface*);
-    void touchCreated(Wrapland::Server::TouchInterface*);
+//    void touchCreated(Wrapland::Server::TouchInterface*);
 
 //    /**
 //     * Emitted whenever the focused pointer changes
@@ -735,7 +735,7 @@ Q_SIGNALS:
      * @see selection
      * @see setSelection
      **/
-    void selectionChanged(DataDeviceInterface*);
+//    void selectionChanged(DataDeviceInterface*);
 
     /**
      * Emitted when a drag'n'drop operation is started
@@ -766,7 +766,7 @@ private:
     friend class Server::Seat;
 
     friend class Display;
-    friend class DataDeviceManagerInterface;
+//    friend class DataDeviceManagerInterface;
     friend class TextInputManagerUnstableV0Interface;
     friend class TextInputManagerUnstableV2Interface;
     explicit SeatInterface(Display *display, QObject *parent);

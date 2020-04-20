@@ -48,6 +48,7 @@ class Client;
 class Display;
 class Private;
 
+class DataDeviceManager;
 class DpmsManager;
 class Output;
 class Seat;
@@ -57,7 +58,6 @@ class Seat;
 class ClientConnection;
 
 class CompositorInterface;
-class DataDeviceManagerInterface;
 class IdleInterface;
 enum class IdleInhibitManagerInterfaceVersion;
 class RemoteAccessManagerInterface;
@@ -147,7 +147,7 @@ public:
     ShellInterface* createShell(QObject* parent = nullptr);
 
     SubCompositorInterface* createSubCompositor(QObject* parent = nullptr);
-    DataDeviceManagerInterface* createDataDeviceManager(QObject* parent = nullptr);
+    DataDeviceManager* createDataDeviceManager(QObject* parent = nullptr);
     OutputManagementV1Interface* createOutputManagementV1(QObject* parent = nullptr);
     PlasmaShellInterface* createPlasmaShell(QObject* parent = nullptr);
     PlasmaWindowManagementInterface* createPlasmaWindowManagement(QObject* parent = nullptr);

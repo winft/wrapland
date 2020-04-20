@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,58 +17,49 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_DATA_DEVICE_MANAGER_INTERFACE_H
-#define WAYLAND_SERVER_DATA_DEVICE_MANAGER_INTERFACE_H
+#pragma once
 
 #include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
-#include "global.h"
-#include "datadevice_interface.h"
 
 namespace Wrapland
 {
 namespace Server
 {
-
-class Display;
-class DataSourceInterface;
+class Client;
+class Seat;
 
 /**
- * @brief Represents the Global for wl_data_device_manager interface.
+ * @brief Resource for the wl_touch interface.
  *
  **/
-class WRAPLANDSERVER_EXPORT DataDeviceManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT Touch : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~DataDeviceManagerInterface();
+    ~Touch() override;
 
-    /**
-     * Drag and Drop actions supported by the DataSourceInterface.
-     * @since 0.0.5XX
-     **/
-    enum class DnDAction {
-        None = 0,
-        Copy = 1 << 0,
-        Move = 1 << 1,
-        Ask = 1 << 2
-    };
-    Q_DECLARE_FLAGS(DnDActions, DnDAction)
+    Client* client() const;
 
 Q_SIGNALS:
-    void dataSourceCreated(Wrapland::Server::DataSourceInterface*);
-    void dataDeviceCreated(Wrapland::Server::DataDeviceInterface*);
+    void resourceDestroyed();
 
 private:
-    explicit DataDeviceManagerInterface(Display *display, QObject *parent = nullptr);
-    friend class Display;
+    void down(qint32 id, quint32 serial, const QPointF& localPos);
+    void up(qint32 id, quint32 serial);
+    void frame();
+    void cancel();
+    void move(qint32 id, const QPointF& localPos);
+
+    friend class Seat;
+
+    Touch(Client* client, uint32_t version, uint32_t id, Seat* seat);
     class Private;
+    Private* d_ptr;
 };
 
 }
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::DataDeviceManagerInterface::DnDActions)
-
-#endif
+Q_DECLARE_METATYPE(Wrapland::Server::Touch*)

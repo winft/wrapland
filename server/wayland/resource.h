@@ -76,7 +76,6 @@ public:
              Handle* handle)
         : m_client{client}
         , m_version{version}
-        , m_id{id}
         , m_handle{handle}
     {
         m_resource = m_client->createResource(interface, m_version, id);
@@ -87,6 +86,16 @@ public:
         }
     }
 
+    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
+    Resource(Client* client,
+             uint32_t version,
+             uint32_t id,
+             const wl_interface* interface,
+             const void* impl)
+        : Resource(client, version, id, interface, impl, nullptr)
+    {
+    }
+
     virtual ~Resource() = default;
 
     wl_resource* resource() const
@@ -94,11 +103,13 @@ public:
         return m_resource;
     }
 
+    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
     GlobalHandle* global() const
     {
         return m_global;
     }
 
+    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
     void setGlobal(GlobalHandle* global)
     {
         m_global = global;
@@ -156,6 +167,7 @@ public:
         wl_resource_destroy(resource->resource());
     }
 
+    template<typename = std::enable_if<std::is_same_v<GlobalHandle, void>>>
     Handle* handle()
     {
         return m_handle;
@@ -164,7 +176,7 @@ public:
 private:
     static void destroy(wl_resource* wlResource)
     {
-        auto resource = reinterpret_cast<Resource*>(wlResource->data);
+        auto resource = fromResource(wlResource);
 
         resource->onDestroy();
         delete resource;
@@ -190,7 +202,6 @@ private:
 
     Client* m_client;
     uint32_t m_version;
-    uint32_t m_id;
     wl_resource* m_resource;
 
     Handle* m_handle;
