@@ -133,6 +133,17 @@ public:
         m_binds.erase(std::remove(m_binds.begin(), m_binds.end(), bind), m_binds.end());
     }
 
+    std::vector<GlobalResource*> getBinds(Server::Client* client)
+    {
+        std::vector<GlobalResource*> ret;
+        for (auto bind : m_binds) {
+            if (bind->client()->handle() == client) {
+                ret.push_back(bind);
+            }
+        }
+        return ret;
+    }
+
     // Legacy
     QVector<wl_resource*> getResources(Server::Client* client)
     {

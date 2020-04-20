@@ -32,19 +32,19 @@ namespace Wrapland
 {
 namespace Server
 {
-class SurfaceInterface;
+class Surface;
 class LinuxDmabufBuffer;
 
 /**
  * @brief Reference counted representation of a Wayland buffer on Server side.
  *
- * This class encapsulates a rendering buffer which is normally attached to a SurfaceInterface.
+ * This class encapsulates a rendering buffer which is normally attached to a Surface.
  * A client should not render to a Wayland buffer as long as the buffer gets used by the server.
  * The server signals whether it's still used. This class provides a convenience access for this
  * functionality by performing reference counting and deleting the BufferInterface instance
  * automatically once it is no longer accessed.
  *
- * The BufferInterface is referenced as long as it is attached to a SurfaceInterface. If one wants
+ * The BufferInterface is referenced as long as it is attached to a Surface. If one wants
  * to keep access to the BufferInterface for a longer time ensure to call ref on first usage and
  * unref again once access to it is no longer needed.
  *
@@ -60,7 +60,7 @@ class LinuxDmabufBuffer;
  * shared memory-mapped QImages.
  *
  * @see Display
- * @see SurfaceInterace
+ * @see Surface
  **/
 class WRAPLANDSERVER_EXPORT BufferInterface : public QObject
 {
@@ -97,9 +97,9 @@ public:
     bool isReferenced() const;
 
     /**
-     * @returns The SurfaceInterface this BufferInterface is attached to.
+     * @returns The Surface this BufferInterface is attached to.
      **/
-    SurfaceInterface *surface() const;
+    Surface *surface() const;
     /**
      * @returns The native wl_shm_buffer if the BufferInterface represents a shared memory buffer, otherwise @c nullptr.
      **/
@@ -179,8 +179,8 @@ Q_SIGNALS:
     void sizeChanged();
 
 private:
-    friend class SurfaceInterface;
-    explicit BufferInterface(wl_resource *resource, SurfaceInterface *parent);
+    friend class Surface;
+    explicit BufferInterface(wl_resource *resource, Surface *parent);
     class Private;
     QScopedPointer<Private> d;
 };

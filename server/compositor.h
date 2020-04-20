@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,12 +17,9 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_COMPOSITOR_INTERFACE_H
-#define WAYLAND_SERVER_COMPOSITOR_INTERFACE_H
+#pragma once
 
-#include "global.h"
-#include "region_interface.h"
-#include "surface_interface.h"
+#include <QObject>
 
 #include <QObject>
 
@@ -33,36 +30,27 @@ namespace Wrapland
 namespace Server
 {
 
-class Display;
-class SurfaceInterface;
+class D_isplay;
+class Region;
+class Surface;
 
-/**
- * @brief Represents the Global for wl_compositor interface.
- *
- **/
-class WRAPLANDSERVER_EXPORT CompositorInterface : public Global
+class WRAPLANDSERVER_EXPORT Compositor : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~CompositorInterface();
+    ~Compositor() override;
 
 Q_SIGNALS:
-    /**
-     * Emitted whenever this CompositorInterface created a SurfaceInterface.
-     **/
-    void surfaceCreated(Wrapland::Server::SurfaceInterface*);
-    /**
-     * Emitted whenever this CompositorInterface created a RegionInterface.
-     **/
-    void regionCreated(Wrapland::Server::RegionInterface*);
+    void surfaceCreated(Wrapland::Server::Surface*);
+    void regionCreated(Wrapland::Server::Region*);
 
 private:
-    explicit CompositorInterface(Display *display, QObject *parent = nullptr);
-    friend class Display;
+    friend class D_isplay;
+    explicit Compositor(D_isplay* display, QObject* parent = nullptr);
+
     class Private;
+    Private* d_ptr;
 };
 
 }
 }
-
-#endif

@@ -22,7 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "global_p.h"
 #include "resource_p.h"
 #include "seat_interface_p.h"
-#include "surface_interface.h"
+
+#include "../../server/surface.h"
+
 
 #include <QVector>
 
@@ -221,7 +223,7 @@ TextInputInterfaceVersion TextInputInterface::interfaceVersion() const
     return d->interfaceVersion();
 }
 
-QPointer<SurfaceInterface> TextInputInterface::surface() const
+QPointer<Surface> TextInputInterface::surface() const
 {
     Q_D();
     return d->surface;

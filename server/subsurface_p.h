@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,14 +17,14 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WAYLAND_SERVER_SUBSURFACE_INTERFACE_P_H
-#define WAYLAND_SERVER_SUBSURFACE_INTERFACE_P_H
+#pragma once
 
-#include "subcompositor_interface.h"
-#include "resource_p.h"
-// Qt
+#include "subcompositor.h"
+
+#include "wayland/resource.h"
+
 #include <QPoint>
-// Wayland
+
 #include <wayland-server.h>
 
 namespace Wrapland
@@ -32,14 +32,17 @@ namespace Wrapland
 namespace Server
 {
 
-class SubSurfaceInterface::Private : public Resource::Private
+class Subsurface::Private : public Wayland::Resource<Subsurface>
 {
 public:
-    Private(SubSurfaceInterface *q, SubCompositorInterface *compositor, wl_resource *parentResource);
-    ~Private();
+    Private(Client* client,
+            uint32_t version,
+            uint32_t id,
+            Surface* surface,
+            Surface* parent,
+            Subsurface* q);
+    ~Private() override;
 
-    using Resource::Private::create;
-    void create(ClientConnection *client, quint32 version, quint32 id, SurfaceInterface *surface, SurfaceInterface *parent);
     void commit();
     void remove();
 
@@ -47,28 +50,27 @@ public:
     QPoint scheduledPos = QPoint();
     bool scheduledPosChange = false;
     Mode mode = Mode::Synchronized;
-    QPointer<SurfaceInterface> surface;
-    QPointer<SurfaceInterface> parent;
+
+    QPointer<Surface> surface;
+    QPointer<Surface> parent;
 
 private:
-    SubSurfaceInterface *q_func() {
-        return reinterpret_cast<SubSurfaceInterface *>(q);
-    }
     void setMode(Mode mode);
-    void setPosition(const QPoint &pos);
-    void placeAbove(SurfaceInterface *sibling);
-    void placeBelow(SurfaceInterface *sibling);
+    void setPosition(const QPoint& pos);
+    void placeAbove(Surface* sibling);
+    void placeBelow(Surface* sibling);
 
-    static void setPositionCallback(wl_client *client, wl_resource *resource, int32_t x, int32_t y);
-    static void placeAboveCallback(wl_client *client, wl_resource *resource, wl_resource *sibling);
-    static void placeBelowCallback(wl_client *client, wl_resource *resource, wl_resource *sibling);
-    static void setSyncCallback(wl_client *client, wl_resource *resource);
-    static void setDeSyncCallback(wl_client *client, wl_resource *resource);
+    static void
+    setPositionCallback(wl_client* wlClient, wl_resource* wlResource, int32_t x, int32_t y);
+    static void
+    placeAboveCallback(wl_client* wlClient, wl_resource* wlResource, wl_resource* wlSibling);
+    static void
+    placeBelowCallback(wl_client* wlClient, wl_resource* wlResource, wl_resource* wlSibling);
+    static void setSyncCallback(wl_client* wlClient, wl_resource* wlResource);
+    static void setDeSyncCallback(wl_client* wlClient, wl_resource* wlResource);
 
     static const struct wl_subsurface_interface s_interface;
 };
 
 }
 }
-
-#endif

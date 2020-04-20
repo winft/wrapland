@@ -27,9 +27,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
 #include "../../src/client/blur.h"
+
 #include "../../src/server/display.h"
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/region_interface.h"
+#include "../../server/compositor.h"
+#include "../../server/region.h"
+
 #include "../../src/server/blur_interface.h"
 #include "../../src/server/filtered_display.h"
 
@@ -52,7 +54,7 @@ private Q_SLOTS:
 
 private:
     TestDisplay *m_display;
-    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Server::Compositor *m_serverCompositor;
     Wrapland::Server::BlurManagerInterface *m_blurManagerInterface;
 };
 
@@ -83,7 +85,7 @@ bool TestDisplay::allowInterface(Wrapland::Server::ClientConnection* client, con
 TestFilter::TestFilter(QObject *parent)
     : QObject(parent)
     , m_display(nullptr)
-    , m_compositorInterface(nullptr)
+    , m_serverCompositor(nullptr)
 {}
 
 void TestFilter::init()
@@ -95,9 +97,8 @@ void TestFilter::init()
     m_display->start();
     QVERIFY(m_display->isRunning());
 
-    m_compositorInterface = m_display->createCompositor(m_display);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    // TODO
+//    m_serverCompositor = m_display->createCompositor(m_display);
 
     m_blurManagerInterface = m_display->createBlurManager(m_display);
     m_blurManagerInterface->create();

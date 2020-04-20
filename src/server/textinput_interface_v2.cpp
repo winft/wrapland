@@ -21,7 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "resource_p.h"
 #include "seat_interface_p.h"
-#include "surface_interface.h"
+
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
 
 #include <wayland-text-input-unstable-v2-server-protocol.h>
 
@@ -36,8 +38,8 @@ public:
     Private(TextInputInterface *q, TextInputManagerUnstableV2Interface *c, wl_resource *parentResource);
     ~Private();
 
-    void sendEnter(SurfaceInterface *surface, quint32 serial) override;
-    void sendLeave(quint32 serial, SurfaceInterface *surface) override;
+    void sendEnter(Surface *surface, quint32 serial) override;
+    void sendLeave(quint32 serial, Surface *surface) override;
     void preEdit(const QByteArray &text, const QByteArray &commit) override;
     void commit(const QByteArray &text) override;
     void deleteSurroundingText(quint32 beforeLength, quint32 afterLength) override;
@@ -66,7 +68,7 @@ private:
     TextInputInterface::ContentHints convertContentHint(uint32_t hint) const override;
     TextInputInterface::ContentPurpose convertContentPurpose(uint32_t purpose) const override;
 
-    void enable(SurfaceInterface *s);
+    void enable(Surface *s);
     void disable();
 };
 
@@ -85,9 +87,9 @@ const struct zwp_text_input_v2_interface TextInputUnstableV2Interface::Private::
 };
 #endif
 
-void TextInputUnstableV2Interface::Private::enable(SurfaceInterface *s)
+void TextInputUnstableV2Interface::Private::enable(Surface *s)
 {
-    surface = QPointer<SurfaceInterface>(s);
+    surface = QPointer<Surface>(s);
     enabled = true;
     emit q_func()->enabledChanged();
 }
@@ -99,20 +101,21 @@ void TextInputUnstableV2Interface::Private::disable()
     emit q_func()->enabledChanged();
 }
 
-void TextInputUnstableV2Interface::Private::sendEnter(SurfaceInterface *surface, quint32 serial)
+void TextInputUnstableV2Interface::Private::sendEnter(Surface *surface, quint32 serial)
 {
-    if (!resource || !surface || !surface->resource()) {
+    // TODO: check on surface resource not necessary?
+    if (!resource || !surface || !surface->d_ptr->resource()) {
         return;
     }
-    zwp_text_input_v2_send_enter(resource, serial, surface->resource());
+    zwp_text_input_v2_send_enter(resource, serial, surface->d_ptr->resource());
 }
 
-void TextInputUnstableV2Interface::Private::sendLeave(quint32 serial, SurfaceInterface *surface)
+void TextInputUnstableV2Interface::Private::sendLeave(quint32 serial, Surface *surface)
 {
-    if (!resource || !surface || !surface->resource()) {
+    if (!resource || !surface || !surface->d_ptr->resource()) {
         return;
     }
-    zwp_text_input_v2_send_leave(resource, serial, surface->resource());
+    zwp_text_input_v2_send_leave(resource, serial, surface->d_ptr->resource());
 }
 
 void TextInputUnstableV2Interface::Private::preEdit(const QByteArray &text, const QByteArray &commit)
@@ -225,7 +228,7 @@ void TextInputUnstableV2Interface::Private::enableCallback(wl_client *client, wl
 {
     auto p = cast<Private>(resource);
     Q_ASSERT(*p->client == client);
-    p->enable(SurfaceInterface::get(surface));
+    p->enable(Surface::Private::fromResource(surface)->handle());
 }
 
 void TextInputUnstableV2Interface::Private::disableCallback(wl_client *client, wl_resource *resource, wl_resource *surface)

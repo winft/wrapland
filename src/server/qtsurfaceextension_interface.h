@@ -36,7 +36,7 @@ namespace Server
 {
 
 class Display;
-class SurfaceInterface;
+class Surface;
 class QtExtendedSurfaceInterface;
 
 /**
@@ -66,7 +66,7 @@ class WRAPLANDSERVER_EXPORT QtExtendedSurfaceInterface : public Resource
 public:
     virtual ~QtExtendedSurfaceInterface();
 
-    SurfaceInterface *surface() const;
+    Surface *surface() const;
     QtSurfaceExtensionInterface *shell() const;
 
     void close();
@@ -85,7 +85,7 @@ Q_SIGNALS:
 
 private:
     friend class QtSurfaceExtensionInterface;
-    explicit QtExtendedSurfaceInterface(QtSurfaceExtensionInterface *shell, SurfaceInterface *parent, wl_resource *parentResource);
+    explicit QtExtendedSurfaceInterface(QtSurfaceExtensionInterface *shell, Surface *parent, wl_resource *parentResource);
     class Private;
     Private *d_func() const;
 };

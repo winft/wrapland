@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_SERVER_GENERIC_SHELL_SURFACE_P_H
 
 #include "seat_interface.h"
-#include "surface_interface.h"
+#include "../../server/surface.h"
 #include "surfacerole_p.h"
 #include <wayland-server.h>
 
@@ -35,13 +35,13 @@ template <class T>
 class GenericShellSurface : public SurfaceRole
 {
 public:
-    GenericShellSurface(T *shellSurface, SurfaceInterface *surface)
+    GenericShellSurface(T *shellSurface, Surface *surface)
         : SurfaceRole(surface)
         , surface(surface)
         , shellSurface(shellSurface)
     {}
 
-    SurfaceInterface *surface;
+    Surface *surface;
     QString title;
     QByteArray windowClass;
 

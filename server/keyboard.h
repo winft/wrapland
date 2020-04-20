@@ -30,7 +30,7 @@ namespace Server
 class Client;
 class Seat;
 
-class SurfaceInterface;
+class Surface;
 
 class WRAPLANDSERVER_EXPORT Keyboard : public QObject
 {
@@ -39,13 +39,13 @@ public:
     ~Keyboard() override;
 
     Client* client() const;
-    SurfaceInterface* focusedSurface() const;
+    Surface* focusedSurface() const;
 
 Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    void setFocusedSurface(quint32 serial, SurfaceInterface* surface);
+    void setFocusedSurface(quint32 serial, Surface* surface);
     void setKeymap(int fd, quint32 size);
     void updateModifiers(quint32 serial,
                          quint32 depressed,

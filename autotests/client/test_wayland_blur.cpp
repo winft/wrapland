@@ -27,9 +27,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
 #include "../../src/client/blur.h"
-#include "../../src/server/display.h"
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/region_interface.h"
+
+#include "../../server/display.h"
+#include "../../server/compositor.h"
+#include "../../server/region.h"
+#include "../../server/surface.h"
+
 #include "../../src/server/blur_interface.h"
 
 using namespace Wrapland::Client;
@@ -47,8 +50,8 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    Wrapland::Server::Display *m_display;
-    Wrapland::Server::CompositorInterface *m_compositorInterface;
+    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Compositor *m_serverCompositor;
     Wrapland::Server::BlurManagerInterface *m_blurManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
@@ -62,7 +65,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-wayland-blur-0
 TestBlur::TestBlur(QObject *parent)
     : QObject(parent)
     , m_display(nullptr)
-    , m_compositorInterface(nullptr)
+    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_queue(nullptr)
@@ -74,10 +77,9 @@ void TestBlur::init()
 {
     using namespace Wrapland::Server;
     delete m_display;
-    m_display = new Display(this);
+    m_display = new D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -112,9 +114,7 @@ void TestBlur::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_compositorInterface = m_display->createCompositor(m_display);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    m_serverCompositor = m_display->createCompositor(m_display);
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
@@ -147,7 +147,7 @@ void TestBlur::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-    CLEANUP(m_compositorInterface)
+    CLEANUP(m_serverCompositor)
     CLEANUP(m_blurManagerInterface)
     CLEANUP(m_display)
 #undef CLEANUP
@@ -155,14 +155,14 @@ void TestBlur::cleanup()
 
 void TestBlur::testCreate()
 {
-    QSignalSpy serverSurfaceCreated(m_compositorInterface, SIGNAL(surfaceCreated(Wrapland::Server::SurfaceInterface*)));
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
-    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
-    QSignalSpy blurChanged(serverSurface, SIGNAL(blurChanged()));
+    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    QSignalSpy blurChanged(serverSurface, &Wrapland::Server::Surface::blurChanged);
 
     auto *blur = m_blurManager->createBlur(surface.get(), surface.get());
     blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur));
@@ -181,14 +181,14 @@ void TestBlur::testCreate()
 
 void TestBlur::testSurfaceDestroy()
 {
-    QSignalSpy serverSurfaceCreated(m_compositorInterface, &Wrapland::Server::CompositorInterface::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
-    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::SurfaceInterface*>();
-    QSignalSpy blurChanged(serverSurface, &Wrapland::Server::SurfaceInterface::blurChanged);
+    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    QSignalSpy blurChanged(serverSurface, &Wrapland::Server::Surface::blurChanged);
     QVERIFY(blurChanged.isValid());
 
     std::unique_ptr<Wrapland::Client::Blur> blur(m_blurManager->createBlur(surface.get()));

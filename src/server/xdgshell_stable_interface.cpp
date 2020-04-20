@@ -27,7 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "resource_p.h"
 #include "output_interface.h"
 #include "seat_interface.h"
-#include "surface_interface.h"
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
 
 #include <wayland-xdg-shell-server-protocol.h>
 
@@ -47,7 +48,7 @@ public:
 
 private:
 
-    void createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource);
+    void createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource);
     void createPositioner(wl_client *client, uint32_t version, uint32_t id, wl_resource *parentResource);
 
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
@@ -73,7 +74,7 @@ private:
 class XdgPopupStableInterface::Private : public XdgShellPopupInterface::Private
 {
 public:
-    Private(XdgPopupStableInterface *q, XdgShellStableInterface *c, SurfaceInterface *surface, wl_resource *parentResource);
+    Private(XdgPopupStableInterface *q, XdgShellStableInterface *c, Surface *surface, wl_resource *parentResource);
     ~Private() override;
 
     QRect windowGeometry() const override;
@@ -121,7 +122,7 @@ private:
 class XdgSurfaceStableInterface::Private : public Wrapland::Server::Resource::Private
 {
 public:
-    Private(XdgSurfaceStableInterface* q, XdgShellStableInterface* c, SurfaceInterface* surface, wl_resource* parentResource);
+    Private(XdgSurfaceStableInterface* q, XdgShellStableInterface* c, Surface* surface, wl_resource* parentResource);
 
     ~Private() override;
 
@@ -132,7 +133,7 @@ public:
     void createTopLevel(wl_client *client, uint32_t version, uint32_t id, wl_resource *parentResource);
     void createPopup(wl_client *client, uint32_t version, uint32_t id, wl_resource *parentResource, wl_resource *parentWindow, wl_resource *positioner);
     XdgShellStableInterface *m_shell;
-    SurfaceInterface *m_surface;
+    Surface *m_surface;
 
     //effectively a union, only one of these should be populated.
     //a surface cannot have two roles
@@ -151,7 +152,7 @@ private:
 class XdgTopLevelStableInterface::Private : public XdgShellSurfaceInterface::Private
 {
 public:
-    Private(XdgTopLevelStableInterface* q, XdgShellStableInterface* c, SurfaceInterface* surface, wl_resource* parentResource);
+    Private(XdgTopLevelStableInterface* q, XdgShellStableInterface* c, Surface* surface, wl_resource* parentResource);
     ~Private() override;
 
     QRect windowGeometry() const override;
@@ -275,10 +276,11 @@ void XdgShellStableInterface::Private::createPositionerCallback(wl_client *clien
 void XdgShellStableInterface::Private::getXdgSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource * surface)
 {
     auto s = cast(resource);
-    s->createSurface(client, wl_resource_get_version(resource), id, SurfaceInterface::get(surface), resource);
+    auto _surface = Surface::Private::fromResource(surface)->handle();
+    s->createSurface(client, wl_resource_get_version(resource), id, _surface, resource);
 }
 
-void XdgShellStableInterface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource)
+void XdgShellStableInterface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource)
 {
     auto it = std::find_if(surfaces.constBegin(), surfaces.constEnd(),
         [surface](XdgSurfaceStableInterface *s) {
@@ -286,7 +288,7 @@ void XdgShellStableInterface::Private::createSurface(wl_client *client, uint32_t
         }
     );
     if (it != surfaces.constEnd()) {
-        wl_resource_post_error(surface->resource(), XDG_WM_BASE_ERROR_ROLE, "XDG Surface already created");
+        wl_resource_post_error(surface->d_ptr->resource(), XDG_WM_BASE_ERROR_ROLE, "XDG Surface already created");
         return;
     }
     XdgSurfaceStableInterface *shellSurface = new XdgSurfaceStableInterface(q, surface, parentResource);
@@ -582,7 +584,7 @@ void XdgSurfaceStableInterface::Private::setWindowGeometryCallback(wl_client *cl
     }
 }
 
-XdgSurfaceStableInterface::Private::Private(XdgSurfaceStableInterface *q, XdgShellStableInterface *c, SurfaceInterface *surface, wl_resource *parentResource)
+XdgSurfaceStableInterface::Private::Private(XdgSurfaceStableInterface *q, XdgShellStableInterface *c, Surface *surface, wl_resource *parentResource)
     : Wrapland::Server::Resource::Private(q, c, parentResource, &xdg_surface_interface, &s_interface),
     m_shell(c),
     m_surface(surface)
@@ -892,7 +894,7 @@ void XdgTopLevelStableInterface::Private::showWindowMenuCallback(wl_client *clie
     emit s->q_func()->windowMenuRequested(SeatInterface::get(seat), serial, QPoint(x, y));
 }
 
-XdgTopLevelStableInterface::Private::Private(XdgTopLevelStableInterface *q, XdgShellStableInterface *c, SurfaceInterface *surface, wl_resource *parentResource)
+XdgTopLevelStableInterface::Private::Private(XdgTopLevelStableInterface *q, XdgShellStableInterface *c, Surface *surface, wl_resource *parentResource)
     : XdgShellSurfaceInterface::Private(XdgShellInterfaceVersion::Stable, q, c, surface, parentResource, &xdg_toplevel_interface, &s_interface)
 {
 }
@@ -945,7 +947,7 @@ const struct xdg_popup_interface XdgPopupStableInterface::Private::s_interface =
 };
 #endif
 
-XdgPopupStableInterface::Private::Private(XdgPopupStableInterface *q, XdgShellStableInterface *c, SurfaceInterface *surface, wl_resource *parentResource)
+XdgPopupStableInterface::Private::Private(XdgPopupStableInterface *q, XdgShellStableInterface *c, Surface *surface, wl_resource *parentResource)
     : XdgShellPopupInterface::Private(XdgShellInterfaceVersion::Stable, q, c, surface, parentResource, &xdg_popup_interface, &s_interface)
 {
 }
@@ -1022,14 +1024,14 @@ Display* XdgShellStableInterface::display() const
 
 XdgShellStableInterface::~XdgShellStableInterface() = default;
 
-XdgSurfaceStableInterface::XdgSurfaceStableInterface(XdgShellStableInterface *parent, SurfaceInterface *surface, wl_resource *parentResource)
+XdgSurfaceStableInterface::XdgSurfaceStableInterface(XdgShellStableInterface *parent, Surface *surface, wl_resource *parentResource)
     : Wrapland::Server::Resource(new Private(this, parent, surface, parentResource))
 {
 }
 
 XdgSurfaceStableInterface::~XdgSurfaceStableInterface() = default;
 
-SurfaceInterface* XdgSurfaceStableInterface::surface() const
+Surface* XdgSurfaceStableInterface::surface() const
 {
     Q_D();
     return d->m_surface;
@@ -1101,7 +1103,7 @@ XdgSurfaceStableInterface::Private *XdgSurfaceStableInterface::d_func() const
 }
 
 
-XdgTopLevelStableInterface::XdgTopLevelStableInterface(XdgShellStableInterface *parent, SurfaceInterface *surface, wl_resource *parentResource)
+XdgTopLevelStableInterface::XdgTopLevelStableInterface(XdgShellStableInterface *parent, Surface *surface, wl_resource *parentResource)
     : Wrapland::Server::XdgShellSurfaceInterface(new Private(this, parent, surface, parentResource))
 {
 }
@@ -1113,7 +1115,7 @@ XdgTopLevelStableInterface::Private *XdgTopLevelStableInterface::d_func() const
     return static_cast<Private*>(d.data());
 }
 
-XdgPopupStableInterface::XdgPopupStableInterface(XdgShellStableInterface *parent, SurfaceInterface *surface, wl_resource *parentResource)
+XdgPopupStableInterface::XdgPopupStableInterface(XdgShellStableInterface *parent, Surface *surface, wl_resource *parentResource)
     : XdgShellPopupInterface(new Private(this, parent, surface, parentResource))
 {
 }

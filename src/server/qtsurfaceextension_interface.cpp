@@ -21,7 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "global_p.h"
 #include "resource_p.h"
 #include "display.h"
-#include "surface_interface.h"
+
+#include "../../server/surface.h"
+#include "../../server/wayland/resource.h"
 
 #include <QTimer>
 #include <QVariant>
@@ -44,7 +46,7 @@ public:
 private:
     static void createSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface);
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
-    void createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource);
+    void createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource);
 
     QtSurfaceExtensionInterface *q;
     static const struct qt_surface_extension_interface s_interface;
@@ -69,9 +71,9 @@ const struct qt_surface_extension_interface QtSurfaceExtensionInterface::Private
 class QtExtendedSurfaceInterface::Private : public Resource::Private
 {
 public:
-    Private(QtExtendedSurfaceInterface *q, QtSurfaceExtensionInterface *shell, SurfaceInterface *surface, wl_resource *parentResource);
+    Private(QtExtendedSurfaceInterface *q, QtSurfaceExtensionInterface *shell, Surface *surface, wl_resource *parentResource);
 
-    SurfaceInterface *surface;
+    Surface *surface;
 
 private:
     // interface callbacks
@@ -109,10 +111,10 @@ void QtSurfaceExtensionInterface::Private::bind(wl_client *client, uint32_t vers
 void QtSurfaceExtensionInterface::Private::createSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface)
 {
     auto s = reinterpret_cast<QtSurfaceExtensionInterface::Private*>(wl_resource_get_user_data(resource));
-    s->createSurface(client, wl_resource_get_version(resource), id, SurfaceInterface::get(surface), resource);
+    s->createSurface(client, wl_resource_get_version(resource), id, Wayland::Resource<Surface>::fromResource(surface)->handle(), resource);
 }
 
-void QtSurfaceExtensionInterface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource)
+void QtSurfaceExtensionInterface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource)
 {
     auto it = std::find_if(surfaces.constBegin(), surfaces.constEnd(),
         [surface](QtExtendedSurfaceInterface *s) {
@@ -120,7 +122,8 @@ void QtSurfaceExtensionInterface::Private::createSurface(wl_client *client, uint
         }
     );
     if (it != surfaces.constEnd()) {
-        wl_resource_post_error(surface->resource(), WL_DISPLAY_ERROR_INVALID_OBJECT, "Qt Surface Extension already created");
+        // TODO
+//        wl_resource_post_error(surface->d_ptr->resource(), WL_DISPLAY_ERROR_INVALID_OBJECT, "Qt Surface Extension already created");
         return;
     }
     QtExtendedSurfaceInterface *shellSurface = new QtExtendedSurfaceInterface(q, surface, parentResource);
@@ -137,7 +140,7 @@ void QtSurfaceExtensionInterface::Private::createSurface(wl_client *client, uint
 /*********************************
  * ShellSurfaceInterface
  *********************************/
-QtExtendedSurfaceInterface::Private::Private(QtExtendedSurfaceInterface *q, QtSurfaceExtensionInterface *shell, SurfaceInterface *surface, wl_resource *parentResource)
+QtExtendedSurfaceInterface::Private::Private(QtExtendedSurfaceInterface *q, QtSurfaceExtensionInterface *shell, Surface *surface, wl_resource *parentResource)
     : Resource::Private(q, shell, parentResource, &qt_extended_surface_interface, &s_interface)
     , surface(surface)
 {
@@ -190,20 +193,19 @@ void QtExtendedSurfaceInterface::Private::updateGenericPropertyCallback(wl_clien
     cast<Private>(resource)->q_func()->setProperty(name, variantValue);
 }
 
-QtExtendedSurfaceInterface::QtExtendedSurfaceInterface(QtSurfaceExtensionInterface *shell, SurfaceInterface *parent, wl_resource *parentResource)
-    : Resource(new Private(this, shell, parent, parentResource))
+QtExtendedSurfaceInterface::QtExtendedSurfaceInterface(QtSurfaceExtensionInterface *shell, Surface *parent, wl_resource *parentResource)
+    : Resource(new Private(this, shell, /*parent*/ nullptr, parentResource))  // TODO
 {
     auto unsetSurface = [this] {
         Q_D();
         d->surface = nullptr;
     };
-    connect(parent, &Resource::unbound, this, unsetSurface);
-    connect(parent, &QObject::destroyed, this, unsetSurface);
+    connect(parent, &Surface::resourceDestroyed, this, unsetSurface);
 }
 
 QtExtendedSurfaceInterface::~QtExtendedSurfaceInterface() = default;
 
-SurfaceInterface *QtExtendedSurfaceInterface::surface() const
+Surface *QtExtendedSurfaceInterface::surface() const
 {
     Q_D();
     return d->surface;

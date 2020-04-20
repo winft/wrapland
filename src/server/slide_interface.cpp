@@ -20,9 +20,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "slide_interface.h"
 #include "display.h"
 #include "global_p.h"
-#include "surface_interface.h"
 #include "resource_p.h"
-#include "surface_interface_p.h"
+
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
+
+#include "../../server/wayland/resource.h"
 
 #include <wayland-server.h>
 #include <wayland-slide-server-protocol.h>
@@ -71,7 +74,7 @@ void SlideManagerInterface::Private::createCallback(wl_client *client, wl_resour
 
 void SlideManagerInterface::Private::createSlide(wl_client *client, wl_resource *resource, uint32_t id, wl_resource * surface)
 {
-    SurfaceInterface *s = SurfaceInterface::get(surface);
+    auto s = Wayland::Resource<Surface>::fromResource(surface)->handle();
     if (!s) {
         return;
     }
@@ -83,7 +86,7 @@ void SlideManagerInterface::Private::createSlide(wl_client *client, wl_resource 
         delete slide;
         return;
     }
-    s->d_func()->setSlide(QPointer<SlideInterface>(slide));
+    s->d_ptr->setSlide(QPointer<SlideInterface>(slide));
 }
 
 void SlideManagerInterface::Private::unsetCallback(wl_client *client, wl_resource *resource, wl_resource * surface)

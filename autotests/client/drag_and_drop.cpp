@@ -34,13 +34,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/touch.h"
 
+#include "../../server/compositor.h"
 #include "../../server/data_device.h"
 #include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
 #include "../../server/seat.h"
+#include "../../server/surface.h"
 
-#include "../../src/server/compositor_interface.h"
 #include "../../src/server/shell_interface.h"
 
 class TestDragAndDrop : public QObject
@@ -58,10 +59,10 @@ private Q_SLOTS:
 
 private:
     Wrapland::Client::Surface* createSurface();
-    Wrapland::Server::SurfaceInterface* getServerSurface();
+    Wrapland::Server::Surface* getServerSurface();
 
     Wrapland::Server::D_isplay* m_display = nullptr;
-    Wrapland::Server::CompositorInterface* m_compositorInterface = nullptr;
+    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
     Wrapland::Server::DataDeviceManager* m_serverDataDeviceManager = nullptr;
     Wrapland::Server::Seat* m_serverSeat = nullptr;
     Wrapland::Server::ShellInterface* m_shellInterface = nullptr;
@@ -95,9 +96,7 @@ void TestDragAndDrop::init()
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
-    m_compositorInterface = m_display->createCompositor(m_display);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    m_serverCompositor = m_display->createCompositor(m_display);
     m_serverSeat = m_display->createSeat(m_display);
     m_serverSeat->setHasPointer(true);
     m_serverSeat->setHasTouch(true);
@@ -203,17 +202,16 @@ Wrapland::Client::Surface* TestDragAndDrop::createSurface()
     return s;
 }
 
-Wrapland::Server::SurfaceInterface* TestDragAndDrop::getServerSurface()
+Wrapland::Server::Surface* TestDragAndDrop::getServerSurface()
 {
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface,
-                                 &Wrapland::Server::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     if (!surfaceCreatedSpy.isValid()) {
         return nullptr;
     }
     if (!surfaceCreatedSpy.wait(500)) {
         return nullptr;
     }
-    return surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    return surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
 }
 
 void TestDragAndDrop::testPointerDragAndDrop()

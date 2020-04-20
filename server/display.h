@@ -57,7 +57,7 @@ class Seat;
 // Legacy
 class ClientConnection;
 
-class CompositorInterface;
+class Compositor;
 class IdleInterface;
 enum class IdleInhibitManagerInterfaceVersion;
 class RemoteAccessManagerInterface;
@@ -75,7 +75,7 @@ class OutputManagementV1Interface;
 class ServerSideDecorationManagerInterface;
 class SlideManagerInterface;
 class ShellInterface;
-class SubCompositorInterface;
+class Subcompositor;
 enum class TextInputInterfaceVersion;
 class TextInputManagerInterface;
 class XdgShellV5Interface;
@@ -84,7 +84,7 @@ class XdgShellInterface;
 class RelativePointerManagerV1;
 class PointerGesturesV1;
 class PointerConstraintsV1;
-class XdgForeignInterface;
+class XdgForeign;
 class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
 class PlasmaVirtualDesktopManagementInterface;
@@ -142,11 +142,11 @@ public:
     void removeOutputDevice(OutputDeviceV1Interface* outputDevice);
     QList<OutputDeviceV1Interface*> outputDevices() const;
 
-    CompositorInterface* createCompositor(QObject* parent = nullptr);
+    Compositor* createCompositor(QObject* parent = nullptr);
     void createShm();
     ShellInterface* createShell(QObject* parent = nullptr);
 
-    SubCompositorInterface* createSubCompositor(QObject* parent = nullptr);
+    Subcompositor* createSubCompositor(QObject* parent = nullptr);
     DataDeviceManager* createDataDeviceManager(QObject* parent = nullptr);
     OutputManagementV1Interface* createOutputManagementV1(QObject* parent = nullptr);
     PlasmaShellInterface* createPlasmaShell(QObject* parent = nullptr);
@@ -174,7 +174,7 @@ public:
     PointerGesturesV1* createPointerGestures(QObject* parent = nullptr);
     PointerConstraintsV1* createPointerConstraints(QObject* parent = nullptr);
 
-    XdgForeignInterface* createXdgForeignInterface(QObject* parent = nullptr);
+    XdgForeign* createXdgForeign(QObject* parent = nullptr);
 
     IdleInhibitManagerInterface*
     createIdleInhibitManager(const IdleInhibitManagerInterfaceVersion& version,

@@ -43,12 +43,12 @@ public:
                        quint32 group,
                        quint32 serial);
 
-    void focusChildSurface(quint32 serial, const QPointer<SurfaceInterface>& childSurface);
-    void sendLeave(quint32 serial, SurfaceInterface* surface);
-    void sendEnter(quint32 serial, SurfaceInterface* surface);
+    void focusChildSurface(quint32 serial, const QPointer<Surface>& childSurface);
+    void sendLeave(quint32 serial, Surface* surface);
+    void sendEnter(quint32 serial, Surface* surface);
 
-    SurfaceInterface* focusedSurface = nullptr;
-    QPointer<SurfaceInterface> focusedChildSurface;
+    Surface* focusedSurface = nullptr;
+    QPointer<Surface> focusedChildSurface;
     QMetaObject::Connection destroyConnection;
 
     Seat* seat;

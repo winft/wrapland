@@ -23,19 +23,20 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
-#include "../../src/client/surface.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/shm_pool.h"
+#include "../../src/client/surface.h"
+
+#include "../../server/compositor.h"
+#include "../../server/display.h"
+#include "../../server/surface.h"
 #include "../../src/server/buffer_interface.h"
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/display.h"
-#include "../../src/server/surface_interface.h"
 
 class TestCompositor : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestCompositor(QObject *parent = nullptr);
+    explicit TestCompositor(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -44,20 +45,20 @@ private Q_SLOTS:
     void testCast();
 
 private:
-    Wrapland::Server::Display *m_display;
-    Wrapland::Server::CompositorInterface *m_compositorInterface;
-    Wrapland::Client::ConnectionThread *m_connection;
-    Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::EventQueue *m_queue;
-    QThread *m_thread;
+    Wrapland::Server::D_isplay* m_display;
+    Wrapland::Server::Compositor* m_serverCompositor;
+    Wrapland::Client::ConnectionThread* m_connection;
+    Wrapland::Client::Compositor* m_compositor;
+    Wrapland::Client::EventQueue* m_queue;
+    QThread* m_thread;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-compositor-0");
 
-TestCompositor::TestCompositor(QObject *parent)
+TestCompositor::TestCompositor(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
-    , m_compositorInterface(nullptr)
+    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_thread(nullptr)
@@ -66,16 +67,14 @@ TestCompositor::TestCompositor(QObject *parent)
 
 void TestCompositor::init()
 {
-    using namespace Wrapland::Server;
-    delete m_display;
-    m_display = new Display(this);
+    m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy establishedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    QSignalSpy establishedSpy(m_connection,
+                              &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
@@ -88,25 +87,24 @@ void TestCompositor::init()
     m_queue = new Wrapland::Client::EventQueue(this);
     m_queue->setup(m_connection);
 
-    QSignalSpy clientConnectedSpy(m_display, &Display::clientConnected);
+    QSignalSpy clientConnectedSpy(m_display, &Wrapland::Server::D_isplay::clientConnected);
     QVERIFY(clientConnectedSpy.isValid());
 
     Wrapland::Client::Registry registry;
-    QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32,quint32)));
+    QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32, quint32)));
     registry.setEventQueue(m_queue);
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
     registry.setup();
 
     // here we need a shm pool
-    m_compositorInterface = m_display->createCompositor(m_display);
-    QVERIFY(m_compositorInterface);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    m_serverCompositor = m_display->createCompositor(m_display);
+    QVERIFY(m_serverCompositor);
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
-                                             compositorSpy.first().last().value<quint32>(), this);
+                                             compositorSpy.first().last().value<quint32>(),
+                                             this);
 
     QVERIFY(clientConnectedSpy.wait());
 }
@@ -164,9 +162,9 @@ void TestCompositor::testCast()
     c.setup(wlComp);
     QCOMPARE((wl_compositor*)c, wlComp);
 
-    const Compositor &c2(c);
+    const Compositor& c2(c);
     QCOMPARE((wl_compositor*)c2, wlComp);
 }
 
 QTEST_GUILESS_MAIN(TestCompositor)
-#include "test_compositor.moc"
+#include "compositor.moc"

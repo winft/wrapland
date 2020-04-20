@@ -32,8 +32,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_gestures_v1_p.h"
 #include "relative_pointer_v1_p.h"
 
-#include "subcompositor_interface.h"
-#include "surface_interface.h"
+#include "subcompositor.h"
+#include "surface.h"
+#include "surface_p.h"
 
 #include <wayland-server.h>
 
@@ -50,53 +51,47 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
 {
 }
 
-void Pointer::Private::setCursor(quint32 serial, SurfaceInterface* surface, const QPoint& hotspot)
+void Pointer::Private::setCursor(quint32 serial, Surface* surface, const QPoint& hotspot)
 {
     if (!cursor) {
         cursor = new Cursor(q_ptr);
-        cursor->d_ptr->update(QPointer<SurfaceInterface>(surface), serial, hotspot);
+        cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
         QObject::connect(cursor, &Cursor::changed, q_ptr, &Pointer::cursorChanged);
         Q_EMIT q_ptr->cursorChanged();
     } else {
-        cursor->d_ptr->update(QPointer<SurfaceInterface>(surface), serial, hotspot);
+        cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
     }
 }
 
 namespace
 {
-QPointF surfacePosition(SurfaceInterface* surface)
+QPointF surfacePosition(Surface* surface)
 {
-    if (!surface || !surface->subSurface()) {
+    if (!surface || !surface->subsurface()) {
         return QPointF();
     }
-    return surface->subSurface()->position()
-        + surfacePosition(surface->subSurface()->parentSurface().data());
+    return surface->subsurface()->position()
+        + surfacePosition(surface->subsurface()->parentSurface().data());
 }
 }
 
 void Pointer::Private::sendEnter(quint32 serial,
-                                 SurfaceInterface* surface,
+                                 Surface* surface,
                                  const QPointF& parentSurfacePosition)
 {
-    if (!surface || !surface->resource()) {
-        return;
-    }
     const QPointF adjustedPos = parentSurfacePosition - surfacePosition(surface);
     send<wl_pointer_send_enter>(serial,
-                                surface->resource(),
+                                surface->d_ptr->resource(),
                                 wl_fixed_from_double(adjustedPos.x()),
                                 wl_fixed_from_double(adjustedPos.y()));
 }
 
-void Pointer::Private::sendLeave(quint32 serial, SurfaceInterface* surface)
+void Pointer::Private::sendLeave(quint32 serial, Surface* surface)
 {
     if (!surface) {
         return;
     }
-    if (!surface->resource()) {
-        return;
-    }
-    send<wl_pointer_send_leave>(serial, surface->resource());
+    send<wl_pointer_send_leave>(serial, surface->d_ptr->resource());
 }
 
 void Pointer::Private::sendMotion(const QPointF& position)
@@ -267,7 +262,7 @@ Pointer::Pointer(Client* client, uint32_t version, uint32_t id, Seat* seat)
             const quint32 serial = d_ptr->client()->display()->handle()->nextSerial();
             d_ptr->sendLeave(serial, d_ptr->focusedChildSurface.data());
 
-            d_ptr->focusedChildSurface = QPointer<SurfaceInterface>(targetSurface);
+            d_ptr->focusedChildSurface = QPointer<Surface>(targetSurface);
             d_ptr->sendEnter(serial, targetSurface, pos);
 
             d_ptr->sendFrame();
@@ -282,7 +277,7 @@ Pointer::Pointer(Client* client, uint32_t version, uint32_t id, Seat* seat)
 
 Pointer::~Pointer() = default;
 
-void Pointer::setFocusedSurface(quint32 serial, SurfaceInterface* surface)
+void Pointer::setFocusedSurface(quint32 serial, Surface* surface)
 {
     d_ptr->sendLeave(serial, d_ptr->focusedChildSurface.data());
     disconnect(d_ptr->destroyConnection);
@@ -295,7 +290,7 @@ void Pointer::setFocusedSurface(quint32 serial, SurfaceInterface* surface)
 
     d_ptr->focusedSurface = surface;
     d_ptr->destroyConnection
-        = connect(d_ptr->focusedSurface, &Resource::aboutToBeUnbound, this, [this] {
+        = connect(d_ptr->focusedSurface, &Surface::resourceDestroyed, this, [this] {
               d_ptr->sendLeave(d_ptr->client()->display()->handle()->nextSerial(),
                                d_ptr->focusedChildSurface.data());
               d_ptr->sendFrame();
@@ -305,10 +300,9 @@ void Pointer::setFocusedSurface(quint32 serial, SurfaceInterface* surface)
 
     const QPointF pos
         = d_ptr->seat->focusedPointerSurfaceTransformation().map(d_ptr->seat->pointerPos());
-    d_ptr->focusedChildSurface
-        = QPointer<SurfaceInterface>(d_ptr->focusedSurface->inputSurfaceAt(pos));
+    d_ptr->focusedChildSurface = QPointer<Surface>(d_ptr->focusedSurface->inputSurfaceAt(pos));
     if (!d_ptr->focusedChildSurface) {
-        d_ptr->focusedChildSurface = QPointer<SurfaceInterface>(d_ptr->focusedSurface);
+        d_ptr->focusedChildSurface = QPointer<Surface>(d_ptr->focusedSurface);
     }
     d_ptr->sendEnter(serial, d_ptr->focusedChildSurface.data(), pos);
     d_ptr->client()->flush();
@@ -399,9 +393,9 @@ void Pointer::Private::setCursorCallback([[maybe_unused]] wl_client* wlClient,
                                          int32_t hotspot_y)
 {
     auto priv = fromResource(wlResource);
+    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
 
-    static_cast<Private*>(priv)->setCursor(
-        serial, SurfaceInterface::get(wlSurface), QPoint(hotspot_x, hotspot_y));
+    static_cast<Private*>(priv)->setCursor(serial, surface, QPoint(hotspot_x, hotspot_y));
 }
 
 Client* Pointer::client() const
@@ -446,7 +440,7 @@ Cursor::Private::Private(Cursor* q, Pointer* _pointer)
 {
 }
 
-void Cursor::Private::update(const QPointer<SurfaceInterface>& s, quint32 serial, const QPoint& p)
+void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const QPoint& p)
 {
     bool emitChanged = false;
     if (enteredSerial != serial) {
@@ -461,12 +455,11 @@ void Cursor::Private::update(const QPointer<SurfaceInterface>& s, quint32 serial
     }
     if (surface != s) {
         if (!surface.isNull()) {
-            QObject::disconnect(
-                surface.data(), &SurfaceInterface::damaged, q_ptr, &Cursor::changed);
+            QObject::disconnect(surface.data(), &Surface::damaged, q_ptr, &Cursor::changed);
         }
         surface = s;
         if (!surface.isNull()) {
-            QObject::connect(surface.data(), &SurfaceInterface::damaged, q_ptr, &Cursor::changed);
+            QObject::connect(surface.data(), &Surface::damaged, q_ptr, &Cursor::changed);
         }
         emitChanged = true;
         Q_EMIT q_ptr->surfaceChanged();
@@ -499,7 +492,7 @@ Pointer* Cursor::pointer() const
     return d_ptr->pointer;
 }
 
-QPointer<SurfaceInterface> Cursor::surface() const
+QPointer<Surface> Cursor::surface() const
 {
     return d_ptr->surface;
 }

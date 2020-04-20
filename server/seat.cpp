@@ -28,11 +28,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keyboard_p.h"
 #include "pointer.h"
 #include "pointer_p.h"
+#include "surface.h"
 #include "touch.h"
 
 // legacy
 #include "seat_interface.h"
-#include "surface_interface.h"
 #include "textinput_interface_p.h"
 
 #include <config-wrapland.h>
@@ -182,7 +182,7 @@ namespace
 {
 
 template<typename T>
-static T* interfaceForSurface(SurfaceInterface* surface, const QVector<T*>& interfaces)
+static T* interfaceForSurface(Surface* surface, const QVector<T*>& interfaces)
 {
     if (!surface) {
         return nullptr;
@@ -190,24 +190,24 @@ static T* interfaceForSurface(SurfaceInterface* surface, const QVector<T*>& inte
 
     for (auto it = interfaces.constBegin(); it != interfaces.constEnd(); ++it) {
         if constexpr (std::is_same_v<T, Pointer>) {
-            if ((*it)->client()->legacy == surface->client()) {
+            if ((*it)->client() == surface->client()) {
                 return (*it);
             }
         } else if constexpr (std::is_same_v<T, Keyboard>) {
-            if ((*it)->client()->legacy == surface->client()) {
+            if ((*it)->client() == surface->client()) {
                 return (*it);
             }
         } else if constexpr (std::is_same_v<T, DataDevice>) {
-            if ((*it)->client()->legacy == surface->client()) {
+            if ((*it)->client() == surface->client()) {
                 return (*it);
             }
         } else if constexpr (std::is_same_v<T, Touch>) {
-            if ((*it)->client()->legacy == surface->client()) {
+            if ((*it)->client() == surface->client()) {
                 return (*it);
             }
         } else {
             // TODO: remove when all in new model
-            if ((*it)->client() == surface->client()) {
+            if ((*it)->client() == surface->client()->legacy) {
                 return (*it);
             }
         }
@@ -216,7 +216,7 @@ static T* interfaceForSurface(SurfaceInterface* surface, const QVector<T*>& inte
 }
 
 template<typename T>
-static QVector<T*> interfacesForSurface(SurfaceInterface* surface, const QVector<T*>& interfaces)
+static QVector<T*> interfacesForSurface(Surface* surface, const QVector<T*>& interfaces)
 {
     QVector<T*> ret;
     if (!surface) {
@@ -225,20 +225,20 @@ static QVector<T*> interfacesForSurface(SurfaceInterface* surface, const QVector
 
     for (auto it = interfaces.constBegin(); it != interfaces.constEnd(); ++it) {
         if constexpr (std::is_same_v<T, Pointer>) {
-            if ((*it)->client()->legacy == surface->client()) {
+            if ((*it)->client() == surface->client()) {
                 ret << *it;
             }
         } else if constexpr (std::is_same_v<T, Keyboard>) {
-            if ((*it)->client()->legacy == surface->client()) {
+            if ((*it)->client() == surface->client()) {
                 ret << *it;
             }
         } else if constexpr (std::is_same_v<T, Touch>) {
-            if ((*it)->client()->legacy == surface->client()) {
+            if ((*it)->client() == surface->client()) {
                 ret << *it;
             }
         } else {
             // TODO: remove when all in new model
-            if ((*it)->client() == surface->client()) {
+            if ((*it)->client() == surface->client()->legacy) {
                 ret << *it;
             }
         }
@@ -247,16 +247,15 @@ static QVector<T*> interfacesForSurface(SurfaceInterface* surface, const QVector
 }
 
 template<typename T>
-static bool forEachInterface(SurfaceInterface* surface,
-                             const QVector<T*>& interfaces,
-                             std::function<void(T*)> method)
+static bool
+forEachInterface(Surface* surface, const QVector<T*>& interfaces, std::function<void(T*)> method)
 {
     if (!surface) {
         return false;
     }
     bool calledAtLeastOne = false;
     for (auto it = interfaces.constBegin(); it != interfaces.constEnd(); ++it) {
-        if ((*it)->client()->legacy == surface->client()) {
+        if ((*it)->client() == surface->client()) {
             method(*it);
             calledAtLeastOne = true;
         }
@@ -266,27 +265,27 @@ static bool forEachInterface(SurfaceInterface* surface,
 
 }
 
-QVector<Pointer*> Seat::Private::pointersForSurface(SurfaceInterface* surface) const
+QVector<Pointer*> Seat::Private::pointersForSurface(Surface* surface) const
 {
     return interfacesForSurface(surface, pointers);
 }
 
-QVector<Keyboard*> Seat::Private::keyboardsForSurface(SurfaceInterface* surface) const
+QVector<Keyboard*> Seat::Private::keyboardsForSurface(Surface* surface) const
 {
     return interfacesForSurface(surface, keyboards);
 }
 
-QVector<Touch*> Seat::Private::touchsForSurface(SurfaceInterface* surface) const
+QVector<Touch*> Seat::Private::touchsForSurface(Surface* surface) const
 {
     return interfacesForSurface(surface, touchs);
 }
 
-DataDevice* Seat::Private::dataDeviceForSurface(SurfaceInterface* surface) const
+DataDevice* Seat::Private::dataDeviceForSurface(Surface* surface) const
 {
     return interfaceForSurface(surface, dataDevices);
 }
 
-TextInputInterface* Seat::Private::textInputForSurface(SurfaceInterface* surface) const
+TextInputInterface* Seat::Private::textInputForSurface(Surface* surface) const
 {
     return interfaceForSurface(surface, textInputs);
 }
@@ -371,7 +370,7 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
     // Is the new DataDevice for the current keyoard focus?
     if (keys.focus.surface && !keys.focus.selection) {
         // Same client?
-        if (keys.focus.surface->client() == dataDevice->client()->legacy) {
+        if (keys.focus.surface->client() == dataDevice->client()) {
             keys.focus.selection = dataDevice;
             if (currentSelection && currentSelection->selection()) {
                 dataDevice->sendSelection(currentSelection);
@@ -387,7 +386,7 @@ void Seat::Private::registerTextInput(TextInputInterface* ti)
         return;
     }
     textInputs << ti;
-    if (textInput.focus.surface && textInput.focus.surface->client() == ti->client()) {
+    if (textInput.focus.surface && textInput.focus.surface->client()->legacy == ti->client()) {
         // This is a text input for the currently focused text input surface.
         if (!textInput.focus.textInput) {
             textInput.focus.textInput = ti;
@@ -442,7 +441,7 @@ void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice)
 void Seat::Private::updateSelection(DataDevice* dataDevice, bool set)
 {
     bool selChanged = currentSelection != dataDevice;
-    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client()->legacy)) {
+    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client())) {
         // cancel the previous selection
         cancelPreviousSelection(dataDevice);
         // new selection on a data device belonging to current keyboard focus
@@ -519,7 +518,7 @@ void Seat::Private::getPointer(Client* client, uint32_t id, wl_resource* resourc
 
     pointers << pointer;
 
-    if (globalPointer.focus.surface && globalPointer.focus.surface->client() == client->legacy) {
+    if (globalPointer.focus.surface && globalPointer.focus.surface->client() == client) {
         // this is a pointer for the currently focused pointer surface
         globalPointer.focus.pointers << pointer;
         pointer->setFocusedSurface(globalPointer.focus.serial, globalPointer.focus.surface);
@@ -564,7 +563,7 @@ void Seat::Private::getKeyboard(Client* client, uint32_t id, wl_resource* resour
 
     keyboards << keyboard;
 
-    if (keys.focus.surface && keys.focus.surface->client() == client->legacy) {
+    if (keys.focus.surface && keys.focus.surface->client() == client) {
         // this is a keyboard for the currently focused keyboard surface
         keys.focus.keyboards << keyboard;
         keyboard->setFocusedSurface(keys.focus.serial, keys.focus.surface);
@@ -594,7 +593,7 @@ void Seat::Private::getTouch(Client* client, uint32_t id, wl_resource* resource)
 
     touchs << touch;
 
-    if (globalTouch.focus.surface && globalTouch.focus.surface->client() == client->legacy) {
+    if (globalTouch.focus.surface && globalTouch.focus.surface->client() == client) {
         // this is a touch for the currently focused touch surface
         globalTouch.focus.touchs << touch;
         if (!globalTouch.ids.isEmpty()) {
@@ -665,7 +664,7 @@ void Seat::setTimestamp(quint32 time)
     Q_EMIT legacy->timestampChanged(time);
 }
 
-void Seat::setDragTarget(SurfaceInterface* surface,
+void Seat::setDragTarget(Surface* surface,
                          const QPointF& globalPosition,
                          const QMatrix4x4& inputTransformation)
 {
@@ -696,7 +695,7 @@ void Seat::setDragTarget(SurfaceInterface* surface,
     return;
 }
 
-void Seat::setDragTarget(SurfaceInterface* surface, const QMatrix4x4& inputTransformation)
+void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation)
 {
     if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
         setDragTarget(surface, pointerPos(), inputTransformation);
@@ -706,12 +705,12 @@ void Seat::setDragTarget(SurfaceInterface* surface, const QMatrix4x4& inputTrans
     }
 }
 
-SurfaceInterface* Seat::focusedPointerSurface() const
+Surface* Seat::focusedPointerSurface() const
 {
     return d_ptr->globalPointer.focus.surface;
 }
 
-void Seat::setFocusedPointerSurface(SurfaceInterface* surface, const QPointF& surfacePosition)
+void Seat::setFocusedPointerSurface(Surface* surface, const QPointF& surfacePosition)
 {
     QMatrix4x4 m;
     m.translate(-surfacePosition.x(), -surfacePosition.y());
@@ -722,7 +721,7 @@ void Seat::setFocusedPointerSurface(SurfaceInterface* surface, const QPointF& su
     }
 }
 
-void Seat::setFocusedPointerSurface(SurfaceInterface* surface, const QMatrix4x4& transformation)
+void Seat::setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transformation)
 {
     if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
         // ignore
@@ -1004,8 +1003,7 @@ void Seat::startPointerSwipeGesture(quint32 fingerCount)
     if (!d_ptr->globalPointer.gestureSurface.isNull()) {
         return;
     }
-    d_ptr->globalPointer.gestureSurface
-        = QPointer<SurfaceInterface>(d_ptr->globalPointer.focus.surface);
+    d_ptr->globalPointer.gestureSurface = QPointer<Surface>(d_ptr->globalPointer.focus.surface);
     if (d_ptr->globalPointer.gestureSurface.isNull()) {
         return;
     }
@@ -1055,8 +1053,7 @@ void Seat::startPointerPinchGesture(quint32 fingerCount)
     if (!d_ptr->globalPointer.gestureSurface.isNull()) {
         return;
     }
-    d_ptr->globalPointer.gestureSurface
-        = QPointer<SurfaceInterface>(d_ptr->globalPointer.focus.surface);
+    d_ptr->globalPointer.gestureSurface = QPointer<Surface>(d_ptr->globalPointer.focus.surface);
     if (d_ptr->globalPointer.gestureSurface.isNull()) {
         return;
     }
@@ -1135,12 +1132,12 @@ void Seat::keyReleased(quint32 key)
     }
 }
 
-SurfaceInterface* Seat::focusedKeyboardSurface() const
+Surface* Seat::focusedKeyboardSurface() const
 {
     return d_ptr->keys.focus.surface;
 }
 
-void Seat::setFocusedKeyboardSurface(SurfaceInterface* surface)
+void Seat::setFocusedKeyboardSurface(Surface* surface)
 {
     const quint32 serial = d_ptr->display()->handle()->nextSerial();
 
@@ -1336,7 +1333,7 @@ Touch* Seat::focusedTouch() const
     return d_ptr->globalTouch.focus.touchs.first();
 }
 
-SurfaceInterface* Seat::focusedTouchSurface() const
+Surface* Seat::focusedTouchSurface() const
 {
     return d_ptr->globalTouch.focus.surface;
 }
@@ -1351,7 +1348,7 @@ bool Seat::isTouchSequence() const
     return !d_ptr->globalTouch.ids.isEmpty();
 }
 
-void Seat::setFocusedTouchSurface(SurfaceInterface* surface, const QPointF& surfacePosition)
+void Seat::setFocusedTouchSurface(Surface* surface, const QPointF& surfacePosition)
 {
     if (isTouchSequence()) {
         // changing surface not allowed during a touch sequence
@@ -1525,7 +1522,7 @@ QMatrix4x4 Seat::dragSurfaceTransformation() const
     return d_ptr->drag.transformation;
 }
 
-SurfaceInterface* Seat::dragSurface() const
+Surface* Seat::dragSurface() const
 {
     return d_ptr->drag.surface;
 }
@@ -1544,7 +1541,7 @@ DataDevice* Seat::dragSource() const
     return d_ptr->drag.source;
 }
 
-void Seat::setFocusedTextInputSurface(SurfaceInterface* surface)
+void Seat::setFocusedTextInputSurface(Surface* surface)
 {
     const quint32 serial = d_ptr->display()->handle()->nextSerial();
     const auto old = d_ptr->textInput.focus.textInput;
@@ -1565,7 +1562,7 @@ void Seat::setFocusedTextInputSurface(SurfaceInterface* surface)
     d_ptr->textInput.focus.textInput = t;
     if (d_ptr->textInput.focus.surface) {
         d_ptr->textInput.focus.destroyConnection
-            = connect(surface, &Resource::aboutToBeUnbound, this, [this] {
+            = connect(surface, &Surface::resourceDestroyed, this, [this] {
                   setFocusedTextInputSurface(nullptr);
               });
         d_ptr->textInput.focus.serial = serial;
@@ -1580,7 +1577,7 @@ void Seat::setFocusedTextInputSurface(SurfaceInterface* surface)
     }
 }
 
-SurfaceInterface* Seat::focusedTextInputSurface() const
+Surface* Seat::focusedTextInputSurface() const
 {
     return d_ptr->textInput.focus.surface;
 }

@@ -1,5 +1,6 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2014 Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,21 +18,21 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// KWin
+
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/subcompositor.h"
-#include "../../src/server/display.h"
-#include "../../src/server/subcompositor_interface.h"
+
+#include "../../server/display.h"
+#include "../../server/subcompositor.h"
 
 class TestSubCompositor : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestSubCompositor(QObject *parent = nullptr);
+    explicit TestSubCompositor(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -40,20 +41,20 @@ private Q_SLOTS:
     void testCast();
 
 private:
-    Wrapland::Server::Display *m_display;
-    Wrapland::Server::SubCompositorInterface *m_subcompositorInterface;
-    Wrapland::Client::ConnectionThread *m_connection;
-    Wrapland::Client::SubCompositor *m_subCompositor;
-    Wrapland::Client::EventQueue *m_queue;
-    QThread *m_thread;
+    Wrapland::Server::D_isplay* m_display;
+    Wrapland::Server::Subcompositor* m_serverSubcompositor;
+    Wrapland::Client::ConnectionThread* m_connection;
+    Wrapland::Client::SubCompositor* m_subCompositor;
+    Wrapland::Client::EventQueue* m_queue;
+    QThread* m_thread;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-subcompositor-0");
 
-TestSubCompositor::TestSubCompositor(QObject *parent)
+TestSubCompositor::TestSubCompositor(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
-    , m_subcompositorInterface(nullptr)
+    , m_serverSubcompositor(nullptr)
     , m_connection(nullptr)
     , m_subCompositor(nullptr)
     , m_queue(nullptr)
@@ -63,12 +64,9 @@ TestSubCompositor::TestSubCompositor(QObject *parent)
 
 void TestSubCompositor::init()
 {
-    using namespace Wrapland::Server;
-    delete m_display;
-    m_display = new Display(this);
+    m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -89,7 +87,7 @@ void TestSubCompositor::init()
     QVERIFY(m_queue->isValid());
 
     Wrapland::Client::Registry registry;
-    QSignalSpy subCompositorSpy(&registry, SIGNAL(subCompositorAnnounced(quint32,quint32)));
+    QSignalSpy subCompositorSpy(&registry, SIGNAL(subCompositorAnnounced(quint32, quint32)));
     QVERIFY(subCompositorSpy.isValid());
     QVERIFY(!registry.eventQueue());
     registry.setEventQueue(m_queue);
@@ -98,13 +96,14 @@ void TestSubCompositor::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_subcompositorInterface = m_display->createSubCompositor(m_display);
-    QVERIFY(m_subcompositorInterface);
-    m_subcompositorInterface->create();
-    QVERIFY(m_subcompositorInterface->isValid());
+    m_serverSubcompositor = m_display->createSubCompositor(m_display);
+    QVERIFY(m_serverSubcompositor);
 
     QVERIFY(subCompositorSpy.wait());
-    m_subCompositor = registry.createSubCompositor(subCompositorSpy.first().first().value<quint32>(), subCompositorSpy.first().last().value<quint32>(), this);
+    m_subCompositor
+        = registry.createSubCompositor(subCompositorSpy.first().first().value<quint32>(),
+                                       subCompositorSpy.first().last().value<quint32>(),
+                                       this);
 }
 
 void TestSubCompositor::cleanup()
@@ -133,7 +132,10 @@ void TestSubCompositor::cleanup()
 void TestSubCompositor::testDestroy()
 {
     using namespace Wrapland::Client;
-    connect(m_connection, &ConnectionThread::establishedChanged, m_subCompositor, &SubCompositor::release);
+    connect(m_connection,
+            &ConnectionThread::establishedChanged,
+            m_subCompositor,
+            &SubCompositor::release);
     connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
     QVERIFY(m_subCompositor->isValid());
 
@@ -153,7 +155,7 @@ void TestSubCompositor::testCast()
     using namespace Wrapland::Client;
     Registry registry;
     registry.setEventQueue(m_queue);
-    QSignalSpy subCompositorSpy(&registry, SIGNAL(subCompositorAnnounced(quint32,quint32)));
+    QSignalSpy subCompositorSpy(&registry, SIGNAL(subCompositorAnnounced(quint32, quint32)));
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
     registry.setup();
@@ -161,13 +163,14 @@ void TestSubCompositor::testCast()
     QVERIFY(subCompositorSpy.wait());
 
     SubCompositor c;
-    auto wlSubComp = registry.bindSubCompositor(subCompositorSpy.first().first().value<quint32>(), subCompositorSpy.first().last().value<quint32>());
+    auto wlSubComp = registry.bindSubCompositor(subCompositorSpy.first().first().value<quint32>(),
+                                                subCompositorSpy.first().last().value<quint32>());
     c.setup(wlSubComp);
     QCOMPARE((wl_subcompositor*)c, wlSubComp);
 
-    const SubCompositor &c2(c);
+    const SubCompositor& c2(c);
     QCOMPARE((wl_subcompositor*)c2, wlSubComp);
 }
 
 QTEST_GUILESS_MAIN(TestSubCompositor)
-#include "test_wayland_subcompositor.moc"
+#include "subcompositor.moc"

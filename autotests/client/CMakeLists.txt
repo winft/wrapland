@@ -83,15 +83,20 @@ add_test(NAME wrapland-testWaylandShell COMMAND testWaylandShell)
 ecm_mark_as_test(testWaylandShell)
 
 ########################################################
-# Test WaylandSurface
+# Test Surface
 ########################################################
-set( testWaylandSurface_SRCS
-        test_wayland_surface.cpp
-    )
-add_executable(testWaylandSurface ${testWaylandSurface_SRCS})
-target_link_libraries( testWaylandSurface Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
-add_test(NAME wrapland-testWaylandSurface COMMAND testWaylandSurface)
-ecm_mark_as_test(testWaylandSurface)
+set( testSurface_SRCS surface.cpp )
+add_executable(testSurface ${testSurface_SRCS})
+target_link_libraries( testSurface
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+    Wayland::Client
+    Wayland::Server
+)
+add_test(NAME wrapland-testSurface COMMAND testSurface)
+ecm_mark_as_test(testSurface)
 
 ########################################################
 # Test WaylandSeat
@@ -166,22 +171,28 @@ ecm_mark_as_test(testWlrOutputManagement)
 ########################################################
 # Test Compositor
 ########################################################
-set( testCompositor_SRCS
-        test_compositor.cpp
-    )
+set( testCompositor_SRCS compositor.cpp )
 add_executable(testCompositor ${testCompositor_SRCS})
-target_link_libraries( testCompositor Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+target_link_libraries( testCompositor
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+)
 add_test(NAME wrapland-testCompositor COMMAND testCompositor)
 ecm_mark_as_test(testCompositor)
 
 ########################################################
 # Test SubCompositor
 ########################################################
-set( testSubCompositor_SRCS
-        test_wayland_subcompositor.cpp
-    )
+set( testSubCompositor_SRCS subcompositor.cpp )
 add_executable(testSubCompositor ${testSubCompositor_SRCS})
-target_link_libraries( testSubCompositor Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+target_link_libraries( testSubCompositor
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+)
 add_test(NAME wrapland-testSubCompositor COMMAND testSubCompositor)
 ecm_mark_as_test(testSubCompositor)
 
@@ -189,22 +200,29 @@ ecm_mark_as_test(testSubCompositor)
 ########################################################
 # Test SubSurface
 ########################################################
-set( testSubSurface_SRCS
-        test_wayland_subsurface.cpp
-    )
+set( testSubSurface_SRCS subsurface.cpp )
 add_executable(testSubSurface ${testSubSurface_SRCS})
-target_link_libraries( testSubSurface Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+target_link_libraries( testSubSurface
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+    Wayland::Client
+)
 add_test(NAME wrapland-testSubSurface COMMAND testSubSurface)
 ecm_mark_as_test(testSubSurface)
 
 ########################################################
 # Test Region
 ########################################################
-set( testRegion_SRCS
-        test_wayland_region.cpp
-    )
+set( testRegion_SRCS region.cpp )
 add_executable(testRegion ${testRegion_SRCS})
-target_link_libraries( testRegion Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+target_link_libraries( testRegion
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+)
 add_test(NAME wrapland-testRegion COMMAND testRegion)
 ecm_mark_as_test(testRegion)
 
@@ -417,11 +435,15 @@ ecm_mark_as_test(testXdgShellV5)
 ########################################################
 # Test XdgForeign
 ########################################################
-set( testXdgForeign_SRCS
-      test_xdg_foreign.cpp
-      )
+set( testXdgForeign_SRCS xdg_foreign.cpp )
 add_executable(testXdgForeign ${testXdgForeign_SRCS})
-target_link_libraries( testXdgForeign Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
+target_link_libraries( testXdgForeign
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Server
+    Wrapland::Client
+    Wayland::Client
+)
 add_test(NAME wrapland-testXdgForeign COMMAND testXdgForeign)
 ecm_mark_as_test(testXdgForeign)
 

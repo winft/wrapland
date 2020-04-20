@@ -19,7 +19,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "display.h"
-#include "compositor_interface.h"
+//#include "compositor_interface.h"
 #include "output_configuration_v1_interface.h"
 #include "output_management_v1_interface.h"
 #include "output_device_v1_interface.h"
@@ -42,11 +42,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "server_decoration_interface.h"
 #include "slide_interface.h"
 #include "shell_interface.h"
-#include "subcompositor_interface.h"
+//#include "subcompositor_interface.h"
 #include "textinput_interface_p.h"
 #include "viewporter_interface.h"
 #include "xdgshell_v5_interface_p.h"
-#include "xdgforeign_interface.h"
+//#include "xdgforeign_interface.h"
 #include "xdgshell_v6_interface_p.h"
 #include "xdgshell_stable_interface_p.h"
 #include "appmenu_interface.h"
@@ -229,12 +229,12 @@ OutputInterface *Display::createOutput(QObject *parent)
     return output->legacy;
 }
 
-CompositorInterface *Display::createCompositor(QObject *parent)
-{
-    CompositorInterface *compositor = new CompositorInterface(this, parent);
-    connect(this, &Display::aboutToTerminate, compositor, [this,compositor] { delete compositor; });
-    return compositor;
-}
+//CompositorInterface *Display::createCompositor(QObject *parent)
+//{
+//    CompositorInterface *compositor = new CompositorInterface(this, parent);
+//    connect(this, &Display::aboutToTerminate, compositor, [this,compositor] { delete compositor; });
+//    return compositor;
+//}
 
 ShellInterface *Display::createShell(QObject *parent)
 {
@@ -268,12 +268,12 @@ SeatInterface *Display::createSeat(QObject *parent)
     return legacy;
 }
 
-SubCompositorInterface *Display::createSubCompositor(QObject *parent)
-{
-    auto c = new SubCompositorInterface(this, parent);
-    connect(this, &Display::aboutToTerminate, c, [this,c] { delete c; });
-    return c;
-}
+//SubCompositorInterface *Display::createSubCompositor(QObject *parent)
+//{
+//    auto c = new SubCompositorInterface(this, parent);
+//    connect(this, &Display::aboutToTerminate, c, [this,c] { delete c; });
+//    return c;
+//}
 
 //DataDeviceManagerInterface *Display::createDataDeviceManager(QObject *parent)
 //{
@@ -439,12 +439,12 @@ XdgShellInterface *Display::createXdgShell(const XdgShellInterfaceVersion &versi
 //    return p;
 //}
 
-XdgForeignInterface *Display::createXdgForeignInterface(QObject *parent)
-{
-    XdgForeignInterface *foreign = new XdgForeignInterface(this, parent);
-    connect(this, &Display::aboutToTerminate, foreign, [this,foreign] { delete foreign; });
-    return foreign;
-}
+//XdgForeignInterface *Display::createXdgForeignInterface(QObject *parent)
+//{
+//    XdgForeignInterface *foreign = new XdgForeignInterface(this, parent);
+//    connect(this, &Display::aboutToTerminate, foreign, [this,foreign] { delete foreign; });
+//    return foreign;
+//}
 
 IdleInhibitManagerInterface *Display::createIdleInhibitManager(const IdleInhibitManagerInterfaceVersion &version, QObject *parent)
 {

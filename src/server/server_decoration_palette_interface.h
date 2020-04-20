@@ -31,7 +31,7 @@ namespace Server
 {
 
 class Display;
-class SurfaceInterface;
+class Surface;
 class ServerSideDecorationPaletteInterface;
 
 /**
@@ -50,7 +50,7 @@ public:
      * Returns any existing palette for a given surface
      * This returns a null pointer if no ServerSideDecorationPaletteInterface exists.
      */
-    ServerSideDecorationPaletteInterface* paletteForSurface(SurfaceInterface *);
+    ServerSideDecorationPaletteInterface* paletteForSurface(Surface *);
 
 Q_SIGNALS:
     /**
@@ -82,9 +82,9 @@ public:
     QString palette() const;
 
     /**
-     * @returns The SurfaceInterface this ServerSideDecorationPaletteInterface references.
+     * @returns The Surface this ServerSideDecorationPaletteInterface references.
      **/
-    SurfaceInterface *surface() const;
+    Surface *surface() const;
 
 Q_SIGNALS:
     /**
@@ -93,7 +93,7 @@ Q_SIGNALS:
     void paletteChanged(const QString &palette);
 
 private:
-    explicit ServerSideDecorationPaletteInterface(ServerSideDecorationPaletteManagerInterface *parent, SurfaceInterface *s, wl_resource *parentResource);
+    explicit ServerSideDecorationPaletteInterface(ServerSideDecorationPaletteManagerInterface *parent, Surface *s, wl_resource *parentResource);
     friend class ServerSideDecorationPaletteManagerInterface;
 
     class Private;

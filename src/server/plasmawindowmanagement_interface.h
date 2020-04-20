@@ -36,7 +36,7 @@ namespace Server
 
 class Display;
 class PlasmaWindowInterface;
-class SurfaceInterface;
+class Surface;
 class PlasmaVirtualDesktopManagementInterface;
 
 /**
@@ -159,7 +159,7 @@ public:
      *          surface of the panels
      * @since 5.5
      */
-    QHash<SurfaceInterface*, QRect> minimizedGeometries() const;
+    QHash<Surface*, QRect> minimizedGeometries() const;
 
     /**
      * Sets this PlasmaWindowInterface as a transient window to @p parentWindow.

@@ -32,7 +32,7 @@ namespace Server
 
 class Display;
 class ServerSideDecorationInterface;
-class SurfaceInterface;
+class Surface;
 
 /**
  * @brief Manager to create ServerSideDecorationInterface.
@@ -46,7 +46,7 @@ public:
     virtual ~ServerSideDecorationManagerInterface();
 
     /**
-     * Decoration mode used for SurfaceInterfaces.
+     * Decoration mode used for Surfaces.
      **/
     enum class Mode {
         /**
@@ -89,7 +89,7 @@ private:
 };
 
 /**
- * @brief Representing how a SurfaceInterface should be decorated.
+ * @brief Representing how a Surface should be decorated.
  *
  * Created by ServerSideDecorationManagerInterface and emitted with decorationCreated signal.
  *
@@ -102,7 +102,7 @@ public:
     virtual ~ServerSideDecorationInterface();
 
     /**
-     * Sets the @p mode on the SurfaceInterface. A client might refuse the provided @p mode,
+     * Sets the @p mode on the Surface. A client might refuse the provided @p mode,
      * in that case modeRequested will be emitted.
      * @see mode
      * @see modeRequested
@@ -116,14 +116,14 @@ public:
     ServerSideDecorationManagerInterface::Mode mode() const;
 
     /**
-     * @returns The SurfaceInterface this ServerSideDecorationInterface references.
+     * @returns The Surface this ServerSideDecorationInterface references.
      **/
-    SurfaceInterface *surface() const;
+    Surface *surface() const;
 
     /**
      * @returns The ServerSideDecorationInterface for the given @p surface, @c nullptr if there is none.
      **/
-    static ServerSideDecorationInterface *get(SurfaceInterface *surface);
+    static ServerSideDecorationInterface *get(Surface *surface);
 
 Q_SIGNALS:
     /**
@@ -135,7 +135,7 @@ Q_SIGNALS:
     void modeRequested(Wrapland::Server::ServerSideDecorationManagerInterface::Mode);
 
 private:
-    explicit ServerSideDecorationInterface(ServerSideDecorationManagerInterface *parent, SurfaceInterface *surface, wl_resource *parentResource);
+    explicit ServerSideDecorationInterface(ServerSideDecorationManagerInterface *parent, Surface *surface, wl_resource *parentResource);
     friend class ServerSideDecorationManagerInterface;
 
     class Private;

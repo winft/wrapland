@@ -21,8 +21,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "global_p.h"
 #include "resource_p.h"
 #include "display.h"
-#include "surface_interface.h"
 #include "plasmavirtualdesktop_interface.h"
+
+#include "../../server/surface.h"
+#include "../../server/wayland/resource.h"
 
 #include <QtConcurrentRun>
 #include <QFile>
@@ -87,7 +89,7 @@ public:
 
     QVector<wl_resource*> resources;
     quint32 windowId = 0;
-    QHash<SurfaceInterface*, QRect> minimizedGeometries;
+    QHash<Surface*, QRect> minimizedGeometries;
     PlasmaWindowManagementInterface *wm;
 
     bool unmapped = false;
@@ -686,7 +688,7 @@ void PlasmaWindowInterface::Private::setMinimizedGeometryCallback(wl_client *cli
 {
     Q_UNUSED(client)
     Private *p = cast(resource);
-    SurfaceInterface *panelSurface = SurfaceInterface::get(panel);
+    Surface *panelSurface = Wayland::Resource<Surface>::fromResource(panel)->handle();
 
     if (!panelSurface) {
         return;
@@ -709,7 +711,7 @@ void PlasmaWindowInterface::Private::unsetMinimizedGeometryCallback(wl_client *c
 {
     Q_UNUSED(client)
     Private *p = cast(resource);
-    SurfaceInterface *panelSurface = SurfaceInterface::get(panel);
+    Surface *panelSurface = Wayland::Resource<Surface>::fromResource(panel)->handle();
 
     if (!panelSurface) {
         return;
@@ -749,7 +751,7 @@ void PlasmaWindowInterface::unmap()
     d->wm->unmapWindow(this);
 }
 
-QHash<SurfaceInterface*, QRect>  PlasmaWindowInterface::minimizedGeometries() const
+QHash<Surface*, QRect>  PlasmaWindowInterface::minimizedGeometries() const
 {
     return d->minimizedGeometries;
 }

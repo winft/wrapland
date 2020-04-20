@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/client.h"
 #include "wayland/display.h"
 
+#include "compositor.h"
 #include "data_device_manager.h"
 #include "dpms.h"
 #include "output.h"
@@ -33,13 +34,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_gestures_v1.h"
 #include "relative_pointer_v1.h"
 #include "seat.h"
+#include "subcompositor.h"
+#include "xdg_foreign.h"
 
 // Legacy
 #include "../src/server/display.h"
 
 #include "../src/server/appmenu_interface.h"
 #include "../src/server/blur_interface.h"
-#include "../src/server/compositor_interface.h"
 #include "../src/server/contrast_interface.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
@@ -61,11 +63,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/shadow_interface.h"
 #include "../src/server/shell_interface.h"
 #include "../src/server/slide_interface.h"
-#include "../src/server/subcompositor_interface.h"
 #include "../src/server/textinput_interface_p.h"
 #include "../src/server/viewporter_interface.h"
 #include "../src/server/xdgdecoration_interface.h"
-#include "../src/server/xdgforeign_interface.h"
 #include "../src/server/xdgoutput_interface.h"
 #include "../src/server/xdgshell_stable_interface_p.h"
 #include "../src/server/xdgshell_v5_interface_p.h"
@@ -194,9 +194,9 @@ void D_isplay::removeOutputDevice(OutputDeviceV1Interface* outputDevice)
     legacy->removeOutputDevice(outputDevice);
 }
 
-CompositorInterface* D_isplay::createCompositor(QObject* parent)
+Compositor* D_isplay::createCompositor(QObject* parent)
 {
-    return legacy->createCompositor(parent);
+    return new Compositor(this, parent);
 }
 
 ShellInterface* D_isplay::createShell(QObject* parent)
@@ -221,9 +221,9 @@ Seat* D_isplay::createSeat(QObject* parent)
     return seat;
 }
 
-SubCompositorInterface* D_isplay::createSubCompositor(QObject* parent)
+Subcompositor* D_isplay::createSubCompositor(QObject* parent)
 {
-    return legacy->createSubCompositor(parent);
+    return new Subcompositor(this, parent);
 }
 
 DataDeviceManager* D_isplay::createDataDeviceManager(QObject* parent)
@@ -318,9 +318,9 @@ PointerConstraintsV1* D_isplay::createPointerConstraints(QObject* parent)
     return new PointerConstraintsV1(this, parent);
 }
 
-XdgForeignInterface* D_isplay::createXdgForeignInterface(QObject* parent)
+XdgForeign* D_isplay::createXdgForeign(QObject* parent)
 {
-    return legacy->createXdgForeignInterface(parent);
+    return new XdgForeign(this, parent);
 }
 
 IdleInhibitManagerInterface*

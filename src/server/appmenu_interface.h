@@ -31,7 +31,7 @@ namespace Server
 {
 
 class Display;
-class SurfaceInterface;
+class Surface;
 class AppMenuInterface;
 
 /**
@@ -50,7 +50,7 @@ public:
      * Returns any existing appMenu for a given surface
      * This returns a null pointer if no AppMenuInterface exists.
      */
-    AppMenuInterface* appMenuForSurface(SurfaceInterface *);
+    AppMenuInterface* appMenuForSurface(Surface *);
 
 Q_SIGNALS:
     /**
@@ -92,9 +92,9 @@ public:
     InterfaceAddress address() const;
 
     /**
-     * @returns The SurfaceInterface this AppmenuInterface references.
+     * @returns The Surface this AppmenuInterface references.
      **/
-    SurfaceInterface *surface() const;
+    Surface *surface() const;
 
 Q_SIGNALS:
     /**
@@ -103,7 +103,7 @@ Q_SIGNALS:
     void addressChanged(Wrapland::Server::AppMenuInterface::InterfaceAddress);
 
 private:
-    explicit AppMenuInterface(AppMenuManagerInterface *parent, SurfaceInterface *s, wl_resource *parentResource);
+    explicit AppMenuInterface(AppMenuManagerInterface *parent, Surface *s, wl_resource *parentResource);
     friend class AppMenuManagerInterface;
 
     class Private;

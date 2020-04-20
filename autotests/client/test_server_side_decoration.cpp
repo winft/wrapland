@@ -26,8 +26,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/server_decoration.h"
 #include "../../src/client/surface.h"
-#include "../../src/server/display.h"
-#include "../../src/server/compositor_interface.h"
+
+#include "../../server/display.h"
+#include "../../server/compositor.h"
+#include "../../server/surface.h"
+
 #include "../../src/server/server_decoration_interface.h"
 
 class TestServerSideDecoration : public QObject
@@ -48,9 +51,10 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    Wrapland::Server::Display *m_display = nullptr;
-    Wrapland::Server::CompositorInterface *m_compositorInterface = nullptr;
+    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Compositor *m_serverCompositor = nullptr;
     Wrapland::Server::ServerSideDecorationManagerInterface *m_serverSideDecorationManagerInterface = nullptr;
+
     Wrapland::Client::ConnectionThread *m_connection = nullptr;
     Wrapland::Client::Compositor *m_compositor = nullptr;
     Wrapland::Client::EventQueue *m_queue = nullptr;
@@ -68,17 +72,13 @@ TestServerSideDecoration::TestServerSideDecoration(QObject *parent)
 
 void TestServerSideDecoration::init()
 {
-    using namespace Wrapland::Server;
-    using namespace Wrapland::Client;
-    delete m_display;
-    m_display = new Display(this);
+    m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -90,15 +90,15 @@ void TestServerSideDecoration::init()
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
 
-    m_queue = new EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     QVERIFY(!m_queue->isValid());
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
 
-    m_registry = new Registry();
-    QSignalSpy compositorSpy(m_registry, &Registry::compositorAnnounced);
+    m_registry = new Wrapland::Client::Registry();
+    QSignalSpy compositorSpy(m_registry, &Wrapland::Client::Registry::compositorAnnounced);
     QVERIFY(compositorSpy.isValid());
-    QSignalSpy serverSideDecoManagerSpy(m_registry, &Registry::serverSideDecorationManagerAnnounced);
+    QSignalSpy serverSideDecoManagerSpy(m_registry, &Wrapland::Client::Registry::serverSideDecorationManagerAnnounced);
     QVERIFY(serverSideDecoManagerSpy.isValid());
 
     QVERIFY(!m_registry->eventQueue());
@@ -108,9 +108,7 @@ void TestServerSideDecoration::init()
     QVERIFY(m_registry->isValid());
     m_registry->setup();
 
-    m_compositorInterface = m_display->createCompositor(m_display);
-    m_compositorInterface->create();
-    QVERIFY(m_compositorInterface->isValid());
+    m_serverCompositor = m_display->createCompositor(m_display);
 
     QVERIFY(compositorSpy.wait());
     m_compositor = m_registry->createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
@@ -157,47 +155,43 @@ void TestServerSideDecoration::cleanup()
 
 void TestServerSideDecoration::testCreate_data()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QTest::addColumn<ServerSideDecorationManagerInterface::Mode>("serverMode");
-    QTest::addColumn<ServerSideDecoration::Mode>("clientMode");
+    QTest::addColumn<Wrapland::Server::ServerSideDecorationManagerInterface::Mode>("serverMode");
+    QTest::addColumn<Wrapland::Client::ServerSideDecoration::Mode>("clientMode");
 
-    QTest::newRow("none") << ServerSideDecorationManagerInterface::Mode::None     << ServerSideDecoration::Mode::None;
-    QTest::newRow("client") << ServerSideDecorationManagerInterface::Mode::Client << ServerSideDecoration::Mode::Client;
-    QTest::newRow("server") << ServerSideDecorationManagerInterface::Mode::Server << ServerSideDecoration::Mode::Server;
+    QTest::newRow("none") << Wrapland::Server::ServerSideDecorationManagerInterface::Mode::None     << Wrapland::Client::ServerSideDecoration::Mode::None;
+    QTest::newRow("client") << Wrapland::Server::ServerSideDecorationManagerInterface::Mode::Client << Wrapland::Client::ServerSideDecoration::Mode::Client;
+    QTest::newRow("server") << Wrapland::Server::ServerSideDecorationManagerInterface::Mode::Server << Wrapland::Client::ServerSideDecoration::Mode::Server;
 }
 
 void TestServerSideDecoration::testCreate()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
     QFETCH(Wrapland::Server::ServerSideDecorationManagerInterface::Mode, serverMode);
     m_serverSideDecorationManagerInterface->setDefaultMode(serverMode);
     QCOMPARE(m_serverSideDecorationManagerInterface->defaultMode(), serverMode);
 
-    QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QSignalSpy decorationCreated(m_serverSideDecorationManagerInterface, &ServerSideDecorationManagerInterface::decorationCreated);
+    QSignalSpy decorationCreated(m_serverSideDecorationManagerInterface, &Wrapland::Server::ServerSideDecorationManagerInterface::decorationCreated);
     QVERIFY(decorationCreated.isValid());
 
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
-    auto serverSurface = serverSurfaceCreated.first().first().value<SurfaceInterface*>();
-    QVERIFY(!ServerSideDecorationInterface::get(serverSurface));
+    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    QVERIFY(!Wrapland::Server::ServerSideDecorationInterface::get(serverSurface));
 
     // create server side deco
-    std::unique_ptr<ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.get()));
-    QCOMPARE(serverSideDecoration->mode(), ServerSideDecoration::Mode::None);
-    QSignalSpy modeChangedSpy(serverSideDecoration.get(), &ServerSideDecoration::modeChanged);
+    std::unique_ptr<Wrapland::Client::ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.get()));
+    QCOMPARE(serverSideDecoration->mode(), Wrapland::Client::ServerSideDecoration::Mode::None);
+    QSignalSpy modeChangedSpy(serverSideDecoration.get(), &Wrapland::Client::ServerSideDecoration::modeChanged);
     QVERIFY(modeChangedSpy.isValid());
 
     QVERIFY(decorationCreated.wait());
 
-    auto serverDeco = decorationCreated.first().first().value<ServerSideDecorationInterface*>();
+    auto serverDeco = decorationCreated.first().first().value<Wrapland::Server::ServerSideDecorationInterface*>();
     QVERIFY(serverDeco);
-    QCOMPARE(serverDeco, ServerSideDecorationInterface::get(serverSurface));
+    QCOMPARE(serverDeco, Wrapland::Server::ServerSideDecorationInterface::get(serverSurface));
     QCOMPARE(serverDeco->surface(), serverSurface);
 
     // after binding the client should get the default mode
@@ -214,19 +208,17 @@ void TestServerSideDecoration::testCreate()
 
 void TestServerSideDecoration::testRequest_data()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QTest::addColumn<ServerSideDecorationManagerInterface::Mode>("defaultMode");
-    QTest::addColumn<ServerSideDecoration::Mode>("clientMode");
-    QTest::addColumn<ServerSideDecoration::Mode>("clientRequestMode");
-    QTest::addColumn<ServerSideDecorationManagerInterface::Mode>("serverRequestedMode");
+    QTest::addColumn<Wrapland::Server::ServerSideDecorationManagerInterface::Mode>("defaultMode");
+    QTest::addColumn<Wrapland::Client::ServerSideDecoration::Mode>("clientMode");
+    QTest::addColumn<Wrapland::Client::ServerSideDecoration::Mode>("clientRequestMode");
+    QTest::addColumn<Wrapland::Server::ServerSideDecorationManagerInterface::Mode>("serverRequestedMode");
 
-    const auto serverNone = ServerSideDecorationManagerInterface::Mode::None;
-    const auto serverClient = ServerSideDecorationManagerInterface::Mode::Client;
-    const auto serverServer = ServerSideDecorationManagerInterface::Mode::Server;
-    const auto clientNone = ServerSideDecoration::Mode::None;
-    const auto clientClient = ServerSideDecoration::Mode::Client;
-    const auto clientServer = ServerSideDecoration::Mode::Server;
+    const auto serverNone = Wrapland::Server::ServerSideDecorationManagerInterface::Mode::None;
+    const auto serverClient = Wrapland::Server::ServerSideDecorationManagerInterface::Mode::Client;
+    const auto serverServer = Wrapland::Server::ServerSideDecorationManagerInterface::Mode::Server;
+    const auto clientNone = Wrapland::Client::ServerSideDecoration::Mode::None;
+    const auto clientClient = Wrapland::Client::ServerSideDecoration::Mode::Client;
+    const auto clientServer = Wrapland::Client::ServerSideDecoration::Mode::Server;
 
     QTest::newRow("none->none")     << serverNone   << clientNone   << clientNone   << serverNone;
     QTest::newRow("none->client")   << serverNone   << clientNone   << clientClient << serverClient;
@@ -241,29 +233,27 @@ void TestServerSideDecoration::testRequest_data()
 
 void TestServerSideDecoration::testRequest()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
     QFETCH(Wrapland::Server::ServerSideDecorationManagerInterface::Mode, defaultMode);
     m_serverSideDecorationManagerInterface->setDefaultMode(defaultMode);
     QCOMPARE(m_serverSideDecorationManagerInterface->defaultMode(), defaultMode);
 
-    QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
-    QSignalSpy decorationCreated(m_serverSideDecorationManagerInterface, &ServerSideDecorationManagerInterface::decorationCreated);
+    QSignalSpy decorationCreated(m_serverSideDecorationManagerInterface, &Wrapland::Server::ServerSideDecorationManagerInterface::decorationCreated);
     QVERIFY(decorationCreated.isValid());
 
     // create server side deco
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.get()));
-    QCOMPARE(serverSideDecoration->mode(), ServerSideDecoration::Mode::None);
-    QSignalSpy modeChangedSpy(serverSideDecoration.get(), &ServerSideDecoration::modeChanged);
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.get()));
+    QCOMPARE(serverSideDecoration->mode(), Wrapland::Client::ServerSideDecoration::Mode::None);
+    QSignalSpy modeChangedSpy(serverSideDecoration.get(), &Wrapland::Client::ServerSideDecoration::modeChanged);
     QVERIFY(modeChangedSpy.isValid());
     QVERIFY(decorationCreated.wait());
 
-    auto serverDeco = decorationCreated.first().first().value<ServerSideDecorationInterface*>();
+    auto serverDeco = decorationCreated.first().first().value<Wrapland::Server::ServerSideDecorationInterface*>();
     QVERIFY(serverDeco);
-    QSignalSpy modeSpy(serverDeco, &ServerSideDecorationInterface::modeRequested);
+    QSignalSpy modeSpy(serverDeco, &Wrapland::Server::ServerSideDecorationInterface::modeRequested);
     QVERIFY(modeSpy.isValid());
 
     // after binding the client should get the default mode
@@ -272,15 +262,15 @@ void TestServerSideDecoration::testRequest()
     QTEST(serverSideDecoration->mode(), "clientMode");
 
     // request a change
-    QFETCH(ServerSideDecoration::Mode, clientRequestMode);
+    QFETCH(Wrapland::Client::ServerSideDecoration::Mode, clientRequestMode);
     serverSideDecoration->requestMode(clientRequestMode);
     // mode not yet changed
     QTEST(serverSideDecoration->mode(), "clientMode");
 
     QVERIFY(modeSpy.wait());
     QCOMPARE(modeSpy.count(), 1);
-    QFETCH(ServerSideDecorationManagerInterface::Mode, serverRequestedMode);
-    QCOMPARE(modeSpy.first().first().value<ServerSideDecorationManagerInterface::Mode>(), serverRequestedMode);
+    QFETCH(Wrapland::Server::ServerSideDecorationManagerInterface::Mode, serverRequestedMode);
+    QCOMPARE(modeSpy.first().first().value<Wrapland::Server::ServerSideDecorationManagerInterface::Mode>(), serverRequestedMode);
 
     // mode not yet changed
     QCOMPARE(serverDeco->mode(), defaultMode);
@@ -295,25 +285,23 @@ void TestServerSideDecoration::testRequest()
 
 void TestServerSideDecoration::testSurfaceDestroy()
 {
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    QSignalSpy serverSurfaceCreated(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    QSignalSpy decorationCreated(m_serverSideDecorationManagerInterface, &ServerSideDecorationManagerInterface::decorationCreated);
+    QSignalSpy decorationCreated(m_serverSideDecorationManagerInterface, &Wrapland::Server::ServerSideDecorationManagerInterface::decorationCreated);
     QVERIFY(decorationCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
-    auto serverSurface = serverSurfaceCreated.first().first().value<SurfaceInterface*>();
-    std::unique_ptr<ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.get()));
-    QCOMPARE(serverSideDecoration->mode(), ServerSideDecoration::Mode::None);
+    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    std::unique_ptr<Wrapland::Client::ServerSideDecoration> serverSideDecoration(m_serverSideDecorationManager->create(surface.get()));
+    QCOMPARE(serverSideDecoration->mode(), Wrapland::Client::ServerSideDecoration::Mode::None);
     QVERIFY(decorationCreated.wait());
-    auto serverDeco = decorationCreated.first().first().value<ServerSideDecorationInterface*>();
+    auto serverDeco = decorationCreated.first().first().value<Wrapland::Server::ServerSideDecorationInterface*>();
     QVERIFY(serverDeco);
 
     // destroy the parent surface
-    QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
+    QSignalSpy surfaceDestroyedSpy(serverSurface, &Wrapland::Server::Surface::resourceDestroyed);
     QVERIFY(surfaceDestroyedSpy.isValid());
     QSignalSpy decorationDestroyedSpy(serverDeco, &QObject::destroyed);
     QVERIFY(decorationDestroyedSpy.isValid());

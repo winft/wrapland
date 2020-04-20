@@ -28,14 +28,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 #include "../../src/client/textinput.h"
-// server
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/display.h"
-#include "../../src/server/seat_interface.h"
-#include "../../src/server/textinput_interface.h"
 
-using namespace Wrapland::Client;
-using namespace Wrapland::Server;
+#include "../../server/compositor.h"
+#include "../../server/display.h"
+#include "../../server/seat.h"
+#include "../../server/surface.h"
+
+#include "../../src/server/textinput_interface.h"
 
 class TextInputTest : public QObject
 {
@@ -72,21 +71,21 @@ private Q_SLOTS:
     void testCommit();
 
 private:
-    SurfaceInterface *waitForSurface();
-    TextInput *createTextInput(TextInputInterfaceVersion version);
-    Display *m_display = nullptr;
-    SeatInterface *m_seatInterface = nullptr;
-    CompositorInterface *m_compositorInterface = nullptr;
-    TextInputManagerInterface *m_textInputManagerV0Interface = nullptr;
-    TextInputManagerInterface *m_textInputManagerV2Interface = nullptr;
-    ConnectionThread *m_connection = nullptr;
+    Wrapland::Server::Surface *waitForSurface();
+    Wrapland::Client::TextInput *createTextInput(Wrapland::Server::TextInputInterfaceVersion version);
+    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Seat *m_serverSeat = nullptr;
+    Wrapland::Server::Compositor *m_serverCompositor = nullptr;
+    Wrapland::Server::TextInputManagerInterface *m_textInputManagerV0Interface = nullptr;
+    Wrapland::Server::TextInputManagerInterface *m_textInputManagerV2Interface = nullptr;
+    Wrapland::Client::ConnectionThread *m_connection = nullptr;
     QThread *m_thread = nullptr;
-    EventQueue *m_queue = nullptr;
+    Wrapland::Client::EventQueue *m_queue = nullptr;
     Wrapland::Client::Seat *m_seat = nullptr;
     Wrapland::Client::Keyboard *m_keyboard = nullptr;
-    Compositor *m_compositor = nullptr;
-    TextInputManager *m_textInputManagerV0 = nullptr;
-    TextInputManager *m_textInputManagerV2 = nullptr;
+    Wrapland::Client::Compositor *m_compositor = nullptr;
+    Wrapland::Client::TextInputManager *m_textInputManagerV0 = nullptr;
+    Wrapland::Client::TextInputManager *m_textInputManagerV2 = nullptr;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-text-input-0");
@@ -94,25 +93,25 @@ static const QString s_socketName = QStringLiteral("wrapland-test-text-input-0")
 void TextInputTest::init()
 {
     delete m_display;
-    m_display = new Display(this);
+    m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
+
     m_display->createShm();
-    m_seatInterface = m_display->createSeat();
-    m_seatInterface->setHasKeyboard(true);
-    m_seatInterface->setHasTouch(true);
-    m_seatInterface->create();
-    m_compositorInterface = m_display->createCompositor();
-    m_compositorInterface->create();
-    m_textInputManagerV0Interface = m_display->createTextInputManager(TextInputInterfaceVersion::UnstableV0);
+    m_serverSeat = m_display->createSeat();
+    m_serverSeat->setHasKeyboard(true);
+    m_serverSeat->setHasTouch(true);
+
+    m_serverCompositor = m_display->createCompositor();
+
+    m_textInputManagerV0Interface = m_display->createTextInputManager(Wrapland::Server::TextInputInterfaceVersion::UnstableV0);
     m_textInputManagerV0Interface->create();
-    m_textInputManagerV2Interface = m_display->createTextInputManager(TextInputInterfaceVersion::UnstableV2);
+    m_textInputManagerV2Interface = m_display->createTextInputManager(Wrapland::Server::TextInputInterfaceVersion::UnstableV2);
     m_textInputManagerV2Interface->create();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -124,11 +123,11 @@ void TextInputTest::init()
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
 
-    m_queue = new EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     m_queue->setup(m_connection);
 
-    Registry registry;
-    QSignalSpy interfacesAnnouncedSpy(&registry, &Registry::interfacesAnnounced);
+    Wrapland::Client::Registry registry;
+    QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
     QVERIFY(interfacesAnnouncedSpy.isValid());
     registry.setEventQueue(m_queue);
     registry.create(m_connection);
@@ -136,8 +135,8 @@ void TextInputTest::init()
     registry.setup();
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    m_seat = registry.createSeat(registry.interface(Registry::Interface::Seat).name,
-                                 registry.interface(Registry::Interface::Seat).version,
+    m_seat = registry.createSeat(registry.interface(Wrapland::Client::Registry::Interface::Seat).name,
+                                 registry.interface(Wrapland::Client::Registry::Interface::Seat).version,
                                  this);
     QVERIFY(m_seat->isValid());
     QSignalSpy hasKeyboardSpy(m_seat, &Wrapland::Client::Seat::hasKeyboardChanged);
@@ -146,18 +145,18 @@ void TextInputTest::init()
     m_keyboard = m_seat->createKeyboard(this);
     QVERIFY(m_keyboard->isValid());
 
-    m_compositor = registry.createCompositor(registry.interface(Registry::Interface::Compositor).name,
-                                             registry.interface(Registry::Interface::Compositor).version,
+    m_compositor = registry.createCompositor(registry.interface(Wrapland::Client::Registry::Interface::Compositor).name,
+                                             registry.interface(Wrapland::Client::Registry::Interface::Compositor).version,
                                              this);
     QVERIFY(m_compositor->isValid());
 
-    m_textInputManagerV0 = registry.createTextInputManager(registry.interface(Registry::Interface::TextInputManagerUnstableV0).name,
-                                                           registry.interface(Registry::Interface::TextInputManagerUnstableV0).version,
+    m_textInputManagerV0 = registry.createTextInputManager(registry.interface(Wrapland::Client::Registry::Interface::TextInputManagerUnstableV0).name,
+                                                           registry.interface(Wrapland::Client::Registry::Interface::TextInputManagerUnstableV0).version,
                                                            this);
     QVERIFY(m_textInputManagerV0->isValid());
 
-    m_textInputManagerV2 = registry.createTextInputManager(registry.interface(Registry::Interface::TextInputManagerUnstableV2).name,
-                                                           registry.interface(Registry::Interface::TextInputManagerUnstableV2).version,
+    m_textInputManagerV2 = registry.createTextInputManager(registry.interface(Wrapland::Client::Registry::Interface::TextInputManagerUnstableV2).name,
+                                                           registry.interface(Wrapland::Client::Registry::Interface::TextInputManagerUnstableV2).version,
                                                            this);
     QVERIFY(m_textInputManagerV2->isValid());
 }
@@ -188,15 +187,15 @@ void TextInputTest::cleanup()
 
     CLEANUP(m_textInputManagerV0Interface)
     CLEANUP(m_textInputManagerV2Interface)
-    CLEANUP(m_compositorInterface)
-    CLEANUP(m_seatInterface)
+    CLEANUP(m_serverCompositor)
+    CLEANUP(m_serverSeat)
     CLEANUP(m_display)
 #undef CLEANUP
 }
 
-SurfaceInterface *TextInputTest::waitForSurface()
+Wrapland::Server::Surface *TextInputTest::waitForSurface()
 {
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     if (!surfaceCreatedSpy.isValid()) {
         return nullptr;
     }
@@ -206,15 +205,15 @@ SurfaceInterface *TextInputTest::waitForSurface()
     if (surfaceCreatedSpy.count() != 1) {
         return nullptr;
     }
-    return surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+    return surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
 }
 
-TextInput *TextInputTest::createTextInput(TextInputInterfaceVersion version)
+Wrapland::Client::TextInput *TextInputTest::createTextInput(Wrapland::Server::TextInputInterfaceVersion version)
 {
     switch (version) {
-    case TextInputInterfaceVersion::UnstableV0:
+    case Wrapland::Server::TextInputInterfaceVersion::UnstableV0:
         return m_textInputManagerV0->createTextInput(m_seat);
-    case TextInputInterfaceVersion::UnstableV2:
+    case Wrapland::Server::TextInputInterfaceVersion::UnstableV2:
         return m_textInputManagerV2->createTextInput(m_seat);
     default:
         Q_UNREACHABLE();
@@ -224,48 +223,50 @@ TextInput *TextInputTest::createTextInput(TextInputInterfaceVersion version)
 
 void TextInputTest::testEnterLeave_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
     QTest::addColumn<bool>("updatesDirectly");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0 << false;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2 << true;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << false;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << true;
 }
 
 void TextInputTest::testEnterLeave()
 {
     // this test verifies that enter leave are sent correctly
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
     QVERIFY(textInput != nullptr);
-    QSignalSpy enteredSpy(textInput.get(), &TextInput::entered);
+    QSignalSpy enteredSpy(textInput.get(), &Wrapland::Client::TextInput::entered);
     QVERIFY(enteredSpy.isValid());
-    QSignalSpy leftSpy(textInput.get(), &TextInput::left);
+    QSignalSpy leftSpy(textInput.get(), &Wrapland::Client::TextInput::left);
     QVERIFY(leftSpy.isValid());
-    QSignalSpy textInputChangedSpy(m_seatInterface, &SeatInterface::focusedTextInputChanged);
+    QSignalSpy textInputChangedSpy(m_serverSeat, &Wrapland::Server::Seat::focusedTextInputChanged);
     QVERIFY(textInputChangedSpy.isValid());
 
     // now let's try to enter it
-    QVERIFY(!m_seatInterface->focusedTextInput());
-    QVERIFY(!m_seatInterface->focusedTextInputSurface());
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    QCOMPARE(m_seatInterface->focusedTextInputSurface(), serverSurface);
+    QVERIFY(!m_serverSeat->focusedTextInput());
+    QVERIFY(!m_serverSeat->focusedTextInputSurface());
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    QCOMPARE(m_serverSeat->focusedTextInputSurface(), serverSurface);
+
     // text input not yet set for the surface
     QFETCH(bool, updatesDirectly);
-    QCOMPARE(bool(m_seatInterface->focusedTextInput()), updatesDirectly);
+    QCOMPARE(bool(m_serverSeat->focusedTextInput()), updatesDirectly);
     QCOMPARE(textInputChangedSpy.isEmpty(), !updatesDirectly);
     textInput->enable(surface.get());
+
     // this should trigger on server side
     if (!updatesDirectly) {
         QVERIFY(textInputChangedSpy.wait());
     }
     QCOMPARE(textInputChangedSpy.count(), 1);
-    auto serverTextInput = m_seatInterface->focusedTextInput();
+    auto serverTextInput = m_serverSeat->focusedTextInput();
     QVERIFY(serverTextInput);
     QCOMPARE(serverTextInput->interfaceVersion(), version);
-    QSignalSpy enabledChangedSpy(serverTextInput, &TextInputInterface::enabledChanged);
+    QSignalSpy enabledChangedSpy(serverTextInput, &Wrapland::Server::TextInputInterface::enabledChanged);
     QVERIFY(enabledChangedSpy.isValid());
     if (updatesDirectly) {
         QVERIFY(enabledChangedSpy.wait());
@@ -282,17 +283,17 @@ void TextInputTest::testEnterLeave()
     QCOMPARE(textInput->enteredSurface(), surface.get());
 
     // now trigger a leave
-    m_seatInterface->setFocusedKeyboardSurface(nullptr);
+    m_serverSeat->setFocusedKeyboardSurface(nullptr);
     QCOMPARE(textInputChangedSpy.count(), 2);
-    QVERIFY(!m_seatInterface->focusedTextInput());
+    QVERIFY(!m_serverSeat->focusedTextInput());
     QVERIFY(leftSpy.wait());
     QVERIFY(!textInput->enteredSurface());
     QVERIFY(serverTextInput->isEnabled());
 
     // if we enter again we should directly get the text input as it's still activated
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(textInputChangedSpy.count(), 3);
-    QVERIFY(m_seatInterface->focusedTextInput());
+    QVERIFY(m_serverSeat->focusedTextInput());
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.count(), 2);
     QCOMPARE(textInput->enteredSurface(), surface.get());
@@ -306,7 +307,7 @@ void TextInputTest::testEnterLeave()
     // does not trigger a leave
     QCOMPARE(textInputChangedSpy.count(), 3);
     // should still be the same text input
-    QCOMPARE(m_seatInterface->focusedTextInput(), serverTextInput);
+    QCOMPARE(m_serverSeat->focusedTextInput(), serverTextInput);
     //reset
     textInput->enable(surface.get());
     QVERIFY(enabledChangedSpy.wait());
@@ -315,9 +316,10 @@ void TextInputTest::testEnterLeave()
     //time we try sending an event after the surface is unbound
     //but not yet destroyed. It should work without errors
     QCOMPARE(textInput->enteredSurface(), surface.get());
-    connect(serverSurface, &Resource::unbound, [=]() {
-        m_seatInterface->setFocusedKeyboardSurface(nullptr);
+    connect(serverSurface, &Wrapland::Server::Surface::resourceDestroyed, [=]() {
+        m_serverSeat->setFocusedKeyboardSurface(nullptr);
     });
+
     //delete the client and wait for the server to catch up
     QSignalSpy unboundSpy(serverSurface, &QObject::destroyed);
     surface.reset();
@@ -328,35 +330,35 @@ void TextInputTest::testEnterLeave()
 
 void TextInputTest::testShowHidePanel_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2;
 }
 
 void TextInputTest::testShowHidePanel()
 {
     // this test verifies that the requests for show/hide panel work
     // and that status is properly sent to the client
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
 
-    QSignalSpy showPanelRequestedSpy(ti, &TextInputInterface::requestShowInputPanel);
+    QSignalSpy showPanelRequestedSpy(ti, &Wrapland::Server::TextInputInterface::requestShowInputPanel);
     QVERIFY(showPanelRequestedSpy.isValid());
-    QSignalSpy hidePanelRequestedSpy(ti, &TextInputInterface::requestHideInputPanel);
+    QSignalSpy hidePanelRequestedSpy(ti, &Wrapland::Server::TextInputInterface::requestHideInputPanel);
     QVERIFY(hidePanelRequestedSpy.isValid());
-    QSignalSpy inputPanelStateChangedSpy(textInput.get(), &TextInput::inputPanelStateChanged);
+    QSignalSpy inputPanelStateChangedSpy(textInput.get(), &Wrapland::Client::TextInput::inputPanelStateChanged);
     QVERIFY(inputPanelStateChangedSpy.isValid());
 
     QCOMPARE(textInput->isInputPanelVisible(), false);
@@ -375,31 +377,31 @@ void TextInputTest::testShowHidePanel()
 
 void TextInputTest::testCursorRectangle_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2;
 }
 
 void TextInputTest::testCursorRectangle()
 {
     // this test verifies that passing the cursor rectangle from client to server works
     // and that setting visibility state from server to client works
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
     QCOMPARE(ti->cursorRectangle(), QRect());
-    QSignalSpy cursorRectangleChangedSpy(ti, &TextInputInterface::cursorRectangleChanged);
+    QSignalSpy cursorRectangleChangedSpy(ti, &Wrapland::Server::TextInputInterface::cursorRectangleChanged);
     QVERIFY(cursorRectangleChangedSpy.isValid());
 
     textInput->setCursorRectangle(QRect(10, 20, 30, 40));
@@ -409,31 +411,31 @@ void TextInputTest::testCursorRectangle()
 
 void TextInputTest::testPreferredLanguage_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2;
 }
 
 void TextInputTest::testPreferredLanguage()
 {
     // this test verifies that passing the preferred language from client to server works
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
     QVERIFY(ti->preferredLanguage().isEmpty());
 
-    QSignalSpy preferredLanguageChangedSpy(ti, &TextInputInterface::preferredLanguageChanged);
+    QSignalSpy preferredLanguageChangedSpy(ti, &Wrapland::Server::TextInputInterface::preferredLanguageChanged);
     QVERIFY(preferredLanguageChangedSpy.isValid());
     textInput->setPreferredLanguage(QStringLiteral("foo"));
     QVERIFY(preferredLanguageChangedSpy.wait());
@@ -442,30 +444,30 @@ void TextInputTest::testPreferredLanguage()
 
 void TextInputTest::testReset_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2;
 }
 
 void TextInputTest::testReset()
 {
     // this test verifies that the reset request is properly passed from client to server
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
 
-    QSignalSpy resetRequestedSpy(ti, &TextInputInterface::requestReset);
+    QSignalSpy resetRequestedSpy(ti, &Wrapland::Server::TextInputInterface::requestReset);
     QVERIFY(resetRequestedSpy.isValid());
 
     textInput->reset();
@@ -474,33 +476,33 @@ void TextInputTest::testReset()
 
 void TextInputTest::testSurroundingText_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2;
 }
 
 void TextInputTest::testSurroundingText()
 {
     // this test verifies that surrounding text is properly passed around
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
     QVERIFY(ti->surroundingText().isEmpty());
     QCOMPARE(ti->surroundingTextCursorPosition(), 0);
     QCOMPARE(ti->surroundingTextSelectionAnchor(), 0);
 
-    QSignalSpy surroundingTextChangedSpy(ti, &TextInputInterface::surroundingTextChanged);
+    QSignalSpy surroundingTextChangedSpy(ti, &Wrapland::Server::TextInputInterface::surroundingTextChanged);
     QVERIFY(surroundingTextChangedSpy.isValid());
 
     textInput->setSurroundingText(QStringLiteral("100 €, 100 $"), 5, 6);
@@ -512,212 +514,212 @@ void TextInputTest::testSurroundingText()
 
 void TextInputTest::testContentHints_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
-    QTest::addColumn<TextInput::ContentHints>("clientHints");
-    QTest::addColumn<TextInputInterface::ContentHints>("serverHints");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Client::TextInput::ContentHints>("clientHints");
+    QTest::addColumn<Wrapland::Server::TextInputInterface::ContentHints>("serverHints");
 
-    QTest::newRow("completion/v0")     << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::AutoCompletion) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::AutoCompletion);
-    QTest::newRow("Correction/v0")     << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::AutoCorrection) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::AutoCorrection);
-    QTest::newRow("Capitalization/v0") << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::AutoCapitalization) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::AutoCapitalization);
-    QTest::newRow("Lowercase/v0")      << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::LowerCase) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::LowerCase);
-    QTest::newRow("Uppercase/v0")      << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::UpperCase) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::UpperCase);
-    QTest::newRow("Titlecase/v0")      << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::TitleCase) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::TitleCase);
-    QTest::newRow("HiddenText/v0")     << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::HiddenText) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::HiddenText);
-    QTest::newRow("SensitiveData/v0")  << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::SensitiveData) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::SensitiveData);
-    QTest::newRow("Latin/v0")          << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::Latin) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::Latin);
-    QTest::newRow("Multiline/v0")      << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentHints(TextInput::ContentHint::MultiLine) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::MultiLine);
+    QTest::newRow("completion/v0")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::AutoCompletion) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::AutoCompletion);
+    QTest::newRow("Correction/v0")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::AutoCorrection) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::AutoCorrection);
+    QTest::newRow("Capitalization/v0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::AutoCapitalization) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::AutoCapitalization);
+    QTest::newRow("Lowercase/v0")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::LowerCase) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::LowerCase);
+    QTest::newRow("Uppercase/v0")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::UpperCase) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::UpperCase);
+    QTest::newRow("Titlecase/v0")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::TitleCase) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::TitleCase);
+    QTest::newRow("HiddenText/v0")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::HiddenText) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::HiddenText);
+    QTest::newRow("SensitiveData/v0")  << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::SensitiveData) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::SensitiveData);
+    QTest::newRow("Latin/v0")          << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::Latin) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::Latin);
+    QTest::newRow("Multiline/v0")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::MultiLine) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::MultiLine);
 
-    QTest::newRow("autos/v0") << TextInputInterfaceVersion::UnstableV0
-                              << (TextInput::ContentHint::AutoCompletion | TextInput::ContentHint::AutoCorrection | TextInput::ContentHint::AutoCapitalization)
-                              << (TextInputInterface::ContentHint::AutoCompletion | TextInputInterface::ContentHint::AutoCorrection | TextInputInterface::ContentHint::AutoCapitalization);
+    QTest::newRow("autos/v0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0
+                              << (Wrapland::Client::TextInput::ContentHint::AutoCompletion | Wrapland::Client::TextInput::ContentHint::AutoCorrection | Wrapland::Client::TextInput::ContentHint::AutoCapitalization)
+                              << (Wrapland::Server::TextInputInterface::ContentHint::AutoCompletion | Wrapland::Server::TextInputInterface::ContentHint::AutoCorrection | Wrapland::Server::TextInputInterface::ContentHint::AutoCapitalization);
 
     // all has combinations which don't make sense - what's both lowercase and uppercase?
-    QTest::newRow("all/v0") << TextInputInterfaceVersion::UnstableV0
-                            << (TextInput::ContentHint::AutoCompletion |
-                                TextInput::ContentHint::AutoCorrection |
-                                TextInput::ContentHint::AutoCapitalization |
-                                TextInput::ContentHint::LowerCase |
-                                TextInput::ContentHint::UpperCase |
-                                TextInput::ContentHint::TitleCase |
-                                TextInput::ContentHint::HiddenText |
-                                TextInput::ContentHint::SensitiveData |
-                                TextInput::ContentHint::Latin |
-                                TextInput::ContentHint::MultiLine)
-                            << (TextInputInterface::ContentHint::AutoCompletion |
-                                TextInputInterface::ContentHint::AutoCorrection |
-                                TextInputInterface::ContentHint::AutoCapitalization |
-                                TextInputInterface::ContentHint::LowerCase |
-                                TextInputInterface::ContentHint::UpperCase |
-                                TextInputInterface::ContentHint::TitleCase |
-                                TextInputInterface::ContentHint::HiddenText |
-                                TextInputInterface::ContentHint::SensitiveData |
-                                TextInputInterface::ContentHint::Latin |
-                                TextInputInterface::ContentHint::MultiLine);
+    QTest::newRow("all/v0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0
+                            << (Wrapland::Client::TextInput::ContentHint::AutoCompletion |
+                                Wrapland::Client::TextInput::ContentHint::AutoCorrection |
+                                Wrapland::Client::TextInput::ContentHint::AutoCapitalization |
+                                Wrapland::Client::TextInput::ContentHint::LowerCase |
+                                Wrapland::Client::TextInput::ContentHint::UpperCase |
+                                Wrapland::Client::TextInput::ContentHint::TitleCase |
+                                Wrapland::Client::TextInput::ContentHint::HiddenText |
+                                Wrapland::Client::TextInput::ContentHint::SensitiveData |
+                                Wrapland::Client::TextInput::ContentHint::Latin |
+                                Wrapland::Client::TextInput::ContentHint::MultiLine)
+                            << (Wrapland::Server::TextInputInterface::ContentHint::AutoCompletion |
+                                Wrapland::Server::TextInputInterface::ContentHint::AutoCorrection |
+                                Wrapland::Server::TextInputInterface::ContentHint::AutoCapitalization |
+                                Wrapland::Server::TextInputInterface::ContentHint::LowerCase |
+                                Wrapland::Server::TextInputInterface::ContentHint::UpperCase |
+                                Wrapland::Server::TextInputInterface::ContentHint::TitleCase |
+                                Wrapland::Server::TextInputInterface::ContentHint::HiddenText |
+                                Wrapland::Server::TextInputInterface::ContentHint::SensitiveData |
+                                Wrapland::Server::TextInputInterface::ContentHint::Latin |
+                                Wrapland::Server::TextInputInterface::ContentHint::MultiLine);
 
     // same for version 2
 
-    QTest::newRow("completion/v2")     << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::AutoCompletion) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::AutoCompletion);
-    QTest::newRow("Correction/v2")     << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::AutoCorrection) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::AutoCorrection);
-    QTest::newRow("Capitalization/v2") << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::AutoCapitalization) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::AutoCapitalization);
-    QTest::newRow("Lowercase/v2")      << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::LowerCase) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::LowerCase);
-    QTest::newRow("Uppercase/v2")      << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::UpperCase) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::UpperCase);
-    QTest::newRow("Titlecase/v2")      << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::TitleCase) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::TitleCase);
-    QTest::newRow("HiddenText/v2")     << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::HiddenText) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::HiddenText);
-    QTest::newRow("SensitiveData/v2")  << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::SensitiveData) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::SensitiveData);
-    QTest::newRow("Latin/v2")          << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::Latin) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::Latin);
-    QTest::newRow("Multiline/v2")      << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentHints(TextInput::ContentHint::MultiLine) << TextInputInterface::ContentHints(TextInputInterface::ContentHint::MultiLine);
+    QTest::newRow("completion/v2")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::AutoCompletion) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::AutoCompletion);
+    QTest::newRow("Correction/v2")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::AutoCorrection) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::AutoCorrection);
+    QTest::newRow("Capitalization/v2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::AutoCapitalization) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::AutoCapitalization);
+    QTest::newRow("Lowercase/v2")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::LowerCase) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::LowerCase);
+    QTest::newRow("Uppercase/v2")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::UpperCase) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::UpperCase);
+    QTest::newRow("Titlecase/v2")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::TitleCase) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::TitleCase);
+    QTest::newRow("HiddenText/v2")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::HiddenText) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::HiddenText);
+    QTest::newRow("SensitiveData/v2")  << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::SensitiveData) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::SensitiveData);
+    QTest::newRow("Latin/v2")          << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::Latin) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::Latin);
+    QTest::newRow("Multiline/v2")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentHints(Wrapland::Client::TextInput::ContentHint::MultiLine) << Wrapland::Server::TextInputInterface::ContentHints(Wrapland::Server::TextInputInterface::ContentHint::MultiLine);
 
-    QTest::newRow("autos/v2") << TextInputInterfaceVersion::UnstableV2
-                              << (TextInput::ContentHint::AutoCompletion | TextInput::ContentHint::AutoCorrection | TextInput::ContentHint::AutoCapitalization)
-                              << (TextInputInterface::ContentHint::AutoCompletion | TextInputInterface::ContentHint::AutoCorrection | TextInputInterface::ContentHint::AutoCapitalization);
+    QTest::newRow("autos/v2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2
+                              << (Wrapland::Client::TextInput::ContentHint::AutoCompletion | Wrapland::Client::TextInput::ContentHint::AutoCorrection | Wrapland::Client::TextInput::ContentHint::AutoCapitalization)
+                              << (Wrapland::Server::TextInputInterface::ContentHint::AutoCompletion | Wrapland::Server::TextInputInterface::ContentHint::AutoCorrection | Wrapland::Server::TextInputInterface::ContentHint::AutoCapitalization);
 
     // all has combinations which don't make sense - what's both lowercase and uppercase?
-    QTest::newRow("all/v2") << TextInputInterfaceVersion::UnstableV2
-                            << (TextInput::ContentHint::AutoCompletion |
-                                TextInput::ContentHint::AutoCorrection |
-                                TextInput::ContentHint::AutoCapitalization |
-                                TextInput::ContentHint::LowerCase |
-                                TextInput::ContentHint::UpperCase |
-                                TextInput::ContentHint::TitleCase |
-                                TextInput::ContentHint::HiddenText |
-                                TextInput::ContentHint::SensitiveData |
-                                TextInput::ContentHint::Latin |
-                                TextInput::ContentHint::MultiLine)
-                            << (TextInputInterface::ContentHint::AutoCompletion |
-                                TextInputInterface::ContentHint::AutoCorrection |
-                                TextInputInterface::ContentHint::AutoCapitalization |
-                                TextInputInterface::ContentHint::LowerCase |
-                                TextInputInterface::ContentHint::UpperCase |
-                                TextInputInterface::ContentHint::TitleCase |
-                                TextInputInterface::ContentHint::HiddenText |
-                                TextInputInterface::ContentHint::SensitiveData |
-                                TextInputInterface::ContentHint::Latin |
-                                TextInputInterface::ContentHint::MultiLine);
+    QTest::newRow("all/v2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2
+                            << (Wrapland::Client::TextInput::ContentHint::AutoCompletion |
+                                Wrapland::Client::TextInput::ContentHint::AutoCorrection |
+                                Wrapland::Client::TextInput::ContentHint::AutoCapitalization |
+                                Wrapland::Client::TextInput::ContentHint::LowerCase |
+                                Wrapland::Client::TextInput::ContentHint::UpperCase |
+                                Wrapland::Client::TextInput::ContentHint::TitleCase |
+                                Wrapland::Client::TextInput::ContentHint::HiddenText |
+                                Wrapland::Client::TextInput::ContentHint::SensitiveData |
+                                Wrapland::Client::TextInput::ContentHint::Latin |
+                                Wrapland::Client::TextInput::ContentHint::MultiLine)
+                            << (Wrapland::Server::TextInputInterface::ContentHint::AutoCompletion |
+                                Wrapland::Server::TextInputInterface::ContentHint::AutoCorrection |
+                                Wrapland::Server::TextInputInterface::ContentHint::AutoCapitalization |
+                                Wrapland::Server::TextInputInterface::ContentHint::LowerCase |
+                                Wrapland::Server::TextInputInterface::ContentHint::UpperCase |
+                                Wrapland::Server::TextInputInterface::ContentHint::TitleCase |
+                                Wrapland::Server::TextInputInterface::ContentHint::HiddenText |
+                                Wrapland::Server::TextInputInterface::ContentHint::SensitiveData |
+                                Wrapland::Server::TextInputInterface::ContentHint::Latin |
+                                Wrapland::Server::TextInputInterface::ContentHint::MultiLine);
 }
 
 void TextInputTest::testContentHints()
 {
     // this test verifies that content hints are properly passed from client to server
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
-    QCOMPARE(ti->contentHints(), TextInputInterface::ContentHints());
+    QCOMPARE(ti->contentHints(), Wrapland::Server::TextInputInterface::ContentHints());
 
-    QSignalSpy contentTypeChangedSpy(ti, &TextInputInterface::contentTypeChanged);
+    QSignalSpy contentTypeChangedSpy(ti, &Wrapland::Server::TextInputInterface::contentTypeChanged);
     QVERIFY(contentTypeChangedSpy.isValid());
-    QFETCH(TextInput::ContentHints, clientHints);
-    textInput->setContentType(clientHints, TextInput::ContentPurpose::Normal);
+    QFETCH(Wrapland::Client::TextInput::ContentHints, clientHints);
+    textInput->setContentType(clientHints, Wrapland::Client::TextInput::ContentPurpose::Normal);
     QVERIFY(contentTypeChangedSpy.wait());
     QTEST(ti->contentHints(), "serverHints");
 
     // setting to same should not trigger an update
-    textInput->setContentType(clientHints, TextInput::ContentPurpose::Normal);
+    textInput->setContentType(clientHints, Wrapland::Client::TextInput::ContentPurpose::Normal);
     QVERIFY(!contentTypeChangedSpy.wait(100));
 
     // unsetting should work
-    textInput->setContentType(TextInput::ContentHints(), TextInput::ContentPurpose::Normal);
+    textInput->setContentType(Wrapland::Client::TextInput::ContentHints(), Wrapland::Client::TextInput::ContentPurpose::Normal);
     QVERIFY(contentTypeChangedSpy.wait());
-    QCOMPARE(ti->contentHints(), TextInputInterface::ContentHints());
+    QCOMPARE(ti->contentHints(), Wrapland::Server::TextInputInterface::ContentHints());
 }
 
 void TextInputTest::testContentPurpose_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
-    QTest::addColumn<TextInput::ContentPurpose>("clientPurpose");
-    QTest::addColumn<TextInputInterface::ContentPurpose>("serverPurpose");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Client::TextInput::ContentPurpose>("clientPurpose");
+    QTest::addColumn<Wrapland::Server::TextInputInterface::ContentPurpose>("serverPurpose");
 
-    QTest::newRow("Alpha/v0")    << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Alpha    << TextInputInterface::ContentPurpose::Alpha;
-    QTest::newRow("Digits/v0")   << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Digits   << TextInputInterface::ContentPurpose::Digits;
-    QTest::newRow("Number/v0")   << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Number   << TextInputInterface::ContentPurpose::Number;
-    QTest::newRow("Phone/v0")    << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Phone    << TextInputInterface::ContentPurpose::Phone;
-    QTest::newRow("Url/v0")      << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Url      << TextInputInterface::ContentPurpose::Url;
-    QTest::newRow("Email/v0")    << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Email    << TextInputInterface::ContentPurpose::Email;
-    QTest::newRow("Name/v0")     << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Name     << TextInputInterface::ContentPurpose::Name;
-    QTest::newRow("Password/v0") << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Password << TextInputInterface::ContentPurpose::Password;
-    QTest::newRow("Date/v0")     << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Date     << TextInputInterface::ContentPurpose::Date;
-    QTest::newRow("Time/v0")     << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Time     << TextInputInterface::ContentPurpose::Time;
-    QTest::newRow("Datetime/v0") << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::DateTime << TextInputInterface::ContentPurpose::DateTime;
-    QTest::newRow("Terminal/v0") << TextInputInterfaceVersion::UnstableV0 << TextInput::ContentPurpose::Terminal << TextInputInterface::ContentPurpose::Terminal;
+    QTest::newRow("Alpha/v0")    << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Alpha    << Wrapland::Server::TextInputInterface::ContentPurpose::Alpha;
+    QTest::newRow("Digits/v0")   << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Digits   << Wrapland::Server::TextInputInterface::ContentPurpose::Digits;
+    QTest::newRow("Number/v0")   << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Number   << Wrapland::Server::TextInputInterface::ContentPurpose::Number;
+    QTest::newRow("Phone/v0")    << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Phone    << Wrapland::Server::TextInputInterface::ContentPurpose::Phone;
+    QTest::newRow("Url/v0")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Url      << Wrapland::Server::TextInputInterface::ContentPurpose::Url;
+    QTest::newRow("Email/v0")    << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Email    << Wrapland::Server::TextInputInterface::ContentPurpose::Email;
+    QTest::newRow("Name/v0")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Name     << Wrapland::Server::TextInputInterface::ContentPurpose::Name;
+    QTest::newRow("Password/v0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Password << Wrapland::Server::TextInputInterface::ContentPurpose::Password;
+    QTest::newRow("Date/v0")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Date     << Wrapland::Server::TextInputInterface::ContentPurpose::Date;
+    QTest::newRow("Time/v0")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Time     << Wrapland::Server::TextInputInterface::ContentPurpose::Time;
+    QTest::newRow("Datetime/v0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::DateTime << Wrapland::Server::TextInputInterface::ContentPurpose::DateTime;
+    QTest::newRow("Terminal/v0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Wrapland::Client::TextInput::ContentPurpose::Terminal << Wrapland::Server::TextInputInterface::ContentPurpose::Terminal;
 
-    QTest::newRow("Alpha/v2")    << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Alpha    << TextInputInterface::ContentPurpose::Alpha;
-    QTest::newRow("Digits/v2")   << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Digits   << TextInputInterface::ContentPurpose::Digits;
-    QTest::newRow("Number/v2")   << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Number   << TextInputInterface::ContentPurpose::Number;
-    QTest::newRow("Phone/v2")    << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Phone    << TextInputInterface::ContentPurpose::Phone;
-    QTest::newRow("Url/v2")      << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Url      << TextInputInterface::ContentPurpose::Url;
-    QTest::newRow("Email/v2")    << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Email    << TextInputInterface::ContentPurpose::Email;
-    QTest::newRow("Name/v2")     << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Name     << TextInputInterface::ContentPurpose::Name;
-    QTest::newRow("Password/v2") << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Password << TextInputInterface::ContentPurpose::Password;
-    QTest::newRow("Date/v2")     << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Date     << TextInputInterface::ContentPurpose::Date;
-    QTest::newRow("Time/v2")     << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Time     << TextInputInterface::ContentPurpose::Time;
-    QTest::newRow("Datetime/v2") << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::DateTime << TextInputInterface::ContentPurpose::DateTime;
-    QTest::newRow("Terminal/v2") << TextInputInterfaceVersion::UnstableV2 << TextInput::ContentPurpose::Terminal << TextInputInterface::ContentPurpose::Terminal;
+    QTest::newRow("Alpha/v2")    << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Alpha    << Wrapland::Server::TextInputInterface::ContentPurpose::Alpha;
+    QTest::newRow("Digits/v2")   << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Digits   << Wrapland::Server::TextInputInterface::ContentPurpose::Digits;
+    QTest::newRow("Number/v2")   << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Number   << Wrapland::Server::TextInputInterface::ContentPurpose::Number;
+    QTest::newRow("Phone/v2")    << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Phone    << Wrapland::Server::TextInputInterface::ContentPurpose::Phone;
+    QTest::newRow("Url/v2")      << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Url      << Wrapland::Server::TextInputInterface::ContentPurpose::Url;
+    QTest::newRow("Email/v2")    << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Email    << Wrapland::Server::TextInputInterface::ContentPurpose::Email;
+    QTest::newRow("Name/v2")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Name     << Wrapland::Server::TextInputInterface::ContentPurpose::Name;
+    QTest::newRow("Password/v2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Password << Wrapland::Server::TextInputInterface::ContentPurpose::Password;
+    QTest::newRow("Date/v2")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Date     << Wrapland::Server::TextInputInterface::ContentPurpose::Date;
+    QTest::newRow("Time/v2")     << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Time     << Wrapland::Server::TextInputInterface::ContentPurpose::Time;
+    QTest::newRow("Datetime/v2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::DateTime << Wrapland::Server::TextInputInterface::ContentPurpose::DateTime;
+    QTest::newRow("Terminal/v2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Wrapland::Client::TextInput::ContentPurpose::Terminal << Wrapland::Server::TextInputInterface::ContentPurpose::Terminal;
 }
 
 void TextInputTest::testContentPurpose()
 {
     // this test verifies that content purpose are properly passed from client to server
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
-    QCOMPARE(ti->contentPurpose(), TextInputInterface::ContentPurpose::Normal);
+    QCOMPARE(ti->contentPurpose(), Wrapland::Server::TextInputInterface::ContentPurpose::Normal);
 
-    QSignalSpy contentTypeChangedSpy(ti, &TextInputInterface::contentTypeChanged);
+    QSignalSpy contentTypeChangedSpy(ti, &Wrapland::Server::TextInputInterface::contentTypeChanged);
     QVERIFY(contentTypeChangedSpy.isValid());
-    QFETCH(TextInput::ContentPurpose, clientPurpose);
-    textInput->setContentType(TextInput::ContentHints(), clientPurpose);
+    QFETCH(Wrapland::Client::TextInput::ContentPurpose, clientPurpose);
+    textInput->setContentType(Wrapland::Client::TextInput::ContentHints(), clientPurpose);
     QVERIFY(contentTypeChangedSpy.wait());
     QTEST(ti->contentPurpose(), "serverPurpose");
 
     // setting to same should not trigger an update
-    textInput->setContentType(TextInput::ContentHints(), clientPurpose);
+    textInput->setContentType(Wrapland::Client::TextInput::ContentHints(), clientPurpose);
     QVERIFY(!contentTypeChangedSpy.wait(100));
 
     // unsetting should work
-    textInput->setContentType(TextInput::ContentHints(), TextInput::ContentPurpose::Normal);
+    textInput->setContentType(Wrapland::Client::TextInput::ContentHints(), Wrapland::Client::TextInput::ContentPurpose::Normal);
     QVERIFY(contentTypeChangedSpy.wait());
-    QCOMPARE(ti->contentPurpose(), TextInputInterface::ContentPurpose::Normal);
+    QCOMPARE(ti->contentPurpose(), Wrapland::Server::TextInputInterface::ContentPurpose::Normal);
 }
 
 void TextInputTest::testTextDirection_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
     QTest::addColumn<Qt::LayoutDirection>("textDirection");
 
-    QTest::newRow("ltr/v0") << TextInputInterfaceVersion::UnstableV0 << Qt::LeftToRight;
-    QTest::newRow("rtl/v0") << TextInputInterfaceVersion::UnstableV0 << Qt::RightToLeft;
+    QTest::newRow("ltr/v0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Qt::LeftToRight;
+    QTest::newRow("rtl/v0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0 << Qt::RightToLeft;
 
-    QTest::newRow("ltr/v2") << TextInputInterfaceVersion::UnstableV2 << Qt::LeftToRight;
-    QTest::newRow("rtl/v2") << TextInputInterfaceVersion::UnstableV2 << Qt::RightToLeft;
+    QTest::newRow("ltr/v2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Qt::LeftToRight;
+    QTest::newRow("rtl/v2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2 << Qt::RightToLeft;
 }
 
 void TextInputTest::testTextDirection()
 {
     // this test verifies that the text direction is sent from server to client
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     // default should be auto
     QCOMPARE(textInput->textDirection(), Qt::LayoutDirectionAuto);
@@ -725,12 +727,12 @@ void TextInputTest::testTextDirection()
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
 
     // let's send the new text direction
-    QSignalSpy textDirectionChangedSpy(textInput.get(), &TextInput::textDirectionChanged);
+    QSignalSpy textDirectionChangedSpy(textInput.get(), &Wrapland::Client::TextInput::textDirectionChanged);
     QVERIFY(textDirectionChangedSpy.isValid());
     QFETCH(Qt::LayoutDirection, textDirection);
     ti->setTextDirection(textDirection);
@@ -748,20 +750,20 @@ void TextInputTest::testTextDirection()
 
 void TextInputTest::testLanguage_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2;
 }
 
 void TextInputTest::testLanguage()
 {
     // this test verifies that language is sent from server to client
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     // default should be empty
     QVERIFY(textInput->language().isEmpty());
@@ -769,12 +771,12 @@ void TextInputTest::testLanguage()
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
 
     // let's send the new language
-    QSignalSpy langugageChangedSpy(textInput.get(), &TextInput::languageChanged);
+    QSignalSpy langugageChangedSpy(textInput.get(), &Wrapland::Client::TextInput::languageChanged);
     QVERIFY(langugageChangedSpy.isValid());
     ti->setLanguage(QByteArrayLiteral("foo"));
     QVERIFY(langugageChangedSpy.wait());
@@ -790,68 +792,68 @@ void TextInputTest::testLanguage()
 
 void TextInputTest::testKeyEvent_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2;
 }
 
 void TextInputTest::testKeyEvent()
 {
     qRegisterMetaType<Qt::KeyboardModifiers>();
-    qRegisterMetaType<TextInput::KeyState>();
+    qRegisterMetaType<Wrapland::Client::TextInput::KeyState>();
     // this test verifies that key events are properly sent to the client
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
 
     // TODO: test modifiers
-    QSignalSpy keyEventSpy(textInput.get(), &TextInput::keyEvent);
+    QSignalSpy keyEventSpy(textInput.get(), &Wrapland::Client::TextInput::keyEvent);
     QVERIFY(keyEventSpy.isValid());
-    m_seatInterface->setTimestamp(100);
+    m_serverSeat->setTimestamp(100);
     ti->keysymPressed(2);
     QVERIFY(keyEventSpy.wait());
     QCOMPARE(keyEventSpy.count(), 1);
     QCOMPARE(keyEventSpy.last().at(0).value<quint32>(), 2u);
-    QCOMPARE(keyEventSpy.last().at(1).value<TextInput::KeyState>(), TextInput::KeyState::Pressed);
+    QCOMPARE(keyEventSpy.last().at(1).value<Wrapland::Client::TextInput::KeyState>(), Wrapland::Client::TextInput::KeyState::Pressed);
     QCOMPARE(keyEventSpy.last().at(2).value<Qt::KeyboardModifiers>(), Qt::KeyboardModifiers());
     QCOMPARE(keyEventSpy.last().at(3).value<quint32>(), 100u);
-    m_seatInterface->setTimestamp(101);
+    m_serverSeat->setTimestamp(101);
     ti->keysymReleased(2);
     QVERIFY(keyEventSpy.wait());
     QCOMPARE(keyEventSpy.count(), 2);
     QCOMPARE(keyEventSpy.last().at(0).value<quint32>(), 2u);
-    QCOMPARE(keyEventSpy.last().at(1).value<TextInput::KeyState>(), TextInput::KeyState::Released);
+    QCOMPARE(keyEventSpy.last().at(1).value<Wrapland::Client::TextInput::KeyState>(), Wrapland::Client::TextInput::KeyState::Released);
     QCOMPARE(keyEventSpy.last().at(2).value<Qt::KeyboardModifiers>(), Qt::KeyboardModifiers());
     QCOMPARE(keyEventSpy.last().at(3).value<quint32>(), 101u);
 }
 
 void TextInputTest::testPreEdit_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2;
 }
 
 void TextInputTest::testPreEdit()
 {
     // this test verifies that pre-edit is correctly passed to the client
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     // verify default values
     QVERIFY(textInput->composingText().isEmpty());
@@ -862,12 +864,12 @@ void TextInputTest::testPreEdit()
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
 
     // now let's pass through some pre-edit events
-    QSignalSpy composingTextChangedSpy(textInput.get(), &TextInput::composingTextChanged);
+    QSignalSpy composingTextChangedSpy(textInput.get(), &Wrapland::Client::TextInput::composingTextChanged);
     QVERIFY(composingTextChangedSpy.isValid());
     ti->setPreEditCursor(1);
     ti->preEdit(QByteArrayLiteral("foo"), QByteArrayLiteral("bar"));
@@ -888,20 +890,20 @@ void TextInputTest::testPreEdit()
 
 void TextInputTest::testCommit_data()
 {
-    QTest::addColumn<TextInputInterfaceVersion>("version");
+    QTest::addColumn<Wrapland::Server::TextInputInterfaceVersion>("version");
 
-    QTest::newRow("UnstableV0") << TextInputInterfaceVersion::UnstableV0;
-    QTest::newRow("UnstableV2") << TextInputInterfaceVersion::UnstableV2;
+    QTest::newRow("UnstableV0") << Wrapland::Server::TextInputInterfaceVersion::UnstableV0;
+    QTest::newRow("UnstableV2") << Wrapland::Server::TextInputInterfaceVersion::UnstableV2;
 }
 
 void TextInputTest::testCommit()
 {
     // this test verifies that the commit is handled correctly by the client
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     auto serverSurface = waitForSurface();
     QVERIFY(serverSurface);
-    QFETCH(TextInputInterfaceVersion, version);
-    std::unique_ptr<TextInput> textInput(createTextInput(version));
+    QFETCH(Wrapland::Server::TextInputInterfaceVersion, version);
+    std::unique_ptr<Wrapland::Client::TextInput> textInput(createTextInput(version));
     QVERIFY(textInput != nullptr);
     // verify default values
     QCOMPARE(textInput->commitText(), QByteArray());
@@ -914,12 +916,12 @@ void TextInputTest::testCommit()
     m_connection->flush();
     m_display->dispatchEvents();
 
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_seatInterface->focusedTextInput();
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = m_serverSeat->focusedTextInput();
     QVERIFY(ti);
 
     // now let's commit
-    QSignalSpy committedSpy(textInput.get(), &TextInput::committed);
+    QSignalSpy committedSpy(textInput.get(), &Wrapland::Client::TextInput::committed);
     QVERIFY(committedSpy.isValid());
     ti->setCursorPosition(3, 4);
     ti->deleteSurroundingText(2, 1);

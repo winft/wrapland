@@ -20,9 +20,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat_interface.h"
 #include "seat_interface_p.h"
 #include "display.h"
-//#include "datadevice_interface.h"
-//#include "datasource_interface.h"
-#include "surface_interface.h"
 #include "textinput_interface_p.h"
 
 #include "../../server/seat_p.h"
@@ -281,7 +278,7 @@ namespace {
 
 TextInputInterface *SeatInterface::Private::textInputForSurface(SurfaceInterface *surface) const
 {
-    return q->newSeat->d_ptr->textInputForSurface(surface);
+    return nullptr;
 //    return interfaceForSurface(surface, textInputs);
 }
 
@@ -699,7 +696,7 @@ void SeatInterface::setTimestamp(quint32 time)
 
 void SeatInterface::setDragTarget(SurfaceInterface *surface, const QPointF &globalPosition, const QMatrix4x4 &inputTransformation)
 {
-    newSeat->setDragTarget(surface, globalPosition, inputTransformation);
+//    newSeat->setDragTarget(surface, globalPosition, inputTransformation);
 //    Q_D();
 //    if (surface == d->drag.surface) {
 //        // no change
@@ -729,7 +726,7 @@ void SeatInterface::setDragTarget(SurfaceInterface *surface, const QPointF &glob
 
 void SeatInterface::setDragTarget(SurfaceInterface *surface, const QMatrix4x4 &inputTransformation)
 {
-    newSeat->setDragTarget(surface, inputTransformation);
+//    newSeat->setDragTarget(surface, inputTransformation);
 //    Q_D();
 //    if (d->drag.mode == Private::Drag::Mode::Pointer) {
 //        setDragTarget(surface, pointerPos(), inputTransformation);
@@ -742,14 +739,15 @@ void SeatInterface::setDragTarget(SurfaceInterface *surface, const QMatrix4x4 &i
 
 SurfaceInterface *SeatInterface::focusedPointerSurface() const
 {
-    return newSeat->focusedPointerSurface();
+    return nullptr;
+//    return newSeat->focusedPointerSurface();
 //    Q_D();
 //    return d->globalPointer.focus.surface;
 }
 
 void SeatInterface::setFocusedPointerSurface(SurfaceInterface *surface, const QPointF &surfacePosition)
 {
-    newSeat->setFocusedPointerSurface(surface,surfacePosition);
+//    newSeat->setFocusedPointerSurface(surface,surfacePosition);
 //    QMatrix4x4 m;
 //    m.translate(-surfacePosition.x(), -surfacePosition.y());
 //    setFocusedPointerSurface(surface, m);
@@ -761,7 +759,7 @@ void SeatInterface::setFocusedPointerSurface(SurfaceInterface *surface, const QP
 
 void SeatInterface::setFocusedPointerSurface(SurfaceInterface *surface, const QMatrix4x4 &transformation)
 {
-    newSeat->setFocusedPointerSurface(surface,transformation);
+//    newSeat->setFocusedPointerSurface(surface,transformation);
 //    Q_D();
 //    if (d->drag.mode == Private::Drag::Mode::Pointer) {
 //        // ignore
@@ -1193,14 +1191,15 @@ void SeatInterface::keyReleased(quint32 key)
 
 SurfaceInterface *SeatInterface::focusedKeyboardSurface() const
 {
-    return newSeat->focusedKeyboardSurface();
+    return nullptr;
+//    return newSeat->focusedKeyboardSurface();
 //    Q_D();
 //    return d->keys.focus.surface;
 }
 
 void SeatInterface::setFocusedKeyboardSurface(SurfaceInterface *surface)
 {
-    newSeat->setFocusedKeyboardSurface(surface);
+//    newSeat->setFocusedKeyboardSurface(surface);
 //    Q_D();
 //    const quint32 serial = d->display->nextSerial();
 //    for (auto it = d->keys.focus.keyboards.constBegin(), end = d->keys.focus.keyboards.constEnd(); it != end; ++it) {
@@ -1628,7 +1627,8 @@ QMatrix4x4 SeatInterface::dragSurfaceTransformation() const
 
 SurfaceInterface *SeatInterface::dragSurface() const
 {
-    return newSeat->dragSurface();
+    return nullptr;
+//    return newSeat->dragSurface();
 //    Q_D();
 //    return d->drag.surface;
 }
@@ -1654,7 +1654,7 @@ SurfaceInterface *SeatInterface::dragSurface() const
 
 void SeatInterface::setFocusedTextInputSurface(SurfaceInterface *surface)
 {
-    newSeat->setFocusedTextInputSurface(surface);
+//    newSeat->setFocusedTextInputSurface(surface);
 //    Q_D();
 //    const quint32 serial = d->display->nextSerial();
 //    const auto old = d->textInput.focus.textInput;
@@ -1691,7 +1691,8 @@ void SeatInterface::setFocusedTextInputSurface(SurfaceInterface *surface)
 
 SurfaceInterface *SeatInterface::focusedTextInputSurface() const
 {
-    return newSeat->focusedTextInputSurface();
+    return nullptr;
+//    return newSeat->focusedTextInputSurface();
 //    Q_D();
 //    return d->textInput.focus.surface;
 }

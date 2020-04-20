@@ -17,9 +17,8 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// client
+
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
@@ -27,18 +26,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/shell.h"
 #include "../../src/client/surface.h"
-// server
-#include "../../src/server/display.h"
-#include "../../src/server/compositor_interface.h"
+
+#include "../../server/display.h"
+#include "../../server/compositor.h"
+
 #include "../../src/server/shell_interface.h"
 #include "../../src/server/plasmashell_interface.h"
 
 #include <wayland-client-protocol.h>
 
 #include <errno.h>  // For EPROTO
-
-using namespace Wrapland::Client;
-using namespace Wrapland::Server;
 
 class ErrorTest : public QObject
 {
@@ -53,30 +50,29 @@ private Q_SLOTS:
     void testTransientForSameSurface();
 
 private:
-    Display *m_display = nullptr;
-    CompositorInterface *m_ci = nullptr;
-    ShellInterface *m_si = nullptr;
-    PlasmaShellInterface *m_psi = nullptr;
-    ConnectionThread *m_connection = nullptr;
+    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Compositor *m_serverCompositor = nullptr;
+    Wrapland::Server::ShellInterface *m_si = nullptr;
+    Wrapland::Server::PlasmaShellInterface *m_psi = nullptr;
+    Wrapland::Client::ConnectionThread *m_connection = nullptr;
     QThread *m_thread = nullptr;
-    EventQueue *m_queue = nullptr;
-    Compositor *m_compositor = nullptr;
-    Shell *m_shell = nullptr;
-    PlasmaShell *m_plasmaShell = nullptr;
+    Wrapland::Client::EventQueue *m_queue = nullptr;
+    Wrapland::Client::Compositor *m_compositor = nullptr;
+    Wrapland::Client::Shell *m_shell = nullptr;
+    Wrapland::Client::PlasmaShell *m_plasmaShell = nullptr;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-error-0");
 
 void ErrorTest::init()
 {
-    delete m_display;
-    m_display = new Display(this);
+    m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
+
     m_display->createShm();
-    m_ci = m_display->createCompositor(m_display);
-    m_ci->create();
+    m_serverCompositor = m_display->createCompositor(m_display);
+
     m_si = m_display->createShell(m_display);
     m_si->create();
     m_psi = m_display->createPlasmaShell(m_display);
@@ -84,7 +80,7 @@ void ErrorTest::init()
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -96,11 +92,11 @@ void ErrorTest::init()
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
 
-    m_queue = new EventQueue(this);
+    m_queue = new Wrapland::Client::EventQueue(this);
     m_queue->setup(m_connection);
 
-    Registry registry;
-    QSignalSpy interfacesAnnouncedSpy(&registry, &Registry::interfacesAnnounced);
+    Wrapland::Client::Registry registry;
+    QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
     QVERIFY(interfacesAnnouncedSpy.isValid());
     registry.setEventQueue(m_queue);
     registry.create(m_connection);
@@ -108,16 +104,16 @@ void ErrorTest::init()
     registry.setup();
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    m_compositor = registry.createCompositor(registry.interface(Registry::Interface::Compositor).name,
-                                             registry.interface(Registry::Interface::Compositor).version,
+    m_compositor = registry.createCompositor(registry.interface(Wrapland::Client::Registry::Interface::Compositor).name,
+                                             registry.interface(Wrapland::Client::Registry::Interface::Compositor).version,
                                              this);
     QVERIFY(m_compositor);
-    m_shell = registry.createShell(registry.interface(Registry::Interface::Shell).name,
-                                   registry.interface(Registry::Interface::Shell).version,
+    m_shell = registry.createShell(registry.interface(Wrapland::Client::Registry::Interface::Shell).name,
+                                   registry.interface(Wrapland::Client::Registry::Interface::Shell).version,
                                    this);
     QVERIFY(m_shell);
-    m_plasmaShell = registry.createPlasmaShell(registry.interface(Registry::Interface::PlasmaShell).name,
-                                               registry.interface(Registry::Interface::PlasmaShell).version,
+    m_plasmaShell = registry.createPlasmaShell(registry.interface(Wrapland::Client::Registry::Interface::PlasmaShell).name,
+                                               registry.interface(Wrapland::Client::Registry::Interface::PlasmaShell).version,
                                                this);
     QVERIFY(m_plasmaShell);
 }
@@ -145,7 +141,7 @@ void ErrorTest::cleanup()
     }
     CLEANUP(m_psi)
     CLEANUP(m_si)
-    CLEANUP(m_ci)
+    CLEANUP(m_serverCompositor)
     CLEANUP(m_display)
 #undef CLEANUP
 }
@@ -153,11 +149,11 @@ void ErrorTest::cleanup()
 void ErrorTest::testMultipleShellSurfacesForSurface()
 {
     // this test verifies that creating two ShellSurfaces for the same Surface triggers a protocol error
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
+    QSignalSpy errorSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<ShellSurface> shellSurface1(m_shell->createSurface(surface.get()));
-    std::unique_ptr<ShellSurface> shellSurface2(m_shell->createSurface(surface.get()));
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::ShellSurface> shellSurface1(m_shell->createSurface(surface.get()));
+    std::unique_ptr<Wrapland::Client::ShellSurface> shellSurface2(m_shell->createSurface(surface.get()));
     QCOMPARE(m_connection->error(), 0);
     QVERIFY(errorSpy.wait());
     QCOMPARE(m_connection->error(), EPROTO);
@@ -168,13 +164,13 @@ void ErrorTest::testMultipleShellSurfacesForSurface()
 void ErrorTest::testMultiplePlasmaShellSurfacesForSurface()
 {
     // this test verifies that creating two ShellSurfaces for the same Surface triggers a protocol error
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
+    QSignalSpy errorSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     // PlasmaShell is too smart and doesn't allow us to create a second PlasmaShellSurface
     // thus we need to cheat by creating a surface manually
     auto surface = wl_compositor_create_surface(*m_compositor);
-    std::unique_ptr<PlasmaShellSurface> shellSurface1(m_plasmaShell->createSurface(surface));
-    std::unique_ptr<PlasmaShellSurface> shellSurface2(m_plasmaShell->createSurface(surface));
+    std::unique_ptr<Wrapland::Client::PlasmaShellSurface> shellSurface1(m_plasmaShell->createSurface(surface));
+    std::unique_ptr<Wrapland::Client::PlasmaShellSurface> shellSurface2(m_plasmaShell->createSurface(surface));
     QCOMPARE(m_connection->error(), 0);
     QVERIFY(errorSpy.wait());
     QCOMPARE(m_connection->error(), EPROTO);
@@ -185,20 +181,20 @@ void ErrorTest::testMultiplePlasmaShellSurfacesForSurface()
 
 void ErrorTest::testTransientForSameSurface_data()
 {
-    QTest::addColumn<ShellSurface::TransientFlag>("flag");
+    QTest::addColumn<Wrapland::Client::ShellSurface::TransientFlag>("flag");
 
-    QTest::newRow("transient") << ShellSurface::TransientFlag::Default;
-    QTest::newRow("transient no focus") << ShellSurface::TransientFlag::NoFocus;
+    QTest::newRow("transient") << Wrapland::Client::ShellSurface::TransientFlag::Default;
+    QTest::newRow("transient no focus") << Wrapland::Client::ShellSurface::TransientFlag::NoFocus;
 }
 
 void ErrorTest::testTransientForSameSurface()
 {
     // this test verifies that creating a transient shell surface for itself triggers a protocol error
-    QSignalSpy errorSpy(m_connection, &ConnectionThread::establishedChanged);
+    QSignalSpy errorSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
-    std::unique_ptr<Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<ShellSurface> shellSurface(m_shell->createSurface(surface.get()));
-    QFETCH(ShellSurface::TransientFlag, flag);
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::ShellSurface> shellSurface(m_shell->createSurface(surface.get()));
+    QFETCH(Wrapland::Client::ShellSurface::TransientFlag, flag);
     shellSurface->setTransient(surface.get(), QPoint(), flag);
     QCOMPARE(m_connection->error(), 0);
     QVERIFY(errorSpy.wait());

@@ -42,9 +42,9 @@ public:
     Pointer* pointer;
     quint32 enteredSerial = 0;
     QPoint hotspot;
-    QPointer<SurfaceInterface> surface;
+    QPointer<Surface> surface;
 
-    void update(const QPointer<SurfaceInterface>& surface, quint32 serial, const QPoint& hotspot);
+    void update(const QPointer<Surface>& surface, quint32 serial, const QPoint& hotspot);
 
 private:
     Cursor* q_ptr;
@@ -57,8 +57,8 @@ public:
 
     Seat* seat;
 
-    SurfaceInterface* focusedSurface = nullptr;
-    QPointer<SurfaceInterface> focusedChildSurface;
+    Surface* focusedSurface = nullptr;
+    QPointer<Surface> focusedChildSurface;
     QMetaObject::Connection destroyConnection;
     Cursor* cursor = nullptr;
 
@@ -66,8 +66,8 @@ public:
     std::vector<PointerSwipeGestureV1*> swipeGestures;
     std::vector<PointerPinchGestureV1*> pinchGestures;
 
-    void sendEnter(quint32 serial, SurfaceInterface* surface, const QPointF& parentSurfacePosition);
-    void sendLeave(quint32 serial, SurfaceInterface* surface);
+    void sendEnter(quint32 serial, Surface* surface, const QPointF& parentSurfacePosition);
+    void sendLeave(quint32 serial, Surface* surface);
     void sendMotion(const QPointF& position);
     void sendAxis(Qt::Orientation orientation, quint32 delta);
     void sendFrame();
@@ -95,7 +95,7 @@ private:
                                   wl_resource* wlSurface,
                                   int32_t hotspot_x,
                                   int32_t hotspot_y);
-    void setCursor(quint32 serial, SurfaceInterface* surface, const QPoint& hotspot);
+    void setCursor(quint32 serial, Surface* surface, const QPoint& hotspot);
 
     static const struct wl_pointer_interface s_interface;
 };

@@ -19,10 +19,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include "server_decoration_palette_interface.h"
 #include "display.h"
-#include "surface_interface.h"
 #include "global_p.h"
 #include "resource_p.h"
 #include "logging.h"
+
+#include "../../server/surface.h"
+#include "../../server/wayland/resource.h"
 
 #include <QtGlobal>
 
@@ -66,10 +68,10 @@ void ServerSideDecorationPaletteManagerInterface::Private::createCallback(wl_cli
     auto p = reinterpret_cast<Private*>(wl_resource_get_user_data(resource));
     Q_ASSERT(p);
 
-    SurfaceInterface *s = SurfaceInterface::get(surface);
+    auto s = Wayland::Resource<Surface>::fromResource(surface)->handle();
     if (!s) {
         // TODO: send error?
-        qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationPaletteInterface requested for non existing SurfaceInterface";
+        qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationPaletteInterface requested for non existing Surface";
         return;
     }
     auto palette = new ServerSideDecorationPaletteInterface(p->q, s, resource);
@@ -111,11 +113,11 @@ void ServerSideDecorationPaletteManagerInterface::Private::unbind(wl_resource *r
 class ServerSideDecorationPaletteInterface::Private : public Resource::Private
 {
 public:
-    Private(ServerSideDecorationPaletteInterface *q, ServerSideDecorationPaletteManagerInterface *c, SurfaceInterface *surface, wl_resource *parentResource);
+    Private(ServerSideDecorationPaletteInterface *q, ServerSideDecorationPaletteManagerInterface *c, Surface *surface, wl_resource *parentResource);
     ~Private();
 
 
-    SurfaceInterface *surface;
+    Surface *surface;
     QString palette;
 private:
     static void setPaletteCallback(wl_client *client, wl_resource *resource, const char * palette);
@@ -123,7 +125,7 @@ private:
     ServerSideDecorationPaletteInterface *q_func() {
         return reinterpret_cast<ServerSideDecorationPaletteInterface *>(q);
     }
-    static ServerSideDecorationPaletteInterface *get(SurfaceInterface *s);
+    static ServerSideDecorationPaletteInterface *get(Surface *s);
     static const struct org_kde_kwin_server_decoration_palette_interface s_interface;
 };
 
@@ -147,7 +149,7 @@ void ServerSideDecorationPaletteInterface::Private::setPaletteCallback(wl_client
     emit p->q_func()->paletteChanged(p->palette);
 }
 
-ServerSideDecorationPaletteInterface::Private::Private(ServerSideDecorationPaletteInterface *q, ServerSideDecorationPaletteManagerInterface *c, SurfaceInterface *s, wl_resource *parentResource)
+ServerSideDecorationPaletteInterface::Private::Private(ServerSideDecorationPaletteInterface *q, ServerSideDecorationPaletteManagerInterface *c, Surface *s, wl_resource *parentResource)
     : Resource::Private(q, c, parentResource, &org_kde_kwin_server_decoration_palette_interface, &s_interface),
     surface(s)
 {
@@ -175,7 +177,7 @@ ServerSideDecorationPaletteManagerInterface::Private *ServerSideDecorationPalett
     return reinterpret_cast<ServerSideDecorationPaletteManagerInterface::Private*>(d.data());
 }
 
-ServerSideDecorationPaletteInterface* ServerSideDecorationPaletteManagerInterface::paletteForSurface(SurfaceInterface *surface)
+ServerSideDecorationPaletteInterface* ServerSideDecorationPaletteManagerInterface::paletteForSurface(Surface *surface)
 {
     Q_D();
     for (ServerSideDecorationPaletteInterface* menu: d->palettes) {
@@ -186,7 +188,7 @@ ServerSideDecorationPaletteInterface* ServerSideDecorationPaletteManagerInterfac
     return nullptr;
 }
 
-ServerSideDecorationPaletteInterface::ServerSideDecorationPaletteInterface(ServerSideDecorationPaletteManagerInterface *parent, SurfaceInterface *s, wl_resource *parentResource):
+ServerSideDecorationPaletteInterface::ServerSideDecorationPaletteInterface(ServerSideDecorationPaletteManagerInterface *parent, Surface *s, wl_resource *parentResource):
     Resource(new Private(this, parent, s, parentResource))
 {
 }
@@ -205,7 +207,7 @@ QString ServerSideDecorationPaletteInterface::palette() const
     return d->palette;
 }
 
-SurfaceInterface* ServerSideDecorationPaletteInterface::surface() const
+Surface* ServerSideDecorationPaletteInterface::surface() const
 {
     Q_D();
     return d->surface;

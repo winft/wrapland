@@ -20,9 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TEST_XDG_SHELL_H
 #define TEST_XDG_SHELL_H
 
-// Qt
 #include <QtTest>
-// client
+
 #include "../../src/client/xdgshell.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/compositor.h"
@@ -32,16 +31,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/shm_pool.h"
 #include "../../src/client/surface.h"
-// server
-#include "../../src/server/display.h"
-#include "../../src/server/compositor_interface.h"
-#include "../../src/server/output_interface.h"
-#include "../../src/server/seat_interface.h"
-#include "../../src/server/surface_interface.h"
-#include "../../src/server/xdgshell_interface.h"
 
-using namespace Wrapland::Client;
-using namespace Wrapland::Server;
+#include "../../server/display.h"
+#include "../../server/compositor.h"
+#include "../../server/surface.h"
+#include "../../server/output.h"
+
+#include "../../src/server/seat_interface.h"
+#include "../../src/server/xdgshell_interface.h"
 
 Q_DECLARE_METATYPE(Qt::MouseButton)
 
@@ -50,7 +47,7 @@ class XdgShellTest : public QObject
     Q_OBJECT
 
 protected:
-    XdgShellTest(XdgShellInterfaceVersion version);
+    XdgShellTest(Wrapland::Server::XdgShellInterfaceVersion version);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -73,34 +70,34 @@ private Q_SLOTS:
     void testConfigureMultipleAcks();
 
 protected:
-    XdgShellInterface *m_xdgShellInterface = nullptr;
-    Compositor *m_compositor = nullptr;
-    XdgShell *m_xdgShell = nullptr;
-    Display *m_display = nullptr;
-    CompositorInterface *m_compositorInterface = nullptr;
-    OutputInterface *m_o1Interface = nullptr;
-    OutputInterface *m_o2Interface = nullptr;
-    SeatInterface *m_seatInterface = nullptr;
-    ConnectionThread *m_connection = nullptr;
+    Wrapland::Server::XdgShellInterface *m_xdgShellInterface = nullptr;
+    Wrapland::Client::Compositor *m_compositor = nullptr;
+    Wrapland::Client::XdgShell *m_xdgShell = nullptr;
+    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Compositor *m_serverCompositor = nullptr;
+    Wrapland::Server::Output *m_o1Interface = nullptr;
+    Wrapland::Server::Output *m_o2Interface = nullptr;
+    Wrapland::Server::Seat *m_serverSeat = nullptr;
+    Wrapland::Client::ConnectionThread *m_connection = nullptr;
     QThread *m_thread = nullptr;
-    EventQueue *m_queue = nullptr;
-    ShmPool *m_shmPool = nullptr;
+    Wrapland::Client::EventQueue *m_queue = nullptr;
+    Wrapland::Client::ShmPool *m_shmPool = nullptr;
     Wrapland::Client::Output *m_output1 = nullptr;
     Wrapland::Client::Output *m_output2 = nullptr;
     Wrapland::Client::Seat *m_seat = nullptr;
 
 private:
-    XdgShellInterfaceVersion m_version;
+    Wrapland::Server::XdgShellInterfaceVersion m_version;
 };
 
 #define SURFACE \
-    QSignalSpy xdgSurfaceCreatedSpy(m_xdgShellInterface, &XdgShellInterface::surfaceCreated); \
+    QSignalSpy xdgSurfaceCreatedSpy(m_xdgShellInterface, &Wrapland::Server::XdgShellInterface::surfaceCreated); \
     QVERIFY(xdgSurfaceCreatedSpy.isValid()); \
-    std::unique_ptr<Surface> surface(m_compositor->createSurface()); \
-    std::unique_ptr<XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get())); \
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface()); \
+    std::unique_ptr<Wrapland::Client::XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get())); \
     QCOMPARE(xdgSurface->size(), QSize()); \
     QVERIFY(xdgSurfaceCreatedSpy.wait()); \
-    auto serverXdgSurface = xdgSurfaceCreatedSpy.first().first().value<XdgShellSurfaceInterface*>(); \
+    auto serverXdgSurface = xdgSurfaceCreatedSpy.first().first().value<Wrapland::Server::XdgShellSurfaceInterface*>(); \
     QVERIFY(serverXdgSurface);
 
 #endif

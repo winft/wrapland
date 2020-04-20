@@ -21,7 +21,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "global_p.h"
 #include "resource_p.h"
 #include "display.h"
-#include "surface_interface.h"
+
+#include "../../server/surface.h"
+#include "../../server/surface_p.h"
+#include "../../server/wayland/resource.h"
 
 #include <QTimer>
 
@@ -43,7 +46,7 @@ public:
 private:
     static void createSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface);
     void bind(wl_client *client, uint32_t version, uint32_t id) override;
-    void createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource);
+    void createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource);
 
     PlasmaShellInterface *q;
     static const struct org_kde_plasma_shell_interface s_interface;
@@ -68,9 +71,9 @@ const struct org_kde_plasma_shell_interface PlasmaShellInterface::Private::s_int
 class PlasmaShellSurfaceInterface::Private : public Resource::Private
 {
 public:
-    Private(PlasmaShellSurfaceInterface *q, PlasmaShellInterface *shell, SurfaceInterface *surface, wl_resource *parentResource);
+    Private(PlasmaShellSurfaceInterface *q, PlasmaShellInterface *shell, Surface *surface, wl_resource *parentResource);
 
-    SurfaceInterface *surface;
+    Surface *surface;
     QPoint m_globalPos;
     Role m_role = Role::Normal;
     bool m_positionSet = false;
@@ -123,10 +126,10 @@ void PlasmaShellInterface::Private::bind(wl_client *client, uint32_t version, ui
 void PlasmaShellInterface::Private::createSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface)
 {
     auto s = reinterpret_cast<PlasmaShellInterface::Private*>(wl_resource_get_user_data(resource));
-    s->createSurface(client, wl_resource_get_version(resource), id, SurfaceInterface::get(surface), resource);
+    s->createSurface(client, wl_resource_get_version(resource), id, Wayland::Resource<Surface>::fromResource(surface)->handle(), resource);
 }
 
-void PlasmaShellInterface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, SurfaceInterface *surface, wl_resource *parentResource)
+void PlasmaShellInterface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource)
 {
     auto it = std::find_if(surfaces.constBegin(), surfaces.constEnd(),
         [surface](PlasmaShellSurfaceInterface *s) {
@@ -134,7 +137,7 @@ void PlasmaShellInterface::Private::createSurface(wl_client *client, uint32_t ve
         }
     );
     if (it != surfaces.constEnd()) {
-        wl_resource_post_error(surface->resource(), WL_DISPLAY_ERROR_INVALID_OBJECT, "PlasmaShellSurface already created");
+        wl_resource_post_error(surface->d_ptr->resource(), WL_DISPLAY_ERROR_INVALID_OBJECT, "PlasmaShellSurface already created");
         return;
     }
     PlasmaShellSurfaceInterface *shellSurface = new PlasmaShellSurfaceInterface(q, surface, parentResource);
@@ -151,7 +154,7 @@ void PlasmaShellInterface::Private::createSurface(wl_client *client, uint32_t ve
 /*********************************
  * ShellSurfaceInterface
  *********************************/
-PlasmaShellSurfaceInterface::Private::Private(PlasmaShellSurfaceInterface *q, PlasmaShellInterface *shell, SurfaceInterface *surface, wl_resource *parentResource)
+PlasmaShellSurfaceInterface::Private::Private(PlasmaShellSurfaceInterface *q, PlasmaShellInterface *shell, Surface *surface, wl_resource *parentResource)
     : Resource::Private(q, shell, parentResource, &org_kde_plasma_surface_interface, &s_interface)
     , surface(surface)
 {
@@ -172,20 +175,20 @@ const struct org_kde_plasma_surface_interface PlasmaShellSurfaceInterface::Priva
 };
 #endif
 
-PlasmaShellSurfaceInterface::PlasmaShellSurfaceInterface(PlasmaShellInterface *shell, SurfaceInterface *parent, wl_resource *parentResource)
+PlasmaShellSurfaceInterface::PlasmaShellSurfaceInterface(PlasmaShellInterface *shell, Surface *parent, wl_resource *parentResource)
     : Resource(new Private(this, shell, parent, parentResource))
 {
     auto unsetSurface = [this] {
         Q_D();
         d->surface = nullptr;
     };
-    connect(parent, &Resource::unbound, this, unsetSurface);
+    connect(parent, &Surface::resourceDestroyed, this, unsetSurface);
     connect(parent, &QObject::destroyed, this, unsetSurface);
 }
 
 PlasmaShellSurfaceInterface::~PlasmaShellSurfaceInterface() = default;
 
-SurfaceInterface *PlasmaShellSurfaceInterface::surface() const {
+Surface *PlasmaShellSurfaceInterface::surface() const {
     Q_D();
     return d->surface;
 }

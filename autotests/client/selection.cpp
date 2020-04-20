@@ -31,11 +31,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/data_device_manager.h"
 #include "../../server/display.h"
 #include "../../server/seat.h"
-
-#include "../../src/server/compositor_interface.h"
+#include "../../server/surface.h"
 
 class SelectionTest : public QObject
 {
@@ -47,7 +47,7 @@ private Q_SLOTS:
 
 private:
     Wrapland::Server::D_isplay* m_display = nullptr;
-    Wrapland::Server::CompositorInterface* m_compositorInterface = nullptr;
+    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
     Wrapland::Server::Seat* m_serverSeat = nullptr;
     Wrapland::Server::DataDeviceManager* m_serverDdm = nullptr;
 
@@ -78,8 +78,8 @@ void SelectionTest::init()
     m_display->start();
 
     m_display->createShm();
-    m_compositorInterface = m_display->createCompositor(m_display);
-    m_compositorInterface->create();
+    m_serverCompositor = m_display->createCompositor(m_display);
+
     m_serverSeat = m_display->createSeat(m_display);
     m_serverSeat->setHasKeyboard(true);
     m_serverDdm = m_display->createDataDeviceManager(m_display);
@@ -178,7 +178,7 @@ void SelectionTest::cleanup()
 
     CLEANUP(m_serverDdm)
     CLEANUP(m_serverSeat)
-    CLEANUP(m_compositorInterface)
+    CLEANUP(m_serverCompositor)
     CLEANUP(m_display)
 #undef CLEANUP
 }
@@ -221,14 +221,12 @@ void SelectionTest::testClearOnEnter()
     QVERIFY(keyboardEnteredClient1Spy.isValid());
 
     // Now create a Surface.
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface,
-                                 &Wrapland::Server::CompositorInterface::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s1(m_client1.compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto serverSurface1
-        = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto serverSurface1 = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface1);
 
     // Pass this surface keyboard focus.
@@ -253,8 +251,7 @@ void SelectionTest::testClearOnEnter()
     QVERIFY(keyboardEnteredClient2Spy.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s2(m_client2.compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface2
-        = surfaceCreatedSpy.last().first().value<Wrapland::Server::SurfaceInterface*>();
+    auto serverSurface2 = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface2);
 
     // Entering that surface should give a selection offer.
