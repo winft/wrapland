@@ -47,7 +47,7 @@ public:
     void sendName(wl_resource *r);
 //    QVector<PointerInterface *> pointersForSurface(SurfaceInterface *surface) const;
 //    QVector<KeyboardInterface *> keyboardsForSurface(SurfaceInterface *surface) const;
-    QVector<TouchInterface *> touchsForSurface(SurfaceInterface *surface) const;
+//    QVector<TouchInterface *> touchsForSurface(SurfaceInterface *surface) const;
     DataDeviceInterface *dataDeviceForSurface(SurfaceInterface *surface) const;
     TextInputInterface *textInputForSurface(SurfaceInterface *surface) const;
     void registerDataDevice(DataDeviceInterface *dataDevice);
@@ -63,7 +63,7 @@ public:
     quint32 timestamp = 0;
 //    QVector<PointerInterface*> pointers;
 //    QVector<KeyboardInterface*> keyboards;
-    QVector<TouchInterface*> touchs;
+//    QVector<TouchInterface*> touchs;
     QVector<DataDeviceInterface*> dataDevices;
     QVector<TextInputInterface*> textInputs;
     DataDeviceInterface *currentSelection = nullptr;
@@ -145,7 +145,7 @@ public:
     struct Touch {
         struct Focus {
             SurfaceInterface *surface = nullptr;
-            QVector<TouchInterface*> touchs;
+//            QVector<TouchInterface*> touchs;
             QMetaObject::Connection destroyConnection;
             QPointF offset = QPointF();
             QPointF firstTouchPos;
@@ -166,7 +166,7 @@ public:
         DataDeviceInterface *target = nullptr;
         SurfaceInterface *surface = nullptr;
 //        PointerInterface *sourcePointer = nullptr;
-        TouchInterface *sourceTouch = nullptr;
+//        TouchInterface *sourceTouch = nullptr;
         QMatrix4x4 transformation;
         QMetaObject::Connection destroyConnection;
         QMetaObject::Connection dragSourceDestroyConnection;

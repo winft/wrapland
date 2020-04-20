@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2016  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,49 +17,48 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef TESTSERVER_H
-#define TESTSERVER_H
+#pragma once
 
-#include <QHash>
 #include <QObject>
-#include <QPointF>
-#include <QVector>
 
-class QElapsedTimer;
-class QTimer;
+#include <Wrapland/Server/wraplandserver_export.h>
 
 namespace Wrapland
 {
 namespace Server
 {
-class D_isplay;
-class Seat;
-class ShellInterface;
-class ShellSurfaceInterface;
-}
-}
 
-class TestServer : public QObject
+class DataDevice;
+class DataSource;
+class D_isplay;
+
+class WRAPLANDSERVER_EXPORT DataDeviceManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestServer(QObject *parent);
-    virtual ~TestServer();
+    ~DataDeviceManager() override;
 
-    void init();
-    void startTestApp(const QString &app, const QStringList &arguments);
+    enum class DnDAction {
+        None = 0,
+        Copy = 1 << 0,
+        Move = 1 << 1,
+        Ask = 1 << 2,
+    };
+    Q_DECLARE_FLAGS(DnDActions, DnDAction)
+
+Q_SIGNALS:
+    void dataSourceCreated(Wrapland::Server::DataSource* source);
+    void dataDeviceCreated(Wrapland::Server::DataDevice* device);
 
 private:
-    void repaint();
+    friend class D_isplay;
+    explicit DataDeviceManager(D_isplay* display, QObject* parent = nullptr);
 
-    Wrapland::Server::D_isplay *m_display = nullptr;
-    Wrapland::Server::ShellInterface *m_shell = nullptr;
-    Wrapland::Server::Seat *m_seat = nullptr;
-    QVector<Wrapland::Server::ShellSurfaceInterface*> m_shellSurfaces;
-    QTimer *m_repaintTimer;
-    QScopedPointer<QElapsedTimer> m_timeSinceStart;
-    QPointF m_cursorPos;
-    QHash<qint32, qint32> m_touchIdMapper;
+    class Private;
+    Private* d_ptr;
 };
 
-#endif
+}
+}
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::DataDeviceManager::DnDActions)

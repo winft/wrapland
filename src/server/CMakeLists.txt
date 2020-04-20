@@ -6,10 +6,6 @@ set(SERVER_LIB_SRCS
     clientconnection.cpp
     compositor_interface.cpp
     contrast_interface.cpp
-    datadevice_interface.cpp
-    datadevicemanager_interface.cpp
-    dataoffer_interface.cpp
-    datasource_interface.cpp
     display.cpp
     eglstream_controller_interface.cpp
     fakeinput_interface.cpp
@@ -44,7 +40,6 @@ set(SERVER_LIB_SRCS
     textinput_interface.cpp
     textinput_interface_v0.cpp
     textinput_interface_v2.cpp
-    touch_interface.cpp
     viewporter_interface.cpp
     xdgdecoration_interface.cpp
     xdgforeign_interface.cpp
@@ -56,10 +51,16 @@ set(SERVER_LIB_SRCS
     xdgshell_v5_interface.cpp
     xdgshell_v6_interface.cpp
 
+
     ../../server/client.cpp
+    ../../server/data_device.cpp
+    ../../server/data_device_manager.cpp
+    ../../server/data_offer.cpp
+    ../../server/data_source.cpp
     ../../server/display.cpp
     ../../server/dpms.cpp
     ../../server/output.cpp
+    ../../server/touch.cpp
     ../../server/pointer.cpp
     ../../server/pointer_constraints_v1.cpp
     ../../server/pointer_gestures_v1.cpp
@@ -330,10 +331,6 @@ set(SERVER_LIB_HEADERS
   clientconnection.h
   compositor_interface.h
   contrast_interface.h
-  datadevice_interface.h
-  datadevicemanager_interface.h
-  dataoffer_interface.h
-  datasource_interface.h
   display.h
   eglstream_controller_interface.h
   fakeinput_interface.h
@@ -363,7 +360,6 @@ set(SERVER_LIB_HEADERS
   subcompositor_interface.h
   surface_interface.h
   textinput_interface.h
-  touch_interface.h
   viewporter_interface.h
   xdgdecoration_interface.h
   xdgforeign_interface.h
@@ -371,9 +367,14 @@ set(SERVER_LIB_HEADERS
   xdgshell_interface.h
 
   ../../server/client.h
+  ../../server/data_device.h
+  ../../server/data_device_manager.h
+  ../../server/data_offer.h
+  ../../server/data_source.h
   ../../server/display.h
   ../../server/dpms.h
   ../../server/keyboard.h
+  ../../server/touch.h
   ../../server/output.h
   ../../server/pointer.h
   ../../server/pointer_constraints_v1.h

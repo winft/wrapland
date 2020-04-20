@@ -255,22 +255,29 @@ ecm_mark_as_test(testWindowmanagement)
 ########################################################
 # Test DataSource
 ########################################################
-set( testDataSource_SRCS
-        test_datasource.cpp
-    )
+set( testDataSource_SRCS data_source.cpp )
 add_executable(testDataSource ${testDataSource_SRCS})
-target_link_libraries( testDataSource Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+target_link_libraries( testDataSource
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+    Wayland::Client
+)
 add_test(NAME wrapland-testDataSource COMMAND testDataSource)
 ecm_mark_as_test(testDataSource)
 
 ########################################################
 # Test DataDevice
 ########################################################
-set( testDataDevice_SRCS
-        test_datadevice.cpp
-    )
+set( testDataDevice_SRCS data_device.cpp )
 add_executable(testDataDevice ${testDataDevice_SRCS})
-target_link_libraries( testDataDevice Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+target_link_libraries( testDataDevice
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+    Wayland::Client)
 add_test(NAME wrapland-testDataDevice COMMAND testDataDevice)
 ecm_mark_as_test(testDataDevice)
 
@@ -288,11 +295,15 @@ ecm_mark_as_test(testServerSideDecoration)
 ########################################################
 # Test Drag'N'Drop
 ########################################################
-set( testDragAndDrop_SRCS
-        test_drag_drop.cpp
-    )
+set( testDragAndDrop_SRCS drag_and_drop.cpp )
 add_executable(testDragAndDrop ${testDragAndDrop_SRCS})
-target_link_libraries( testDragAndDrop Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+target_link_libraries( testDragAndDrop
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+    Wayland::Client
+)
 add_test(NAME wrapland-testDragAndDrop COMMAND testDragAndDrop)
 ecm_mark_as_test(testDragAndDrop)
 
@@ -380,11 +391,14 @@ ecm_mark_as_test(testError)
 ########################################################
 # Test Selection
 ########################################################
-set( testSelection_SRCS
-        test_selection.cpp
-    )
+set( testSelection_SRCS selection.cpp )
 add_executable(testSelection ${testSelection_SRCS})
-target_link_libraries( testSelection Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+target_link_libraries( testSelection
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+    Wayland::Client)
 add_test(NAME wrapland-testSelection COMMAND testSelection)
 ecm_mark_as_test(testSelection)
 

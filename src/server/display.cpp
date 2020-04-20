@@ -20,7 +20,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "display.h"
 #include "compositor_interface.h"
-#include "datadevicemanager_interface.h"
 #include "output_configuration_v1_interface.h"
 #include "output_management_v1_interface.h"
 #include "output_device_v1_interface.h"
@@ -276,12 +275,12 @@ SubCompositorInterface *Display::createSubCompositor(QObject *parent)
     return c;
 }
 
-DataDeviceManagerInterface *Display::createDataDeviceManager(QObject *parent)
-{
-    auto m = new DataDeviceManagerInterface(this, parent);
-    connect(this, &Display::aboutToTerminate, m, [this,m] { delete m; });
-    return m;
-}
+//DataDeviceManagerInterface *Display::createDataDeviceManager(QObject *parent)
+//{
+//    auto m = new DataDeviceManagerInterface(this, parent);
+//    connect(this, &Display::aboutToTerminate, m, [this,m] { delete m; });
+//    return m;
+//}
 
 PlasmaShellInterface *Display::createPlasmaShell(QObject* parent)
 {

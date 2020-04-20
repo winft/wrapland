@@ -20,8 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat_interface.h"
 #include "seat_interface_p.h"
 #include "display.h"
-#include "datadevice_interface.h"
-#include "datasource_interface.h"
+//#include "datadevice_interface.h"
+//#include "datasource_interface.h"
 #include "surface_interface.h"
 #include "textinput_interface_p.h"
 
@@ -267,17 +267,17 @@ namespace {
 ////    return interfacesForSurface(surface, keyboards);
 //}
 
-QVector<TouchInterface *> SeatInterface::Private::touchsForSurface(SurfaceInterface *surface) const
-{
-    return q->newSeat->d_ptr->touchsForSurface(surface);
+//QVector<TouchInterface *> SeatInterface::Private::touchsForSurface(SurfaceInterface *surface) const
+//{
+//    return q->newSeat->d_ptr->touchsForSurface(surface);
 //    return interfacesForSurface(surface, touchs);
-}
+//}
 
-DataDeviceInterface *SeatInterface::Private::dataDeviceForSurface(SurfaceInterface *surface) const
-{
-    return q->newSeat->d_ptr->dataDeviceForSurface(surface);
+//DataDeviceInterface *SeatInterface::Private::dataDeviceForSurface(SurfaceInterface *surface) const
+//{
+//    return q->newSeat->d_ptr->dataDeviceForSurface(surface);
 //    return interfaceForSurface(surface, dataDevices);
-}
+//}
 
 TextInputInterface *SeatInterface::Private::textInputForSurface(SurfaceInterface *surface) const
 {
@@ -285,9 +285,9 @@ TextInputInterface *SeatInterface::Private::textInputForSurface(SurfaceInterface
 //    return interfaceForSurface(surface, textInputs);
 }
 
-void SeatInterface::Private::registerDataDevice(DataDeviceInterface *dataDevice)
-{
-    q->newSeat->d_ptr->registerDataDevice(dataDevice);
+//void SeatInterface::Private::registerDataDevice(DataDeviceInterface *dataDevice)
+//{
+//    q->newSeat->d_ptr->registerDataDevice(dataDevice);
 //    Q_ASSERT(dataDevice->seat() == q);
 //    dataDevices << dataDevice;
 //    auto dataDeviceCleanup = [this, dataDevice] {
@@ -377,7 +377,7 @@ void SeatInterface::Private::registerDataDevice(DataDeviceInterface *dataDevice)
 //            }
 //        }
 //    }
-}
+//}
 
 
 void SeatInterface::Private::registerTextInput(TextInputInterface *ti)
@@ -407,9 +407,9 @@ void SeatInterface::Private::registerTextInput(TextInputInterface *ti)
 //    );
 }
 
-void SeatInterface::Private::endDrag(quint32 serial)
-{
-    q->newSeat->d_ptr->endDrag(serial);
+//void SeatInterface::Private::endDrag(quint32 serial)
+//{
+//    q->newSeat->d_ptr->endDrag(serial);
 //    auto target = drag.target;
 //    QObject::disconnect(drag.destroyConnection);
 //    QObject::disconnect(drag.dragSourceDestroyConnection);
@@ -423,11 +423,12 @@ void SeatInterface::Private::endDrag(quint32 serial)
 //    drag = Drag();
 //    emit q->dragSurfaceChanged();
 //    emit q->dragEnded();
-}
+//}
 
-void SeatInterface::Private::cancelPreviousSelection(DataDeviceInterface *dataDevice)
-{
-    q->newSeat->d_ptr->cancelPreviousSelection(dataDevice);
+//void SeatInterface::Private::cancelPreviousSelection(DataDeviceInterface *dataDevice)
+//{
+//    q->newSeat->d_ptr->cancelPreviousSelection(dataDevice);
+
 //    if (!currentSelection) {
 //        return;
 //    }
@@ -438,11 +439,12 @@ void SeatInterface::Private::cancelPreviousSelection(DataDeviceInterface *dataDe
 //            s->cancel();
 //        }
 //    }
-}
+//}
 
-void SeatInterface::Private::updateSelection(DataDeviceInterface *dataDevice, bool set)
-{
-    q->newSeat->d_ptr->updateSelection(dataDevice, set);
+//void SeatInterface::Private::updateSelection(DataDeviceInterface *dataDevice, bool set)
+//{
+//    q->newSeat->d_ptr->updateSelection(dataDevice, set);
+
 //    bool selChanged = currentSelection != dataDevice;
 //    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client())) {
 //        // cancel the previous selection
@@ -465,7 +467,7 @@ void SeatInterface::Private::updateSelection(DataDeviceInterface *dataDevice, bo
 //    if (selChanged) {
 //        emit q->selectionChanged(currentSelection);
 //    }
-}
+//}
 
 void SeatInterface::setHasKeyboard(bool has)
 {
@@ -642,7 +644,8 @@ bool SeatInterface::hasKeyboard() const
 
 bool SeatInterface::hasTouch() const
 {
-    return newSeat->hasTouch();
+    return false;
+//    return newSeat->hasTouch();
 //    Q_D();
 //    return d->touch;
 }
@@ -1378,9 +1381,9 @@ QVector< quint32 > SeatInterface::pressedKeys() const
 ////    return d->keys.focus.keyboards.first();
 //}
 
-void SeatInterface::cancelTouchSequence()
-{
-    newSeat->cancelTouchSequence();
+//void SeatInterface::cancelTouchSequence()
+//{
+//    newSeat->cancelTouchSequence();
 //    Q_D();
 //    for (auto it = d->globalTouch.focus.touchs.constBegin(), end = d->globalTouch.focus.touchs.constEnd(); it != end; ++it) {
 //        (*it)->cancel();
@@ -1396,42 +1399,42 @@ void SeatInterface::cancelTouchSequence()
 //        d->endDrag(0);
 //    }
 //    d->globalTouch.ids.clear();
-}
+//}
 
-TouchInterface *SeatInterface::focusedTouch() const
-{
-    return newSeat->focusedTouch();
+//TouchInterface *SeatInterface::focusedTouch() const
+//{
+//    return newSeat->focusedTouch();
 //    Q_D();
 //    if (d->globalTouch.focus.touchs.isEmpty()) {
 //        return nullptr;
 //    }
 //    return d->globalTouch.focus.touchs.first();
-}
+//}
 
-SurfaceInterface *SeatInterface::focusedTouchSurface() const
-{
-    return newSeat->focusedTouchSurface();
+//SurfaceInterface *SeatInterface::focusedTouchSurface() const
+//{
+//    return newSeat->focusedTouchSurface();
 //    Q_D();
 //    return d->globalTouch.focus.surface;
-}
+//}
 
-QPointF SeatInterface::focusedTouchSurfacePosition() const
-{
-    return newSeat->focusedTouchSurfacePosition();
+//QPointF SeatInterface::focusedTouchSurfacePosition() const
+//{
+//    return newSeat->focusedTouchSurfacePosition();
 //    Q_D();
 //    return d->globalTouch.focus.offset;
-}
+//}
 
-bool SeatInterface::isTouchSequence() const
-{
-    return newSeat->isTouchSequence();
+//bool SeatInterface::isTouchSequence() const
+//{
+//    return newSeat->isTouchSequence();
 //    Q_D();
 //    return !d->globalTouch.ids.isEmpty();
-}
+//}
 
-void SeatInterface::setFocusedTouchSurface(SurfaceInterface *surface, const QPointF &surfacePosition)
-{
-    newSeat->setFocusedTouchSurface(surface,surfacePosition);
+//void SeatInterface::setFocusedTouchSurface(SurfaceInterface *surface, const QPointF &surfacePosition)
+//{
+//    newSeat->setFocusedTouchSurface(surface,surfacePosition);
 //    if (isTouchSequence()) {
 //        // changing surface not allowed during a touch sequence
 //        return;
@@ -1459,18 +1462,18 @@ void SeatInterface::setFocusedTouchSurface(SurfaceInterface *surface, const QPoi
 //            }
 //        );
 //    }
-}
+//}
 
-void SeatInterface::setFocusedTouchSurfacePosition(const QPointF &surfacePosition)
-{
-    newSeat->setFocusedTouchSurfacePosition(surfacePosition);
+//void SeatInterface::setFocusedTouchSurfacePosition(const QPointF &surfacePosition)
+//{
+//    newSeat->setFocusedTouchSurfacePosition(surfacePosition);
 //    Q_D();
 //    d->globalTouch.focus.offset = surfacePosition;
-}
+//}
 
-qint32 SeatInterface::touchDown(const QPointF &globalPosition)
-{
-    return newSeat->touchDown(globalPosition);
+//qint32 SeatInterface::touchDown(const QPointF &globalPosition)
+//{
+//    return newSeat->touchDown(globalPosition);
 //    Q_D();
 //    const qint32 id = d->globalTouch.ids.isEmpty() ? 0 : d->globalTouch.ids.lastKey() + 1;
 //    const qint32 serial = display()->nextSerial();
@@ -1504,11 +1507,11 @@ qint32 SeatInterface::touchDown(const QPointF &globalPosition)
 
 //    d->globalTouch.ids[id] = serial;
 //    return id;
-}
+//}
 
-void SeatInterface::touchMove(qint32 id, const QPointF &globalPosition)
-{
-    newSeat->touchMove(id, globalPosition);
+//void SeatInterface::touchMove(qint32 id, const QPointF &globalPosition)
+//{
+//    newSeat->touchMove(id, globalPosition);
 //    Q_D();
 //    Q_ASSERT(d->globalTouch.ids.contains(id));
 //    const auto pos = globalPosition - d->globalTouch.focus.offset;
@@ -1530,11 +1533,11 @@ void SeatInterface::touchMove(qint32 id, const QPointF &globalPosition)
 //        );
 //    }
 //    emit touchMoved(id, d->globalTouch.ids[id], globalPosition);
-}
+//}
 
-void SeatInterface::touchUp(qint32 id)
-{
-    newSeat->touchUp(id);
+//void SeatInterface::touchUp(qint32 id)
+//{
+//    newSeat->touchUp(id);
 //    Q_D();
 //    Q_ASSERT(d->globalTouch.ids.contains(id));
 //    const qint32 serial = display()->nextSerial();
@@ -1560,41 +1563,41 @@ void SeatInterface::touchUp(qint32 id)
 //#endif
 
 //    d->globalTouch.ids.remove(id);
-}
+//}
 
-void SeatInterface::touchFrame()
-{
-    newSeat->touchFrame();
+//void SeatInterface::touchFrame()
+//{
+//    newSeat->touchFrame();
 //    Q_D();
 //    for (auto it = d->globalTouch.focus.touchs.constBegin(), end = d->globalTouch.focus.touchs.constEnd(); it != end; ++it) {
 //        (*it)->frame();
 //    }
-}
+//}
 
-bool SeatInterface::hasImplicitTouchGrab(quint32 serial) const
-{
-    return newSeat->hasImplicitTouchGrab(serial);
+//bool SeatInterface::hasImplicitTouchGrab(quint32 serial) const
+//{
+//    return newSeat->hasImplicitTouchGrab(serial);
 //    Q_D();
 //    if (!d->globalTouch.focus.surface) {
 //        // origin surface has been destroyed
 //        return false;
 //    }
 //    return d->globalTouch.ids.key(serial, -1) != -1;
-}
+//}
 
-bool SeatInterface::isDrag() const
-{
-    return newSeat->isDrag();
+//bool SeatInterface::isDrag() const
+//{
+//    return newSeat->isDrag();
 //    Q_D();
 //    return d->drag.mode != Private::Drag::Mode::None;
-}
+//}
 
-bool SeatInterface::isDragPointer() const
-{
-    return newSeat->isDragPointer();
+//bool SeatInterface::isDragPointer() const
+//{
+//    return newSeat->isDragPointer();
 //    Q_D();
 //    return d->drag.mode == Private::Drag::Mode::Pointer;
-}
+//}
 
 bool SeatInterface::isDragTouch() const
 {
@@ -1641,12 +1644,13 @@ SurfaceInterface *SeatInterface::dragSurface() const
 //    return d->drag.sourcePointer;
 //}
 
-DataDeviceInterface *SeatInterface::dragSource() const
-{
-    return newSeat->dragSource();
+//DataDeviceInterface *SeatInterface::dragSource() const
+//{
+//    return nullptr;
+//    return newSeat->dragSource();
 //    Q_D();
 //    return d->drag.source;
-}
+//}
 
 void SeatInterface::setFocusedTextInputSurface(SurfaceInterface *surface)
 {
@@ -1699,16 +1703,17 @@ TextInputInterface *SeatInterface::focusedTextInput() const
 //    return d->textInput.focus.textInput;
 }
 
-DataDeviceInterface *SeatInterface::selection() const
-{
-    return newSeat->selection();
+//DataDeviceInterface *SeatInterface::selection() const
+//{
+//    return nullptr;
+//    return newSeat->selection();
 //    Q_D();
 //    return d->currentSelection;
-}
+//}
 
-void SeatInterface::setSelection(DataDeviceInterface *dataDevice)
-{
-    newSeat->setSelection(dataDevice);
+//void SeatInterface::setSelection(DataDeviceInterface *dataDevice)
+//{
+//    newSeat->setSelection(dataDevice);
 //    Q_D();
 //    if (d->currentSelection == dataDevice) {
 //        return;
@@ -1724,7 +1729,7 @@ void SeatInterface::setSelection(DataDeviceInterface *dataDevice)
 //        }
 //    }
 //    emit selectionChanged(dataDevice);
-}
+//}
 
 }
 }

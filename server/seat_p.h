@@ -36,7 +36,7 @@ namespace Wrapland
 namespace Server
 {
 
-class DataDeviceInterface;
+class DataDevice;
 class TextInputInterface;
 
 using Sender = std::function<void(wl_resource*)>;
@@ -48,6 +48,7 @@ public:
     ~Private() override = default;
 
     void bindInit(Wayland::Client* client, uint32_t version, uint32_t id) override;
+
     uint32_t version() const override;
 
     void sendCapabilities();
@@ -59,13 +60,13 @@ public:
 
     QVector<Pointer*> pointersForSurface(SurfaceInterface* surface) const;
     QVector<Keyboard*> keyboardsForSurface(SurfaceInterface* surface) const;
-    QVector<TouchInterface*> touchsForSurface(SurfaceInterface* surface) const;
-    DataDeviceInterface* dataDeviceForSurface(SurfaceInterface* surface) const;
+    QVector<Touch*> touchsForSurface(SurfaceInterface* surface) const;
+    DataDevice* dataDeviceForSurface(SurfaceInterface* surface) const;
     TextInputInterface* textInputForSurface(SurfaceInterface* surface) const;
-    void registerDataDevice(DataDeviceInterface* dataDevice);
+    void registerDataDevice(DataDevice* dataDevice);
     void registerTextInput(TextInputInterface* textInput);
     void endDrag(quint32 serial);
-    void cancelPreviousSelection(DataDeviceInterface* newlySelectedDataDevice);
+    void cancelPreviousSelection(DataDevice* newlySelectedDataDevice);
 
     std::string name;
     bool pointer = false;
@@ -75,10 +76,10 @@ public:
     quint32 timestamp = 0;
     QVector<Pointer*> pointers;
     QVector<Keyboard*> keyboards;
-    QVector<TouchInterface*> touchs;
-    QVector<DataDeviceInterface*> dataDevices;
+    QVector<Touch*> touchs;
+    QVector<DataDevice*> dataDevices;
     QVector<TextInputInterface*> textInputs;
-    DataDeviceInterface* currentSelection = nullptr;
+    DataDevice* currentSelection = nullptr;
 
     // Pointer related members
     struct SeatPointer {
@@ -131,7 +132,7 @@ public:
             QVector<Keyboard*> keyboards;
             QMetaObject::Connection destroyConnection;
             quint32 serial = 0;
-            DataDeviceInterface* selection = nullptr;
+            DataDevice* selection = nullptr;
         };
         Focus focus;
         quint32 lastStateSerial = 0;
@@ -156,10 +157,10 @@ public:
     TextInput textInput;
 
     // Touch related members
-    struct Touch {
+    struct SeatTouch {
         struct Focus {
             SurfaceInterface* surface = nullptr;
-            QVector<TouchInterface*> touchs;
+            QVector<Touch*> touchs;
             QMetaObject::Connection destroyConnection;
             QPointF offset = QPointF();
             QPointF firstTouchPos;
@@ -167,7 +168,7 @@ public:
         Focus focus;
         QMap<qint32, quint32> ids;
     };
-    Touch globalTouch;
+    SeatTouch globalTouch;
 
     struct Drag {
         enum class Mode {
@@ -176,11 +177,11 @@ public:
             Touch,
         };
         Mode mode = Mode::None;
-        DataDeviceInterface* source = nullptr;
-        DataDeviceInterface* target = nullptr;
+        DataDevice* source = nullptr;
+        DataDevice* target = nullptr;
         SurfaceInterface* surface = nullptr;
         Pointer* sourcePointer = nullptr;
-        TouchInterface* sourceTouch = nullptr;
+        Touch* sourceTouch = nullptr;
         QMatrix4x4 transformation;
         QMetaObject::Connection destroyConnection;
         QMetaObject::Connection dragSourceDestroyConnection;
@@ -198,8 +199,8 @@ private:
     void getKeyboard(Client* client, uint32_t id, /*TODO legacy*/ wl_resource* resource);
     void getTouch(Client* client, uint32_t id, /*TODO legacy*/ wl_resource* resource);
 
-    void updateSelection(DataDeviceInterface* dataDevice, bool set);
-    static Private* cast(wl_resource* r);
+    void updateSelection(DataDevice* dataDevice, bool set);
+    void cleanupDataDevice(DataDevice* dataDevice);
 
     static void getPointerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
     static void getKeyboardCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);

@@ -1,5 +1,6 @@
 /********************************************************************
-Copyright 2016  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2016 Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,11 +18,10 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// client
-#include "../../src/client/connection_thread.h"
+
 #include "../../src/client/compositor.h"
+#include "../../src/client/connection_thread.h"
 #include "../../src/client/datadevice.h"
 #include "../../src/client/datadevicemanager.h"
 #include "../../src/client/datasource.h"
@@ -30,15 +30,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
-// server
+
+#include "../../server/data_device_manager.h"
+#include "../../server/display.h"
+#include "../../server/seat.h"
+
 #include "../../src/server/compositor_interface.h"
-#include "../../src/server/datadevicemanager_interface.h"
-#include "../../src/server/display.h"
-#include "../../src/server/seat_interface.h"
-
-using namespace Wrapland::Client;
-using namespace Wrapland::Server;
-
 
 class SelectionTest : public QObject
 {
@@ -49,45 +46,43 @@ private Q_SLOTS:
     void testClearOnEnter();
 
 private:
-    Display *m_display = nullptr;
-    CompositorInterface *m_compositorInterface = nullptr;
-    SeatInterface *m_seatInterface = nullptr;
-    DataDeviceManagerInterface *m_ddmInterface = nullptr;
+    Wrapland::Server::D_isplay* m_display = nullptr;
+    Wrapland::Server::CompositorInterface* m_compositorInterface = nullptr;
+    Wrapland::Server::Seat* m_serverSeat = nullptr;
+    Wrapland::Server::DataDeviceManager* m_serverDdm = nullptr;
 
     struct Connection {
-        ConnectionThread *connection = nullptr;
-        QThread *thread = nullptr;
-        EventQueue *queue = nullptr;
-        Compositor *compositor = nullptr;
-        Wrapland::Client::Seat *seat = nullptr;
-        DataDeviceManager *ddm = nullptr;
-        Wrapland::Client::Keyboard *keyboard = nullptr;
-        DataDevice *dataDevice = nullptr;
+        Wrapland::Client::ConnectionThread* connection = nullptr;
+        QThread* thread = nullptr;
+        Wrapland::Client::EventQueue* queue = nullptr;
+        Wrapland::Client::Compositor* compositor = nullptr;
+        Wrapland::Client::Seat* seat = nullptr;
+        Wrapland::Client::DataDeviceManager* ddm = nullptr;
+        Wrapland::Client::Keyboard* keyboard = nullptr;
+        Wrapland::Client::DataDevice* dataDevice = nullptr;
     };
-    bool setupConnection(Connection *c);
-    void cleanupConnection(Connection *c);
+    bool setupConnection(Connection* c);
+    void cleanupConnection(Connection* c);
 
     Connection m_client1;
     Connection m_client2;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-selection-0");
+static const std::string s_socketName{"wrapland-test-selection-0"};
 
 void SelectionTest::init()
 {
     delete m_display;
-    m_display = new Display(this);
+    m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
+
     m_display->createShm();
     m_compositorInterface = m_display->createCompositor(m_display);
     m_compositorInterface->create();
-    m_seatInterface = m_display->createSeat(m_display);
-    m_seatInterface->setHasKeyboard(true);
-    m_seatInterface->create();
-    m_ddmInterface = m_display->createDataDeviceManager(m_display);
-    m_ddmInterface->create();
+    m_serverSeat = m_display->createSeat(m_display);
+    m_serverSeat->setHasKeyboard(true);
+    m_serverDdm = m_display->createDataDeviceManager(m_display);
 
     // setup connection
     setupConnection(&m_client1);
@@ -96,12 +91,12 @@ void SelectionTest::init()
 
 bool SelectionTest::setupConnection(Connection* c)
 {
-    c->connection = new ConnectionThread;
-    QSignalSpy connectedSpy(c->connection, &ConnectionThread::establishedChanged);
+    c->connection = new Wrapland::Client::ConnectionThread;
+    QSignalSpy connectedSpy(c->connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     if (!connectedSpy.isValid()) {
         return false;
     }
-    c->connection->setSocketName(s_socketName);
+    c->connection->setSocketName(QString::fromStdString(s_socketName));
 
     c->thread = new QThread(this);
     c->connection->moveToThread(c->thread);
@@ -112,11 +107,11 @@ bool SelectionTest::setupConnection(Connection* c)
         return false;
     }
 
-    c->queue = new EventQueue(this);
+    c->queue = new Wrapland::Client::EventQueue(this);
     c->queue->setup(c->connection);
 
-    Registry registry;
-    QSignalSpy interfacesAnnouncedSpy(&registry, &Registry::interfacesAnnounced);
+    Wrapland::Client::Registry registry;
+    QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
     if (!interfacesAnnouncedSpy.isValid()) {
         return false;
     }
@@ -130,21 +125,24 @@ bool SelectionTest::setupConnection(Connection* c)
         return false;
     }
 
-    c->compositor = registry.createCompositor(registry.interface(Registry::Interface::Compositor).name,
-                                              registry.interface(Registry::Interface::Compositor).version,
-                                              this);
+    c->compositor = registry.createCompositor(
+        registry.interface(Wrapland::Client::Registry::Interface::Compositor).name,
+        registry.interface(Wrapland::Client::Registry::Interface::Compositor).version,
+        this);
     if (!c->compositor->isValid()) {
         return false;
     }
-    c->ddm = registry.createDataDeviceManager(registry.interface(Registry::Interface::DataDeviceManager).name,
-                                              registry.interface(Registry::Interface::DataDeviceManager).version,
-                                              this);
+    c->ddm = registry.createDataDeviceManager(
+        registry.interface(Wrapland::Client::Registry::Interface::DataDeviceManager).name,
+        registry.interface(Wrapland::Client::Registry::Interface::DataDeviceManager).version,
+        this);
     if (!c->ddm->isValid()) {
         return false;
     }
-    c->seat = registry.createSeat(registry.interface(Registry::Interface::Seat).name,
-                                  registry.interface(Registry::Interface::Seat).version,
-                                  this);
+    c->seat = registry.createSeat(
+        registry.interface(Wrapland::Client::Registry::Interface::Seat).name,
+        registry.interface(Wrapland::Client::Registry::Interface::Seat).version,
+        this);
     if (!c->seat->isValid()) {
         return false;
     }
@@ -174,18 +172,18 @@ void SelectionTest::cleanup()
 {
     cleanupConnection(&m_client1);
     cleanupConnection(&m_client2);
-#define CLEANUP(variable) \
-        delete variable; \
-        variable = nullptr;
+#define CLEANUP(variable)                                                                          \
+    delete variable;                                                                               \
+    variable = nullptr;
 
-    CLEANUP(m_ddmInterface)
-    CLEANUP(m_seatInterface)
+    CLEANUP(m_serverDdm)
+    CLEANUP(m_serverSeat)
     CLEANUP(m_compositorInterface)
     CLEANUP(m_display)
 #undef CLEANUP
 }
 
-void SelectionTest::cleanupConnection(Connection *c)
+void SelectionTest::cleanupConnection(Connection* c)
 {
     delete c->dataDevice;
     c->dataDevice = nullptr;
@@ -213,60 +211,73 @@ void SelectionTest::cleanupConnection(Connection *c)
 
 void SelectionTest::testClearOnEnter()
 {
-    // this test verifies that the selection is cleared prior to keyboard enter if there is no current selection
-    QSignalSpy selectionClearedClient1Spy(m_client1.dataDevice, &DataDevice::selectionCleared);
+    // This test verifies that the selection is cleared prior to keyboard enter if there is no
+    // current selection.
+
+    QSignalSpy selectionClearedClient1Spy(m_client1.dataDevice,
+                                          &Wrapland::Client::DataDevice::selectionCleared);
     QVERIFY(selectionClearedClient1Spy.isValid());
     QSignalSpy keyboardEnteredClient1Spy(m_client1.keyboard, &Wrapland::Client::Keyboard::entered);
     QVERIFY(keyboardEnteredClient1Spy.isValid());
 
-    // now create a Surface
-    QSignalSpy surfaceCreatedSpy(m_compositorInterface, &CompositorInterface::surfaceCreated);
+    // Now create a Surface.
+    QSignalSpy surfaceCreatedSpy(m_compositorInterface,
+                                 &Wrapland::Server::CompositorInterface::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    std::unique_ptr<Surface> s1(m_client1.compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> s1(m_client1.compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface1 = surfaceCreatedSpy.first().first().value<SurfaceInterface*>();
+
+    auto serverSurface1
+        = surfaceCreatedSpy.first().first().value<Wrapland::Server::SurfaceInterface*>();
     QVERIFY(serverSurface1);
 
-    // pass this surface keyboard focus
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface1);
+    // Pass this surface keyboard focus.
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface1);
     // should get a clear
     QVERIFY(selectionClearedClient1Spy.wait());
 
-    // let's set a selection
-    std::unique_ptr<DataSource> dataSource(m_client1.ddm->createDataSource());
+    // Let's set a selection.
+    std::unique_ptr<Wrapland::Client::DataSource> dataSource(m_client1.ddm->createDataSource());
     dataSource->offer(QStringLiteral("text/plain"));
-    m_client1.dataDevice->setSelection(keyboardEnteredClient1Spy.first().first().value<quint32>(), dataSource.get());
+    m_client1.dataDevice->setSelection(keyboardEnteredClient1Spy.first().first().value<quint32>(),
+                                       dataSource.get());
 
-    // now let's bring in client 2
-    QSignalSpy selectionOfferedClient2Spy(m_client2.dataDevice, &DataDevice::selectionOffered);
+    // Now let's bring in client 2.
+    QSignalSpy selectionOfferedClient2Spy(m_client2.dataDevice,
+                                          &Wrapland::Client::DataDevice::selectionOffered);
     QVERIFY(selectionOfferedClient2Spy.isValid());
-    QSignalSpy selectionClearedClient2Spy(m_client2.dataDevice, &DataDevice::selectionCleared);
+    QSignalSpy selectionClearedClient2Spy(m_client2.dataDevice,
+                                          &Wrapland::Client::DataDevice::selectionCleared);
     QVERIFY(selectionClearedClient2Spy.isValid());
     QSignalSpy keyboardEnteredClient2Spy(m_client2.keyboard, &Wrapland::Client::Keyboard::entered);
     QVERIFY(keyboardEnteredClient2Spy.isValid());
-    std::unique_ptr<Surface> s2(m_client2.compositor->createSurface());
+    std::unique_ptr<Wrapland::Client::Surface> s2(m_client2.compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface2 = surfaceCreatedSpy.last().first().value<SurfaceInterface*>();
+    auto serverSurface2
+        = surfaceCreatedSpy.last().first().value<Wrapland::Server::SurfaceInterface*>();
     QVERIFY(serverSurface2);
 
-    // entering that surface should give a selection offer
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface2);
+    // Entering that surface should give a selection offer.
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface2);
     QVERIFY(selectionOfferedClient2Spy.wait());
     QVERIFY(selectionClearedClient2Spy.isEmpty());
 
-    // set a data source but without offers
-    std::unique_ptr<DataSource> dataSource2(m_client2.ddm->createDataSource());
-    m_client2.dataDevice->setSelection(keyboardEnteredClient2Spy.first().first().value<quint32>(), dataSource2.get());
+    // Set a data source but without offers.
+    std::unique_ptr<Wrapland::Client::DataSource> dataSource2(m_client2.ddm->createDataSource());
+    m_client2.dataDevice->setSelection(keyboardEnteredClient2Spy.first().first().value<quint32>(),
+                                       dataSource2.get());
     QVERIFY(selectionOfferedClient2Spy.wait());
     // and clear
-    m_client2.dataDevice->clearSelection(keyboardEnteredClient2Spy.first().first().value<quint32>());
+    m_client2.dataDevice->clearSelection(
+        keyboardEnteredClient2Spy.first().first().value<quint32>());
     QVERIFY(selectionClearedClient2Spy.wait());
 
-    // now pass focus to first surface
-    m_seatInterface->setFocusedKeyboardSurface(serverSurface1);
-    // we should get a clear
+    // Now pass focus to first surface.
+    m_serverSeat->setFocusedKeyboardSurface(serverSurface1);
+
+    // We should get a clear.
     QVERIFY(selectionClearedClient1Spy.wait());
 }
 
 QTEST_GUILESS_MAIN(SelectionTest)
-#include "test_selection.moc"
+#include "selection.moc"

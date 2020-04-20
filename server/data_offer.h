@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2016  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,49 +17,49 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef TESTSERVER_H
-#define TESTSERVER_H
+#pragma once
 
-#include <QHash>
 #include <QObject>
-#include <QPointF>
-#include <QVector>
 
-class QElapsedTimer;
-class QTimer;
+#include <Wrapland/Server/wraplandserver_export.h>
+
+#include "data_device_manager.h"
 
 namespace Wrapland
 {
 namespace Server
 {
-class D_isplay;
-class Seat;
-class ShellInterface;
-class ShellSurfaceInterface;
-}
-}
 
-class TestServer : public QObject
+class Client;
+class DataDevice;
+class DataSource;
+
+class WRAPLANDSERVER_EXPORT DataOffer : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestServer(QObject *parent);
-    virtual ~TestServer();
+    ~DataOffer() override;
 
-    void init();
-    void startTestApp(const QString &app, const QStringList &arguments);
+    void sendAllOffers();
+
+    DataDeviceManager::DnDActions supportedDragAndDropActions() const;
+    DataDeviceManager::DnDAction preferredDragAndDropAction() const;
+    void dndAction(DataDeviceManager::DnDAction action);
+
+Q_SIGNALS:
+    void dragAndDropActionsChanged();
+    void resourceDestroyed();
 
 private:
-    void repaint();
+    friend class DataDevice;
 
-    Wrapland::Server::D_isplay *m_display = nullptr;
-    Wrapland::Server::ShellInterface *m_shell = nullptr;
-    Wrapland::Server::Seat *m_seat = nullptr;
-    QVector<Wrapland::Server::ShellSurfaceInterface*> m_shellSurfaces;
-    QTimer *m_repaintTimer;
-    QScopedPointer<QElapsedTimer> m_timeSinceStart;
-    QPointF m_cursorPos;
-    QHash<qint32, qint32> m_touchIdMapper;
+    explicit DataOffer(Client* client, uint32_t version, DataSource* source);
+
+    class Private;
+    Private* d_ptr;
 };
 
-#endif
+}
+}
+
+Q_DECLARE_METATYPE(Wrapland::Server::DataOffer*)

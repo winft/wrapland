@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer.h"
 #include "pointer_p.h"
 
+#include "data_device.h"
 #include "display.h"
 #include "seat.h"
 
@@ -31,7 +32,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_gestures_v1_p.h"
 #include "relative_pointer_v1_p.h"
 
-#include "datadevice_interface.h"
 #include "subcompositor_interface.h"
 #include "surface_interface.h"
 

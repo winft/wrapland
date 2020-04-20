@@ -40,18 +40,20 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/buffer_interface.h"
 #include "../../src/server/clientconnection.h"
 #include "../../src/server/compositor_interface.h"
-#include "../../src/server/datadevicemanager_interface.h"
 #include "../../src/server/seat_interface.h"
 #include "../../src/server/subcompositor_interface.h"
 #include "../../src/server/surface_interface.h"
 
 #include "../../server/client.h"
+#include "../../server/data_device.h"
+#include "../../server/data_device_manager.h"
 #include "../../server/display.h"
 #include "../../server/keyboard.h"
 #include "../../server/pointer.h"
 #include "../../server/pointer_gestures_v1.h"
 #include "../../server/relative_pointer_v1.h"
 #include "../../server/seat.h"
+#include "../../server/touch.h"
 
 #include <QtTest>
 
@@ -144,8 +146,10 @@ TestSeat::TestSeat(QObject* parent)
     , m_queue(nullptr)
     , m_thread(nullptr)
 {
+    qRegisterMetaType<Wrapland::Server::DataDevice*>();
     qRegisterMetaType<Wrapland::Server::Keyboard*>();
     qRegisterMetaType<Wrapland::Server::Pointer*>();
+    qRegisterMetaType<Wrapland::Server::Touch*>();
 }
 
 void TestSeat::init()
@@ -1951,8 +1955,7 @@ void TestSeat::testDestroy()
 
 void TestSeat::testSelection()
 {
-    QScopedPointer<Srv::DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
-    ddmi->create();
+    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
 
     Clt::Registry registry;
     QSignalSpy dataDeviceManagerSpy(&registry, &Clt::Registry::dataDeviceManagerAnnounced);
@@ -2079,9 +2082,8 @@ void TestSeat::testSelectionNoDataSource()
     // a DataDevice which doesn't have a DataSource yet.
 
     // First create the DataDevice.
-    QScopedPointer<Srv::DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
-    ddmi->create();
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManagerInterface::dataDeviceCreated);
+    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::dataDeviceCreated);
     QVERIFY(ddiCreatedSpy.isValid());
 
     Clt::Registry registry;
@@ -2100,8 +2102,11 @@ void TestSeat::testSelectionNoDataSource()
 
     QScopedPointer<Clt::DataDevice> dd(ddm->getDataDevice(m_seat));
     QVERIFY(dd->isValid());
+
     QVERIFY(ddiCreatedSpy.wait());
-    auto* ddi = ddiCreatedSpy.first().first().value<Srv::DataDeviceInterface*>();
+    QCOMPARE(ddiCreatedSpy.count(), 1);
+
+    auto ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
     QVERIFY(ddi);
 
     // Now create a surface and pass it keyboard focus.
@@ -2111,7 +2116,7 @@ void TestSeat::testSelectionNoDataSource()
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
 
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::SurfaceInterface*>();
     QVERIFY(!m_serverSeat->selection());
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedKeyboardSurface(), serverSurface);
@@ -2127,9 +2132,8 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     // To properly test the functionality this test requires a second client.
 
     // Create the DataDeviceManager.
-    QScopedPointer<Srv::DataDeviceManagerInterface> ddmi(m_display->createDataDeviceManager());
-    ddmi->create();
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManagerInterface::dataDeviceCreated);
+    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::dataDeviceCreated);
     QVERIFY(ddiCreatedSpy.isValid());
 
     // Create a second Wayland client connection to use it for setSelection.
@@ -2170,7 +2174,7 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     // Now create our first datadevice.
     QScopedPointer<Clt::DataDevice> dd1(ddm1->getDataDevice(seat.data()));
     QVERIFY(ddiCreatedSpy.wait());
-    auto* ddi = ddiCreatedSpy.first().first().value<Srv::DataDeviceInterface*>();
+    auto* ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
     QVERIFY(ddi);
     m_serverSeat->setSelection(ddi);
 
@@ -2247,8 +2251,7 @@ void TestSeat::testTouch()
     QVERIFY(touchCreatedSpy.wait());
     auto serverTouch = m_serverSeat->focusedTouch();
     QVERIFY(serverTouch);
-    QCOMPARE(touchCreatedSpy.first().first().value<Srv::TouchInterface*>(),
-             m_serverSeat->focusedTouch());
+    QCOMPARE(touchCreatedSpy.first().first().value<Srv::Touch*>(), m_serverSeat->focusedTouch());
 
     QSignalSpy sequenceStartedSpy(touch, &Clt::Touch::sequenceStarted);
     QVERIFY(sequenceStartedSpy.isValid());
@@ -2410,26 +2413,21 @@ void TestSeat::testTouch()
     QCOMPARE(touch->sequence().first()->position(), QPointF(0, 0));
 
     // Destroy touch on client side.
-    QSignalSpy unboundSpy(serverTouch, &Srv::TouchInterface::unbound);
-    QVERIFY(unboundSpy.isValid());
-    QSignalSpy destroyedSpy(serverTouch, &Srv::TouchInterface::destroyed);
+    QSignalSpy destroyedSpy(serverTouch, &Srv::Touch::resourceDestroyed);
     QVERIFY(destroyedSpy.isValid());
+
     delete touch;
-    QVERIFY(unboundSpy.wait());
-    QCOMPARE(unboundSpy.count(), 1);
-    QCOMPARE(destroyedSpy.count(), 0);
-    QVERIFY(!serverTouch->resource());
+    QVERIFY(destroyedSpy.wait());
+    QCOMPARE(destroyedSpy.count(), 1);
 
     // Try to call into all the methods of the touch interface, should not crash.
-    QCOMPARE(m_serverSeat->focusedTouch(), serverTouch);
+    QCOMPARE(m_serverSeat->focusedTouch(), nullptr);
     m_serverSeat->setTimestamp(8);
     QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 0);
     m_serverSeat->touchFrame();
     m_serverSeat->touchMove(0, QPointF(0, 0));
     QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 1);
     m_serverSeat->cancelTouchSequence();
-    QVERIFY(destroyedSpy.wait());
-    QCOMPARE(destroyedSpy.count(), 1);
 
     // Should have unset the focused touch.
     QVERIFY(!m_serverSeat->focusedTouch());
@@ -2471,7 +2469,7 @@ void TestSeat::testDisconnect()
     QScopedPointer<Clt::Touch> touch(m_seat->createTouch());
     QVERIFY(!touch.isNull());
     QVERIFY(touchCreatedSpy.wait());
-    auto serverTouch = touchCreatedSpy.first().first().value<Srv::TouchInterface*>();
+    auto serverTouch = touchCreatedSpy.first().first().value<Srv::Touch*>();
     QVERIFY(serverTouch);
 
     // Setup destroys.

@@ -68,6 +68,7 @@ private:
 
     friend class RelativePointerManagerV1;
     friend class PointerGesturesV1;
+    friend class PointerConstraintsV1;
 
     friend class Seat;
     Pointer(Client* client, uint32_t version, uint32_t id, Seat* seat);

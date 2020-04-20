@@ -26,7 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Server/wraplandserver_export.h>
 
 #include "global.h"
-#include "touch_interface.h"
 
 struct wl_client;
 struct wl_resource;
@@ -36,12 +35,18 @@ namespace Wrapland
 namespace Server
 {
 
-class DataDeviceInterface;
+class DataDevice;
 class D_isplay;
+
 class Keyboard;
 class Pointer;
+class Touch;
+
 class SurfaceInterface;
 class TextInputInterface;
+
+// legacy
+class SeatInterface;
 
 enum class PointerAxisSource {
     Unknown,
@@ -76,7 +81,7 @@ public:
     QMatrix4x4 dragSurfaceTransformation() const;
     SurfaceInterface* dragSurface() const;
     Pointer* dragPointer() const;
-    DataDeviceInterface* dragSource() const;
+    DataDevice* dragSource() const;
     void setDragTarget(SurfaceInterface* surface,
                        const QPointF& globalPosition,
                        const QMatrix4x4& inputTransformation);
@@ -143,7 +148,7 @@ public:
     void setFocusedTouchSurface(SurfaceInterface* surface,
                                 const QPointF& surfacePosition = QPointF());
     SurfaceInterface* focusedTouchSurface() const;
-    TouchInterface* focusedTouch() const;
+    Touch* focusedTouch() const;
     void setFocusedTouchSurfacePosition(const QPointF& surfacePosition);
     QPointF focusedTouchSurfacePosition() const;
     qint32 touchDown(const QPointF& globalPosition);
@@ -158,8 +163,8 @@ public:
     SurfaceInterface* focusedTextInputSurface() const;
     TextInputInterface* focusedTextInput() const;
 
-    DataDeviceInterface* selection() const;
-    void setSelection(DataDeviceInterface* dataDevice);
+    DataDevice* selection() const;
+    void setSelection(DataDevice* dataDevice);
 
     // legacy
     SeatInterface* legacy;
@@ -167,7 +172,7 @@ public:
     //
 
 Q_SIGNALS:
-    void nameChanged(const std::string&);
+    void nameChanged(std::string);
     void hasPointerChanged(bool);
     void hasKeyboardChanged(bool);
     void hasTouchChanged(bool);
@@ -177,11 +182,11 @@ Q_SIGNALS:
 
     void pointerCreated(Wrapland::Server::Pointer*);
     void keyboardCreated(Wrapland::Server::Keyboard*);
-    void touchCreated(Wrapland::Server::TouchInterface*);
+    void touchCreated(Wrapland::Server::Touch*);
 
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 
-    void selectionChanged(DataDeviceInterface*);
+    void selectionChanged(DataDevice*);
     void dragStarted();
     void dragEnded();
     void dragSurfaceChanged();
@@ -189,10 +194,10 @@ Q_SIGNALS:
 
 private:
     friend class D_isplay;
+    friend class DataDeviceManager;
 
     // legacy
     friend class SeatInterface;
-    friend class DataDeviceManagerInterface;
     friend class TextInputManagerUnstableV0Interface;
     friend class TextInputManagerUnstableV2Interface;
 
