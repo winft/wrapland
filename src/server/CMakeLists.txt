@@ -9,7 +9,6 @@ set(SERVER_LIB_SRCS
     fakeinput_interface.cpp
     filtered_display.cpp
     global.cpp
-    idle_interface.cpp
     idleinhibit_interface.cpp
     idleinhibit_interface_v1.cpp
     output_interface.cpp
@@ -67,6 +66,7 @@ set(SERVER_LIB_SRCS
     ../../server/seat.cpp
     ../../server/keystate.cpp
     ../../server/wayland/buffer_manager.cpp
+    ../../server/kde_idle.cpp
     ../../server/wayland/client.cpp
     ../../server/wayland/display.cpp
 
@@ -335,7 +335,6 @@ set(SERVER_LIB_HEADERS
   fakeinput_interface.h
   filtered_display.h
   global.h
-  idle_interface.h
   idleinhibit_interface.h
   output_interface.h
   output_changeset_v1.h
@@ -367,7 +366,7 @@ set(SERVER_LIB_HEADERS
   ../../server/surface.h
   ../../server/compositor.h
   ../../server/subcompositor.h
-
+  ../../server/kde_idle.h
   ../../server/client.h
   ../../server/data_device.h
   ../../server/data_device_manager.h

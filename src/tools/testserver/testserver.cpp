@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../../server/seat.h"
 #include "../../../server/surface.h"
 
-#include "../../server/idle_interface.h"
+#include "../../../server/kde_idle.h"
 #include "../../server/fakeinput_interface.h"
 #include "../../server/shell_interface.h"
 
@@ -78,7 +78,7 @@ void TestServer::init()
     m_seat->setHasTouch(true);
 
     m_display->createDataDeviceManager(m_display);
-    m_display->createIdle(m_display)->create();
+    m_display->createIdle(m_display);
     m_display->createSubCompositor(m_display);
 
     auto output = m_display->createOutput(m_display);
