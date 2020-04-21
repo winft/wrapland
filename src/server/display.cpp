@@ -56,7 +56,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdgdecoration_interface.h"
 #include "eglstream_controller_interface.h"
 //#include "../../server/keystate.h"
-#include "linuxdmabuf_v1_interface.h"
+//#include "linuxdmabuf_v1_interface.h"
 
 //
 // Remodel
@@ -472,12 +472,12 @@ ServerSideDecorationPaletteManagerInterface *Display::createServerSideDecoration
     return b;
 }
 
-LinuxDmabufUnstableV1Interface *Display::createLinuxDmabufInterface(QObject *parent)
-{
-    auto b = new LinuxDmabufUnstableV1Interface(this, parent);
-    connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
-    return b;
-}
+//LinuxDmabufUnstableV1Interface *Display::createLinuxDmabufInterface(QObject *parent)
+//{
+//    auto b = new LinuxDmabufUnstableV1Interface(this, parent);
+//    connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
+//    return b;
+//}
 
 PlasmaVirtualDesktopManagementInterface *Display::createPlasmaVirtualDesktopManagement(QObject *parent)
 {

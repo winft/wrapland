@@ -42,6 +42,7 @@ class D_isplay;
 
 namespace Wayland
 {
+class BufferManager;
 class Client;
 
 using GlobalCapsule = Capsule<wl_global>;
@@ -87,6 +88,8 @@ public:
 
     static Display* backendCast(Server::D_isplay* display);
 
+    BufferManager* bufferManager() const;
+
 protected:
     virtual Client* castClientImpl(Server::Client* client) = 0;
 
@@ -100,6 +103,7 @@ private:
 
     std::vector<GlobalCapsule*> m_globals;
     std::vector<Client*> m_clients;
+    std::unique_ptr<BufferManager> m_bufferManager;
 
     Server::D_isplay* m_handle;
 };

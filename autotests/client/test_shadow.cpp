@@ -28,9 +28,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/shm_pool.h"
 #include "../../src/client/surface.h"
 
-#include "../../src/server/buffer_interface.h"
 #include "../../src/server/shadow_interface.h"
 
+#include "../../server/buffer.h"
 #include "../../server/display.h"
 #include "../../server/compositor.h"
 #include "../../server/surface.h"
@@ -247,7 +247,7 @@ void ShadowTest::testShadowElements()
     // first attach one buffer
     shadow->attachTopLeft(m_shm->createBuffer(topLeftImage));
     // create a destroyed signal
-    QSignalSpy destroyedSpy(serverShadow->topLeft(), &Wrapland::Server::BufferInterface::aboutToBeDestroyed);
+    QSignalSpy destroyedSpy(serverShadow->topLeft(), &Wrapland::Server::Buffer::resourceDestroyed);
     QVERIFY(destroyedSpy.isValid());
     delete m_shm;
     m_shm = nullptr;

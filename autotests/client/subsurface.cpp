@@ -29,8 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/subsurface.h"
 #include "../../src/client/surface.h"
 
-#include "../../src/server/buffer_interface.h"
-
+#include "../../server/buffer.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/subcompositor.h"
@@ -1041,7 +1040,7 @@ void TestSubsurface::testMappingOfSurfaceTree()
     // unmapping a parent should unmap the complete tree
     QSignalSpy unmappedSpy(child->surface().data(), &Wrapland::Server::Surface::unmapped);
     QVERIFY(unmappedSpy.isValid());
-    childLevel1Surface->attachBuffer(Buffer::Ptr());
+    childLevel1Surface->attachBuffer(Wrapland::Client::Buffer::Ptr());
     childLevel1Surface->damage(QRect(0, 0, 200, 200));
     childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(unmappedSpy.wait());

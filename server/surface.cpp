@@ -21,8 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "surface.h"
 #include "surface_p.h"
 
-#include "buffer_interface.h"
-//#include "clientconnection.h"
+#include "buffer.h"
+
 #include "compositor.h"
 #include "idleinhibit_interface_p.h"
 #include "output_p.h"
@@ -47,6 +47,7 @@ namespace Server
 
 Surface::Private::Private(Client* client, uint32_t version, uint32_t id, Surface* q)
     : Wayland::Resource<Surface>(client, version, id, &wl_surface_interface, &s_interface, q)
+    , q_ptr{q}
 {
 }
 
@@ -409,7 +410,7 @@ void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
     }
 }
 
-void Surface::Private::soureRectangleContainCheck(const BufferInterface* buffer,
+void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
                                                   Output::Transform transform,
                                                   qint32 scale,
                                                   const QRectF& sourceRectangle) const
@@ -468,7 +469,7 @@ void Surface::Private::swapStates(State* source, State* target, bool emitChanged
             if (emitChanged) {
                 target->buffer->unref();
                 QObject::disconnect(
-                    target->buffer, &BufferInterface::sizeChanged, handle(), &Surface::sizeChanged);
+                    target->buffer, &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
             } else {
                 delete target->buffer;
                 target->buffer = nullptr;
@@ -479,7 +480,7 @@ void Surface::Private::swapStates(State* source, State* target, bool emitChanged
             if (emitChanged) {
                 source->buffer->ref();
                 QObject::connect(
-                    source->buffer, &BufferInterface::sizeChanged, handle(), &Surface::sizeChanged);
+                    source->buffer, &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
             }
             const QSize newSize = source->buffer->size();
             sizeChanged = newSize.isValid() && newSize != oldSize;
@@ -769,23 +770,21 @@ void Surface::Private::attachBuffer(wl_resource* buffer, const QPoint& offset)
         return;
     }
 
-    pending.buffer = new BufferInterface(buffer, nullptr);
+    pending.buffer = new Buffer(buffer, q_ptr);
 
-    QObject::connect(pending.buffer,
-                     &BufferInterface::aboutToBeDestroyed,
-                     handle(),
-                     [this](BufferInterface* buffer) {
-                         if (pending.buffer == buffer) {
-                             pending.buffer = nullptr;
-                         }
-                         if (subsurfacePending.buffer == buffer) {
-                             subsurfacePending.buffer = nullptr;
-                         }
-                         if (current.buffer == buffer) {
-                             current.buffer->unref();
-                             current.buffer = nullptr;
-                         }
-                     });
+    QObject::connect(
+        pending.buffer, &Buffer::resourceDestroyed, handle(), [this, buffer = pending.buffer]() {
+            if (pending.buffer == buffer) {
+                pending.buffer = nullptr;
+            }
+            if (subsurfacePending.buffer == buffer) {
+                subsurfacePending.buffer = nullptr;
+            }
+            if (current.buffer == buffer) {
+                current.buffer->unref();
+                current.buffer = nullptr;
+            }
+        });
 }
 
 void Surface::Private::destroyFrameCallback(wl_resource* wlResource)
@@ -926,13 +925,13 @@ Output::Transform Surface::transform() const
     return d_ptr->current.transform;
 }
 
-BufferInterface* Surface::buffer()
+Buffer* Surface::buffer()
 {
 
     return d_ptr->current.buffer;
 }
 
-BufferInterface* Surface::buffer() const
+Buffer* Surface::buffer() const
 {
 
     return d_ptr->current.buffer;

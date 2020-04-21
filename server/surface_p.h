@@ -65,7 +65,7 @@ public:
         QList<wl_resource*> callbacks = QList<wl_resource*>();
 
         QPoint offset = QPoint();
-        BufferInterface* buffer = nullptr;
+        Buffer* buffer = nullptr;
 
         QRectF sourceRectangle = QRectF();
         QSize destinationSize = QSize();
@@ -156,7 +156,7 @@ private:
     /**
      * Posts Wayland error in case the source rectangle is not contained in surface size.
      */
-    void soureRectangleContainCheck(const BufferInterface* buffer,
+    void soureRectangleContainCheck(const Buffer* buffer,
                                     Output::Transform transform,
                                     qint32 scale,
                                     const QRectF& sourceRectangle) const;
@@ -197,6 +197,8 @@ private:
                                      int32_t height);
 
     static const struct wl_surface_interface s_interface;
+
+    Surface* q_ptr;
 };
 
 }

@@ -37,10 +37,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/touch.h"
 
-#include "../../src/server/buffer_interface.h"
 #include "../../src/server/clientconnection.h"
 #include "../../src/server/seat_interface.h"
 
+#include "../../server/buffer.h"
 #include "../../server/client.h"
 #include "../../server/compositor.h"
 #include "../../server/data_device.h"

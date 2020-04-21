@@ -31,10 +31,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/shm_pool.h"
 #include "../../src/client/surface.h"
 
-#include "../../src/server/buffer_interface.h"
 #include "../../src/server/clientconnection.h"
 #include "../../src/server/idleinhibit_interface.h"
 
+#include "../../server/buffer.h"
 #include "../../server/client.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
@@ -435,7 +435,7 @@ void TestSurface::testAttachBuffer()
     QVERIFY(unmappedSpy.isEmpty());
 
     // now the ServerSurface should have the black image attached as a buffer
-    Wrapland::Server::BufferInterface* buffer = serverSurface->buffer();
+    Wrapland::Server::Buffer* buffer = serverSurface->buffer();
     buffer->ref();
     QVERIFY(buffer->shmBuffer());
     QCOMPARE(buffer->data(), black);
@@ -448,7 +448,7 @@ void TestSurface::testAttachBuffer()
     damageSpy.clear();
     QVERIFY(damageSpy.wait());
     QVERIFY(unmappedSpy.isEmpty());
-    Wrapland::Server::BufferInterface* buffer2 = serverSurface->buffer();
+    Wrapland::Server::Buffer* buffer2 = serverSurface->buffer();
     buffer2->ref();
     QVERIFY(buffer2->shmBuffer());
     QCOMPARE(buffer2->data().format(), QImage::Format_ARGB32_Premultiplied);
@@ -484,7 +484,7 @@ void TestSurface::testAttachBuffer()
     }
     QVERIFY(redBuffer.get()->isReleased());
 
-    Wrapland::Server::BufferInterface* buffer3 = serverSurface->buffer();
+    Wrapland::Server::Buffer* buffer3 = serverSurface->buffer();
     buffer3->ref();
     QVERIFY(buffer3->shmBuffer());
     QCOMPARE(buffer3->data().format(), QImage::Format_ARGB32_Premultiplied);
@@ -587,7 +587,7 @@ void TestSurface::testMultipleSurfaces()
     QVERIFY(damageSpy1.wait());
 
     // now the ServerSurface should have the black image attached as a buffer
-    BufferInterface* buffer1 = serverSurface1->buffer();
+    auto buffer1 = serverSurface1->buffer();
     QVERIFY(buffer1);
     QImage buffer1Data = buffer1->data();
     QCOMPARE(buffer1Data, black);
@@ -607,7 +607,7 @@ void TestSurface::testMultipleSurfaces()
     QVERIFY(damageSpy2.isValid());
     QVERIFY(damageSpy2.wait());
 
-    BufferInterface* buffer2 = serverSurface2->buffer();
+    auto buffer2 = serverSurface2->buffer();
     QVERIFY(buffer2);
     QImage buffer2Data = buffer2->data();
     QCOMPARE(buffer2Data, red);
@@ -749,13 +749,13 @@ void TestSurface::testInput()
 
 void TestSurface::testScale()
 {
-    // this test verifies that updating the scale factor is correctly passed to the Wayland server
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    // create surface
+    // This test verifies that updating the scale factor is correctly passed to the Wayland server.
+
+    // Create surface.
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
+
     std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QCOMPARE(s->scale(), 1);
     QVERIFY(serverSurfaceCreated.wait());
@@ -803,7 +803,7 @@ void TestSurface::testScale()
     // attach a buffer of 100x100, our scale is 4, so this should be a size of 25x25
     QImage red(100, 100, QImage::Format_ARGB32_Premultiplied);
     red.fill(QColor(255, 0, 0, 128));
-    std::shared_ptr<Buffer> redBuffer = m_shm->createBuffer(red).lock();
+    std::shared_ptr<Wrapland::Client::Buffer> redBuffer = m_shm->createBuffer(red).lock();
     QVERIFY(redBuffer);
     s->attachBuffer(redBuffer.get());
     s->damage(QRect(0, 0, 25, 25));
@@ -828,7 +828,7 @@ void TestSurface::testScale()
     // set scale and size in one commit, buffer is 50x50 at scale 2 so size should be 25x25
     QImage blue(50, 50, QImage::Format_ARGB32_Premultiplied);
     red.fill(QColor(255, 0, 0, 128));
-    std::shared_ptr<Buffer> blueBuffer = m_shm->createBuffer(blue).lock();
+    std::shared_ptr<Wrapland::Client::Buffer> blueBuffer = m_shm->createBuffer(blue).lock();
     QVERIFY(blueBuffer);
     s->attachBuffer(blueBuffer.get());
     s->setScale(2);
@@ -875,8 +875,7 @@ void TestSurface::testUnmapOfNotMappedSurface()
 {
     // this test verifies that a surface which doesn't have a buffer attached doesn't trigger the
     // unmapped signal
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
+
     // create surface
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     &Wrapland::Server::Compositor::surfaceCreated);
@@ -890,7 +889,7 @@ void TestSurface::testUnmapOfNotMappedSurface()
     QSignalSpy scaleChanged(serverSurface, &Wrapland::Server::Surface::scaleChanged);
 
     // let's map a null buffer and change scale to trigger a signal we can wait for
-    s->attachBuffer(Buffer::Ptr());
+    s->attachBuffer(Wrapland::Client::Buffer::Ptr());
     s->setScale(2);
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
 
@@ -1002,8 +1001,7 @@ void TestSurface::testSurfaceAt()
 void TestSurface::testDestroyAttachedBuffer()
 {
     // this test verifies that destroying of a buffer attached to a surface works
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
+
     // create surface
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     &Wrapland::Server::Compositor::surfaceCreated);
@@ -1029,7 +1027,7 @@ void TestSurface::testDestroyAttachedBuffer()
     m_connection->flush();
 
     // Let's try to destroy it
-    QSignalSpy destroySpy(serverSurface->buffer(), &BufferInterface::aboutToBeDestroyed);
+    QSignalSpy destroySpy(serverSurface->buffer(), &Wrapland::Server::Buffer::resourceDestroyed);
     QVERIFY(destroySpy.isValid());
     delete m_shm;
     m_shm = nullptr;
