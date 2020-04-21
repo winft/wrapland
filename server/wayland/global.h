@@ -33,6 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <wayland-server.h>
+#include <wayland-version.h>
 
 namespace Wrapland
 {
@@ -179,8 +180,9 @@ protected:
         if (!m_capsule->valid()) {
             return;
         }
+#if (WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR > 17)
         wl_global_remove(*m_capsule);
-
+#endif
         // TODO: call destroy with timer.
         destroy(std::move(m_capsule));
     }
