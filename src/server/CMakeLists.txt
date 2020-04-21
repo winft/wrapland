@@ -13,7 +13,6 @@ set(SERVER_LIB_SRCS
     idle_interface.cpp
     idleinhibit_interface.cpp
     idleinhibit_interface_v1.cpp
-    keystate_interface.cpp
     linuxdmabuf_v1_interface.cpp
     output_interface.cpp
     output_changeset_v1.cpp
@@ -66,6 +65,7 @@ set(SERVER_LIB_SRCS
     ../../server/pointer_gestures_v1.cpp
     ../../server/relative_pointer_v1.cpp
     ../../server/seat.cpp
+    ../../server/keystate.cpp
     ../../server/wayland/client.cpp
     ../../server/wayland/display.cpp
 
@@ -337,7 +337,6 @@ set(SERVER_LIB_HEADERS
   global.h
   idle_interface.h
   idleinhibit_interface.h
-  keystate_interface.h
   linuxdmabuf_v1_interface.h
   output_interface.h
   output_changeset_v1.h
@@ -377,6 +376,7 @@ set(SERVER_LIB_HEADERS
   ../../server/dpms.h
   ../../server/keyboard.h
   ../../server/touch.h
+  ../../server/keystate.h
   ../../server/output.h
   ../../server/pointer.h
   ../../server/pointer_constraints_v1.h
