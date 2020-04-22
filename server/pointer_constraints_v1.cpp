@@ -77,7 +77,7 @@ void PointerConstraintsV1::Private::confinePointerCallback(wl_client* wlClient,
                                                            uint32_t lifetime)
 {
     auto handle = fromResource(wlResource);
-    handle->d_ptr->createConstraint<LockedPointerV1>(
+    handle->d_ptr->createConstraint<ConfinedPointerV1>(
         wlClient, id, wlSurface, wlPointer, wlRegion, lifetime);
 }
 
@@ -115,7 +115,7 @@ void PointerConstraintsV1::Private::createConstraint(wl_client* wlClient,
         break;
     }
 
-    auto region = Wayland::Resource<Region>::fromResource(wlRegion)->handle();
+    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
     constraint->d_ptr->region = region ? region->region() : QRegion();
 
     surface->d_ptr->installPointerConstraint(constraint);
@@ -165,8 +165,8 @@ void LockedPointerV1::Private::setRegionCallback([[maybe_unused]] wl_client* wlC
                                                  wl_resource* wlRegion)
 {
     auto priv = fromResource(wlResource)->handle()->d_ptr;
+    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
 
-    auto region = Wayland::Resource<Region>::fromResource(wlRegion)->handle();
     priv->pendingRegion = region ? region->region() : QRegion();
     priv->regionIsSet = true;
 }
@@ -247,7 +247,7 @@ ConfinedPointerV1::Private::Private(Client* client,
     : Wayland::Resource<ConfinedPointerV1>(client,
                                            version,
                                            id,
-                                           &zwp_locked_pointer_v1_interface,
+                                           &zwp_confined_pointer_v1_interface,
                                            &s_interface,
                                            q)
     , q_ptr(q)
@@ -266,7 +266,7 @@ void ConfinedPointerV1::Private::setRegionCallback([[maybe_unused]] wl_client* w
                                                    wl_resource* wlRegion)
 {
     auto priv = fromResource(wlResource);
-    auto region = Wayland::Resource<Region>::fromResource(wlRegion)->handle();
+    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
 
     priv->handle()->d_ptr->pendingRegion = region ? region->region() : QRegion();
     priv->handle()->d_ptr->regionIsSet = true;

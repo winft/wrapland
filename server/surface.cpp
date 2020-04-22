@@ -298,7 +298,7 @@ void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
               });
     }
     constrainsUnboundConnection
-        = QObject::connect(lock, &QObject::destroyed, handle(), [this, cleanUp] {
+        = QObject::connect(lock, &LockedPointerV1::resourceDestroyed, handle(), [this, cleanUp] {
               if (lockedPointer.isNull()) {
                   return;
               }
@@ -331,13 +331,13 @@ void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
                 cleanUp();
             });
     }
-    constrainsUnboundConnection
-        = QObject::connect(confinement, &QObject::destroyed, handle(), [this, cleanUp] {
-              if (confinedPointer.isNull()) {
-                  return;
-              }
-              cleanUp();
-          });
+    constrainsUnboundConnection = QObject::connect(
+        confinement, &ConfinedPointerV1::resourceDestroyed, handle(), [this, cleanUp] {
+            if (confinedPointer.isNull()) {
+                return;
+            }
+            cleanUp();
+        });
     Q_EMIT handle()->pointerConstraintsChanged();
 }
 
@@ -1167,19 +1167,16 @@ Surface* Surface::inputSurfaceAt(const QPointF& position)
 
 QPointer<LockedPointerV1> Surface::lockedPointer() const
 {
-
     return d_ptr->lockedPointer;
 }
 
 QPointer<ConfinedPointerV1> Surface::confinedPointer() const
 {
-
     return d_ptr->confinedPointer;
 }
 
 bool Surface::inhibitsIdle() const
 {
-
     return !d_ptr->idleInhibitors.isEmpty();
 }
 
@@ -1191,7 +1188,6 @@ void Surface::setDataProxy(Surface* surface)
 
 Surface* Surface::dataProxy() const
 {
-
     return d_ptr->dataProxy;
 }
 
