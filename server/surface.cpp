@@ -841,7 +841,7 @@ void Surface::Private::opaqueRegionCallback([[maybe_unused]] wl_client* wlClient
                                             wl_resource* wlRegion)
 {
     auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto region = Wayland::Resource<Region>::fromResource(wlRegion)->handle();
+    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
     priv->setOpaque(region ? region->region() : QRegion());
 }
 
@@ -856,7 +856,7 @@ void Surface::Private::inputRegionCallback([[maybe_unused]] wl_client* wlClient,
                                            wl_resource* wlRegion)
 {
     auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto region = Wayland::Resource<Region>::fromResource(wlRegion)->handle();
+    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
     priv->setInput(region ? region->region() : QRegion(), !region);
 }
 
@@ -1047,7 +1047,8 @@ void Surface::setOutputs(std::vector<Output*> outputs)
 
     for (auto it = outputs.cbegin(), end = outputs.cend(); it != end; ++it) {
         auto stays = *it;
-        std::remove(removedOutputs.begin(), removedOutputs.end(), stays);
+        removedOutputs.erase(std::remove(removedOutputs.begin(), removedOutputs.end(), stays),
+                             removedOutputs.end());
     }
 
     for (auto it = removedOutputs.cbegin(), end = removedOutputs.cend(); it != end; ++it) {
@@ -1061,7 +1062,8 @@ void Surface::setOutputs(std::vector<Output*> outputs)
     std::vector<Output*> addedOutputs = outputs;
     for (auto it = d_ptr->outputs.cbegin(), end = d_ptr->outputs.cend(); it != end; ++it) {
         auto const keeping = *it;
-        std::remove(addedOutputs.begin(), addedOutputs.end(), keeping);
+        addedOutputs.erase(std::remove(addedOutputs.begin(), addedOutputs.end(), keeping),
+                           addedOutputs.end());
     }
 
     for (auto it = addedOutputs.cbegin(), end = addedOutputs.cend(); it != end; ++it) {
@@ -1072,22 +1074,24 @@ void Surface::setOutputs(std::vector<Output*> outputs)
             d_ptr->send<wl_surface_send_enter>(bind->resource());
         }
 
-        d_ptr->outputDestroyedConnections[add]
-            = connect(add, &Output::destroyed, this, [this, add] {
-                  auto outputs = d_ptr->outputs;
-                  bool removed = false;
-                  std::remove_if(outputs.begin(), outputs.end(), [&removed, add](Output* out) {
-                      if (add == out) {
-                          removed = true;
-                          return true;
-                      }
-                      return false;
-                  });
+        d_ptr->outputDestroyedConnections[add] = connect(add, &Output::removed, this, [this, add] {
+            auto outputs = d_ptr->outputs;
+            bool removed = false;
+            outputs.erase(std::remove_if(outputs.begin(),
+                                         outputs.end(),
+                                         [&removed, add](Output* out) {
+                                             if (add == out) {
+                                                 removed = true;
+                                                 return true;
+                                             }
+                                             return false;
+                                         }),
+                          outputs.end());
 
-                  if (removed) {
-                      setOutputs(outputs);
-                  }
-              });
+            if (removed) {
+                setOutputs(outputs);
+            }
+        });
     }
     // TODO: send enter when the client binds the Output another time
 

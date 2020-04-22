@@ -66,8 +66,8 @@ private Q_SLOTS:
     void testSurfaceAt();
     void testDestroyAttachedBuffer();
     void testDestroyWithPendingCallback();
-    void testOutput();
     void testDisconnect();
+    void testOutput();
     void testInhibit();
 
 private:
@@ -1139,7 +1139,7 @@ void TestSurface::testOutput()
     QVERIFY(serverSurface);
     QCOMPARE(serverSurface->outputs(), std::vector<Wrapland::Server::Output*>());
 
-    // create another registry to get notified about added outputs
+    // Create another registry to get notified about added outputs.
     Wrapland::Client::Registry registry;
     registry.setEventQueue(m_queue);
     QSignalSpy allAnnounced(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
@@ -1161,7 +1161,7 @@ void TestSurface::testOutput()
     m_connection->flush();
     m_display->dispatchEvents();
 
-    // now enter it
+    // Now enter it.
     std::vector<Wrapland::Server::Output*> outputs;
     outputs.push_back(serverOutput);
     serverSurface->setOutputs(outputs);
@@ -1171,7 +1171,7 @@ void TestSurface::testOutput()
     QCOMPARE(enteredSpy.first().first().value<Wrapland::Client::Output*>(), clientOutput.get());
     QCOMPARE(s->outputs(), QVector<Wrapland::Client::Output*>{clientOutput.get()});
 
-    // adding to same should not trigger
+    // Adding to same should not trigger.
     serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>{serverOutput});
 
     // leave again
@@ -1183,7 +1183,7 @@ void TestSurface::testOutput()
     QCOMPARE(leftSpy.first().first().value<Wrapland::Client::Output*>(), clientOutput.get());
     QCOMPARE(s->outputs(), QVector<Wrapland::Client::Output*>());
 
-    // leave again should not trigger
+    // Leave again should not trigger.
     serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>());
 
     // and enter again, just to verify
@@ -1193,11 +1193,11 @@ void TestSurface::testOutput()
     QCOMPARE(enteredSpy.count(), 2);
     QCOMPARE(leftSpy.count(), 1);
 
-    // delete output client is on.
-    // client should get an exit and be left on no outputs (which is allowed)
+    // Delete output client is on. Client should get an exit and be left on no outputs (which is
+    // allowed).
     serverOutput->deleteLater();
     QVERIFY(leftSpy.wait());
-    QCOMPARE(serverSurface->outputs(), std::vector<Wrapland::Server::Output*>());
+    QCOMPARE(serverSurface->outputs().size(), 0);
 }
 
 void TestSurface::testInhibit()
