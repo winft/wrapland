@@ -71,8 +71,8 @@ public:
     QPoint offset() const;
     QSize size() const;
 
-    QPointer<Subsurface> subsurface() const;
-    QList<QPointer<Subsurface>> childSubsurfaces() const;
+    Subsurface* subsurface() const;
+    std::vector<Subsurface*> childSubsurfaces() const;
 
     QPointer<ShadowInterface> shadow() const;
     QPointer<BlurInterface> blur() const;

@@ -132,14 +132,11 @@ Subsurface::Private::Private(Client* client,
 {
 }
 
-Subsurface::Private::~Private()
-{
-    this->remove();
-}
+Subsurface::Private::~Private() = default;
 
 void Subsurface::Private::init()
 {
-    surface->d_ptr->subsurface = QPointer<Subsurface>(handle());
+    surface->d_ptr->subsurface = handle();
 
     // Copy current state to subsurfacePending state.
     // It's the reference for all new pending state which needs to be committed.
@@ -154,18 +151,17 @@ void Subsurface::Private::init()
     surface->d_ptr->subsurfacePending.opaqueIsSet = false;
     surface->d_ptr->subsurfacePending.shadowIsSet = false;
     surface->d_ptr->subsurfacePending.slideIsSet = false;
-    parent->d_ptr->addChild(QPointer<Subsurface>(handle()));
+    parent->d_ptr->addChild(handle());
 
     QObject::connect(surface, &Surface::resourceDestroyed, handle(), [this] {
         // From spec: "If the wl_surface associated with the wl_subsurface is destroyed,
         // the wl_subsurface object becomes inert. Note, that destroying either object
         // takes effect immediately."
-        if (this->parent) {
-            reinterpret_cast<Surface::Private*>(this->parent->d_ptr)
-                ->removeChild(QPointer<Subsurface>(handle()));
+        if (parent) {
+            parent->d_ptr->removeChild(handle());
+            parent = nullptr;
         }
     });
-
 }
 
 const struct wl_subsurface_interface Subsurface::Private::s_interface = {
@@ -176,15 +172,6 @@ const struct wl_subsurface_interface Subsurface::Private::s_interface = {
     setSyncCallback,
     setDeSyncCallback,
 };
-
-void Subsurface::Private::remove()
-{
-    // No need to notify the surface as it's tracking a QPointer which will be reset automatically.
-    if (parent) {
-        parent->d_ptr->removeChild(QPointer<Subsurface>(handle()));
-    }
-    parent = nullptr;
-}
 
 void Subsurface::Private::commit()
 {
@@ -237,11 +224,11 @@ void Subsurface::Private::placeAboveCallback([[maybe_unused]] wl_client* wlClien
 
 void Subsurface::Private::placeAbove(Surface* sibling)
 {
-    if (parent.isNull()) {
+    if (!parent) {
         // TODO: raise error
         return;
     }
-    if (!parent->d_ptr->raiseChild(QPointer<Subsurface>(handle()), sibling)) {
+    if (!parent->d_ptr->raiseChild(handle(), sibling)) {
         postError(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE, "Incorrect sibling");
     }
 }
@@ -257,11 +244,11 @@ void Subsurface::Private::placeBelowCallback([[maybe_unused]] wl_client* wlClien
 
 void Subsurface::Private::placeBelow(Surface* sibling)
 {
-    if (parent.isNull()) {
+    if (!parent) {
         // TODO: raise error
         return;
     }
-    if (!parent->d_ptr->lowerChild(QPointer<Subsurface>(handle()), sibling)) {
+    if (!parent->d_ptr->lowerChild(handle(), sibling)) {
         postError(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE, "Incorrect sibling");
     }
 }
@@ -308,19 +295,31 @@ Subsurface::Subsurface(Client* client,
     d_ptr->init();
 }
 
-Subsurface::~Subsurface() = default;
+Subsurface::~Subsurface()
+{
+    // No need to notify the surface as it's tracking a QPointer which will be reset automatically.
+    if (d_ptr->surface) {
+        d_ptr->surface->d_ptr->subsurface = nullptr;
+    }
+    d_ptr->surface = nullptr;
+
+    if (d_ptr->parent) {
+        d_ptr->parent->d_ptr->removeChild(this);
+    }
+    d_ptr->parent = nullptr;
+}
 
 QPoint Subsurface::position() const
 {
     return d_ptr->pos;
 }
 
-QPointer<Surface> Subsurface::surface() const
+Surface* Subsurface::surface() const
 {
     return d_ptr->surface;
 }
 
-QPointer<Surface> Subsurface::parentSurface() const
+Surface* Subsurface::parentSurface() const
 {
     return d_ptr->parent;
 }
@@ -336,24 +335,24 @@ bool Subsurface::isSynchronized() const
         return true;
     }
 
-    if (d_ptr->parent.isNull()) {
+    if (!d_ptr->parent) {
         // That shouldn't happen, but let's assume false.
         return false;
     }
 
-    if (!d_ptr->parent->subsurface().isNull()) {
+    if (auto parentSub = d_ptr->parent->subsurface()) {
         // Follow parent's mode.
-        return d_ptr->parent->subsurface()->isSynchronized();
+        return parentSub->isSynchronized();
     }
 
     // Parent is no subsurface, thus parent is in desync mode and this surface is in desync mode.
     return false;
 }
 
-QPointer<Surface> Subsurface::mainSurface() const
+Surface* Subsurface::mainSurface() const
 {
     if (!d_ptr->parent) {
-        return QPointer<Surface>();
+        return nullptr;
     }
     if (d_ptr->parent->d_ptr->subsurface) {
         return d_ptr->parent->d_ptr->subsurface->mainSurface();

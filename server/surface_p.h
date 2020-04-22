@@ -71,7 +71,7 @@ public:
         QSize destinationSize = QSize();
 
         // Stacking order: bottom (first) -> top (last).
-        QList<QPointer<Subsurface>> children;
+        std::vector<Subsurface*> children;
 
         QPointer<ShadowInterface> shadow;
         QPointer<BlurInterface> blur;
@@ -82,13 +82,11 @@ public:
     Private(Client* client, uint32_t version, uint32_t id, Surface* q);
     ~Private() override;
 
-    void destroy();
+    void addChild(Subsurface* subsurface);
+    void removeChild(Subsurface* subsurface);
 
-    void addChild(QPointer<Subsurface> subsurface);
-    void removeChild(QPointer<Subsurface> subsurface);
-
-    bool raiseChild(QPointer<Subsurface> subsurface, Surface* sibling);
-    bool lowerChild(QPointer<Subsurface> subsurface, Surface* sibling);
+    bool raiseChild(Subsurface* subsurface, Surface* sibling);
+    bool lowerChild(Subsurface* subsurface, Surface* sibling);
 
     void setShadow(const QPointer<ShadowInterface>& shadow);
     void setBlur(const QPointer<BlurInterface>& blur);
@@ -111,7 +109,7 @@ public:
     State current;
     State pending;
     State subsurfacePending;
-    QPointer<Subsurface> subsurface;
+    Subsurface* subsurface = nullptr;
     QRegion trackedDamage;
 
     // Workaround for https://bugreports.qt.io/browse/QTBUG-52192:

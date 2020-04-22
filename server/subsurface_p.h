@@ -50,15 +50,14 @@ public:
     void init();
 
     void commit();
-    void remove();
 
     QPoint pos = QPoint(0, 0);
     QPoint scheduledPos = QPoint();
     bool scheduledPosChange = false;
     Mode mode = Mode::Synchronized;
 
-    QPointer<Surface> surface;
-    QPointer<Surface> parent;
+    Surface* surface = nullptr;
+    Surface* parent = nullptr;
 
 private:
     void setMode(Mode mode);

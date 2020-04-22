@@ -71,7 +71,7 @@ QPointF surfacePosition(Surface* surface)
         return QPointF();
     }
     return surface->subsurface()->position()
-        + surfacePosition(surface->subsurface()->parentSurface().data());
+        + surfacePosition(surface->subsurface()->parentSurface());
 }
 }
 
