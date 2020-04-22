@@ -66,9 +66,9 @@ public:
 
     bool isSynchronized() const;
 
-    QPointer<Surface> surface() const;
-    QPointer<Surface> parentSurface() const;
-    QPointer<Surface> mainSurface() const;
+    Surface* surface() const;
+    Surface* parentSurface() const;
+    Surface* mainSurface() const;
 
 Q_SIGNALS:
     void positionChanged(const QPoint&);

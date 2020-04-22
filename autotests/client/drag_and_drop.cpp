@@ -85,7 +85,8 @@ static const QString s_socketName = QStringLiteral("wrapland-test-wayland-drag-n
 
 void TestDragAndDrop::init()
 {
-    delete m_display;
+    qRegisterMetaType<Wrapland::Server::Surface*>();
+
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();

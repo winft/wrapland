@@ -2,7 +2,6 @@ set(SERVER_LIB_SRCS
     ../compat/wayland-xdg-shell-v5-protocol.c
     appmenu_interface.cpp
     blur_interface.cpp
-    buffer_interface.cpp
     clientconnection.cpp
     contrast_interface.cpp
     display.cpp
@@ -13,7 +12,6 @@ set(SERVER_LIB_SRCS
     idle_interface.cpp
     idleinhibit_interface.cpp
     idleinhibit_interface_v1.cpp
-    linuxdmabuf_v1_interface.cpp
     output_interface.cpp
     output_changeset_v1.cpp
     output_configuration_v1_interface.cpp
@@ -44,6 +42,8 @@ set(SERVER_LIB_SRCS
     xdgshell_v5_interface.cpp
     xdgshell_v6_interface.cpp
 
+    ../../server/buffer.cpp
+    ../../server/linux_dmabuf_v1.cpp
     ../../server/compositor.cpp
     ../../server/region.cpp
     ../../server/subcompositor.cpp
@@ -66,6 +66,7 @@ set(SERVER_LIB_SRCS
     ../../server/relative_pointer_v1.cpp
     ../../server/seat.cpp
     ../../server/keystate.cpp
+    ../../server/wayland/buffer_manager.cpp
     ../../server/wayland/client.cpp
     ../../server/wayland/display.cpp
 
@@ -327,7 +328,6 @@ set(SERVER_LIB_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/Wrapland/Server/wraplandserver_export.h
   appmenu_interface.h
   blur_interface.h
-  buffer_interface.h
   clientconnection.h
   contrast_interface.h
   display.h
@@ -337,7 +337,6 @@ set(SERVER_LIB_HEADERS
   global.h
   idle_interface.h
   idleinhibit_interface.h
-  linuxdmabuf_v1_interface.h
   output_interface.h
   output_changeset_v1.h
   output_configuration_v1_interface.h
@@ -360,6 +359,8 @@ set(SERVER_LIB_HEADERS
   xdgoutput_interface.h
   xdgshell_interface.h
 
+  ../../server/buffer.h
+  ../../server/linux_dmabuf_v1.h
   ../../server/xdg_foreign.h
   ../../server/region.h
   ../../server/region.h

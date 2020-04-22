@@ -161,9 +161,10 @@ public:
         sendTuple<sender, minVersion>(std::forward<decltype(tuple)>(tuple), indices);
     }
 
-    void postError(uint32_t code, std::string message)
+    template<typename... Args>
+    void postError(uint32_t code, Args&&... args)
     {
-        wl_resource_post_error(m_resource, code, "%s", message.c_str());
+        wl_resource_post_error(m_resource, code, args...);
     }
 
     static void destroyCallback([[maybe_unused]] wl_client* client, wl_resource* wlResource)

@@ -29,10 +29,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/registry.h"
 
-#include "../../src/server/buffer_interface.h"
 #include "../../src/server/clientconnection.h"
 #include "../../src/server/shell_interface.h"
 
+#include "../../server/buffer.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/seat.h"

@@ -18,11 +18,11 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "shadow_interface.h"
-#include "buffer_interface.h"
 #include "display.h"
 #include "global_p.h"
 #include "resource_p.h"
 
+#include "../../server/buffer.h"
 #include "../../server/surface.h"
 #include "../../server/surface_p.h"
 #include "../../server/wayland/resource.h"
@@ -156,14 +156,14 @@ public:
             BottomLeftBuffer = 1 << 7,
             Offset = 1 << 8
         };
-        BufferInterface *left = nullptr;
-        BufferInterface *topLeft = nullptr;
-        BufferInterface *top = nullptr;
-        BufferInterface *topRight = nullptr;
-        BufferInterface *right = nullptr;
-        BufferInterface *bottomRight = nullptr;
-        BufferInterface *bottom = nullptr;
-        BufferInterface *bottomLeft = nullptr;
+        Buffer *left = nullptr;
+        Buffer *topLeft = nullptr;
+        Buffer *top = nullptr;
+        Buffer *topRight = nullptr;
+        Buffer *right = nullptr;
+        Buffer *bottomRight = nullptr;
+        Buffer *bottom = nullptr;
+        Buffer *bottomLeft = nullptr;
         QMarginsF offset;
         Flags flags  = Flags::None;
     };
@@ -172,7 +172,7 @@ public:
 
 private:
     void commit();
-    void attach(State::Flags flag, wl_resource *buffer);
+    void attach(State::Flags flag, wl_resource *wlBuffer);
     ShadowInterface *q_func() {
         return reinterpret_cast<ShadowInterface *>(q);
     }
@@ -247,12 +247,12 @@ void ShadowInterface::Private::commit()
     pending = State();
 }
 
-void ShadowInterface::Private::attach(ShadowInterface::Private::State::Flags flag, wl_resource *buffer)
+void ShadowInterface::Private::attach(ShadowInterface::Private::State::Flags flag, wl_resource *wlBuffer)
 {
-    BufferInterface *b = BufferInterface::get(buffer);
-    if (b) {
-        QObject::connect(b, &BufferInterface::aboutToBeDestroyed, q,
-            [this](BufferInterface *buffer) {
+    auto buffer = Buffer::get(global->display()->newDisplay, wlBuffer);
+    if (buffer) {
+        QObject::connect(buffer, &Buffer::resourceDestroyed, q,
+            [this, buffer]() {
     #define PENDING( __PART__ ) \
                 if (pending.__PART__ == buffer) { \
                     pending.__PART__ = nullptr; \
@@ -286,28 +286,28 @@ void ShadowInterface::Private::attach(ShadowInterface::Private::State::Flags fla
     }
     switch (flag) {
     case State::LeftBuffer:
-        pending.left = b;
+        pending.left = buffer;
         break;
     case State::TopLeftBuffer:
-        pending.topLeft = b;
+        pending.topLeft = buffer;
         break;
     case State::TopBuffer:
-        pending.top = b;
+        pending.top = buffer;
         break;
     case State::TopRightBuffer:
-        pending.topRight = b;
+        pending.topRight = buffer;
         break;
     case State::RightBuffer:
-        pending.right = b;
+        pending.right = buffer;
         break;
     case State::BottomRightBuffer:
-        pending.bottomRight = b;
+        pending.bottomRight = buffer;
         break;
     case State::BottomBuffer:
-        pending.bottom = b;
+        pending.bottom = buffer;
         break;
     case State::BottomLeftBuffer:
-        pending.bottomLeft = b;
+        pending.bottomLeft = buffer;
         break;
     default:
         Q_UNREACHABLE();
@@ -388,7 +388,7 @@ QMarginsF ShadowInterface::offset() const
 }
 
 #define BUFFER( __PART__ ) \
-BufferInterface *ShadowInterface::__PART__() const \
+Buffer *ShadowInterface::__PART__() const \
 { \
     Q_D(); \
     return d->current.__PART__; \

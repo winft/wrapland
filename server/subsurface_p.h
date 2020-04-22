@@ -43,16 +43,21 @@ public:
             Subsurface* q);
     ~Private() override;
 
+    /**
+     * Initializes the subsurface in relation to its parent. Needs to be after the subsurface
+     * is created already since we access its data from outside.
+     */
+    void init();
+
     void commit();
-    void remove();
 
     QPoint pos = QPoint(0, 0);
     QPoint scheduledPos = QPoint();
     bool scheduledPosChange = false;
     Mode mode = Mode::Synchronized;
 
-    QPointer<Surface> surface;
-    QPointer<Surface> parent;
+    Surface* surface = nullptr;
+    Surface* parent = nullptr;
 
 private:
     void setMode(Mode mode);

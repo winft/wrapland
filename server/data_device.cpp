@@ -114,7 +114,7 @@ void DataDevice::Private::startDragCallback([[maybe_unused]] wl_client* wlClient
     auto priv = static_cast<Private*>(fromResource(wlResource));
     auto source = wlSource ? Resource<DataSource>::fromResource(wlSource)->handle() : nullptr;
     auto origin = Resource<Surface>::fromResource(wlOrigin)->handle();
-    auto icon = Resource<Surface>::fromResource(wlIcon)->handle();
+    auto icon = wlIcon ? Resource<Surface>::fromResource(wlIcon)->handle() : nullptr;
 
     priv->startDrag(source, origin, icon, serial);
 }

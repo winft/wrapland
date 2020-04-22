@@ -107,6 +107,9 @@ Output::~Output()
     if (legacy) {
         delete legacy;
     }
+
+    Q_EMIT removed();
+
     d_ptr->displayHandle->removeOutput(this);
     delete d_ptr;
 }

@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "compositor.h"
 #include "data_device_manager.h"
 #include "dpms.h"
+#include "linux_dmabuf_v1.h"
 #include "output.h"
 #include "pointer.h"
 #include "pointer_constraints_v1.h"
@@ -47,7 +48,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/fakeinput_interface.h"
 #include "../src/server/idle_interface.h"
 #include "../src/server/idleinhibit_interface_p.h"
-#include "../src/server/linuxdmabuf_v1_interface.h"
 #include "../src/server/output_configuration_v1_interface.h"
 #include "../src/server/output_device_v1_interface.h"
 #include "../src/server/output_interface.h"
@@ -341,9 +341,9 @@ D_isplay::createServerSideDecorationPaletteManager(QObject* parent)
     return legacy->createServerSideDecorationPaletteManager(parent);
 }
 
-LinuxDmabufUnstableV1Interface* D_isplay::createLinuxDmabufInterface(QObject* parent)
+LinuxDmabufV1* D_isplay::createLinuxDmabuf(QObject* parent)
 {
-    return legacy->createLinuxDmabufInterface(parent);
+    return new LinuxDmabufV1(this, parent);
 }
 
 PlasmaVirtualDesktopManagementInterface*

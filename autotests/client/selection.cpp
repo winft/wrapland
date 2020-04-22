@@ -72,7 +72,8 @@ static const std::string s_socketName{"wrapland-test-selection-0"};
 
 void SelectionTest::init()
 {
-    delete m_display;
+    qRegisterMetaType<Wrapland::Server::Surface*>();
+
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
