@@ -49,6 +49,7 @@ private:
 SubSurface::Private::Private(QPointer< Surface > surface, QPointer< Surface > parentSurface, SubSurface *q)
     : surface(surface)
     , parentSurface(parentSurface)
+    , q(q)
 {
 }
 

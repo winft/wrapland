@@ -17,7 +17,6 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
 
 #include "../../src/client/compositor.h"
@@ -27,10 +26,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/shm_pool.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/buffer.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/surface.h"
-#include "../../src/server/buffer_interface.h"
 
 class TestCompositor : public QObject
 {

@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2015  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,69 +17,63 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WRAPLAND_SERVER_SHADOW_INTERFACE_H
-#define WRAPLAND_SERVER_SHADOW_INTERFACE_H
+#pragma once
 
-#include "global.h"
-#include "resource.h"
-
+#include <QImage>
 #include <QObject>
-#include <QMarginsF>
+
+#include <memory>
 
 #include <Wrapland/Server/wraplandserver_export.h>
+
+struct wl_resource;
+struct wl_shm_buffer;
 
 namespace Wrapland
 {
 namespace Server
 {
+class D_isplay;
+class Surface;
+class LinuxDmabufBufferV1;
 
-class Buffer;
-class Display;
-
-/**
- * TODO
- */
-class WRAPLANDSERVER_EXPORT ShadowManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT Buffer : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~ShadowManagerInterface();
+    ~Buffer() override;
+
+    void ref();
+    void unref();
+    bool isReferenced() const;
+
+    Surface* surface() const;
+    wl_shm_buffer* shmBuffer();
+    LinuxDmabufBufferV1* linuxDmabufBuffer();
+    wl_resource* resource() const;
+
+    QImage data();
+    QSize size() const;
+    void setSize(const QSize& size);
+
+    bool hasAlphaChannel() const;
+
+    static Buffer* get(D_isplay* display, wl_resource* resource);
+
+Q_SIGNALS:
+    void sizeChanged();
+    void resourceDestroyed();
 
 private:
-    explicit ShadowManagerInterface(Display *display, QObject *parent = nullptr);
-    friend class Display;
-    class Private;
-};
-
-/**
- * TODO
- */
-class WRAPLANDSERVER_EXPORT ShadowInterface : public Resource
-{
-    Q_OBJECT
-public:
-    virtual ~ShadowInterface();
-
-    Buffer *left() const;
-    Buffer *topLeft() const;
-    Buffer *top() const;
-    Buffer *topRight() const;
-    Buffer *right() const;
-    Buffer *bottomRight() const;
-    Buffer *bottom() const;
-    Buffer *bottomLeft() const;
-
-    QMarginsF offset() const;
-
-private:
-    explicit ShadowInterface(ShadowManagerInterface *parent, wl_resource *parentResource);
-    friend class ShadowManagerInterface;
+    friend class Surface;
+    Buffer(wl_resource* wlResource, Surface* parent);
+    Buffer(wl_resource* wlResource, D_isplay* display);
 
     class Private;
-    Private *d_func() const;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }
 }
 
-#endif
+Q_DECLARE_METATYPE(Wrapland::Server::Buffer*)

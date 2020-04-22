@@ -74,6 +74,8 @@ static const QString s_socketName = QStringLiteral("wrapland-test-pointer_constr
 
 void TestPointerConstraints::init()
 {
+    qRegisterMetaType<Wrapland::Server::Surface*>();
+
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
@@ -174,8 +176,9 @@ void TestPointerConstraints::testLockPointer_data()
 
 void TestPointerConstraints::testLockPointer()
 {
-    // this test verifies the basic interaction for lock pointer
-    // first create a surface
+    // This test verifies the basic interaction for lock pointer.
+
+    // First create a surface.
     QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     std::unique_ptr<Surface> surface(m_compositor->createSurface());
@@ -187,10 +190,11 @@ void TestPointerConstraints::testLockPointer()
     QVERIFY(serverSurface->lockedPointer().isNull());
     QVERIFY(serverSurface->confinedPointer().isNull());
 
-    // now create the locked pointer
+    // Now create the locked pointer.
     QSignalSpy pointerConstraintsChangedSpy(serverSurface, &Wrapland::Server::Surface::pointerConstraintsChanged);
     QVERIFY(pointerConstraintsChangedSpy.isValid());
     QFETCH(PointerConstraints::LifeTime, clientLifeTime);
+
     std::unique_ptr<LockedPointer> lockedPointer(m_pointerConstraints->lockPointer(surface.get(), m_pointer, nullptr, clientLifeTime));
     QSignalSpy lockedSpy(lockedPointer.get(), &LockedPointer::locked);
     QVERIFY(lockedSpy.isValid());
@@ -207,31 +211,33 @@ void TestPointerConstraints::testLockPointer()
     QCOMPARE(serverLockedPointer->region(), QRegion());
     QFETCH(Wrapland::Server::LockedPointerV1::LifeTime, serverLifeTime);
     QCOMPARE(serverLockedPointer->lifeTime(), serverLifeTime);
-    // setting to unlocked now should not trigger an unlocked spy
+
+    // Setting to unlocked now should not trigger an unlocked spy.
     serverLockedPointer->setLocked(false);
     QVERIFY(!unlockedSpy.wait(500));
 
-    // try setting a region
-    QSignalSpy destroyedSpy(serverLockedPointer.data(), &QObject::destroyed);
-    QVERIFY(destroyedSpy.isValid());
+    // Try setting a region.
     QSignalSpy regionChangedSpy(serverLockedPointer.data(), &Wrapland::Server::LockedPointerV1::regionChanged);
     QVERIFY(regionChangedSpy.isValid());
     lockedPointer->setRegion(m_compositor->createRegion(QRegion(0, 5, 10, 20), m_compositor));
-    // it's double buffered
+
+    // It's double buffered.
     QVERIFY(!regionChangedSpy.wait(500));
     surface->commit(Surface::CommitFlag::None);
     QVERIFY(regionChangedSpy.wait());
     QCOMPARE(serverLockedPointer->region(), QRegion(0, 5, 10, 20));
-    // and unset region again
+
+    // And unset region again.
     lockedPointer->setRegion(nullptr);
     surface->commit(Surface::CommitFlag::None);
     QVERIFY(regionChangedSpy.wait());
     QCOMPARE(serverLockedPointer->region(), QRegion());
 
-    // let's lock the surface
+    // Let's lock the surface.
     QSignalSpy lockedChangedSpy(serverLockedPointer.data(), &Wrapland::Server::LockedPointerV1::lockedChanged);
     QVERIFY(lockedChangedSpy.isValid());
     m_serverSeat->setFocusedPointerSurface(serverSurface);
+
     QSignalSpy pointerMotionSpy(m_pointer, &Wrapland::Client::Pointer::motion);
     QVERIFY(pointerMotionSpy.isValid());
     m_serverSeat->setPointerPos(QPoint(0, 1));
@@ -254,7 +260,7 @@ void TestPointerConstraints::testLockPointer()
     QVERIFY(hintChangedSpy.wait());
     QCOMPARE(serverLockedPointer->cursorPositionHint(), hint);
 
-    // and unlock again
+    // And unlock again.
     serverLockedPointer->setLocked(false);
     QCOMPARE(serverLockedPointer->isLocked(), false);
     QCOMPARE(serverLockedPointer->cursorPositionHint(), QPointF(-1., -1.));
@@ -265,11 +271,13 @@ void TestPointerConstraints::testLockPointer()
     QCOMPARE(unlockedSpy.count(), 1);
     QCOMPARE(lockedSpy.count(), 1);
 
-    // now motion should work again
+    // Now motion should work again.
     m_serverSeat->setPointerPos(QPoint(0, 1));
     QVERIFY(pointerMotionSpy.wait());
     QCOMPARE(pointerMotionSpy.count(), 2);
 
+    QSignalSpy destroyedSpy(serverLockedPointer.data(), &Wrapland::Server::LockedPointerV1::resourceDestroyed);
+    QVERIFY(destroyedSpy.isValid());
     lockedPointer.reset();
     QVERIFY(destroyedSpy.wait());
     QCOMPARE(pointerConstraintsChangedSpy.count(), 2);
@@ -288,10 +296,12 @@ void TestPointerConstraints::testConfinePointer_data()
 
 void TestPointerConstraints::testConfinePointer()
 {
-    // this test verifies the basic interaction for confined pointer
-    // first create a surface
+    // This test verifies the basic interaction for confined pointer.
+
+    // First create a surface.
     QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
+
     std::unique_ptr<Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
@@ -301,10 +311,11 @@ void TestPointerConstraints::testConfinePointer()
     QVERIFY(serverSurface->lockedPointer().isNull());
     QVERIFY(serverSurface->confinedPointer().isNull());
 
-    // now create the confined pointer
+    // Now create the confined pointer.
     QSignalSpy pointerConstraintsChangedSpy(serverSurface, &Wrapland::Server::Surface::pointerConstraintsChanged);
     QVERIFY(pointerConstraintsChangedSpy.isValid());
     QFETCH(PointerConstraints::LifeTime, clientLifeTime);
+
     std::unique_ptr<ConfinedPointer> confinedPointer(m_pointerConstraints->confinePointer(surface.get(), m_pointer, nullptr, clientLifeTime));
     QSignalSpy confinedSpy(confinedPointer.get(), &ConfinedPointer::confined);
     QVERIFY(confinedSpy.isValid());
@@ -321,28 +332,31 @@ void TestPointerConstraints::testConfinePointer()
     QCOMPARE(serverConfinedPointer->region(), QRegion());
     QFETCH(Wrapland::Server::ConfinedPointerV1::LifeTime, serverLifeTime);
     QCOMPARE(serverConfinedPointer->lifeTime(), serverLifeTime);
-    // setting to unconfined now should not trigger an unconfined spy
+
+    // Setting to unconfined now should not trigger an unconfined spy.
     serverConfinedPointer->setConfined(false);
     QVERIFY(!unconfinedSpy.wait(500));
 
-    // try setting a region
-    QSignalSpy destroyedSpy(serverConfinedPointer.data(), &QObject::destroyed);
+    // Try setting a region.
+    QSignalSpy destroyedSpy(serverConfinedPointer.data(), &Wrapland::Server::ConfinedPointerV1::resourceDestroyed);
     QVERIFY(destroyedSpy.isValid());
     QSignalSpy regionChangedSpy(serverConfinedPointer.data(), &Wrapland::Server::ConfinedPointerV1::regionChanged);
     QVERIFY(regionChangedSpy.isValid());
     confinedPointer->setRegion(m_compositor->createRegion(QRegion(0, 5, 10, 20), m_compositor));
-    // it's double buffered
+
+    // It's double buffered.
     QVERIFY(!regionChangedSpy.wait(500));
     surface->commit(Surface::CommitFlag::None);
     QVERIFY(regionChangedSpy.wait());
     QCOMPARE(serverConfinedPointer->region(), QRegion(0, 5, 10, 20));
-    // and unset region again
+
+    // And unset region again.
     confinedPointer->setRegion(nullptr);
     surface->commit(Surface::CommitFlag::None);
     QVERIFY(regionChangedSpy.wait());
     QCOMPARE(serverConfinedPointer->region(), QRegion());
 
-    // let's confine the surface
+    // Let's confine the surface.
     QSignalSpy confinedChangedSpy(serverConfinedPointer.data(), &Wrapland::Server::ConfinedPointerV1::confinedChanged);
     QVERIFY(confinedChangedSpy.isValid());
     m_serverSeat->setFocusedPointerSurface(serverSurface);
@@ -353,7 +367,7 @@ void TestPointerConstraints::testConfinePointer()
     QVERIFY(confinedSpy.wait());
     QVERIFY(unconfinedSpy.isEmpty());
 
-    // and unconfine again
+    // And unconfine again.
     serverConfinedPointer->setConfined(false);
     QCOMPARE(serverConfinedPointer->isConfined(), false);
     QCOMPARE(confinedChangedSpy.count(), 2);

@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/shm_pool.h"
 
-#include "../../src/server/buffer_interface.h"
+#include "../../server/buffer.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/surface.h"

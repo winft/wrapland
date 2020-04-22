@@ -23,8 +23,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/seat.h"
 #include "../server/compositor.h"
 #include "../server/surface.h"
+#include "../server/buffer.h"
 
-#include "../src/server/buffer_interface.h"
 #include "../src/server/shell_interface.h"
 
 #include <QApplication>

@@ -71,7 +71,7 @@ QPointF surfacePosition(Surface* surface)
         return QPointF();
     }
     return surface->subsurface()->position()
-        + surfacePosition(surface->subsurface()->parentSurface().data());
+        + surfacePosition(surface->subsurface()->parentSurface());
 }
 }
 
@@ -392,10 +392,11 @@ void Pointer::Private::setCursorCallback([[maybe_unused]] wl_client* wlClient,
                                          int32_t hotspot_x,
                                          int32_t hotspot_y)
 {
-    auto priv = fromResource(wlResource);
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto surface
+        = wlSurface ? Wayland::Resource<Surface>::fromResource(wlSurface)->handle() : nullptr;
 
-    static_cast<Private*>(priv)->setCursor(serial, surface, QPoint(hotspot_x, hotspot_y));
+    priv->setCursor(serial, surface, QPoint(hotspot_x, hotspot_y));
 }
 
 Client* Pointer::client() const

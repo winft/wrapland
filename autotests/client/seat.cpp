@@ -37,10 +37,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/touch.h"
 
-#include "../../src/server/buffer_interface.h"
 #include "../../src/server/clientconnection.h"
 #include "../../src/server/seat_interface.h"
 
+#include "../../server/buffer.h"
 #include "../../server/client.h"
 #include "../../server/compositor.h"
 #include "../../server/data_device.h"
@@ -150,6 +150,7 @@ TestSeat::TestSeat(QObject* parent)
     qRegisterMetaType<Wrapland::Server::Keyboard*>();
     qRegisterMetaType<Wrapland::Server::Pointer*>();
     qRegisterMetaType<Wrapland::Server::Touch*>();
+    qRegisterMetaType<Wrapland::Server::Surface*>();
 }
 
 void TestSeat::init()
@@ -2506,6 +2507,12 @@ void TestSeat::testDisconnect()
 
 void TestSeat::testPointerEnterOnUnboundSurface()
 {
+    // We currently don't allow to set the pointer on an unbound surface. The consumer must listen
+    // for the destroy event on a surface instead. That's the API contract.
+    // We might change this back again if it makes sense, but what's the advantage of handling this
+    // case? It will just fail silently and the session seems broken.
+    // For the general question on object lifetime see also issue #38.
+#if 0
     // Create the things we need.
     m_serverSeat->setHasKeyboard(true);
     m_serverSeat->setHasPointer(true);
@@ -2540,6 +2547,7 @@ void TestSeat::testPointerEnterOnUnboundSurface()
     QVERIFY(!pointerChangedSpy.wait(200));
     QCOMPARE(serverPointerChangedSpy.count(), 2);
     QVERIFY(!m_serverSeat->focusedPointerSurface());
+#endif
 }
 
 QTEST_GUILESS_MAIN(TestSeat)

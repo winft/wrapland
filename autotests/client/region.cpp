@@ -73,6 +73,8 @@ TestRegion::TestRegion(QObject* parent)
 
 void TestRegion::init()
 {
+    qRegisterMetaType<Wrapland::Server::Region*>();
+
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();

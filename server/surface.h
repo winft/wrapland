@@ -33,7 +33,7 @@ namespace Server
 {
 class BlurManagerInterface;
 class BlurInterface;
-class BufferInterface;
+class Buffer;
 class ConfinedPointerV1;
 class ContrastInterface;
 class ContrastManagerInterface;
@@ -65,14 +65,14 @@ public:
     qint32 scale() const;
     Output::Transform transform() const;
 
-    BufferInterface* buffer();
-    BufferInterface* buffer() const;
+    Buffer* buffer();
+    Buffer* buffer() const;
 
     QPoint offset() const;
     QSize size() const;
 
-    QPointer<Subsurface> subsurface() const;
-    QList<QPointer<Subsurface>> childSubsurfaces() const;
+    Subsurface* subsurface() const;
+    std::vector<Subsurface*> childSubsurfaces() const;
 
     QPointer<ShadowInterface> shadow() const;
     QPointer<BlurInterface> blur() const;

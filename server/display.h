@@ -93,7 +93,7 @@ class XdgOutputManagerInterface;
 class XdgDecorationManagerInterface;
 class EglStreamControllerInterface;
 class KeyState;
-class LinuxDmabufUnstableV1Interface;
+class LinuxDmabufV1;
 //
 //
 
@@ -183,7 +183,7 @@ public:
 
     ServerSideDecorationPaletteManagerInterface*
     createServerSideDecorationPaletteManager(QObject* parent = nullptr);
-    LinuxDmabufUnstableV1Interface* createLinuxDmabufInterface(QObject* parent = nullptr);
+    LinuxDmabufV1* createLinuxDmabuf(QObject* parent = nullptr);
     ViewporterInterface* createViewporterInterface(QObject* parent = nullptr);
     XdgOutputManagerInterface* createXdgOutputManager(QObject* parent = nullptr);
 

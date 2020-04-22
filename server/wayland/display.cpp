@@ -27,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "display.h"
 
+#include "buffer_manager.h"
 #include "client.h"
 #include "global.h"
 
@@ -58,7 +59,8 @@ Client* Display::castClient(Server::Client* client)
 }
 
 Display::Display(Server::D_isplay* parent)
-    : m_handle(parent)
+    : m_bufferManager{std::make_unique<BufferManager>(this)}
+    , m_handle(parent)
 {
 }
 
@@ -279,6 +281,11 @@ void Display::setupClient(Client* client)
 std::vector<Client*> const& Display::clients() const
 {
     return m_clients;
+}
+
+BufferManager* Display::bufferManager() const
+{
+    return m_bufferManager.get();
 }
 
 Server::D_isplay* Display::handle() const

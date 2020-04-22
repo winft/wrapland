@@ -78,6 +78,7 @@ void TestDataDevice::init()
 {
     qRegisterMetaType<Wrapland::Server::DataDevice*>();
     qRegisterMetaType<Wrapland::Server::DataSource*>();
+    qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
