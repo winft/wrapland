@@ -746,12 +746,13 @@ void Seat::setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transfor
     d_ptr->globalPointer.focus = Private::SeatPointer::Focus();
     d_ptr->globalPointer.focus.surface = surface;
 
-    auto p = d_ptr->pointersForSurface(surface);
-    d_ptr->globalPointer.focus.pointers = p;
+    d_ptr->globalPointer.focus.pointers.clear();
 
-    if (d_ptr->globalPointer.focus.surface) {
+    if (surface) {
+        d_ptr->globalPointer.focus.pointers = d_ptr->pointersForSurface(surface);
+
         d_ptr->globalPointer.focus.destroyConnection
-            = connect(surface, &QObject::destroyed, this, [this] {
+            = connect(surface, &Surface::resourceDestroyed, this, [this] {
                   d_ptr->globalPointer.focus = Private::SeatPointer::Focus();
                   Q_EMIT focusedPointerChanged(nullptr);
               });
@@ -760,7 +761,8 @@ void Seat::setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transfor
         d_ptr->globalPointer.focus.serial = serial;
     }
 
-    if (p.isEmpty()) {
+    auto& pointers = d_ptr->globalPointer.focus.pointers;
+    if (pointers.isEmpty()) {
         Q_EMIT focusedPointerChanged(nullptr);
         for (auto p : qAsConst(framePointers)) {
             p->d_ptr->sendFrame();
@@ -769,9 +771,9 @@ void Seat::setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transfor
     }
 
     // TODO: signal with all pointers
-    Q_EMIT focusedPointerChanged(p.first());
+    Q_EMIT focusedPointerChanged(pointers.first());
 
-    for (auto it = p.constBegin(), end = p.constEnd(); it != end; ++it) {
+    for (auto it = pointers.constBegin(), end = pointers.constEnd(); it != end; ++it) {
         (*it)->setFocusedSurface(serial, surface);
         framePointers << *it;
     }
