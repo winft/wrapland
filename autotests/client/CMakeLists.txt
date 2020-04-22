@@ -183,34 +183,34 @@ add_test(NAME wrapland-testCompositor COMMAND testCompositor)
 ecm_mark_as_test(testCompositor)
 
 ########################################################
-# Test SubCompositor
+# Test Subcompositor
 ########################################################
-set( testSubCompositor_SRCS subcompositor.cpp )
-add_executable(testSubCompositor ${testSubCompositor_SRCS})
-target_link_libraries( testSubCompositor
+set( testSubcompositor_SRCS subcompositor.cpp )
+add_executable(testSubcompositor ${testSubcompositor_SRCS})
+target_link_libraries( testSubcompositor
     Qt5::Test
     Qt5::Gui
     Wrapland::Client
     Wrapland::Server
 )
-add_test(NAME wrapland-testSubCompositor COMMAND testSubCompositor)
-ecm_mark_as_test(testSubCompositor)
+add_test(NAME wrapland-testSubcompositor COMMAND testSubcompositor)
+ecm_mark_as_test(testSubcompositor)
 
 
 ########################################################
-# Test SubSurface
+# Test Subsurface
 ########################################################
-set( testSubSurface_SRCS subsurface.cpp )
-add_executable(testSubSurface ${testSubSurface_SRCS})
-target_link_libraries( testSubSurface
+set( testSubsurface_SRCS subsurface.cpp )
+add_executable(testSubsurface ${testSubsurface_SRCS})
+target_link_libraries( testSubsurface
     Qt5::Test
     Qt5::Gui
     Wrapland::Client
     Wrapland::Server
     Wayland::Client
 )
-add_test(NAME wrapland-testSubSurface COMMAND testSubSurface)
-ecm_mark_as_test(testSubSurface)
+add_test(NAME wrapland-testSubsurface COMMAND testSubsurface)
+ecm_mark_as_test(testSubsurface)
 
 ########################################################
 # Test Region
