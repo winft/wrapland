@@ -130,6 +130,15 @@ Subsurface::Private::Private(Client* client,
     , surface{surface}
     , parent{parent}
 {
+}
+
+Subsurface::Private::~Private()
+{
+    this->remove();
+}
+
+void Subsurface::Private::init()
+{
     surface->d_ptr->subsurface = QPointer<Subsurface>(handle());
 
     // Copy current state to subsurfacePending state.
@@ -156,11 +165,7 @@ Subsurface::Private::Private(Client* client,
                 ->removeChild(QPointer<Subsurface>(handle()));
         }
     });
-}
 
-Subsurface::Private::~Private()
-{
-    remove();
 }
 
 const struct wl_subsurface_interface Subsurface::Private::s_interface = {
@@ -176,8 +181,7 @@ void Subsurface::Private::remove()
 {
     // No need to notify the surface as it's tracking a QPointer which will be reset automatically.
     if (parent) {
-        reinterpret_cast<Surface::Private*>(parent->d_ptr)
-            ->removeChild(QPointer<Subsurface>(handle()));
+        parent->d_ptr->removeChild(QPointer<Subsurface>(handle()));
     }
     parent = nullptr;
 }
@@ -301,6 +305,7 @@ Subsurface::Subsurface(Client* client,
     : QObject(nullptr)
     , d_ptr(new Private(client, version, id, surface, parent, this))
 {
+    d_ptr->init();
 }
 
 Subsurface::~Subsurface() = default;

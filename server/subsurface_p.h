@@ -43,6 +43,12 @@ public:
             Subsurface* q);
     ~Private() override;
 
+    /**
+     * Initializes the subsurface in relation to its parent. Needs to be after the subsurface
+     * is created already since we access its data from outside.
+     */
+    void init();
+
     void commit();
     void remove();
 

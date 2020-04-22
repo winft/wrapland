@@ -92,6 +92,8 @@ TestSubsurface::TestSubsurface(QObject* parent)
 
 void TestSubsurface::init()
 {
+    qRegisterMetaType<Wrapland::Server::Surface*>();
+
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
@@ -679,10 +681,11 @@ void TestSubsurface::testDestroy()
 
 void TestSubsurface::testCast()
 {
-    // create two Surfaces
+    // Create two Surfaces.
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     std::unique_ptr<Wrapland::Client::Surface> parent(m_compositor->createSurface());
-    // create subsurface for surface of parent
+
+    // Create subsurface for surface with parent.
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
         m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
                                           QPointer<Wrapland::Client::Surface>(parent.get())));
