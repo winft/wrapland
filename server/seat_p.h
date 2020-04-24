@@ -47,14 +47,12 @@ public:
     Private(Seat* q, D_isplay* d);
     ~Private() override = default;
 
-    void bindInit(Wayland::Client* client, uint32_t version, uint32_t id) override;
+    void bindInit(Wayland::Resource<Seat, Global<Seat>>* bind) override;
 
     uint32_t version() const override;
 
     void sendCapabilities();
-    void sendCapabilities(Wayland::Client* client);
     void sendName();
-    void sendName(Wayland::Client* client);
 
     uint32_t getCapabilities() const;
 

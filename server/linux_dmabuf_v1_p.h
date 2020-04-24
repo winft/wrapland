@@ -40,7 +40,7 @@ public:
     ~Private() override final;
 
     uint32_t version() const override final;
-    void bindInit(Wayland::Client* client, uint32_t version, uint32_t id) override final;
+    void bindInit(Wayland::Resource<LinuxDmabufV1, Global<LinuxDmabufV1>>* bind) override final;
 
     static const struct wl_buffer_interface* bufferInterface();
     static void createParamsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);

@@ -60,7 +60,7 @@ uint32_t LinuxDmabufV1::Private::version() const
     return s_version;
 }
 
-void LinuxDmabufV1::Private::bindInit(Wayland::Client* client, uint32_t version, uint32_t id)
+void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, Global<LinuxDmabufV1>>* bind)
 {
     // Send formats & modifiers.
     QHash<uint32_t, QSet<uint64_t>>::const_iterator it = supportedFormatsWithModifiers.constBegin();
@@ -72,7 +72,7 @@ void LinuxDmabufV1::Private::bindInit(Wayland::Client* client, uint32_t version,
         }
 
         for (uint64_t modifier : qAsConst(modifiers)) {
-            if (version >= ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
+            if (bind->version() >= ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
                 const uint32_t modifier_lo = modifier & 0xFFFFFFFF;
                 const uint32_t modifier_hi = modifier >> 32;
                 send<zwp_linux_dmabuf_v1_send_modifier, ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION>(

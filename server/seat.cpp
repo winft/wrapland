@@ -97,12 +97,10 @@ Seat::~Seat()
     delete d_ptr;
 }
 
-void Seat::Private::bindInit(Wayland::Client* client,
-                             [[maybe_unused]] uint32_t version,
-                             [[maybe_unused]] uint32_t id)
+void Seat::Private::bindInit(Wayland::Resource<Seat, Global<Seat>>* bind)
 {
-    sendCapabilities(client);
-    sendName(client);
+    send<wl_seat_send_capabilities>(bind, getCapabilities());
+    send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(bind, name.c_str());
 }
 
 uint32_t Seat::Private::version() const
@@ -144,10 +142,6 @@ bool Seat::Private::updateKey(quint32 key, SeatKeyboard::State state)
     return true;
 }
 
-void Seat::Private::sendName(Wayland::Client* client)
-{
-    send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(client, name.c_str());
-}
 void Seat::Private::sendName()
 {
     send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(name.c_str());
@@ -166,11 +160,6 @@ uint32_t Seat::Private::getCapabilities() const
         capabilities |= WL_SEAT_CAPABILITY_TOUCH;
     }
     return capabilities;
-}
-
-void Seat::Private::sendCapabilities(Wayland::Client* client)
-{
-    send<wl_seat_send_capabilities>(client, getCapabilities());
 }
 
 void Seat::Private::sendCapabilities()

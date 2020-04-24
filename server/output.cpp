@@ -257,13 +257,10 @@ int32_t Output::Private::toSubPixel() const
     abort();
 }
 
-void Output::Private::bindInit(Wayland::Client* client, uint32_t version, uint32_t id)
+void Output::Private::bindInit(Wayland::Resource<Output, Global<Output>>* bind)
 {
-    Q_UNUSED(version)
-    Q_UNUSED(id)
-
-    sendGeometry(client);
-    sendScale(client);
+    send<wl_output_send_geometry>(bind, geometryArgs());
+    send<wl_output_send_scale, 2>(bind, scale);
 
     auto currentModeIt = modes.cend();
     for (auto it = modes.cbegin(); it != modes.cend(); ++it) {
@@ -273,15 +270,15 @@ void Output::Private::bindInit(Wayland::Client* client, uint32_t version, uint32
             currentModeIt = it;
             continue;
         }
-        sendMode(client, mode);
+        sendMode(bind, mode);
     }
 
     if (currentModeIt != modes.cend()) {
-        sendMode(client, *currentModeIt);
+        sendMode(bind, *currentModeIt);
     }
 
-    sendDone(client);
-    client->flush();
+    send<wl_output_send_done, 2>(bind);
+    bind->client()->flush();
 }
 
 uint32_t Output::Private::version() const
@@ -301,10 +298,10 @@ int32_t Output::Private::getFlags(const Mode& mode)
     return flags;
 }
 
-void Output::Private::sendMode(Wayland::Client* client, const Mode& mode)
+void Output::Private::sendMode(Wayland::Resource<Output, Global<Output>>* bind, const Mode& mode)
 {
     send<wl_output_send_mode>(
-        client, getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
+        bind, getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
 }
 
 void Output::Private::sendMode(const Mode& mode)
@@ -313,29 +310,14 @@ void Output::Private::sendMode(const Mode& mode)
         getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
 }
 
-void Output::Private::sendGeometry(Wayland::Client* client)
-{
-    send<wl_output_send_geometry>(client, geometryArgs());
-}
-
 void Output::Private::sendGeometry()
 {
     send<wl_output_send_geometry>(geometryArgs());
 }
 
-void Output::Private::sendScale(Wayland::Client* client)
-{
-    send<wl_output_send_scale, 2>(client, scale);
-}
-
 void Output::Private::sendScale()
 {
     send<wl_output_send_scale, 2>(scale);
-}
-
-void Output::Private::sendDone(Wayland::Client* client)
-{
-    send<wl_output_send_done, 2>(client);
 }
 
 void Output::Private::sendDone()

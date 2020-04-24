@@ -37,16 +37,13 @@ public:
     Private(Output* q, D_isplay* display);
     ~Private() override;
 
-    void bindInit(Wayland::Client* client, uint32_t version, uint32_t id) override;
+    void bindInit(Wayland::Resource<Output, Global<Output>>* bind) override;
     uint32_t version() const override;
 
-    void sendMode(Wayland::Client* client, const Mode& mode);
+    void sendMode(Wayland::Resource<Output, Global<Output>>* bind, const Mode& mode);
     void sendMode(const Mode& mode);
-    void sendGeometry(Wayland::Client* client);
     void sendGeometry();
-    void sendScale(Wayland::Client* client);
     void sendScale();
-    void sendDone(Wayland::Client* client);
     void sendDone();
 
     void updateGeometry();
