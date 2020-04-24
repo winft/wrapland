@@ -23,7 +23,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_configuration_v1_interface.h"
 #include "output_management_v1_interface.h"
 #include "output_device_v1_interface.h"
-#include "idle_interface.h"
 #include "idleinhibit_interface_p.h"
 #include "remote_access_interface.h"
 #include "fakeinput_interface.h"
@@ -309,14 +308,14 @@ RemoteAccessManagerInterface *Display::createRemoteAccessManager(QObject *parent
     connect(this, &Display::aboutToTerminate, i, [this, i] { delete i; });
     return i;
 }
-
+/*
 IdleInterface *Display::createIdle(QObject *parent)
 {
     auto i = new IdleInterface(this, parent);
     connect(this, &Display::aboutToTerminate, i, [this, i] { delete i; });
     return i;
 }
-
+*/
 FakeInputInterface *Display::createFakeInput(QObject *parent)
 {
     auto i = new FakeInputInterface(this, parent);

@@ -58,7 +58,7 @@ class Seat;
 class ClientConnection;
 
 class Compositor;
-class IdleInterface;
+class KdeIdle;
 enum class IdleInhibitManagerInterfaceVersion;
 class RemoteAccessManagerInterface;
 class IdleInhibitManagerInterface;
@@ -152,7 +152,7 @@ public:
     PlasmaShellInterface* createPlasmaShell(QObject* parent = nullptr);
     PlasmaWindowManagementInterface* createPlasmaWindowManagement(QObject* parent = nullptr);
     QtSurfaceExtensionInterface* createQtSurfaceExtension(QObject* parent = nullptr);
-    IdleInterface* createIdle(QObject* parent = nullptr);
+    KdeIdle* createIdle(QObject* parent = nullptr);
     RemoteAccessManagerInterface* createRemoteAccessManager(QObject* parent = nullptr);
     FakeInputInterface* createFakeInput(QObject* parent = nullptr);
     ShadowManagerInterface* createShadowManager(QObject* parent = nullptr);
