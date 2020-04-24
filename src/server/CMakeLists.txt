@@ -34,7 +34,7 @@ set(SERVER_LIB_SRCS
     textinput_interface_v2.cpp
     viewporter_interface.cpp
     xdgdecoration_interface.cpp
-    xdgoutput_interface.cpp
+    
     xdgshell_interface.cpp
     xdgshell_stable_interface.cpp
     xdgshell_v5_interface.cpp
@@ -71,6 +71,7 @@ set(SERVER_LIB_SRCS
     ../../server/wayland/display.cpp
 
     ../../server/keyboard.cpp
+    ../../server/xdgoutput.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -355,7 +356,6 @@ set(SERVER_LIB_HEADERS
   textinput_interface.h
   viewporter_interface.h
   xdgdecoration_interface.h
-  xdgoutput_interface.h
   xdgshell_interface.h
 
   ../../server/buffer.h
@@ -383,6 +383,7 @@ set(SERVER_LIB_HEADERS
   ../../server/pointer_gestures_v1.h
   ../../server/relative_pointer_v1.h
   ../../server/seat.h
+  ../../server/xdgoutput.h
 )
 
 install(FILES
