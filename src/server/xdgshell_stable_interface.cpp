@@ -425,7 +425,7 @@ quint32 XdgShellStableInterface::Private::ping(XdgShellSurfaceInterface *surface
 
 XdgShellStableInterface::Private *XdgShellStableInterface::d_func() const
 {
-    return static_cast<Private*>(d.data());
+    return static_cast<Private*>(d.get());
 }
 
 namespace {
@@ -1081,7 +1081,7 @@ QPoint XdgPositionerStableInterface::anchorOffset() const
 
 XdgPositionerStableInterface::Private *XdgPositionerStableInterface::d_func() const
 {
-    return static_cast<Private*>(d.data());
+    return static_cast<Private*>(d.get());
 }
 
 
@@ -1099,7 +1099,7 @@ XdgPopupStableInterface* XdgSurfaceStableInterface::popup() const
 
 XdgSurfaceStableInterface::Private *XdgSurfaceStableInterface::d_func() const
 {
-    return static_cast<Private*>(d.data());
+    return static_cast<Private*>(d.get());
 }
 
 
@@ -1112,7 +1112,7 @@ XdgTopLevelStableInterface::~XdgTopLevelStableInterface() = default;
 
 XdgTopLevelStableInterface::Private *XdgTopLevelStableInterface::d_func() const
 {
-    return static_cast<Private*>(d.data());
+    return static_cast<Private*>(d.get());
 }
 
 XdgPopupStableInterface::XdgPopupStableInterface(XdgShellStableInterface *parent, Surface *surface, wl_resource *parentResource)
@@ -1124,7 +1124,7 @@ XdgPopupStableInterface::~XdgPopupStableInterface() = default;
 
 XdgPopupStableInterface::Private *XdgPopupStableInterface::d_func() const
 {
-    return static_cast<Private*>(d.data());
+    return static_cast<Private*>(d.get());
 }
 
 }

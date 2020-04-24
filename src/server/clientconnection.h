@@ -26,6 +26,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+//STD
+#include <memory>
+
 struct wl_client;
 struct wl_interface;
 struct wl_resource;
@@ -164,7 +167,7 @@ private:
 
     explicit ClientConnection(wl_client *c, Display *parent);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

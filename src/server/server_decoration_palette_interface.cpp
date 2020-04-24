@@ -174,7 +174,7 @@ ServerSideDecorationPaletteManagerInterface::~ServerSideDecorationPaletteManager
 
 ServerSideDecorationPaletteManagerInterface::Private *ServerSideDecorationPaletteManagerInterface::d_func() const
 {
-    return reinterpret_cast<ServerSideDecorationPaletteManagerInterface::Private*>(d.data());
+    return reinterpret_cast<ServerSideDecorationPaletteManagerInterface::Private*>(d.get());
 }
 
 ServerSideDecorationPaletteInterface* ServerSideDecorationPaletteManagerInterface::paletteForSurface(Surface *surface)
@@ -195,7 +195,7 @@ ServerSideDecorationPaletteInterface::ServerSideDecorationPaletteInterface(Serve
 
 ServerSideDecorationPaletteInterface::Private *ServerSideDecorationPaletteInterface::d_func() const
 {
-    return reinterpret_cast<ServerSideDecorationPaletteInterface::Private*>(d.data());
+    return reinterpret_cast<ServerSideDecorationPaletteInterface::Private*>(d.get());
 }
 
 ServerSideDecorationPaletteInterface::~ServerSideDecorationPaletteInterface()

@@ -25,6 +25,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <memory>
+
 namespace Wrapland
 {
 namespace Server
@@ -163,7 +165,7 @@ private:
     friend class PlasmaVirtualDesktopManagementInterface;
 
     class Private;
-    const QScopedPointer<Private> d;
+    const std::unique_ptr<Private> d;
 };
 
 }

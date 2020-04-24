@@ -243,7 +243,7 @@ bool TextInputInterface::isEnabled() const
 
 TextInputInterface::Private *TextInputInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 TextInputInterface::TextInputInterface(Private *p, QObject *parent)
@@ -268,7 +268,7 @@ TextInputInterfaceVersion TextInputManagerInterface::interfaceVersion() const
 
 TextInputManagerInterface::Private *TextInputManagerInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

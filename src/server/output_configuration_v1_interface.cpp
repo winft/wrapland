@@ -216,7 +216,7 @@ OutputConfigurationV1Interface::Private::~Private() = default;
 
 OutputConfigurationV1Interface::Private *OutputConfigurationV1Interface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 QHash<OutputDeviceV1Interface*, OutputChangesetV1*> OutputConfigurationV1Interface::changes() const

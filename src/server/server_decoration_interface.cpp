@@ -163,7 +163,7 @@ ServerSideDecorationManagerInterface::~ServerSideDecorationManagerInterface()
 
 ServerSideDecorationManagerInterface::Private *ServerSideDecorationManagerInterface::d_func() const
 {
-    return reinterpret_cast<ServerSideDecorationManagerInterface::Private*>(d.data());
+    return reinterpret_cast<ServerSideDecorationManagerInterface::Private*>(d.get());
 }
 
 void ServerSideDecorationManagerInterface::setDefaultMode(Mode mode)
@@ -278,7 +278,7 @@ Surface *ServerSideDecorationInterface::surface() const
 
 ServerSideDecorationInterface::Private *ServerSideDecorationInterface::d_func() const
 {
-    return reinterpret_cast<ServerSideDecorationInterface::Private*>(d.data());
+    return reinterpret_cast<ServerSideDecorationInterface::Private*>(d.get());
 }
 
 ServerSideDecorationInterface *ServerSideDecorationInterface::get(Surface *s)

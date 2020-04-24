@@ -178,7 +178,7 @@ private:
     friend class FakeInputInterface;
     FakeInputDevice(wl_resource *resource, FakeInputInterface *parent);
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

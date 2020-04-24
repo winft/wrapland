@@ -74,7 +74,7 @@ public:
 
     void commit() override;
 
-    QScopedPointer<QTimer> pingTimer;
+    std::unique_ptr<QTimer> pingTimer;
     quint32 pingSerial = 0;
     enum class WindowMode {
         Fullscreen,
@@ -189,7 +189,7 @@ ShellSurfaceInterface::ShellSurfaceInterface(ShellInterface *shell, Surface *par
     : Resource(new Private(this, shell, parent, parentResource))
 {
     Q_D();
-    connect(d->pingTimer.data(), &QTimer::timeout, this, &ShellSurfaceInterface::pingTimeout);
+    connect(d->pingTimer.get(), &QTimer::timeout, this, &ShellSurfaceInterface::pingTimeout);
     auto unsetSurface = [this] {
         Q_D();
         d->surface = nullptr;
@@ -477,7 +477,7 @@ QPointer< Surface > ShellSurfaceInterface::transientFor() const
 
 ShellSurfaceInterface::Private *ShellSurfaceInterface::d_func() const
 {
-    return reinterpret_cast<ShellSurfaceInterface::Private*>(d.data());
+    return reinterpret_cast<ShellSurfaceInterface::Private*>(d.get());
 }
 
 }

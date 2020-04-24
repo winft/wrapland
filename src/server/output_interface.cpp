@@ -577,7 +577,7 @@ OutputInterface *OutputInterface::get(wl_resource* native)
 
 OutputInterface::Private *OutputInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

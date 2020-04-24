@@ -49,7 +49,7 @@ OutputChangesetV1::~OutputChangesetV1() = default;
 
 OutputChangesetV1::Private *OutputChangesetV1::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 bool OutputChangesetV1::enabledChanged() const

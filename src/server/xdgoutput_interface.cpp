@@ -119,7 +119,7 @@ XdgOutputInterface* XdgOutputManagerInterface::createXdgOutput(OutputInterface *
 
 XdgOutputManagerInterface::Private* XdgOutputManagerInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 void XdgOutputManagerInterface::Private::destroyCallback(wl_client *client, wl_resource *resource)
