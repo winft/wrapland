@@ -337,15 +337,15 @@ add_test(NAME wrapland-testPlasmaShell COMMAND testPlasmaShell)
 ecm_mark_as_test(testPlasmaShell)
 
 ########################################################
-# Test Idle
+# Test KdeIdle
 ########################################################
-set( testIdle_SRCS
-        test_idle.cpp
+set( testKdeIdle_SRCS
+        kde_idle.cpp
     )
-add_executable(testIdle ${testIdle_SRCS})
-target_link_libraries( testIdle Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
-add_test(NAME wrapland-testIdle COMMAND testIdle)
-ecm_mark_as_test(testIdle)
+add_executable(testKdeIdle ${testKdeIdle_SRCS})
+target_link_libraries( testKdeIdle Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testKdeIdle COMMAND testKdeIdle)
+ecm_mark_as_test(testKdeIdle)
 
 ########################################################
 # Test Shadow

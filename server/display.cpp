@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "compositor.h"
 #include "data_device_manager.h"
 #include "dpms.h"
+#include "kde_idle.h"
 #include "linux_dmabuf_v1.h"
 #include "output.h"
 #include "pointer.h"
@@ -37,7 +38,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat.h"
 #include "subcompositor.h"
 #include "xdg_foreign.h"
-
 // Legacy
 #include "../src/server/display.h"
 
@@ -46,7 +46,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/contrast_interface.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
-#include "../src/server/idle_interface.h"
 #include "../src/server/idleinhibit_interface_p.h"
 #include "../src/server/output_configuration_v1_interface.h"
 #include "../src/server/output_device_v1_interface.h"
@@ -251,9 +250,9 @@ RemoteAccessManagerInterface* D_isplay::createRemoteAccessManager(QObject* paren
     return legacy->createRemoteAccessManager(parent);
 }
 
-IdleInterface* D_isplay::createIdle(QObject* parent)
+KdeIdle* D_isplay::createIdle(QObject* parent)
 {
-    return legacy->createIdle(parent);
+    return new KdeIdle(this, parent);
 }
 
 FakeInputInterface* D_isplay::createFakeInput(QObject* parent)
