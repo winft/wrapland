@@ -106,14 +106,21 @@ public:
     }
 
     template<auto sender, uint32_t minVersion = 0, typename... Args>
-    void send(Client* client, Args&&... args)
+    void send(GlobalResource* bind, Args&&... args)
     {
-        auto bind = findBind(client);
-        assert(bind);
-
         // See Vandevoorde et al.: C++ Templates - The Complete Guide p.79
         // or https://stackoverflow.com/a/4942746.
         bind->template send<sender, minVersion>(std::forward<Args>(args)...);
+    }
+
+    template<auto sender, uint32_t minVersion = 0, typename... Args>
+    void send(Client* client, Args&&... args)
+    {
+        for (auto bind : m_binds) {
+            if (bind->client() == client) {
+                bind->template send<sender, minVersion>(std::forward<Args>(args)...);
+            }
+        }
     }
 
     template<auto sender, uint32_t minVersion = 0, typename... Args>
@@ -132,6 +139,16 @@ public:
     void unbind(GlobalResource* bind)
     {
         m_binds.erase(std::remove(m_binds.begin(), m_binds.end(), bind), m_binds.end());
+    }
+
+    GlobalResource* getBind(wl_resource* wlResource)
+    {
+        for (auto bind : m_binds) {
+            if (bind->resource() == wlResource) {
+                return bind;
+            }
+        }
+        return nullptr;
     }
 
     std::vector<GlobalResource*> getBinds(Server::Client* client)
@@ -192,27 +209,14 @@ protected:
         GlobalResource::destroyCallback(wlClient, wlResource);
     }
 
-    virtual void bindInit(Wayland::Client* client, uint32_t version, uint32_t id)
+    virtual void bindInit([[maybe_unused]] GlobalResource* bind)
     {
-        Q_UNUSED(client);
-        Q_UNUSED(version);
-        Q_UNUSED(id);
     }
 
 private:
     static void destroy(std::unique_ptr<GlobalCapsule> global)
     {
         global.reset();
-    }
-
-    GlobalResource* findBind(Client* client)
-    {
-        for (auto* bind : m_binds) {
-            if (bind->client() == client) {
-                return bind;
-            }
-        }
-        return nullptr;
     }
 
     static void bind(wl_client* wlClient, void* data, uint32_t version, uint32_t id)
@@ -242,7 +246,7 @@ private:
         auto resource = new GlobalResource(client, version, id, m_interface, m_implementation);
         resource->setGlobal(this);
         m_binds.push_back(resource);
-        bindInit(client, version, id);
+        bindInit(resource);
     }
 
     Handle* m_handle;

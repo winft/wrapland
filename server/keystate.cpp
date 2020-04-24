@@ -17,7 +17,6 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-
 #include "keystate_p.h"
 
 namespace Wrapland
@@ -33,17 +32,19 @@ KeyState::Private::Private(D_isplay* display, KeyState* q)
 {
     create();
 }
-KeyState::Private::~Private() = default;
-void KeyState::Private::fetchStatesCallback(struct wl_client* wlClient,
-                                            struct wl_resource* resource)
-{
-    auto s = fromResource(resource);
-    auto s_private = static_cast<KeyState::Private*>(s->d_ptr.get());
-    auto client = s_private->display()->getClient(wlClient);
 
-    for (int i = 0; i < s_private->m_keyStates.count(); ++i)
-        s_private->send<org_kde_kwin_keystate_send_stateChanged>(
-            client, i, s_private->m_keyStates[i]);
+KeyState::Private::~Private() = default;
+
+void KeyState::Private::fetchStatesCallback(struct wl_client* wlClient,
+                                            struct wl_resource* wlResource)
+{
+    auto handle = fromResource(wlResource);
+    auto bind = handle->d_ptr->getBind(wlResource);
+
+    for (int i = 0; i < handle->d_ptr->m_keyStates.count(); ++i) {
+        handle->d_ptr->send<org_kde_kwin_keystate_send_stateChanged>(
+            bind, i, handle->d_ptr->m_keyStates[i]);
+    }
 }
 
 KeyState::KeyState(D_isplay* d, QObject* parent)
@@ -56,7 +57,6 @@ KeyState::~KeyState() = default;
 void KeyState::setState(KeyState::Key key, KeyState::State state)
 {
     d_ptr->m_keyStates[int(key)] = state;
-
     d_ptr->send<org_kde_kwin_keystate_send_stateChanged>(int(key), int(state));
 }
 

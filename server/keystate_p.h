@@ -35,7 +35,7 @@ class KeyState::Private : public Wayland::Global<KeyState>
 public:
     Private(D_isplay* d, KeyState* q);
     ~Private() override;
-    static void fetchStatesCallback(struct wl_client* client, struct wl_resource* resource);
+    static void fetchStatesCallback(struct wl_client* client, struct wl_resource* wlResource);
 
     static const quint32 s_version = 1;
     QVector<wl_resource*> m_resources;
