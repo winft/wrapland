@@ -287,7 +287,7 @@ private:
     explicit PlasmaWindowInterface(PlasmaWindowManagementInterface *wm, QObject *parent);
 
     class Private;
-    const QScopedPointer<Private> d;
+    const std::unique_ptr<Private> d;
 };
 
 }

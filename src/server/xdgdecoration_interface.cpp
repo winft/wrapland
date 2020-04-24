@@ -243,7 +243,7 @@ XdgShellSurfaceInterface* XdgDecorationInterface::surface() const
 
 XdgDecorationInterface::Private *XdgDecorationInterface::d_func() const
 {
-    return reinterpret_cast<XdgDecorationInterface::Private*>(d.data());
+    return reinterpret_cast<XdgDecorationInterface::Private*>(d.get());
 }
 
 

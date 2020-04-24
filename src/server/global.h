@@ -23,6 +23,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QDebug>
 
+#include <memory>
+
 #include <Wrapland/Server/wraplandserver_export.h>
 
 struct wl_global;
@@ -102,7 +104,7 @@ Q_SIGNALS:
 protected:
     class Private;
     explicit Global(Private *d, QObject *parent = nullptr);
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

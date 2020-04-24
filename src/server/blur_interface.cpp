@@ -51,7 +51,7 @@ private:
     static Private *cast(wl_resource *r) {
         auto blurManager = reinterpret_cast<QPointer<BlurManagerInterface>*>(wl_resource_get_user_data(r))->data();
         if (blurManager) {
-            return static_cast<Private*>(blurManager->d.data());
+            return static_cast<Private*>(blurManager->d.get());
         }
         return nullptr;
     }
@@ -211,7 +211,7 @@ QRegion BlurInterface::region()
 
 BlurInterface::Private *BlurInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

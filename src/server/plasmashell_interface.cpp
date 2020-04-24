@@ -200,7 +200,7 @@ PlasmaShellInterface *PlasmaShellSurfaceInterface::shell() const {
 
 PlasmaShellSurfaceInterface::Private *PlasmaShellSurfaceInterface::d_func() const
 {
-    return reinterpret_cast<PlasmaShellSurfaceInterface::Private*>(d.data());
+    return reinterpret_cast<PlasmaShellSurfaceInterface::Private*>(d.get());
 }
 
 void PlasmaShellSurfaceInterface::Private::setOutputCallback(wl_client *client, wl_resource *resource, wl_resource *output)

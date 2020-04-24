@@ -25,6 +25,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_device_v1_interface.h"
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <memory>
+
 namespace Wrapland
 {
 namespace Server
@@ -79,7 +81,7 @@ private:
 
 
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
     Private *d_func() const;
 };
 

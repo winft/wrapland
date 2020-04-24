@@ -405,7 +405,7 @@ BUFFER(bottomLeft)
 
 ShadowInterface::Private *ShadowInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

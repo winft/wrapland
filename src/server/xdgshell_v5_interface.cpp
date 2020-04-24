@@ -248,7 +248,7 @@ quint32 XdgShellV5Interface::Private::ping(XdgShellSurfaceInterface * surface)
 
 XdgShellV5Interface::Private *XdgShellV5Interface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 class XdgSurfaceV5Interface::Private : public XdgShellSurfaceInterface::Private
@@ -567,7 +567,7 @@ XdgPopupV5Interface::~XdgPopupV5Interface() = default;
 
 XdgPopupV5Interface::Private *XdgPopupV5Interface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

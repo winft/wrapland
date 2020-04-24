@@ -178,7 +178,7 @@ AppMenuManagerInterface::~AppMenuManagerInterface()
 
 AppMenuManagerInterface::Private *AppMenuManagerInterface::d_func() const
 {
-    return reinterpret_cast<AppMenuManagerInterface::Private*>(d.data());
+    return reinterpret_cast<AppMenuManagerInterface::Private*>(d.get());
 }
 
 AppMenuInterface* AppMenuManagerInterface::appMenuForSurface(Surface *surface)
@@ -199,7 +199,7 @@ AppMenuInterface::AppMenuInterface(AppMenuManagerInterface *parent, Surface *s, 
 
 AppMenuInterface::Private *AppMenuInterface::d_func() const
 {
-    return reinterpret_cast<AppMenuInterface::Private*>(d.data());
+    return reinterpret_cast<AppMenuInterface::Private*>(d.get());
 }
 
 AppMenuInterface::~AppMenuInterface()

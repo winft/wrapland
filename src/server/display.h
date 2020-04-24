@@ -28,6 +28,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "clientconnection.h"
 
+//STD
+#include <memory>
+
 struct wl_client;
 struct wl_display;
 struct wl_event_loop;
@@ -370,7 +373,7 @@ Q_SIGNALS:
 
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }

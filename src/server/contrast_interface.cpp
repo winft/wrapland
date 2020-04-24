@@ -51,7 +51,7 @@ private:
     static Private *cast(wl_resource *r) {
         auto contrastManager = reinterpret_cast<QPointer<ContrastManagerInterface>*>(wl_resource_get_user_data(r))->data();
         if (contrastManager) {
-            return static_cast<Private*>(contrastManager->d.data());
+            return static_cast<Private*>(contrastManager->d.get());
          }
         return nullptr;
     }
@@ -266,7 +266,7 @@ qreal ContrastInterface::saturation() const
 
 ContrastInterface::Private *ContrastInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

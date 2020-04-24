@@ -56,7 +56,7 @@ public:
     virtual bool allowInterface(ClientConnection *client, const QByteArray &interfaceName) = 0;
 private:
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 }
