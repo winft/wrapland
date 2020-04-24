@@ -423,7 +423,7 @@ quint32 XdgShellV6Interface::Private::ping(XdgShellSurfaceInterface *surface)
 
 XdgShellV6Interface::Private *XdgShellV6Interface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 namespace {
@@ -1065,7 +1065,7 @@ QPoint XdgPositionerV6Interface::anchorOffset() const
 
 XdgPositionerV6Interface::Private *XdgPositionerV6Interface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 
@@ -1083,7 +1083,7 @@ XdgPopupV6Interface* XdgSurfaceV6Interface::popup() const
 
 XdgSurfaceV6Interface::Private *XdgSurfaceV6Interface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 
@@ -1096,7 +1096,7 @@ XdgTopLevelV6Interface::~XdgTopLevelV6Interface() = default;
 
 XdgTopLevelV6Interface::Private *XdgTopLevelV6Interface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 XdgPopupV6Interface::XdgPopupV6Interface(XdgShellV6Interface *parent, Surface *surface, wl_resource *parentResource)
@@ -1108,7 +1108,7 @@ XdgPopupV6Interface::~XdgPopupV6Interface() = default;
 
 XdgPopupV6Interface::Private *XdgPopupV6Interface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

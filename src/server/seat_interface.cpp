@@ -655,7 +655,7 @@ SeatInterface *SeatInterface::get(wl_resource *native)
 
 SeatInterface::Private *SeatInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 QPointF SeatInterface::pointerPos() const

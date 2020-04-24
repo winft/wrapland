@@ -259,7 +259,7 @@ void PlasmaWindowManagementInterface::setShowingDesktopState(PlasmaWindowManagem
 
 PlasmaWindowManagementInterface::Private *PlasmaWindowManagementInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 PlasmaWindowInterface *PlasmaWindowManagementInterface::createWindow(QObject *parent)

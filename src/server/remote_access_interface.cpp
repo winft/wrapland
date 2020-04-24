@@ -320,13 +320,13 @@ RemoteAccessManagerInterface::RemoteAccessManagerInterface(Display *display, QOb
 
 void RemoteAccessManagerInterface::sendBufferReady(const OutputInterface *output, const BufferHandle *buf)
 {
-    Private *priv = reinterpret_cast<Private *>(d.data());
+    Private *priv = reinterpret_cast<Private *>(d.get());
     priv->sendBufferReady(output, buf);
 }
 
 bool RemoteAccessManagerInterface::isBound() const
 {
-    Private *priv = reinterpret_cast<Private *>(d.data());
+    Private *priv = reinterpret_cast<Private *>(d.get());
     return !priv->clientResources.isEmpty();
 }
 
@@ -372,7 +372,7 @@ RemoteBufferInterface::RemoteBufferInterface(RemoteAccessManagerInterface *ram, 
 
 RemoteBufferInterface::Private *RemoteBufferInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 

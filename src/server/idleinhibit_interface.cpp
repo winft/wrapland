@@ -46,7 +46,7 @@ IdleInhibitManagerInterfaceVersion IdleInhibitManagerInterface::interfaceVersion
 
 IdleInhibitManagerInterface::Private *IdleInhibitManagerInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

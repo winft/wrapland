@@ -529,7 +529,7 @@ OutputDeviceV1Interface::Transform OutputDeviceV1Interface::transform() const
 
 OutputDeviceV1Interface::Private *OutputDeviceV1Interface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 QByteArray OutputDeviceV1Interface::uuid() const

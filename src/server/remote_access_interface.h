@@ -63,7 +63,7 @@ private:
     friend class RemoteAccessManagerInterface;
     friend class RemoteBufferInterface;
     class Private;
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 };
 
 class WRAPLANDSERVER_EXPORT RemoteAccessManagerInterface : public Global

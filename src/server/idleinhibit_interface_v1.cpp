@@ -135,7 +135,7 @@ IdleInhibitorInterface::~IdleInhibitorInterface() = default;
 
 IdleInhibitorInterface::Private *IdleInhibitorInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

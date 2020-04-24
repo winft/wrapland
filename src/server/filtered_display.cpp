@@ -58,7 +58,7 @@ FilteredDisplay::FilteredDisplay(QObject *parent):
         if (!running) {
             return;
         }
-        wl_display_set_global_filter(*this, Private::globalFilterCallback, d.data());
+        wl_display_set_global_filter(*this, Private::globalFilterCallback, d.get());
     });
 }
 

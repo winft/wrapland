@@ -211,7 +211,7 @@ qint32 SlideInterface::offset() const
 
 SlideInterface::Private *SlideInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

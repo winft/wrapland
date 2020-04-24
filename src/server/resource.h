@@ -24,6 +24,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <memory>
+
 struct wl_client;
 struct wl_resource;
 
@@ -95,7 +97,7 @@ Q_SIGNALS:
 protected:
     class Private;
     explicit Resource(Private *d, QObject *parent = nullptr);
-    QScopedPointer<Private> d;
+    std::unique_ptr<Private> d;
 
 };
 

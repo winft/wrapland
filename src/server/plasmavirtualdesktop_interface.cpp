@@ -201,7 +201,7 @@ PlasmaVirtualDesktopManagementInterface::~PlasmaVirtualDesktopManagementInterfac
 
 PlasmaVirtualDesktopManagementInterface::Private *PlasmaVirtualDesktopManagementInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 void PlasmaVirtualDesktopManagementInterface::setRows(quint32 rows)

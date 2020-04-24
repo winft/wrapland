@@ -81,7 +81,7 @@ quint32 XdgShellInterface::ping(XdgShellSurfaceInterface * surface)
 
 XdgShellInterface::Private *XdgShellInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 XdgShellSurfaceInterface::Private::Private(XdgShellInterfaceVersion interfaceVersion, XdgShellSurfaceInterface *q, Global *c, Surface *surface, wl_resource *parentResource, const wl_interface *interface, const void *implementation)
@@ -174,7 +174,7 @@ QSize XdgShellSurfaceInterface::maximumSize() const
 
 XdgShellSurfaceInterface::Private *XdgShellSurfaceInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 XdgShellPopupInterface::Private::Private(XdgShellInterfaceVersion interfaceVersion, XdgShellPopupInterface *q, XdgShellInterface *c, Surface *surface, wl_resource *parentResource, const wl_interface *interface, const void *implementation)
@@ -290,7 +290,7 @@ quint32 XdgShellPopupInterface::configure(const QRect &rect)
 
 XdgShellPopupInterface::Private *XdgShellPopupInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }

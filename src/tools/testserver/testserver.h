@@ -25,6 +25,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPointF>
 #include <QVector>
 
+//STD
+#include <memory>
+
 class QElapsedTimer;
 class QTimer;
 
@@ -57,7 +60,7 @@ private:
     Wrapland::Server::Seat *m_seat = nullptr;
     QVector<Wrapland::Server::ShellSurfaceInterface*> m_shellSurfaces;
     QTimer *m_repaintTimer;
-    QScopedPointer<QElapsedTimer> m_timeSinceStart;
+    std::unique_ptr<QElapsedTimer> m_timeSinceStart;
     QPointF m_cursorPos;
     QHash<qint32, qint32> m_touchIdMapper;
 };

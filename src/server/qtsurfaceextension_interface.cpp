@@ -219,7 +219,7 @@ QtSurfaceExtensionInterface *QtExtendedSurfaceInterface::shell() const
 
 QtExtendedSurfaceInterface::Private *QtExtendedSurfaceInterface::d_func() const
 {
-    return reinterpret_cast<QtExtendedSurfaceInterface::Private*>(d.data());
+    return reinterpret_cast<QtExtendedSurfaceInterface::Private*>(d.get());
 }
 
 void QtExtendedSurfaceInterface::close()

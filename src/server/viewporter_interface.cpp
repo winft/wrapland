@@ -54,7 +54,7 @@ private:
         auto viewporter = reinterpret_cast<QPointer<ViewporterInterface>*>(
                               wl_resource_get_user_data(r))->data();
         if (viewporter) {
-            return static_cast<Private*>(viewporter->d.data());
+            return static_cast<Private*>(viewporter->d.get());
          }
         return nullptr;
     }
@@ -255,7 +255,7 @@ ViewportInterface::~ViewportInterface() = default;
 
 ViewportInterface::Private *ViewportInterface::d_func() const
 {
-    return reinterpret_cast<Private*>(d.data());
+    return reinterpret_cast<Private*>(d.get());
 }
 
 }
