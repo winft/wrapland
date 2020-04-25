@@ -31,8 +31,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/shm_pool.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/idle_inhibit_v1.h"
 #include "../../src/server/clientconnection.h"
-#include "../../src/server/idleinhibit_interface.h"
 
 #include "../../server/buffer.h"
 #include "../../server/client.h"
@@ -73,7 +73,7 @@ private Q_SLOTS:
 private:
     Wrapland::Server::D_isplay* m_display;
     Wrapland::Server::Compositor* m_serverCompositor;
-    Wrapland::Server::IdleInhibitManagerInterface* m_idleInhibitInterface;
+    Wrapland::Server::IdleInhibitManagerV1* m_idleInhibitInterface;
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::ShmPool* m_shm;
@@ -107,11 +107,8 @@ void TestSurface::init()
     m_serverCompositor = m_display->createCompositor(m_display);
     QVERIFY(m_serverCompositor);
 
-    m_idleInhibitInterface = m_display->createIdleInhibitManager(
-        Wrapland::Server::IdleInhibitManagerInterfaceVersion::UnstableV1, m_display);
+    m_idleInhibitInterface = m_display->createIdleInhibitManager(m_display);
     QVERIFY(m_idleInhibitInterface);
-    m_idleInhibitInterface->create();
-    QVERIFY(m_idleInhibitInterface->isValid());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;

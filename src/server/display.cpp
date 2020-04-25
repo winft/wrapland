@@ -23,7 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_configuration_v1_interface.h"
 #include "output_management_v1_interface.h"
 #include "output_device_v1_interface.h"
-#include "idleinhibit_interface_p.h"
+//#include "idleinhibit_interface_p.h"
 #include "remote_access_interface.h"
 #include "fakeinput_interface.h"
 #include "logging.h"
@@ -444,19 +444,19 @@ XdgShellInterface *Display::createXdgShell(const XdgShellInterfaceVersion &versi
 //    connect(this, &Display::aboutToTerminate, foreign, [this,foreign] { delete foreign; });
 //    return foreign;
 //}
-
-IdleInhibitManagerInterface *Display::createIdleInhibitManager(const IdleInhibitManagerInterfaceVersion &version, QObject *parent)
+/*
+IdleInhibitManager *Display::createIdleInhibitManager(const IdleInhibitManagerInterfaceVersion &version, QObject *parent)
 {
-    IdleInhibitManagerInterface *i = nullptr;
+    IdleInhibitManager *i = nullptr;
     switch (version) {
     case IdleInhibitManagerInterfaceVersion::UnstableV1:
-        i = new IdleInhibitManagerUnstableV1Interface(this, parent);
+        i = new IdleInhibitManagerV1(this, parent);
         break;
     }
     connect(this, &Display::aboutToTerminate, i, [this,i] { delete i; });
     return i;
 }
-
+*/
 AppMenuManagerInterface *Display::createAppMenuManagerInterface(QObject *parent)
 {
     auto b = new AppMenuManagerInterface(this, parent);

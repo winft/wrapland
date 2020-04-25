@@ -48,7 +48,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/subcompositor.h"
 #include "../../src/client/xdgshell.h"
 
-#include "../../src/server/idleinhibit_interface.h"
+#include "../../server/idle_inhibit_v1.h"
 #include "../../src/server/output_interface.h"
 #include "../../src/server/shell_interface.h"
 #include "../../src/server/blur_interface.h"
@@ -130,7 +130,7 @@ private:
     Wrapland::Server::PointerConstraintsV1* m_pointerConstraintsV1;
     Wrapland::Server::BlurManagerInterface *m_blur;
     Wrapland::Server::ContrastManagerInterface *m_contrast;
-    Wrapland::Server::IdleInhibitManagerInterface *m_idleInhibit;
+    Wrapland::Server::IdleInhibitManagerV1 *m_idleInhibit;
 
 };
 
@@ -199,9 +199,7 @@ void TestWaylandRegistry::init()
     m_relativePointerV1 = m_display->createRelativePointerManager();
     m_pointerGesturesV1 = m_display->createPointerGestures();
     m_pointerConstraintsV1 = m_display->createPointerConstraints();
-    m_idleInhibit = m_display->createIdleInhibitManager(Wrapland::Server::IdleInhibitManagerInterfaceVersion::UnstableV1);
-    m_idleInhibit->create();
-    QCOMPARE(m_idleInhibit->interfaceVersion(), Wrapland::Server::IdleInhibitManagerInterfaceVersion::UnstableV1);
+    m_idleInhibit = m_display->createIdleInhibitManager();
 }
 
 void TestWaylandRegistry::cleanup()
