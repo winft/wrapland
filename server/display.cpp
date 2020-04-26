@@ -38,6 +38,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat.h"
 #include "subcompositor.h"
 #include "xdg_foreign.h"
+#include "xdgoutput.h"
 // Legacy
 #include "../src/server/display.h"
 
@@ -64,7 +65,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/textinput_interface_p.h"
 #include "../src/server/viewporter_interface.h"
 #include "../src/server/xdgdecoration_interface.h"
-#include "../src/server/xdgoutput_interface.h"
 #include "../src/server/xdgshell_stable_interface_p.h"
 #include "../src/server/xdgshell_v5_interface_p.h"
 #include "../src/server/xdgshell_v6_interface_p.h"
@@ -356,9 +356,9 @@ ViewporterInterface* D_isplay::createViewporterInterface(QObject* parent)
     return legacy->createViewporterInterface(parent);
 }
 
-XdgOutputManagerInterface* D_isplay::createXdgOutputManager(QObject* parent)
+XdgOutputManager* D_isplay::createXdgOutputManager(QObject* parent)
 {
-    return legacy->createXdgOutputManager(parent);
+    return new XdgOutputManager(this, parent);
 }
 
 XdgDecorationManagerInterface*

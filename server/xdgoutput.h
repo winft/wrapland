@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright 2018  David Edmundson <kde@davidedmundson.co.uk>
+Copyright 2020  Adrien Faveraux <ad1rie3@hotmail.fr>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,72 +17,51 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef WRAPLAND_SERVER_XDGOUTPUT_INTERFACE_H
-#define WRAPLAND_SERVER_XDGOUTPUT_INTERFACE_H
+#pragma once
 
-#include "global.h"
-#include "resource.h"
+#include "display.h"
+#include "output.h"
 
+#include "wayland/client.h"
+#include "wayland/display.h"
+#include "wayland/global.h"
+#include "wayland/resource.h"
+
+#include <memory>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-
-/*
- * In terms of protocol XdgOutputInterface are a resource
- * but for the sake of sanity, we should treat XdgOutputs as globals like Output is
- * Hence this doesn't match most of wrapland API paradigms.
- */
-
-namespace Wrapland
+namespace Wrapland::Server
 {
-namespace Server
-{
-
-class Display;
+class D_isplay;
 class OutputInterface;
-class XdgOutputInterface;
+class XdgOutput;
 
-/**
- * Global manager for XdgOutputs
- * @since 0.0.547
- */
-class WRAPLANDSERVER_EXPORT XdgOutputManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT XdgOutputManager : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~XdgOutputManagerInterface();
-    /**
-     * Creates an XdgOutputInterface object for an existing Output
-     * which exposes XDG specific properties of outputs
-     *
-     * @arg output the wl_output interface this XDG output is for
-     * @parent the parent of the newly created object
-     */
-    XdgOutputInterface* createXdgOutput(OutputInterface *output, QObject *parent);
+    ~XdgOutputManager() override;
+    XdgOutput* createXdgOutput(Output* output, QObject* parent);
+
 private:
-    explicit XdgOutputManagerInterface(Display *display, QObject *parent = nullptr);
-    friend class Display;
+    explicit XdgOutputManager(D_isplay* display, QObject* parent = nullptr);
+    friend class D_isplay;
     class Private;
-    Private *d_func() const;
+    Private* d_ptr;
 };
 
-/**
- * Extension to Output
- * Users should set all relevant values on creation and on future changes.
- * done() should be explicitly called after change batches including initial setting.
- * @since 0.0.547
- */
-class WRAPLANDSERVER_EXPORT XdgOutputInterface : public QObject
+class WRAPLANDSERVER_EXPORT XdgOutput : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~XdgOutputInterface();
+    ~XdgOutput() override;
 
     /**
      * Sets the size of this output in logical co-ordinates.
      * Users should call done() after setting all values
      */
-    void setLogicalSize(const QSize &size);
+    void setLogicalSize(const QSize& size);
 
     /**
      * Returns the last set logical size on this output
@@ -94,7 +73,7 @@ public:
      * Users should call done() after setting all values
      * @see OutputInterface::setPosition
      */
-    void setLogicalPosition(const QPoint &pos);
+    void setLogicalPosition(const QPoint& pos);
 
     /**
      * Returns the last set logical position on this output
@@ -107,15 +86,27 @@ public:
     void done();
 
 private:
-    explicit XdgOutputInterface(QObject *parent);
-    friend class XdgOutputManagerInterface;
+    explicit XdgOutput(QObject* parent);
+    friend class XdgOutputManager;
 
     class Private;
-    std::unique_ptr<Private> d;
+    std::unique_ptr<Private> d_ptr;
 };
 
+class XdgOutputV1 : public QObject
+{
+    Q_OBJECT
+public:
+    XdgOutputV1(Wayland::Client* client, uint32_t version, uint32_t id, XdgOutputManager* parent);
+    ~XdgOutputV1() override;
+    void setLogicalSize(const QSize& size);
+    void setLogicalPosition(const QPoint& pos);
+    void done();
+    class Private;
+    Private* d_ptr;
+
+Q_SIGNALS:
+    void resourceDestroyed();
+};
 
 }
-}
-
-#endif
