@@ -51,7 +51,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "appmenu_interface.h"
 #include "server_decoration_palette_interface.h"
 #include "plasmavirtualdesktop_interface.h"
-#include "xdgoutput_interface.h"
+//#include "xdgoutput.h"
 #include "xdgdecoration_interface.h"
 #include "eglstream_controller_interface.h"
 //#include "../../server/keystate.h"
@@ -491,14 +491,14 @@ ViewporterInterface *Display::createViewporterInterface(QObject *parent)
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
-
+/*
 XdgOutputManagerInterface *Display::createXdgOutputManager(QObject *parent)
 {
     auto b = new XdgOutputManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
-
+*/
 XdgDecorationManagerInterface *Display::createXdgDecorationManager(XdgShellInterface *shellInterface, QObject *parent)
 {
     auto d = new XdgDecorationManagerInterface(this, shellInterface, parent);

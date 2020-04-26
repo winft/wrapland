@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/output.h"
 #include "../../src/client/xdgoutput.h"
 #include "../../src/client/registry.h"
-#include "../../src/server/xdgoutput_interface.h"
+#include "../../server/xdgoutput.h"
 
 class TestXdgOutput : public QObject
 {
@@ -42,8 +42,8 @@ private Q_SLOTS:
 private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Output* m_serverOutput;
-    Wrapland::Server::XdgOutputManagerInterface *m_serverXdgOutputManager;
-    Wrapland::Server::XdgOutputInterface *m_serverXdgOutput;
+    Wrapland::Server::XdgOutputManager *m_serverXdgOutputManager;
+    Wrapland::Server::XdgOutput *m_serverXdgOutput;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
@@ -73,8 +73,7 @@ void TestXdgOutput::init()
     m_serverOutput->setCurrentMode(QSize(1920, 1080));
 
     m_serverXdgOutputManager = m_display->createXdgOutputManager(this);
-    m_serverXdgOutputManager->create();
-    m_serverXdgOutput =  m_serverXdgOutputManager->createXdgOutput(m_serverOutput->legacy, this);
+    m_serverXdgOutput =  m_serverXdgOutputManager->createXdgOutput(m_serverOutput, this);
     m_serverXdgOutput->setLogicalSize(QSize(1280, 720)); //a 1.5 scale factor
     m_serverXdgOutput->setLogicalPosition(QPoint(11,12)); //not a sensible value for one monitor, but works for this test
     m_serverXdgOutput->done();
