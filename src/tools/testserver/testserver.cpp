@@ -28,7 +28,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../../server/kde_idle.h"
 #include "../../server/fakeinput_interface.h"
-#include "../../server/shell_interface.h"
+#include "../../../server/xdg_shell.h"
+#include "../../../server/xdg_shell_toplevel.h"
 
 #include <QCoreApplication>
 #include <QElapsedTimer>
@@ -58,12 +59,13 @@ void TestServer::init()
     m_display->start(D_isplay::StartMode::ConnectClientsOnly);
     m_display->createShm();
     m_display->createCompositor();
-    m_shell = m_display->createShell(m_display);
-    connect(m_shell, &ShellInterface::surfaceCreated, this,
-        [this] (ShellSurfaceInterface *surface) {
+    m_shell = m_display->createXdgShell(m_display);
+
+    connect(m_shell, &XdgShell::toplevelCreated, this,
+        [this] (XdgShellToplevel *surface) {
             m_shellSurfaces << surface;
             // TODO: pass keyboard/pointer/touch focus on mapped
-            connect(surface, &QObject::destroyed, this,
+            connect(surface, &XdgShellToplevel::resourceDestroyed, this,
                 [this, surface] {
                     m_shellSurfaces.removeOne(surface);
                 }
@@ -71,7 +73,6 @@ void TestServer::init()
         }
     );
 
-    m_shell->create();
     m_seat = m_display->createSeat(m_display);
     m_seat->setHasKeyboard(true);
     m_seat->setHasPointer(true);
@@ -195,6 +196,6 @@ void TestServer::startTestApp(const QString &app, const QStringList &arguments)
 void TestServer::repaint()
 {
     for (auto it = m_shellSurfaces.constBegin(), end = m_shellSurfaces.constEnd(); it != end; ++it) {
-        (*it)->surface()->frameRendered(m_timeSinceStart->elapsed());
+        (*it)->surface()->surface()->frameRendered(m_timeSinceStart->elapsed());
     }
 }

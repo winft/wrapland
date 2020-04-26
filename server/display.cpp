@@ -30,6 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "dpms.h"
 #include "idle_inhibit_v1.h"
 #include "kde_idle.h"
+#include "keystate.h"
 #include "linux_dmabuf_v1.h"
 #include "output.h"
 #include "pointer.h"
@@ -38,8 +39,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "relative_pointer_v1.h"
 #include "seat.h"
 #include "subcompositor.h"
+#include "xdg_decoration.h"
 #include "xdg_foreign.h"
+#include "xdg_shell.h"
 #include "xdgoutput.h"
+
 // Legacy
 #include "../src/server/display.h"
 
@@ -60,15 +64,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/server_decoration_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
 #include "../src/server/shadow_interface.h"
-#include "../src/server/shell_interface.h"
 #include "../src/server/slide_interface.h"
 #include "../src/server/textinput_interface_p.h"
 #include "../src/server/viewporter_interface.h"
-#include "../src/server/xdgdecoration_interface.h"
-#include "../src/server/xdgshell_stable_interface_p.h"
-#include "../src/server/xdgshell_v5_interface_p.h"
-#include "../src/server/xdgshell_v6_interface_p.h"
-#include "keystate.h"
 //
 //
 
@@ -198,11 +196,6 @@ Compositor* D_isplay::createCompositor(QObject* parent)
     return new Compositor(this, parent);
 }
 
-ShellInterface* D_isplay::createShell(QObject* parent)
-{
-    return legacy->createShell(parent);
-}
-
 OutputDeviceV1Interface* D_isplay::createOutputDeviceV1(QObject* parent)
 {
     return legacy->createOutputDeviceV1(parent);
@@ -296,10 +289,9 @@ D_isplay::createTextInputManager(const TextInputInterfaceVersion& version, QObje
     return legacy->createTextInputManager(version, parent);
 }
 
-XdgShellInterface* D_isplay::createXdgShell(const XdgShellInterfaceVersion& version,
-                                            QObject* parent)
+XdgShell* D_isplay::createXdgShell(QObject* parent)
 {
-    return legacy->createXdgShell(version, parent);
+    return new XdgShell(this, parent);
 }
 
 RelativePointerManagerV1* D_isplay::createRelativePointerManager(QObject* parent)
@@ -359,10 +351,9 @@ XdgOutputManager* D_isplay::createXdgOutputManager(QObject* parent)
     return new XdgOutputManager(this, parent);
 }
 
-XdgDecorationManagerInterface*
-D_isplay::createXdgDecorationManager(XdgShellInterface* shellInterface, QObject* parent)
+XdgDecorationManager* D_isplay::createXdgDecorationManager(XdgShell* shell, QObject* parent)
 {
-    return legacy->createXdgDecorationManager(shellInterface, parent);
+    return new XdgDecorationManager(this, shell, parent);
 }
 
 EglStreamControllerInterface* D_isplay::createEglStreamControllerInterface(QObject* parent)

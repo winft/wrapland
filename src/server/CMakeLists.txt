@@ -1,5 +1,4 @@
 set(SERVER_LIB_SRCS
-    ../compat/wayland-xdg-shell-v5-protocol.c
     appmenu_interface.cpp
     blur_interface.cpp
     clientconnection.cpp
@@ -24,20 +23,11 @@ set(SERVER_LIB_SRCS
     server_decoration_interface.cpp
     server_decoration_palette_interface.cpp
     shadow_interface.cpp
-    shell_interface.cpp
     slide_interface.cpp
-    surfacerole.cpp
     textinput_interface.cpp
     textinput_interface_v0.cpp
     textinput_interface_v2.cpp
     viewporter_interface.cpp
-    xdgdecoration_interface.cpp
-    
-    xdgshell_interface.cpp
-    xdgshell_stable_interface.cpp
-    xdgshell_v5_interface.cpp
-    xdgshell_v5_interface.cpp
-    xdgshell_v6_interface.cpp
 
     ../../server/buffer.cpp
     ../../server/linux_dmabuf_v1.cpp
@@ -45,8 +35,14 @@ set(SERVER_LIB_SRCS
     ../../server/region.cpp
     ../../server/subcompositor.cpp
     ../../server/surface.cpp
+    ../../server/xdg_decoration.cpp
     ../../server/xdg_foreign.cpp
     ../../server/xdg_foreign_v2.cpp
+    ../../server/xdg_shell.cpp
+    ../../server/xdg_shell_surface.cpp
+    ../../server/xdg_shell_toplevel.cpp
+    ../../server/xdg_shell_popup.cpp
+    ../../server/xdg_shell_positioner.cpp
 
     ../../server/client.cpp
     ../../server/data_device.cpp
@@ -156,11 +152,6 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
     BASENAME text-input-unstable-v2
-)
-
-ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-shell/xdg-shell-unstable-v6.xml
-    BASENAME xdg-shell-v6
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
@@ -287,8 +278,6 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-foreign-unstable-v2-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-shell-server-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-shell-v6-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-shell-v6-server-protocol.h
 )
 
 set_source_files_properties(${SERVER_GENERATED_SRCS} PROPERTIES SKIP_AUTOMOC ON)
@@ -348,12 +337,9 @@ set(SERVER_LIB_HEADERS
   server_decoration_interface.h
   server_decoration_palette_interface.h
   shadow_interface.h
-  shell_interface.h
   slide_interface.h
   textinput_interface.h
   viewporter_interface.h
-  xdgdecoration_interface.h
-  xdgshell_interface.h
 
   ../../server/buffer.h
   ../../server/linux_dmabuf_v1.h
@@ -382,6 +368,8 @@ set(SERVER_LIB_HEADERS
   ../../server/seat.h
   ../../server/xdgoutput.h
   ../../server/idle_inhibit_v1.h
+  ../../server/xdg_shell.h
+  ../../server/xdg_decoration.h
 )
 
 install(FILES

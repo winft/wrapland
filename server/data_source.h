@@ -66,4 +66,3 @@ private:
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::DataSource*)
-Q_DECLARE_METATYPE(std::string)

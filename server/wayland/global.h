@@ -66,7 +66,7 @@ public:
         Q_ASSERT(!m_capsule->valid());
 
         m_capsule->create(
-            wl_global_create(*display()->handle(), m_interface, version(), this, bind));
+            wl_global_create(display()->handle()->display(), m_interface, version(), this, bind));
     }
 
     virtual uint32_t version() const
