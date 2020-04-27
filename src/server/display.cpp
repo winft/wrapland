@@ -43,8 +43,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "shell_interface.h"
 //#include "subcompositor_interface.h"
 #include "textinput_interface_p.h"
-#include "viewporter_interface.h"
 //#include "xdgshell_v5_interface_p.h"
+//#include "viewporter_interface.h"
 //#include "xdgforeign_interface.h"
 //#include "xdgshell_v6_interface_p.h"
 //#include "xdgshell_stable_interface_p.h"
@@ -484,13 +484,13 @@ PlasmaVirtualDesktopManagementInterface *Display::createPlasmaVirtualDesktopMana
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
-
+/*
 ViewporterInterface *Display::createViewporterInterface(QObject *parent)
 {
     auto b = new ViewporterInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
-}
+}*/
 /*
 XdgOutputManagerInterface *Display::createXdgOutputManager(QObject *parent)
 {

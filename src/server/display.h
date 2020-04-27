@@ -91,7 +91,7 @@ class TextInputManagerInterface;
 class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
 class PlasmaVirtualDesktopManagementInterface;
-class ViewporterInterface;
+//class ViewporterInterface;
 class XdgOutputManagerInterface;
 //class XdgDecorationManagerInterface;
 class EglStreamControllerInterface;
@@ -299,7 +299,7 @@ public:
      * @return the created viewporter
      * @since 0.518.0
      */
-    ViewporterInterface *createViewporterInterface(QObject *parent = nullptr);
+    //ViewporterInterface *createViewporterInterface(QObject *parent = nullptr);
 
     /**
      * Creates the XdgOutputManagerInterface

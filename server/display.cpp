@@ -39,6 +39,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "relative_pointer_v1.h"
 #include "seat.h"
 #include "subcompositor.h"
+#include "viewporter.h"
 #include "xdg_decoration.h"
 #include "xdg_foreign.h"
 #include "xdg_shell.h"
@@ -66,7 +67,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/shadow_interface.h"
 #include "../src/server/slide_interface.h"
 #include "../src/server/textinput_interface_p.h"
-#include "../src/server/viewporter_interface.h"
 //
 //
 
@@ -341,9 +341,9 @@ D_isplay::createPlasmaVirtualDesktopManagement(QObject* parent)
     return legacy->createPlasmaVirtualDesktopManagement(parent);
 }
 
-ViewporterInterface* D_isplay::createViewporterInterface(QObject* parent)
+Viewporter* D_isplay::createViewporter(QObject* parent)
 {
-    return legacy->createViewporterInterface(parent);
+    return new Viewporter(this, parent);
 }
 
 XdgOutputManager* D_isplay::createXdgOutputManager(QObject* parent)
