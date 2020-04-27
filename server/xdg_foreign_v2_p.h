@@ -77,7 +77,11 @@ class Q_DECL_HIDDEN XdgExportedV2 : public QObject
 {
     Q_OBJECT
 public:
-    XdgExportedV2(Client* client, uint32_t version, uint32_t id, Surface* surface);
+    XdgExportedV2(Client* client,
+                  uint32_t version,
+                  uint32_t id,
+                  Surface* surface,
+                  const QString& protocolHandle);
     ~XdgExportedV2() override;
 
     Surface* surface() const;
@@ -105,6 +109,8 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
+    void onSourceDestroy();
+
     class Private;
     Private* d_ptr;
 };
