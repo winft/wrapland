@@ -74,13 +74,13 @@ class OutputDeviceV1Interface;
 class OutputManagementV1Interface;
 class ServerSideDecorationManagerInterface;
 class SlideManagerInterface;
-class ShellInterface;
+//class ShellInterface;
 //class SubCompositorInterface;
 enum class TextInputInterfaceVersion;
 class TextInputManagerInterface;
-class XdgShellV5Interface;
-enum class XdgShellInterfaceVersion;
-class XdgShellInterface;
+//class XdgShellV5Interface;
+//enum class XdgShellInterfaceVersion;
+//class XdgShellInterface;
 //enum class RelativePointerInterfaceVersion;
 //class RelativePointerManagerInterface;
 //enum class PointerGesturesInterfaceVersion;
@@ -93,7 +93,7 @@ class ServerSideDecorationPaletteManagerInterface;
 class PlasmaVirtualDesktopManagementInterface;
 class ViewporterInterface;
 class XdgOutputManagerInterface;
-class XdgDecorationManagerInterface;
+//class XdgDecorationManagerInterface;
 class EglStreamControllerInterface;
 //class KeyState;
 //class LinuxDmabufUnstableV1Interface;
@@ -188,7 +188,7 @@ public:
 
 //    CompositorInterface *createCompositor(QObject *parent = nullptr);
     void createShm();
-    ShellInterface *createShell(QObject *parent = nullptr);
+//    ShellInterface *createShell(QObject *parent = nullptr);
     SeatInterface *createSeat(QObject *parent = nullptr);
     /**
      * @returns All SeatInterface currently managed on the Display.
@@ -223,12 +223,12 @@ public:
      **/
     TextInputManagerInterface *createTextInputManager(const TextInputInterfaceVersion &version, QObject *parent = nullptr);
 
-    /**
-     * Creates the XdgShell in interface @p version.
-     *
-     * @since 0.0.525
-     **/
-    XdgShellInterface *createXdgShell(const XdgShellInterfaceVersion &version, QObject *parent = nullptr);
+//    /**
+//     * Creates the XdgShell in interface @p version.
+//     *
+//     * @since 0.0.525
+//     **/
+//    XdgShellInterface *createXdgShell(const XdgShellInterfaceVersion &version, QObject *parent = nullptr);
 
 //    /**
 //     * Creates the RelativePointerManagerInterface in interface @p version
@@ -318,14 +318,14 @@ public:
      **/
     PlasmaVirtualDesktopManagementInterface *createPlasmaVirtualDesktopManagement(QObject *parent = nullptr);
 
-    /**
-     * Creates the XdgDecorationManagerInterface
-     * @arg shellInterface A created XdgShellInterface based on XDG_WM_BASE
-     *
-     * @return the created manager
-     * @since 0.0.554
-     */
-    XdgDecorationManagerInterface *createXdgDecorationManager(XdgShellInterface *shellInterface, QObject *parent = nullptr);
+//    /**
+//     * Creates the XdgDecorationManagerInterface
+//     * @arg shellInterface A created XdgShellInterface based on XDG_WM_BASE
+//     *
+//     * @return the created manager
+//     * @since 0.0.554
+//     */
+//    XdgDecorationManagerInterface *createXdgDecorationManager(XdgShellInterface *shellInterface, QObject *parent = nullptr);
 
     /**
      * Creates the EglStreamControllerInterface

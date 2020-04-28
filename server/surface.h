@@ -134,16 +134,10 @@ private:
     friend class IdleInhibitManagerV1;
     friend class IdleInhibitor;
 
-    friend class XdgShellStableInterface;
-    friend class ShellInterface;
-    friend class ShellSurfaceInterface;
-    friend class XdgShellV6Interface;
-    friend class XdgShellV5Interface;
     friend class AppMenuManagerInterface;
     friend class PlasmaShellInterface;
-    friend class XdgShellStableInterface;
-    friend class XdgShellStableInterface;
-    friend class XdgShellStableInterface;
+    friend class XdgShell;
+    friend class XdgShellSurface;
 
     friend class Seat;
     friend class Keyboard;

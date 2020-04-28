@@ -25,9 +25,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/display.h"
 #include "../../server/output.h"
 #include "../../server/seat.h"
+#include "../../server/xdg_shell.h"
 
 #include "../../src/server/qtsurfaceextension_interface.h"
-#include "../../src/server/shell_interface.h"
 #include "../../src/server/clientconnection.h"
 
 using namespace Wrapland::Server;
@@ -58,9 +58,7 @@ void TestQtSurfaceExtension::testCloseWindow()
     seat->setHasTouch(true);
 
     Compositor *compositor = display.createCompositor();
-
-    ShellInterface *shell = display.createShell();
-    shell->create();
+    auto shell = display.createXdgShell(&display);
 
     Output *output = display.createOutput();
     output->setManufacturer("org.kde");

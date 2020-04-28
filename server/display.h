@@ -52,6 +52,7 @@ class DataDeviceManager;
 class DpmsManager;
 class Output;
 class Seat;
+class XdgShell;
 
 //
 // Legacy
@@ -73,13 +74,9 @@ class OutputDeviceV1Interface;
 class OutputManagementV1Interface;
 class ServerSideDecorationManagerInterface;
 class SlideManagerInterface;
-class ShellInterface;
 class Subcompositor;
 enum class TextInputInterfaceVersion;
 class TextInputManagerInterface;
-class XdgShellV5Interface;
-enum class XdgShellInterfaceVersion;
-class XdgShellInterface;
 class RelativePointerManagerV1;
 class PointerGesturesV1;
 class PointerConstraintsV1;
@@ -89,7 +86,7 @@ class ServerSideDecorationPaletteManagerInterface;
 class PlasmaVirtualDesktopManagementInterface;
 class ViewporterInterface;
 class XdgOutputManager;
-class XdgDecorationManagerInterface;
+class XdgDecorationManager;
 class EglStreamControllerInterface;
 class KeyState;
 class LinuxDmabufV1;
@@ -143,7 +140,6 @@ public:
 
     Compositor* createCompositor(QObject* parent = nullptr);
     void createShm();
-    ShellInterface* createShell(QObject* parent = nullptr);
 
     Subcompositor* createSubCompositor(QObject* parent = nullptr);
     DataDeviceManager* createDataDeviceManager(QObject* parent = nullptr);
@@ -166,8 +162,7 @@ public:
                                                                             = nullptr);
     TextInputManagerInterface* createTextInputManager(const TextInputInterfaceVersion& version,
                                                       QObject* parent = nullptr);
-    XdgShellInterface* createXdgShell(const XdgShellInterfaceVersion& version,
-                                      QObject* parent = nullptr);
+    XdgShell* createXdgShell(QObject* parent = nullptr);
 
     RelativePointerManagerV1* createRelativePointerManager(QObject* parent = nullptr);
     PointerGesturesV1* createPointerGestures(QObject* parent = nullptr);
@@ -186,8 +181,7 @@ public:
 
     PlasmaVirtualDesktopManagementInterface* createPlasmaVirtualDesktopManagement(QObject* parent
                                                                                   = nullptr);
-    XdgDecorationManagerInterface* createXdgDecorationManager(XdgShellInterface* shellInterface,
-                                                              QObject* parent = nullptr);
+    XdgDecorationManager* createXdgDecorationManager(XdgShell* shell, QObject* parent = nullptr);
     EglStreamControllerInterface* createEglStreamControllerInterface(QObject* parent = nullptr);
 
     Server::ClientConnection* getClientLegacy(wl_client* client);
@@ -218,3 +212,5 @@ private:
 
 }
 }
+
+Q_DECLARE_METATYPE(std::string)

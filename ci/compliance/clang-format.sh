@@ -19,5 +19,7 @@ python $SCRIPT_DIR/run-clang-format.py \
     ${SOURCE_DIR}/autotests/client/subcompositor.cpp \
     ${SOURCE_DIR}/autotests/client/subsurface.cpp \
     ${SOURCE_DIR}/autotests/client/surface.cpp \
+    ${SOURCE_DIR}/autotests/client/xdg_decoration.cpp \
     ${SOURCE_DIR}/autotests/client/xdg_foreign.cpp \
+    ${SOURCE_DIR}/autotests/client/xdg_shell.cpp \
     ${SOURCE_DIR}/autotests/server/display.cpp

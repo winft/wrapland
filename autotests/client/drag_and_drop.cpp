@@ -29,7 +29,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/pointer.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/seat.h"
-#include "../../src/client/shell.h"
 #include "../../src/client/shm_pool.h"
 #include "../../src/client/surface.h"
 #include "../../src/client/touch.h"
@@ -41,8 +40,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/display.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
-
-#include "../../src/server/shell_interface.h"
 
 class TestDragAndDrop : public QObject
 {
@@ -65,7 +62,6 @@ private:
     Wrapland::Server::Compositor* m_serverCompositor = nullptr;
     Wrapland::Server::DataDeviceManager* m_serverDataDeviceManager = nullptr;
     Wrapland::Server::Seat* m_serverSeat = nullptr;
-    Wrapland::Server::ShellInterface* m_shellInterface = nullptr;
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
     Wrapland::Client::Compositor* m_compositor = nullptr;
     Wrapland::Client::EventQueue* m_queue = nullptr;
@@ -78,7 +74,6 @@ private:
     Wrapland::Client::Touch* m_touch = nullptr;
     Wrapland::Client::DataDeviceManager* m_ddm = nullptr;
     Wrapland::Client::ShmPool* m_shm = nullptr;
-    Wrapland::Client::Shell* m_shell = nullptr;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-drag-n-drop-0");
@@ -104,8 +99,6 @@ void TestDragAndDrop::init()
 
     m_serverDataDeviceManager = m_display->createDataDeviceManager(m_display);
     m_display->createShm();
-    m_shellInterface = m_display->createShell(m_display);
-    m_shellInterface->create();
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -143,7 +136,6 @@ void TestDragAndDrop::init()
     CREATE(m_seat, Seat, Seat)
     CREATE(m_ddm, DataDeviceManager, DataDeviceManager)
     CREATE(m_shm, ShmPool, Shm)
-    CREATE(m_shell, Shell, Shell)
 
 #undef CREATE
 
@@ -170,7 +162,6 @@ void TestDragAndDrop::cleanup()
     }
     DELETE(m_dataSource)
     DELETE(m_dataDevice)
-    DELETE(m_shell)
     DELETE(m_shm)
     DELETE(m_compositor)
     DELETE(m_ddm)

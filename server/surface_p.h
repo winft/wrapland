@@ -34,7 +34,7 @@ namespace Server
 {
 
 class IdleInhibitor;
-class SurfaceRole;
+class XdgShellSurface;
 
 class Surface::Private : public Wayland::Resource<Surface>
 {
@@ -104,7 +104,7 @@ public:
     void commitSubsurface();
     void commit();
 
-    SurfaceRole* role = nullptr;
+    XdgShellSurface* shellSurface = nullptr;
 
     State current;
     State pending;
