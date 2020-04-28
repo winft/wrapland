@@ -59,9 +59,8 @@ class ClientConnection;
 
 class Compositor;
 class KdeIdle;
-enum class IdleInhibitManagerInterfaceVersion;
 class RemoteAccessManagerInterface;
-class IdleInhibitManagerInterface;
+class IdleInhibitManagerV1;
 class FakeInputInterface;
 class PlasmaShellInterface;
 class PlasmaWindowManagementInterface;
@@ -176,9 +175,7 @@ public:
 
     XdgForeign* createXdgForeign(QObject* parent = nullptr);
 
-    IdleInhibitManagerInterface*
-    createIdleInhibitManager(const IdleInhibitManagerInterfaceVersion& version,
-                             QObject* parent = nullptr);
+    IdleInhibitManagerV1* createIdleInhibitManager(QObject* parent = nullptr);
     AppMenuManagerInterface* createAppMenuManagerInterface(QObject* parent = nullptr);
 
     ServerSideDecorationPaletteManagerInterface*

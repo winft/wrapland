@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "compositor.h"
 #include "data_device_manager.h"
 #include "dpms.h"
+#include "idle_inhibit_v1.h"
 #include "kde_idle.h"
 #include "linux_dmabuf_v1.h"
 #include "output.h"
@@ -47,7 +48,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/contrast_interface.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
-#include "../src/server/idleinhibit_interface_p.h"
 #include "../src/server/output_configuration_v1_interface.h"
 #include "../src/server/output_device_v1_interface.h"
 #include "../src/server/output_interface.h"
@@ -322,11 +322,9 @@ XdgForeign* D_isplay::createXdgForeign(QObject* parent)
     return new XdgForeign(this, parent);
 }
 
-IdleInhibitManagerInterface*
-D_isplay::createIdleInhibitManager(const IdleInhibitManagerInterfaceVersion& version,
-                                   QObject* parent)
+IdleInhibitManagerV1* D_isplay::createIdleInhibitManager(QObject* parent)
 {
-    return legacy->createIdleInhibitManager(version, parent);
+    return new IdleInhibitManagerV1(this, parent);
 }
 
 AppMenuManagerInterface* D_isplay::createAppMenuManagerInterface(QObject* parent)

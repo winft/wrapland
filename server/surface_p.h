@@ -33,7 +33,7 @@ namespace Wrapland
 namespace Server
 {
 
-class IdleInhibitorInterface;
+class IdleInhibitor;
 class SurfaceRole;
 
 class Surface::Private : public Wayland::Resource<Surface>
@@ -98,7 +98,7 @@ public:
 
     void installPointerConstraint(LockedPointerV1* lock);
     void installPointerConstraint(ConfinedPointerV1* confinement);
-    void installIdleInhibitor(IdleInhibitorInterface* inhibitor);
+    void installIdleInhibitor(IdleInhibitor* inhibitor);
     void installViewport(ViewportInterface* vp);
 
     void commitSubsurface();
@@ -124,7 +124,7 @@ public:
     QPointer<ConfinedPointerV1> confinedPointer;
     QPointer<ViewportInterface> viewport;
     QHash<Output*, QMetaObject::Connection> outputDestroyedConnections;
-    QVector<IdleInhibitorInterface*> idleInhibitors;
+    QVector<IdleInhibitor*> idleInhibitors;
 
     Surface* dataProxy = nullptr;
 

@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright 2017  Martin Flöser <mgraesslin@kde.org>
+Copyright 2020  Faveraux Adrien <ad1rie3@hotmail.fr>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,37 +17,28 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#include "idleinhibit_interface_p.h"
+#pragma once
 
-namespace Wrapland
+#include <Wrapland/Server/wraplandserver_export.h>
+
+#include <QObject>
+
+namespace Wrapland::Server
 {
-namespace Server
+
+class D_isplay;
+
+class WRAPLANDSERVER_EXPORT IdleInhibitManagerV1 : public QObject
 {
+    Q_OBJECT
+public:
+    explicit IdleInhibitManagerV1(D_isplay* D_isplay, QObject* parent = nullptr);
+    ~IdleInhibitManagerV1() override;
 
-IdleInhibitManagerInterface::Private::Private(IdleInhibitManagerInterface *q, Display *d, const wl_interface *interface, quint32 version, IdleInhibitManagerInterfaceVersion interfaceVersion)
-    : Global::Private(d, interface, version)
-    , interfaceVersion(interfaceVersion)
-    , q(q)
-{
-}
+private:
+    friend class D_isplay;
+    class Private;
+    std::unique_ptr<Private> d_ptr;
+};
 
-IdleInhibitManagerInterface::IdleInhibitManagerInterface(Private *d, QObject *parent)
-    : Global(d, parent)
-{
-}
-
-IdleInhibitManagerInterface::~IdleInhibitManagerInterface() = default;
-
-IdleInhibitManagerInterfaceVersion IdleInhibitManagerInterface::interfaceVersion() const
-{
-    Q_D();
-    return d->interfaceVersion;
-}
-
-IdleInhibitManagerInterface::Private *IdleInhibitManagerInterface::d_func() const
-{
-    return reinterpret_cast<Private*>(d.get());
-}
-
-}
 }

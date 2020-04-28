@@ -57,7 +57,7 @@ class D_isplay;
 //class CompositorInterface;
 //class DataDeviceManagerInterface;
 class IdleInterface;
-enum class IdleInhibitManagerInterfaceVersion;
+//enum class IdleInhibitManagerInterfaceVersion;
 class RemoteAccessManagerInterface;
 class IdleInhibitManagerInterface;
 class FakeInputInterface;
@@ -263,12 +263,12 @@ public:
 //    XdgForeignInterface *createXdgForeignInterface(QObject *parent = nullptr);
 
     /**
-     * Creates the IdleInhibitManagerInterface in interface @p version.
+     * Creates the IdleInhibitManager in interface @p version.
      *
      * @returns The created manager object
      * @since 0.0.541
      **/
-    IdleInhibitManagerInterface *createIdleInhibitManager(const IdleInhibitManagerInterfaceVersion &version, QObject *parent = nullptr);
+    //IdleInhibitManager *createIdleInhibitManager(const IdleInhibitManagerInterfaceVersion &version, QObject *parent = nullptr);
 
     /**
      * Creates the AppMenuManagerInterface in interface @p version.
