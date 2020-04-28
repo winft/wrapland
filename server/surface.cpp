@@ -24,7 +24,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "buffer.h"
 
 #include "compositor.h"
-#include "idleinhibit_interface_p.h"
+#include "idle_inhibit_v1.h"
+#include "idle_inhibit_v1_p.h"
 #include "output_p.h"
 #include "pointer_constraints_v1.h"
 #include "pointer_constraints_v1_p.h"
@@ -341,16 +342,15 @@ void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
     Q_EMIT handle()->pointerConstraintsChanged();
 }
 
-void Surface::Private::installIdleInhibitor(IdleInhibitorInterface* inhibitor)
+void Surface::Private::installIdleInhibitor(IdleInhibitor* inhibitor)
 {
     idleInhibitors << inhibitor;
-    QObject::connect(
-        inhibitor, &IdleInhibitorInterface::aboutToBeUnbound, handle(), [this, inhibitor] {
-            idleInhibitors.removeOne(inhibitor);
-            if (idleInhibitors.isEmpty()) {
-                Q_EMIT handle()->inhibitsIdleChanged();
-            }
-        });
+    QObject::connect(inhibitor, &IdleInhibitor::resourceDestroyed, handle(), [this, inhibitor] {
+        idleInhibitors.removeOne(inhibitor);
+        if (idleInhibitors.isEmpty()) {
+            Q_EMIT handle()->inhibitsIdleChanged();
+        }
+    });
     if (idleInhibitors.count() == 1) {
         Q_EMIT handle()->inhibitsIdleChanged();
     }

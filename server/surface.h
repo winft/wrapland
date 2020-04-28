@@ -38,7 +38,8 @@ class ConfinedPointerV1;
 class ContrastInterface;
 class ContrastManagerInterface;
 class Compositor;
-class IdleInhibitManagerUnstableV1Interface;
+class IdleInhibitManagerV1;
+class IdleInhibitor;
 class LockedPointerV1;
 class PointerConstraintsV1;
 class ShadowManagerInterface;
@@ -130,7 +131,8 @@ private:
     friend class BlurManagerInterface;
     friend class SlideManagerInterface;
     friend class ContrastManagerInterface;
-    friend class IdleInhibitManagerUnstableV1Interface;
+    friend class IdleInhibitManagerV1;
+    friend class IdleInhibitor;
 
     friend class XdgShellStableInterface;
     friend class ShellInterface;
