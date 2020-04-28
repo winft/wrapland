@@ -27,7 +27,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 
-#include "../../src/server/shell_interface.h"
 #include "../../src/server/output_configuration_v1_interface.h"
 #include "../../src/server/output_device_v1_interface.h"
 #include "../../src/server/output_management_v1_interface.h"
@@ -87,9 +86,6 @@ void TestWlrOutputManagement::init()
 {
     m_display = new Srv::D_isplay(this);
     m_display->setSocketName(s_socketName);
-
-    auto shell = m_display->createShell(this);
-    shell->create();
     m_display->createCompositor(this);
 
     auto outputDeviceInterface = m_display->createOutputDeviceV1(this);

@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright 2019 Vlad Zagorodniy <vlad.zahorodnii@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,34 +17,51 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
+#pragma once
 
-#ifndef WRAPLAND_SERVER_SURFACEROLE_P_H
-#define WRAPLAND_SERVER_SURFACEROLE_P_H
+// For Qt metatype declaration.
+#include "xdg_shell_popup.h"
+#include "xdg_shell_toplevel.h"
 
-#include <QPointer>
+#include <QObject>
 
-namespace Wrapland
+#include <Wrapland/Server/wraplandserver_export.h>
+
+#include <memory>
+
+namespace Wrapland::Server
 {
-namespace Server
-{
+class Client;
+class D_isplay;
+class XdgShellPopup;
+class XdgShellToplevel;
 
-class Surface;
-
-class SurfaceRole
+class WRAPLANDSERVER_EXPORT XdgShell : public QObject
 {
+    Q_OBJECT
 public:
-    explicit SurfaceRole(Surface *surface);
-    virtual ~SurfaceRole();
+    ~XdgShell() override;
 
-    virtual void commit() = 0;
+    uint32_t ping(Client* client);
+
+Q_SIGNALS:
+    void toplevelCreated(XdgShellToplevel* toplevel);
+    void popupCreated(XdgShellPopup* popup);
+
+    void pongReceived(uint32_t serial);
+    void pingDelayed(uint32_t serial);
+    void pingTimeout(uint32_t serial);
 
 private:
-    QPointer<Surface> m_surface;
+    friend class D_isplay;
+    friend class XdgShellSurface;
+    friend class XdgDecorationManager;
+    explicit XdgShell(D_isplay* display, QObject* parent = nullptr);
 
-    Q_DISABLE_COPY(SurfaceRole)
+    class Private;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }
-}
 
-#endif // WRAPLAND_SERVER_SURFACEROLE_P_H
+Q_DECLARE_METATYPE(uint32_t)

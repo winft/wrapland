@@ -37,8 +37,8 @@ namespace Server
 {
 class D_isplay;
 class Seat;
-class ShellInterface;
-class ShellSurfaceInterface;
+class XdgShell;
+class XdgShellToplevel;
 }
 }
 
@@ -56,9 +56,9 @@ private:
     void repaint();
 
     Wrapland::Server::D_isplay *m_display = nullptr;
-    Wrapland::Server::ShellInterface *m_shell = nullptr;
+    Wrapland::Server::XdgShell *m_shell = nullptr;
     Wrapland::Server::Seat *m_seat = nullptr;
-    QVector<Wrapland::Server::ShellSurfaceInterface*> m_shellSurfaces;
+    QVector<Wrapland::Server::XdgShellToplevel*> m_shellSurfaces;
     QTimer *m_repaintTimer;
     std::unique_ptr<QElapsedTimer> m_timeSinceStart;
     QPointF m_cursorPos;

@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/display.h"
 #include "../server/output.h"
 #include "../server/seat.h"
-#include "../src/server/shell_interface.h"
+#include "../server/xdg_shell.h"
 
 #include <QGuiApplication>
 #include <QFile>
@@ -89,8 +89,7 @@ int main(int argc, char **argv)
     display.createShm();
     display.createCompositor(&display);
 
-    Wrapland::Server::ShellInterface *shell = display.createShell();
-    shell->create();
+    Wrapland::Server::XdgShell *shell = display.createXdgShell();
 
     Wrapland::Server::Output *output = display.createOutput(&display);
     output->setPhysicalSize(QSize(10, 10));

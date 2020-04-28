@@ -40,19 +40,19 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "relativepointer_interface_p.h"
 #include "server_decoration_interface.h"
 #include "slide_interface.h"
-#include "shell_interface.h"
+//#include "shell_interface.h"
 //#include "subcompositor_interface.h"
 #include "textinput_interface_p.h"
 #include "viewporter_interface.h"
-#include "xdgshell_v5_interface_p.h"
+//#include "xdgshell_v5_interface_p.h"
 //#include "xdgforeign_interface.h"
-#include "xdgshell_v6_interface_p.h"
-#include "xdgshell_stable_interface_p.h"
+//#include "xdgshell_v6_interface_p.h"
+//#include "xdgshell_stable_interface_p.h"
 #include "appmenu_interface.h"
 #include "server_decoration_palette_interface.h"
 #include "plasmavirtualdesktop_interface.h"
-//#include "xdgoutput.h"
-#include "xdgdecoration_interface.h"
+//#include "xdgoutput_interfce.h"
+//#include "xdgdecoration_interface.h"
 #include "eglstream_controller_interface.h"
 //#include "../../server/keystate.h"
 //#include "linuxdmabuf_v1_interface.h"
@@ -235,12 +235,12 @@ OutputInterface *Display::createOutput(QObject *parent)
 //    return compositor;
 //}
 
-ShellInterface *Display::createShell(QObject *parent)
-{
-    ShellInterface *shell = new ShellInterface(this, parent);
-    connect(this, &Display::aboutToTerminate, shell, [this,shell] { delete shell; });
-    return shell;
-}
+//ShellInterface *Display::createShell(QObject *parent)
+//{
+//    ShellInterface *shell = new ShellInterface(this, parent);
+//    connect(this, &Display::aboutToTerminate, shell, [this,shell] { delete shell; });
+//    return shell;
+//}
 
 OutputDeviceV1Interface *Display::createOutputDeviceV1(QObject *parent)
 {
@@ -375,23 +375,23 @@ TextInputManagerInterface *Display::createTextInputManager(const TextInputInterf
     return t;
 }
 
-XdgShellInterface *Display::createXdgShell(const XdgShellInterfaceVersion &version, QObject *parent)
-{
-    XdgShellInterface *x = nullptr;
-    switch (version) {
-    case XdgShellInterfaceVersion::UnstableV5:
-        x = new XdgShellV5Interface(this, parent);
-        break;
-    case XdgShellInterfaceVersion::UnstableV6:
-        x = new XdgShellV6Interface(this, parent);
-        break;
-    case XdgShellInterfaceVersion::Stable:
-        x = new XdgShellStableInterface(this, parent);
-        break;
-    }
-    connect(this, &Display::aboutToTerminate, x, [x] { delete x; });
-    return x;
-}
+//XdgShellInterface *Display::createXdgShell(const XdgShellInterfaceVersion &version, QObject *parent)
+//{
+//    XdgShellInterface *x = nullptr;
+//    switch (version) {
+//    case XdgShellInterfaceVersion::UnstableV5:
+//        x = new XdgShellV5Interface(this, parent);
+//        break;
+//    case XdgShellInterfaceVersion::UnstableV6:
+//        x = new XdgShellV6Interface(this, parent);
+//        break;
+//    case XdgShellInterfaceVersion::Stable:
+//        x = new XdgShellStableInterface(this, parent);
+//        break;
+//    }
+//    connect(this, &Display::aboutToTerminate, x, [x] { delete x; });
+//    return x;
+//}
 
 //RelativePointerManagerInterface *Display::createRelativePointerManager(const RelativePointerInterfaceVersion &version, QObject *parent)
 //{
@@ -499,12 +499,13 @@ XdgOutputManagerInterface *Display::createXdgOutputManager(QObject *parent)
     return b;
 }
 */
-XdgDecorationManagerInterface *Display::createXdgDecorationManager(XdgShellInterface *shellInterface, QObject *parent)
-{
-    auto d = new XdgDecorationManagerInterface(this, shellInterface, parent);
-    connect(this, &Display::aboutToTerminate, d, [d] { delete d; });
-    return d;
-}
+
+//XdgDecorationManagerInterface *Display::createXdgDecorationManager(XdgShellInterface *shellInterface, QObject *parent)
+//{
+//    auto d = new XdgDecorationManagerInterface(this, shellInterface, parent);
+//    connect(this, &Display::aboutToTerminate, d, [d] { delete d; });
+//    return d;
+//}
 
 EglStreamControllerInterface *Display::createEglStreamControllerInterface(QObject *parent)
 {

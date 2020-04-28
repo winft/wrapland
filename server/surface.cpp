@@ -32,8 +32,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "region.h"
 #include "subcompositor.h"
 #include "subsurface_p.h"
-#include "surfacerole_p.h"
 #include "viewporter_interface.h"
+#include "xdg_shell_surface.h"
 
 #include <QListIterator>
 
@@ -706,9 +706,11 @@ void Surface::Private::commit()
             subsurface->d_ptr->commit();
         }
     }
-    if (role) {
-        role->commit();
+
+    if (shellSurface) {
+        shellSurface->commit();
     }
+
     Q_EMIT handle()->committed();
 }
 

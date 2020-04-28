@@ -24,8 +24,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/compositor.h"
 #include "../server/surface.h"
 #include "../server/buffer.h"
-
-#include "../src/server/shell_interface.h"
+#include "../server/xdg_shell.h"
+#include "../server/xdg_shell_toplevel.h"
 
 #include <QApplication>
 #include <QCommandLineParser>
@@ -93,7 +93,7 @@ public:
     explicit CompositorWindow(QWidget *parent = nullptr);
     virtual ~CompositorWindow();
 
-    void surfaceCreated(Wrapland::Server::ShellSurfaceInterface *surface);
+    void surfaceCreated(Wrapland::Server::XdgShellToplevel *surface);
 
     void setSeat(const QPointer<Wrapland::Server::Seat> &seat);
 
@@ -108,7 +108,7 @@ protected:
 
 private:
     void updateFocus();
-    QList<Wrapland::Server::ShellSurfaceInterface*> m_stackingOrder;
+    QList<Wrapland::Server::XdgShellToplevel*> m_stackingOrder;
     QPointer<Wrapland::Server::Seat> m_seat;
 };
 
@@ -120,26 +120,26 @@ CompositorWindow::CompositorWindow(QWidget *parent)
 
 CompositorWindow::~CompositorWindow() = default;
 
-void CompositorWindow::surfaceCreated(Wrapland::Server::ShellSurfaceInterface *surface)
+void CompositorWindow::surfaceCreated(Wrapland::Server::XdgShellToplevel *surface)
 {
     using namespace Wrapland::Server;
     m_stackingOrder << surface;
-    connect(surface, &ShellSurfaceInterface::fullscreenChanged, this,
+    connect(surface, &XdgShellToplevel::fullscreenChanged, this,
         [surface, this](bool fullscreen) {
             if (fullscreen) {
-                surface->requestSize(size());
+                surface->configure(XdgShellSurface::State::Fullscreen, size());
             }
         }
     );
-    connect(surface, &ShellSurfaceInterface::maximizedChanged, this,
+    connect(surface, &XdgShellToplevel::maximizedChanged, this,
         [surface, this](bool maximized) {
             if (maximized) {
-                surface->requestSize(size());
+                surface->configure(XdgShellSurface::State::Maximized, size());
             }
         }
     );
-    connect(surface->surface(), &Wrapland::Server::Surface::damaged, this, static_cast<void (CompositorWindow::*)()>(&CompositorWindow::update));
-    connect(surface, &ShellSurfaceInterface::destroyed, this,
+    connect(surface->surface()->surface(), &Wrapland::Server::Surface::damaged, this, static_cast<void (CompositorWindow::*)()>(&CompositorWindow::update));
+    connect(surface, &XdgShellToplevel::destroyed, this,
         [surface, this] {
             m_stackingOrder.removeAll(surface);
             updateFocus();
@@ -156,15 +156,15 @@ void CompositorWindow::updateFocus()
         return;
     }
     auto it = std::find_if(m_stackingOrder.constBegin(), m_stackingOrder.constEnd(),
-        [](ShellSurfaceInterface *s) {
-            return s->surface()->buffer() != nullptr;
+        [](XdgShellToplevel *s) {
+            return s->surface()->surface()->buffer() != nullptr;
         }
     );
     if (it == m_stackingOrder.constEnd()) {
         return;
     }
-    m_seat->setFocusedPointerSurface((*it)->surface());
-    m_seat->setFocusedKeyboardSurface((*it)->surface());
+    m_seat->setFocusedPointerSurface((*it)->surface()->surface());
+    m_seat->setFocusedKeyboardSurface((*it)->surface()->surface());
 }
 
 void CompositorWindow::setSeat(const QPointer< Wrapland::Server::Seat > &seat)
@@ -177,9 +177,9 @@ void CompositorWindow::paintEvent(QPaintEvent *event)
     QWidget::paintEvent(event);
     QPainter p(this);
     for (auto s : m_stackingOrder) {
-        if (auto *b = s->surface()->buffer()) {
+        if (auto *b = s->surface()->surface()->buffer()) {
             p.drawImage(QPoint(0, 0), b->data());
-            s->surface()->frameRendered(QDateTime::currentMSecsSinceEpoch());
+            s->surface()->surface()->frameRendered(QDateTime::currentMSecsSinceEpoch());
         }
     }
 }
@@ -222,7 +222,7 @@ void CompositorWindow::mousePressEvent(QMouseEvent *event)
     QWidget::mousePressEvent(event);
     if (!m_seat->focusedPointerSurface()) {
         if (!m_stackingOrder.isEmpty()) {
-            m_seat->setFocusedPointerSurface(m_stackingOrder.last()->surface());
+            m_seat->setFocusedPointerSurface(m_stackingOrder.last()->surface()->surface());
         }
     }
     m_seat->setTimestamp(event->timestamp());
@@ -265,10 +265,8 @@ int main(int argc, char **argv)
     display.start();
 
     display.createDataDeviceManager();
-    auto compositor = display.createCompositor(&display);
-
-    ShellInterface *shell = display.createShell();
-    shell->create();
+    display.createCompositor(&display);
+    auto shell = display.createXdgShell();
     display.createShm();
     auto output = display.createOutput(&display);
     output->setPhysicalSize(QSize(269, 202));
@@ -286,7 +284,7 @@ int main(int argc, char **argv)
     compositorWindow.setMaximumSize(windowSize);
     compositorWindow.setGeometry(QRect(QPoint(0, 0), windowSize));
     compositorWindow.show();
-    QObject::connect(shell, &ShellInterface::surfaceCreated, &compositorWindow, &CompositorWindow::surfaceCreated);
+    QObject::connect(shell, &XdgShell::toplevelCreated, &compositorWindow, &CompositorWindow::surfaceCreated);
 
     // start XWayland
     if (parser.isSet(xwaylandOption)) {

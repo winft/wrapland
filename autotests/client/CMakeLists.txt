@@ -72,17 +72,6 @@ ecm_mark_as_test(testOutput)
 #ecm_mark_as_test(testWaylandOutput)
 
 ########################################################
-# Test WaylandShell
-########################################################
-set( testWaylandShell_SRCS
-        test_wayland_shell.cpp
-    )
-add_executable(testWaylandShell ${testWaylandShell_SRCS})
-target_link_libraries( testWaylandShell Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
-add_test(NAME wrapland-testWaylandShell COMMAND testWaylandShell)
-ecm_mark_as_test(testWaylandShell)
-
-########################################################
 # Test Surface
 ########################################################
 set( testSurface_SRCS surface.cpp )
@@ -421,18 +410,6 @@ add_test(NAME wrapland-testSelection COMMAND testSelection)
 ecm_mark_as_test(testSelection)
 
 ########################################################
-# Test XdgShellV5
-########################################################
-set( testXdgShellV5_SRCS
-      test_xdg_shell.cpp
-      test_xdg_shell_v5.cpp
-      )
-add_executable(testXdgShellV5 ${testXdgShellV5_SRCS})
-target_link_libraries( testXdgShellV5 Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
-add_test(NAME wrapland-testXdgShellV5 COMMAND testXdgShellV5)
-ecm_mark_as_test(testXdgShellV5)
-
-########################################################
 # Test XdgForeign
 ########################################################
 set( testXdgForeign_SRCS xdg_foreign.cpp )
@@ -448,27 +425,13 @@ add_test(NAME wrapland-testXdgForeign COMMAND testXdgForeign)
 ecm_mark_as_test(testXdgForeign)
 
 ########################################################
-# Test XdgShellV6
+# Test XdgShell
 ########################################################
-set( testXdgShellV6_SRCS
-      test_xdg_shell.cpp
-      test_xdg_shell_v6.cpp
-      )
-add_executable(testXdgShellV6 ${testXdgShellV6_SRCS})
-target_link_libraries( testXdgShellV6 Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
-add_test(NAME wrapland-testXdgShellV6 COMMAND testXdgShellV6)
-ecm_mark_as_test(testXdgShellV6)
-########################################################
-# Test XdgShellStable
-########################################################
-set( testXdgShellStable_SRCS
-      test_xdg_shell.cpp
-      test_xdg_shell_stable.cpp
-      )
-add_executable(testXdgShellStable ${testXdgShellStable_SRCS})
-target_link_libraries( testXdgShellStable Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
-add_test(NAME wrapland-testXdgShellStable COMMAND testXdgShellStable)
-ecm_mark_as_test(testXdgShellStable)
+set( testXdgShell_SRCS xdg_shell.cpp )
+add_executable(testXdgShell ${testXdgShell_SRCS})
+target_link_libraries( testXdgShell Qt5::Test Qt5::Gui Wrapland::Server Wrapland::Client Wayland::Client)
+add_test(NAME wrapland-testXdgShell COMMAND testXdgShell)
+ecm_mark_as_test(testXdgShell)
 
 ########################################################
 # Test Pointer Constraints
@@ -548,11 +511,15 @@ ecm_mark_as_test(testXdgOutput)
 ########################################################
 # Test XDG Decoration
 ########################################################
-set( testXdgdecoration_SRCS
-        test_xdg_decoration.cpp
-    )
+set( testXdgdecoration_SRCS xdg_decoration.cpp )
 add_executable(testXdgDecoration ${testXdgdecoration_SRCS})
-target_link_libraries( testXdgDecoration Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client Wayland::Server)
+target_link_libraries( testXdgDecoration
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+    Wayland::Client
+    Wayland::Server
+)
 add_test(NAME wrapland-testXdgDecoration COMMAND testXdgDecoration)
 ecm_mark_as_test(testXdgDecoration)
-
