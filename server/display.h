@@ -84,7 +84,7 @@ class XdgForeign;
 class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
 class PlasmaVirtualDesktopManagementInterface;
-class ViewporterInterface;
+class Viewporter;
 class XdgOutputManager;
 class XdgDecorationManager;
 class EglStreamControllerInterface;
@@ -176,7 +176,7 @@ public:
     ServerSideDecorationPaletteManagerInterface*
     createServerSideDecorationPaletteManager(QObject* parent = nullptr);
     LinuxDmabufV1* createLinuxDmabuf(QObject* parent = nullptr);
-    ViewporterInterface* createViewporterInterface(QObject* parent = nullptr);
+    Viewporter* createViewporter(QObject* parent = nullptr);
     XdgOutputManager* createXdgOutputManager(QObject* parent = nullptr);
 
     PlasmaVirtualDesktopManagementInterface* createPlasmaVirtualDesktopManagement(QObject* parent

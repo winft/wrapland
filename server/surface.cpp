@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "region.h"
 #include "subcompositor.h"
 #include "subsurface_p.h"
-#include "viewporter_interface.h"
+#include "viewporter_p.h"
 #include "xdg_shell_surface.h"
 
 #include <QListIterator>
@@ -258,17 +258,17 @@ void Surface::Private::setDestinationSize(const QSize& dest)
     pending.destinationSizeIsSet = true;
 }
 
-void Surface::Private::installViewport(ViewportInterface* vp)
+void Surface::Private::installViewport(Viewport* vp)
 {
     Q_ASSERT(viewport.isNull());
-    viewport = QPointer<ViewportInterface>(vp);
-    connect(viewport, &ViewportInterface::destinationSizeSet, handle(), [this](const QSize& size) {
+    viewport = QPointer<Viewport>(vp);
+    connect(viewport, &Viewport::destinationSizeSet, handle(), [this](const QSize& size) {
         setDestinationSize(size);
     });
-    connect(viewport, &ViewportInterface::sourceRectangleSet, handle(), [this](const QRectF& rect) {
+    connect(viewport, &Viewport::sourceRectangleSet, handle(), [this](const QRectF& rect) {
         setSourceRectangle(rect);
     });
-    connect(viewport, &ViewportInterface::unbound, handle(), [this] {
+    connect(viewport, &Viewport::resourceDestroyed, handle(), [this] {
         setDestinationSize(QSize());
         setSourceRectangle(QRectF());
     });
@@ -416,11 +416,8 @@ void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
     const double height = sourceRectangle.height();
 
     if (!qFuzzyCompare(width, (int)width) || !qFuzzyCompare(height, (int)height)) {
-        wl_resource_post_error(viewport->parentResource(),
-                               WP_VIEWPORT_ERROR_BAD_SIZE,
-                               "Source rectangle not integer valued");
-        //        viewport->d_ptr->postError(WP_VIEWPORT_ERROR_BAD_SIZE,
-        //                                     "Source rectangle not integer valued");
+        viewport->d_ptr->postError(WP_VIEWPORT_ERROR_BAD_SIZE,
+                                   "Source rectangle not integer valued");
     }
 }
 
@@ -441,11 +438,8 @@ void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
     }
 
     if (!QRectF(QPointF(), bufferSize).contains(sourceRectangle)) {
-        wl_resource_post_error(viewport->parentResource(),
-                               WP_VIEWPORT_ERROR_OUT_OF_BUFFER,
-                               "Source rectangle not contained in buffer");
-        //        viewport->d_ptr->postError(WP_VIEWPORT_ERROR_OUT_OF_BUFFER,
-        //                                   "Source rectangle not contained in buffer");
+        viewport->d_ptr->postError(WP_VIEWPORT_ERROR_OUT_OF_BUFFER,
+                                   "Source rectangle not contained in buffer");
     }
 }
 

@@ -30,8 +30,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/surface.h"
-
-#include "../../src/server/viewporter_interface.h"
+#include "../../server/wayland/client.h"
+#include "../../server/viewporter.h"
 
 #include <wayland-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
@@ -39,6 +39,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtTest>
 #include <QImage>
 #include <QPainter>
+
+namespace Clt = Wrapland::Client;
+namespace Srv = Wrapland::Server;
 
 class TestViewporter : public QObject
 {
@@ -61,14 +64,14 @@ private Q_SLOTS:
     void testNoSurface();
 
 private:
-    Wrapland::Server::D_isplay *m_display;
-    Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::ViewporterInterface *m_viewporterInterface;
-    Wrapland::Client::ConnectionThread *m_connection;
-    Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::ShmPool *m_shm;
-    Wrapland::Client::EventQueue *m_queue;
-    Wrapland::Client::Viewporter *m_viewporter;
+    Srv::D_isplay *m_display;
+    Srv::Compositor *m_serverCompositor;
+    Srv::Viewporter *m_viewporterInterface;
+    Clt::ConnectionThread *m_connection;
+    Clt::Compositor *m_compositor;
+    Clt::ShmPool *m_shm;
+    Clt::EventQueue *m_queue;
+    Clt::Viewporter *m_viewporter;
     QThread *m_thread;
 };
 
@@ -86,9 +89,9 @@ TestViewporter::TestViewporter(QObject *parent)
 
 void TestViewporter::init()
 {
-    qRegisterMetaType<Wrapland::Server::Surface*>();
+    qRegisterMetaType<Srv::Surface*>();
 
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Srv::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     m_display->createShm();
@@ -96,13 +99,11 @@ void TestViewporter::init()
     m_serverCompositor = m_display->createCompositor(m_display);
     QVERIFY(m_serverCompositor);
 
-    m_viewporterInterface = m_display->createViewporterInterface(m_display);
+    m_viewporterInterface = m_display->createViewporter(m_display);
     QVERIFY(m_viewporterInterface);
-    m_viewporterInterface->create();
-    QVERIFY(m_viewporterInterface->isValid());
 
     // setup connection
-    m_connection = new Wrapland::Client::ConnectionThread;
+    m_connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, SIGNAL(establishedChanged(bool)));
     m_connection->setSocketName(s_socketName);
 
@@ -114,12 +115,12 @@ void TestViewporter::init()
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
 
-    m_queue = new Wrapland::Client::EventQueue(this);
+    m_queue = new Clt::EventQueue(this);
     QVERIFY(!m_queue->isValid());
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
 
-    Wrapland::Client::Registry registry;
+    Clt::Registry registry;
     registry.setEventQueue(m_queue);
     QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32,quint32)));
     QSignalSpy shmSpy(&registry, SIGNAL(shmAnnounced(quint32,quint32)));
@@ -143,8 +144,8 @@ void TestViewporter::init()
     QVERIFY(m_shm->isValid());
 
     m_viewporter = registry.createViewporter(
-                registry.interface(Wrapland::Client::Registry::Interface::Viewporter).name,
-                registry.interface(Wrapland::Client::Registry::Interface::Viewporter).version,
+                registry.interface(Clt::Registry::Interface::Viewporter).name,
+                registry.interface(Clt::Registry::Interface::Viewporter).version,
                 this);
     QVERIFY(m_viewporter->isValid());
 }
@@ -191,29 +192,29 @@ void TestViewporter::testViewportExists()
     // This test verifies that setting the viewport for a surface twice results in a protocol error.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Wrapland::Server::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    Srv::Surface *serverSurface
+            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Wrapland::Server::ViewporterInterface::viewportCreated);
+    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp1(m_viewporter->createViewport(s.get(), this));
+    std::unique_ptr<Clt::Viewport> vp1(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     auto serverViewport
-            = serverViewportCreated.first().first().value<Wrapland::Server::ViewportInterface*>();
+            = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Create second viewport with error.
-    QSignalSpy errorSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    QSignalSpy errorSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp2(m_viewporter->createViewport(s.get(), this));
+    std::unique_ptr<Clt::Viewport> vp2(m_viewporter->createViewport(s.get(), this));
     QVERIFY(errorSpy.wait());
 }
 
@@ -222,31 +223,31 @@ void TestViewporter::testWithoutBuffer()
     // This test verifies that setting the viewport while buffer is zero does not change the size.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface
-            = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Wrapland::Server::ViewporterInterface::viewportCreated);
+    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp(m_viewporter->createViewport(s.get(), this));
+    std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     auto serverViewport
-            = serverViewportCreated.first().first().value<Wrapland::Server::ViewportInterface*>();
+            = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     QVERIFY(!serverSurface->buffer());
 
     // Change the destination size.
-    QSignalSpy sizeChangedSpy(serverSurface, &Wrapland::Server::Surface::sizeChanged);
+    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
     vp->setDestinationSize(QSize(400, 200));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // Even though a new destination size is set if there is no buffer, the surface size has not
     // changed.
@@ -256,7 +257,7 @@ void TestViewporter::testWithoutBuffer()
 
     // Now change the source rectangle.
     vp->setSourceRectangle(QRectF(QPointF(100, 50), QSizeF(400, 200)));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // Even though a new source rectangle is set if there is no buffer, the surface size has not
     // changed.
@@ -270,38 +271,38 @@ void TestViewporter::testDestinationSize()
     // This test verifies setting the destination size is received by the server.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Wrapland::Server::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    Srv::Surface *serverSurface
+            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Wrapland::Server::ViewporterInterface::viewportCreated);
+    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp(m_viewporter->createViewport(s.get(), this));
+    std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     auto serverViewport
-            = serverViewportCreated.first().first().value<Wrapland::Server::ViewportInterface*>();
+            = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Wrapland::Server::Surface::sizeChanged);
+    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
     QVERIFY(sizeChangedSpy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
 
     // Change the destination size.
     vp->setDestinationSize(QSize(400, 200));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
     QVERIFY(sizeChangedSpy.wait());
@@ -310,7 +311,7 @@ void TestViewporter::testDestinationSize()
 
     // Destroy the viewport and check that the size is reset.
     vp.reset();
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
     QCOMPARE(sizeChangedSpy.count(), 3);
     QCOMPARE(serverSurface->size(), image.size());
@@ -321,40 +322,40 @@ void TestViewporter::testSourceRectangle()
     // This test verifies setting the source rectangle is received by the server.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Wrapland::Server::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    Srv::Surface *serverSurface
+            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Wrapland::Server::ViewporterInterface::viewportCreated);
+    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp(m_viewporter->createViewport(s.get(), this));
+    std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     auto serverViewport
-            = serverViewportCreated.first().first().value<Wrapland::Server::ViewportInterface*>();
+            = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Wrapland::Server::Surface::sizeChanged);
+    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
     QVERIFY(sizeChangedSpy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
 
     // Change the source rectangle.
     const QRectF rect(QPointF(100, 50), QSizeF(400, 200));
-    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Wrapland::Server::Surface::sourceRectangleChanged);
+    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Srv::Surface::sourceRectangleChanged);
     vp->setSourceRectangle(rect);
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
     QVERIFY(sizeChangedSpy.wait());
@@ -368,7 +369,7 @@ void TestViewporter::testSourceRectangle()
 
     // Destroy the viewport and check that the size is reset.
     vp.reset();
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
     QCOMPARE(sizeChangedSpy.count(), 3);
     QCOMPARE(serverSurface->size(), image.size());
@@ -380,33 +381,33 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     // server.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Wrapland::Server::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    Srv::Surface *serverSurface
+            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Wrapland::Server::ViewporterInterface::viewportCreated);
+    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp(m_viewporter->createViewport(s.get(), this));
+    std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     auto serverViewport
-            = serverViewportCreated.first().first().value<Wrapland::Server::ViewportInterface*>();
+            = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Wrapland::Server::Surface::sizeChanged);
+    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
     QVERIFY(sizeChangedSpy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
 
     // Change the destination size.
@@ -415,9 +416,9 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
 
     // Change the source rectangle.
     const QRectF rect(QPointF(100.1, 50.5), QSizeF(400.9, 200.8));
-    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Wrapland::Server::Surface::sourceRectangleChanged);
+    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Srv::Surface::sourceRectangleChanged);
     vp->setSourceRectangle(rect);
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
     QVERIFY(sizeChangedSpy.wait());
@@ -434,7 +435,7 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
 
     // Destroy the viewport and check that the size is reset.
     vp.reset();
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
     QCOMPARE(sizeChangedSpy.count(), 3);
     QCOMPARE(serverSurface->size(), image.size());
@@ -457,39 +458,39 @@ void TestViewporter::testDataError()
     // This test verifies setting the source rectangle is received by the server.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Wrapland::Server::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    Srv::Surface *serverSurface
+            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Wrapland::Server::ViewporterInterface::viewportCreated);
+    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp(m_viewporter->createViewport(s.get(), this));
+    std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     auto serverViewport
-            = serverViewportCreated.first().first().value<Wrapland::Server::ViewportInterface*>();
+            = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Wrapland::Server::Surface::sizeChanged);
+    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
     QVERIFY(sizeChangedSpy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
 
     QFETCH(QSize, destinationSize);
     QFETCH(QRectF, sourceRectangle);
 
-    QSignalSpy errorSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    QSignalSpy errorSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     QVERIFY(!m_connection->error());
 
@@ -512,40 +513,40 @@ void TestViewporter::testBufferSizeChange()
     // condition correctly.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Wrapland::Server::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    Srv::Surface *serverSurface
+            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Wrapland::Server::ViewporterInterface::viewportCreated);
+    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp(m_viewporter->createViewport(s.get(), this));
+    std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     auto serverViewport
-            = serverViewportCreated.first().first().value<Wrapland::Server::ViewportInterface*>();
+            = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Wrapland::Server::Surface::sizeChanged);
+    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
     QVERIFY(sizeChangedSpy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
 
     // Change the source rectangle.
     const QRectF rect(QPointF(100, 200), QSizeF(500, 200));
-    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Wrapland::Server::Surface::sourceRectangleChanged);
+    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Srv::Surface::sourceRectangleChanged);
     vp->setSourceRectangle(rect);
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
     QVERIFY(sizeChangedSpy.wait());
@@ -566,7 +567,7 @@ void TestViewporter::testBufferSizeChange()
     // Change the source rectangle accordingly.
     const QRectF rect2(QPointF(100, 200), QSizeF(499, 199));
     vp->setSourceRectangle(rect2);
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
     QVERIFY(sizeChangedSpy.wait());
@@ -584,11 +585,11 @@ void TestViewporter::testBufferSizeChange()
     s->attachBuffer(m_shm->createBuffer(image3));
 
     // And try to commit without changing the source rectangle accordingly, what leads to an error.
-    QSignalSpy errorSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    QSignalSpy errorSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     QVERIFY(!m_connection->error());
 
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(errorSpy.wait());
     QVERIFY(m_connection->error());
     // TODO: compare protocol error code
@@ -600,33 +601,33 @@ void TestViewporter::testDestinationSizeChange()
     // its integer condition correctly.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
+    std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Wrapland::Server::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    Srv::Surface *serverSurface
+            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Wrapland::Server::ViewporterInterface::viewportCreated);
+    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp(m_viewporter->createViewport(s.get(), this));
+    std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     auto serverViewport
-            = serverViewportCreated.first().first().value<Wrapland::Server::ViewportInterface*>();
+            = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Wrapland::Server::Surface::sizeChanged);
+    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
     QVERIFY(sizeChangedSpy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
 
     // Set the destination size.
@@ -635,9 +636,9 @@ void TestViewporter::testDestinationSizeChange()
 
     // Change the source rectangle.
     const QRectF rect(QPointF(100.5, 200.3), QSizeF(200, 100));
-    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Wrapland::Server::Surface::sourceRectangleChanged);
+    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Srv::Surface::sourceRectangleChanged);
     vp->setSourceRectangle(rect);
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
     QVERIFY(sizeChangedSpy.wait());
@@ -654,7 +655,7 @@ void TestViewporter::testDestinationSizeChange()
 
     // Unset the destination size.
     vp->setDestinationSize(QSize(-1, -1));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed to that of the source rectangle.
     QVERIFY(sizeChangedSpy.wait());
@@ -675,7 +676,7 @@ void TestViewporter::testDestinationSizeChange()
     // Change the source rectangle to non-integer values.
     const QRectF rect2(QPointF(100.5, 200.3), QSizeF(200.5, 100.5));
     vp->setSourceRectangle(rect2);
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed back.
     QVERIFY(sizeChangedSpy.wait());
@@ -691,12 +692,12 @@ void TestViewporter::testDestinationSizeChange()
                 - rect2.bottomRight()).manhattanLength() < 0.01);
 
     // And try to unset the destination size, what leads to an error.
-    QSignalSpy errorSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    QSignalSpy errorSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     QVERIFY(!m_connection->error());
 
     vp->setDestinationSize(QSize(-1, -1));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
+    s->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(errorSpy.wait());
     QVERIFY(m_connection->error());
     // TODO: compare protocol error code
@@ -707,38 +708,38 @@ void TestViewporter::testNoSurface()
     // This test verifies that setting the viewport for a surface twice results in a protocol error.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Clt::Surface> surface(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Wrapland::Server::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    Srv::Surface *serverSurface
+            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Wrapland::Server::ViewporterInterface::viewportCreated);
+    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
-    std::unique_ptr<Wrapland::Client::Viewport> vp(m_viewporter->createViewport(surface.get(), this));
+    std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(surface.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
     auto serverViewport
-            = serverViewportCreated.first().first().value<Wrapland::Server::ViewportInterface*>();
+            = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Wrapland::Server::Surface::sizeChanged);
+    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
     QVERIFY(sizeChangedSpy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     surface->attachBuffer(m_shm->createBuffer(image));
     surface->damage(QRect(0, 0, 600, 400));
-    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    surface->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(sizeChangedSpy.wait());
 
     // Change the destination size.
     vp->setDestinationSize(QSize(400, 200));
-    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    surface->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
     QVERIFY(sizeChangedSpy.wait());
@@ -749,7 +750,7 @@ void TestViewporter::testNoSurface()
     surface.reset();
 
     // And try to set data with the viewport what leads to a protocol error.
-    QSignalSpy errorSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    QSignalSpy errorSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(errorSpy.isValid());
     QVERIFY(!m_connection->error());
 
