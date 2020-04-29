@@ -46,8 +46,8 @@ class ShadowManagerInterface;
 class ShadowInterface;
 class SlideInterface;
 class Subsurface;
-class ViewportInterface;
-class ViewporterInterface;
+class Viewport;
+class Viewporter;
 
 class WRAPLANDSERVER_EXPORT Surface : public QObject
 {
@@ -79,7 +79,7 @@ public:
     QPointer<BlurInterface> blur() const;
     QPointer<ContrastInterface> contrast() const;
     QPointer<SlideInterface> slideOnShowHide() const;
-    QPointer<ViewportInterface> viewport() const;
+    QPointer<Viewport> viewport() const;
 
     bool isMapped() const;
     QRegion trackedDamage() const;
@@ -150,7 +150,7 @@ private:
     friend class TextInputUnstableV2Interface;
 
     friend class SurfaceRole;
-    friend class ViewporterInterface;
+    friend class Viewporter;
 
     explicit Surface(Client* client, uint32_t version, uint32_t id);
 

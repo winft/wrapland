@@ -99,7 +99,7 @@ public:
     void installPointerConstraint(LockedPointerV1* lock);
     void installPointerConstraint(ConfinedPointerV1* confinement);
     void installIdleInhibitor(IdleInhibitor* inhibitor);
-    void installViewport(ViewportInterface* vp);
+    void installViewport(Viewport* vp);
 
     void commitSubsurface();
     void commit();
@@ -122,7 +122,7 @@ public:
 
     QPointer<LockedPointerV1> lockedPointer;
     QPointer<ConfinedPointerV1> confinedPointer;
-    QPointer<ViewportInterface> viewport;
+    QPointer<Viewport> viewport;
     QHash<Output*, QMetaObject::Connection> outputDestroyedConnections;
     QVector<IdleInhibitor*> idleInhibitors;
 
