@@ -36,6 +36,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keystate.h"
 #include "linux_dmabuf_v1.h"
 #include "output.h"
+#include "plasma_virtual_desktop.h"
+#include "plasma_window.h"
 #include "pointer.h"
 #include "pointer_constraints_v1.h"
 #include "pointer_gestures_v1.h"
@@ -60,8 +62,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/output_interface.h"
 #include "../src/server/output_management_v1_interface.h"
 #include "../src/server/plasmashell_interface.h"
-#include "../src/server/plasmavirtualdesktop_interface.h"
-#include "../src/server/plasmawindowmanagement_interface.h"
 #include "../src/server/remote_access_interface.h"
 #include "../src/server/server_decoration_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
@@ -227,9 +227,9 @@ PlasmaShellInterface* D_isplay::createPlasmaShell(QObject* parent)
     return legacy->createPlasmaShell(parent);
 }
 
-PlasmaWindowManagementInterface* D_isplay::createPlasmaWindowManagement(QObject* parent)
+PlasmaWindowManager* D_isplay::createPlasmaWindowManager(QObject* parent)
 {
-    return legacy->createPlasmaWindowManagement(parent);
+    return new PlasmaWindowManager(this, parent);
 }
 
 RemoteAccessManagerInterface* D_isplay::createRemoteAccessManager(QObject* parent)
@@ -329,10 +329,9 @@ LinuxDmabufV1* D_isplay::createLinuxDmabuf(QObject* parent)
     return new LinuxDmabufV1(this, parent);
 }
 
-PlasmaVirtualDesktopManagementInterface*
-D_isplay::createPlasmaVirtualDesktopManagement(QObject* parent)
+PlasmaVirtualDesktopManager* D_isplay::createPlasmaVirtualDesktopManager(QObject* parent)
 {
-    return legacy->createPlasmaVirtualDesktopManagement(parent);
+    return new PlasmaVirtualDesktopManager(this, parent);
 }
 
 Viewporter* D_isplay::createViewporter(QObject* parent)

@@ -51,6 +51,8 @@ class Private;
 class DataDeviceManager;
 class DpmsManager;
 class Output;
+class PlasmaVirtualDesktopManager;
+class PlasmaWindowManager;
 class Seat;
 class XdgShell;
 
@@ -64,7 +66,6 @@ class RemoteAccessManagerInterface;
 class IdleInhibitManagerV1;
 class FakeInputInterface;
 class PlasmaShellInterface;
-class PlasmaWindowManagementInterface;
 class ShadowManager;
 class BlurManager;
 class ContrastManager;
@@ -82,7 +83,6 @@ class PointerConstraintsV1;
 class XdgForeign;
 class AppMenuManager;
 class ServerSideDecorationPaletteManagerInterface;
-class PlasmaVirtualDesktopManagementInterface;
 class Viewporter;
 class XdgOutputManager;
 class XdgDecorationManager;
@@ -144,7 +144,7 @@ public:
     DataDeviceManager* createDataDeviceManager(QObject* parent = nullptr);
     OutputManagementV1Interface* createOutputManagementV1(QObject* parent = nullptr);
     PlasmaShellInterface* createPlasmaShell(QObject* parent = nullptr);
-    PlasmaWindowManagementInterface* createPlasmaWindowManagement(QObject* parent = nullptr);
+    PlasmaWindowManager* createPlasmaWindowManager(QObject* parent = nullptr);
     KdeIdle* createIdle(QObject* parent = nullptr);
     RemoteAccessManagerInterface* createRemoteAccessManager(QObject* parent = nullptr);
     FakeInputInterface* createFakeInput(QObject* parent = nullptr);
@@ -177,8 +177,7 @@ public:
     Viewporter* createViewporter(QObject* parent = nullptr);
     XdgOutputManager* createXdgOutputManager(QObject* parent = nullptr);
 
-    PlasmaVirtualDesktopManagementInterface* createPlasmaVirtualDesktopManagement(QObject* parent
-                                                                                  = nullptr);
+    PlasmaVirtualDesktopManager* createPlasmaVirtualDesktopManager(QObject* parent = nullptr);
     XdgDecorationManager* createXdgDecorationManager(XdgShell* shell, QObject* parent = nullptr);
     EglStreamControllerInterface* createEglStreamControllerInterface(QObject* parent = nullptr);
 
