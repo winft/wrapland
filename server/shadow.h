@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright 2015  Martin Gräßlin <mgraesslin@kde.org>
+Copyright 2020  Adrien Faveraux <ad1rie3@hotmail.fr>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,69 +17,58 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WRAPLAND_SERVER_SHADOW_INTERFACE_H
-#define WRAPLAND_SERVER_SHADOW_INTERFACE_H
+#pragma once
 
-#include "global.h"
-#include "resource.h"
-
-#include <QObject>
 #include <QMarginsF>
+#include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Buffer;
-class Display;
+class D_isplay;
 
-/**
- * TODO
- */
-class WRAPLANDSERVER_EXPORT ShadowManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT ShadowManager : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~ShadowManagerInterface();
+    ~ShadowManager() override;
 
 private:
-    explicit ShadowManagerInterface(Display *display, QObject *parent = nullptr);
-    friend class Display;
+    explicit ShadowManager(D_isplay* display, QObject* parent = nullptr);
+    friend class D_isplay;
     class Private;
+    std::unique_ptr<Private> d_ptr;
 };
 
-/**
- * TODO
- */
-class WRAPLANDSERVER_EXPORT ShadowInterface : public Resource
+class WRAPLANDSERVER_EXPORT Shadow : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~ShadowInterface();
+    ~Shadow() override;
 
-    Buffer *left() const;
-    Buffer *topLeft() const;
-    Buffer *top() const;
-    Buffer *topRight() const;
-    Buffer *right() const;
-    Buffer *bottomRight() const;
-    Buffer *bottom() const;
-    Buffer *bottomLeft() const;
+    Buffer* left() const;
+    Buffer* topLeft() const;
+    Buffer* top() const;
+    Buffer* topRight() const;
+    Buffer* right() const;
+    Buffer* bottomRight() const;
+    Buffer* bottom() const;
+    Buffer* bottomLeft() const;
 
     QMarginsF offset() const;
 
+Q_SIGNALS:
+    void resourceDestroyed();
+
 private:
-    explicit ShadowInterface(ShadowManagerInterface *parent, wl_resource *parentResource);
-    friend class ShadowManagerInterface;
+    explicit Shadow(Client* client, uint32_t version, uint32_t id);
+    friend class ShadowManager;
 
     class Private;
-    Private *d_func() const;
+    Private* d_ptr;
 };
 
 }
-}
-
-#endif

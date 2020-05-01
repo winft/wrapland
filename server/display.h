@@ -66,7 +66,7 @@ class FakeInputInterface;
 class PlasmaShellInterface;
 class PlasmaWindowManagementInterface;
 class QtSurfaceExtensionInterface;
-class ShadowManagerInterface;
+class ShadowManager;
 class BlurManagerInterface;
 class ContrastManagerInterface;
 class OutputConfigurationV1Interface;
@@ -150,7 +150,7 @@ public:
     KdeIdle* createIdle(QObject* parent = nullptr);
     RemoteAccessManagerInterface* createRemoteAccessManager(QObject* parent = nullptr);
     FakeInputInterface* createFakeInput(QObject* parent = nullptr);
-    ShadowManagerInterface* createShadowManager(QObject* parent = nullptr);
+    ShadowManager* createShadowManager(QObject* parent = nullptr);
     BlurManagerInterface* createBlurManager(QObject* parent = nullptr);
     ContrastManagerInterface* createContrastManager(QObject* parent = nullptr);
     SlideManagerInterface* createSlideManager(QObject* parent = nullptr);
