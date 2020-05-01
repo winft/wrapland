@@ -48,6 +48,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Legacy
 #include "../src/server/display.h"
 
+#include "../server/shadow.h"
 #include "../src/server/appmenu_interface.h"
 #include "../src/server/blur_interface.h"
 #include "../src/server/contrast_interface.h"
@@ -64,7 +65,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/remote_access_interface.h"
 #include "../src/server/server_decoration_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
-#include "../src/server/shadow_interface.h"
 #include "../src/server/slide_interface.h"
 #include "../src/server/textinput_interface_p.h"
 //
@@ -253,9 +253,9 @@ FakeInputInterface* D_isplay::createFakeInput(QObject* parent)
     return legacy->createFakeInput(parent);
 }
 
-ShadowManagerInterface* D_isplay::createShadowManager(QObject* parent)
+ShadowManager* D_isplay::createShadowManager(QObject* parent)
 {
-    return legacy->createShadowManager(parent);
+    return new ShadowManager(this, parent);
 }
 
 BlurManagerInterface* D_isplay::createBlurManager(QObject* parent)

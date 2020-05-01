@@ -34,7 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "pointergestures_interface_p.h"
 #include "qtsurfaceextension_interface.h"
 #include "seat_interface.h"
-#include "shadow_interface.h"
+//#include "shadow_interface.h"
 #include "blur_interface.h"
 #include "contrast_interface.h"
 //#include "relativepointer_interface_p.h"
@@ -322,14 +322,14 @@ FakeInputInterface *Display::createFakeInput(QObject *parent)
     connect(this, &Display::aboutToTerminate, i, [this, i] { delete i; });
     return i;
 }
-
+/*
 ShadowManagerInterface *Display::createShadowManager(QObject *parent)
 {
     auto s = new ShadowManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, s, [this, s] { delete s; });
     return s;
 }
-
+*/
 BlurManagerInterface *Display::createBlurManager(QObject *parent)
 {
     auto b = new BlurManagerInterface(this, parent);

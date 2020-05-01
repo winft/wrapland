@@ -42,8 +42,8 @@ class IdleInhibitManagerV1;
 class IdleInhibitor;
 class LockedPointerV1;
 class PointerConstraintsV1;
-class ShadowManagerInterface;
-class ShadowInterface;
+class ShadowManager;
+class Shadow;
 class SlideInterface;
 class Subsurface;
 class Viewport;
@@ -75,7 +75,7 @@ public:
     Subsurface* subsurface() const;
     std::vector<Subsurface*> childSubsurfaces() const;
 
-    QPointer<ShadowInterface> shadow() const;
+    QPointer<Shadow> shadow() const;
     QPointer<BlurInterface> blur() const;
     QPointer<ContrastInterface> contrast() const;
     QPointer<SlideInterface> slideOnShowHide() const;
@@ -127,7 +127,7 @@ Q_SIGNALS:
 private:
     friend class Compositor;
     friend class Subsurface;
-    friend class ShadowManagerInterface;
+    friend class ShadowManager;
     friend class BlurManagerInterface;
     friend class SlideManagerInterface;
     friend class ContrastManagerInterface;

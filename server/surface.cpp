@@ -222,7 +222,7 @@ bool Surface::Private::lowerChild(Subsurface* subsurface, Surface* sibling)
     return true;
 }
 
-void Surface::Private::setShadow(const QPointer<ShadowInterface>& shadow)
+void Surface::Private::setShadow(const QPointer<Shadow>& shadow)
 {
     pending.shadow = shadow;
     pending.shadowIsSet = true;
@@ -997,7 +997,7 @@ QSize Surface::size() const
     return d_ptr->current.buffer->size() / scale();
 }
 
-QPointer<ShadowInterface> Surface::shadow() const
+QPointer<Shadow> Surface::shadow() const
 {
 
     return d_ptr->current.shadow;

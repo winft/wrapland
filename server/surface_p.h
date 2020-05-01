@@ -73,7 +73,7 @@ public:
         // Stacking order: bottom (first) -> top (last).
         std::vector<Subsurface*> children;
 
-        QPointer<ShadowInterface> shadow;
+        QPointer<Shadow> shadow;
         QPointer<BlurInterface> blur;
         QPointer<ContrastInterface> contrast;
         QPointer<SlideInterface> slide;
@@ -88,7 +88,7 @@ public:
     bool raiseChild(Subsurface* subsurface, Surface* sibling);
     bool lowerChild(Subsurface* subsurface, Surface* sibling);
 
-    void setShadow(const QPointer<ShadowInterface>& shadow);
+    void setShadow(const QPointer<Shadow>& shadow);
     void setBlur(const QPointer<BlurInterface>& blur);
     void setContrast(const QPointer<ContrastInterface>& contrast);
     void setSlide(const QPointer<SlideInterface>& slide);
