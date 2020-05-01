@@ -33,14 +33,16 @@ namespace Wrapland::Server
 {
 class BufferV1;
 
-class LinuxDmabufV1::Private : public Wayland::Global<LinuxDmabufV1>
+constexpr uint32_t LinuxDmabufV1Version = 3;
+using LinuxDmabufV1Global = Wayland::Global<LinuxDmabufV1, LinuxDmabufV1Version>;
+
+class LinuxDmabufV1::Private : public LinuxDmabufV1Global
 {
 public:
     Private(LinuxDmabufV1* q, D_isplay* display);
     ~Private() override final;
 
-    uint32_t version() const override final;
-    void bindInit(Wayland::Resource<LinuxDmabufV1, Global<LinuxDmabufV1>>* bind) override final;
+    void bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind) override final;
 
     static const struct wl_buffer_interface* bufferInterface();
     static void createParamsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
@@ -51,8 +53,6 @@ public:
     LinuxDmabufV1* q_ptr;
 
 private:
-    static const uint32_t s_version;
-
     static const struct zwp_linux_dmabuf_v1_interface s_interface;
 };
 

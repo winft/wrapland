@@ -35,14 +35,15 @@ namespace Wrapland
 namespace Server
 {
 
-class DataDeviceManager::Private : public Wayland::Global<DataDeviceManager>
+constexpr uint32_t DataDeviceManagerVersion = 3;
+using DataDeviceManagerGlobal = Wayland::Global<DataDeviceManager, DataDeviceManagerVersion>;
+
+class DataDeviceManager::Private : public DataDeviceManagerGlobal
 {
 public:
     Private(DataDeviceManager* q, D_isplay* display);
 
 private:
-    uint32_t version() const override;
-
     static void createDataSourceCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
     static void getDataDeviceCallback(wl_client* wlClient,
                                       wl_resource* wlResource,
@@ -51,16 +52,8 @@ private:
 
     static const struct wl_data_device_manager_interface s_interface;
 
-    static const quint32 s_version;
-    static const qint32 s_dataDeviceVersion;
-    static const qint32 s_dataSourceVersion;
-
     DataDeviceManager* q_ptr;
 };
-
-const quint32 DataDeviceManager::Private::s_version = 3;
-const qint32 DataDeviceManager::Private::s_dataDeviceVersion = 3;
-const qint32 DataDeviceManager::Private::s_dataSourceVersion = 3;
 
 const struct wl_data_device_manager_interface DataDeviceManager::Private::s_interface = {
     createDataSourceCallback,
@@ -68,10 +61,7 @@ const struct wl_data_device_manager_interface DataDeviceManager::Private::s_inte
 };
 
 DataDeviceManager::Private::Private(DataDeviceManager* q, D_isplay* display)
-    : Wayland::Global<DataDeviceManager>(q,
-                                         display,
-                                         &wl_data_device_manager_interface,
-                                         &s_interface)
+    : DataDeviceManagerGlobal(q, display, &wl_data_device_manager_interface, &s_interface)
     , q_ptr{q}
 {
 }
@@ -98,7 +88,7 @@ void DataDeviceManager::Private::getDataDeviceCallback(wl_client* wlClient,
 {
     auto handle = fromResource(wlResource);
     auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
-    auto seat = Global<Seat>::fromResource(wlSeat);
+    auto seat = SeatGlobal::fromResource(wlSeat);
 
     auto dataDevice = new DataDevice(client, handle->d_ptr->version(), id, seat);
     if (!dataDevice) {
@@ -107,11 +97,6 @@ void DataDeviceManager::Private::getDataDeviceCallback(wl_client* wlClient,
 
     seat->d_ptr->registerDataDevice(dataDevice);
     Q_EMIT handle->dataDeviceCreated(dataDevice);
-}
-
-uint32_t DataDeviceManager::Private::version() const
-{
-    return s_version;
 }
 
 DataDeviceManager::DataDeviceManager(D_isplay* display, [[maybe_unused]] QObject* parent)

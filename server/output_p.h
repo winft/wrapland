@@ -31,16 +31,18 @@ class D_isplay;
 
 using Sender = std::function<void(wl_resource*)>;
 
-class Output::Private : public Wayland::Global<Output>
+constexpr uint32_t OutputVersion = 3;
+using OutputGlobal = Wayland::Global<Output, OutputVersion>;
+
+class Output::Private : public OutputGlobal
 {
 public:
     Private(Output* q, D_isplay* display);
     ~Private() override;
 
-    void bindInit(Wayland::Resource<Output, Global<Output>>* bind) override;
-    uint32_t version() const override;
+    void bindInit(Wayland::Resource<Output, OutputGlobal>* bind) override;
 
-    void sendMode(Wayland::Resource<Output, Global<Output>>* bind, const Mode& mode);
+    void sendMode(Wayland::Resource<Output, OutputGlobal>* bind, const Mode& mode);
     void sendMode(const Mode& mode);
     void sendGeometry();
     void sendScale();
@@ -79,7 +81,6 @@ private:
     int32_t getFlags(const Mode& mode);
 
     static const struct wl_output_interface s_interface;
-    static const quint32 s_version;
 };
 
 }

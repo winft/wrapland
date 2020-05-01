@@ -53,13 +53,8 @@ namespace Wrapland
 namespace Server
 {
 
-const quint32 Seat::Private::s_version = 5;
-const qint32 Seat::Private::s_pointerVersion = 5;
-const qint32 Seat::Private::s_touchVersion = 5;
-const qint32 Seat::Private::s_keyboardVersion = 5;
-
 Seat::Private::Private(Seat* q, D_isplay* display)
-    : Wayland::Global<Seat>(q, display, &wl_seat_interface, &s_interface)
+    : SeatGlobal(q, display, &wl_seat_interface, &s_interface)
     , q_ptr(q)
 {
 }
@@ -97,15 +92,10 @@ Seat::~Seat()
     delete d_ptr;
 }
 
-void Seat::Private::bindInit(Wayland::Resource<Seat, Global<Seat>>* bind)
+void Seat::Private::bindInit(Wayland::Resource<Seat, SeatGlobal>* bind)
 {
     send<wl_seat_send_capabilities>(bind, getCapabilities());
     send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(bind, name.c_str());
-}
-
-uint32_t Seat::Private::version() const
-{
-    return s_version;
 }
 
 void Seat::Private::updatePointerButtonSerial(quint32 button, quint32 serial)
@@ -503,7 +493,7 @@ void Seat::Private::getPointerCallback(wl_client* wlClient, wl_resource* wlResou
 void Seat::Private::getPointer(Client* client, uint32_t id, wl_resource* resource)
 {
     auto pointer
-        = new Pointer(client, qMin(wl_resource_get_version(resource), s_pointerVersion), id, q_ptr);
+        = new Pointer(client, std::min(wl_resource_get_version(resource), version()), id, q_ptr);
 
     pointers << pointer;
 
@@ -541,8 +531,8 @@ void Seat::Private::getKeyboardCallback(wl_client* wlClient, wl_resource* wlReso
 void Seat::Private::getKeyboard(Client* client, uint32_t id, wl_resource* resource)
 {
     // TODO: only create if seat has keyboard?
-    auto keyboard = new Keyboard(
-        client, qMin(wl_resource_get_version(resource), s_keyboardVersion), id, q_ptr);
+    auto keyboard
+        = new Keyboard(client, std::min(wl_resource_get_version(resource), version()), id, q_ptr);
 
     keyboard->repeatInfo(keys.keyRepeat.charactersPerSecond, keys.keyRepeat.delay);
 
@@ -577,7 +567,7 @@ void Seat::Private::getTouch(Client* client, uint32_t id, wl_resource* resource)
 {
     // TODO: only create if seat has touch?
     auto touch
-        = new Touch(client, qMin(wl_resource_get_version(resource), s_touchVersion), id, q_ptr);
+        = new Touch(client, std::min(wl_resource_get_version(resource), version()), id, q_ptr);
     // TODO: check for error
 
     touchs << touch;
@@ -618,7 +608,7 @@ bool Seat::hasTouch() const
 
 Seat* Seat::get(void* data)
 {
-    auto resource = reinterpret_cast<Wayland::Resource<Seat, Wayland::Global<Seat>>*>(data);
+    auto resource = reinterpret_cast<Wayland::Resource<Seat, SeatGlobal>*>(data);
     auto seatPriv = static_cast<Seat::Private*>(resource->global());
     return seatPriv->q_ptr;
 }

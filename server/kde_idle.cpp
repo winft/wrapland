@@ -32,7 +32,6 @@ namespace Wrapland
 namespace Server
 {
 
-const uint32_t KdeIdle::Private::s_version = 1;
 const struct org_kde_kwin_idle_interface KdeIdle::Private::s_interface = {getIdleTimeoutCallback};
 
 KdeIdle::Private::Private(D_isplay* d, KdeIdle* q)

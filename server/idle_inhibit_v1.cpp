@@ -22,8 +22,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-const uint32_t IdleInhibitManagerV1::Private::s_version = 1;
-
 const struct zwp_idle_inhibit_manager_v1_interface IdleInhibitManagerV1::Private::s_interface = {
     resourceDestroyCallback,
     createInhibitorCallback,

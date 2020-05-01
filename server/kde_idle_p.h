@@ -55,7 +55,6 @@ private:
                                        uint32_t timeout);
 
     static const struct org_kde_kwin_idle_interface s_interface;
-    static const uint32_t s_version;
 };
 
 class WRAPLANDSERVER_EXPORT IdleTimeout : public QObject
