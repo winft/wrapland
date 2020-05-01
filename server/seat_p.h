@@ -41,15 +41,16 @@ class TextInputInterface;
 
 using Sender = std::function<void(wl_resource*)>;
 
-class Seat::Private : public Wayland::Global<Seat>
+constexpr uint32_t SeatVersion = 5;
+using SeatGlobal = Wayland::Global<Seat, SeatVersion>;
+
+class Seat::Private : public SeatGlobal
 {
 public:
     Private(Seat* q, D_isplay* d);
     ~Private() override = default;
 
-    void bindInit(Wayland::Resource<Seat, Global<Seat>>* bind) override;
-
-    uint32_t version() const override;
+    void bindInit(Wayland::Resource<Seat, SeatGlobal>* bind) override;
 
     void sendCapabilities();
     void sendName();
@@ -205,11 +206,6 @@ private:
     static void getTouchCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
 
     static const struct wl_seat_interface s_interface;
-    static const quint32 s_version;
-
-    static const qint32 s_pointerVersion;
-    static const qint32 s_touchVersion;
-    static const qint32 s_keyboardVersion;
 };
 
 }

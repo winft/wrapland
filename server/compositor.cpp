@@ -30,26 +30,24 @@ namespace Wrapland
 namespace Server
 {
 
-class Compositor::Private : public Wayland::Global<Compositor>
+constexpr uint32_t CompositorVersion = 4;
+using CompositorGlobal = Wayland::Global<Compositor, CompositorVersion>;
+
+class Compositor::Private : public CompositorGlobal
 {
 public:
     Private(Compositor* q, D_isplay* display);
     ~Private() override;
-
-    uint32_t version() const override;
 
 private:
     static void createSurfaceCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
     static void createRegionCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
 
     static const struct wl_compositor_interface s_interface;
-    static const quint32 s_version;
 };
 
-const uint32_t Compositor::Private::s_version = 4;
-
 Compositor::Private::Private(Compositor* q, D_isplay* display)
-    : Wayland::Global<Compositor>(q, display, &wl_compositor_interface, &s_interface)
+    : CompositorGlobal(q, display, &wl_compositor_interface, &s_interface)
 {
 }
 
@@ -59,11 +57,6 @@ const struct wl_compositor_interface Compositor::Private::s_interface = {
     createSurfaceCallback,
     createRegionCallback,
 };
-
-uint32_t Compositor::Private::version() const
-{
-    return s_version;
-}
 
 Compositor::Compositor(D_isplay* display, QObject* parent)
     : QObject(parent)

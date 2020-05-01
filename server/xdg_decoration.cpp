@@ -48,10 +48,7 @@ private:
     XdgShell* m_shell;
 
     static const struct zxdg_decoration_manager_v1_interface s_interface;
-    static const uint32_t s_version;
 };
-
-const uint32_t XdgDecorationManager::Private::s_version = 1;
 
 XdgDecorationManager::Private::Private(XdgDecorationManager* q, D_isplay* display, XdgShell* shell)
     : Wayland::Global<XdgDecorationManager>(q,

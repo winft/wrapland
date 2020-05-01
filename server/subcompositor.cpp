@@ -49,10 +49,7 @@ private:
                                    wl_resource* wlParent);
 
     static const struct wl_subcompositor_interface s_interface;
-    static const quint32 s_version;
 };
-
-const quint32 Subcompositor::Private::s_version = 1;
 
 const struct wl_subcompositor_interface Subcompositor::Private::s_interface = {
     resourceDestroyCallback,

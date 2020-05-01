@@ -25,7 +25,6 @@ namespace Wrapland
 namespace Server
 {
 
-const uint32_t XdgOutputManager::Private::s_version = 1;
 const struct zxdg_output_manager_v1_interface XdgOutputManager::Private::s_interface = {
     destroyCallback,
     getXdgOutputCallback,

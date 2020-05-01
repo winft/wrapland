@@ -46,11 +46,11 @@ namespace Wayland
 {
 class Client;
 
-template<typename Handle>
+template<typename Handle, int Version = 1>
 class Global
 {
 public:
-    using GlobalResource = Resource<Handle, Global<Handle>>;
+    using GlobalResource = Resource<Handle, Global<Handle, Version>>;
 
     virtual ~Global()
     {
@@ -69,9 +69,9 @@ public:
             wl_global_create(display()->handle()->display(), m_interface, version(), this, bind));
     }
 
-    virtual uint32_t version() const
+    constexpr int version() const
     {
-        return 1;
+        return Version;
     }
 
     Display* display()

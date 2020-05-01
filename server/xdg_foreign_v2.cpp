@@ -36,7 +36,10 @@ namespace Wrapland
 namespace Server
 {
 
-class Q_DECL_HIDDEN XdgExporterV2::Private : public Wayland::Global<XdgExporterV2>
+constexpr uint32_t XdgExporterV2Version = 1;
+
+class Q_DECL_HIDDEN XdgExporterV2::Private
+    : public Wayland::Global<XdgExporterV2, XdgExporterV2Version>
 {
 public:
     Private(XdgExporterV2* q, D_isplay* display);
@@ -51,13 +54,13 @@ private:
                                        wl_resource* wlSurface);
 
     static const struct zxdg_exporter_v2_interface s_interface;
-    static const uint32_t s_version;
 };
 
-const uint32_t XdgExporterV2::Private::s_version = 1;
-
 XdgExporterV2::Private::Private(XdgExporterV2* q, D_isplay* display)
-    : Wayland::Global<XdgExporterV2>(q, display, &zxdg_exporter_v2_interface, &s_interface)
+    : Wayland::Global<XdgExporterV2, XdgExporterV2Version>(q,
+                                                           display,
+                                                           &zxdg_exporter_v2_interface,
+                                                           &s_interface)
 {
 }
 
@@ -110,7 +113,10 @@ XdgExporterV2::~XdgExporterV2()
     delete d_ptr;
 }
 
-class Q_DECL_HIDDEN XdgImporterV2::Private : public Wayland::Global<XdgImporterV2>
+constexpr uint32_t XdgImporterV2Version = 1;
+
+class Q_DECL_HIDDEN XdgImporterV2::Private
+    : public Wayland::Global<XdgImporterV2, XdgImporterV2Version>
 {
 public:
     Private(XdgImporterV2* q, D_isplay* display);
@@ -131,10 +137,7 @@ private:
                                        const char* handle);
 
     static const struct zxdg_importer_v2_interface s_interface;
-    static const uint32_t s_version;
 };
-
-const uint32_t XdgImporterV2::Private::s_version = 1;
 
 const struct zxdg_importer_v2_interface XdgImporterV2::Private::s_interface = {
     resourceDestroyCallback,
@@ -177,7 +180,10 @@ void XdgImporterV2::Private::importToplevelCallback(wl_client* wlClient,
 }
 
 XdgImporterV2::Private::Private(XdgImporterV2* q, D_isplay* display)
-    : Wayland::Global<XdgImporterV2>(q, display, &zxdg_importer_v2_interface, &s_interface)
+    : Wayland::Global<XdgImporterV2, XdgImporterV2Version>(q,
+                                                           display,
+                                                           &zxdg_importer_v2_interface,
+                                                           &s_interface)
 {
 }
 

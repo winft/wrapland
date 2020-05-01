@@ -35,8 +35,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-const uint32_t XdgShell::Private::s_version = 1;
-
 XdgShell::Private::Private(XdgShell* q, D_isplay* display)
     : Wayland::Global<XdgShell>(q, display, &xdg_wm_base_interface, &s_interface)
 {

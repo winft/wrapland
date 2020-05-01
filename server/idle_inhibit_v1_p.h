@@ -44,7 +44,6 @@ private:
                                         wl_resource* surface);
 
     static const struct zwp_idle_inhibit_manager_v1_interface s_interface;
-    static const uint32_t s_version;
 };
 
 class WRAPLANDSERVER_EXPORT IdleInhibitor : public QObject

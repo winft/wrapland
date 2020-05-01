@@ -37,8 +37,6 @@ public:
     ~Private() override;
     static void fetchStatesCallback(struct wl_client* client, struct wl_resource* wlResource);
 
-    static const quint32 s_version = 1;
-    QVector<wl_resource*> m_resources;
     QVector<State> m_keyStates = QVector<State>(3, Unlocked);
     static const struct org_kde_kwin_keystate_interface s_interface;
 };

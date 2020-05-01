@@ -53,7 +53,6 @@ private:
                                      wl_resource* output);
 
     static const struct zxdg_output_manager_v1_interface s_interface;
-    static const uint32_t s_version;
 };
 class XdgOutput::Private
 {
