@@ -54,7 +54,6 @@ private:
                                     wl_resource* wlSurface);
 
     static const struct wp_viewporter_interface s_interface;
-    static const uint32_t s_version;
 };
 
 class Viewport::Private : public Wayland::Resource<Viewport>

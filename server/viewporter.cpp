@@ -33,8 +33,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-const uint32_t Viewporter::Private::s_version = 1;
-
 const struct wp_viewporter_interface Viewporter::Private::s_interface = {
     resourceDestroyCallback,
     getViewportCallback,

@@ -64,7 +64,6 @@ private:
     static void pongCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t serial);
 
     static const struct xdg_wm_base_interface s_interface;
-    static const uint32_t s_version;
 };
 
 }

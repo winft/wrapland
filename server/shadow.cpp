@@ -33,8 +33,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-const uint32_t ShadowManager::Private::s_version = 2;
-
 const struct org_kde_kwin_shadow_manager_interface ShadowManager::Private::s_interface = {
     createCallback,
     unsetCallback,
@@ -42,19 +40,12 @@ const struct org_kde_kwin_shadow_manager_interface ShadowManager::Private::s_int
 };
 
 ShadowManager::Private::Private(D_isplay* display, ShadowManager* qptr)
-    : Wayland::Global<ShadowManager>(qptr,
-                                     display,
-                                     &org_kde_kwin_shadow_manager_interface,
-                                     &s_interface)
+    : ShadowManagerGlobal(qptr, display, &org_kde_kwin_shadow_manager_interface, &s_interface)
 {
     create();
 }
-ShadowManager::Private::~Private() = default;
 
-uint32_t ShadowManager::Private::version() const
-{
-    return s_version;
-}
+ShadowManager::Private::~Private() = default;
 
 void ShadowManager::Private::createCallback(wl_client* wlClient,
                                             wl_resource* wlResource,

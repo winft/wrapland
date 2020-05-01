@@ -39,10 +39,8 @@ namespace Wrapland
 namespace Server
 {
 
-const quint32 Output::Private::s_version = 3;
-
 Output::Private::Private(Output* q, D_isplay* display)
-    : Wayland::Global<Output>(q, display, &wl_output_interface, &s_interface)
+    : OutputGlobal(q, display, &wl_output_interface, &s_interface)
     , displayHandle(display)
     , q_ptr(q)
 {
@@ -257,7 +255,7 @@ int32_t Output::Private::toSubPixel() const
     abort();
 }
 
-void Output::Private::bindInit(Wayland::Resource<Output, Global<Output>>* bind)
+void Output::Private::bindInit(Wayland::Resource<Output, OutputGlobal>* bind)
 {
     send<wl_output_send_geometry>(bind, geometryArgs());
     send<wl_output_send_scale, 2>(bind, scale);
@@ -281,11 +279,6 @@ void Output::Private::bindInit(Wayland::Resource<Output, Global<Output>>* bind)
     bind->client()->flush();
 }
 
-uint32_t Output::Private::version() const
-{
-    return s_version;
-}
-
 int32_t Output::Private::getFlags(const Mode& mode)
 {
     int32_t flags = 0;
@@ -298,7 +291,7 @@ int32_t Output::Private::getFlags(const Mode& mode)
     return flags;
 }
 
-void Output::Private::sendMode(Wayland::Resource<Output, Global<Output>>* bind, const Mode& mode)
+void Output::Private::sendMode(Wayland::Resource<Output, OutputGlobal>* bind, const Mode& mode)
 {
     send<wl_output_send_mode>(
         bind, getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
@@ -437,7 +430,7 @@ bool Output::isDpmsSupported() const
 
 Output* Output::get(void* data)
 {
-    auto resource = reinterpret_cast<Wayland::Resource<Output, Wayland::Global<Output>>*>(data);
+    auto resource = reinterpret_cast<Wayland::Resource<Output, OutputGlobal>*>(data);
     auto outputPriv = static_cast<Output::Private*>(resource->global());
     return outputPriv->q_ptr;
 }

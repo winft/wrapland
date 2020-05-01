@@ -42,7 +42,7 @@ namespace Wrapland::Server
 {
 
 LinuxDmabufV1::Private::Private(LinuxDmabufV1* q, D_isplay* display)
-    : Wayland::Global<LinuxDmabufV1>(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
+    : LinuxDmabufV1Global(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
 {
 }
 
@@ -53,14 +53,7 @@ const struct zwp_linux_dmabuf_v1_interface LinuxDmabufV1::Private::s_interface =
     createParamsCallback,
 };
 
-const uint32_t LinuxDmabufV1::Private::s_version = 3;
-
-uint32_t LinuxDmabufV1::Private::version() const
-{
-    return s_version;
-}
-
-void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, Global<LinuxDmabufV1>>* bind)
+void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind)
 {
     // Send formats & modifiers.
     QHash<uint32_t, QSet<uint64_t>>::const_iterator it = supportedFormatsWithModifiers.constBegin();

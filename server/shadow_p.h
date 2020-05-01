@@ -32,12 +32,14 @@ namespace Wrapland::Server
 class Buffer;
 class D_isplay;
 
-class ShadowManager::Private : public Wayland::Global<ShadowManager>
+constexpr uint32_t ShadowManagerVersion = 2;
+using ShadowManagerGlobal = Wayland::Global<ShadowManager, ShadowManagerVersion>;
+
+class ShadowManager::Private : public ShadowManagerGlobal
 {
 public:
     Private(D_isplay* display, ShadowManager* qptr);
     ~Private() override;
-    uint32_t version() const override;
 
 private:
     void createShadow(wl_client* client, wl_resource* resource, uint32_t id, wl_resource* surface);
@@ -47,7 +49,6 @@ private:
     static void unsetCallback(wl_client* client, wl_resource* resource, wl_resource* surface);
 
     static const struct org_kde_kwin_shadow_manager_interface s_interface;
-    static const uint32_t s_version;
 };
 
 class Shadow::Private : public Wayland::Resource<Shadow>

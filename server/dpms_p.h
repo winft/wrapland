@@ -42,7 +42,6 @@ private:
     getDpmsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id, wl_resource* output);
 
     static const struct org_kde_kwin_dpms_manager_interface s_interface;
-    static const quint32 s_version = 1;
 };
 
 using Sender = std::function<void(wl_resource*)>;
