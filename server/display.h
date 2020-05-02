@@ -65,7 +65,6 @@ class IdleInhibitManagerV1;
 class FakeInputInterface;
 class PlasmaShellInterface;
 class PlasmaWindowManagementInterface;
-class QtSurfaceExtensionInterface;
 class ShadowManager;
 class BlurManagerInterface;
 class ContrastManagerInterface;
@@ -146,7 +145,6 @@ public:
     OutputManagementV1Interface* createOutputManagementV1(QObject* parent = nullptr);
     PlasmaShellInterface* createPlasmaShell(QObject* parent = nullptr);
     PlasmaWindowManagementInterface* createPlasmaWindowManagement(QObject* parent = nullptr);
-    QtSurfaceExtensionInterface* createQtSurfaceExtension(QObject* parent = nullptr);
     KdeIdle* createIdle(QObject* parent = nullptr);
     RemoteAccessManagerInterface* createRemoteAccessManager(QObject* parent = nullptr);
     FakeInputInterface* createFakeInput(QObject* parent = nullptr);
