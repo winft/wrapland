@@ -61,7 +61,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/plasmashell_interface.h"
 #include "../src/server/plasmavirtualdesktop_interface.h"
 #include "../src/server/plasmawindowmanagement_interface.h"
-#include "../src/server/qtsurfaceextension_interface.h"
 #include "../src/server/remote_access_interface.h"
 #include "../src/server/server_decoration_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
@@ -231,11 +230,6 @@ PlasmaShellInterface* D_isplay::createPlasmaShell(QObject* parent)
 PlasmaWindowManagementInterface* D_isplay::createPlasmaWindowManagement(QObject* parent)
 {
     return legacy->createPlasmaWindowManagement(parent);
-}
-
-QtSurfaceExtensionInterface* D_isplay::createQtSurfaceExtension(QObject* parent)
-{
-    return legacy->createQtSurfaceExtension(parent);
 }
 
 RemoteAccessManagerInterface* D_isplay::createRemoteAccessManager(QObject* parent)

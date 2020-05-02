@@ -16,7 +16,6 @@ set(SERVER_LIB_SRCS
     plasmashell_interface.cpp
     plasmavirtualdesktop_interface.cpp
     plasmawindowmanagement_interface.cpp
-    qtsurfaceextension_interface.cpp
     remote_access_interface.cpp
     resource.cpp
     seat_interface.cpp
@@ -331,7 +330,6 @@ set(SERVER_LIB_HEADERS
   plasmashell_interface.h
   plasmavirtualdesktop_interface.h
   plasmawindowmanagement_interface.h
-  qtsurfaceextension_interface.h
   remote_access_interface.h
   resource.h
   server_decoration_interface.h

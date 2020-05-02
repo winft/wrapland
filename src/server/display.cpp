@@ -32,7 +32,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "plasmawindowmanagement_interface.h"
 //#include "pointerconstraints_interface_p.h"
 //#include "pointergestures_interface_p.h"
-#include "qtsurfaceextension_interface.h"
 #include "seat_interface.h"
 //#include "shadow_interface.h"
 #include "blur_interface.h"
@@ -293,13 +292,6 @@ PlasmaWindowManagementInterface *Display::createPlasmaWindowManagement(QObject *
     auto wm = new PlasmaWindowManagementInterface(this, parent);
     connect(this, &Display::aboutToTerminate, wm, [this, wm] { delete wm; });
     return wm;
-}
-
-QtSurfaceExtensionInterface *Display::createQtSurfaceExtension(QObject *parent)
-{
-    auto s = new QtSurfaceExtensionInterface(this, parent);
-    connect(this, &Display::aboutToTerminate, s, [this, s] { delete s; });
-    return s;
 }
 
 RemoteAccessManagerInterface *Display::createRemoteAccessManager(QObject *parent)
