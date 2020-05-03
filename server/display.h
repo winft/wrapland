@@ -66,7 +66,7 @@ class FakeInputInterface;
 class PlasmaShellInterface;
 class PlasmaWindowManagementInterface;
 class ShadowManager;
-class BlurManagerInterface;
+class BlurManager;
 class ContrastManagerInterface;
 class OutputConfigurationV1Interface;
 class OutputDeviceV1Interface;
@@ -149,7 +149,7 @@ public:
     RemoteAccessManagerInterface* createRemoteAccessManager(QObject* parent = nullptr);
     FakeInputInterface* createFakeInput(QObject* parent = nullptr);
     ShadowManager* createShadowManager(QObject* parent = nullptr);
-    BlurManagerInterface* createBlurManager(QObject* parent = nullptr);
+    BlurManager* createBlurManager(QObject* parent = nullptr);
     ContrastManagerInterface* createContrastManager(QObject* parent = nullptr);
     SlideManagerInterface* createSlideManager(QObject* parent = nullptr);
     DpmsManager* createDpmsManager(QObject* parent = nullptr);

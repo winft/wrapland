@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/client.h"
 #include "wayland/display.h"
 
+#include "blur.h"
 #include "compositor.h"
 #include "data_device_manager.h"
 #include "dpms.h"
@@ -50,7 +51,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../server/shadow.h"
 #include "../src/server/appmenu_interface.h"
-#include "../src/server/blur_interface.h"
 #include "../src/server/contrast_interface.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
@@ -252,9 +252,9 @@ ShadowManager* D_isplay::createShadowManager(QObject* parent)
     return new ShadowManager(this, parent);
 }
 
-BlurManagerInterface* D_isplay::createBlurManager(QObject* parent)
+BlurManager* D_isplay::createBlurManager(QObject* parent)
 {
-    return legacy->createBlurManager(parent);
+    return new BlurManager(this, parent);
 }
 
 ContrastManagerInterface* D_isplay::createContrastManager(QObject* parent)
