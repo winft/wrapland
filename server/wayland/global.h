@@ -151,6 +151,11 @@ public:
         return nullptr;
     }
 
+    std::vector<GlobalResource*> getBinds()
+    {
+        return m_binds;
+    }
+
     std::vector<GlobalResource*> getBinds(Server::Client* client)
     {
         std::vector<GlobalResource*> ret;
