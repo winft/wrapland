@@ -34,7 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
-#include "../../src/server/contrast_interface.h"
+#include "../../server/contrast.h"
 
 #include <wayland-util.h>
 
@@ -53,7 +53,7 @@ private Q_SLOTS:
 private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::ContrastManagerInterface *m_contrastManagerInterface;
+    Wrapland::Server::ContrastManager *m_contrastManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
     Wrapland::Client::ContrastManager *m_contrastManager;
@@ -76,6 +76,7 @@ TestContrast::TestContrast(QObject *parent)
 
 void TestContrast::init()
 {
+    qRegisterMetaType<Wrapland::Server::Surface*>();
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
@@ -118,8 +119,6 @@ void TestContrast::init()
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
 
     m_contrastManagerInterface = m_display->createContrastManager(m_display);
-    m_contrastManagerInterface->create();
-    QVERIFY(m_contrastManagerInterface->isValid());
 
     QVERIFY(contrastSpy.wait());
     m_contrastManager = registry.createContrastManager(contrastSpy.first().first().value<quint32>(), contrastSpy.first().last().value<quint32>(), this);
