@@ -75,7 +75,7 @@ public:
 
         QPointer<Shadow> shadow;
         QPointer<BlurInterface> blur;
-        QPointer<ContrastInterface> contrast;
+        QPointer<Contrast> contrast;
         QPointer<SlideInterface> slide;
     };
 
@@ -90,7 +90,7 @@ public:
 
     void setShadow(const QPointer<Shadow>& shadow);
     void setBlur(const QPointer<BlurInterface>& blur);
-    void setContrast(const QPointer<ContrastInterface>& contrast);
+    void setContrast(const QPointer<Contrast>& contrast);
     void setSlide(const QPointer<SlideInterface>& slide);
 
     void setSourceRectangle(const QRectF& source);
