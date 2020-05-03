@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/client.h"
 #include "wayland/display.h"
 
+#include "appmenu.h"
 #include "blur.h"
 #include "compositor.h"
 #include "contrast.h"
@@ -52,7 +53,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/display.h"
 
 #include "../server/shadow.h"
-#include "../src/server/appmenu_interface.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
 #include "../src/server/output_configuration_v1_interface.h"
@@ -313,9 +313,9 @@ IdleInhibitManagerV1* D_isplay::createIdleInhibitManager(QObject* parent)
     return new IdleInhibitManagerV1(this, parent);
 }
 
-AppMenuManagerInterface* D_isplay::createAppMenuManagerInterface(QObject* parent)
+AppMenuManager* D_isplay::createAppMenuManager(QObject* parent)
 {
-    return legacy->createAppMenuManagerInterface(parent);
+    return new AppMenuManager(this, parent);
 }
 
 ServerSideDecorationPaletteManagerInterface*

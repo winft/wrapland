@@ -87,7 +87,7 @@ class TextInputManagerInterface;
 //enum class PointerConstraintsInterfaceVersion;
 //class PointerConstraintsInterface;
 //class XdgForeignInterface;
-class AppMenuManagerInterface;
+//class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
 class PlasmaVirtualDesktopManagementInterface;
 //class ViewporterInterface;
@@ -274,7 +274,7 @@ public:
      * @returns The created manager object
      * @since 0.0.542
      **/
-    AppMenuManagerInterface *createAppMenuManagerInterface(QObject *parent = nullptr);
+   // AppMenuManagerInterface *createAppMenuManagerInterface(QObject *parent = nullptr);
 
     /**
      * Creates the ServerSideDecorationPaletteManagerInterface in interface @p version.
