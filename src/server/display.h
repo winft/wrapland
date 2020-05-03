@@ -65,7 +65,7 @@ class PlasmaShellInterface;
 class PlasmaWindowManagementInterface;
 class SeatInterface;
 //class ShadowManagerInterface;
-class BlurManagerInterface;
+//class BlurManagerInterface;
 class ContrastManagerInterface;
 class OutputInterface;
 class OutputConfigurationV1Interface;
@@ -203,7 +203,7 @@ public:
     RemoteAccessManagerInterface *createRemoteAccessManager(QObject *parent = nullptr);
     FakeInputInterface *createFakeInput(QObject *parent = nullptr);
 //    ShadowManagerInterface *createShadowManager(QObject *parent = nullptr);
-    BlurManagerInterface *createBlurManager(QObject *parent = nullptr);
+//    BlurManagerInterface *createBlurManager(QObject *parent = nullptr);
     ContrastManagerInterface *createContrastManager(QObject *parent = nullptr);
     SlideManagerInterface *createSlideManager(QObject *parent = nullptr);
 

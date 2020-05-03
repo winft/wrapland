@@ -228,7 +228,7 @@ void Surface::Private::setShadow(const QPointer<Shadow>& shadow)
     pending.shadowIsSet = true;
 }
 
-void Surface::Private::setBlur(const QPointer<BlurInterface>& blur)
+void Surface::Private::setBlur(const QPointer<Blur>& blur)
 {
     pending.blur = blur;
     pending.blurIsSet = true;
@@ -1003,7 +1003,7 @@ QPointer<Shadow> Surface::shadow() const
     return d_ptr->current.shadow;
 }
 
-QPointer<BlurInterface> Surface::blur() const
+QPointer<Blur> Surface::blur() const
 {
 
     return d_ptr->current.blur;
