@@ -53,7 +53,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/blur_interface.h"
 #include "../../src/server/contrast_interface.h"
 #include "../../src/server/server_decoration_interface.h"
-#include "../../src/server/slide_interface.h"
+#include "../../server/slide.h"
 #include "../../src/server/output_management_v1_interface.h"
 #include "../../src/server/output_device_v1_interface.h"
 #include "../../src/server/textinput_interface.h"
@@ -176,7 +176,7 @@ void TestWaylandRegistry::init()
     m_blur->create();
     m_contrast = m_display->createContrastManager(this);
     m_contrast->create();
-    m_display->createSlideManager(this)->create();
+    m_display->createSlideManager(this);
     m_display->createDpmsManager();
     m_serverSideDecorationManager = m_display->createServerSideDecorationManager();
     m_serverSideDecorationManager->create();

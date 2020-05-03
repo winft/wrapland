@@ -38,7 +38,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "contrast_interface.h"
 //#include "relativepointer_interface_p.h"
 #include "server_decoration_interface.h"
-#include "slide_interface.h"
+//#include "slide_interface.h"
 //#include "shell_interface.h"
 //#include "subcompositor_interface.h"
 #include "textinput_interface_p.h"
@@ -335,14 +335,14 @@ ContrastManagerInterface *Display::createContrastManager(QObject *parent)
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
-
+/*
 SlideManagerInterface *Display::createSlideManager(QObject *parent)
 {
     auto b = new SlideManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
-
+*/
 ServerSideDecorationManagerInterface *Display::createServerSideDecorationManager(QObject *parent)
 {
     auto d = new ServerSideDecorationManagerInterface(this, parent);

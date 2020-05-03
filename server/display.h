@@ -72,7 +72,7 @@ class OutputConfigurationV1Interface;
 class OutputDeviceV1Interface;
 class OutputManagementV1Interface;
 class ServerSideDecorationManagerInterface;
-class SlideManagerInterface;
+class SlideManager;
 class Subcompositor;
 enum class TextInputInterfaceVersion;
 class TextInputManagerInterface;
@@ -151,7 +151,7 @@ public:
     ShadowManager* createShadowManager(QObject* parent = nullptr);
     BlurManagerInterface* createBlurManager(QObject* parent = nullptr);
     ContrastManagerInterface* createContrastManager(QObject* parent = nullptr);
-    SlideManagerInterface* createSlideManager(QObject* parent = nullptr);
+    SlideManager* createSlideManager(QObject* parent = nullptr);
     DpmsManager* createDpmsManager(QObject* parent = nullptr);
 
     KeyState* createKeyState(QObject* parent = nullptr);

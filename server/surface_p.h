@@ -76,7 +76,7 @@ public:
         QPointer<Shadow> shadow;
         QPointer<BlurInterface> blur;
         QPointer<ContrastInterface> contrast;
-        QPointer<SlideInterface> slide;
+        QPointer<Slide> slide;
     };
 
     Private(Client* client, uint32_t version, uint32_t id, Surface* q);
@@ -91,7 +91,7 @@ public:
     void setShadow(const QPointer<Shadow>& shadow);
     void setBlur(const QPointer<BlurInterface>& blur);
     void setContrast(const QPointer<ContrastInterface>& contrast);
-    void setSlide(const QPointer<SlideInterface>& slide);
+    void setSlide(const QPointer<Slide>& slide);
 
     void setSourceRectangle(const QRectF& source);
     void setDestinationSize(const QSize& dest);

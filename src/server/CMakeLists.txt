@@ -21,7 +21,6 @@ set(SERVER_LIB_SRCS
     seat_interface.cpp
     server_decoration_interface.cpp
     server_decoration_palette_interface.cpp
-    slide_interface.cpp
     textinput_interface.cpp
     textinput_interface_v0.cpp
     textinput_interface_v2.cpp
@@ -65,6 +64,7 @@ set(SERVER_LIB_SRCS
     ../../server/xdgoutput.cpp
     ../../server/viewporter.cpp
     ../../server/shadow.cpp
+    ../../server/slide.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -334,8 +334,6 @@ set(SERVER_LIB_HEADERS
   resource.h
   server_decoration_interface.h
   server_decoration_palette_interface.h
-
-  slide_interface.h
   textinput_interface.h
 
   ../../server/buffer.h
@@ -369,6 +367,7 @@ set(SERVER_LIB_HEADERS
   ../../server/xdg_decoration.h
   ../../server/viewporter.h
   ../../server/shadow.h
+  ../../server/slide.h
 )
 
 install(FILES

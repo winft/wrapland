@@ -44,7 +44,7 @@ class LockedPointerV1;
 class PointerConstraintsV1;
 class ShadowManager;
 class Shadow;
-class SlideInterface;
+class Slide;
 class Subsurface;
 class Viewport;
 class Viewporter;
@@ -78,7 +78,7 @@ public:
     QPointer<Shadow> shadow() const;
     QPointer<BlurInterface> blur() const;
     QPointer<ContrastInterface> contrast() const;
-    QPointer<SlideInterface> slideOnShowHide() const;
+    QPointer<Slide> slideOnShowHide() const;
     QPointer<Viewport> viewport() const;
 
     bool isMapped() const;
@@ -129,7 +129,7 @@ private:
     friend class Subsurface;
     friend class ShadowManager;
     friend class BlurManagerInterface;
-    friend class SlideManagerInterface;
+    friend class SlideManager;
     friend class ContrastManagerInterface;
     friend class IdleInhibitManagerV1;
     friend class IdleInhibitor;
