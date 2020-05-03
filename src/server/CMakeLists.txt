@@ -1,6 +1,5 @@
 set(SERVER_LIB_SRCS
     appmenu_interface.cpp
-    blur_interface.cpp
     clientconnection.cpp
     display.cpp
     eglstream_controller_interface.cpp
@@ -65,6 +64,7 @@ set(SERVER_LIB_SRCS
     ../../server/shadow.cpp
     ../../server/slide.cpp
     ../../server/contrast.cpp
+    ../../server/blur.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -314,7 +314,6 @@ install(TARGETS WraplandServer EXPORT WraplandTargets ${INSTALL_TARGETS_DEFAULT_
 set(SERVER_LIB_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/Wrapland/Server/wraplandserver_export.h
   appmenu_interface.h
-  blur_interface.h
   clientconnection.h
   display.h
   eglstream_controller_interface.h
@@ -368,6 +367,7 @@ set(SERVER_LIB_HEADERS
   ../../server/shadow.h
   ../../server/slide.h
   ../../server/contrast.h
+  ../../server/blur.h
 )
 
 install(FILES

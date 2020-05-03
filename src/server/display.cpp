@@ -34,7 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "pointergestures_interface_p.h"
 #include "seat_interface.h"
 //#include "shadow_interface.h"
-#include "blur_interface.h"
+//#include "blur_interface.h"
 //#include "contrast_interface.h"
 //#include "relativepointer_interface_p.h"
 #include "server_decoration_interface.h"
@@ -322,12 +322,14 @@ ShadowManagerInterface *Display::createShadowManager(QObject *parent)
     return s;
 }
 */
+/*
 BlurManagerInterface *Display::createBlurManager(QObject *parent)
 {
     auto b = new BlurManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
+*/
 /*
 ContrastManagerInterface *Display::createContrastManager(QObject *parent)
 {
