@@ -2,7 +2,6 @@ set(SERVER_LIB_SRCS
     appmenu_interface.cpp
     blur_interface.cpp
     clientconnection.cpp
-    contrast_interface.cpp
     display.cpp
     eglstream_controller_interface.cpp
     fakeinput_interface.cpp
@@ -65,6 +64,7 @@ set(SERVER_LIB_SRCS
     ../../server/viewporter.cpp
     ../../server/shadow.cpp
     ../../server/slide.cpp
+    ../../server/contrast.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -316,7 +316,6 @@ set(SERVER_LIB_HEADERS
   appmenu_interface.h
   blur_interface.h
   clientconnection.h
-  contrast_interface.h
   display.h
   eglstream_controller_interface.h
   fakeinput_interface.h
@@ -368,6 +367,7 @@ set(SERVER_LIB_HEADERS
   ../../server/viewporter.h
   ../../server/shadow.h
   ../../server/slide.h
+  ../../server/contrast.h
 )
 
 install(FILES

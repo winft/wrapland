@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/display.h"
 
 #include "compositor.h"
+#include "contrast.h"
 #include "data_device_manager.h"
 #include "dpms.h"
 #include "idle_inhibit_v1.h"
@@ -52,7 +53,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/shadow.h"
 #include "../src/server/appmenu_interface.h"
 #include "../src/server/blur_interface.h"
-#include "../src/server/contrast_interface.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
 #include "../src/server/output_configuration_v1_interface.h"
@@ -257,9 +257,9 @@ BlurManagerInterface* D_isplay::createBlurManager(QObject* parent)
     return legacy->createBlurManager(parent);
 }
 
-ContrastManagerInterface* D_isplay::createContrastManager(QObject* parent)
+ContrastManager* D_isplay::createContrastManager(QObject* parent)
 {
-    return legacy->createContrastManager(parent);
+    return new ContrastManager(this, parent);
 }
 
 SlideManager* D_isplay::createSlideManager(QObject* parent)

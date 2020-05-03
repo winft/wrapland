@@ -35,8 +35,8 @@ class BlurManagerInterface;
 class BlurInterface;
 class Buffer;
 class ConfinedPointerV1;
-class ContrastInterface;
-class ContrastManagerInterface;
+class Contrast;
+class ContrastManager;
 class Compositor;
 class IdleInhibitManagerV1;
 class IdleInhibitor;
@@ -77,8 +77,8 @@ public:
 
     QPointer<Shadow> shadow() const;
     QPointer<BlurInterface> blur() const;
-    QPointer<ContrastInterface> contrast() const;
     QPointer<Slide> slideOnShowHide() const;
+    QPointer<Contrast> contrast() const;
     QPointer<Viewport> viewport() const;
 
     bool isMapped() const;
@@ -130,7 +130,7 @@ private:
     friend class ShadowManager;
     friend class BlurManagerInterface;
     friend class SlideManager;
-    friend class ContrastManagerInterface;
+    friend class ContrastManager;
     friend class IdleInhibitManagerV1;
     friend class IdleInhibitor;
 

@@ -66,7 +66,7 @@ class PlasmaWindowManagementInterface;
 class SeatInterface;
 //class ShadowManagerInterface;
 class BlurManagerInterface;
-class ContrastManagerInterface;
+//class ContrastManagerInterface;
 class OutputInterface;
 class OutputConfigurationV1Interface;
 class OutputDeviceV1Interface;
@@ -204,8 +204,8 @@ public:
     FakeInputInterface *createFakeInput(QObject *parent = nullptr);
 //    ShadowManagerInterface *createShadowManager(QObject *parent = nullptr);
     BlurManagerInterface *createBlurManager(QObject *parent = nullptr);
-    ContrastManagerInterface *createContrastManager(QObject *parent = nullptr);
 //    SlideManagerInterface *createSlideManager(QObject *parent = nullptr);
+//    ContrastManagerInterface *createContrastManager(QObject *parent = nullptr);
 
     /** @since 0.0.560 */
     //KeyState *createKeyState(QObject *parent = nullptr);

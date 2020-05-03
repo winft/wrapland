@@ -35,7 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat_interface.h"
 //#include "shadow_interface.h"
 #include "blur_interface.h"
-#include "contrast_interface.h"
+//#include "contrast_interface.h"
 //#include "relativepointer_interface_p.h"
 #include "server_decoration_interface.h"
 //#include "slide_interface.h"
@@ -328,13 +328,14 @@ BlurManagerInterface *Display::createBlurManager(QObject *parent)
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
-
+/*
 ContrastManagerInterface *Display::createContrastManager(QObject *parent)
 {
     auto b = new ContrastManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
+*/
 /*
 SlideManagerInterface *Display::createSlideManager(QObject *parent)
 {

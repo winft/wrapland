@@ -240,7 +240,7 @@ void Surface::Private::setSlide(const QPointer<Slide>& slide)
     pending.slideIsSet = true;
 }
 
-void Surface::Private::setContrast(const QPointer<ContrastInterface>& contrast)
+void Surface::Private::setContrast(const QPointer<Contrast>& contrast)
 {
     pending.contrast = contrast;
     pending.contrastIsSet = true;
@@ -1009,7 +1009,7 @@ QPointer<BlurInterface> Surface::blur() const
     return d_ptr->current.blur;
 }
 
-QPointer<ContrastInterface> Surface::contrast() const
+QPointer<Contrast> Surface::contrast() const
 {
 
     return d_ptr->current.contrast;
