@@ -19,14 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
-#include "display.h"
-#include "output.h"
-
-#include "wayland/client.h"
-#include "wayland/display.h"
-#include "wayland/global.h"
-#include "wayland/resource.h"
-
+#include <QObject>
 #include <memory>
 
 #include <Wrapland/Server/wraplandserver_export.h>
@@ -97,7 +90,7 @@ class XdgOutputV1 : public QObject
 {
     Q_OBJECT
 public:
-    XdgOutputV1(Wayland::Client* client, uint32_t version, uint32_t id, XdgOutputManager* parent);
+    XdgOutputV1(Client* client, uint32_t version, uint32_t id, XdgOutputManager* parent);
     ~XdgOutputV1() override;
     void setLogicalSize(const QSize& size);
     void setLogicalPosition(const QPoint& pos);

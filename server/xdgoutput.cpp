@@ -20,9 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output.h"
 #include "xdgoutput_p.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 const struct zxdg_output_manager_v1_interface XdgOutputManager::Private::s_interface = {
@@ -62,20 +60,20 @@ XdgOutput* XdgOutputManager::createXdgOutput(Output* output, QObject* parent)
     return d_ptr->outputs[output];
 }
 
-void XdgOutputManager::Private::destroyCallback([[maybe_unused]] wl_client* client,
-                                                wl_resource* resource)
+void XdgOutputManager::Private::destroyCallback([[maybe_unused]] wl_client* wlClient,
+                                                wl_resource* wlResource)
 {
-    wl_resource_destroy(resource);
+    wl_resource_destroy(wlResource);
 }
 
 void XdgOutputManager::Private::getXdgOutputCallback(wl_client* wlClient,
                                                      wl_resource* wlResource,
                                                      uint32_t id,
-                                                     wl_resource* outputResource)
+                                                     wl_resource* wlOutputResource)
 {
     auto priv = fromResource(wlResource)->d_ptr;
-    auto client = priv->display()->getClient(wlClient);
-    auto output = Global<Output>::fromResource(outputResource);
+    auto client = priv->display()->getClient(wlClient)->handle();
+    auto output = Global<Output>::fromResource(wlOutputResource);
 
     // Output client is requesting XdgOutput for an Output that doesn't exist.
     if (!output) {
@@ -170,10 +168,8 @@ void XdgOutput::Private::resourceDisconnected(XdgOutputV1* resource)
 }
 
 const struct zxdg_output_v1_interface XdgOutputV1::Private::s_interface = {destroyCallback};
-XdgOutputV1::Private::Private(Wayland::Client* client,
-                              uint32_t version,
-                              uint32_t id,
-                              XdgOutputV1* q)
+
+XdgOutputV1::Private::Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q)
     : Wayland::Resource<XdgOutputV1>(client,
                                      version,
                                      id,
@@ -183,10 +179,7 @@ XdgOutputV1::Private::Private(Wayland::Client* client,
 {
 }
 
-XdgOutputV1::XdgOutputV1(Wayland::Client* client,
-                         uint32_t version,
-                         uint32_t id,
-                         XdgOutputManager* parent)
+XdgOutputV1::XdgOutputV1(Client* client, uint32_t version, uint32_t id, XdgOutputManager* parent)
     : QObject(parent)
     , d_ptr(new XdgOutputV1::Private(client, version, id, this))
 {
@@ -209,5 +202,4 @@ void XdgOutputV1::done()
     d_ptr->send<zxdg_output_v1_send_done>();
 }
 
-}
 }
