@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
+#include "client.h"
 #include "kde_idle.h"
 
 #include "wayland/global.h"
@@ -27,12 +28,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QTimer>
 #include <vector>
 
-#include <Wrapland/Server/wraplandserver_export.h>
 #include <wayland-idle-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class D_isplay;
@@ -42,12 +40,15 @@ class IdleTimeout;
 class KdeIdle::Private : public Wayland::Global<KdeIdle>
 {
 public:
-    Private(D_isplay* d, KdeIdle* q);
-    ~Private();
+    Private(D_isplay* display, KdeIdle* qptr);
+    ~Private() override;
+
+private:
+    friend class KdeIdle;
+
     int inhibitCount = 0;
     std::vector<IdleTimeout*> idleTimeouts;
 
-private:
     static void getIdleTimeoutCallback(wl_client* wlClient,
                                        wl_resource* wlResource,
                                        uint32_t id,
@@ -67,7 +68,7 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    explicit IdleTimeout(Wayland::Client* client,
+    explicit IdleTimeout(Client* client,
                          uint32_t version,
                          uint32_t id,
                          Seat* seat,
@@ -80,14 +81,15 @@ private:
 class IdleTimeout::Private : public Wayland::Resource<IdleTimeout>
 {
 public:
-    Private(Wayland::Client* client,
+    Private(Client* client,
             uint32_t version,
             uint32_t id,
             Seat* seat,
             KdeIdle* manager,
             IdleTimeout* q);
 
-    ~Private();
+    ~Private() override;
+
     void setup(quint32 timeout);
 
     void simulateUserActivity();
@@ -101,5 +103,4 @@ private:
     static const struct org_kde_kwin_idle_timeout_interface s_interface;
 };
 
-}
 }

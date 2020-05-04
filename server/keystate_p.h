@@ -20,26 +20,29 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include "display.h"
 #include "keystate.h"
+
 #include "wayland/global.h"
 #include "wayland/resource.h"
 
-namespace Wrapland
-{
-namespace Server
+#include <wayland-keystate-server-protocol.h>
+
+#include <vector>
+
+namespace Wrapland::Server
 {
 
-class KeyState;
 class KeyState::Private : public Wayland::Global<KeyState>
 {
 public:
-    Private(D_isplay* d, KeyState* q);
+    Private(D_isplay* display, KeyState* qptr);
     ~Private() override;
     static void fetchStatesCallback(struct wl_client* client, struct wl_resource* wlResource);
 
-    QVector<State> m_keyStates = QVector<State>(3, Unlocked);
+    std::vector<State> m_keyStates = std::vector<State>(3, Unlocked);
+
     static const struct org_kde_kwin_keystate_interface s_interface;
 };
 
-}
 }

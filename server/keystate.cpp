@@ -19,29 +19,26 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "keystate_p.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
-const struct org_kde_kwin_keystate_interface KeyState::Private::s_interface
-    = {KeyState::Private::fetchStatesCallback};
+const struct org_kde_kwin_keystate_interface KeyState::Private::s_interface = {fetchStatesCallback};
 
-KeyState::Private::Private(D_isplay* display, KeyState* q)
-    : Wayland::Global<KeyState>(q, display, &org_kde_kwin_keystate_interface, &s_interface)
+KeyState::Private::Private(D_isplay* display, KeyState* qptr)
+    : Wayland::Global<KeyState>(qptr, display, &org_kde_kwin_keystate_interface, &s_interface)
 {
     create();
 }
 
 KeyState::Private::~Private() = default;
 
-void KeyState::Private::fetchStatesCallback(struct wl_client* wlClient,
-                                            struct wl_resource* wlResource)
+void KeyState::Private::fetchStatesCallback([[maybe_unused]] wl_client* wlClient,
+                                            wl_resource* wlResource)
 {
     auto handle = fromResource(wlResource);
     auto bind = handle->d_ptr->getBind(wlResource);
 
-    for (int i = 0; i < handle->d_ptr->m_keyStates.count(); ++i) {
+    for (uint32_t i = 0; i < handle->d_ptr->m_keyStates.size(); ++i) {
         handle->d_ptr->send<org_kde_kwin_keystate_send_stateChanged>(
             bind, i, handle->d_ptr->m_keyStates[i]);
     }
@@ -58,8 +55,6 @@ void KeyState::setState(KeyState::Key key, KeyState::State state)
 {
     d_ptr->m_keyStates[int(key)] = state;
     d_ptr->send<org_kde_kwin_keystate_send_stateChanged>(int(key), int(state));
-}
-
 }
 
 }

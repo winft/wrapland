@@ -24,18 +24,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QTimer>
 #include <functional>
 
-#include <wayland-idle-server-protocol.h>
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_idle_interface KdeIdle::Private::s_interface = {getIdleTimeoutCallback};
 
-KdeIdle::Private::Private(D_isplay* d, KdeIdle* q)
-    : Wayland::Global<KdeIdle>(q, d, &org_kde_kwin_idle_interface, &s_interface)
+KdeIdle::Private::Private(D_isplay* display, KdeIdle* qptr)
+    : Wayland::Global<KdeIdle>(qptr, display, &org_kde_kwin_idle_interface, &s_interface)
 {
     create();
 }
@@ -48,10 +45,9 @@ void KdeIdle::Private::getIdleTimeoutCallback(wl_client* wlClient,
                                               uint32_t timeout)
 {
     auto kdeidle = fromResource(wlResource);
-    auto priv = fromResource(wlResource)->d_ptr;
-    auto client = priv->display()->getClient(wlClient);
+    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto client = priv->display()->getClient(wlClient)->handle();
     auto seat = reinterpret_cast<Seat*>(fromResource(wlSeat));
-
     auto idleTimeout
         = new IdleTimeout(client, wl_resource_get_version(wlResource), id, seat, kdeidle);
     if (!idleTimeout->d_ptr->resource()) {
@@ -59,7 +55,9 @@ void KdeIdle::Private::getIdleTimeoutCallback(wl_client* wlClient,
         delete idleTimeout;
         return;
     }
+
     priv->idleTimeouts.push_back(idleTimeout);
+
     QObject::connect(
         idleTimeout, &IdleTimeout::resourceDestroyed, priv->handle(), [priv, idleTimeout]() {
             priv->idleTimeouts.erase(
@@ -106,21 +104,23 @@ void KdeIdle::simulateUserActivity()
     }
 }
 
-const struct org_kde_kwin_idle_timeout_interface IdleTimeout::Private::s_interface
-    = {destroyCallback, simulateUserActivityCallback};
+const struct org_kde_kwin_idle_timeout_interface IdleTimeout::Private::s_interface = {
+    destroyCallback,
+    simulateUserActivityCallback,
+};
 
-IdleTimeout::Private::Private(Wayland::Client* client,
+IdleTimeout::Private::Private(Client* client,
                               uint32_t version,
                               uint32_t id,
                               Seat* seat,
                               KdeIdle* manager,
-                              IdleTimeout* q)
+                              IdleTimeout* qptr)
     : Wayland::Resource<IdleTimeout>(client,
                                      version,
                                      id,
                                      &org_kde_kwin_idle_timeout_interface,
                                      &s_interface,
-                                     q)
+                                     qptr)
     , seat(seat)
     , manager(manager)
 {
@@ -131,8 +131,8 @@ IdleTimeout::Private::~Private() = default;
 void IdleTimeout::Private::simulateUserActivityCallback([[maybe_unused]] wl_client* client,
                                                         wl_resource* resource)
 {
-    auto p = reinterpret_cast<Private*>(fromResource(resource));
-    p->simulateUserActivity();
+    auto priv = static_cast<Private*>(fromResource(resource));
+    priv->simulateUserActivity();
 }
 
 void IdleTimeout::Private::simulateUserActivity()
@@ -153,13 +153,13 @@ void IdleTimeout::Private::setup(quint32 timeout)
     if (timer) {
         return;
     }
-    auto q_ptr = handle();
-    timer = new QTimer(q_ptr);
+    auto parent = handle();
+    timer = new QTimer(parent);
     timer->setSingleShot(true);
     // less than 5 sec is not idle by definition
     timer->setInterval(qMax(timeout, 5000u));
     QObject::connect(
-        timer, &QTimer::timeout, q_ptr, [this] { send<org_kde_kwin_idle_timeout_send_idle>(); });
+        timer, &QTimer::timeout, parent, [this] { send<org_kde_kwin_idle_timeout_send_idle>(); });
     if (manager->isInhibited()) {
         // don't start if inhibited
         return;
@@ -167,12 +167,8 @@ void IdleTimeout::Private::setup(quint32 timeout)
     timer->start();
 }
 
-IdleTimeout::IdleTimeout(Wayland::Client* client,
-                         uint32_t version,
-                         uint32_t id,
-                         Seat* seat,
-                         KdeIdle* parent)
-    : QObject(parent)
+IdleTimeout::IdleTimeout(Client* client, uint32_t version, uint32_t id, Seat* seat, KdeIdle* parent)
+    : QObject(nullptr)
     , d_ptr(new Private(client, version, id, seat, parent, this))
 {
     connect(seat, &Seat::timestampChanged, this, [this] { d_ptr->simulateUserActivity(); });
@@ -194,5 +190,4 @@ IdleTimeout::IdleTimeout(Wayland::Client* client,
 
 IdleTimeout::~IdleTimeout() = default;
 
-}
 }

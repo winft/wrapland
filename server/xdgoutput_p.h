@@ -21,11 +21,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "xdgoutput.h"
 
+#include "client.h"
+#include "display.h"
+#include "output.h"
 #include "wayland/display.h"
 #include "wayland/global.h"
 #include "wayland/resource.h"
 
-#include <Wrapland/Server/wraplandserver_export.h>
 #include <wayland-xdg-output-server-protocol.h>
 
 #include <map>
@@ -69,7 +71,7 @@ public:
 class XdgOutputV1::Private : public Wayland::Resource<XdgOutputV1>
 {
 public:
-    Private(Wayland::Client* client, uint32_t version, uint32_t id, XdgOutputV1* q);
+    Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q);
     ~Private() override = default;
     void setLogicalSize(const QSize& size);
     void setLogicalPosition(const QPoint& pos);

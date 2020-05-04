@@ -19,23 +19,19 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 
 #pragma once
-#include "display.h"
-#include <QVector>
-#include <Wrapland/Server/wraplandserver_export.h>
+
+#include <QObject>
 #include <memory>
-#include <wayland-keystate-server-protocol.h>
-#include <wayland-server.h>
-namespace Wrapland
-{
-namespace Server
+
+#include <Wrapland/Server/wraplandserver_export.h>
+
+namespace Wrapland::Server
 {
 
 class D_isplay;
 
 /**
  * @brief Exposes key states to wayland clients
- *
- * @since 0.0.558
  **/
 class WRAPLANDSERVER_EXPORT KeyState : public QObject
 {
@@ -48,13 +44,12 @@ public:
         NumLock = 1,
         ScrollLock = 2,
     };
-    Q_ENUM(Key);
+
     enum State {
         Unlocked = 0,
         Latched = 1,
         Locked = 2,
     };
-    Q_ENUM(State)
 
     void setState(Key k, State s);
 
@@ -67,5 +62,4 @@ private:
     std::unique_ptr<Private> d_ptr;
 };
 
-}
 }
