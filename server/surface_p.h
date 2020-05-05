@@ -74,9 +74,9 @@ public:
         std::vector<Subsurface*> children;
 
         QPointer<Shadow> shadow;
-        QPointer<BlurInterface> blur;
-        QPointer<ContrastInterface> contrast;
-        QPointer<SlideInterface> slide;
+        QPointer<Blur> blur;
+        QPointer<Slide> slide;
+        QPointer<Contrast> contrast;
     };
 
     Private(Client* client, uint32_t version, uint32_t id, Surface* q);
@@ -89,9 +89,9 @@ public:
     bool lowerChild(Subsurface* subsurface, Surface* sibling);
 
     void setShadow(const QPointer<Shadow>& shadow);
-    void setBlur(const QPointer<BlurInterface>& blur);
-    void setContrast(const QPointer<ContrastInterface>& contrast);
-    void setSlide(const QPointer<SlideInterface>& slide);
+    void setBlur(const QPointer<Blur>& blur);
+    void setSlide(const QPointer<Slide>& slide);
+    void setContrast(const QPointer<Contrast>& contrast);
 
     void setSourceRectangle(const QRectF& source);
     void setDestinationSize(const QSize& dest);

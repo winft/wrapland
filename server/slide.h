@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright 2015  Marco Martin <notmart@gmail.com>
+Copyright 2020  Faveraux Adrien <ad1rie3@hotmail.fr>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,73 +17,54 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef WRAPLAND_SERVER_SLIDE_INTERFACE_H
-#define WRAPLAND_SERVER_SLIDE_INTERFACE_H
+#pragma once
 
-#include "global.h"
-#include "resource.h"
+#include <QObject>
+#include <memory>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-namespace Wrapland
+namespace Wrapland::Server
 {
-namespace Server
-{
+class D_isplay;
 
-class Display;
-
-/**
- * TODO
- */
-class WRAPLANDSERVER_EXPORT SlideManagerInterface : public Global
+class WRAPLANDSERVER_EXPORT SlideManager : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~SlideManagerInterface();
+    ~SlideManager() override;
 
 private:
-    explicit SlideManagerInterface(Display *display, QObject *parent = nullptr);
-    friend class Display;
+    explicit SlideManager(D_isplay* display, QObject* parent = nullptr);
+    friend class D_isplay;
     class Private;
+    std::unique_ptr<Private> d_ptr;
 };
 
-/**
- * TODO
- */
-class WRAPLANDSERVER_EXPORT SlideInterface : public Resource
+class WRAPLANDSERVER_EXPORT Slide : public QObject
 {
     Q_OBJECT
 public:
     enum Location {
-        Left = 0, /**< Slide from the left edge of the screen */
-        Top, /**< Slide from the top edge of the screen */
-        Right, /**< Slide from the bottom edge of the screen */
-        Bottom /**< Slide from the bottom edge of the screen */
+        Left = 0,
+        Top,
+        Right,
+        Bottom,
     };
 
-    virtual ~SlideInterface();
+    ~Slide() override;
 
-    /**
-     * @returns the location the window will be slided from
-     */
     Location location() const;
+    int offset() const;
 
-    /**
-     * @returns the offset from the screen edge the window will
-     *          be slided from
-     */
-    qint32 offset() const;
+Q_SIGNALS:
+    void resourceDestroyed();
 
 private:
-    explicit SlideInterface(SlideManagerInterface *parent, wl_resource *parentResource);
-    friend class SlideManagerInterface;
+    Slide(Client* client, uint32_t version, uint32_t id);
+    friend class SlideManager;
 
     class Private;
-    Private *d_func() const;
+    Private* d_ptr;
 };
-
-
 }
-}
-
-#endif

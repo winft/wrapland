@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
-#include "../../src/server/slide_interface.h"
+#include "../../server/slide.h"
 
 using namespace Wrapland::Client;
 
@@ -51,7 +51,7 @@ private Q_SLOTS:
 private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::SlideManagerInterface *m_slideManagerInterface;
+    Wrapland::Server::SlideManager *m_slideManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
     Wrapland::Client::SlideManager *m_slideManager;
@@ -74,6 +74,7 @@ TestSlide::TestSlide(QObject *parent)
 
 void TestSlide::init()
 {
+    qRegisterMetaType<Wrapland::Server::Surface*>();
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
@@ -116,8 +117,6 @@ void TestSlide::init()
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
 
     m_slideManagerInterface = m_display->createSlideManager(m_display);
-    m_slideManagerInterface->create();
-    QVERIFY(m_slideManagerInterface->isValid());
 
     QVERIFY(slideSpy.wait());
     m_slideManager = registry.createSlideManager(slideSpy.first().first().value<quint32>(), slideSpy.first().last().value<quint32>(), this);
@@ -167,7 +166,7 @@ void TestSlide::testCreate()
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
     QVERIFY(slideChanged.wait());
-    QCOMPARE(serverSurface->slideOnShowHide()->location(), Wrapland::Server::SlideInterface::Location::Top);
+    QCOMPARE(serverSurface->slideOnShowHide()->location(), Wrapland::Server::Slide::Location::Top);
     QCOMPARE(serverSurface->slideOnShowHide()->offset(), 15);
 
     // and destroy
