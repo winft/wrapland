@@ -80,7 +80,7 @@ class RelativePointerManagerV1;
 class PointerGesturesV1;
 class PointerConstraintsV1;
 class XdgForeign;
-class AppMenuManagerInterface;
+class AppMenuManager;
 class ServerSideDecorationPaletteManagerInterface;
 class PlasmaVirtualDesktopManagementInterface;
 class Viewporter;
@@ -169,7 +169,7 @@ public:
     XdgForeign* createXdgForeign(QObject* parent = nullptr);
 
     IdleInhibitManagerV1* createIdleInhibitManager(QObject* parent = nullptr);
-    AppMenuManagerInterface* createAppMenuManagerInterface(QObject* parent = nullptr);
+    AppMenuManager* createAppMenuManager(QObject* parent = nullptr);
 
     ServerSideDecorationPaletteManagerInterface*
     createServerSideDecorationPaletteManager(QObject* parent = nullptr);

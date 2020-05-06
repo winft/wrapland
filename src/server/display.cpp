@@ -47,7 +47,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "xdgforeign_interface.h"
 //#include "xdgshell_v6_interface_p.h"
 //#include "xdgshell_stable_interface_p.h"
-#include "appmenu_interface.h"
+//#include "appmenu_interface.h"
 #include "server_decoration_palette_interface.h"
 #include "plasmavirtualdesktop_interface.h"
 //#include "xdgoutput_interfce.h"
@@ -452,12 +452,13 @@ IdleInhibitManager *Display::createIdleInhibitManager(const IdleInhibitManagerIn
     return i;
 }
 */
+/*
 AppMenuManagerInterface *Display::createAppMenuManagerInterface(QObject *parent)
 {
     auto b = new AppMenuManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
-}
+}*/
 
 ServerSideDecorationPaletteManagerInterface *Display::createServerSideDecorationPaletteManager(QObject *parent)
 {
