@@ -34,11 +34,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "pointergestures_interface_p.h"
 #include "seat_interface.h"
 //#include "shadow_interface.h"
-#include "blur_interface.h"
-#include "contrast_interface.h"
+//#include "blur_interface.h"
+//#include "contrast_interface.h"
 //#include "relativepointer_interface_p.h"
 #include "server_decoration_interface.h"
-#include "slide_interface.h"
+//#include "slide_interface.h"
 //#include "shell_interface.h"
 //#include "subcompositor_interface.h"
 #include "textinput_interface_p.h"
@@ -322,27 +322,30 @@ ShadowManagerInterface *Display::createShadowManager(QObject *parent)
     return s;
 }
 */
+/*
 BlurManagerInterface *Display::createBlurManager(QObject *parent)
 {
     auto b = new BlurManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
-
+*/
+/*
 ContrastManagerInterface *Display::createContrastManager(QObject *parent)
 {
     auto b = new ContrastManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
-
+*/
+/*
 SlideManagerInterface *Display::createSlideManager(QObject *parent)
 {
     auto b = new SlideManagerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
 }
-
+*/
 ServerSideDecorationManagerInterface *Display::createServerSideDecorationManager(QObject *parent)
 {
     auto d = new ServerSideDecorationManagerInterface(this, parent);

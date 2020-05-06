@@ -228,19 +228,19 @@ void Surface::Private::setShadow(const QPointer<Shadow>& shadow)
     pending.shadowIsSet = true;
 }
 
-void Surface::Private::setBlur(const QPointer<BlurInterface>& blur)
+void Surface::Private::setBlur(const QPointer<Blur>& blur)
 {
     pending.blur = blur;
     pending.blurIsSet = true;
 }
 
-void Surface::Private::setSlide(const QPointer<SlideInterface>& slide)
+void Surface::Private::setSlide(const QPointer<Slide>& slide)
 {
     pending.slide = slide;
     pending.slideIsSet = true;
 }
 
-void Surface::Private::setContrast(const QPointer<ContrastInterface>& contrast)
+void Surface::Private::setContrast(const QPointer<Contrast>& contrast)
 {
     pending.contrast = contrast;
     pending.contrastIsSet = true;
@@ -1003,19 +1003,19 @@ QPointer<Shadow> Surface::shadow() const
     return d_ptr->current.shadow;
 }
 
-QPointer<BlurInterface> Surface::blur() const
+QPointer<Blur> Surface::blur() const
 {
 
     return d_ptr->current.blur;
 }
 
-QPointer<ContrastInterface> Surface::contrast() const
+QPointer<Contrast> Surface::contrast() const
 {
 
     return d_ptr->current.contrast;
 }
 
-QPointer<SlideInterface> Surface::slideOnShowHide() const
+QPointer<Slide> Surface::slideOnShowHide() const
 {
 
     return d_ptr->current.slide;

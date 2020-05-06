@@ -25,7 +25,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/client.h"
 #include "wayland/display.h"
 
+#include "blur.h"
 #include "compositor.h"
+#include "contrast.h"
 #include "data_device_manager.h"
 #include "dpms.h"
 #include "idle_inhibit_v1.h"
@@ -38,6 +40,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_gestures_v1.h"
 #include "relative_pointer_v1.h"
 #include "seat.h"
+#include "slide.h"
 #include "subcompositor.h"
 #include "viewporter.h"
 #include "xdg_decoration.h"
@@ -50,8 +53,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../server/shadow.h"
 #include "../src/server/appmenu_interface.h"
-#include "../src/server/blur_interface.h"
-#include "../src/server/contrast_interface.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
 #include "../src/server/output_configuration_v1_interface.h"
@@ -64,7 +65,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/remote_access_interface.h"
 #include "../src/server/server_decoration_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
-#include "../src/server/slide_interface.h"
 #include "../src/server/textinput_interface_p.h"
 //
 //
@@ -252,19 +252,19 @@ ShadowManager* D_isplay::createShadowManager(QObject* parent)
     return new ShadowManager(this, parent);
 }
 
-BlurManagerInterface* D_isplay::createBlurManager(QObject* parent)
+BlurManager* D_isplay::createBlurManager(QObject* parent)
 {
-    return legacy->createBlurManager(parent);
+    return new BlurManager(this, parent);
 }
 
-ContrastManagerInterface* D_isplay::createContrastManager(QObject* parent)
+ContrastManager* D_isplay::createContrastManager(QObject* parent)
 {
-    return legacy->createContrastManager(parent);
+    return new ContrastManager(this, parent);
 }
 
-SlideManagerInterface* D_isplay::createSlideManager(QObject* parent)
+SlideManager* D_isplay::createSlideManager(QObject* parent)
 {
-    return legacy->createSlideManager(parent);
+    return new SlideManager(this, parent);
 }
 
 DpmsManager* D_isplay::createDpmsManager(QObject* parent)

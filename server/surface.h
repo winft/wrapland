@@ -31,12 +31,12 @@ namespace Wrapland
 {
 namespace Server
 {
-class BlurManagerInterface;
-class BlurInterface;
+class BlurManager;
+class Blur;
 class Buffer;
 class ConfinedPointerV1;
-class ContrastInterface;
-class ContrastManagerInterface;
+class Contrast;
+class ContrastManager;
 class Compositor;
 class IdleInhibitManagerV1;
 class IdleInhibitor;
@@ -44,7 +44,7 @@ class LockedPointerV1;
 class PointerConstraintsV1;
 class ShadowManager;
 class Shadow;
-class SlideInterface;
+class Slide;
 class Subsurface;
 class Viewport;
 class Viewporter;
@@ -76,9 +76,9 @@ public:
     std::vector<Subsurface*> childSubsurfaces() const;
 
     QPointer<Shadow> shadow() const;
-    QPointer<BlurInterface> blur() const;
-    QPointer<ContrastInterface> contrast() const;
-    QPointer<SlideInterface> slideOnShowHide() const;
+    QPointer<Blur> blur() const;
+    QPointer<Slide> slideOnShowHide() const;
+    QPointer<Contrast> contrast() const;
     QPointer<Viewport> viewport() const;
 
     bool isMapped() const;
@@ -128,9 +128,9 @@ private:
     friend class Compositor;
     friend class Subsurface;
     friend class ShadowManager;
-    friend class BlurManagerInterface;
-    friend class SlideManagerInterface;
-    friend class ContrastManagerInterface;
+    friend class BlurManager;
+    friend class SlideManager;
+    friend class ContrastManager;
     friend class IdleInhibitManagerV1;
     friend class IdleInhibitor;
 
