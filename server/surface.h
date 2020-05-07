@@ -134,7 +134,7 @@ private:
     friend class IdleInhibitManagerV1;
     friend class IdleInhibitor;
 
-    friend class AppMenuManagerInterface;
+    friend class AppMenuManager;
     friend class PlasmaShellInterface;
     friend class XdgShell;
     friend class XdgShellSurface;
