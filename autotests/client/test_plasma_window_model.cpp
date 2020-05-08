@@ -24,9 +24,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/plasmawindowmanagement.h"
 #include "../../src/client/plasmawindowmodel.h"
 
-#include "../../src/server/display.h"
-#include "../../src/server/plasmawindowmanagement_interface.h"
-#include "../../src/server/plasmavirtualdesktop_interface.h"
+#include "../../server/display.h"
+#include "../../server/plasma_window.h"
+#include "../../server/plasma_virtual_desktop.h"
 
 #include <QtTest>
 
@@ -40,19 +40,19 @@ Q_DECLARE_METATYPE(Qt::MouseButton)
 typedef void (Clt::PlasmaWindow::*ClientWindowSignal)();
 Q_DECLARE_METATYPE(ClientWindowSignal)
 
-typedef void (Srv::PlasmaWindowInterface::*ServerWindowBoolSetter)(bool);
+typedef void (Srv::PlasmaWindow::*ServerWindowBoolSetter)(bool);
 Q_DECLARE_METATYPE(ServerWindowBoolSetter)
 
-typedef void (Srv::PlasmaWindowInterface::*ServerWindowStringSetter)(const QString&);
+typedef void (Srv::PlasmaWindow::*ServerWindowStringSetter)(const QString&);
 Q_DECLARE_METATYPE(ServerWindowStringSetter)
 
-typedef void (Srv::PlasmaWindowInterface::*ServerWindowQuint32Setter)(quint32);
+typedef void (Srv::PlasmaWindow::*ServerWindowQuint32Setter)(quint32);
 Q_DECLARE_METATYPE(ServerWindowQuint32Setter)
 
-typedef void (Srv::PlasmaWindowInterface::*ServerWindowVoidSetter)();
+typedef void (Srv::PlasmaWindow::*ServerWindowVoidSetter)();
 Q_DECLARE_METATYPE(ServerWindowVoidSetter)
 
-typedef void (Srv::PlasmaWindowInterface::*ServerWindowIconSetter)(const QIcon&);
+typedef void (Srv::PlasmaWindow::*ServerWindowIconSetter)(const QIcon&);
 Q_DECLARE_METATYPE(ServerWindowIconSetter)
 
 class PlasmaWindowModelTest : public QObject
@@ -109,14 +109,14 @@ private Q_SLOTS:
 
 private:
     bool testBooleanData(Clt::PlasmaWindowModel::AdditionalRoles role,
-                         void (Srv::PlasmaWindowInterface::*function)(bool));
+                         void (Srv::PlasmaWindow::*function)(bool));
 
-    Srv::Display *m_display = nullptr;
+    Srv::D_isplay *m_display = nullptr;
 
-    Srv::PlasmaWindowManagementInterface *m_pwInterface = nullptr;
+    Srv::PlasmaWindowManager *m_pwInterface = nullptr;
     Clt::PlasmaWindowManagement *m_pw = nullptr;
 
-    Srv::PlasmaVirtualDesktopManagementInterface *m_vDInterface = nullptr;
+    Srv::PlasmaVirtualDesktopManager *m_serverPlasmaVirtualDesktopManager = nullptr;
 
     Clt::ConnectionThread *m_connection = nullptr;
     QThread *m_thread = nullptr;
@@ -128,23 +128,19 @@ static const QString s_socketName = QStringLiteral("wrapland-test-fake-input-0")
 void PlasmaWindowModelTest::init()
 {
     delete m_display;
-    m_display = new Srv::Display(this);
+    m_display = new Srv::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
+    QVERIFY(m_display->running());
 
     m_display->createShm();
-    m_pwInterface = m_display->createPlasmaWindowManagement();
-    m_pwInterface->create();
-    QVERIFY(m_pwInterface->isValid());
+    m_pwInterface = m_display->createPlasmaWindowManager();
 
-    m_vDInterface = m_display->createPlasmaVirtualDesktopManagement(m_display);
-    m_vDInterface->create();
-    QVERIFY(m_vDInterface->isValid());
+    m_serverPlasmaVirtualDesktopManager = m_display->createPlasmaVirtualDesktopManager(m_display);
 
-    m_vDInterface->createDesktop("desktop1");
-    m_vDInterface->createDesktop("desktop2");
-    m_pwInterface->setPlasmaVirtualDesktopManagementInterface(m_vDInterface);
+    m_serverPlasmaVirtualDesktopManager->createDesktop("desktop1");
+    m_serverPlasmaVirtualDesktopManager->createDesktop("desktop2");
+    m_pwInterface->setVirtualDesktopManager(m_serverPlasmaVirtualDesktopManager);
 
     // Setup connection.
     m_connection = new Clt::ConnectionThread;
@@ -189,7 +185,7 @@ void PlasmaWindowModelTest::cleanup()
         variable = nullptr; \
     }
     CLEANUP(m_pw)
-    CLEANUP(m_vDInterface)
+    CLEANUP(m_serverPlasmaVirtualDesktopManager)
     CLEANUP(m_queue)
     if (m_connection) {
         m_connection->deleteLater();
@@ -208,7 +204,7 @@ void PlasmaWindowModelTest::cleanup()
 }
 
 bool PlasmaWindowModelTest::testBooleanData(Clt::PlasmaWindowModel::AdditionalRoles role,
-                                            void (Srv::PlasmaWindowInterface::*function)(bool))
+                                            void (Srv::PlasmaWindow::*function)(bool))
 {
 #define VERIFY(statement) \
 if (!QTest::qVerify((statement), #statement, "", __FILE__, __LINE__))\
@@ -472,109 +468,109 @@ void PlasmaWindowModelTest::testDefaultData()
 void PlasmaWindowModelTest::testIsActive()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsActive,
-                            &Srv::PlasmaWindowInterface::setActive));
+                            &Srv::PlasmaWindow::setActive));
 }
 
 void PlasmaWindowModelTest::testIsFullscreenable()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsFullscreenable,
-                            &Srv::PlasmaWindowInterface::setFullscreenable));
+                            &Srv::PlasmaWindow::setFullscreenable));
 }
 
 void PlasmaWindowModelTest::testIsFullscreen()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsFullscreen,
-                            &Srv::PlasmaWindowInterface::setFullscreen));
+                            &Srv::PlasmaWindow::setFullscreen));
 }
 
 void PlasmaWindowModelTest::testIsMaximizable()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsMaximizable,
-                            &Srv::PlasmaWindowInterface::setMaximizeable));
+                            &Srv::PlasmaWindow::setMaximizeable));
 }
 
 void PlasmaWindowModelTest::testIsMaximized()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsMaximized,
-                            &Srv::PlasmaWindowInterface::setMaximized));
+                            &Srv::PlasmaWindow::setMaximized));
 }
 
 void PlasmaWindowModelTest::testIsMinimizable()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsMinimizable,
-                            &Srv::PlasmaWindowInterface::setMinimizeable));
+                            &Srv::PlasmaWindow::setMinimizeable));
 }
 
 void PlasmaWindowModelTest::testIsMinimized()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsMinimized,
-                            &Srv::PlasmaWindowInterface::setMinimized));
+                            &Srv::PlasmaWindow::setMinimized));
 }
 
 void PlasmaWindowModelTest::testIsKeepAbove()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsKeepAbove,
-                            &Srv::PlasmaWindowInterface::setKeepAbove));
+                            &Srv::PlasmaWindow::setKeepAbove));
 }
 
 void PlasmaWindowModelTest::testIsKeepBelow()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsKeepBelow,
-                            &Srv::PlasmaWindowInterface::setKeepBelow));
+                            &Srv::PlasmaWindow::setKeepBelow));
 }
 
 void PlasmaWindowModelTest::testIsDemandingAttention()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsDemandingAttention,
-                            &Srv::PlasmaWindowInterface::setDemandsAttention));
+                            &Srv::PlasmaWindow::setDemandsAttention));
 }
 
 void PlasmaWindowModelTest::testSkipTaskbar()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::SkipTaskbar,
-                            &Srv::PlasmaWindowInterface::setSkipTaskbar));
+                            &Srv::PlasmaWindow::setSkipTaskbar));
 }
 
 void PlasmaWindowModelTest::testSkipSwitcher()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::SkipSwitcher,
-                            &Srv::PlasmaWindowInterface::setSkipSwitcher));
+                            &Srv::PlasmaWindow::setSkipSwitcher));
 }
 
 void PlasmaWindowModelTest::testIsShadeable()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsShadeable,
-                            &Srv::PlasmaWindowInterface::setShadeable));
+                            &Srv::PlasmaWindow::setShadeable));
 }
 
 void PlasmaWindowModelTest::testIsShaded()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsShaded,
-                            &Srv::PlasmaWindowInterface::setShaded));
+                            &Srv::PlasmaWindow::setShaded));
 }
 
 void PlasmaWindowModelTest::testIsMovable()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsMovable,
-                            &Srv::PlasmaWindowInterface::setMovable));
+                            &Srv::PlasmaWindow::setMovable));
 }
 
 void PlasmaWindowModelTest::testIsResizable()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsResizable,
-                            &Srv::PlasmaWindowInterface::setResizable));
+                            &Srv::PlasmaWindow::setResizable));
 }
 
 void PlasmaWindowModelTest::testIsVirtualDesktopChangeable()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsVirtualDesktopChangeable,
-                            &Srv::PlasmaWindowInterface::setVirtualDesktopChangeable));
+                            &Srv::PlasmaWindow::setVirtualDesktopChangeable));
 }
 
 void PlasmaWindowModelTest::testIsCloseable()
 {
     QVERIFY(testBooleanData(Clt::PlasmaWindowModel::IsCloseable,
-                            &Srv::PlasmaWindowInterface::setCloseable));
+                            &Srv::PlasmaWindow::setCloseable));
 }
 
 void PlasmaWindowModelTest::testGeometry()
@@ -798,23 +794,23 @@ void PlasmaWindowModelTest::testRequests()
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
-    QSignalSpy activateRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::activeRequested);
+    QSignalSpy activateRequestedSpy(serverWindow, &Srv::PlasmaWindow::activeRequested);
     QVERIFY(activateRequestedSpy.isValid());
-    QSignalSpy closeRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::closeRequested);
+    QSignalSpy closeRequestedSpy(serverWindow, &Srv::PlasmaWindow::closeRequested);
     QVERIFY(closeRequestedSpy.isValid());
-    QSignalSpy moveRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::moveRequested);
+    QSignalSpy moveRequestedSpy(serverWindow, &Srv::PlasmaWindow::moveRequested);
     QVERIFY(moveRequestedSpy.isValid());
-    QSignalSpy resizeRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::resizeRequested);
+    QSignalSpy resizeRequestedSpy(serverWindow, &Srv::PlasmaWindow::resizeRequested);
     QVERIFY(resizeRequestedSpy.isValid());
-    QSignalSpy keepAboveRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::keepAboveRequested);
+    QSignalSpy keepAboveRequestedSpy(serverWindow, &Srv::PlasmaWindow::keepAboveRequested);
     QVERIFY(keepAboveRequestedSpy.isValid());
-    QSignalSpy keepBelowRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::keepBelowRequested);
+    QSignalSpy keepBelowRequestedSpy(serverWindow, &Srv::PlasmaWindow::keepBelowRequested);
     QVERIFY(keepBelowRequestedSpy.isValid());
-    QSignalSpy minimizedRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::minimizedRequested);
+    QSignalSpy minimizedRequestedSpy(serverWindow, &Srv::PlasmaWindow::minimizedRequested);
     QVERIFY(minimizedRequestedSpy.isValid());
-    QSignalSpy maximizeRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::maximizedRequested);
+    QSignalSpy maximizeRequestedSpy(serverWindow, &Srv::PlasmaWindow::maximizedRequested);
     QVERIFY(maximizeRequestedSpy.isValid());
-    QSignalSpy shadeRequestedSpy(serverWindow, &Srv::PlasmaWindowInterface::shadedRequested);
+    QSignalSpy shadeRequestedSpy(serverWindow, &Srv::PlasmaWindow::shadedRequested);
     QVERIFY(shadeRequestedSpy.isValid());
 
     // First let's use some invalid row numbers.
@@ -1038,83 +1034,83 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy_data()
 
     QTest::newRow("active")
             << &Clt::PlasmaWindow::activeChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setActive)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setActive)
             << QVariant(true);
     QTest::newRow("minimized")
             << &Clt::PlasmaWindow::minimizedChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setMinimized)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setMinimized)
             << QVariant(true);
     QTest::newRow("fullscreen")
             << &Clt::PlasmaWindow::fullscreenChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setFullscreen)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setFullscreen)
             << QVariant(true);
     QTest::newRow("keepAbove")
             << &Clt::PlasmaWindow::keepAboveChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setKeepAbove)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setKeepAbove)
             << QVariant(true);
     QTest::newRow("keepBelow")
             << &Clt::PlasmaWindow::keepBelowChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setKeepBelow)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setKeepBelow)
             << QVariant(true);
     QTest::newRow("maximized")
             << &Clt::PlasmaWindow::maximizedChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setMaximized)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setMaximized)
             << QVariant(true);
     QTest::newRow("demandsAttention")
             << &Clt::PlasmaWindow::demandsAttentionChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setDemandsAttention)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setDemandsAttention)
             << QVariant(true);
     QTest::newRow("closeable")
             << &Clt::PlasmaWindow::closeableChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setCloseable)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setCloseable)
             << QVariant(true);
     QTest::newRow("minimizeable")
             << &Clt::PlasmaWindow::minimizeableChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setMinimizeable)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setMinimizeable)
             << QVariant(true);
     QTest::newRow("maximizeable")
             << &Clt::PlasmaWindow::maximizeableChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setMaximizeable)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setMaximizeable)
             << QVariant(true);
     QTest::newRow("fullscreenable")
             << &Clt::PlasmaWindow::fullscreenableChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setFullscreenable)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setFullscreenable)
             << QVariant(true);
     QTest::newRow("skipTaskbar")
             << &Clt::PlasmaWindow::skipTaskbarChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setSkipTaskbar)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setSkipTaskbar)
             << QVariant(true);
     QTest::newRow("shadeable")
             << &Clt::PlasmaWindow::shadeableChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setShadeable)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setShadeable)
             << QVariant(true);
     QTest::newRow("shaded")
             << &Clt::PlasmaWindow::shadedChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setShaded)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setShaded)
             << QVariant(true);
     QTest::newRow("movable")
             << &Clt::PlasmaWindow::movableChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setMovable)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setMovable)
             << QVariant(true);
     QTest::newRow("resizable")
             << &Clt::PlasmaWindow::resizableChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setResizable)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setResizable)
             << QVariant(true);
     QTest::newRow("vdChangeable")
             << &Clt::PlasmaWindow::virtualDesktopChangeableChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setVirtualDesktopChangeable)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setVirtualDesktopChangeable)
             << QVariant(true);
     QTest::newRow("onallDesktop")
             << &Clt::PlasmaWindow::onAllDesktopsChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setOnAllDesktops)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setOnAllDesktops)
             << QVariant(true);
     QTest::newRow("title")
             << &Clt::PlasmaWindow::titleChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setTitle)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setTitle)
             << QVariant(QStringLiteral("foo"));
     QTest::newRow("appId")
             << &Clt::PlasmaWindow::appIdChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setAppId)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setAppId)
             << QVariant(QStringLiteral("foo"));
 
     // Disable the icon test for now. Our way of providing icons is fundamentally wrong and the
@@ -1123,13 +1119,13 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy_data()
 #if 0
     QTest::newRow("icon" )
             << &Clt::PlasmaWindow::iconChanged
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::setIcon)
+            << QVariant::fromValue(&Srv::PlasmaWindow::setIcon)
             << QVariant::fromValue(QIcon::fromTheme(QStringLiteral("foo")));
 #endif
 
     QTest::newRow("unmapped")
             << &Clt::PlasmaWindow::unmapped
-            << QVariant::fromValue(&Srv::PlasmaWindowInterface::unmap)
+            << QVariant::fromValue(&Srv::PlasmaWindow::unmap)
             << QVariant();
 }
 

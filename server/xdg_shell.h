@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // For Qt metatype declaration.
+#include "display.h"
 #include "xdg_shell_popup.h"
 #include "xdg_shell_toplevel.h"
 
@@ -63,5 +64,3 @@ private:
 };
 
 }
-
-Q_DECLARE_METATYPE(uint32_t)

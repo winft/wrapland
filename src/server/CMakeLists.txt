@@ -11,8 +11,6 @@ set(SERVER_LIB_SRCS
     output_device_v1_interface.cpp
     output_management_v1_interface.cpp
     plasmashell_interface.cpp
-    plasmavirtualdesktop_interface.cpp
-    plasmawindowmanagement_interface.cpp
     remote_access_interface.cpp
     resource.cpp
     seat_interface.cpp
@@ -65,6 +63,8 @@ set(SERVER_LIB_SRCS
     ../../server/contrast.cpp
     ../../server/blur.cpp
     ../../server/appmenu.cpp
+    ../../server/plasma_virtual_desktop.cpp
+    ../../server/plasma_window.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -325,8 +325,6 @@ set(SERVER_LIB_HEADERS
   output_device_v1_interface.h
   output_management_v1_interface.h
   plasmashell_interface.h
-  plasmavirtualdesktop_interface.h
-  plasmawindowmanagement_interface.h
   remote_access_interface.h
   resource.h
   server_decoration_interface.h
@@ -368,6 +366,8 @@ set(SERVER_LIB_HEADERS
   ../../server/contrast.h
   ../../server/blur.h
   ../../server/appmenu.h
+  ../../server/plasma_virtual_desktop.h
+  ../../server/plasma_window.h
 )
 
 install(FILES
