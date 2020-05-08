@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_management_v1_interface.h"
 #include "output_device_v1_interface.h"
 //#include "idleinhibit_interface_p.h"
-#include "remote_access_interface.h"
+//#include "remote_access_interface.h"
 #include "fakeinput_interface.h"
 #include "logging.h"
 #include "output_interface.h"
@@ -294,12 +294,12 @@ PlasmaWindowManagement *Display::createPlasmaWindowManagement(QObject *parent)
 }
 */
 
-RemoteAccessManagerInterface *Display::createRemoteAccessManager(QObject *parent)
-{
-    auto i = new RemoteAccessManagerInterface(this, parent);
-    connect(this, &Display::aboutToTerminate, i, [this, i] { delete i; });
-    return i;
-}
+//RemoteAccessManagerInterface *Display::createRemoteAccessManager(QObject *parent)
+//{
+//    auto i = new RemoteAccessManagerInterface(this, parent);
+//    connect(this, &Display::aboutToTerminate, i, [this, i] { delete i; });
+//    return i;
+//}
 /*
 IdleInterface *Display::createIdle(QObject *parent)
 {
