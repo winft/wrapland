@@ -43,7 +43,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/idleinhibit.h"
 #include "../../src/client/seat.h"
 #include "../../src/client/relativepointer.h"
-#include "../../src/client/server_decoration.h"
 #include "../../src/client/surface.h"
 #include "../../src/client/subcompositor.h"
 #include "../../src/client/xdgshell.h"
@@ -52,7 +51,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/server/output_interface.h"
 #include "../../server/contrast.h"
 #include "../../server/blur.h"
-#include "../../src/server/server_decoration_interface.h"
 #include "../../server/slide.h"
 #include "../../src/server/output_management_v1_interface.h"
 #include "../../src/server/output_device_v1_interface.h"
@@ -63,7 +61,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
-#include <wayland-server-decoration-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
 #include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
@@ -92,7 +89,6 @@ private Q_SLOTS:
     void testBindContrastManager();
     void testBindSlideManager();
     void testBindDpmsManager();
-    void testBindServerSideDecorationManager();
     void testBindTextInputManagerV2();
     void testBindXdgShell();
     void testBindRelativePointerManagerUnstableV1();
@@ -124,7 +120,6 @@ private:
     Wrapland::Server::Subcompositor *m_subcompositor;
     Wrapland::Server::DataDeviceManager* m_dataDeviceManager;
     Wrapland::Server::OutputManagementV1Interface *m_outputManagement;
-    Wrapland::Server::ServerSideDecorationManagerInterface *m_serverSideDecorationManager;
     Wrapland::Server::TextInputManagerV2 *m_textInputManagerV2;
     Wrapland::Server::XdgShell *m_serverXdgShell;
     Wrapland::Server::RelativePointerManagerV1* m_relativePointerV1;
@@ -148,7 +143,6 @@ TestWaylandRegistry::TestWaylandRegistry(QObject *parent)
     , m_subcompositor(nullptr)
     , m_dataDeviceManager(nullptr)
     , m_outputManagement(nullptr)
-    , m_serverSideDecorationManager(nullptr)
     , m_textInputManagerV2(nullptr)
     , m_serverXdgShell(nullptr)
     , m_relativePointerV1(nullptr)
@@ -181,10 +175,8 @@ void TestWaylandRegistry::init()
     m_contrast = m_display->createContrastManager(this);
     m_display->createSlideManager(this);
     m_display->createDpmsManager();
-    m_serverSideDecorationManager = m_display->createServerSideDecorationManager();
-    m_serverSideDecorationManager->create();
     m_textInputManagerV2 = m_display->createTextInputManager();
-   m_serverXdgShell = m_display->createXdgShell();
+    m_serverXdgShell = m_display->createXdgShell();
     m_relativePointerV1 = m_display->createRelativePointerManager();
     m_pointerGesturesV1 = m_display->createPointerGestures();
     m_pointerConstraintsV1 = m_display->createPointerConstraints();
@@ -316,11 +308,6 @@ void TestWaylandRegistry::testBindDpmsManager()
     TEST_BIND(Wrapland::Client::Registry::Interface::Dpms, SIGNAL(dpmsAnnounced(quint32,quint32)), bindDpmsManager, org_kde_kwin_dpms_manager_destroy)
 }
 
-void TestWaylandRegistry::testBindServerSideDecorationManager()
-{
-    TEST_BIND(Wrapland::Client::Registry::Interface::ServerSideDecorationManager, SIGNAL(serverSideDecorationManagerAnnounced(quint32,quint32)), bindServerSideDecorationManager, org_kde_kwin_server_decoration_manager_destroy)
-}
-
 void TestWaylandRegistry::testBindTextInputManagerV2()
 {
     TEST_BIND(Wrapland::Client::Registry::Interface::TextInputManagerUnstableV2, SIGNAL(textInputManagerUnstableV2Announced(quint32,quint32)), bindTextInputManagerUnstableV2, zwp_text_input_manager_v2_destroy)
@@ -387,8 +374,6 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(subCompositorAnnouncedSpy.isValid());
     QSignalSpy outputManagementAnnouncedSpy(&registry, SIGNAL(outputManagementV1Announced(quint32,quint32)));
     QVERIFY(outputManagementAnnouncedSpy.isValid());
-    QSignalSpy serverSideDecorationManagerAnnouncedSpy(&registry, &Registry::serverSideDecorationManagerAnnounced);
-    QVERIFY(serverSideDecorationManagerAnnouncedSpy.isValid());
     QSignalSpy blurAnnouncedSpy(&registry, &Registry::blurAnnounced);
     QVERIFY(blurAnnouncedSpy.isValid());
     QSignalSpy idleInhibitManagerUnstableV1AnnouncedSpy(&registry, &Registry::idleInhibitManagerUnstableV1Announced);
@@ -406,7 +391,6 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(!seatAnnouncedSpy.isEmpty());
     QVERIFY(!subCompositorAnnouncedSpy.isEmpty());
     QVERIFY(!outputManagementAnnouncedSpy.isEmpty());
-    QVERIFY(!serverSideDecorationManagerAnnouncedSpy.isEmpty());
     QVERIFY(!blurAnnouncedSpy.isEmpty());
     QVERIFY(!idleInhibitManagerUnstableV1AnnouncedSpy.isEmpty());
 
@@ -420,7 +404,6 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::SubCompositor));
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::FullscreenShell));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::OutputManagementV1));
-    QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::ServerSideDecorationManager));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::Blur));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::IdleInhibitManagerUnstableV1));
 
@@ -433,7 +416,6 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::SubCompositor).isEmpty());
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::FullscreenShell).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::OutputManagementV1).isEmpty());
-    QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::ServerSideDecorationManager).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::Blur).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::IdleInhibitManagerUnstableV1).isEmpty());
 
@@ -445,7 +427,6 @@ void TestWaylandRegistry::testRemoval()
     Output *output = registry.createOutput(registry.interface(Registry::Interface::Output).name, registry.interface(Registry::Interface::Output).version, &registry);
     Compositor *compositor = registry.createCompositor(registry.interface(Registry::Interface::Compositor).name, registry.interface(Registry::Interface::Compositor).version, &registry);
     SubCompositor *subcompositor = registry.createSubCompositor(registry.interface(Registry::Interface::SubCompositor).name, registry.interface(Registry::Interface::SubCompositor).version, &registry);
-    ServerSideDecorationManager *serverSideDeco = registry.createServerSideDecorationManager(registry.interface(Registry::Interface::ServerSideDecorationManager).name, registry.interface(Registry::Interface::ServerSideDecorationManager).version, &registry);
     BlurManager *blurManager = registry.createBlurManager(registry.interface(Registry::Interface::Blur).name, registry.interface(Registry::Interface::Blur).version, &registry);
     auto idleInhibitManager = registry.createIdleInhibitManager(registry.interface(Registry::Interface::IdleInhibitManagerUnstableV1).name, registry.interface(Registry::Interface::IdleInhibitManagerUnstableV1).version, &registry);
 
@@ -529,18 +510,6 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::OutputManagementV1));
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::OutputManagementV1).isEmpty());
 
-    QSignalSpy serverSideDecoManagerRemovedSpy(&registry, &Registry::serverSideDecorationManagerRemoved);
-    QVERIFY(serverSideDecoManagerRemovedSpy.isValid());
-    QSignalSpy serverSideDecoManagerObjectRemovedSpy(serverSideDeco, &ServerSideDecorationManager::removed);
-    QVERIFY(serverSideDecoManagerObjectRemovedSpy.isValid());
-
-    delete m_serverSideDecorationManager;
-    QVERIFY(serverSideDecoManagerRemovedSpy.wait());
-    QCOMPARE(serverSideDecoManagerRemovedSpy.first().first(), serverSideDecorationManagerAnnouncedSpy.first().first());
-    QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::ServerSideDecorationManager));
-    QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::ServerSideDecorationManager).isEmpty());
-    QCOMPARE(serverSideDecoManagerObjectRemovedSpy.count(), 1);
-
     QSignalSpy blurRemovedSpy(&registry, &Registry::blurRemoved);
     QVERIFY(blurRemovedSpy.isValid());
     QSignalSpy blurObjectRemovedSpy(blurManager, &BlurManager::removed);
@@ -569,7 +538,6 @@ void TestWaylandRegistry::testRemoval()
     QCOMPARE(outputObjectRemovedSpy.count(), 1);
     QCOMPARE(compositorObjectRemovedSpy.count(), 1);
     QCOMPARE(subcompositorObjectRemovedSpy.count(), 1);
-    QCOMPARE(serverSideDecoManagerObjectRemovedSpy.count(), 1);
     QCOMPARE(blurObjectRemovedSpy.count(), 1);
     QCOMPARE(idleInhibitManagerObjectRemovedSpy.count(), 1);
 
@@ -578,7 +546,6 @@ void TestWaylandRegistry::testRemoval()
     delete output;
     delete compositor;
     delete subcompositor;
-    delete serverSideDeco;
     delete blurManager;
     delete idleInhibitManager;
     registry.release();

@@ -71,7 +71,6 @@ class OutputInterface;
 class OutputConfigurationV1Interface;
 class OutputDeviceV1Interface;
 class OutputManagementV1Interface;
-class ServerSideDecorationManagerInterface;
 //class SlideManagerInterface;
 //class ShellInterface;
 //class SubCompositorInterface;
@@ -210,10 +209,6 @@ public:
     /** @since 0.0.560 */
     //KeyState *createKeyState(QObject *parent = nullptr);
 
-    /**
-     * @since 5.6
-     **/
-    ServerSideDecorationManagerInterface *createServerSideDecorationManager(QObject *parent = nullptr);
     /**
      * Create the text input manager in interface @p version.
      * @returns The created manager object

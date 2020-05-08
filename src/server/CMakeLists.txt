@@ -14,7 +14,6 @@ set(SERVER_LIB_SRCS
     remote_access_interface.cpp
     resource.cpp
     seat_interface.cpp
-    server_decoration_interface.cpp
     server_decoration_palette_interface.cpp
 
     ../../server/buffer.cpp
@@ -137,11 +136,6 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/server-decoration.xml
-    BASENAME server_decoration
-)
-
-ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input.xml
     BASENAME text
 )
@@ -255,8 +249,6 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-qt-surface-extension-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-server-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-server_decoration-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-server_decoration-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-server_decoration_palette-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-server_decoration_palette-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-shadow-client-protocol.h
@@ -325,7 +317,6 @@ set(SERVER_LIB_HEADERS
   plasmashell_interface.h
   remote_access_interface.h
   resource.h
-  server_decoration_interface.h
   server_decoration_palette_interface.h
 
   ../../server/buffer.h

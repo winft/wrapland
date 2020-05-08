@@ -46,7 +46,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "blur.h"
 #include "contrast.h"
 #include "relativepointer.h"
-#include "server_decoration.h"
 #include "slide.h"
 #include "shell.h"
 #include "shm_pool.h"
@@ -81,7 +80,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
-#include <wayland-server-decoration-client-protocol.h>
 #include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
 #include "../compat/wayland-xdg-shell-v5-client-protocol.h"
@@ -278,13 +276,6 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &org_kde_kwin_dpms_manager_interface,
         &Registry::dpmsAnnounced,
         &Registry::dpmsRemoved
-    }},
-    {Registry::Interface::ServerSideDecorationManager, {
-        1,
-        QByteArrayLiteral("org_kde_kwin_server_decoration_manager"),
-        &org_kde_kwin_server_decoration_manager_interface,
-        &Registry::serverSideDecorationManagerAnnounced,
-        &Registry::serverSideDecorationManagerRemoved
     }},
     {Registry::Interface::TextInputManagerUnstableV0, {
         1,
@@ -699,7 +690,6 @@ BIND(FakeInput, org_kde_kwin_fake_input)
 BIND(OutputManagementV1, zkwinft_output_management_v1)
 BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
-BIND(ServerSideDecorationManager, org_kde_kwin_server_decoration_manager)
 BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
 BIND(Viewporter, wp_viewporter)
@@ -772,7 +762,6 @@ CREATE(BlurManager)
 CREATE(ContrastManager)
 CREATE(SlideManager)
 CREATE(DpmsManager)
-CREATE(ServerSideDecorationManager)
 CREATE2(ShmPool, Shm)
 CREATE(AppMenuManager)
 CREATE(Keystate)
