@@ -62,7 +62,7 @@ class RemoteAccessManagerInterface;
 class IdleInhibitManagerInterface;
 class FakeInputInterface;
 class PlasmaShellInterface;
-class PlasmaWindowManagementInterface;
+//class PlasmaWindowManagementInterface;
 class SeatInterface;
 //class ShadowManagerInterface;
 //class ContrastManagerInterface;
@@ -89,7 +89,7 @@ class TextInputManagerInterface;
 //class XdgForeignInterface;
 //class AppMenuManagerInterface;
 class ServerSideDecorationPaletteManagerInterface;
-class PlasmaVirtualDesktopManagementInterface;
+//class PlasmaVirtualDesktopManagementInterface;
 //class ViewporterInterface;
 class XdgOutputManagerInterface;
 //class XdgDecorationManagerInterface;
@@ -198,7 +198,7 @@ public:
 //    DataDeviceManagerInterface *createDataDeviceManager(QObject *parent = nullptr);
     OutputManagementV1Interface *createOutputManagementV1(QObject *parent = nullptr);
     PlasmaShellInterface *createPlasmaShell(QObject *parent = nullptr);
-    PlasmaWindowManagementInterface *createPlasmaWindowManagement(QObject *parent = nullptr);
+    //PlasmaWindowManagement *createPlasmaWindowManagement(QObject *parent = nullptr);
     IdleInterface *createIdle(QObject *parent = nullptr);
     RemoteAccessManagerInterface *createRemoteAccessManager(QObject *parent = nullptr);
     FakeInputInterface *createFakeInput(QObject *parent = nullptr);
@@ -314,7 +314,7 @@ public:
      * @returns The created manager object
      * @since 0.0.552
      **/
-    PlasmaVirtualDesktopManagementInterface *createPlasmaVirtualDesktopManagement(QObject *parent = nullptr);
+    //PlasmaVirtualDesktopManagementInterface *createPlasmaVirtualDesktopManagement(QObject *parent = nullptr);
 
 //    /**
 //     * Creates the XdgDecorationManagerInterface

@@ -29,7 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "logging.h"
 #include "output_interface.h"
 #include "plasmashell_interface.h"
-#include "plasmawindowmanagement_interface.h"
+//#include "plasmawindowmanagement_interface.h"
 //#include "pointerconstraints_interface_p.h"
 //#include "pointergestures_interface_p.h"
 #include "seat_interface.h"
@@ -49,7 +49,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "xdgshell_stable_interface_p.h"
 //#include "appmenu_interface.h"
 #include "server_decoration_palette_interface.h"
-#include "plasmavirtualdesktop_interface.h"
+//#include "plasmavirtualdesktop_interface.h"
 //#include "xdgoutput_interfce.h"
 //#include "xdgdecoration_interface.h"
 #include "eglstream_controller_interface.h"
@@ -286,13 +286,14 @@ PlasmaShellInterface *Display::createPlasmaShell(QObject* parent)
     connect(this, &Display::aboutToTerminate, s, [this, s] { delete s; });
     return s;
 }
-
-PlasmaWindowManagementInterface *Display::createPlasmaWindowManagement(QObject *parent)
+/*
+PlasmaWindowManagement *Display::createPlasmaWindowManagement(QObject *parent)
 {
-    auto wm = new PlasmaWindowManagementInterface(this, parent);
+    auto wm = new PlasmaWindowManagement(this, parent);
     connect(this, &Display::aboutToTerminate, wm, [this, wm] { delete wm; });
     return wm;
 }
+*/
 
 RemoteAccessManagerInterface *Display::createRemoteAccessManager(QObject *parent)
 {
@@ -473,13 +474,13 @@ ServerSideDecorationPaletteManagerInterface *Display::createServerSideDecoration
 //    connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
 //    return b;
 //}
-
+/*
 PlasmaVirtualDesktopManagementInterface *Display::createPlasmaVirtualDesktopManagement(QObject *parent)
 {
     auto b = new PlasmaVirtualDesktopManagementInterface(this, parent);
     connect(this, &Display::aboutToTerminate, b, [this, b] { delete b; });
     return b;
-}
+}*/
 /*
 ViewporterInterface *Display::createViewporterInterface(QObject *parent)
 {
