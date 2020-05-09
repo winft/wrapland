@@ -138,6 +138,7 @@ public:
 
     void unbind(GlobalResource* bind)
     {
+        prepareUnbind(bind);
         m_binds.erase(std::remove(m_binds.begin(), m_binds.end(), bind), m_binds.end());
     }
 
@@ -215,6 +216,10 @@ protected:
     }
 
     virtual void bindInit([[maybe_unused]] GlobalResource* bind)
+    {
+    }
+
+    virtual void prepareUnbind([[maybe_unused]] GlobalResource* bind)
     {
     }
 
