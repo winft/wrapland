@@ -45,6 +45,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat.h"
 #include "slide.h"
 #include "subcompositor.h"
+#include "text_input_v2.h"
 #include "viewporter.h"
 #include "xdg_decoration.h"
 #include "xdg_foreign.h"
@@ -65,7 +66,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/remote_access_interface.h"
 #include "../src/server/server_decoration_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
-#include "../src/server/textinput_interface_p.h"
+
 //
 //
 
@@ -276,11 +277,9 @@ ServerSideDecorationManagerInterface* D_isplay::createServerSideDecorationManage
 {
     return legacy->createServerSideDecorationManager(parent);
 }
-
-TextInputManagerInterface*
-D_isplay::createTextInputManager(const TextInputInterfaceVersion& version, QObject* parent)
+TextInputManagerV2* D_isplay::createTextInputManager(QObject* parent)
 {
-    return legacy->createTextInputManager(version, parent);
+    return new TextInputManagerV2(this, parent);
 }
 
 XdgShell* D_isplay::createXdgShell(QObject* parent)
