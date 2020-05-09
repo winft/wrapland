@@ -70,7 +70,7 @@ void XdgDecorationManager::Private::getToplevelDecorationCallback(
     uint32_t id,
     wl_resource* wlToplevel)
 {
-    auto priv = fromResource(wlResource)->d_ptr;
+    auto priv = fromResource(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     auto toplevel = priv->m_shell->d_ptr->getToplevel(wlToplevel);
