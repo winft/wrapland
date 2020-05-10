@@ -19,13 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
-#include "display.h"
-#include "output.h"
-
 #include "wayland/client.h"
-#include "wayland/display.h"
-#include "wayland/global.h"
-#include "wayland/resource.h"
 
 #include <memory>
 

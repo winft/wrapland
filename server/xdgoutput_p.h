@@ -19,13 +19,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
+#include "display.h"
+#include "output.h"
 #include "xdgoutput.h"
 
+#include "wayland/client.h"
 #include "wayland/display.h"
 #include "wayland/global.h"
 #include "wayland/resource.h"
 
-#include <Wrapland/Server/wraplandserver_export.h>
 #include <wayland-xdg-output-server-protocol.h>
 
 #include <map>
