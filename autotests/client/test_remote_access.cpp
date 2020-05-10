@@ -18,31 +18,32 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// client
+
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/remote_access.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/output.h"
-// server
-#include "../../src/server/display.h"
-#include "../../src/server/output_interface.h"
-#include "../../src/server/remote_access_interface.h"
+
+#include "../../server/display.h"
+#include "../../server/output.h"
+#include "../../server/remote_access.h"
 
 #include <linux/input.h>
 
-using namespace Wrapland::Client;
-using namespace Wrapland::Server;
+namespace Clt = Wrapland::Client;
+namespace Srv = Wrapland::Server;
 
-Q_DECLARE_METATYPE(const BufferHandle *)
-Q_DECLARE_METATYPE(const RemoteBuffer *)
-Q_DECLARE_METATYPE(const void *)
+Q_DECLARE_METATYPE(Clt::RemoteBuffer const*)
+Q_DECLARE_METATYPE(void const*)
 
 class RemoteAccessTest : public QObject
 {
     Q_OBJECT
+public:
+    explicit RemoteAccessTest(QObject *parent = nullptr);
+
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -54,9 +55,9 @@ private Q_SLOTS:
     void testSendReceiveClientGone();
 
 private:
-    Display *m_display = nullptr;
-    OutputInterface *m_outputInterface[2] = {nullptr};
-    RemoteAccessManagerInterface *m_remoteAccessInterface = nullptr;
+    Srv::D_isplay *m_display = nullptr;
+    Srv::Output *m_serverOutput[2] = {nullptr};
+    Srv::RemoteAccessManager *m_serverRemoteAccess = nullptr;
 };
 
 class MockupClient : public QObject
@@ -68,12 +69,12 @@ public:
 
     void bindOutput(int index);
 
-    ConnectionThread *connection = nullptr;
+    Clt::ConnectionThread *connection = nullptr;
     QThread *thread = nullptr;
-    EventQueue *queue = nullptr;
-    Registry *registry = nullptr;
-    RemoteAccessManager *remoteAccess = nullptr;
-    Wrapland::Client::Output *outputs[2] = {nullptr};
+    Clt::EventQueue *queue = nullptr;
+    Clt::Registry *registry = nullptr;
+    Clt::RemoteAccessManager *remoteAccess = nullptr;
+    Clt::Output *outputs[2] = {nullptr};
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-remote-access-0");
@@ -82,8 +83,8 @@ MockupClient::MockupClient(QObject *parent)
     : QObject(parent)
 {
     // setup connection
-    connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(connection, &ConnectionThread::establishedChanged);
+    connection = new Clt::ConnectionThread;
+    QSignalSpy connectedSpy(connection, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketName(s_socketName);
 
@@ -95,11 +96,11 @@ MockupClient::MockupClient(QObject *parent)
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
 
-    queue = new EventQueue(this);
+    queue = new Clt::EventQueue(this);
     queue->setup(connection);
 
-    registry = new Registry(this);
-    QSignalSpy interfacesAnnouncedSpy(registry, &Registry::interfacesAnnounced);
+    registry = new Clt::Registry(this);
+    QSignalSpy interfacesAnnouncedSpy(registry, &Clt::Registry::interfacesAnnounced);
     QVERIFY(interfacesAnnouncedSpy.isValid());
     registry->setEventQueue(queue);
     registry->create(connection);
@@ -108,8 +109,8 @@ MockupClient::MockupClient(QObject *parent)
     QVERIFY(interfacesAnnouncedSpy.wait());
 
     remoteAccess = registry->createRemoteAccessManager(
-                                            registry->interface(Registry::Interface::RemoteAccessManager).name,
-                                            registry->interface(Registry::Interface::RemoteAccessManager).version,
+                                            registry->interface(Clt::Registry::Interface::RemoteAccessManager).name,
+                                            registry->interface(Clt::Registry::Interface::RemoteAccessManager).version,
                                             this);
     QVERIFY(remoteAccess->isValid());
     connection->flush();
@@ -145,36 +146,41 @@ MockupClient::~MockupClient()
 void MockupClient::bindOutput(int index)
 {
     // client-bound output
-    outputs[index] = registry->createOutput(registry->interfaces(Registry::Interface::Output)[index].name,
-                             registry->interfaces(Registry::Interface::Output)[index].version,
+    outputs[index] = registry->createOutput(registry->interfaces(Clt::Registry::Interface::Output)[index].name,
+                             registry->interfaces(Clt::Registry::Interface::Output)[index].version,
                              this);
     QVERIFY(outputs[index]->isValid());
     connection->flush();
 }
 
+RemoteAccessTest::RemoteAccessTest(QObject *parent)
+    : QObject(parent)
+{
+//    qRegisterMetaType<Srv::RemoteBufferHandle const*>();
+}
+
 void RemoteAccessTest::init()
 {
-    qRegisterMetaType<const BufferHandle *>();
-    qRegisterMetaType<const RemoteBuffer *>();
-    qRegisterMetaType<const void *>();
+//    qRegisterMetaType<Clt::RemoteBuffer const*>();
+//    qRegisterMetaType<void const*>();
 
     delete m_display;
-    m_display = new Display(this);
+    m_display = new Srv::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
+    QVERIFY(m_display->running());
+
     m_display->createShm();
 
     auto initOutputIface = [this](int i) {
-        m_outputInterface[i] = m_display->createOutput();
-        m_outputInterface[i]->create();
+        m_serverOutput[i] = m_display->createOutput();
     };
     initOutputIface(0);
     initOutputIface(1);
 
-    m_remoteAccessInterface = m_display->createRemoteAccessManager();
-    m_remoteAccessInterface->create();
-    QSignalSpy bufferReleasedSpy(m_remoteAccessInterface, &RemoteAccessManagerInterface::bufferReleased);
+    m_serverRemoteAccess = m_display->createRemoteAccessManager();
+
+    QSignalSpy bufferReleasedSpy(m_serverRemoteAccess, &Srv::RemoteAccessManager::bufferReleased);
     QVERIFY(bufferReleasedSpy.isValid());
 }
 
@@ -185,9 +191,9 @@ void RemoteAccessTest::cleanup()
         delete variable; \
         variable = nullptr; \
     }
-    CLEANUP(m_outputInterface[0])
-    CLEANUP(m_outputInterface[1])
-    CLEANUP(m_remoteAccessInterface)
+    CLEANUP(m_serverOutput[0])
+    CLEANUP(m_serverOutput[1])
+    CLEANUP(m_serverRemoteAccess)
     CLEANUP(m_display)
 #undef CLEANUP
 }
@@ -197,17 +203,17 @@ void RemoteAccessTest::testSendReleaseSingle()
     // this test verifies that a buffer is sent to client and returned back
 
     // setup
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    QVERIFY(!m_serverRemoteAccess->bound());
     auto *client = new MockupClient(this);
     client->bindOutput(0);
 
     m_display->dispatchEvents();
 
-    QVERIFY(m_remoteAccessInterface->isBound()); // we have one client now
-    QSignalSpy bufferReadySpy(client->remoteAccess, &RemoteAccessManager::bufferReady);
+    QVERIFY(m_serverRemoteAccess->bound()); // we have one client now
+    QSignalSpy bufferReadySpy(client->remoteAccess, &Clt::RemoteAccessManager::bufferReady);
     QVERIFY(bufferReadySpy.isValid());
 
-    BufferHandle *buf = new BufferHandle();
+    auto buf = new Srv::RemoteBufferHandle();
     QTemporaryFile *tmpFile = new QTemporaryFile(this);
     tmpFile->open();
 
@@ -215,16 +221,19 @@ void RemoteAccessTest::testSendReleaseSingle()
     buf->setSize(50, 50);
     buf->setFormat(100500);
     buf->setStride(7800);
-    m_remoteAccessInterface->sendBufferReady(m_outputInterface[0], buf);
 
-    // receive buffer
+    m_serverRemoteAccess->sendBufferReady(m_serverOutput[0], buf);
+
+    // Receive buffer.
     QVERIFY(bufferReadySpy.wait());
-    auto rbuf = bufferReadySpy.takeFirst()[1].value<const RemoteBuffer *>();
-    QSignalSpy paramsObtainedSpy(rbuf, &RemoteBuffer::parametersObtained);
+    auto rbuf = bufferReadySpy.takeFirst()[1].value<Clt::RemoteBuffer*>();
+
+    QSignalSpy paramsObtainedSpy(rbuf, &Clt::RemoteBuffer::parametersObtained);
     QVERIFY(paramsObtainedSpy.isValid());
 
     // wait for params
     QVERIFY(paramsObtainedSpy.wait());
+
     // client fd is different, not subject to check
     QCOMPARE(rbuf->width(), 50u);
     QCOMPARE(rbuf->height(), 50u);
@@ -232,7 +241,7 @@ void RemoteAccessTest::testSendReleaseSingle()
     QCOMPARE(rbuf->stride(), 7800u);
 
     // release
-    QSignalSpy bufferReleasedSpy(m_remoteAccessInterface, &RemoteAccessManagerInterface::bufferReleased);
+    QSignalSpy bufferReleasedSpy(m_serverRemoteAccess, &Srv::RemoteAccessManager::bufferReleased);
     QVERIFY(bufferReleasedSpy.isValid());
     delete rbuf;
     QVERIFY(bufferReleasedSpy.wait());
@@ -241,7 +250,7 @@ void RemoteAccessTest::testSendReleaseSingle()
     delete buf;
     delete client;
     m_display->dispatchEvents();
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    QVERIFY(!m_serverRemoteAccess->bound());
 }
 
 void RemoteAccessTest::testSendReleaseMultiple()
@@ -249,20 +258,20 @@ void RemoteAccessTest::testSendReleaseMultiple()
     // this test verifies that a buffer is sent to 2 clients and returned back
 
     // setup
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    QVERIFY(!m_serverRemoteAccess->bound());
     auto *client1 = new MockupClient(this);
     auto *client2 = new MockupClient(this);
     client1->bindOutput(0);
     client2->bindOutput(0);
     m_display->dispatchEvents();
-    QVERIFY(m_remoteAccessInterface->isBound()); // now we have 2 clients
+    QVERIFY(m_serverRemoteAccess->bound()); // now we have 2 clients
 
-    QSignalSpy bufferReadySpy1(client1->remoteAccess, &RemoteAccessManager::bufferReady);
+    QSignalSpy bufferReadySpy1(client1->remoteAccess, &Clt::RemoteAccessManager::bufferReady);
     QVERIFY(bufferReadySpy1.isValid());
-    QSignalSpy bufferReadySpy2(client2->remoteAccess, &RemoteAccessManager::bufferReady);
+    QSignalSpy bufferReadySpy2(client2->remoteAccess, &Clt::RemoteAccessManager::bufferReady);
     QVERIFY(bufferReadySpy2.isValid());
 
-    BufferHandle *buf = new BufferHandle();
+    auto buf = new Srv::RemoteBufferHandle();
     QTemporaryFile *tmpFile = new QTemporaryFile(this);
     tmpFile->open();
 
@@ -270,14 +279,15 @@ void RemoteAccessTest::testSendReleaseMultiple()
     buf->setSize(50, 50);
     buf->setFormat(100500);
     buf->setStride(7800);
-    m_remoteAccessInterface->sendBufferReady(m_outputInterface[0], buf);
+    m_serverRemoteAccess->sendBufferReady(m_serverOutput[0], buf);
 
     // wait for event loop
     QVERIFY(bufferReadySpy1.wait());
+
     // receive buffer at client 1
     QCOMPARE(bufferReadySpy1.size(), 1);
-    auto rbuf1 = bufferReadySpy1.takeFirst()[1].value<const RemoteBuffer *>();
-    QSignalSpy paramsObtainedSpy1(rbuf1, &RemoteBuffer::parametersObtained);
+    auto rbuf1 = bufferReadySpy1.takeFirst()[1].value<Clt::RemoteBuffer*>();
+    QSignalSpy paramsObtainedSpy1(rbuf1, &Clt::RemoteBuffer::parametersObtained);
     QVERIFY(paramsObtainedSpy1.isValid());
 
     if (bufferReadySpy2.size() == 0) {
@@ -285,8 +295,8 @@ void RemoteAccessTest::testSendReleaseMultiple()
     }
     // receive buffer at client 2
     QCOMPARE(bufferReadySpy2.size(), 1);
-    auto rbuf2 = bufferReadySpy2.takeFirst()[1].value<const RemoteBuffer *>();
-    QSignalSpy paramsObtainedSpy2(rbuf2, &RemoteBuffer::parametersObtained);
+    auto rbuf2 = bufferReadySpy2.takeFirst()[1].value<Clt::RemoteBuffer *>();
+    QSignalSpy paramsObtainedSpy2(rbuf2, &Clt::RemoteBuffer::parametersObtained);
     QVERIFY(paramsObtainedSpy2.isValid());
 
     // wait for event loop
@@ -301,7 +311,7 @@ void RemoteAccessTest::testSendReleaseMultiple()
 #endif
 
     // release
-    QSignalSpy bufferReleasedSpy(m_remoteAccessInterface, &RemoteAccessManagerInterface::bufferReleased);
+    QSignalSpy bufferReleasedSpy(m_serverRemoteAccess, &Srv::RemoteAccessManager::bufferReleased);
     QVERIFY(bufferReleasedSpy.isValid());
     delete rbuf1;
     QVERIFY(!bufferReleasedSpy.wait(1000)); // one client released, second still holds buffer!
@@ -314,7 +324,7 @@ void RemoteAccessTest::testSendReleaseMultiple()
     delete client1;
     delete client2;
     m_display->dispatchEvents();
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    QVERIFY(!m_serverRemoteAccess->bound());
 }
 
 void RemoteAccessTest::testSendReleaseCrossScreen()
@@ -323,24 +333,24 @@ void RemoteAccessTest::testSendReleaseCrossScreen()
     // multiple clients and returned back
 
     // setup
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    QVERIFY(!m_serverRemoteAccess->bound());
     auto *client1 = new MockupClient(this);
     auto *client2 = new MockupClient(this);
     client1->bindOutput(1);
     client2->bindOutput(0);
     m_display->dispatchEvents();
-    QVERIFY(m_remoteAccessInterface->isBound()); // now we have 2 clients
+    QVERIFY(m_serverRemoteAccess->bound()); // now we have 2 clients
 
-    QSignalSpy bufferReadySpy1(client1->remoteAccess, &RemoteAccessManager::bufferReady);
+    QSignalSpy bufferReadySpy1(client1->remoteAccess, &Clt::RemoteAccessManager::bufferReady);
     QVERIFY(bufferReadySpy1.isValid());
-    QSignalSpy bufferReadySpy2(client2->remoteAccess, &RemoteAccessManager::bufferReady);
+    QSignalSpy bufferReadySpy2(client2->remoteAccess, &Clt::RemoteAccessManager::bufferReady);
     QVERIFY(bufferReadySpy2.isValid());
 
-    BufferHandle *buf1 = new BufferHandle();
+    auto buf1 = new Srv::RemoteBufferHandle();
     QTemporaryFile *tmpFile1 = new QTemporaryFile(this);
     tmpFile1->open();
 
-    BufferHandle *buf2 = new BufferHandle();
+    auto buf2 = new Srv::RemoteBufferHandle();
     QTemporaryFile *tmpFile2 = new QTemporaryFile(this);
     tmpFile2->open();
 
@@ -354,8 +364,8 @@ void RemoteAccessTest::testSendReleaseCrossScreen()
     buf2->setFormat(100500);
     buf2->setStride(7800);
 
-    m_remoteAccessInterface->sendBufferReady(m_outputInterface[0], buf1);
-    m_remoteAccessInterface->sendBufferReady(m_outputInterface[1], buf2);
+    m_serverRemoteAccess->sendBufferReady(m_serverOutput[0], buf1);
+    m_serverRemoteAccess->sendBufferReady(m_serverOutput[1], buf2);
 
     // wait for event loop
     QVERIFY(bufferReadySpy1.wait());
@@ -365,14 +375,14 @@ void RemoteAccessTest::testSendReleaseCrossScreen()
 
     // receive buffer at client 1
     QCOMPARE(bufferReadySpy1.size(), 1);
-    auto rbuf1 = bufferReadySpy1.takeFirst()[1].value<const RemoteBuffer *>();
-    QSignalSpy paramsObtainedSpy1(rbuf1, &RemoteBuffer::parametersObtained);
+    auto rbuf1 = bufferReadySpy1.takeFirst()[1].value<Clt::RemoteBuffer *>();
+    QSignalSpy paramsObtainedSpy1(rbuf1, &Clt::RemoteBuffer::parametersObtained);
     QVERIFY(paramsObtainedSpy1.isValid());
 
     // receive buffer at client 2
     QCOMPARE(bufferReadySpy2.size(), 1);
-    auto rbuf2 = bufferReadySpy2.takeFirst()[1].value<const RemoteBuffer *>();
-    QSignalSpy paramsObtainedSpy2(rbuf2, &RemoteBuffer::parametersObtained);
+    auto rbuf2 = bufferReadySpy2.takeFirst()[1].value<Clt::RemoteBuffer *>();
+    QSignalSpy paramsObtainedSpy2(rbuf2, &Clt::RemoteBuffer::parametersObtained);
     QVERIFY(paramsObtainedSpy2.isValid());
 
     // Wait for event loop.
@@ -389,7 +399,7 @@ void RemoteAccessTest::testSendReleaseCrossScreen()
     }
 
     // release
-    QSignalSpy bufferReleasedSpy(m_remoteAccessInterface, &RemoteAccessManagerInterface::bufferReleased);
+    QSignalSpy bufferReleasedSpy(m_serverRemoteAccess, &Srv::RemoteAccessManager::bufferReleased);
     QVERIFY(bufferReleasedSpy.isValid());
     delete rbuf1;
     QVERIFY(bufferReleasedSpy.wait());
@@ -405,22 +415,23 @@ void RemoteAccessTest::testSendReleaseCrossScreen()
     delete client1;
     delete client2;
     m_display->dispatchEvents();
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    QVERIFY(!m_serverRemoteAccess->bound());
 }
 
 void RemoteAccessTest::testSendClientGone()
 {
-    // this test verifies that when buffer is sent and client is gone, server will release buffer correctly
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    // this test verifies that when buffer is sent and client is gone, server will release buffer
+    // correctly
+    QVERIFY(!m_serverRemoteAccess->bound());
     auto *client = new MockupClient(this);
     client->bindOutput(0);
     m_display->dispatchEvents();
 
-    QVERIFY(m_remoteAccessInterface->isBound()); // we have one client now
-    QSignalSpy bufferReadySpy(client->remoteAccess, &RemoteAccessManager::bufferReady);
+    QVERIFY(m_serverRemoteAccess->bound()); // we have one client now
+    QSignalSpy bufferReadySpy(client->remoteAccess, &Clt::RemoteAccessManager::bufferReady);
     QVERIFY(bufferReadySpy.isValid());
 
-    BufferHandle *buf = new BufferHandle();
+    auto buf = new Srv::RemoteBufferHandle();
     QTemporaryFile *tmpFile = new QTemporaryFile(this);
     tmpFile->open();
 
@@ -428,34 +439,35 @@ void RemoteAccessTest::testSendClientGone()
     buf->setSize(50, 50);
     buf->setFormat(100500);
     buf->setStride(7800);
-    m_remoteAccessInterface->sendBufferReady(m_outputInterface[0], buf);
+    m_serverRemoteAccess->sendBufferReady(m_serverOutput[0], buf);
 
     // release forcefully
-    QSignalSpy bufferReleasedSpy(m_remoteAccessInterface, &RemoteAccessManagerInterface::bufferReleased);
+    QSignalSpy bufferReleasedSpy(m_serverRemoteAccess, &Srv::RemoteAccessManager::bufferReleased);
     QVERIFY(bufferReleasedSpy.isValid());
+
     delete client;
     QVERIFY(bufferReleasedSpy.wait());
 
     // cleanup
     delete buf;
     m_display->dispatchEvents();
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    QVERIFY(!m_serverRemoteAccess->bound());
 }
 
 void RemoteAccessTest::testSendReceiveClientGone()
 {
     // this test verifies that when buffer is sent, received and client is gone,
     // both client and server will release buffer correctly
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    QVERIFY(!m_serverRemoteAccess->bound());
     auto *client = new MockupClient(this);
     client->bindOutput(0);
     m_display->dispatchEvents();
 
-    QVERIFY(m_remoteAccessInterface->isBound()); // we have one client now
-    QSignalSpy bufferReadySpy(client->remoteAccess, &RemoteAccessManager::bufferReady);
+    QVERIFY(m_serverRemoteAccess->bound()); // we have one client now
+    QSignalSpy bufferReadySpy(client->remoteAccess, &Clt::RemoteAccessManager::bufferReady);
     QVERIFY(bufferReadySpy.isValid());
 
-    BufferHandle *buf = new BufferHandle();
+    auto buf = new Srv::RemoteBufferHandle();
     QTemporaryFile *tmpFile = new QTemporaryFile(this);
     tmpFile->open();
 
@@ -463,12 +475,12 @@ void RemoteAccessTest::testSendReceiveClientGone()
     buf->setSize(50, 50);
     buf->setFormat(100500);
     buf->setStride(7800);
-    m_remoteAccessInterface->sendBufferReady(m_outputInterface[0], buf);
+    m_serverRemoteAccess->sendBufferReady(m_serverOutput[0], buf);
 
     // receive buffer
     QVERIFY(bufferReadySpy.wait());
-    auto rbuf = bufferReadySpy.takeFirst()[1].value<const RemoteBuffer *>();
-    QSignalSpy paramsObtainedSpy(rbuf, &RemoteBuffer::parametersObtained);
+    auto rbuf = bufferReadySpy.takeFirst()[1].value<Clt::RemoteBuffer *>();
+    QSignalSpy paramsObtainedSpy(rbuf, &Clt::RemoteBuffer::parametersObtained);
     QVERIFY(paramsObtainedSpy.isValid());
 
     // wait for params
@@ -480,7 +492,7 @@ void RemoteAccessTest::testSendReceiveClientGone()
     QCOMPARE(rbuf->stride(), 7800u);
 
     // release forcefully
-    QSignalSpy bufferReleasedSpy(m_remoteAccessInterface, &RemoteAccessManagerInterface::bufferReleased);
+    QSignalSpy bufferReleasedSpy(m_serverRemoteAccess, &Srv::RemoteAccessManager::bufferReleased);
     QVERIFY(bufferReleasedSpy.isValid());
     delete client;
     QVERIFY(bufferReleasedSpy.wait());
@@ -488,7 +500,7 @@ void RemoteAccessTest::testSendReceiveClientGone()
     // cleanup
     delete buf;
     m_display->dispatchEvents();
-    QVERIFY(!m_remoteAccessInterface->isBound());
+    QVERIFY(!m_serverRemoteAccess->bound());
 }
 
 QTEST_GUILESS_MAIN(RemoteAccessTest)

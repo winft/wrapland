@@ -151,6 +151,7 @@ Q_SIGNALS:
 
 private:
     friend class D_isplay;
+    friend class RemoteAccessManager;
     friend class Surface;
 
     explicit Output(Wrapland::Server::D_isplay* display, QObject* parent = nullptr);

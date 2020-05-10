@@ -138,6 +138,7 @@ public:
 
     void unbind(GlobalResource* bind)
     {
+        prepareUnbind(bind);
         m_binds.erase(std::remove(m_binds.begin(), m_binds.end(), bind), m_binds.end());
     }
 
@@ -149,6 +150,11 @@ public:
             }
         }
         return nullptr;
+    }
+
+    std::vector<GlobalResource*> getBinds()
+    {
+        return m_binds;
     }
 
     std::vector<GlobalResource*> getBinds(Server::Client* client)
@@ -210,6 +216,10 @@ protected:
     }
 
     virtual void bindInit([[maybe_unused]] GlobalResource* bind)
+    {
+    }
+
+    virtual void prepareUnbind([[maybe_unused]] GlobalResource* bind)
     {
     }
 
