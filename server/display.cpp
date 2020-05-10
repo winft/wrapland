@@ -36,6 +36,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keystate.h"
 #include "linux_dmabuf_v1.h"
 #include "output.h"
+#include "output_configuration_v1.h"
+#include "output_device_v1.h"
+#include "output_management_v1.h"
 #include "plasma_virtual_desktop.h"
 #include "plasma_window.h"
 #include "pointer.h"
@@ -59,10 +62,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/shadow.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
-#include "../src/server/output_configuration_v1_interface.h"
-#include "../src/server/output_device_v1_interface.h"
 #include "../src/server/output_interface.h"
-#include "../src/server/output_management_v1_interface.h"
 #include "../src/server/plasmashell_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
 
@@ -185,9 +185,11 @@ void D_isplay::removeOutput(Output* output)
     // delete output;
 }
 
-void D_isplay::removeOutputDevice(OutputDeviceV1Interface* outputDevice)
+void D_isplay::removeOutputDevice(OutputDeviceV1* outputDevice)
 {
-    legacy->removeOutputDevice(outputDevice);
+    d_ptr->outputDevices.erase(
+        std::remove(d_ptr->outputDevices.begin(), d_ptr->outputDevices.end(), outputDevice),
+        d_ptr->outputDevices.end());
 }
 
 Compositor* D_isplay::createCompositor(QObject* parent)
@@ -195,14 +197,14 @@ Compositor* D_isplay::createCompositor(QObject* parent)
     return new Compositor(this, parent);
 }
 
-OutputDeviceV1Interface* D_isplay::createOutputDeviceV1(QObject* parent)
+OutputDeviceV1* D_isplay::createOutputDeviceV1(QObject* parent)
 {
-    return legacy->createOutputDeviceV1(parent);
+    return new OutputDeviceV1(this, parent);
 }
 
-OutputManagementV1Interface* D_isplay::createOutputManagementV1(QObject* parent)
+OutputManagementV1* D_isplay::createOutputManagementV1(QObject* parent)
 {
-    return legacy->createOutputManagementV1(parent);
+    return new OutputManagementV1(this, parent);
 }
 
 Seat* D_isplay::createSeat(QObject* parent)

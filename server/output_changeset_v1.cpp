@@ -1,5 +1,4 @@
 /********************************************************************
-Copyright © 2015  Sebastian Kügler <sebas@kde.org>
 Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
@@ -18,86 +17,68 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#include "output_changeset_v1.h"
 #include "output_changeset_v1_p.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
-OutputChangesetV1::Private::Private(OutputDeviceV1Interface *outputDevice,
-                                    OutputChangesetV1 *parent)
-    : q(parent)
-    , o(outputDevice)
-    , enabled(o->enabled())
-    , modeId(o->modeId())
-    , transform(o->transform())
-    , geometry(o->geometry())
+OutputChangesetV1::Private::Private(OutputDeviceV1* outputDevice, OutputChangesetV1* parent)
+    : device{outputDevice}
+    , enabled{device->enabled()}
+    , modeId{device->modeId()}
+    , transform{device->transform()}
+    , geometry{device->geometry()}
+    , q{parent}
 {
 }
 
 OutputChangesetV1::Private::~Private() = default;
 
-OutputChangesetV1::OutputChangesetV1(OutputDeviceV1Interface *outputDevice, QObject *parent)
+OutputChangesetV1::OutputChangesetV1(OutputDeviceV1* outputDevice, QObject* parent)
     : QObject(parent)
-    , d(new Private(outputDevice, this))
+    , d_ptr(new Private(outputDevice, this))
 {
 }
 
 OutputChangesetV1::~OutputChangesetV1() = default;
 
-OutputChangesetV1::Private *OutputChangesetV1::d_func() const
-{
-    return reinterpret_cast<Private*>(d.get());
-}
-
 bool OutputChangesetV1::enabledChanged() const
 {
-    Q_D();
-    return d->enabled != d->o->enabled();
+    return d_ptr->enabled != d_ptr->device->enabled();
 }
 
-OutputDeviceV1Interface::Enablement OutputChangesetV1::enabled() const
+OutputDeviceV1::Enablement OutputChangesetV1::enabled() const
 {
-    Q_D();
-    return d->enabled;
+    return d_ptr->enabled;
 }
 
 bool OutputChangesetV1::modeChanged() const
 {
-    Q_D();
-    return d->modeId != d->o->modeId();
+    return d_ptr->modeId != d_ptr->device->modeId();
 }
 
 int OutputChangesetV1::mode() const
 {
-    Q_D();
-    return d->modeId;
+    return d_ptr->modeId;
 }
 
 bool OutputChangesetV1::transformChanged() const
 {
-    Q_D();
-    return d->transform != d->o->transform();
+    return d_ptr->transform != d_ptr->device->transform();
 }
 
-OutputDeviceV1Interface::Transform OutputChangesetV1::transform() const
+OutputDeviceV1::Transform OutputChangesetV1::transform() const
 {
-    Q_D();
-    return d->transform;
+    return d_ptr->transform;
 }
 bool OutputChangesetV1::geometryChanged() const
 {
-    Q_D();
-    return d->geometry != d->o->geometry();
+    return d_ptr->geometry != d_ptr->device->geometry();
 }
 
 QRectF OutputChangesetV1::geometry() const
 {
-    Q_D();
-    return d->geometry;
+    return d_ptr->geometry;
 }
 
-}
 }

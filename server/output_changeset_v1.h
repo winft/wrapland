@@ -1,5 +1,4 @@
 /********************************************************************
-Copyright © 2015  Sebastian Kügler <sebas@kde.org>
 Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
@@ -20,28 +19,37 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include "output_changeset_v1.h"
+#include <QObject>
 
-#include <QRectF>
+#include "output_device_v1.h"
 
-namespace Wrapland
-{
-namespace Server
+#include <Wrapland/Server/wraplandserver_export.h>
+#include <memory>
+
+namespace Wrapland::Server
 {
 
-class OutputChangesetV1::Private
+class WRAPLANDSERVER_EXPORT OutputChangesetV1 : public QObject
 {
+    Q_OBJECT
 public:
-    Private(OutputDeviceV1Interface *outputDevice, OutputChangesetV1 *parent);
-    ~Private();
+    ~OutputChangesetV1() override;
 
-    OutputChangesetV1 *q;
-    OutputDeviceV1Interface *o;
+    bool enabledChanged() const;
+    bool transformChanged() const;
+    bool modeChanged() const;
+    bool geometryChanged() const;
+    OutputDeviceV1::Enablement enabled() const;
+    int mode() const;
+    OutputDeviceV1::Transform transform() const;
+    QRectF geometry() const;
 
-    OutputDeviceV1Interface::Enablement enabled;
-    int modeId;
-    OutputDeviceV1Interface::Transform transform;
-    QRectF geometry;
+private:
+    friend class OutputConfigurationV1;
+    explicit OutputChangesetV1(OutputDeviceV1* outputDevice, QObject* parent = nullptr);
+
+    class Private;
+    std::unique_ptr<Private> d_ptr;
 };
-}
+
 }

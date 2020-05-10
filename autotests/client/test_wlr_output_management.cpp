@@ -26,10 +26,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-
-#include "../../src/server/output_configuration_v1_interface.h"
-#include "../../src/server/output_device_v1_interface.h"
-#include "../../src/server/output_management_v1_interface.h"
+#include "../../server/output_configuration_v1.h"
+#include "../../server/output_device_v1.h"
+#include "../../server/output_management_v1.h"
 
 #include <QtTest>
 
@@ -49,15 +48,15 @@ private Q_SLOTS:
 
 private:
     Srv::D_isplay *m_display;
-    Srv::OutputManagementV1Interface *m_outputManagementInterface;
-    QList<Srv::OutputDeviceV1Interface *> m_serverOutputs;
+    Srv::OutputManagementV1 *m_outputManagementInterface;
+    QList<Srv::OutputDeviceV1 *> m_serverOutputs;
 
     Clt::Registry *m_registry = nullptr;
     Clt::WlrOutputHeadV1 *m_outputHead = nullptr;
     Clt::WlrOutputManagerV1 *m_outputManager = nullptr;
     Clt::WlrOutputConfigurationV1 *m_outputConfiguration = nullptr;
     QList<Clt::WlrOutputHeadV1*> m_clientOutputs;
-    QList<Srv::OutputDeviceV1Interface::Mode> m_modes;
+    QList<Srv::OutputDeviceV1::Mode> m_modes;
 
     Clt::ConnectionThread *m_connection = nullptr;
     Clt::EventQueue *m_queue = nullptr;
@@ -79,7 +78,7 @@ TestWlrOutputManagement::TestWlrOutputManagement(QObject *parent)
     , m_thread(nullptr)
     , m_announcedSpy(nullptr)
 {
-    qRegisterMetaType<Srv::OutputConfigurationV1Interface*>();
+    qRegisterMetaType<Srv::OutputConfigurationV1*>();
 }
 
 void TestWlrOutputManagement::init()
@@ -90,28 +89,28 @@ void TestWlrOutputManagement::init()
 
     auto outputDeviceInterface = m_display->createOutputDeviceV1(this);
 
-    Srv::OutputDeviceV1Interface::Mode m0;
+    Srv::OutputDeviceV1::Mode m0;
     m0.id = 0;
     m0.size = QSize(800, 600);
-    m0.flags = Srv::OutputDeviceV1Interface::ModeFlags(
-                Srv::OutputDeviceV1Interface::ModeFlag::Preferred);
+    m0.flags = Srv::OutputDeviceV1::ModeFlags(
+                Srv::OutputDeviceV1::ModeFlag::Preferred);
     outputDeviceInterface->addMode(m0);
 
-    Srv::OutputDeviceV1Interface::Mode m1;
+    Srv::OutputDeviceV1::Mode m1;
     m1.id = 1;
     m1.size = QSize(1024, 768);
     outputDeviceInterface->addMode(m1);
 
-    Srv::OutputDeviceV1Interface::Mode m2;
+    Srv::OutputDeviceV1::Mode m2;
     m2.id = 2;
     m2.size = QSize(1280, 1024);
     m2.refreshRate = 90000;
     outputDeviceInterface->addMode(m2);
 
-    Srv::OutputDeviceV1Interface::Mode m3;
+    Srv::OutputDeviceV1::Mode m3;
     m3.id = 3;
     m3.size = QSize(1920, 1080);
-    m3.flags = Srv::OutputDeviceV1Interface::ModeFlags();
+    m3.flags = Srv::OutputDeviceV1::ModeFlags();
     m3.refreshRate = 100000;
     outputDeviceInterface->addMode(m3);
 
@@ -119,12 +118,9 @@ void TestWlrOutputManagement::init()
 
     outputDeviceInterface->setMode(1);
     outputDeviceInterface->setGeometry(QRectF(QPointF(0, 1920), QSizeF(1024, 768)));
-    outputDeviceInterface->create();
     m_serverOutputs << outputDeviceInterface;
 
     m_outputManagementInterface = m_display->createOutputManagementV1(this);
-    m_outputManagementInterface->create();
-    QVERIFY(m_outputManagementInterface->isValid());
 
     // setup connection
     m_connection = new Clt::ConnectionThread;

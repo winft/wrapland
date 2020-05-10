@@ -19,41 +19,42 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include "client.h"
-#include "display.h"
-#include "wayland/display.h"
+#include <QObject>
 
-#include <EGL/egl.h>
+#include <Wrapland/Server/wraplandserver_export.h>
 
-namespace Wrapland
+namespace Wrapland::Server
 {
-namespace Server
-{
+class Client;
+class OutputChangesetV1;
+class OutputDeviceV1;
+class OutputManagementV1;
 
-class Private : public Wayland::Display
+class WRAPLANDSERVER_EXPORT OutputConfigurationV1 : public QObject
 {
+    Q_OBJECT
 public:
-    Private(D_isplay* display)
-        : Wayland::Display(display)
-        , q_ptr(display)
-    {
-    }
+    ~OutputConfigurationV1() override;
 
-    Client* createClientHandle(wl_client* wlClient);
-    Wayland::Client* castClientImpl(Server::Client* client) override;
+    QHash<OutputDeviceV1*, OutputChangesetV1*> changes() const;
 
-    std::vector<Output*> outputs;
-    std::vector<OutputDeviceV1*> outputDevices;
-    std::vector<Seat*> seats;
+    void setApplied();
+    void setFailed();
 
-    EGLDisplay eglDisplay = EGL_NO_DISPLAY;
-
-    static Private* castDisplay(D_isplay* display);
+Q_SIGNALS:
+    void resourceDestroyed();
 
 private:
-    friend class Wayland::Display;
-    D_isplay* q_ptr;
+    OutputConfigurationV1(Client* client,
+                          uint32_t version,
+                          uint32_t id,
+                          OutputManagementV1* manager);
+    friend class OutputManagementV1;
+
+    class Private;
+    Private* d_ptr;
 };
 
 }
-}
+
+Q_DECLARE_METATYPE(Wrapland::Server::OutputConfigurationV1*)

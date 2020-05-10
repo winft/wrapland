@@ -6,10 +6,6 @@ set(SERVER_LIB_SRCS
     filtered_display.cpp
     global.cpp
     output_interface.cpp
-    output_changeset_v1.cpp
-    output_configuration_v1_interface.cpp
-    output_device_v1_interface.cpp
-    output_management_v1_interface.cpp
     plasmashell_interface.cpp
     resource.cpp
     seat_interface.cpp
@@ -62,6 +58,10 @@ set(SERVER_LIB_SRCS
     ../../server/plasma_window.cpp
     ../../server/text_input_v2.cpp
     ../../server/remote_access.cpp
+    ../../server/output_changeset_v1.cpp
+    ../../server/output_configuration_v1.cpp
+    ../../server/output_device_v1.cpp
+    ../../server/output_management_v1.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -310,10 +310,6 @@ set(SERVER_LIB_HEADERS
   filtered_display.h
   global.h
   output_interface.h
-  output_changeset_v1.h
-  output_configuration_v1_interface.h
-  output_device_v1_interface.h
-  output_management_v1_interface.h
   plasmashell_interface.h
   resource.h
   server_decoration_palette_interface.h
@@ -357,6 +353,10 @@ set(SERVER_LIB_HEADERS
   ../../server/plasma_window.h
   ../../server/text_input_v2.h
   ../../server/remote_access.h
+  ../../server/output_changeset_v1.h
+  ../../server/output_configuration_v1.h
+  ../../server/output_device_v1.h
+  ../../server/output_management_v1.h
 )
 
 install(FILES
