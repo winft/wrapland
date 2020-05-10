@@ -37,7 +37,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "blur_interface.h"
 //#include "contrast_interface.h"
 //#include "relativepointer_interface_p.h"
-#include "server_decoration_interface.h"
 //#include "slide_interface.h"
 //#include "shell_interface.h"
 //#include "subcompositor_interface.h"
@@ -347,12 +346,6 @@ SlideManagerInterface *Display::createSlideManager(QObject *parent)
     return b;
 }
 */
-ServerSideDecorationManagerInterface *Display::createServerSideDecorationManager(QObject *parent)
-{
-    auto d = new ServerSideDecorationManagerInterface(this, parent);
-    connect(this, &Display::aboutToTerminate, d, [d] { delete d; });
-    return d;
-}
 /*
 TextInputManagerInterface *Display::createTextInputManager(const TextInputVersion &version, QObject *parent)
 {

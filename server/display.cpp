@@ -64,7 +64,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/output_management_v1_interface.h"
 #include "../src/server/plasmashell_interface.h"
 #include "../src/server/remote_access_interface.h"
-#include "../src/server/server_decoration_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
 
 //
@@ -273,10 +272,6 @@ DpmsManager* D_isplay::createDpmsManager(QObject* parent)
     return new DpmsManager(this, parent);
 }
 
-ServerSideDecorationManagerInterface* D_isplay::createServerSideDecorationManager(QObject* parent)
-{
-    return legacy->createServerSideDecorationManager(parent);
-}
 TextInputManagerV2* D_isplay::createTextInputManager(QObject* parent)
 {
     return new TextInputManagerV2(this, parent);
