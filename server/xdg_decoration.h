@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <QObject>
+#include <memory>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
@@ -45,7 +46,7 @@ private:
     XdgDecorationManager(D_isplay* display, XdgShell* shell, QObject* parent = nullptr);
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 class WRAPLANDSERVER_EXPORT XdgDecoration : public QObject

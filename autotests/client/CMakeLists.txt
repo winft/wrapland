@@ -289,17 +289,6 @@ add_test(NAME wrapland-testDataDevice COMMAND testDataDevice)
 ecm_mark_as_test(testDataDevice)
 
 ########################################################
-# Test ServerSideDecoration
-########################################################
-set( testServerSideDecoration_SRCS
-        test_server_side_decoration.cpp
-    )
-add_executable(testServerSideDecoration ${testServerSideDecoration_SRCS})
-target_link_libraries( testServerSideDecoration Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
-add_test(NAME wrapland-testServerSideDecoration COMMAND testServerSideDecoration)
-ecm_mark_as_test(testServerSideDecoration)
-
-########################################################
 # Test Drag'N'Drop
 ########################################################
 set( testDragAndDrop_SRCS drag_and_drop.cpp )

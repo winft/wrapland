@@ -72,7 +72,6 @@ class ContrastManager;
 class OutputConfigurationV1Interface;
 class OutputDeviceV1Interface;
 class OutputManagementV1Interface;
-class ServerSideDecorationManagerInterface;
 class SlideManager;
 class Subcompositor;
 class TextInputManagerV2;
@@ -155,8 +154,6 @@ public:
 
     KeyState* createKeyState(QObject* parent = nullptr);
 
-    ServerSideDecorationManagerInterface* createServerSideDecorationManager(QObject* parent
-                                                                            = nullptr);
     TextInputManagerV2* createTextInputManager(QObject* parent = nullptr);
 
     XdgShell* createXdgShell(QObject* parent = nullptr);
