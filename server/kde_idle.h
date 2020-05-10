@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-namespace Wrapland
-{
-namespace Server
+#include <memory>
+
+namespace Wrapland::Server
 {
 
 class D_isplay;
@@ -47,8 +47,7 @@ private:
     explicit KdeIdle(D_isplay* display, QObject* parent = nullptr);
     friend class D_isplay;
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
-}
 }
