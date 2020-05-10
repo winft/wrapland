@@ -56,7 +56,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/slide.h"
 #include "../../src/server/output_management_v1_interface.h"
 #include "../../src/server/output_device_v1_interface.h"
-#include "../../src/server/textinput_interface.h"
+#include "../../server/text_input_v2.h"
 
 #include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
@@ -93,8 +93,7 @@ private Q_SLOTS:
     void testBindSlideManager();
     void testBindDpmsManager();
     void testBindServerSideDecorationManager();
-    void testBindTextInputManagerUnstableV0();
-    void testBindTextInputManagerUnstableV2();
+    void testBindTextInputManagerV2();
     void testBindXdgShell();
     void testBindRelativePointerManagerUnstableV1();
     void testBindPointerGesturesUnstableV1();
@@ -126,8 +125,7 @@ private:
     Wrapland::Server::DataDeviceManager* m_dataDeviceManager;
     Wrapland::Server::OutputManagementV1Interface *m_outputManagement;
     Wrapland::Server::ServerSideDecorationManagerInterface *m_serverSideDecorationManager;
-    Wrapland::Server::TextInputManagerInterface *m_textInputManagerV0;
-    Wrapland::Server::TextInputManagerInterface *m_textInputManagerV2;
+    Wrapland::Server::TextInputManagerV2 *m_textInputManagerV2;
     Wrapland::Server::XdgShell *m_serverXdgShell;
     Wrapland::Server::RelativePointerManagerV1* m_relativePointerV1;
     Wrapland::Server::PointerGesturesV1* m_pointerGesturesV1;
@@ -151,7 +149,6 @@ TestWaylandRegistry::TestWaylandRegistry(QObject *parent)
     , m_dataDeviceManager(nullptr)
     , m_outputManagement(nullptr)
     , m_serverSideDecorationManager(nullptr)
-    , m_textInputManagerV0(nullptr)
     , m_textInputManagerV2(nullptr)
     , m_serverXdgShell(nullptr)
     , m_relativePointerV1(nullptr)
@@ -186,13 +183,8 @@ void TestWaylandRegistry::init()
     m_display->createDpmsManager();
     m_serverSideDecorationManager = m_display->createServerSideDecorationManager();
     m_serverSideDecorationManager->create();
-    m_textInputManagerV0 = m_display->createTextInputManager(Wrapland::Server::TextInputInterfaceVersion::UnstableV0);
-    QCOMPARE(m_textInputManagerV0->interfaceVersion(), Wrapland::Server::TextInputInterfaceVersion::UnstableV0);
-    m_textInputManagerV0->create();
-    m_textInputManagerV2 = m_display->createTextInputManager(Wrapland::Server::TextInputInterfaceVersion::UnstableV2);
-    QCOMPARE(m_textInputManagerV2->interfaceVersion(), Wrapland::Server::TextInputInterfaceVersion::UnstableV2);
-    m_textInputManagerV2->create();
-    m_serverXdgShell = m_display->createXdgShell();
+    m_textInputManagerV2 = m_display->createTextInputManager();
+   m_serverXdgShell = m_display->createXdgShell();
     m_relativePointerV1 = m_display->createRelativePointerManager();
     m_pointerGesturesV1 = m_display->createPointerGestures();
     m_pointerConstraintsV1 = m_display->createPointerConstraints();
@@ -329,12 +321,7 @@ void TestWaylandRegistry::testBindServerSideDecorationManager()
     TEST_BIND(Wrapland::Client::Registry::Interface::ServerSideDecorationManager, SIGNAL(serverSideDecorationManagerAnnounced(quint32,quint32)), bindServerSideDecorationManager, org_kde_kwin_server_decoration_manager_destroy)
 }
 
-void TestWaylandRegistry::testBindTextInputManagerUnstableV0()
-{
-    TEST_BIND(Wrapland::Client::Registry::Interface::TextInputManagerUnstableV0, SIGNAL(textInputManagerUnstableV0Announced(quint32,quint32)), bindTextInputManagerUnstableV0, wl_text_input_manager_destroy)
-}
-
-void TestWaylandRegistry::testBindTextInputManagerUnstableV2()
+void TestWaylandRegistry::testBindTextInputManagerV2()
 {
     TEST_BIND(Wrapland::Client::Registry::Interface::TextInputManagerUnstableV2, SIGNAL(textInputManagerUnstableV2Announced(quint32,quint32)), bindTextInputManagerUnstableV2, zwp_text_input_manager_v2_destroy)
 }

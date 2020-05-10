@@ -20,7 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat_interface.h"
 #include "seat_interface_p.h"
 #include "display.h"
-#include "textinput_interface_p.h"
+//#include "textinput_interface_p.h"
 
 #include "../../server/seat_p.h"
 
@@ -275,13 +275,13 @@ namespace {
 //    return q->newSeat->d_ptr->dataDeviceForSurface(surface);
 //    return interfaceForSurface(surface, dataDevices);
 //}
-
+/*
 TextInputInterface *SeatInterface::Private::textInputForSurface(SurfaceInterface *surface) const
 {
     return nullptr;
 //    return interfaceForSurface(surface, textInputs);
 }
-
+*/
 //void SeatInterface::Private::registerDataDevice(DataDeviceInterface *dataDevice)
 //{
 //    q->newSeat->d_ptr->registerDataDevice(dataDevice);
@@ -376,7 +376,7 @@ TextInputInterface *SeatInterface::Private::textInputForSurface(SurfaceInterface
 //    }
 //}
 
-
+/*
 void SeatInterface::Private::registerTextInput(TextInputInterface *ti)
 {
     q->newSeat->d_ptr->registerTextInput(ti);
@@ -403,7 +403,7 @@ void SeatInterface::Private::registerTextInput(TextInputInterface *ti)
 //        }
 //    );
 }
-
+*/
 //void SeatInterface::Private::endDrag(quint32 serial)
 //{
 //    q->newSeat->d_ptr->endDrag(serial);
@@ -1696,13 +1696,13 @@ SurfaceInterface *SeatInterface::focusedTextInputSurface() const
 //    Q_D();
 //    return d->textInput.focus.surface;
 }
-
+/*
 TextInputInterface *SeatInterface::focusedTextInput() const
 {
     return newSeat->focusedTextInput();
 //    Q_D();
 //    return d->textInput.focus.textInput;
-}
+}*/
 
 //DataDeviceInterface *SeatInterface::selection() const
 //{

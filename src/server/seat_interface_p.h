@@ -36,7 +36,7 @@ namespace Server
 {
 
 class DataDeviceInterface;
-class TextInputInterface;
+//class TextInputInterface;
 
 class SeatInterface::Private : public Global::Private
 {
@@ -49,9 +49,9 @@ public:
 //    QVector<KeyboardInterface *> keyboardsForSurface(SurfaceInterface *surface) const;
 //    QVector<TouchInterface *> touchsForSurface(SurfaceInterface *surface) const;
     DataDeviceInterface *dataDeviceForSurface(SurfaceInterface *surface) const;
-    TextInputInterface *textInputForSurface(SurfaceInterface *surface) const;
+    //TextInputInterface *textInputForSurface(SurfaceInterface *surface) const;
     void registerDataDevice(DataDeviceInterface *dataDevice);
-    void registerTextInput(TextInputInterface *textInput);
+    //void registerTextInput(TextInputInterface *textInput);
     void endDrag(quint32 serial);
     void cancelPreviousSelection(DataDeviceInterface *newlySelectedDataDevice);
 
@@ -65,7 +65,7 @@ public:
 //    QVector<KeyboardInterface*> keyboards;
 //    QVector<TouchInterface*> touchs;
     QVector<DataDeviceInterface*> dataDevices;
-    QVector<TextInputInterface*> textInputs;
+//    QVector<TextInputInterface*> textInputs;
     DataDeviceInterface *currentSelection = nullptr;
 
     // Pointer related members
@@ -130,7 +130,7 @@ public:
     Keyboard keys;
     bool updateKey(quint32 key, Keyboard::State state);
 
-    struct TextInput {
+ /*   struct TextInput {
         struct Focus {
             SurfaceInterface *surface = nullptr;
             QMetaObject::Connection destroyConnection;
@@ -140,7 +140,7 @@ public:
         Focus focus;
     };
     TextInput textInput;
-
+*/
     // Touch related members
     struct Touch {
         struct Focus {

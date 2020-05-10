@@ -37,7 +37,7 @@ namespace Server
 {
 
 class DataDevice;
-class TextInputInterface;
+class TextInputV2;
 
 using Sender = std::function<void(wl_resource*)>;
 
@@ -61,9 +61,9 @@ public:
     QVector<Keyboard*> keyboardsForSurface(Surface* surface) const;
     QVector<Touch*> touchsForSurface(Surface* surface) const;
     DataDevice* dataDeviceForSurface(Surface* surface) const;
-    TextInputInterface* textInputForSurface(Surface* surface) const;
+    TextInputV2* textInputForSurface(Surface* surface) const;
     void registerDataDevice(DataDevice* dataDevice);
-    void registerTextInput(TextInputInterface* textInput);
+    void registerTextInput(TextInputV2* textInput);
     void endDrag(quint32 serial);
     void cancelPreviousSelection(DataDevice* newlySelectedDataDevice);
 
@@ -77,7 +77,7 @@ public:
     QVector<Keyboard*> keyboards;
     QVector<Touch*> touchs;
     QVector<DataDevice*> dataDevices;
-    QVector<TextInputInterface*> textInputs;
+    QVector<TextInputV2*> textInputs;
     DataDevice* currentSelection = nullptr;
 
     // Pointer related members
@@ -144,16 +144,16 @@ public:
 
     bool updateKey(quint32 key, SeatKeyboard::State state);
 
-    struct TextInput {
+    struct structTextInput {
         struct Focus {
             Surface* surface = nullptr;
             QMetaObject::Connection destroyConnection;
             quint32 serial = 0;
-            TextInputInterface* textInput = nullptr;
+            TextInputV2* textInput = nullptr;
         };
         Focus focus;
     };
-    TextInput textInput;
+    structTextInput textInput;
 
     // Touch related members
     struct SeatTouch {

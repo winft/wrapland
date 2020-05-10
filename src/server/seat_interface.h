@@ -681,7 +681,7 @@ public:
      * @see focusedTextInputSurface
      * @since 0.0.523
      **/
-    TextInputInterface *focusedTextInput() const;
+    //TextInputInterface *focusedTextInput() const;
     ///@}
 
 //    /**
@@ -767,8 +767,8 @@ private:
 
     friend class Display;
 //    friend class DataDeviceManagerInterface;
-    friend class TextInputManagerUnstableV0Interface;
-    friend class TextInputManagerUnstableV2Interface;
+//    friend class TextInputManagerUnstableV0Interface;
+    friend class TextInputManagerUnstableV2;
     explicit SeatInterface(Display *display, QObject *parent);
 
     class Private;
