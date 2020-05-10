@@ -42,6 +42,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_constraints_v1.h"
 #include "pointer_gestures_v1.h"
 #include "relative_pointer_v1.h"
+#include "remote_access.h"
 #include "seat.h"
 #include "slide.h"
 #include "subcompositor.h"
@@ -63,7 +64,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/output_interface.h"
 #include "../src/server/output_management_v1_interface.h"
 #include "../src/server/plasmashell_interface.h"
-#include "../src/server/remote_access_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
 
 //
@@ -232,9 +232,9 @@ PlasmaWindowManager* D_isplay::createPlasmaWindowManager(QObject* parent)
     return new PlasmaWindowManager(this, parent);
 }
 
-RemoteAccessManagerInterface* D_isplay::createRemoteAccessManager(QObject* parent)
+RemoteAccessManager* D_isplay::createRemoteAccessManager(QObject* parent)
 {
-    return legacy->createRemoteAccessManager(parent);
+    return new RemoteAccessManager(this, parent);
 }
 
 KdeIdle* D_isplay::createIdle(QObject* parent)

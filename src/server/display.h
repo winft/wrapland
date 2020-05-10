@@ -58,7 +58,7 @@ class D_isplay;
 //class DataDeviceManagerInterface;
 class IdleInterface;
 //enum class IdleInhibitManagerInterfaceVersion;
-class RemoteAccessManagerInterface;
+//class RemoteAccessManagerInterface;
 class IdleInhibitManagerInterface;
 class FakeInputInterface;
 class PlasmaShellInterface;
@@ -199,7 +199,7 @@ public:
     PlasmaShellInterface *createPlasmaShell(QObject *parent = nullptr);
     //PlasmaWindowManagement *createPlasmaWindowManagement(QObject *parent = nullptr);
     IdleInterface *createIdle(QObject *parent = nullptr);
-    RemoteAccessManagerInterface *createRemoteAccessManager(QObject *parent = nullptr);
+//    RemoteAccessManagerInterface *createRemoteAccessManager(QObject *parent = nullptr);
     FakeInputInterface *createFakeInput(QObject *parent = nullptr);
 //    ShadowManagerInterface *createShadowManager(QObject *parent = nullptr);
 //    SlideManagerInterface *createSlideManager(QObject *parent = nullptr);
