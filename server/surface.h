@@ -146,8 +146,7 @@ private:
     friend class PointerConstraintsV1;
     friend class PointerPinchGestureV1;
     friend class PointerSwipeGestureV1;
-    friend class TextInputUnstableV0Interface;
-    friend class TextInputUnstableV2Interface;
+    friend class TextInputV2;
 
     friend class SurfaceRole;
     friend class Viewporter;

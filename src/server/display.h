@@ -75,8 +75,8 @@ class ServerSideDecorationManagerInterface;
 //class SlideManagerInterface;
 //class ShellInterface;
 //class SubCompositorInterface;
-enum class TextInputInterfaceVersion;
-class TextInputManagerInterface;
+//enum class TextInputInterfaceVersion;
+//class TextInputManagerInterface;
 //class XdgShellV5Interface;
 //enum class XdgShellInterfaceVersion;
 //class XdgShellInterface;
@@ -219,7 +219,7 @@ public:
      * @returns The created manager object
      * @since 0.0.523
      **/
-    TextInputManagerInterface *createTextInputManager(const TextInputInterfaceVersion &version, QObject *parent = nullptr);
+    //TextInputManagerInterface *createTextInputManager(const TextInputInterfaceVersion &version, QObject *parent = nullptr);
 
 //    /**
 //     * Creates the XdgShell in interface @p version.

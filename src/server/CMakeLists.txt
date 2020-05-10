@@ -16,9 +16,6 @@ set(SERVER_LIB_SRCS
     seat_interface.cpp
     server_decoration_interface.cpp
     server_decoration_palette_interface.cpp
-    textinput_interface.cpp
-    textinput_interface_v0.cpp
-    textinput_interface_v2.cpp
 
     ../../server/buffer.cpp
     ../../server/linux_dmabuf_v1.cpp
@@ -65,6 +62,7 @@ set(SERVER_LIB_SRCS
     ../../server/appmenu.cpp
     ../../server/plasma_virtual_desktop.cpp
     ../../server/plasma_window.cpp
+    ../../server/text_input_v2.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -329,7 +327,6 @@ set(SERVER_LIB_HEADERS
   resource.h
   server_decoration_interface.h
   server_decoration_palette_interface.h
-  textinput_interface.h
 
   ../../server/buffer.h
   ../../server/linux_dmabuf_v1.h
@@ -368,6 +365,7 @@ set(SERVER_LIB_HEADERS
   ../../server/appmenu.h
   ../../server/plasma_virtual_desktop.h
   ../../server/plasma_window.h
+  ../../server/text_input_v2.h
 )
 
 install(FILES

@@ -29,11 +29,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer.h"
 #include "pointer_p.h"
 #include "surface.h"
+#include "text_input_v2_p.h"
 #include "touch.h"
 
 // legacy
 #include "seat_interface.h"
-#include "textinput_interface_p.h"
 
 #include <config-wrapland.h>
 
@@ -186,7 +186,7 @@ static T* interfaceForSurface(Surface* surface, const QVector<T*>& interfaces)
             }
         } else {
             // TODO: remove when all in new model
-            if ((*it)->client() == surface->client()->legacy) {
+            if ((*it)->client()->legacy == surface->client()->legacy) {
                 return (*it);
             }
         }
@@ -264,7 +264,7 @@ DataDevice* Seat::Private::dataDeviceForSurface(Surface* surface) const
     return interfaceForSurface(surface, dataDevices);
 }
 
-TextInputInterface* Seat::Private::textInputForSurface(Surface* surface) const
+TextInputV2* Seat::Private::textInputForSurface(Surface* surface) const
 {
     return interfaceForSurface(surface, textInputs);
 }
@@ -358,20 +358,20 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
     }
 }
 
-void Seat::Private::registerTextInput(TextInputInterface* ti)
+void Seat::Private::registerTextInput(TextInputV2* ti)
 {
     // Text input version 0 might call this multiple times.
     if (textInputs.contains(ti)) {
         return;
     }
     textInputs << ti;
-    if (textInput.focus.surface && textInput.focus.surface->client()->legacy == ti->client()) {
+    if (textInput.focus.surface
+        && textInput.focus.surface->client() == ti->d_ptr->client()->handle()) {
         // This is a text input for the currently focused text input surface.
         if (!textInput.focus.textInput) {
             textInput.focus.textInput = ti;
-            ti->d_func()->sendEnter(textInput.focus.surface, textInput.focus.serial);
+            ti->d_ptr->sendEnter(textInput.focus.surface, textInput.focus.serial);
             Q_EMIT q_ptr->focusedTextInputChanged();
-            Q_EMIT q_ptr->legacy->focusedTextInputChanged();
         }
     }
     QObject::connect(ti, &QObject::destroyed, q_ptr, [this, ti] {
@@ -379,7 +379,6 @@ void Seat::Private::registerTextInput(TextInputInterface* ti)
         if (textInput.focus.textInput == ti) {
             textInput.focus.textInput = nullptr;
             Q_EMIT q_ptr->focusedTextInputChanged();
-            Q_EMIT q_ptr->legacy->focusedTextInputChanged();
         }
     });
 }
@@ -1528,16 +1527,15 @@ void Seat::setFocusedTextInputSurface(Surface* surface)
     const auto old = d_ptr->textInput.focus.textInput;
     if (d_ptr->textInput.focus.textInput) {
         // TODO: setFocusedSurface like in other interfaces
-        d_ptr->textInput.focus.textInput->d_func()->sendLeave(serial,
-                                                              d_ptr->textInput.focus.surface);
+        d_ptr->textInput.focus.textInput->d_ptr->sendLeave(serial, d_ptr->textInput.focus.surface);
     }
     if (d_ptr->textInput.focus.surface) {
         disconnect(d_ptr->textInput.focus.destroyConnection);
     }
-    d_ptr->textInput.focus = Private::TextInput::Focus();
+    d_ptr->textInput.focus = Private::structTextInput::Focus();
     d_ptr->textInput.focus.surface = surface;
-    TextInputInterface* t = d_ptr->textInputForSurface(surface);
-    if (t && !t->resource()) {
+    TextInputV2* t = d_ptr->textInputForSurface(surface);
+    if (t && !t->d_ptr->resource()) {
         t = nullptr;
     }
     d_ptr->textInput.focus.textInput = t;
@@ -1550,7 +1548,7 @@ void Seat::setFocusedTextInputSurface(Surface* surface)
     }
     if (t) {
         // TODO: setFocusedSurface like in other interfaces
-        t->d_func()->sendEnter(surface, serial);
+        t->d_ptr->sendEnter(surface, serial);
     }
     if (old != t) {
         Q_EMIT focusedTextInputChanged();
@@ -1563,7 +1561,7 @@ Surface* Seat::focusedTextInputSurface() const
     return d_ptr->textInput.focus.surface;
 }
 
-TextInputInterface* Seat::focusedTextInput() const
+TextInputV2* Seat::focusedTextInput() const
 {
     return d_ptr->textInput.focus.textInput;
 }

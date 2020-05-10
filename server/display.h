@@ -75,8 +75,7 @@ class OutputManagementV1Interface;
 class ServerSideDecorationManagerInterface;
 class SlideManager;
 class Subcompositor;
-enum class TextInputInterfaceVersion;
-class TextInputManagerInterface;
+class TextInputManagerV2;
 class RelativePointerManagerV1;
 class PointerGesturesV1;
 class PointerConstraintsV1;
@@ -158,8 +157,8 @@ public:
 
     ServerSideDecorationManagerInterface* createServerSideDecorationManager(QObject* parent
                                                                             = nullptr);
-    TextInputManagerInterface* createTextInputManager(const TextInputInterfaceVersion& version,
-                                                      QObject* parent = nullptr);
+    TextInputManagerV2* createTextInputManager(QObject* parent = nullptr);
+
     XdgShell* createXdgShell(QObject* parent = nullptr);
 
     RelativePointerManagerV1* createRelativePointerManager(QObject* parent = nullptr);

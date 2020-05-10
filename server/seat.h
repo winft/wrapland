@@ -43,7 +43,7 @@ class Pointer;
 class Touch;
 
 class Surface;
-class TextInputInterface;
+class TextInputV2;
 
 // legacy
 class SeatInterface;
@@ -158,7 +158,7 @@ public:
 
     void setFocusedTextInputSurface(Surface* surface);
     Surface* focusedTextInputSurface() const;
-    TextInputInterface* focusedTextInput() const;
+    TextInputV2* focusedTextInput() const;
 
     DataDevice* selection() const;
     void setSelection(DataDevice* dataDevice);
@@ -195,8 +195,7 @@ private:
 
     // legacy
     friend class SeatInterface;
-    friend class TextInputManagerUnstableV0Interface;
-    friend class TextInputManagerUnstableV2Interface;
+    friend class TextInputManagerV2;
 
     Seat(D_isplay* display, QObject* parent);
 
