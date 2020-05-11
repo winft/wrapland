@@ -166,27 +166,8 @@ static T* interfaceForSurface(Surface* surface, const QVector<T*>& interfaces)
     }
 
     for (auto it = interfaces.constBegin(); it != interfaces.constEnd(); ++it) {
-        if constexpr (std::is_same_v<T, Pointer>) {
-            if ((*it)->client() == surface->client()) {
-                return (*it);
-            }
-        } else if constexpr (std::is_same_v<T, Keyboard>) {
-            if ((*it)->client() == surface->client()) {
-                return (*it);
-            }
-        } else if constexpr (std::is_same_v<T, DataDevice>) {
-            if ((*it)->client() == surface->client()) {
-                return (*it);
-            }
-        } else if constexpr (std::is_same_v<T, Touch>) {
-            if ((*it)->client() == surface->client()) {
-                return (*it);
-            }
-        } else {
-            // TODO: remove when all in new model
-            if ((*it)->client()->legacy == surface->client()->legacy) {
-                return (*it);
-            }
+        if ((*it)->client() == surface->client()) {
+            return (*it);
         }
     }
     return nullptr;
@@ -201,23 +182,8 @@ static QVector<T*> interfacesForSurface(Surface* surface, const QVector<T*>& int
     }
 
     for (auto it = interfaces.constBegin(); it != interfaces.constEnd(); ++it) {
-        if constexpr (std::is_same_v<T, Pointer>) {
-            if ((*it)->client() == surface->client()) {
-                ret << *it;
-            }
-        } else if constexpr (std::is_same_v<T, Keyboard>) {
-            if ((*it)->client() == surface->client()) {
-                ret << *it;
-            }
-        } else if constexpr (std::is_same_v<T, Touch>) {
-            if ((*it)->client() == surface->client()) {
-                ret << *it;
-            }
-        } else {
-            // TODO: remove when all in new model
-            if ((*it)->client() == surface->client()->legacy) {
-                ret << *it;
-            }
+        if ((*it)->client() == surface->client()) {
+            ret << *it;
         }
     }
     return ret;
