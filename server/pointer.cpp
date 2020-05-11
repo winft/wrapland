@@ -56,7 +56,6 @@ QPointF surfacePosition(Surface* surface)
 Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Pointer* q)
     : Wayland::Resource<Pointer>(client, version, id, &wl_pointer_interface, &s_interface, q)
     , seat{_seat}
-    , q_ptr{q}
 {
     // TODO: handle touch
     connect(seat, &Seat::pointerPosChanged, q, [this] {
@@ -103,10 +102,10 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
 void Pointer::Private::setCursor(quint32 serial, Surface* surface, const QPoint& hotspot)
 {
     if (!cursor) {
-        cursor = new Cursor(q_ptr);
+        cursor = new Cursor(handle());
         cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
-        QObject::connect(cursor, &Cursor::changed, q_ptr, &Pointer::cursorChanged);
-        Q_EMIT q_ptr->cursorChanged();
+        QObject::connect(cursor, &Cursor::changed, handle(), &Pointer::cursorChanged);
+        Q_EMIT handle()->cursorChanged();
     } else {
         cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
     }
@@ -155,7 +154,7 @@ void Pointer::Private::registerRelativePointer(RelativePointerV1* relativePointe
     relativePointers.push_back(relativePointer);
 
     QObject::connect(
-        relativePointer, &RelativePointerV1::resourceDestroyed, q_ptr, [this, relativePointer] {
+        relativePointer, &RelativePointerV1::resourceDestroyed, handle(), [this, relativePointer] {
             relativePointers.erase(
                 std::remove(relativePointers.begin(), relativePointers.end(), relativePointer),
                 relativePointers.end());
@@ -165,7 +164,7 @@ void Pointer::Private::registerRelativePointer(RelativePointerV1* relativePointe
 void Pointer::Private::registerSwipeGesture(PointerSwipeGestureV1* gesture)
 {
     swipeGestures.push_back(gesture);
-    QObject::connect(gesture, &PointerSwipeGestureV1::resourceDestroyed, q_ptr, [this, gesture] {
+    QObject::connect(gesture, &PointerSwipeGestureV1::resourceDestroyed, handle(), [this, gesture] {
         swipeGestures.erase(std::remove(swipeGestures.begin(), swipeGestures.end(), gesture),
                             swipeGestures.end());
     });
@@ -174,7 +173,7 @@ void Pointer::Private::registerSwipeGesture(PointerSwipeGestureV1* gesture)
 void Pointer::Private::registerPinchGesture(PointerPinchGestureV1* gesture)
 {
     pinchGestures.push_back(gesture);
-    QObject::connect(gesture, &PointerPinchGestureV1::resourceDestroyed, q_ptr, [this, gesture] {
+    QObject::connect(gesture, &PointerPinchGestureV1::resourceDestroyed, handle(), [this, gesture] {
         pinchGestures.erase(std::remove(pinchGestures.begin(), pinchGestures.end(), gesture),
                             pinchGestures.end());
     });
@@ -430,7 +429,7 @@ void Pointer::relativeMotion(const QSizeF& delta,
 Pointer* Pointer::get(void* data)
 {
     auto priv = Private::fromResource(reinterpret_cast<wl_resource*>(data));
-    return static_cast<Private*>(priv)->q_ptr;
+    return static_cast<Private*>(priv)->handle();
 }
 
 Cursor::Private::Private(Cursor* q, Pointer* _pointer)

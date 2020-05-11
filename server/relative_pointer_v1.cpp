@@ -39,7 +39,6 @@ RelativePointerManagerV1::Private::Private(RelativePointerManagerV1* q, D_isplay
                                                 display,
                                                 &zwp_relative_pointer_manager_v1_interface,
                                                 &s_interface)
-    , q_ptr(q)
 {
 }
 
@@ -88,7 +87,6 @@ RelativePointerV1::Private::Private(Client* client,
                                            &zwp_relative_pointer_v1_interface,
                                            &s_interface,
                                            q)
-    , q_ptr{q}
 {
 }
 

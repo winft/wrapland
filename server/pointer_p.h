@@ -88,8 +88,6 @@ public:
 
     void setFocusedSurface(quint32 serial, Surface* surface);
 
-    Pointer* q_ptr;
-
 private:
     static void setCursorCallback(wl_client* wlClient,
                                   wl_resource* wlResource,

@@ -40,7 +40,7 @@ class LinuxDmabufV1::Private : public LinuxDmabufV1Global
 {
 public:
     Private(LinuxDmabufV1* q, D_isplay* display);
-    ~Private() override final;
+    ~Private() override;
 
     void bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind) override final;
 
@@ -49,8 +49,6 @@ public:
 
     LinuxDmabufV1::Impl* impl;
     QHash<uint32_t, QSet<uint64_t>> supportedFormatsWithModifiers;
-
-    LinuxDmabufV1* q_ptr;
 
 private:
     static const struct zwp_linux_dmabuf_v1_interface s_interface;
@@ -66,9 +64,6 @@ public:
     QSize size;
 
     BufferV1* buffer;
-
-private:
-    LinuxDmabufBufferV1* q_ptr;
 };
 
 class BufferV1 : public Wayland::Resource<LinuxDmabufBufferV1>
@@ -81,8 +76,6 @@ public:
 
 private:
     static const struct wl_buffer_interface s_interface;
-
-    LinuxDmabufBufferV1* q_ptr;
 };
 
 class ParamsWrapperV1;
@@ -126,7 +119,6 @@ private:
 
     static struct zwp_linux_buffer_params_v1_interface const s_interface;
 
-    wl_resource* m_resource;
     LinuxDmabufV1::Private* m_dmabuf;
     std::array<LinuxDmabufV1::Plane, 4> m_planes;
     size_t m_planeCount = 0;
