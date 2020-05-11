@@ -63,7 +63,7 @@ class IdleInhibitManagerInterface;
 class FakeInputInterface;
 class PlasmaShellInterface;
 //class PlasmaWindowManagementInterface;
-class SeatInterface;
+//class SeatInterface;
 //class ShadowManagerInterface;
 //class ContrastManagerInterface;
 //class BlurManagerInterface;
@@ -187,12 +187,12 @@ public:
 //    CompositorInterface *createCompositor(QObject *parent = nullptr);
     void createShm();
 //    ShellInterface *createShell(QObject *parent = nullptr);
-    SeatInterface *createSeat(QObject *parent = nullptr);
-    /**
-     * @returns All SeatInterface currently managed on the Display.
-     * @since 5.6
-     **/
-    QVector<SeatInterface*> seats() const;
+//    SeatInterface *createSeat(QObject *parent = nullptr);
+//    /**
+//     * @returns All SeatInterface currently managed on the Display.
+//     * @since 5.6
+//     **/
+//    QVector<SeatInterface*> seats() const;
 //    SubCompositorInterface *createSubCompositor(QObject *parent = nullptr);
 //    DataDeviceManagerInterface *createDataDeviceManager(QObject *parent = nullptr);
     OutputManagementV1Interface *createOutputManagementV1(QObject *parent = nullptr);

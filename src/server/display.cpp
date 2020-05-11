@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "plasmawindowmanagement_interface.h"
 //#include "pointerconstraints_interface_p.h"
 //#include "pointergestures_interface_p.h"
-#include "seat_interface.h"
+//#include "seat_interface.h"
 //#include "shadow_interface.h"
 //#include "blur_interface.h"
 //#include "contrast_interface.h"
@@ -61,7 +61,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/display.h"
 
 #include "../../server/output.h"
-#include "../../server/seat.h"
+//#include "../../server/seat.h"
 //
 //
 
@@ -97,7 +97,7 @@ public:
     bool automaticSocketNaming = false;
     QList<OutputInterface*> outputs;
 //    QList<OutputDeviceV1Interface*> outputDevices;
-    QVector<SeatInterface*> seats;
+//    QVector<SeatInterface*> seats;
     QVector<ClientConnection*> clients;
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 
@@ -256,14 +256,14 @@ OutputInterface *Display::createOutput(QObject *parent)
 //    return om;
 //}
 
-SeatInterface *Display::createSeat(QObject *parent)
-{
-    auto seat = newDisplay->createSeat(parent);
-    auto legacy = seat->legacy;
+//SeatInterface *Display::createSeat(QObject *parent)
+//{
+//    auto seat = newDisplay->createSeat(parent);
+//    auto legacy = seat->legacy;
 
-    d->seats << legacy;
-    return legacy;
-}
+//    d->seats << legacy;
+//    return legacy;
+//}
 
 //SubCompositorInterface *Display::createSubCompositor(QObject *parent)
 //{
@@ -562,10 +562,10 @@ QList<OutputInterface*> Display::outputs() const
 //    return d->outputDevices;
 //}
 
-QVector<SeatInterface*> Display::seats() const
-{
-    return d->seats;
-}
+//QVector<SeatInterface*> Display::seats() const
+//{
+//    return d->seats;
+//}
 
 ClientConnection *Display::getConnection(wl_client *client)
 {

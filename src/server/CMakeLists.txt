@@ -7,7 +7,6 @@ set(SERVER_LIB_SRCS
     output_interface.cpp
     plasmashell_interface.cpp
     resource.cpp
-    seat_interface.cpp
     server_decoration_palette_interface.cpp
 
     ../../server/buffer.cpp

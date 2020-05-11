@@ -32,9 +32,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "text_input_v2_p.h"
 #include "touch.h"
 
-// legacy
-#include "seat_interface.h"
-
 #include <config-wrapland.h>
 
 #ifndef WL_SEAT_NAME_SINCE_VERSION
@@ -70,9 +67,6 @@ Seat::Seat(D_isplay* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {
-    legacy = new Server::SeatInterface(display->legacy, this);
-    legacy->newSeat = this;
-
     connect(this, &Seat::nameChanged, this, [this] { d_ptr->sendName(); });
 
     auto sendCapabilities = [this] { d_ptr->sendCapabilities(); };
@@ -83,12 +77,7 @@ Seat::Seat(D_isplay* display, QObject* parent)
     d_ptr->create();
 }
 
-Seat::~Seat()
-{
-    if (legacy) {
-        delete legacy;
-    }
-}
+Seat::~Seat() = default;
 
 void Seat::Private::bindInit(Wayland::Resource<Seat, SeatGlobal>* bind)
 {
@@ -306,8 +295,6 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
                                      dataDevice->dragImplicitGrabSerial());
         Q_EMIT q_ptr->dragStarted();
         Q_EMIT q_ptr->dragSurfaceChanged();
-        Q_EMIT q_ptr->legacy->dragStarted();
-        Q_EMIT q_ptr->legacy->dragSurfaceChanged();
     });
 
     // Is the new DataDevice for the current keyoard focus?
@@ -362,8 +349,6 @@ void Seat::Private::endDrag(quint32 serial)
     drag = Drag();
     Q_EMIT q_ptr->dragSurfaceChanged();
     Q_EMIT q_ptr->dragEnded();
-    Q_EMIT q_ptr->legacy->dragSurfaceChanged();
-    Q_EMIT q_ptr->legacy->dragEnded();
 }
 
 void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice)
@@ -413,7 +398,6 @@ void Seat::setHasKeyboard(bool has)
     }
     d_ptr->keyboard = has;
     Q_EMIT hasKeyboardChanged(d_ptr->keyboard);
-    Q_EMIT legacy->hasKeyboardChanged(d_ptr->keyboard);
 }
 
 void Seat::setHasPointer(bool has)
@@ -423,7 +407,6 @@ void Seat::setHasPointer(bool has)
     }
     d_ptr->pointer = has;
     Q_EMIT hasPointerChanged(d_ptr->pointer);
-    Q_EMIT legacy->hasPointerChanged(d_ptr->pointer);
 }
 
 void Seat::setHasTouch(bool has)
@@ -442,7 +425,6 @@ void Seat::setName(const std::string& name)
     }
     d_ptr->name = name;
     Q_EMIT nameChanged(d_ptr->name);
-    Q_EMIT legacy->nameChanged(QString::fromStdString(d_ptr->name));
 }
 
 void Seat::Private::getPointerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id)
@@ -569,13 +551,6 @@ bool Seat::hasTouch() const
     return d_ptr->touch;
 }
 
-Seat* Seat::get(void* data)
-{
-    auto resource = reinterpret_cast<Wayland::Resource<Seat, SeatGlobal>*>(data);
-    auto seatPriv = static_cast<Seat::Private*>(resource->global());
-    return seatPriv->q_ptr;
-}
-
 QPointF Seat::pointerPos() const
 {
     return d_ptr->globalPointer.pos;
@@ -588,7 +563,6 @@ void Seat::setPointerPos(const QPointF& pos)
     }
     d_ptr->globalPointer.pos = pos;
     Q_EMIT pointerPosChanged(pos);
-    Q_EMIT legacy->pointerPosChanged(pos);
 }
 
 quint32 Seat::timestamp() const
@@ -603,7 +577,6 @@ void Seat::setTimestamp(quint32 time)
     }
     d_ptr->timestamp = time;
     Q_EMIT timestampChanged(time);
-    Q_EMIT legacy->timestampChanged(time);
 }
 
 void Seat::setDragTarget(Surface* surface,
@@ -633,7 +606,6 @@ void Seat::setDragTarget(Surface* surface,
         d_ptr->drag.surface = nullptr;
     }
     Q_EMIT dragSurfaceChanged();
-    Q_EMIT legacy->dragSurfaceChanged();
     return;
 }
 
@@ -1516,7 +1488,6 @@ void Seat::setFocusedTextInputSurface(Surface* surface)
     }
     if (old != t) {
         Q_EMIT focusedTextInputChanged();
-        Q_EMIT legacy->focusedTextInputChanged();
     }
 }
 
