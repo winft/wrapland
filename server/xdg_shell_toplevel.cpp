@@ -21,6 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdg_shell_toplevel_p.h"
 
 #include "display.h"
+#include "output_p.h"
+#include "seat_p.h"
 #include "xdg_shell_surface.h"
 #include "xdg_shell_surface_p.h"
 
@@ -96,7 +98,7 @@ void XdgShellToplevel::Private::moveCallback([[maybe_unused]] wl_client* wlClien
                                              uint32_t serial)
 {
     auto priv = static_cast<Private*>(fromResource(wlResource));
-    Q_EMIT priv->handle()->moveRequested(Wayland::Global<Seat>::fromResource(wlSeat), serial);
+    Q_EMIT priv->handle()->moveRequested(SeatGlobal::fromResource(wlSeat), serial);
 }
 
 Qt::Edges edgesToQtEdges(xdg_toplevel_resize_edge edges)
@@ -143,9 +145,8 @@ void XdgShellToplevel::Private::resizeCallback([[maybe_unused]] wl_client* wlCli
                                                uint32_t edges)
 {
     auto priv = static_cast<Private*>(fromResource(wlResource));
-    Q_EMIT priv->handle()->resizeRequested(Wayland::Global<Seat>::fromResource(wlSeat),
-                                           serial,
-                                           edgesToQtEdges(xdg_toplevel_resize_edge(edges)));
+    Q_EMIT priv->handle()->resizeRequested(
+        SeatGlobal::fromResource(wlSeat), serial, edgesToQtEdges(xdg_toplevel_resize_edge(edges)));
 }
 
 void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
@@ -322,7 +323,7 @@ void XdgShellToplevel::Private::showWindowMenuCallback([[maybe_unused]] wl_clien
                                                        int32_t y)
 {
     auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto seat = Wayland::Global<Seat>::fromResource(wlSeat);
+    auto seat = SeatGlobal::fromResource(wlSeat);
     Q_EMIT priv->handle()->windowMenuRequested(seat, serial, QPoint(x, y));
 }
 
@@ -345,7 +346,7 @@ void XdgShellToplevel::Private::setFullscreenCallback([[maybe_unused]] wl_client
                                                       wl_resource* wlOutput)
 {
     auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto output = wlOutput ? Wayland::Global<Output>::fromResource(wlOutput) : nullptr;
+    auto output = wlOutput ? OutputGlobal::fromResource(wlOutput) : nullptr;
     Q_EMIT priv->handle()->fullscreenChanged(true, output);
 }
 

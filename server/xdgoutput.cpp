@@ -17,8 +17,9 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#include "output.h"
 #include "xdgoutput_p.h"
+
+#include "output_p.h"
 
 namespace Wrapland
 {
@@ -75,7 +76,7 @@ void XdgOutputManager::Private::getXdgOutputCallback(wl_client* wlClient,
 {
     auto priv = fromResource(wlResource)->d_ptr;
     auto client = priv->display()->getClient(wlClient);
-    auto output = Global<Output>::fromResource(outputResource);
+    auto output = OutputGlobal::fromResource(outputResource);
 
     // Output client is requesting XdgOutput for an Output that doesn't exist.
     if (!output) {

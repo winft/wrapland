@@ -49,8 +49,7 @@ void DpmsManager::Private::getDpmsCallback(wl_client* wlClient,
     auto handle = fromResource(wlResource);
     auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
 
-    auto dpms
-        = new Dpms(client, handle->d_ptr->version(), id, Global<Output>::fromResource(output));
+    auto dpms = new Dpms(client, handle->d_ptr->version(), id, OutputGlobal::fromResource(output));
     if (!dpms) {
         return;
     }
