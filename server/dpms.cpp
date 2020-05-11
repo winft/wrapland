@@ -26,9 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/client.h"
 #include "wayland/display.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_dpms_manager_interface DpmsManager::Private::s_interface = {
@@ -151,5 +149,4 @@ void Dpms::sendDone()
     d_ptr->flush();
 }
 
-}
 }

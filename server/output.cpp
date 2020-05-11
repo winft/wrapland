@@ -34,9 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 Output::Private::Private(Output* q, D_isplay* display)
@@ -440,5 +438,4 @@ QVector<wl_resource*> Output::getResources(Client* client)
     return d_ptr->getResources(client);
 }
 
-}
 }
