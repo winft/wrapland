@@ -198,7 +198,7 @@ void TestSeat::init()
     registry.setup();
     QVERIFY(compositorSpy.wait());
 
-    m_serverSeat = m_display->createSeat();
+    m_serverSeat = m_display->createSeat(m_display);
     QVERIFY(m_serverSeat);
     m_serverSeat->setName("seat0");
 

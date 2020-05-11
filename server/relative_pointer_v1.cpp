@@ -67,9 +67,8 @@ void RelativePointerManagerV1::Private::relativePointerCallback(wl_client* wlCli
     pointer->registerRelativePointer(relative);
 }
 
-RelativePointerManagerV1::RelativePointerManagerV1(D_isplay* display,
-                                                   [[maybe_unused]] QObject* parent)
-    : QObject(nullptr)
+RelativePointerManagerV1::RelativePointerManagerV1(D_isplay* display, QObject* parent)
+    : QObject(parent)
     , d_ptr(new Private(this, display))
 {
     d_ptr->create();
