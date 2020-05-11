@@ -51,6 +51,9 @@ class Private;
 class DataDeviceManager;
 class DpmsManager;
 class Output;
+class OutputConfigurationV1;
+class OutputDeviceV1;
+class OutputManagementV1;
 class PlasmaVirtualDesktopManager;
 class PlasmaWindowManager;
 class Seat;
@@ -69,9 +72,6 @@ class PlasmaShellInterface;
 class ShadowManager;
 class BlurManager;
 class ContrastManager;
-class OutputConfigurationV1Interface;
-class OutputDeviceV1Interface;
-class OutputManagementV1Interface;
 class SlideManager;
 class Subcompositor;
 class TextInputManagerV2;
@@ -131,16 +131,16 @@ public:
     // Legacy
     void setSocketName(const QString& name);
 
-    OutputDeviceV1Interface* createOutputDeviceV1(QObject* parent = nullptr);
-    void removeOutputDevice(OutputDeviceV1Interface* outputDevice);
-    QList<OutputDeviceV1Interface*> outputDevices() const;
+    OutputDeviceV1* createOutputDeviceV1(QObject* parent = nullptr);
+    void removeOutputDevice(OutputDeviceV1* outputDevice);
+    std::vector<OutputDeviceV1*> outputDevices() const;
 
     Compositor* createCompositor(QObject* parent = nullptr);
     void createShm();
 
     Subcompositor* createSubCompositor(QObject* parent = nullptr);
     DataDeviceManager* createDataDeviceManager(QObject* parent = nullptr);
-    OutputManagementV1Interface* createOutputManagementV1(QObject* parent = nullptr);
+    OutputManagementV1* createOutputManagementV1(QObject* parent = nullptr);
     PlasmaShellInterface* createPlasmaShell(QObject* parent = nullptr);
     PlasmaWindowManager* createPlasmaWindowManager(QObject* parent = nullptr);
     KdeIdle* createIdle(QObject* parent = nullptr);

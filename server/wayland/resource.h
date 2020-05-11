@@ -81,9 +81,7 @@ public:
         m_resource = m_client->createResource(interface, m_version, id);
 
         wl_resource_set_user_data(m_resource, this);
-        if (impl) {
-            wl_resource_set_implementation(m_resource, impl, this, destroy);
-        }
+        wl_resource_set_implementation(m_resource, impl, this, destroy);
     }
 
     template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
