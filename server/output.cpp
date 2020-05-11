@@ -25,11 +25,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/client.h"
 #include "wayland/display.h"
 
-// legacy
-#include "../src/server/display.h"
-#include "../src/server/output_interface.h"
-#include "wayland/resource.h"
-
 #include <cassert>
 #include <functional>
 #include <wayland-server.h>
@@ -48,27 +43,10 @@ Output::Private::~Private() = default;
 
 const struct wl_output_interface Output::Private::s_interface = {resourceDestroyCallback};
 
-Output::Mode fromOutputInterfaceMode(OutputInterface::Mode mode)
-{
-    Output::Mode ret;
-    ret.flags = (Output::ModeFlags)(int)mode.flags;
-    ret.refreshRate = mode.refreshRate;
-    ret.size = mode.size;
-    return ret;
-}
-
 Output::Output(D_isplay* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {
-    legacy = new Server::OutputInterface(display->legacy, this);
-    legacy->newOutput = this;
-
-    connect(
-        legacy, &OutputInterface::dpmsModeRequested, this, [this](OutputInterface::DpmsMode mode) {
-            Q_EMIT dpmsModeRequested((Output::DpmsMode)(int)mode);
-        });
-
     connect(this, &Output::currentModeChanged, this, [this] {
         auto currentModeIt
             = std::find_if(d_ptr->modes.cbegin(), d_ptr->modes.cend(), [](const Mode& mode) {
@@ -100,10 +78,6 @@ Output::Output(D_isplay* display, QObject* parent)
 
 Output::~Output()
 {
-    if (legacy) {
-        delete legacy;
-    }
-
     Q_EMIT removed();
 
     d_ptr->displayHandle->removeOutput(this);
@@ -403,7 +377,6 @@ void Output::setDpmsMode(Output::DpmsMode mode)
     }
     d_ptr->dpms.mode = mode;
     Q_EMIT dpmsModeChanged();
-    Q_EMIT legacy->dpmsModeChanged();
 }
 
 void Output::setDpmsSupported(bool supported)
@@ -413,7 +386,6 @@ void Output::setDpmsSupported(bool supported)
     }
     d_ptr->dpms.supported = supported;
     Q_EMIT dpmsSupportedChanged();
-    Q_EMIT legacy->dpmsSupportedChanged();
 }
 
 Output::DpmsMode Output::dpmsMode() const

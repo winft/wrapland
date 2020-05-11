@@ -67,7 +67,7 @@ class PlasmaShellInterface;
 //class ShadowManagerInterface;
 //class ContrastManagerInterface;
 //class BlurManagerInterface;
-class OutputInterface;
+//class OutputInterface;
 class OutputConfigurationV1Interface;
 class OutputDeviceV1Interface;
 class OutputManagementV1Interface;
@@ -176,9 +176,9 @@ public:
     operator wl_display*() const;
     bool isRunning() const;
 
-    OutputInterface *createOutput(QObject *parent = nullptr);
-    void removeOutput(OutputInterface *output);
-    QList<OutputInterface*> outputs() const;
+//    OutputInterface *createOutput(QObject *parent = nullptr);
+//    void removeOutput(OutputInterface *output);
+//    QList<OutputInterface*> outputs() const;
 
     OutputDeviceV1Interface *createOutputDeviceV1(QObject *parent = nullptr);
     void removeOutputDevice(OutputDeviceV1Interface *outputDevice);

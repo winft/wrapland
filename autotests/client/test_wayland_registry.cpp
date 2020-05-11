@@ -49,7 +49,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/xdgdecoration.h"
 
 #include "../../server/idle_inhibit_v1.h"
-#include "../../src/server/output_interface.h"
 #include "../../server/contrast.h"
 #include "../../server/blur.h"
 #include "../../server/slide.h"

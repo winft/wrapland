@@ -62,7 +62,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/shadow.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
-#include "../src/server/output_interface.h"
 #include "../src/server/plasmashell_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
 
