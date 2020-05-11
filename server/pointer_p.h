@@ -61,7 +61,7 @@ public:
     QPointer<Surface> focusedChildSurface;
     QMetaObject::Connection surfaceDestroyConnection;
     QMetaObject::Connection clientDestroyConnection;
-    Cursor* cursor = nullptr;
+    std::unique_ptr<Cursor> cursor;
 
     std::vector<RelativePointerV1*> relativePointers;
     std::vector<PointerSwipeGestureV1*> swipeGestures;

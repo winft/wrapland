@@ -122,9 +122,9 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
 void Pointer::Private::setCursor(quint32 serial, Surface* surface, const QPoint& hotspot)
 {
     if (!cursor) {
-        cursor = new Cursor(handle());
+        cursor.reset(new Cursor(handle()));
         cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
-        QObject::connect(cursor, &Cursor::changed, handle(), &Pointer::cursorChanged);
+        QObject::connect(cursor.get(), &Cursor::changed, handle(), &Pointer::cursorChanged);
         Q_EMIT handle()->cursorChanged();
     } else {
         cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
@@ -417,7 +417,7 @@ Seat* Pointer::seat() const
 
 Cursor* Pointer::cursor() const
 {
-    return d_ptr->cursor;
+    return d_ptr->cursor.get();
 }
 
 void Pointer::relativeMotion(const QSizeF& delta,
@@ -477,7 +477,7 @@ void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const Q
 }
 
 Cursor::Cursor(Pointer* pointer)
-    : QObject(pointer)
+    : QObject(nullptr)
     , d_ptr(new Private(this, pointer))
 {
 }
