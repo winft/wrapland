@@ -59,7 +59,8 @@ public:
 
     Surface* focusedSurface = nullptr;
     QPointer<Surface> focusedChildSurface;
-    QMetaObject::Connection destroyConnection;
+    QMetaObject::Connection surfaceDestroyConnection;
+    QMetaObject::Connection clientDestroyConnection;
     Cursor* cursor = nullptr;
 
     std::vector<RelativePointerV1*> relativePointers;

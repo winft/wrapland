@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer.h"
 #include "pointer_p.h"
 
+#include "client.h"
 #include "data_device.h"
 #include "display.h"
 #include "seat.h"
@@ -281,7 +282,8 @@ void Pointer::Private::cancelPinchGesture(quint32 serial)
 void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
 {
     sendLeave(serial, focusedChildSurface.data());
-    disconnect(destroyConnection);
+    disconnect(surfaceDestroyConnection);
+    disconnect(clientDestroyConnection);
 
     if (!surface) {
         focusedSurface = nullptr;
@@ -290,9 +292,16 @@ void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
     }
 
     focusedSurface = surface;
-    destroyConnection = connect(focusedSurface, &Surface::resourceDestroyed, handle(), [this] {
-        sendLeave(client()->display()->handle()->nextSerial(), focusedChildSurface.data());
-        sendFrame();
+    surfaceDestroyConnection
+        = connect(focusedSurface, &Surface::resourceDestroyed, handle(), [this] {
+              disconnect(clientDestroyConnection);
+              sendLeave(client()->display()->handle()->nextSerial(), focusedChildSurface.data());
+              sendFrame();
+              focusedSurface = nullptr;
+              focusedChildSurface.clear();
+          });
+    clientDestroyConnection = connect(client()->handle(), &Client::disconnected, handle(), [this] {
+        disconnect(surfaceDestroyConnection);
         focusedSurface = nullptr;
         focusedChildSurface.clear();
     });
