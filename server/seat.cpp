@@ -275,9 +275,10 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
         }
         drag.source = dataDevice;
         drag.sourcePointer = interfaceForSurface(originSurface, pointers);
-        drag.destroyConnection = QObject::connect(dataDevice, &QObject::destroyed, q_ptr, [this] {
-            endDrag(display()->handle()->nextSerial());
-        });
+        drag.destroyConnection
+            = QObject::connect(dataDevice, &DataDevice::resourceDestroyed, q_ptr, [this] {
+                  endDrag(display()->handle()->nextSerial());
+              });
         if (dataDevice->dragSource()) {
             drag.dragSourceDestroyConnection = QObject::connect(
                 dataDevice->dragSource(), &DataSource::resourceDestroyed, q_ptr, [this] {
@@ -325,7 +326,7 @@ void Seat::Private::registerTextInput(TextInputV2* ti)
             Q_EMIT q_ptr->focusedTextInputChanged();
         }
     }
-    QObject::connect(ti, &QObject::destroyed, q_ptr, [this, ti] {
+    QObject::connect(ti, &TextInputV2::resourceDestroyed, q_ptr, [this, ti] {
         textInputs.removeAt(textInputs.indexOf(ti));
         if (textInput.focus.textInput == ti) {
             textInput.focus.textInput = nullptr;
@@ -524,7 +525,7 @@ void Seat::Private::getTouch(Client* client, uint32_t id, wl_resource* resource)
             // TODO: send out all the points
         }
     }
-    QObject::connect(touch, &QObject::destroyed, q_ptr, [touch, this] {
+    QObject::connect(touch, &Touch::resourceDestroyed, q_ptr, [touch, this] {
         touchs.removeAt(touchs.indexOf(touch));
         globalTouch.focus.touchs.removeOne(touch);
     });
@@ -1073,9 +1074,10 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
     d_ptr->keys.focus.keyboards = d_ptr->keyboardsForSurface(surface);
 
     if (d_ptr->keys.focus.surface) {
-        d_ptr->keys.focus.destroyConnection = connect(surface, &QObject::destroyed, this, [this] {
-            d_ptr->keys.focus = Private::SeatKeyboard::Focus();
-        });
+        d_ptr->keys.focus.destroyConnection
+            = connect(surface, &Surface::resourceDestroyed, this, [this] {
+                  d_ptr->keys.focus = Private::SeatKeyboard::Focus();
+              });
         d_ptr->keys.focus.serial = serial;
 
         // selection?
@@ -1281,7 +1283,7 @@ void Seat::setFocusedTouchSurface(Surface* surface, const QPointF& surfacePositi
     d_ptr->globalTouch.focus.touchs = d_ptr->touchsForSurface(surface);
     if (d_ptr->globalTouch.focus.surface) {
         d_ptr->globalTouch.focus.destroyConnection
-            = connect(surface, &QObject::destroyed, this, [this] {
+            = connect(surface, &Surface::resourceDestroyed, this, [this] {
                   if (isTouchSequence()) {
                       // Surface destroyed during touch sequence - send a cancel
                       for (auto it = d_ptr->globalTouch.focus.touchs.constBegin(),

@@ -362,15 +362,16 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
                           d_ptr->client()->flush();
                       });
     }
-    d_ptr->drag.destroyConnection = connect(d_ptr->drag.surface, &QObject::destroyed, this, [this] {
-        if (d_ptr->resource()) {
-            d_ptr->send<wl_data_device_send_leave>();
-        }
-        if (d_ptr->drag.posConnection) {
-            disconnect(d_ptr->drag.posConnection);
-        }
-        d_ptr->drag = Private::Drag();
-    });
+    d_ptr->drag.destroyConnection
+        = connect(d_ptr->drag.surface, &Surface::resourceDestroyed, this, [this] {
+              if (d_ptr->resource()) {
+                  d_ptr->send<wl_data_device_send_leave>();
+              }
+              if (d_ptr->drag.posConnection) {
+                  disconnect(d_ptr->drag.posConnection);
+              }
+              d_ptr->drag = Private::Drag();
+          });
 
     // TODO: handle touch position
     const QPointF pos = d_ptr->seat->dragSurfaceTransformation().map(d_ptr->seat->pointerPos());
