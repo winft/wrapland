@@ -294,7 +294,7 @@ void DataDevice::drop()
     d_ptr->drag.destroyConnection = QMetaObject::Connection();
     d_ptr->drag.surface = nullptr;
 
-    d_ptr->client()->flush();
+    // TODO: do we need to flush the client here?
 }
 
 void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
