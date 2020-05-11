@@ -27,7 +27,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QTimer>
 #include <vector>
 
-#include <Wrapland/Server/wraplandserver_export.h>
 #include <wayland-idle-server-protocol.h>
 
 namespace Wrapland

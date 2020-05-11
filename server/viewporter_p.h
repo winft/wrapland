@@ -28,7 +28,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "viewporter.h"
 
-#include <Wrapland/Server/wraplandserver_export.h>
 #include <wayland-viewporter-server-protocol.h>
 
 namespace Wrapland::Server

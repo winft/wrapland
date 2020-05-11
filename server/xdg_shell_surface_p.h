@@ -24,7 +24,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "wayland/resource.h"
 
-#include <Wrapland/Server/wraplandserver_export.h>
 #include <wayland-xdg-shell-server-protocol.h>
 
 #include <QSize>
