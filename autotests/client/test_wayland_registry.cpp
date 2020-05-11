@@ -53,8 +53,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/contrast.h"
 #include "../../server/blur.h"
 #include "../../server/slide.h"
-#include "../../src/server/output_management_v1_interface.h"
-#include "../../src/server/output_device_v1_interface.h"
+#include "../../server/output_management_v1.h"
+#include "../../server/output_device_v1.h"
 #include "../../server/text_input_v2.h"
 #include "../../server/xdg_decoration.h"
 
@@ -119,11 +119,11 @@ private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Compositor *m_compositor;
     Wrapland::Server::Output *m_output;
-    Wrapland::Server::OutputDeviceV1Interface *m_outputDevice;
+    Wrapland::Server::OutputDeviceV1 *m_outputDevice;
     Wrapland::Server::Seat* m_seat;
     Wrapland::Server::Subcompositor *m_subcompositor;
     Wrapland::Server::DataDeviceManager* m_dataDeviceManager;
-    Wrapland::Server::OutputManagementV1Interface *m_outputManagement;
+    Wrapland::Server::OutputManagementV1 *m_outputManagement;
     Wrapland::Server::XdgDecorationManager* m_xdgDecorationManager;
     Wrapland::Server::TextInputManagerV2 *m_textInputManagerV2;
     Wrapland::Server::XdgShell *m_serverXdgShell;
@@ -173,10 +173,7 @@ void TestWaylandRegistry::init()
     m_subcompositor = m_display->createSubCompositor();
     m_dataDeviceManager = m_display->createDataDeviceManager();
     m_outputManagement = m_display->createOutputManagementV1();
-    m_outputManagement->create();
     m_outputDevice = m_display->createOutputDeviceV1();
-    m_outputDevice->create();
-    QVERIFY(m_outputManagement->isValid());
     m_blur = m_display->createBlurManager(this);
     m_contrast = m_display->createContrastManager(this);
     m_display->createSlideManager(this);
@@ -857,6 +854,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     // just its display.
     registry.create(connection.display());
     registry.setup();
+
     QVERIFY(syncSpy.wait());
     QCOMPARE(syncSpy.count(), 1);
 
@@ -865,8 +863,10 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
 
     QSignalSpy outputDeviceAnnouncedSpy(&registry, &Registry::outputDeviceV1Announced);
     QVERIFY(outputDeviceAnnouncedSpy.isValid());
-    m_display->createOutputDeviceV1()->create();
+
+    m_display->createOutputDeviceV1();
     QVERIFY(outputDeviceAnnouncedSpy.wait());
+
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 2);
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().name, outputDeviceAnnouncedSpy.first().first().value<quint32>());
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().version, outputDeviceAnnouncedSpy.first().last().value<quint32>());
@@ -874,7 +874,6 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).version, outputDeviceAnnouncedSpy.first().last().value<quint32>());
 
     auto outputDevice = m_display->createOutputDeviceV1();
-    outputDevice->create();
     QVERIFY(outputDeviceAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 3);
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().name, outputDeviceAnnouncedSpy.last().first().value<quint32>());

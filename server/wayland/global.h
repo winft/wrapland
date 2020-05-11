@@ -54,7 +54,9 @@ public:
 
     virtual ~Global()
     {
-        m_display->removeGlobal(m_capsule.get());
+        if (m_capsule->valid()) {
+            m_display->removeGlobal(m_capsule.get());
+        }
         for (auto bind : m_binds) {
             bind->setGlobal(nullptr);
         }

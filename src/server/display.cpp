@@ -20,9 +20,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "display.h"
 //#include "compositor_interface.h"
-#include "output_configuration_v1_interface.h"
-#include "output_management_v1_interface.h"
-#include "output_device_v1_interface.h"
+//#include "output_configuration_v1_interface.h"
+//#include "output_management_v1_interface.h"
+//#include "output_device_v1_interface.h"
 //#include "idleinhibit_interface_p.h"
 //#include "remote_access_interface.h"
 #include "fakeinput_interface.h"
@@ -96,7 +96,7 @@ public:
     bool running = false;
     bool automaticSocketNaming = false;
     QList<OutputInterface*> outputs;
-    QList<OutputDeviceV1Interface*> outputDevices;
+//    QList<OutputDeviceV1Interface*> outputDevices;
     QVector<SeatInterface*> seats;
     QVector<ClientConnection*> clients;
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
@@ -240,21 +240,21 @@ OutputInterface *Display::createOutput(QObject *parent)
 //    return shell;
 //}
 
-OutputDeviceV1Interface *Display::createOutputDeviceV1(QObject *parent)
-{
-    auto *output = new OutputDeviceV1Interface(this, parent);
-    connect(output, &QObject::destroyed, this, [this,output] { d->outputDevices.removeAll(output); });
-    connect(this, &Display::aboutToTerminate, output, [this,output] { removeOutputDevice(output); });
-    d->outputDevices << output;
-    return output;
-}
+//OutputDeviceV1Interface *Display::createOutputDeviceV1(QObject *parent)
+//{
+//    auto *output = new OutputDeviceV1Interface(this, parent);
+//    connect(output, &QObject::destroyed, this, [this,output] { d->outputDevices.removeAll(output); });
+//    connect(this, &Display::aboutToTerminate, output, [this,output] { removeOutputDevice(output); });
+//    d->outputDevices << output;
+//    return output;
+//}
 
-OutputManagementV1Interface *Display::createOutputManagementV1(QObject *parent)
-{
-    auto *om = new OutputManagementV1Interface(this, parent);
-    connect(this, &Display::aboutToTerminate, om, [this,om] { delete om; });
-    return om;
-}
+//OutputManagementV1Interface *Display::createOutputManagementV1(QObject *parent)
+//{
+//    auto *om = new OutputManagementV1Interface(this, parent);
+//    connect(this, &Display::aboutToTerminate, om, [this,om] { delete om; });
+//    return om;
+//}
 
 SeatInterface *Display::createSeat(QObject *parent)
 {
@@ -521,11 +521,11 @@ void Display::removeOutput(OutputInterface *output)
     newDisplay->removeOutput(output->newOutput);
 }
 
-void Display::removeOutputDevice(OutputDeviceV1Interface *outputDevice)
-{
-    d->outputDevices.removeAll(outputDevice);
-    delete outputDevice;
-}
+//void Display::removeOutputDevice(OutputDeviceV1Interface *outputDevice)
+//{
+//    d->outputDevices.removeAll(outputDevice);
+//    delete outputDevice;
+//}
 
 quint32 Display::nextSerial()
 {
@@ -557,10 +557,10 @@ QList<OutputInterface*> Display::outputs() const
     return d->outputs;
 }
 
-QList<OutputDeviceV1Interface*> Display::outputDevices() const
-{
-    return d->outputDevices;
-}
+//QList<OutputDeviceV1Interface*> Display::outputDevices() const
+//{
+//    return d->outputDevices;
+//}
 
 QVector<SeatInterface*> Display::seats() const
 {

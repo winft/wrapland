@@ -19,11 +19,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include <QtTest>
 
-#include "../../src/server/output_management_v1_interface.h"
-
 #include "../../server/client.h"
 #include "../../server/display.h"
 #include "../../server/output.h"
+#include "../../server/output_management_v1.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -219,9 +218,7 @@ void TestServerDisplay::testOutputManagement()
     D_isplay display;
     display.setSocketName(std::string("wrapland-test-0"));
     display.start();
-    auto kwin = display.createOutputManagementV1(this);
-    kwin->create();
-    QVERIFY(kwin->isValid());
+    display.createOutputManagementV1(this);
 }
 
 void TestServerDisplay::testAutoSocketName()

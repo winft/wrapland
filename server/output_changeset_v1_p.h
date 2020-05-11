@@ -19,41 +19,27 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include "client.h"
-#include "display.h"
-#include "wayland/display.h"
+#include "output_changeset_v1.h"
 
-#include <EGL/egl.h>
+#include <QRectF>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
-class Private : public Wayland::Display
+class OutputChangesetV1::Private
 {
 public:
-    Private(D_isplay* display)
-        : Wayland::Display(display)
-        , q_ptr(display)
-    {
-    }
+    Private(OutputDeviceV1* outputDevice, OutputChangesetV1* parent);
+    ~Private();
 
-    Client* createClientHandle(wl_client* wlClient);
-    Wayland::Client* castClientImpl(Server::Client* client) override;
+    OutputDeviceV1* device;
 
-    std::vector<Output*> outputs;
-    std::vector<OutputDeviceV1*> outputDevices;
-    std::vector<Seat*> seats;
+    OutputDeviceV1::Enablement enabled;
+    int modeId;
+    OutputDeviceV1::Transform transform;
+    QRectF geometry;
 
-    EGLDisplay eglDisplay = EGL_NO_DISPLAY;
-
-    static Private* castDisplay(D_isplay* display);
-
-private:
-    friend class Wayland::Display;
-    D_isplay* q_ptr;
+    OutputChangesetV1* q;
 };
 
-}
 }
