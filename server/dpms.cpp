@@ -29,12 +29,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
+constexpr uint32_t DpmsManagerVersion = 1;
+using DpmsManagerGlobal = Wayland::Global<DpmsManager, DpmsManagerVersion>;
+
 const struct org_kde_kwin_dpms_manager_interface DpmsManager::Private::s_interface = {
     getDpmsCallback,
 };
 
 DpmsManager::Private::Private(D_isplay* display, DpmsManager* q)
-    : Wayland::Global<DpmsManager>(q, display, &org_kde_kwin_dpms_manager_interface, &s_interface)
+    : DpmsManagerGlobal(q, display, &org_kde_kwin_dpms_manager_interface, &s_interface)
 {
     create();
 }
