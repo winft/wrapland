@@ -86,6 +86,8 @@ public:
     void endPinchGesture(quint32 serial);
     void cancelPinchGesture(quint32 serial);
 
+    void setFocusedSurface(quint32 serial, Surface* surface);
+
     Pointer* q_ptr;
 
 private:
