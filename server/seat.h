@@ -200,7 +200,7 @@ private:
     Seat(D_isplay* display, QObject* parent);
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

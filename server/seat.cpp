@@ -88,8 +88,6 @@ Seat::~Seat()
     if (legacy) {
         delete legacy;
     }
-
-    delete d_ptr;
 }
 
 void Seat::Private::bindInit(Wayland::Resource<Seat, SeatGlobal>* bind)
