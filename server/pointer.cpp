@@ -53,6 +53,25 @@ QPointF surfacePosition(Surface* surface)
         + surfacePosition(surface->subsurface()->parentSurface());
 }
 
+const struct wl_pointer_interface Pointer::Private::s_interface = {
+    setCursorCallback,
+    destroyCallback,
+};
+
+void Pointer::Private::setCursorCallback([[maybe_unused]] wl_client* wlClient,
+                                         wl_resource* wlResource,
+                                         uint32_t serial,
+                                         wl_resource* wlSurface,
+                                         int32_t hotspot_x,
+                                         int32_t hotspot_y)
+{
+    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto surface
+        = wlSurface ? Wayland::Resource<Surface>::fromResource(wlSurface)->handle() : nullptr;
+
+    priv->setCursor(serial, surface, QPoint(hotspot_x, hotspot_y));
+}
+
 Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Pointer* q)
     : Wayland::Resource<Pointer>(client, version, id, &wl_pointer_interface, &s_interface, q)
     , seat{_seat}
@@ -259,11 +278,6 @@ void Pointer::Private::cancelPinchGesture(quint32 serial)
     }
 }
 
-const struct wl_pointer_interface Pointer::Private::s_interface = {
-    setCursorCallback,
-    destroyCallback,
-};
-
 void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
 {
     sendLeave(serial, focusedChildSurface.data());
@@ -380,20 +394,6 @@ void Pointer::axis(Qt::Orientation orientation, quint32 delta)
     Q_ASSERT(d_ptr->focusedSurface);
     d_ptr->sendAxis(orientation, delta);
     d_ptr->sendFrame();
-}
-
-void Pointer::Private::setCursorCallback([[maybe_unused]] wl_client* wlClient,
-                                         wl_resource* wlResource,
-                                         uint32_t serial,
-                                         wl_resource* wlSurface,
-                                         int32_t hotspot_x,
-                                         int32_t hotspot_y)
-{
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto surface
-        = wlSurface ? Wayland::Resource<Surface>::fromResource(wlSurface)->handle() : nullptr;
-
-    priv->setCursor(serial, surface, QPoint(hotspot_x, hotspot_y));
 }
 
 Client* Pointer::client() const
