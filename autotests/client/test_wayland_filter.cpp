@@ -135,7 +135,7 @@ void TestFilter::testFilter()
     //been previous fetched via getConnection()
     if (accessAllowed) {
         wl_client *clientConnection;
-        wl_client_for_each(clientConnection, wl_display_get_client_list(*m_display)) {
+        wl_client_for_each(clientConnection, wl_display_get_client_list(m_display->native())) {
             m_display->m_allowedClients << clientConnection;
         }
     }

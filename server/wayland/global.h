@@ -68,7 +68,7 @@ public:
         Q_ASSERT(!m_capsule->valid());
 
         m_capsule->create(
-            wl_global_create(display()->handle()->display(), m_interface, version(), this, bind));
+            wl_global_create(display()->handle()->native(), m_interface, version(), this, bind));
     }
 
     constexpr int version() const

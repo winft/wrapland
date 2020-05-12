@@ -544,12 +544,12 @@ bool Display::isRunning() const
 
 Display::operator wl_display*()
 {
-    return newDisplay->display();
+    return newDisplay->native();
 }
 
 Display::operator wl_display*() const
 {
-    return newDisplay->display();
+    return newDisplay->native();
 }
 
 //QList<OutputInterface*> Display::outputs() const

@@ -115,9 +115,7 @@ public:
 
     void dispatchEvents(int msecTimeout = -1);
 
-    wl_display* display() const;
-    operator wl_display*();
-    operator wl_display*() const;
+    wl_display* native() const;
     bool running() const;
 
     Output* createOutput(QObject* parent = nullptr);

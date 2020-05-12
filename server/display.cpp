@@ -366,18 +366,18 @@ KeyState* D_isplay::createKeyState(QObject* parent)
 
 void D_isplay::createShm()
 {
-    Q_ASSERT(d_ptr->display());
-    wl_display_init_shm(d_ptr->display());
+    Q_ASSERT(d_ptr->native());
+    wl_display_init_shm(d_ptr->native());
 }
 
 quint32 D_isplay::nextSerial()
 {
-    return wl_display_next_serial(d_ptr->display());
+    return wl_display_next_serial(d_ptr->native());
 }
 
 quint32 D_isplay::serial()
 {
-    return wl_display_get_serial(d_ptr->display());
+    return wl_display_get_serial(d_ptr->native());
 }
 
 bool D_isplay::running() const
@@ -385,19 +385,9 @@ bool D_isplay::running() const
     return d_ptr->running();
 }
 
-wl_display* D_isplay::display() const
+wl_display* D_isplay::native() const
 {
-    return d_ptr->display();
-}
-
-D_isplay::operator wl_display*()
-{
-    return d_ptr->display();
-}
-
-D_isplay::operator wl_display*() const
-{
-    return d_ptr->display();
+    return d_ptr->native();
 }
 
 std::vector<Output*>& D_isplay::outputs() const

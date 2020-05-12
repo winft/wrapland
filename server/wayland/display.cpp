@@ -75,7 +75,7 @@ Display::~Display()
     }
 }
 
-wl_display* Display::display() const
+wl_display* Display::native() const
 {
     return m_display;
 }
@@ -143,7 +143,7 @@ void Display::start(bool createSocket)
 void Display::startLoop()
 {
     Q_ASSERT(!running());
-    Q_ASSERT(display());
+    Q_ASSERT(native());
     installSocketNotifier(m_handle);
 }
 

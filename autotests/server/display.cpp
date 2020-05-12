@@ -126,7 +126,7 @@ void TestServerDisplay::testClientConnection()
     int sv[2];
     QVERIFY(socketpair(AF_UNIX, SOCK_STREAM, 0, sv) >= 0);
 
-    auto* wlClient = wl_client_create(display, sv[0]);
+    auto* wlClient = wl_client_create(display.native(), sv[0]);
     QVERIFY(wlClient);
 
     QVERIFY(connectedSpy.isEmpty());

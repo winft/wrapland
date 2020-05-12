@@ -58,7 +58,7 @@ public:
     void addGlobal(GlobalCapsule* capsule);
     void removeGlobal(GlobalCapsule* capsule);
 
-    wl_display* display() const;
+    wl_display* native() const;
     std::string socketName() const;
 
     void start(bool createSocket);
