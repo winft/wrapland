@@ -74,7 +74,7 @@ void XdgOutputManager::Private::getXdgOutputCallback(wl_client* wlClient,
                                                      uint32_t id,
                                                      wl_resource* outputResource)
 {
-    auto priv = fromResource(wlResource)->d_ptr;
+    auto priv = fromResource(wlResource)->d_ptr.get();
     auto client = priv->display()->getClient(wlClient);
     auto output = OutputGlobal::fromResource(outputResource);
 
