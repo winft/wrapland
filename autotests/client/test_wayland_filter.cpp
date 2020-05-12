@@ -28,12 +28,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/blur.h"
 
-#include "../../src/server/display.h"
+#include "../../server/client.h"
+#include "../../server/display.h"
 #include "../../server/compositor.h"
 #include "../../server/region.h"
-
 #include "../../server/blur.h"
-#include "../../src/server/filtered_display.h"
+#include "../../server/filtered_display.h"
 
 #include <wayland-server.h>
 
@@ -66,7 +66,7 @@ class TestDisplay : public Wrapland::Server::FilteredDisplay
 {
 public:
     TestDisplay(QObject *parent);
-    bool allowInterface(Wrapland::Server::ClientConnection * client, const QByteArray & interfaceName) override;
+    bool allowInterface(Wrapland::Server::Client* client, const QByteArray & interfaceName) override;
     QList<wl_client*> m_allowedClients;
 };
 
@@ -74,10 +74,10 @@ TestDisplay::TestDisplay(QObject *parent):
     Wrapland::Server::FilteredDisplay(parent)
 {}
 
-bool TestDisplay::allowInterface(Wrapland::Server::ClientConnection* client, const QByteArray& interfaceName)
+bool TestDisplay::allowInterface(Wrapland::Server::Client* client, const QByteArray& interfaceName)
 {
     if (interfaceName == "org_kde_kwin_blur_manager") {
-        return m_allowedClients.contains(*client);
+        return m_allowedClients.contains(client->client());
     }
     return true;
 }
@@ -95,14 +95,10 @@ void TestFilter::init()
     m_display = new TestDisplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
+    QVERIFY(m_display->running());
 
-    // TODO
-//    m_serverCompositor = m_display->createCompositor(m_display);
-    /*
+    m_serverCompositor = m_display->createCompositor(m_display);
     m_blurManagerInterface = m_display->createBlurManager(m_display);
-    m_blurManagerInterface->create();
-    QVERIFY(m_blurManagerInterface->isValid());*/
 }
 
 void TestFilter::cleanup()
