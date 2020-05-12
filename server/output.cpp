@@ -80,7 +80,9 @@ Output::~Output()
 {
     Q_EMIT removed();
 
-    d_ptr->displayHandle->removeOutput(this);
+    if (d_ptr->displayHandle) {
+        d_ptr->displayHandle->removeOutput(this);
+    }
     delete d_ptr;
 }
 

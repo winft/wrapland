@@ -29,6 +29,7 @@ namespace Wrapland::Server
 
 OutputDeviceV1::Private::Private(OutputDeviceV1* q, D_isplay* display)
     : OutputDeviceV1Global(q, display, &zkwinft_output_device_v1_interface, nullptr)
+    , displayHandle{display}
 {
     create();
 }
@@ -409,7 +410,12 @@ OutputDeviceV1::OutputDeviceV1(D_isplay* display, QObject* parent)
 {
 }
 
-OutputDeviceV1::~OutputDeviceV1() = default;
+OutputDeviceV1::~OutputDeviceV1()
+{
+    if (d_ptr->displayHandle) {
+        d_ptr->displayHandle->removeOutputDevice(this);
+    }
+}
 
 void OutputDeviceV1::done()
 {
