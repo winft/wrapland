@@ -41,8 +41,9 @@ public:
 private:
     explicit XdgOutputManager(D_isplay* display, QObject* parent = nullptr);
     friend class D_isplay;
+
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 class WRAPLANDSERVER_EXPORT XdgOutput : public QObject

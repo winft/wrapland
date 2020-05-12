@@ -506,7 +506,7 @@ void TestOutput::testDpms_data()
 
 void TestOutput::testDpms()
 {
-    m_display->createDpmsManager();
+    std::unique_ptr<Srv::DpmsManager> serverDpmsManager{m_display->createDpmsManager()};
 
     // set Dpms on the Output
     QSignalSpy serverDpmsSupportedChangedSpy(m_serverOutput, &Srv::Output::dpmsSupportedChanged);
@@ -608,7 +608,7 @@ void TestOutput::testDpmsRequestMode()
     // server side.
 
     // Setup code
-    m_display->createDpmsManager();
+    std::unique_ptr<Srv::DpmsManager> serverDpmsManager{m_display->createDpmsManager()};
 
     // set Dpms on the Output
     QSignalSpy serverDpmsSupportedChangedSpy(m_serverOutput, &Srv::Output::dpmsSupportedChanged);

@@ -38,7 +38,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/touch.h"
 
 #include "../../src/server/clientconnection.h"
-#include "../../src/server/seat_interface.h"
 
 #include "../../server/buffer.h"
 #include "../../server/client.h"
@@ -199,7 +198,7 @@ void TestSeat::init()
     registry.setup();
     QVERIFY(compositorSpy.wait());
 
-    m_serverSeat = m_display->createSeat();
+    m_serverSeat = m_display->createSeat(m_display);
     QVERIFY(m_serverSeat);
     m_serverSeat->setName("seat0");
 

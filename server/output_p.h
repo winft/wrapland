@@ -23,13 +23,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "wayland/global.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class D_isplay;
-
-using Sender = std::function<void(wl_resource*)>;
 
 constexpr uint32_t OutputVersion = 3;
 using OutputGlobal = Wayland::Global<Output, OutputVersion>;
@@ -83,5 +79,4 @@ private:
     static const struct wl_output_interface s_interface;
 };
 
-}
 }

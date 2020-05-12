@@ -43,8 +43,6 @@ private:
                                         wl_resource* wlPointer);
 
     static const struct zwp_relative_pointer_manager_v1_interface s_interface;
-
-    RelativePointerManagerV1* q_ptr;
 };
 
 class RelativePointerV1 : public QObject
@@ -73,8 +71,6 @@ public:
 
 private:
     static const struct zwp_relative_pointer_v1_interface s_interface;
-
-    RelativePointerV1* q_ptr;
 };
 
 }

@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keyboard_p.h"
 
 #include "display.h"
-#include "seat_interface.h"
+#include "seat.h"
 #include "surface.h"
 #include "surface_p.h"
 

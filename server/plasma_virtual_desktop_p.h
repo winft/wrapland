@@ -68,8 +68,6 @@ private:
     static void
     requestRemoveVirtualDesktopCallback(wl_client* client, wl_resource* resource, const char* id);
 
-    PlasmaVirtualDesktopManager* q;
-
     static const struct org_kde_plasma_virtual_desktop_management_interface s_interface;
 };
 
@@ -92,7 +90,6 @@ public:
 
 private:
     PlasmaVirtualDesktop* q_ptr;
-    wl_listener listener;
 };
 
 class PlasmaVirtualDesktopRes : public QObject

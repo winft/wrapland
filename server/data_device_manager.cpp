@@ -100,7 +100,7 @@ void DataDeviceManager::Private::getDataDeviceCallback(wl_client* wlClient,
 }
 
 DataDeviceManager::DataDeviceManager(D_isplay* display, [[maybe_unused]] QObject* parent)
-    : QObject(nullptr)
+    : QObject(parent)
     , d_ptr(new Private(this, display))
 {
     d_ptr->create();

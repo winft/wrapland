@@ -35,11 +35,8 @@ struct wl_global;
 struct wl_client;
 struct wl_resource;
 
-namespace Wrapland
+namespace Wrapland::Server
 {
-namespace Server
-{
-
 class Client;
 class D_isplay;
 class OutputInterface;
@@ -160,7 +157,6 @@ private:
     Private* d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::Output::ModeFlags)

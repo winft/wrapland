@@ -58,8 +58,9 @@ Q_SIGNALS:
 private:
     friend class D_isplay;
     explicit PlasmaWindowManager(D_isplay* display, QObject* parent);
+
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 class WRAPLANDSERVER_EXPORT PlasmaWindow : public QObject

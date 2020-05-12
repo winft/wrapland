@@ -37,16 +37,11 @@ namespace Server
 
 class DataDevice;
 class D_isplay;
-
 class Keyboard;
 class Pointer;
-class Touch;
-
 class Surface;
 class TextInputV2;
-
-// legacy
-class SeatInterface;
+class Touch;
 
 enum class PointerAxisSource {
     Unknown,
@@ -60,7 +55,7 @@ class WRAPLANDSERVER_EXPORT Seat : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~Seat();
+    ~Seat() override;
 
     std::string name() const;
     bool hasPointer() const;
@@ -163,11 +158,6 @@ public:
     DataDevice* selection() const;
     void setSelection(DataDevice* dataDevice);
 
-    // legacy
-    SeatInterface* legacy;
-    static Seat* get(void* data);
-    //
-
 Q_SIGNALS:
     void nameChanged(std::string);
     void hasPointerChanged(bool);
@@ -192,15 +182,12 @@ Q_SIGNALS:
 private:
     friend class D_isplay;
     friend class DataDeviceManager;
-
-    // legacy
-    friend class SeatInterface;
     friend class TextInputManagerV2;
 
     Seat(D_isplay* display, QObject* parent);
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

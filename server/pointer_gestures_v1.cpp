@@ -43,7 +43,6 @@ PointerGesturesV1::Private::Private(PointerGesturesV1* q, D_isplay* display)
                                          display,
                                          &zwp_pointer_gestures_v1_interface,
                                          &s_interface)
-    , q_ptr(q)
 {
 }
 

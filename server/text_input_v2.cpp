@@ -49,7 +49,7 @@ void TextInputManagerV2::Private::getTextInputCallback([[maybe_unused]] wl_clien
                                                        uint32_t id,
                                                        wl_resource* wlSeat)
 {
-    auto seat = Wayland::Global<Seat>::fromResource(wlSeat);
+    auto seat = SeatGlobal::fromResource(wlSeat);
     auto priv = fromResource(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 

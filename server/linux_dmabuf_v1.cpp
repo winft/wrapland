@@ -348,7 +348,6 @@ LinuxDmabufBufferV1::Private::Private(uint32_t format, const QSize& size, LinuxD
     : format(format)
     , size(size)
     , buffer(nullptr)
-    , q_ptr(q)
 {
 }
 
@@ -382,7 +381,6 @@ BufferV1::BufferV1(Client* client, uint32_t version, uint32_t id, LinuxDmabufBuf
                                              &wl_buffer_interface,
                                              &s_interface,
                                              q)
-    , q_ptr(q)
 {
 }
 

@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "display.h"
 #include "kde_idle_p.h"
-#include "seat.h"
+#include "seat_p.h"
 
 #include <QTimer>
 #include <functional>
@@ -48,7 +48,7 @@ void KdeIdle::Private::getIdleTimeoutCallback([[maybe_unused]] wl_client* wlClie
     auto kdeidle = fromResource(wlResource);
     auto priv = fromResource(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
-    auto seat = reinterpret_cast<Seat*>(fromResource(wlSeat));
+    auto seat = SeatGlobal::fromResource(wlSeat);
 
     auto idleTimeout
         = new IdleTimeout(bind->client()->handle(), bind->version(), id, seat, kdeidle);

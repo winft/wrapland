@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdg_shell_popup_p.h"
 
 #include "display.h"
+#include "seat_p.h"
 #include "xdg_shell_surface_p.h"
 
 #include "wayland/global.h"
@@ -110,7 +111,7 @@ void XdgShellPopup::Private::grabCallback(wl_client* wlClient,
                                           uint32_t serial)
 {
     auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto seat = Wayland::Global<Seat>::fromResource(wlSeat);
+    auto seat = SeatGlobal::fromResource(wlSeat);
 
     priv->handle()->grabRequested(seat, serial);
 }

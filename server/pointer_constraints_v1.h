@@ -22,9 +22,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QRegion>
 
-#include "resource.h"
-
 #include <Wrapland/Server/wraplandserver_export.h>
+#include <memory>
 
 namespace Wrapland
 {
@@ -45,7 +44,7 @@ private:
     explicit PointerConstraintsV1(D_isplay* display, QObject* parent = nullptr);
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 class WRAPLANDSERVER_EXPORT LockedPointerV1 : public QObject

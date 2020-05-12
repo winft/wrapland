@@ -39,7 +39,6 @@ RelativePointerManagerV1::Private::Private(RelativePointerManagerV1* q, D_isplay
                                                 display,
                                                 &zwp_relative_pointer_manager_v1_interface,
                                                 &s_interface)
-    , q_ptr(q)
 {
 }
 
@@ -68,9 +67,8 @@ void RelativePointerManagerV1::Private::relativePointerCallback(wl_client* wlCli
     pointer->registerRelativePointer(relative);
 }
 
-RelativePointerManagerV1::RelativePointerManagerV1(D_isplay* display,
-                                                   [[maybe_unused]] QObject* parent)
-    : QObject(nullptr)
+RelativePointerManagerV1::RelativePointerManagerV1(D_isplay* display, QObject* parent)
+    : QObject(parent)
     , d_ptr(new Private(this, display))
 {
     d_ptr->create();
@@ -88,7 +86,6 @@ RelativePointerV1::Private::Private(Client* client,
                                            &zwp_relative_pointer_v1_interface,
                                            &s_interface,
                                            q)
-    , q_ptr{q}
 {
 }
 
