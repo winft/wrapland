@@ -91,12 +91,12 @@ public:
         return m_implementation;
     }
 
-    operator wl_global*() const
+    explicit operator wl_global*() const
     {
         return *m_capsule;
     }
 
-    operator wl_global*()
+    explicit operator wl_global*()
     {
         return *m_capsule;
     }
