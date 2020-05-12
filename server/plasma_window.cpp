@@ -113,7 +113,7 @@ void PlasmaWindowManager::Private::getWindowCallback([[maybe_unused]] wl_client*
                                                      uint32_t id,
                                                      uint32_t internalWindowId)
 {
-    auto priv = fromResource(wlResource)->d_ptr;
+    auto priv = fromResource(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     auto it = std::find_if(priv->windows.constBegin(),
