@@ -42,7 +42,7 @@ class ContrastManager::Private : public ContrastManagerGlobal
 {
 public:
     Private(D_isplay* display, ContrastManager* q);
-    ~Private();
+    ~Private() override;
 
 private:
     void createContrast(wl_client* wlClient,
@@ -63,7 +63,7 @@ class Contrast::Private : public Wayland::Resource<Contrast>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, Contrast* q);
-    ~Private();
+    ~Private() override;
 
     QRegion pendingRegion;
     QRegion currentRegion;

@@ -39,7 +39,7 @@ class OutputManagementV1::Private : public OutputManagementV1Global
 {
 public:
     Private(OutputManagementV1* q, D_isplay* display);
-    ~Private();
+    ~Private() override;
 
 private:
     static void

@@ -120,7 +120,7 @@ class WRAPLANDSERVER_EXPORT LinuxDmabufBufferV1 : public QObject
     Q_OBJECT
 public:
     LinuxDmabufBufferV1(uint32_t format, const QSize& size, QObject* parent = nullptr);
-    ~LinuxDmabufBufferV1();
+    ~LinuxDmabufBufferV1() override;
 
     uint32_t format() const;
     QSize size() const;
