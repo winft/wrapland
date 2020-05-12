@@ -77,9 +77,9 @@ public:
         : m_client{client}
         , m_version{version}
         , m_handle{handle}
+        , m_global{nullptr}
+        , m_resource{client->createResource(interface, version, id)}
     {
-        m_resource = m_client->createResource(interface, m_version, id);
-
         wl_resource_set_user_data(m_resource, this);
         wl_resource_set_implementation(m_resource, impl, this, destroy);
     }
@@ -206,13 +206,11 @@ private:
 
     Client* m_client;
     uint32_t m_version;
-    wl_resource* m_resource;
 
     Handle* m_handle;
-    GlobalHandle* m_global = nullptr;
+    GlobalHandle* m_global;
 
-    wl_interface* m_interface;
-    void* m_implementation;
+    wl_resource* m_resource;
 };
 
 }
