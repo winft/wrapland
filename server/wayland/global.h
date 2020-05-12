@@ -103,7 +103,7 @@ public:
 
     static Handle* fromResource(wl_resource* wlResource)
     {
-        auto resource = reinterpret_cast<GlobalResource*>(wl_resource_get_user_data(wlResource));
+        auto resource = static_cast<GlobalResource*>(wl_resource_get_user_data(wlResource));
         return resource->global()->handle();
     }
 
@@ -233,7 +233,7 @@ private:
 
     static void bind(wl_client* wlClient, void* data, uint32_t version, uint32_t id)
     {
-        auto global = reinterpret_cast<Global*>(data);
+        auto global = static_cast<Global*>(data);
         auto getClient = [&global, &wlClient] { return global->display()->getClient(wlClient); };
 
         auto bindToGlobal
