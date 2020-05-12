@@ -97,7 +97,7 @@ void Client::destroyListenerCallback(wl_listener* listener, void* data)
     auto* wlClient = reinterpret_cast<wl_client*>(data);
 
     auto it = std::find_if(allClients.cbegin(), allClients.cend(), [wlClient](Client* client) {
-        return *client == wlClient;
+        return client->native() == wlClient;
     });
     Q_ASSERT(it != allClients.cend());
     auto* client = *it;
@@ -125,12 +125,7 @@ wl_resource* Client::getResource(uint32_t id)
     return wl_client_get_object(m_client, id);
 }
 
-Client::operator wl_client*()
-{
-    return m_client;
-}
-
-Client::operator wl_client*() const
+wl_client* Client::native() const
 {
     return m_client;
 }

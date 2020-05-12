@@ -649,7 +649,7 @@ void PlasmaWindowRes::Private::unmap()
 {
     window = nullptr;
     send<org_kde_plasma_window_send_unmapped>();
-    wl_client_flush(*client());
+    client()->flush();
 }
 
 const struct org_kde_plasma_window_interface PlasmaWindowRes::Private::s_interface = {

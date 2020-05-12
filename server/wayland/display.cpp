@@ -245,7 +245,7 @@ Client* Display::getClient(wl_client* wlClient)
     Q_ASSERT(wlClient);
 
     auto it = std::find_if(m_clients.cbegin(), m_clients.cend(), [wlClient](Client* client) {
-        return *client == wlClient;
+        return client->native() == wlClient;
     });
 
     if (it != m_clients.cend()) {

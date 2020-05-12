@@ -77,7 +77,7 @@ TestDisplay::TestDisplay(QObject *parent):
 bool TestDisplay::allowInterface(Wrapland::Server::Client* client, const QByteArray& interfaceName)
 {
     if (interfaceName == "org_kde_kwin_blur_manager") {
-        return m_allowedClients.contains(client->client());
+        return m_allowedClients.contains(client->native());
     }
     return true;
 }

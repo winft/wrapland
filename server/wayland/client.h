@@ -59,8 +59,8 @@ public:
     gid_t groupId() const;
     std::string executablePath() const;
 
-    operator wl_client*();
-    operator wl_client*() const;
+    wl_client* native() const;
+
     void destroy();
 
 private:

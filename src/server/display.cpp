@@ -585,7 +585,7 @@ QVector< ClientConnection* > Display::connections() const
 ClientConnection *Display::createClient(int fd)
 {
     Server::Client* client = newDisplay->createClient(fd);
-    client->legacy = getConnection(client->client());
+    client->legacy = getConnection(client->native());
     client->legacy->newClient = client;
     return client->legacy;
 }

@@ -142,17 +142,17 @@ wl_resource *ClientConnection::getResource(quint32 id)
 
 wl_client *ClientConnection::client()
 {
-    return newClient->client();
+    return newClient->native();
 }
 
 ClientConnection::operator wl_client*()
 {
-    return newClient->client();
+    return newClient->native();
 }
 
 ClientConnection::operator wl_client*() const
 {
-    return newClient->client();
+    return newClient->native();
 }
 
 Display *ClientConnection::display()
