@@ -3,7 +3,6 @@ set(SERVER_LIB_SRCS
     display.cpp
     eglstream_controller_interface.cpp
     fakeinput_interface.cpp
-    filtered_display.cpp
     global.cpp
     output_interface.cpp
     plasmashell_interface.cpp
@@ -12,6 +11,7 @@ set(SERVER_LIB_SRCS
     server_decoration_palette_interface.cpp
 
     ../../server/buffer.cpp
+    ../../server/filtered_display.cpp
     ../../server/linux_dmabuf_v1.cpp
     ../../server/compositor.cpp
     ../../server/region.cpp
@@ -307,7 +307,6 @@ set(SERVER_LIB_HEADERS
   display.h
   eglstream_controller_interface.h
   fakeinput_interface.h
-  filtered_display.h
   global.h
   output_interface.h
   plasmashell_interface.h
@@ -315,6 +314,7 @@ set(SERVER_LIB_HEADERS
   server_decoration_palette_interface.h
 
   ../../server/buffer.h
+  ../../server/filtered_display.h
   ../../server/linux_dmabuf_v1.h
   ../../server/xdg_foreign.h
   ../../server/region.h

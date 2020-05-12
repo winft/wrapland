@@ -1,5 +1,6 @@
 /********************************************************************
 Copyright 2017  David Edmundson <davidedmundson@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,49 +18,42 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
+#pragma once
 
-#ifndef WRAPLAND_SERVER_FILTERED_DISPLAY_H
-#define WRAPLAND_SERVER_FILTERED_DISPLAY_H
-
-#include "global.h"
 #include "display.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>
+#include <memory>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 /**
-* Server Implementation that allows one to restrict which globals are available to which clients
-*
-* Users of this class must implement the virtual @method allowInterface method.
-*
-* @since 0.0.5FIXME
-*/
-class WRAPLANDSERVER_EXPORT FilteredDisplay : public Display
+ * Server Implementation that allows one to restrict which globals are available to which clients.
+ *
+ * Users of this class must implement the virtual @method allowInterface method.
+ */
+class WRAPLANDSERVER_EXPORT FilteredDisplay : public D_isplay
 {
     Q_OBJECT
 public:
-    FilteredDisplay(QObject *parent);
+    FilteredDisplay(QObject* parent);
     ~FilteredDisplay();
 
-/**
-* Return whether the @arg client can see the interface with the given @arg interfaceName
-*
-* When false will not see these globals for a given interface in the registry,
-* and any manual attempts to bind will fail
-*
-* @return true if the client should be able to access the global with the following interfaceName
-*/
-    virtual bool allowInterface(ClientConnection *client, const QByteArray &interfaceName) = 0;
+    /**
+     * Return whether the @arg client can see the interface with the given @arg interfaceName
+     *
+     * When false will not see these globals for a given interface in the registry,
+     * and any manual attempts to bind will fail
+     *
+     * @return true if the client should be able to access the global with the following
+     * interfaceName
+     */
+    virtual bool allowInterface(Client* client, const QByteArray& interfaceName) = 0;
+
 private:
     class Private;
-    std::unique_ptr<Private> d;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }
-}
-
-#endif

@@ -142,6 +142,7 @@ std::string const D_isplay::socketName() const
 void D_isplay::start(StartMode mode)
 {
     d_ptr->start(mode == StartMode::ConnectToSocket);
+    Q_EMIT started();
 }
 
 void D_isplay::startLoop()
