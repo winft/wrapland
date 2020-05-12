@@ -195,6 +195,7 @@ public:
     void* eglDisplay() const;
 
 Q_SIGNALS:
+    void started();
     void clientConnected(Wrapland::Server::Client*);
     void clientDisconnected(Wrapland::Server::Client*);
 

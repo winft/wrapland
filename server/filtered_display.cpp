@@ -1,5 +1,6 @@
 /********************************************************************
 Copyright 2017  David Edmundson <davidedmundson@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,54 +18,53 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-
 #include "filtered_display.h"
-#include "display.h"
 
 #include <wayland-server.h>
 
 #include <QByteArray>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class FilteredDisplay::Private
 {
 public:
-    Private(FilteredDisplay *_q);
-    FilteredDisplay *q;
-    static bool globalFilterCallback(const wl_client *client, const wl_global *global, void *data)
-    {
-        auto t = static_cast<FilteredDisplay::Private*>(data);
-        auto clientConnection = t->q->getConnection(const_cast<wl_client*>(client));
-        auto interface = wl_global_get_interface(global);
-        auto name = QByteArray::fromRawData(interface->name, strlen(interface->name));
-        return t->q->allowInterface(clientConnection, name);
-    };
+    Private(FilteredDisplay* q);
+
+    static bool filterCallback(const wl_client* wlClient, const wl_global* wlGlobal, void* data);
+
+private:
+    FilteredDisplay* q_ptr;
 };
 
-FilteredDisplay::Private::Private(FilteredDisplay *_q):
-    q(_q)
-{}
-
-
-FilteredDisplay::FilteredDisplay(QObject *parent):
-    Display(parent),
-    d(new Private(this))
+FilteredDisplay::Private::Private(FilteredDisplay* q)
+    : q_ptr(q)
 {
-    connect(this, &Display::runningChanged, [this](bool running) {
-        if (!running) {
-            return;
-        }
-        wl_display_set_global_filter(*this, Private::globalFilterCallback, d.get());
+}
+
+bool FilteredDisplay::Private::filterCallback(const wl_client* wlClient,
+                                              const wl_global* wlGlobal,
+                                              void* data)
+{
+    auto priv = static_cast<FilteredDisplay::Private*>(data);
+
+    auto client = priv->q_ptr->getClient(const_cast<wl_client*>(wlClient));
+    auto interface = wl_global_get_interface(wlGlobal);
+    auto name = QByteArray::fromRawData(interface->name, strlen(interface->name));
+
+    return priv->q_ptr->allowInterface(client, name);
+};
+
+FilteredDisplay::FilteredDisplay(QObject* parent)
+    : D_isplay(parent)
+    , d_ptr{new Private(this)}
+{
+    connect(this, &D_isplay::started, [this]() {
+        wl_display_set_global_filter(*this, Private::filterCallback, d_ptr.get());
     });
 }
 
-FilteredDisplay::~FilteredDisplay()
-{
-}
+FilteredDisplay::~FilteredDisplay() = default;
 
-}
 }
