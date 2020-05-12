@@ -47,8 +47,6 @@ private:
                                      uint32_t id,
                                      wl_resource* wlPointer);
 
-    PointerGesturesV1* q_ptr;
-
     static const struct zwp_pointer_gestures_v1_interface s_interface;
 };
 

@@ -59,8 +59,9 @@ public:
 
     Surface* focusedSurface = nullptr;
     QPointer<Surface> focusedChildSurface;
-    QMetaObject::Connection destroyConnection;
-    Cursor* cursor = nullptr;
+    QMetaObject::Connection surfaceDestroyConnection;
+    QMetaObject::Connection clientDestroyConnection;
+    std::unique_ptr<Cursor> cursor;
 
     std::vector<RelativePointerV1*> relativePointers;
     std::vector<PointerSwipeGestureV1*> swipeGestures;
@@ -86,7 +87,7 @@ public:
     void endPinchGesture(quint32 serial);
     void cancelPinchGesture(quint32 serial);
 
-    Pointer* q_ptr;
+    void setFocusedSurface(quint32 serial, Surface* surface);
 
 private:
     static void setCursorCallback(wl_client* wlClient,

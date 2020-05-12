@@ -4,10 +4,8 @@ set(SERVER_LIB_SRCS
     eglstream_controller_interface.cpp
     fakeinput_interface.cpp
     global.cpp
-    output_interface.cpp
     plasmashell_interface.cpp
     resource.cpp
-    seat_interface.cpp
     server_decoration_palette_interface.cpp
 
     ../../server/buffer.cpp
@@ -308,7 +306,6 @@ set(SERVER_LIB_HEADERS
   eglstream_controller_interface.h
   fakeinput_interface.h
   global.h
-  output_interface.h
   plasmashell_interface.h
   resource.h
   server_decoration_palette_interface.h

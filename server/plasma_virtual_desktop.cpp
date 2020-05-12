@@ -69,7 +69,7 @@ void PlasmaVirtualDesktopManager::Private::getVirtualDesktopCallback(
     uint32_t serial,
     const char* id)
 {
-    auto priv = fromResource(wlResource)->d_ptr;
+    auto priv = fromResource(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
     auto virtualDesktopIt = priv->constFindDesktop(QString::fromUtf8(id));
 

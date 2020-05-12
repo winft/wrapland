@@ -27,12 +27,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "remote_access_interface.h"
 #include "fakeinput_interface.h"
 #include "logging.h"
-#include "output_interface.h"
+//#include "output_interface.h"
 #include "plasmashell_interface.h"
 //#include "plasmawindowmanagement_interface.h"
 //#include "pointerconstraints_interface_p.h"
 //#include "pointergestures_interface_p.h"
-#include "seat_interface.h"
+//#include "seat_interface.h"
 //#include "shadow_interface.h"
 //#include "blur_interface.h"
 //#include "contrast_interface.h"
@@ -61,7 +61,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/display.h"
 
 #include "../../server/output.h"
-#include "../../server/seat.h"
+//#include "../../server/seat.h"
 //
 //
 
@@ -95,9 +95,9 @@ public:
     QString socketName = QStringLiteral("wayland-0");
     bool running = false;
     bool automaticSocketNaming = false;
-    QList<OutputInterface*> outputs;
+//    QList<OutputInterface*> outputs;
 //    QList<OutputDeviceV1Interface*> outputDevices;
-    QVector<SeatInterface*> seats;
+//    QVector<SeatInterface*> seats;
     QVector<ClientConnection*> clients;
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 
@@ -220,11 +220,11 @@ void Display::Private::setRunning(bool r)
 //    emit q->runningChanged(running);
 }
 
-OutputInterface *Display::createOutput(QObject *parent)
-{
-    auto* output = newDisplay->createOutput(parent);
-    return output->legacy;
-}
+//OutputInterface *Display::createOutput(QObject *parent)
+//{
+//    auto* output = newDisplay->createOutput(parent);
+//    return output->legacy;
+//}
 
 //CompositorInterface *Display::createCompositor(QObject *parent)
 //{
@@ -256,14 +256,14 @@ OutputInterface *Display::createOutput(QObject *parent)
 //    return om;
 //}
 
-SeatInterface *Display::createSeat(QObject *parent)
-{
-    auto seat = newDisplay->createSeat(parent);
-    auto legacy = seat->legacy;
+//SeatInterface *Display::createSeat(QObject *parent)
+//{
+//    auto seat = newDisplay->createSeat(parent);
+//    auto legacy = seat->legacy;
 
-    d->seats << legacy;
-    return legacy;
-}
+//    d->seats << legacy;
+//    return legacy;
+//}
 
 //SubCompositorInterface *Display::createSubCompositor(QObject *parent)
 //{
@@ -516,10 +516,10 @@ void Display::createShm()
     newDisplay->createShm();
 }
 
-void Display::removeOutput(OutputInterface *output)
-{
-    newDisplay->removeOutput(output->newOutput);
-}
+//void Display::removeOutput(OutputInterface *output)
+//{
+//    newDisplay->removeOutput(output->newOutput);
+//}
 
 //void Display::removeOutputDevice(OutputDeviceV1Interface *outputDevice)
 //{
@@ -552,20 +552,20 @@ Display::operator wl_display*() const
     return newDisplay->display();
 }
 
-QList<OutputInterface*> Display::outputs() const
-{
-    return d->outputs;
-}
+//QList<OutputInterface*> Display::outputs() const
+//{
+//    return d->outputs;
+//}
 
 //QList<OutputDeviceV1Interface*> Display::outputDevices() const
 //{
 //    return d->outputDevices;
 //}
 
-QVector<SeatInterface*> Display::seats() const
-{
-    return d->seats;
-}
+//QVector<SeatInterface*> Display::seats() const
+//{
+//    return d->seats;
+//}
 
 ClientConnection *Display::getConnection(wl_client *client)
 {

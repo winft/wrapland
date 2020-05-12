@@ -63,11 +63,11 @@ class IdleInhibitManagerInterface;
 class FakeInputInterface;
 class PlasmaShellInterface;
 //class PlasmaWindowManagementInterface;
-class SeatInterface;
+//class SeatInterface;
 //class ShadowManagerInterface;
 //class ContrastManagerInterface;
 //class BlurManagerInterface;
-class OutputInterface;
+//class OutputInterface;
 class OutputConfigurationV1Interface;
 class OutputDeviceV1Interface;
 class OutputManagementV1Interface;
@@ -176,9 +176,9 @@ public:
     operator wl_display*() const;
     bool isRunning() const;
 
-    OutputInterface *createOutput(QObject *parent = nullptr);
-    void removeOutput(OutputInterface *output);
-    QList<OutputInterface*> outputs() const;
+//    OutputInterface *createOutput(QObject *parent = nullptr);
+//    void removeOutput(OutputInterface *output);
+//    QList<OutputInterface*> outputs() const;
 
     OutputDeviceV1Interface *createOutputDeviceV1(QObject *parent = nullptr);
     void removeOutputDevice(OutputDeviceV1Interface *outputDevice);
@@ -187,12 +187,12 @@ public:
 //    CompositorInterface *createCompositor(QObject *parent = nullptr);
     void createShm();
 //    ShellInterface *createShell(QObject *parent = nullptr);
-    SeatInterface *createSeat(QObject *parent = nullptr);
-    /**
-     * @returns All SeatInterface currently managed on the Display.
-     * @since 5.6
-     **/
-    QVector<SeatInterface*> seats() const;
+//    SeatInterface *createSeat(QObject *parent = nullptr);
+//    /**
+//     * @returns All SeatInterface currently managed on the Display.
+//     * @since 5.6
+//     **/
+//    QVector<SeatInterface*> seats() const;
 //    SubCompositorInterface *createSubCompositor(QObject *parent = nullptr);
 //    DataDeviceManagerInterface *createDataDeviceManager(QObject *parent = nullptr);
     OutputManagementV1Interface *createOutputManagementV1(QObject *parent = nullptr);

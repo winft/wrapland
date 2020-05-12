@@ -35,10 +35,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "kde_idle.h"
 #include "keystate.h"
 #include "linux_dmabuf_v1.h"
-#include "output.h"
 #include "output_configuration_v1.h"
-#include "output_device_v1.h"
+#include "output_device_v1_p.h"
 #include "output_management_v1.h"
+#include "output_p.h"
 #include "plasma_virtual_desktop.h"
 #include "plasma_window.h"
 #include "pointer.h"
@@ -62,7 +62,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/shadow.h"
 #include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
-#include "../src/server/output_interface.h"
 #include "../src/server/plasmashell_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
 
@@ -116,6 +115,13 @@ D_isplay::D_isplay(QObject* parent, bool legacyInvoked)
 
 D_isplay::~D_isplay()
 {
+    for (auto output : d_ptr->outputs) {
+        output->d_ptr->displayHandle = nullptr;
+    }
+    for (auto output : d_ptr->outputDevices) {
+        output->d_ptr->displayHandle = nullptr;
+    }
+
     delete d_ptr;
 
     if (deleteLegacy) {
@@ -200,7 +206,9 @@ Compositor* D_isplay::createCompositor(QObject* parent)
 
 OutputDeviceV1* D_isplay::createOutputDeviceV1(QObject* parent)
 {
-    return new OutputDeviceV1(this, parent);
+    auto device = new OutputDeviceV1(this, parent);
+    d_ptr->outputDevices.push_back(device);
+    return device;
 }
 
 OutputManagementV1* D_isplay::createOutputManagementV1(QObject* parent)

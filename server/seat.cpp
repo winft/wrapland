@@ -32,9 +32,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "text_input_v2_p.h"
 #include "touch.h"
 
-// legacy
-#include "seat_interface.h"
-
 #include <config-wrapland.h>
 
 #ifndef WL_SEAT_NAME_SINCE_VERSION
@@ -70,9 +67,6 @@ Seat::Seat(D_isplay* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {
-    legacy = new Server::SeatInterface(display->legacy, this);
-    legacy->newSeat = this;
-
     connect(this, &Seat::nameChanged, this, [this] { d_ptr->sendName(); });
 
     auto sendCapabilities = [this] { d_ptr->sendCapabilities(); };
@@ -83,14 +77,7 @@ Seat::Seat(D_isplay* display, QObject* parent)
     d_ptr->create();
 }
 
-Seat::~Seat()
-{
-    if (legacy) {
-        delete legacy;
-    }
-
-    delete d_ptr;
-}
+Seat::~Seat() = default;
 
 void Seat::Private::bindInit(Wayland::Resource<Seat, SeatGlobal>* bind)
 {
@@ -168,27 +155,8 @@ static T* interfaceForSurface(Surface* surface, const QVector<T*>& interfaces)
     }
 
     for (auto it = interfaces.constBegin(); it != interfaces.constEnd(); ++it) {
-        if constexpr (std::is_same_v<T, Pointer>) {
-            if ((*it)->client() == surface->client()) {
-                return (*it);
-            }
-        } else if constexpr (std::is_same_v<T, Keyboard>) {
-            if ((*it)->client() == surface->client()) {
-                return (*it);
-            }
-        } else if constexpr (std::is_same_v<T, DataDevice>) {
-            if ((*it)->client() == surface->client()) {
-                return (*it);
-            }
-        } else if constexpr (std::is_same_v<T, Touch>) {
-            if ((*it)->client() == surface->client()) {
-                return (*it);
-            }
-        } else {
-            // TODO: remove when all in new model
-            if ((*it)->client()->legacy == surface->client()->legacy) {
-                return (*it);
-            }
+        if ((*it)->client() == surface->client()) {
+            return (*it);
         }
     }
     return nullptr;
@@ -203,23 +171,8 @@ static QVector<T*> interfacesForSurface(Surface* surface, const QVector<T*>& int
     }
 
     for (auto it = interfaces.constBegin(); it != interfaces.constEnd(); ++it) {
-        if constexpr (std::is_same_v<T, Pointer>) {
-            if ((*it)->client() == surface->client()) {
-                ret << *it;
-            }
-        } else if constexpr (std::is_same_v<T, Keyboard>) {
-            if ((*it)->client() == surface->client()) {
-                ret << *it;
-            }
-        } else if constexpr (std::is_same_v<T, Touch>) {
-            if ((*it)->client() == surface->client()) {
-                ret << *it;
-            }
-        } else {
-            // TODO: remove when all in new model
-            if ((*it)->client() == surface->client()->legacy) {
-                ret << *it;
-            }
+        if ((*it)->client() == surface->client()) {
+            ret << *it;
         }
     }
     return ret;
@@ -322,9 +275,10 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
         }
         drag.source = dataDevice;
         drag.sourcePointer = interfaceForSurface(originSurface, pointers);
-        drag.destroyConnection = QObject::connect(dataDevice, &QObject::destroyed, q_ptr, [this] {
-            endDrag(display()->handle()->nextSerial());
-        });
+        drag.destroyConnection
+            = QObject::connect(dataDevice, &DataDevice::resourceDestroyed, q_ptr, [this] {
+                  endDrag(display()->handle()->nextSerial());
+              });
         if (dataDevice->dragSource()) {
             drag.dragSourceDestroyConnection = QObject::connect(
                 dataDevice->dragSource(), &DataSource::resourceDestroyed, q_ptr, [this] {
@@ -342,8 +296,6 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
                                      dataDevice->dragImplicitGrabSerial());
         Q_EMIT q_ptr->dragStarted();
         Q_EMIT q_ptr->dragSurfaceChanged();
-        Q_EMIT q_ptr->legacy->dragStarted();
-        Q_EMIT q_ptr->legacy->dragSurfaceChanged();
     });
 
     // Is the new DataDevice for the current keyoard focus?
@@ -374,7 +326,7 @@ void Seat::Private::registerTextInput(TextInputV2* ti)
             Q_EMIT q_ptr->focusedTextInputChanged();
         }
     }
-    QObject::connect(ti, &QObject::destroyed, q_ptr, [this, ti] {
+    QObject::connect(ti, &TextInputV2::resourceDestroyed, q_ptr, [this, ti] {
         textInputs.removeAt(textInputs.indexOf(ti));
         if (textInput.focus.textInput == ti) {
             textInput.focus.textInput = nullptr;
@@ -398,8 +350,6 @@ void Seat::Private::endDrag(quint32 serial)
     drag = Drag();
     Q_EMIT q_ptr->dragSurfaceChanged();
     Q_EMIT q_ptr->dragEnded();
-    Q_EMIT q_ptr->legacy->dragSurfaceChanged();
-    Q_EMIT q_ptr->legacy->dragEnded();
 }
 
 void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice)
@@ -449,7 +399,6 @@ void Seat::setHasKeyboard(bool has)
     }
     d_ptr->keyboard = has;
     Q_EMIT hasKeyboardChanged(d_ptr->keyboard);
-    Q_EMIT legacy->hasKeyboardChanged(d_ptr->keyboard);
 }
 
 void Seat::setHasPointer(bool has)
@@ -459,7 +408,6 @@ void Seat::setHasPointer(bool has)
     }
     d_ptr->pointer = has;
     Q_EMIT hasPointerChanged(d_ptr->pointer);
-    Q_EMIT legacy->hasPointerChanged(d_ptr->pointer);
 }
 
 void Seat::setHasTouch(bool has)
@@ -478,7 +426,6 @@ void Seat::setName(const std::string& name)
     }
     d_ptr->name = name;
     Q_EMIT nameChanged(d_ptr->name);
-    Q_EMIT legacy->nameChanged(QString::fromStdString(d_ptr->name));
 }
 
 void Seat::Private::getPointerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id)
@@ -578,7 +525,7 @@ void Seat::Private::getTouch(Client* client, uint32_t id, wl_resource* resource)
             // TODO: send out all the points
         }
     }
-    QObject::connect(touch, &QObject::destroyed, q_ptr, [touch, this] {
+    QObject::connect(touch, &Touch::resourceDestroyed, q_ptr, [touch, this] {
         touchs.removeAt(touchs.indexOf(touch));
         globalTouch.focus.touchs.removeOne(touch);
     });
@@ -605,13 +552,6 @@ bool Seat::hasTouch() const
     return d_ptr->touch;
 }
 
-Seat* Seat::get(void* data)
-{
-    auto resource = reinterpret_cast<Wayland::Resource<Seat, SeatGlobal>*>(data);
-    auto seatPriv = static_cast<Seat::Private*>(resource->global());
-    return seatPriv->q_ptr;
-}
-
 QPointF Seat::pointerPos() const
 {
     return d_ptr->globalPointer.pos;
@@ -624,7 +564,6 @@ void Seat::setPointerPos(const QPointF& pos)
     }
     d_ptr->globalPointer.pos = pos;
     Q_EMIT pointerPosChanged(pos);
-    Q_EMIT legacy->pointerPosChanged(pos);
 }
 
 quint32 Seat::timestamp() const
@@ -639,7 +578,6 @@ void Seat::setTimestamp(quint32 time)
     }
     d_ptr->timestamp = time;
     Q_EMIT timestampChanged(time);
-    Q_EMIT legacy->timestampChanged(time);
 }
 
 void Seat::setDragTarget(Surface* surface,
@@ -669,7 +607,6 @@ void Seat::setDragTarget(Surface* surface,
         d_ptr->drag.surface = nullptr;
     }
     Q_EMIT dragSurfaceChanged();
-    Q_EMIT legacy->dragSurfaceChanged();
     return;
 }
 
@@ -1137,9 +1074,10 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
     d_ptr->keys.focus.keyboards = d_ptr->keyboardsForSurface(surface);
 
     if (d_ptr->keys.focus.surface) {
-        d_ptr->keys.focus.destroyConnection = connect(surface, &QObject::destroyed, this, [this] {
-            d_ptr->keys.focus = Private::SeatKeyboard::Focus();
-        });
+        d_ptr->keys.focus.destroyConnection
+            = connect(surface, &Surface::resourceDestroyed, this, [this] {
+                  d_ptr->keys.focus = Private::SeatKeyboard::Focus();
+              });
         d_ptr->keys.focus.serial = serial;
 
         // selection?
@@ -1345,7 +1283,7 @@ void Seat::setFocusedTouchSurface(Surface* surface, const QPointF& surfacePositi
     d_ptr->globalTouch.focus.touchs = d_ptr->touchsForSurface(surface);
     if (d_ptr->globalTouch.focus.surface) {
         d_ptr->globalTouch.focus.destroyConnection
-            = connect(surface, &QObject::destroyed, this, [this] {
+            = connect(surface, &Surface::resourceDestroyed, this, [this] {
                   if (isTouchSequence()) {
                       // Surface destroyed during touch sequence - send a cancel
                       for (auto it = d_ptr->globalTouch.focus.touchs.constBegin(),
@@ -1552,7 +1490,6 @@ void Seat::setFocusedTextInputSurface(Surface* surface)
     }
     if (old != t) {
         Q_EMIT focusedTextInputChanged();
-        Q_EMIT legacy->focusedTextInputChanged();
     }
 }
 

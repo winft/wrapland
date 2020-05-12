@@ -87,6 +87,8 @@ public:
 
     QList<Mode> modes;
 
+    D_isplay* displayHandle;
+
 private:
     bool broadcastInfo();
     bool broadcastEnabled();
