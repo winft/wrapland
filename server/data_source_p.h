@@ -32,7 +32,7 @@ class DataSource::Private : public Wayland::Resource<DataSource>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, DataSource* q);
-    ~Private();
+    ~Private() override;
 
     std::vector<std::string> mimeTypes;
     DataDeviceManager::DnDActions supportedDnDActions = DataDeviceManager::DnDAction::None;

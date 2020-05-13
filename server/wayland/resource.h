@@ -77,9 +77,9 @@ public:
         : m_client{client}
         , m_version{version}
         , m_handle{handle}
+        , m_global{nullptr}
+        , m_resource{client->createResource(interface, version, id)}
     {
-        m_resource = m_client->createResource(interface, m_version, id);
-
         wl_resource_set_user_data(m_resource, this);
         wl_resource_set_implementation(m_resource, impl, this, destroy);
     }
@@ -133,9 +133,10 @@ public:
         m_client->flush();
     }
 
-    static ResourceType* fromResource(wl_resource* resource)
+    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
+    static Handle* handle(wl_resource* resource)
     {
-        return reinterpret_cast<ResourceType*>(wl_resource_get_user_data(resource));
+        return self(resource)->m_handle;
     }
 
     template<auto sender, uint32_t minVersion = 0, typename... Args>
@@ -167,7 +168,7 @@ public:
 
     static void destroyCallback([[maybe_unused]] wl_client* client, wl_resource* wlResource)
     {
-        auto resource = fromResource(wlResource);
+        auto resource = self(wlResource);
         wl_resource_destroy(resource->resource());
     }
 
@@ -178,9 +179,14 @@ public:
     }
 
 private:
+    static ResourceType* self(wl_resource* resource)
+    {
+        return static_cast<ResourceType*>(wl_resource_get_user_data(resource));
+    }
+
     static void destroy(wl_resource* wlResource)
     {
-        auto resource = fromResource(wlResource);
+        auto resource = self(wlResource);
 
         resource->onDestroy();
         delete resource;
@@ -206,13 +212,11 @@ private:
 
     Client* m_client;
     uint32_t m_version;
-    wl_resource* m_resource;
 
     Handle* m_handle;
-    GlobalHandle* m_global = nullptr;
+    GlobalHandle* m_global;
 
-    wl_interface* m_interface;
-    void* m_implementation;
+    wl_resource* m_resource;
 };
 
 }

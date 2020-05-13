@@ -76,7 +76,7 @@ void Region::Private::addCallback([[maybe_unused]] wl_client* client,
                                   int32_t width,
                                   int32_t height)
 {
-    auto priv = static_cast<Region::Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     priv->qtRegion = priv->qtRegion.united(QRect(x, y, width, height));
     Q_EMIT priv->handle()->regionChanged(priv->qtRegion);
@@ -89,7 +89,7 @@ void Region::Private::subtractCallback([[maybe_unused]] wl_client* wlClient,
                                        int32_t width,
                                        int32_t height)
 {
-    auto priv = static_cast<Region::Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     if (priv->qtRegion.isEmpty()) {
         return;
@@ -113,7 +113,7 @@ QRegion Region::region() const
 
 Region* Region::get(void* native)
 {
-    return Region::Private::fromResource(static_cast<wl_resource*>(native))->handle();
+    return Region::Private::handle(static_cast<wl_resource*>(native));
     //    d_ptr->resou
     //    return Private::get<Region>(native);
     return nullptr;

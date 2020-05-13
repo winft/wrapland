@@ -82,10 +82,10 @@ void XdgExporterV2::Private::exportToplevelCallback([[maybe_unused]] wl_client* 
                                                     uint32_t id,
                                                     wl_resource* wlSurface)
 {
-    auto priv = fromResource(wlResource)->d_ptr;
+    auto priv = handle(wlResource)->d_ptr;
     auto bind = priv->getBind(wlResource);
 
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     const QString protocolHandle = QUuid::createUuid().toString();
 
@@ -149,7 +149,7 @@ void XdgImporterV2::Private::importToplevelCallback(wl_client* wlClient,
                                                     uint32_t id,
                                                     const char* handle)
 {
-    auto importerHandle = fromResource(wlResource);
+    auto importerHandle = XdgImporterV2::Private::handle(wlResource);
     auto client = importerHandle->d_ptr->display()->handle()->getClient(wlClient);
 
     if (!importerHandle->d_ptr->exporter) {
@@ -336,8 +336,8 @@ void XdgImportedV2::Private::setParentOfCallback([[maybe_unused]] wl_client* wlC
                                                  wl_resource* wlResource,
                                                  wl_resource* wlSurface)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto priv = handle(wlResource)->d_ptr;
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     // Guaranteed by libwayland (?).
     Q_ASSERT(surface);

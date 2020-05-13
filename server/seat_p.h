@@ -43,6 +43,7 @@ using Sender = std::function<void(wl_resource*)>;
 
 constexpr uint32_t SeatVersion = 5;
 using SeatGlobal = Wayland::Global<Seat, SeatVersion>;
+using SeatBind = Wayland::Resource<Seat, SeatGlobal>;
 
 class Seat::Private : public SeatGlobal
 {
@@ -194,9 +195,9 @@ public:
     Seat* q_ptr;
 
 private:
-    void getPointer(Client* client, uint32_t id, /*TODO legacy*/ wl_resource* resource);
-    void getKeyboard(Client* client, uint32_t id, /*TODO legacy*/ wl_resource* resource);
-    void getTouch(Client* client, uint32_t id, /*TODO legacy*/ wl_resource* resource);
+    void getPointer(SeatBind* bind, uint32_t id);
+    void getKeyboard(SeatBind* bind, uint32_t id);
+    void getTouch(SeatBind* bind, uint32_t id);
 
     void updateSelection(DataDevice* dataDevice, bool set);
     void cleanupDataDevice(DataDevice* dataDevice);

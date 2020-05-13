@@ -63,9 +63,9 @@ void PointerConstraintsV1::Private::lockPointerCallback(wl_client* wlClient,
                                                         wl_resource* wlRegion,
                                                         uint32_t lifetime)
 {
-    auto handle = fromResource(wlResource);
-    handle->d_ptr->createConstraint<LockedPointerV1>(
-        wlClient, id, wlSurface, wlPointer, wlRegion, lifetime);
+    auto priv = handle(wlResource)->d_ptr.get();
+    priv->createConstraint<LockedPointerV1>(
+        wlResource, id, wlSurface, wlPointer, wlRegion, lifetime);
 }
 
 void PointerConstraintsV1::Private::confinePointerCallback(wl_client* wlClient,
@@ -76,34 +76,37 @@ void PointerConstraintsV1::Private::confinePointerCallback(wl_client* wlClient,
                                                            wl_resource* wlRegion,
                                                            uint32_t lifetime)
 {
-    auto handle = fromResource(wlResource);
-    handle->d_ptr->createConstraint<ConfinedPointerV1>(
-        wlClient, id, wlSurface, wlPointer, wlRegion, lifetime);
+    auto priv = handle(wlResource)->d_ptr.get();
+    priv->createConstraint<ConfinedPointerV1>(
+        wlResource, id, wlSurface, wlPointer, wlRegion, lifetime);
 }
 
 template<class Constraint>
-void PointerConstraintsV1::Private::createConstraint(wl_client* wlClient,
+void PointerConstraintsV1::Private::createConstraint(wl_resource* wlResource,
                                                      uint32_t id,
                                                      wl_resource* wlSurface,
                                                      wl_resource* wlPointer,
                                                      wl_resource* wlRegion,
                                                      uint32_t lifetime)
 {
-    auto client = display()->handle()->getClient(wlClient);
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
-    auto pointer = Wayland::Resource<Pointer>::fromResource(wlPointer)->handle();
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    if (!surface || !pointer) {
+    if (!wlSurface || !wlPointer) {
         // send error?
         return;
     }
+
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
+
     if (!surface->lockedPointer().isNull() || !surface->confinedPointer().isNull()) {
         surface->d_ptr->postError(ZWP_POINTER_CONSTRAINTS_V1_ERROR_ALREADY_CONSTRAINED,
                                   "Surface already constrained");
         return;
     }
 
-    auto constraint = new Constraint(client, version(), id, handle());
+    auto constraint = new Constraint(bind->client()->handle(), bind->version(), id, priv->handle());
 
     switch (lifetime) {
     case ZWP_POINTER_CONSTRAINTS_V1_LIFETIME_PERSISTENT:
@@ -115,7 +118,7 @@ void PointerConstraintsV1::Private::createConstraint(wl_client* wlClient,
         break;
     }
 
-    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
+    auto region = wlRegion ? Wayland::Resource<Region>::handle(wlRegion) : nullptr;
     constraint->d_ptr->region = region ? region->region() : QRegion();
 
     surface->d_ptr->installPointerConstraint(constraint);
@@ -154,7 +157,7 @@ void LockedPointerV1::Private::setCursorPositionHintCallback([[maybe_unused]] wl
                                                              wl_fixed_t surface_x,
                                                              wl_fixed_t surface_y)
 {
-    auto priv = fromResource(wlResource)->handle()->d_ptr;
+    auto priv = handle(wlResource)->d_ptr;
 
     priv->pendingHint = QPointF(wl_fixed_to_double(surface_x), wl_fixed_to_double(surface_y));
     priv->hintIsSet = true;
@@ -164,8 +167,8 @@ void LockedPointerV1::Private::setRegionCallback([[maybe_unused]] wl_client* wlC
                                                  wl_resource* wlResource,
                                                  wl_resource* wlRegion)
 {
-    auto priv = fromResource(wlResource)->handle()->d_ptr;
-    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
+    auto priv = handle(wlResource)->d_ptr;
+    auto region = wlRegion ? Wayland::Resource<Region>::handle(wlRegion) : nullptr;
 
     priv->pendingRegion = region ? region->region() : QRegion();
     priv->regionIsSet = true;
@@ -265,8 +268,8 @@ void ConfinedPointerV1::Private::setRegionCallback([[maybe_unused]] wl_client* w
                                                    wl_resource* wlResource,
                                                    wl_resource* wlRegion)
 {
-    auto priv = fromResource(wlResource);
-    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
+    auto priv = handle(wlResource)->d_ptr;
+    auto region = wlRegion ? Wayland::Resource<Region>::handle(wlRegion) : nullptr;
 
     priv->handle()->d_ptr->pendingRegion = region ? region->region() : QRegion();
     priv->handle()->d_ptr->regionIsSet = true;

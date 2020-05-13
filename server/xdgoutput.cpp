@@ -74,20 +74,23 @@ void XdgOutputManager::Private::getXdgOutputCallback(wl_client* wlClient,
                                                      uint32_t id,
                                                      wl_resource* outputResource)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
-    auto client = priv->display()->getClient(wlClient);
-    auto output = OutputGlobal::fromResource(outputResource);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
     // Output client is requesting XdgOutput for an Output that doesn't exist.
-    if (!output) {
+    if (!outputResource) {
         return;
     }
+
+    auto output = OutputGlobal::handle(outputResource);
+
     if (priv->outputs.find(output) == priv->outputs.end()) {
         // Server hasn't created an XdgOutput for this output yet, give the client nothing.
         return;
     }
+
     auto xdgOutputV1
-        = new XdgOutputV1(client, wl_resource_get_version(wlResource), id, priv->handle());
+        = new XdgOutputV1(bind->client()->handle(), bind->version(), id, priv->handle());
     if (!xdgOutputV1->d_ptr->resource()) {
         wl_resource_post_no_memory(wlResource);
         delete xdgOutputV1;
@@ -171,10 +174,7 @@ void XdgOutput::Private::resourceDisconnected(XdgOutputV1* resource)
 }
 
 const struct zxdg_output_v1_interface XdgOutputV1::Private::s_interface = {destroyCallback};
-XdgOutputV1::Private::Private(Wayland::Client* client,
-                              uint32_t version,
-                              uint32_t id,
-                              XdgOutputV1* q)
+XdgOutputV1::Private::Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q)
     : Wayland::Resource<XdgOutputV1>(client,
                                      version,
                                      id,
@@ -184,10 +184,7 @@ XdgOutputV1::Private::Private(Wayland::Client* client,
 {
 }
 
-XdgOutputV1::XdgOutputV1(Wayland::Client* client,
-                         uint32_t version,
-                         uint32_t id,
-                         XdgOutputManager* parent)
+XdgOutputV1::XdgOutputV1(Client* client, uint32_t version, uint32_t id, XdgOutputManager* parent)
     : QObject(parent)
     , d_ptr(new XdgOutputV1::Private(client, version, id, this))
 {

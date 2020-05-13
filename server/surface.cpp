@@ -812,7 +812,7 @@ void Surface::Private::attachCallback([[maybe_unused]] wl_client* wlClient,
                                       int32_t sx,
                                       int32_t sy)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->attachBuffer(buffer, QPoint(sx, sy));
 }
 
@@ -823,7 +823,7 @@ void Surface::Private::damageCallback([[maybe_unused]] wl_client* wlClient,
                                       int32_t width,
                                       int32_t height)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->damage(QRect(x, y, width, height));
 }
 
@@ -834,7 +834,7 @@ void Surface::Private::damageBufferCallback([[maybe_unused]] wl_client* wlClient
                                             int32_t width,
                                             int32_t height)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->damageBuffer(QRect(x, y, width, height));
 }
 
@@ -842,7 +842,7 @@ void Surface::Private::frameCallback([[maybe_unused]] wl_client* wlClient,
                                      wl_resource* wlResource,
                                      uint32_t callback)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->addFrameCallback(callback);
 }
 
@@ -850,8 +850,8 @@ void Surface::Private::opaqueRegionCallback([[maybe_unused]] wl_client* wlClient
                                             wl_resource* wlResource,
                                             wl_resource* wlRegion)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
+    auto priv = handle(wlResource)->d_ptr;
+    auto region = wlRegion ? Wayland::Resource<Region>::handle(wlRegion) : nullptr;
     priv->setOpaque(region ? region->region() : QRegion());
 }
 
@@ -865,8 +865,8 @@ void Surface::Private::inputRegionCallback([[maybe_unused]] wl_client* wlClient,
                                            wl_resource* wlResource,
                                            wl_resource* wlRegion)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto region = wlRegion ? Wayland::Resource<Region>::fromResource(wlRegion)->handle() : nullptr;
+    auto priv = handle(wlResource)->d_ptr;
+    auto region = wlRegion ? Wayland::Resource<Region>::handle(wlRegion) : nullptr;
     priv->setInput(region ? region->region() : QRegion(), !region);
 }
 
@@ -879,7 +879,7 @@ void Surface::Private::setInput(const QRegion& region, bool isInfinite)
 
 void Surface::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->commit();
 }
 
@@ -887,7 +887,7 @@ void Surface::Private::bufferTransformCallback([[maybe_unused]] wl_client* wlCli
                                                wl_resource* wlResource,
                                                int32_t transform)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->setTransform(Output::Transform(transform));
 }
 
@@ -895,7 +895,7 @@ void Surface::Private::bufferScaleCallback([[maybe_unused]] wl_client* wlClient,
                                            wl_resource* wlResource,
                                            int32_t scale)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->setScale(scale);
 }
 

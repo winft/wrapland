@@ -50,7 +50,7 @@ class WRAPLANDSERVER_EXPORT IdleInhibitor : public QObject
 {
     Q_OBJECT
 public:
-    explicit IdleInhibitor(Wayland::Client* client, uint32_t version, uint32_t id);
+    explicit IdleInhibitor(Client* client, uint32_t version, uint32_t id);
     friend class IdleInhibitManagerV1;
     ~IdleInhibitor() override;
     class Private;
@@ -62,7 +62,7 @@ Q_SIGNALS:
 class IdleInhibitor::Private : public Wayland::Resource<IdleInhibitor>
 {
 public:
-    Private(Wayland::Client* client, uint32_t version, uint32_t id, IdleInhibitor* q);
+    Private(Client* client, uint32_t version, uint32_t id, IdleInhibitor* q);
     ~Private() override;
 
 private:

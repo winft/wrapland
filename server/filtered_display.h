@@ -38,7 +38,7 @@ class WRAPLANDSERVER_EXPORT FilteredDisplay : public D_isplay
     Q_OBJECT
 public:
     FilteredDisplay(QObject* parent);
-    ~FilteredDisplay();
+    ~FilteredDisplay() override;
 
     /**
      * Return whether the @arg client can see the interface with the given @arg interfaceName

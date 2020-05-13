@@ -44,23 +44,17 @@ Viewporter::Private::Private(D_isplay* display, Viewporter* qptr)
     create();
 }
 Viewporter::Private::~Private() = default;
-void Viewporter::Private::getViewportCallback(wl_client* wlClient,
+void Viewporter::Private::getViewportCallback([[maybe_unused]] wl_client* wlClient,
                                               wl_resource* wlResource,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
-    auto privateInstance = fromResource(wlResource)->d_ptr.get();
-
-    privateInstance->getViewport(wlClient, wlResource, id, wlSurface);
+    handle(wlResource)->d_ptr->getViewport(wlResource, id, wlSurface);
 }
 
-void Viewporter::Private::getViewport(wl_client* wlClient,
-                                      wl_resource* wlResource,
-                                      uint32_t id,
-                                      wl_resource* wlSurface)
+void Viewporter::Private::getViewport(wl_resource* wlResource, uint32_t id, wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
-    auto client = display()->getClient(wlClient);
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     auto bind = getBind(wlResource);
     if (!surface) {
         // TODO: send error msg?
@@ -73,7 +67,7 @@ void Viewporter::Private::getViewport(wl_client* wlClient,
         return;
     }
 
-    Viewport* viewport = new Viewport(client, wl_resource_get_version(wlResource), id, surface);
+    auto viewport = new Viewport(bind->client()->handle(), bind->version(), id, surface);
     if (!viewport->d_ptr->resource()) {
         wl_resource_post_no_memory(wlResource);
         delete viewport;
@@ -98,7 +92,7 @@ const struct wp_viewport_interface Viewport::Private::s_interface = {
     setDestinationCallback,
 };
 
-Viewport::Private::Private(Wayland::Client* client,
+Viewport::Private::Private(Client* client,
                            uint32_t version,
                            uint32_t id,
                            Surface* _surface,
@@ -110,11 +104,7 @@ Viewport::Private::Private(Wayland::Client* client,
 
 Viewport::Private::~Private() = default;
 
-Viewport::Viewport(Wayland::Client* client,
-                   uint32_t version,
-                   uint32_t id,
-                   Surface* surface,
-                   QObject* parent)
+Viewport::Viewport(Client* client, uint32_t version, uint32_t id, Surface* surface, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(client, version, id, surface, this))
 {
@@ -130,11 +120,11 @@ void Viewport::Private::setSourceCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_fixed_t width,
                                           wl_fixed_t height)
 {
-    auto privateInstance = reinterpret_cast<Private*>(fromResource(wlResource));
-    privateInstance->setSource(wl_fixed_to_double(x),
-                               wl_fixed_to_double(y),
-                               wl_fixed_to_double(width),
-                               wl_fixed_to_double(height));
+    auto priv = handle(wlResource)->d_ptr;
+    priv->setSource(wl_fixed_to_double(x),
+                    wl_fixed_to_double(y),
+                    wl_fixed_to_double(width),
+                    wl_fixed_to_double(height));
 }
 
 void Viewport::Private::setSource(double x, double y, double width, double height)
@@ -159,8 +149,7 @@ void Viewport::Private::setDestinationCallback([[maybe_unused]] wl_client* wlCli
                                                int32_t width,
                                                int32_t height)
 {
-    auto privateInstance = reinterpret_cast<Private*>(fromResource(wlResource));
-    privateInstance->setDestination(width, height);
+    handle(wlResource)->d_ptr->setDestination(width, height);
 }
 
 void Viewport::Private::setDestination(int width, int height)

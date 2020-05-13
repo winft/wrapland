@@ -51,8 +51,7 @@ void SlideManager::Private::createCallback(wl_client* wlClient,
                                            uint32_t id,
                                            wl_resource* wlSurface)
 {
-    auto manager = fromResource(wlResource);
-    manager->d_ptr->createSlide(wlClient, wlResource, id, wlSurface);
+    handle(wlResource)->d_ptr->createSlide(wlClient, wlResource, id, wlSurface);
 }
 
 void SlideManager::Private::createSlide([[maybe_unused]] wl_client* wlClient,
@@ -60,8 +59,8 @@ void SlideManager::Private::createSlide([[maybe_unused]] wl_client* wlClient,
                                         uint32_t id,
                                         wl_resource* wlSurface)
 {
-    auto bind = fromResource(wlResource)->d_ptr->getBind(wlResource);
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto bind = handle(wlResource)->d_ptr->getBind(wlResource);
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto slide = new Slide(bind->client()->handle(), bind->version(), id);
     if (!slide->d_ptr->resource()) {
@@ -77,7 +76,7 @@ void SlideManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
                                           [[maybe_unused]] wl_resource* wlResource,
                                           wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     surface->d_ptr->setSlide(QPointer<Slide>());
 }
 
@@ -110,7 +109,7 @@ Slide::Private::~Private() = default;
 
 void Slide::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->currentLocation = priv->pendingLocation;
     priv->currentOffset = priv->pendingOffset;
 }
@@ -119,7 +118,7 @@ void Slide::Private::setLocationCallback([[maybe_unused]] wl_client* wlClient,
                                          wl_resource* wlResource,
                                          uint32_t location)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->pendingLocation = (Slide::Location)location;
 }
 
@@ -127,7 +126,7 @@ void Slide::Private::setOffsetCallback([[maybe_unused]] wl_client* wlClient,
                                        wl_resource* wlResource,
                                        int32_t offset)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->pendingOffset = offset;
 }
 

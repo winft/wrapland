@@ -544,12 +544,12 @@ bool Display::isRunning() const
 
 Display::operator wl_display*()
 {
-    return newDisplay->display();
+    return newDisplay->native();
 }
 
 Display::operator wl_display*() const
 {
-    return newDisplay->display();
+    return newDisplay->native();
 }
 
 //QList<OutputInterface*> Display::outputs() const
@@ -585,7 +585,7 @@ QVector< ClientConnection* > Display::connections() const
 ClientConnection *Display::createClient(int fd)
 {
     Server::Client* client = newDisplay->createClient(fd);
-    client->legacy = getConnection(client->client());
+    client->legacy = getConnection(client->native());
     client->legacy->newClient = client;
     return client->legacy;
 }

@@ -68,7 +68,7 @@ public:
         Q_ASSERT(!m_capsule->valid());
 
         m_capsule->create(
-            wl_global_create(display()->handle()->display(), m_interface, version(), this, bind));
+            wl_global_create(display()->handle()->native(), m_interface, version(), this, bind));
     }
 
     constexpr int version() const
@@ -91,19 +91,19 @@ public:
         return m_implementation;
     }
 
-    operator wl_global*() const
+    explicit operator wl_global*() const
     {
         return *m_capsule;
     }
 
-    operator wl_global*()
+    explicit operator wl_global*()
     {
         return *m_capsule;
     }
 
-    static Handle* fromResource(wl_resource* wlResource)
+    static Handle* handle(wl_resource* wlResource)
     {
-        auto resource = reinterpret_cast<GlobalResource*>(wl_resource_get_user_data(wlResource));
+        auto resource = static_cast<GlobalResource*>(wl_resource_get_user_data(wlResource));
         return resource->global()->handle();
     }
 
@@ -233,7 +233,7 @@ private:
 
     static void bind(wl_client* wlClient, void* data, uint32_t version, uint32_t id)
     {
-        auto global = reinterpret_cast<Global*>(data);
+        auto global = static_cast<Global*>(data);
         auto getClient = [&global, &wlClient] { return global->display()->getClient(wlClient); };
 
         auto bindToGlobal

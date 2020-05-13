@@ -39,7 +39,7 @@ class OutputManagementV1::Private : public OutputManagementV1Global
 {
 public:
     Private(OutputManagementV1* q, D_isplay* display);
-    ~Private();
+    ~Private() override;
 
 private:
     static void
@@ -70,7 +70,7 @@ void OutputManagementV1::Private::createConfigurationCallback([[maybe_unused]] w
                                                               wl_resource* wlResource,
                                                               uint32_t id)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     auto config

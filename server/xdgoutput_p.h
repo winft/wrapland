@@ -71,7 +71,7 @@ public:
 class XdgOutputV1::Private : public Wayland::Resource<XdgOutputV1>
 {
 public:
-    Private(Wayland::Client* client, uint32_t version, uint32_t id, XdgOutputV1* q);
+    Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q);
     ~Private() override = default;
     void setLogicalSize(const QSize& size);
     void setLogicalPosition(const QPoint& pos);

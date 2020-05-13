@@ -50,7 +50,7 @@ void DataSource::Private::offerCallback([[maybe_unused]] wl_client* wlClient,
                                         wl_resource* wlResource,
                                         const char* mimeType)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->offer(mimeType);
 }
 
@@ -83,7 +83,7 @@ void DataSource::Private::setActionsCallback([[maybe_unused]] wl_client* wlClien
         return;
     }
 
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     if (priv->supportedDnDActions != supportedActions) {
         priv->supportedDnDActions = supportedActions;
         Q_EMIT priv->q_ptr->supportedDragAndDropActionsChanged();

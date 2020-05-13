@@ -53,7 +53,7 @@ void ShadowManager::Private::createCallback(wl_client* wlClient,
                                             wl_resource* wlSurface)
 {
 
-    fromResource(wlResource)->d_ptr->createShadow(wlClient, wlResource, id, wlSurface);
+    handle(wlResource)->d_ptr->createShadow(wlClient, wlResource, id, wlSurface);
 }
 
 void ShadowManager::Private::createShadow(wl_client* wlClient,
@@ -61,7 +61,7 @@ void ShadowManager::Private::createShadow(wl_client* wlClient,
                                           uint32_t id,
                                           wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     auto client = display()->handle()->getClient(wlClient);
     auto shadow = new Shadow(client, wl_resource_get_version(wlResource), id);
 
@@ -77,7 +77,7 @@ void ShadowManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
                                            [[maybe_unused]] wl_resource* wlResource,
                                            wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     surface->d_ptr->setShadow(QPointer<Shadow>());
 }
 
@@ -108,8 +108,8 @@ const struct org_kde_kwin_shadow_interface Shadow::Private::s_interface = {
 
 void Shadow::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)
 {
-    auto privateInstance = static_cast<Private*>(fromResource(wlResource));
-    privateInstance->commit();
+    auto priv = handle(wlResource)->d_ptr;
+    priv->commit();
 }
 
 void Shadow::Private::commit()
@@ -212,7 +212,7 @@ void Shadow::Private::attach(Shadow::Private::State::Flags flag, wl_resource* wl
     void Shadow::Private::attach##__PART__##Callback(                                              \
         [[maybe_unused]] wl_client* wlClient, wl_resource* wlResource, wl_resource* wlBuffer)      \
     {                                                                                              \
-        auto priv = reinterpret_cast<Private*>(fromResource(wlResource));                          \
+        auto priv = handle(wlResource)->d_ptr;                                                     \
         priv->attach(State::__PART__##Buffer, wlBuffer);                                           \
     }
 
@@ -232,7 +232,7 @@ ATTACH(BottomLeft)
                                                      [[maybe_unused]] wl_resource* wlResource,     \
                                                      wl_fixed_t offset)                            \
     {                                                                                              \
-        auto priv = reinterpret_cast<Private*>(fromResource(wlResource));                          \
+        auto priv = handle(wlResource)->d_ptr;                                                     \
         priv->pending.flags = State::Flags(priv->pending.flags | State::Offset);                   \
         priv->pending.offset.set##__PART__(wl_fixed_to_double(offset));                            \
     }

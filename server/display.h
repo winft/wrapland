@@ -95,7 +95,7 @@ class WRAPLANDSERVER_EXPORT D_isplay : public QObject
     Q_OBJECT
 public:
     explicit D_isplay(QObject* parent = nullptr, bool legacyInvoked = false);
-    virtual ~D_isplay();
+    ~D_isplay() override;
 
     void setSocketName(const std::string& name);
     const std::string socketName() const;
@@ -115,9 +115,7 @@ public:
 
     void dispatchEvents(int msecTimeout = -1);
 
-    wl_display* display() const;
-    operator wl_display*();
-    operator wl_display*() const;
+    wl_display* native() const;
     bool running() const;
 
     Output* createOutput(QObject* parent = nullptr);

@@ -58,7 +58,7 @@ void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
                                         char const* mimeType)
 {
     // TODO: verify serial?
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->source->accept(mimeType);
 }
 
@@ -67,7 +67,7 @@ void DataOffer::Private::receiveCallback([[maybe_unused]] wl_client* wlClient,
                                          char const* mimeType,
                                          int32_t fd)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->receive(mimeType, fd);
 }
 
@@ -83,7 +83,7 @@ void DataOffer::Private::receive(std::string mimeType, int32_t fd)
 void DataOffer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
                                         wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->source->dndFinished();
     // TODO: It is a client error to perform other requests than wl_data_offer.destroy after this
     // one.
@@ -132,7 +132,7 @@ void DataOffer::Private::setActionsCallback(wl_client* wlClient,
         preferredAction = DataDeviceManager::DnDAction::Ask;
     }
 
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->supportedDnDActions = supportedActions;
     priv->preferredDnDAction = preferredAction;
     Q_EMIT priv->q_ptr->dragAndDropActionsChanged();

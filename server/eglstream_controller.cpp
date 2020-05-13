@@ -59,9 +59,8 @@ void EglStreamController::Private::attachStreamConsumerAttribs([[maybe_unused]] 
                                                                wl_resource* eglStream,
                                                                wl_array* attribs)
 {
-    auto parent = fromResource(wlResource);
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
-    Q_EMIT parent->streamConsumerAttached(surface, eglStream, attribs);
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    Q_EMIT handle(wlResource)->streamConsumerAttached(surface, eglStream, attribs);
 }
 
 EglStreamController::EglStreamController(D_isplay* display, QObject* parent)

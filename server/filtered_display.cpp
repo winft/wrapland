@@ -61,7 +61,7 @@ FilteredDisplay::FilteredDisplay(QObject* parent)
     , d_ptr{new Private(this)}
 {
     connect(this, &D_isplay::started, [this]() {
-        wl_display_set_global_filter(*this, Private::filterCallback, d_ptr.get());
+        wl_display_set_global_filter(native(), Private::filterCallback, d_ptr.get());
     });
 }
 

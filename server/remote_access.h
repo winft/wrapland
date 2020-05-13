@@ -56,7 +56,7 @@ class WRAPLANDSERVER_EXPORT RemoteBufferHandle : public QObject
     Q_OBJECT
 public:
     RemoteBufferHandle();
-    virtual ~RemoteBufferHandle();
+    ~RemoteBufferHandle() override;
 
     void setFd(uint32_t fd);
     void setSize(uint32_t width, uint32_t height);

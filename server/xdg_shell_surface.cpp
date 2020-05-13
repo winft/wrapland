@@ -65,7 +65,7 @@ void XdgShellSurface::Private::getTopLevelCallback([[maybe_unused]] wl_client* w
                                                    wl_resource* wlResource,
                                                    uint32_t id)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     if (!priv->checkAlreadyConstructed()) {
         return;
@@ -88,7 +88,7 @@ void XdgShellSurface::Private::getPopupCallback([[maybe_unused]] wl_client* wlCl
                                                 wl_resource* wlParent,
                                                 wl_resource* wlPositioner)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     if (!priv->checkAlreadyConstructed()) {
         return;
@@ -135,7 +135,7 @@ void XdgShellSurface::Private::setWindowGeometryCallback([[maybe_unused]] wl_cli
                                                          int32_t width,
                                                          int32_t height)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     if (!priv->toplevel && !priv->popup) {
         priv->postError(XDG_SURFACE_ERROR_NOT_CONSTRUCTED, "No role object constructed.");
@@ -159,7 +159,7 @@ void XdgShellSurface::Private::ackConfigureCallback([[maybe_unused]] wl_client* 
                                                     wl_resource* wlResource,
                                                     uint32_t serial)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     if (!priv->toplevel && !priv->popup) {
         priv->postError(XDG_SURFACE_ERROR_NOT_CONSTRUCTED, "No role object constructed.");

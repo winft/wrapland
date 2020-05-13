@@ -430,16 +430,16 @@ void Seat::setName(const std::string& name)
 
 void Seat::Private::getPointerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    handle->d_ptr->getPointer(client, id, wlResource);
+    priv->getPointer(bind, id);
 }
 
-void Seat::Private::getPointer(Client* client, uint32_t id, wl_resource* resource)
+void Seat::Private::getPointer(SeatBind* bind, uint32_t id)
 {
-    auto pointer
-        = new Pointer(client, std::min(wl_resource_get_version(resource), version()), id, q_ptr);
+    auto client = bind->client()->handle();
+    auto pointer = new Pointer(client, bind->version(), id, q_ptr);
 
     pointers << pointer;
 
@@ -468,17 +468,18 @@ void Seat::Private::getPointer(Client* client, uint32_t id, wl_resource* resourc
 
 void Seat::Private::getKeyboardCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    handle->d_ptr->getKeyboard(client, id, wlResource);
+    priv->getKeyboard(bind, id);
 }
 
-void Seat::Private::getKeyboard(Client* client, uint32_t id, wl_resource* resource)
+void Seat::Private::getKeyboard(SeatBind* bind, uint32_t id)
 {
+    auto client = bind->client()->handle();
+
     // TODO: only create if seat has keyboard?
-    auto keyboard
-        = new Keyboard(client, std::min(wl_resource_get_version(resource), version()), id, q_ptr);
+    auto keyboard = new Keyboard(client, bind->version(), id, q_ptr);
 
     keyboard->repeatInfo(keys.keyRepeat.charactersPerSecond, keys.keyRepeat.delay);
 
@@ -503,17 +504,18 @@ void Seat::Private::getKeyboard(Client* client, uint32_t id, wl_resource* resour
 
 void Seat::Private::getTouchCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    handle->d_ptr->getTouch(client, id, wlResource);
+    priv->getTouch(bind, id);
 }
 
-void Seat::Private::getTouch(Client* client, uint32_t id, wl_resource* resource)
+void Seat::Private::getTouch(SeatBind* bind, uint32_t id)
 {
+    auto client = bind->client()->handle();
+
     // TODO: only create if seat has touch?
-    auto touch
-        = new Touch(client, std::min(wl_resource_get_version(resource), version()), id, q_ptr);
+    auto touch = new Touch(client, bind->version(), id, q_ptr);
     // TODO: check for error
 
     touchs << touch;

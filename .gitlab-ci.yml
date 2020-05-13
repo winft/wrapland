@@ -82,10 +82,8 @@ clang-tidy:
       artifacts: true
   script:
     - pacman -Sy python2 --noconfirm --needed
-    - SOURCE_DIR=$(pwd)
-    - cd ci-build
     # Run clang-tidy via wrapper script.
-    - bash ../ci/compliance/clang-tidy.sh
+    - bash ci/compliance/clang-tidy.sh ci-build
 
   # TODO: Remove again when decided on which checks to use.
   allow_failure: true

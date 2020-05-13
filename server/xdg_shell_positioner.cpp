@@ -52,7 +52,7 @@ void XdgShellPositioner::Private::setSizeCallback([[maybe_unused]] wl_client* wl
                                                   int32_t width,
                                                   int32_t height)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->initialSize = QSize(width, height);
 }
 
@@ -63,7 +63,7 @@ void XdgShellPositioner::Private::setAnchorRectCallback([[maybe_unused]] wl_clie
                                                         int32_t width,
                                                         int32_t height)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->anchorRect = QRect(x, y, width, height);
 }
 
@@ -71,7 +71,7 @@ void XdgShellPositioner::Private::setAnchorCallback([[maybe_unused]] wl_client* 
                                                     wl_resource* wlResource,
                                                     uint32_t anchor)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     Qt::Edges qtEdges;
     switch (anchor) {
@@ -113,7 +113,7 @@ void XdgShellPositioner::Private::setGravityCallback([[maybe_unused]] wl_client*
                                                      wl_resource* wlResource,
                                                      uint32_t gravity)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     Qt::Edges qtEdges;
     switch (gravity) {
@@ -156,7 +156,7 @@ void XdgShellPositioner::Private::setConstraintAdjustmentCallback(
     wl_resource* wlResource,
     uint32_t constraint_adjustment)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     XdgShellSurface::ConstraintAdjustments constraints;
     if (constraint_adjustment & XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_X) {
@@ -186,7 +186,7 @@ void XdgShellPositioner::Private::setOffsetCallback([[maybe_unused]] wl_client* 
                                                     int32_t x,
                                                     int32_t y)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->anchorOffset = QPoint(x, y);
 }
 

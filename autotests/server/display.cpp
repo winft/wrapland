@@ -126,14 +126,14 @@ void TestServerDisplay::testClientConnection()
     int sv[2];
     QVERIFY(socketpair(AF_UNIX, SOCK_STREAM, 0, sv) >= 0);
 
-    auto* wlClient = wl_client_create(display, sv[0]);
+    auto* wlClient = wl_client_create(display.native(), sv[0]);
     QVERIFY(wlClient);
 
     QVERIFY(connectedSpy.isEmpty());
     QVERIFY(display.clients().empty());
     Client* connection = display.getClient(wlClient);
     QVERIFY(connection);
-    QCOMPARE(connection->client(), wlClient);
+    QCOMPARE(connection->native(), wlClient);
 
     if (getuid() == 0) {
         QEXPECT_FAIL("", "Please don't run test as root", Continue);
@@ -148,10 +148,10 @@ void TestServerDisplay::testClientConnection()
     QCOMPARE(connection->display(), &display);
     QCOMPARE(connection->executablePath(),
              QCoreApplication::applicationFilePath().toUtf8().constData());
-    QCOMPARE((wl_client*)*connection, wlClient);
+    QCOMPARE((connection->native()), wlClient);
 
     const Client& constRef = *connection;
-    QCOMPARE((wl_client*)constRef, wlClient);
+    QCOMPARE(constRef.native(), wlClient);
     QCOMPARE(connectedSpy.count(), 1);
 
     QCOMPARE(connectedSpy.first().first().value<Client*>(), connection);
@@ -167,7 +167,7 @@ void TestServerDisplay::testClientConnection()
     auto* client2 = display.createClient(sv2[0]);
     QVERIFY(client2);
 
-    Client* connection2 = display.getClient(client2->client());
+    auto connection2 = display.getClient(client2->native());
     QVERIFY(connection2);
     QCOMPARE(connection2, client2);
     QCOMPARE(connectedSpy.count(), 2);
@@ -208,7 +208,7 @@ void TestServerDisplay::testConnectNoSocket()
     auto client = display.createClient(sv[0]);
     QVERIFY(client);
 
-    wl_client_destroy(client->client());
+    wl_client_destroy(client->native());
     close(sv[0]);
     close(sv[1]);
 }

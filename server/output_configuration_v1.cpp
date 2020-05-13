@@ -62,8 +62,8 @@ void OutputConfigurationV1::Private::enableCallback([[maybe_unused]] wl_client* 
                                                     wl_resource* wlOutputDevice,
                                                     int32_t wlEnable)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto outputDevice = OutputDeviceV1Global::fromResource(wlOutputDevice);
+    auto priv = handle(wlResource)->d_ptr;
+    auto outputDevice = OutputDeviceV1Global::handle(wlOutputDevice);
 
     auto enable = (wlEnable == ZKWINFT_OUTPUT_DEVICE_V1_ENABLEMENT_ENABLED)
         ? OutputDeviceV1::Enablement::Enabled
@@ -77,8 +77,8 @@ void OutputConfigurationV1::Private::modeCallback([[maybe_unused]] wl_client* wl
                                                   wl_resource* wlOutputDevice,
                                                   int32_t mode_id)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto outputDevice = OutputDeviceV1Global::fromResource(wlOutputDevice);
+    auto priv = handle(wlResource)->d_ptr;
+    auto outputDevice = OutputDeviceV1Global::handle(wlOutputDevice);
 
     bool modeValid = false;
     for (const auto& m : outputDevice->modes()) {
@@ -101,8 +101,8 @@ void OutputConfigurationV1::Private::transformCallback([[maybe_unused]] wl_clien
                                                        wl_resource* wlOutputDevice,
                                                        int32_t wlTransform)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto outputDevice = OutputDeviceV1Global::fromResource(wlOutputDevice);
+    auto priv = handle(wlResource)->d_ptr;
+    auto outputDevice = OutputDeviceV1Global::handle(wlOutputDevice);
 
     auto toTransform = [](int32_t wlTransform) {
         switch (wlTransform) {
@@ -137,8 +137,8 @@ void OutputConfigurationV1::Private::geometryCallback([[maybe_unused]] wl_client
                                                       wl_fixed_t width,
                                                       wl_fixed_t height)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto outputDevice = OutputDeviceV1Global::fromResource(wlOutputDevice);
+    auto priv = handle(wlResource)->d_ptr;
+    auto outputDevice = OutputDeviceV1Global::handle(wlOutputDevice);
 
     const QRectF geo(wl_fixed_to_double(x),
                      wl_fixed_to_double(y),
@@ -151,7 +151,7 @@ void OutputConfigurationV1::Private::geometryCallback([[maybe_unused]] wl_client
 void OutputConfigurationV1::Private::applyCallback([[maybe_unused]] wl_client* wlClient,
                                                    wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     if (!priv->manager) {
         priv->sendFailed();

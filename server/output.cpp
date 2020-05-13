@@ -60,7 +60,7 @@ Output::Output(D_isplay* display, QObject* parent)
         d_ptr->sendMode(*currentModeIt);
         d_ptr->sendDone();
 
-        wl_display_flush_clients(*(d_ptr->displayHandle));
+        wl_display_flush_clients(d_ptr->displayHandle->native());
     });
 
     connect(this, &Output::subPixelChanged, this, [this] { d_ptr->updateGeometry(); });
