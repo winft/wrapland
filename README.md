@@ -1,6 +1,8 @@
 # Wrapland
 
 [![pipeline status][pipe-status-img]][pipe-status-link]
+[![semver][semver-img]][semver-link]
+[![chat on gitter][gitter-img]][gitter-link]
 
 Wrapland is a Qt/C++ library that wraps and mediates the libwayland client and server API for its
 consumers. Wrapland is an independent part of the [KWinFT project][kwinft-project] with the KWinFT
@@ -182,5 +184,9 @@ Please make sure that your project is configured with C++11 support:
 
 [pipe-status-img]: https://gitlab.com/kwinft/wrapland/badges/master/pipeline.svg
 [pipe-status-link]: https://gitlab.com/kwinft/wrapland/-/commits/master
+[semver-img]: https://img.shields.io/badge/semver-2.0.0-blue
+[semver-link]: https://semver.org/spec/v2.0.0.html
+[gitter-img]: https://badges.gitter.im/kwinft/community.svg
+[gitter-link]: https://gitter.im/kwinft/community
 [kwinft-project]: https://gitlab.com/kwinft
 [plasma-schedule]: https://community.kde.org/Schedules/Plasma_5
