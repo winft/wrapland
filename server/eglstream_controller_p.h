@@ -17,42 +17,38 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef WAYLAND_SERVER_EGLSTREAM_CONTROLLER_INTERFACE_P_H
-#define WAYLAND_SERVER_EGLSTREAM_CONTROLLER_INTERFACE_P_H
+#pragma once
 
-#include "eglstream_controller_interface.h"
-#include "global_p.h"
+#include "eglstream_controller.h"
+#include "wayland/global.h"
 
 #include <wayland-eglstream-controller-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
-class Q_DECL_HIDDEN EglStreamControllerInterface::Private : public Global::Private
+constexpr uint32_t EglStreamControllerrVersion = 1;
+using EglStreamControllerGlobal = Wayland::Global<EglStreamController, EglStreamControllerrVersion>;
+
+class Q_DECL_HIDDEN EglStreamController::Private : public EglStreamControllerGlobal
 {
 public:
-    Private(EglStreamControllerInterface *controller, Display *display);
-    void create();
+    Private(D_isplay* display, const wl_interface* interface, EglStreamController* controller);
+    ~Private() override;
 
 private:
-    static void attachStreamConsumer(wl_client *client,
-                                     wl_resource *resource,
-                                     wl_resource *surface,
-                                     wl_resource *eglStream);
-    static void attachStreamConsumerAttribs(wl_client *client,
-                                            wl_resource *resource,
-                                            wl_resource *surface,
-                                            wl_resource *eglStream,
-                                            wl_array *attribs);
+    static void attachStreamConsumer(wl_client* wlClient,
+                                     wl_resource* wlResource,
+                                     wl_resource* wlSurface,
+                                     wl_resource* eglStream);
+
+    static void attachStreamConsumerAttribs(wl_client* wlClient,
+                                            wl_resource* wlResource,
+                                            wl_resource* wlSurface,
+                                            wl_resource* eglStream,
+                                            wl_array* attribs);
+
     static const struct wl_eglstream_controller_interface s_interface;
-    static const quint32 s_version;
-    void bind(wl_client *client, uint32_t version, uint32_t id) override;
-    EglStreamControllerInterface *q;
 };
 
 }
-}
-
-#endif

@@ -17,50 +17,33 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#ifndef WAYLAND_SERVER_EGLSTREAM_CONTROLLER_INTERFACE_H
-#define WAYLAND_SERVER_EGLSTREAM_CONTROLLER_INTERFACE_H
+#pragma once
 
-#include "global.h"
-
-#include <Wrapland/Server/wraplandserver_export.h>
-#include <wayland-util.h>
 #include <QObject>
+#include <Wrapland/Server/wraplandserver_export.h>
+#include <memory>
+#include <wayland-util.h>
 
-namespace Wrapland
+namespace Wrapland::Server
 {
-namespace Server
-{
-class Display;
+class D_isplay;
 class Surface;
 
-/**
- * @brief Represents the Global for the wl_eglstream_controller interface.
- *
- * This class handles requests (typically from the NVIDIA EGL driver) to attach
- * a newly created EGL Stream to a Wayland surface, facilitating the sharing
- * of buffer contents between client and compositor.
- *
- */
-class WRAPLANDSERVER_EXPORT EglStreamControllerInterface : public Global
+class WRAPLANDSERVER_EXPORT EglStreamController : public QObject
 {
     Q_OBJECT
 public:
-    ~EglStreamControllerInterface() override;
-    void create();
+    ~EglStreamController() override;
 
 Q_SIGNALS:
-    /**
-     * Emitted when a new stream attach request is received.
-     */
-    void streamConsumerAttached(Surface *surface, void *eglStream, wl_array *attribs);
+    void streamConsumerAttached(Surface* surface, void* eglStream, wl_array* attribs);
+
 private:
-    explicit EglStreamControllerInterface(Display *display, QObject *parent = nullptr);
-    
+    explicit EglStreamController(D_isplay* display, QObject* parent = nullptr);
+
     class Private;
-    friend class Display;
+    friend class D_isplay;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }
-}
-
-#endif
