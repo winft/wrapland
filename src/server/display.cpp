@@ -51,7 +51,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "plasmavirtualdesktop_interface.h"
 //#include "xdgoutput_interfce.h"
 //#include "xdgdecoration_interface.h"
-#include "eglstream_controller_interface.h"
+//#include "eglstream_controller_interface.h"
 //#include "../../server/keystate.h"
 //#include "linuxdmabuf_v1_interface.h"
 
@@ -496,13 +496,13 @@ XdgOutputManagerInterface *Display::createXdgOutputManager(QObject *parent)
 //    connect(this, &Display::aboutToTerminate, d, [d] { delete d; });
 //    return d;
 //}
-
+/*
 EglStreamControllerInterface *Display::createEglStreamControllerInterface(QObject *parent)
 {
     EglStreamControllerInterface *e = new EglStreamControllerInterface(this, parent);
     connect(this, &Display::aboutToTerminate, e, [e] { delete e; });
     return e;
-}
+}*/
 /*
 KeyState *Display::createKeyState(QObject *parent)
 {
