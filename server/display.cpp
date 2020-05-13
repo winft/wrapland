@@ -32,6 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_device_manager.h"
 #include "dpms.h"
 #include "eglstream_controller.h"
+#include "fakeinput.h"
 #include "idle_inhibit_v1.h"
 #include "kde_idle.h"
 #include "keystate.h"
@@ -61,7 +62,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/display.h"
 
 #include "../server/shadow.h"
-#include "../src/server/fakeinput_interface.h"
 #include "../src/server/plasmashell_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
 
@@ -253,9 +253,9 @@ KdeIdle* D_isplay::createIdle(QObject* parent)
     return new KdeIdle(this, parent);
 }
 
-FakeInputInterface* D_isplay::createFakeInput(QObject* parent)
+FakeInput* D_isplay::createFakeInput(QObject* parent)
 {
-    return legacy->createFakeInput(parent);
+    return new FakeInput(this, parent);
 }
 
 ShadowManager* D_isplay::createShadowManager(QObject* parent)

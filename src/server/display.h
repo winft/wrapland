@@ -60,7 +60,7 @@ class IdleInterface;
 //enum class IdleInhibitManagerInterfaceVersion;
 //class RemoteAccessManagerInterface;
 class IdleInhibitManagerInterface;
-class FakeInputInterface;
+//class FakeInputInterface;
 class PlasmaShellInterface;
 //class PlasmaWindowManagementInterface;
 //class SeatInterface;
@@ -200,7 +200,7 @@ public:
     //PlasmaWindowManagement *createPlasmaWindowManagement(QObject *parent = nullptr);
     IdleInterface *createIdle(QObject *parent = nullptr);
 //    RemoteAccessManagerInterface *createRemoteAccessManager(QObject *parent = nullptr);
-    FakeInputInterface *createFakeInput(QObject *parent = nullptr);
+//   FakeInputInterface *createFakeInput(QObject *parent = nullptr);
 //    ShadowManagerInterface *createShadowManager(QObject *parent = nullptr);
 //    SlideManagerInterface *createSlideManager(QObject *parent = nullptr);
 //    ContrastManagerInterface *createContrastManager(QObject *parent = nullptr);
