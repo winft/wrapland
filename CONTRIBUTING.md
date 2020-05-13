@@ -71,7 +71,7 @@ pattern *Plasma/\**.
 Code contributions to later branches than the current stable branch are not possible.
 
 ## Commit Message Guideline
-The [Conventional Commits 1.0.0-beta.4][conventional-commits] specification is applied with the following amendments:
+The [Conventional Commits 1.0.0][conventional-commits] specification is applied with the following amendments:
 
 * Only the following types are allowed:
   * build: changes to the CMake build system, dependencies or other build-related tooling
@@ -118,7 +118,7 @@ referred to doing that.
 [issue]: https://gitlab.com/kwinft/wrapland/-/issues
 [frameworks-style]: https://community.kde.org/Policies/Frameworks_Coding_Style
 [plasma-schedule]: https://community.kde.org/Schedules/Plasma_5
-[conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0-beta.4/#specification
+[conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/#specification
 [angular-revert]: https://github.com/angular/angular/blob/3cf2005a936bec2058610b0786dd0671dae3d358/CONTRIBUTING.md#revert
 [angular-subject]: https://github.com/angular/angular/blob/3cf2005a936bec2058610b0786dd0671dae3d358/CONTRIBUTING.md#subject
 [gitter-room]: https://gitter.im/kwinft/community
