@@ -71,7 +71,8 @@ pattern *Plasma/\**.
 Code contributions to later branches than the current stable branch are not possible.
 
 ## Commit Message Guideline
-The [Conventional Commits 1.0.0][conventional-commits] specification is applied with the following amendments:
+The [Conventional Commits 1.0.0][conventional-commits] specification is applied with the following
+amendments:
 
 * Only the following types are allowed:
   * build: changes to the CMake build system, dependencies or other build-related tooling
@@ -87,7 +88,6 @@ The [Conventional Commits 1.0.0][conventional-commits] specification is applied 
   * client
   * server
 * Angular's [Revert][angular-revert] and [Subject][angular-subject] policies are applied.
-* Breaking changes are supposed to be pointed out only in prose in the commit body.
 
 Commits deliberately ignoring this guideline will not be merged and in case reverted.
 
