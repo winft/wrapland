@@ -98,6 +98,14 @@ Commits deliberately ignoring this guideline will not be merged and in case reve
     For function exampleFunction the return value was incorrect.
     Instead provide the correct value A by changing B to C.
 
+### Tooling
+There is a linter on merge requests checking every included commit for being in line with this
+specification. This linter can also be used locally before opening a merge request:
+
+    yarn global add commitlint
+    yarn add conventional-changelog-conventionalcommits
+    commitlint --verbose --config ci/commitlint.config.js -f origin/master
+
 ## Contact
 When you have a quick question about contributing to Wrapland join our [Gitter room][gitter-room].
 For more complex questions open a separate [issue ticket][issue].
