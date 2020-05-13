@@ -99,7 +99,12 @@ Commits deliberately ignoring this guideline will not be merged and in case reve
     Instead provide the correct value A by changing B to C.
 
 ## Contact
-Real-time communication about the project happens on the IRC channel `#plasma` on freenode and the bridged Matrix room `#plasma:kde.org`.
+When you have a quick question about contributing to Wrapland join our [Gitter room][gitter-room].
+For more complex questions open a separate [issue ticket][issue].
+
+In case you are unsure if your question should go into a separate issue ticket drop by in our Gitter
+room first and if a separate issue ticket would make sense for your question you will then be
+referred to doing that.
 
 [merge-request]: https://gitlab.com/kwinft/wrapland/-/merge_requests
 [issue]: https://gitlab.com/kwinft/wrapland/-/issues
@@ -108,4 +113,4 @@ Real-time communication about the project happens on the IRC channel `#plasma` o
 [conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0-beta.4/#specification
 [angular-revert]: https://github.com/angular/angular/blob/3cf2005a936bec2058610b0786dd0671dae3d358/CONTRIBUTING.md#revert
 [angular-subject]: https://github.com/angular/angular/blob/3cf2005a936bec2058610b0786dd0671dae3d358/CONTRIBUTING.md#subject
-
+[gitter-room]: https://gitter.im/kwinft/community
