@@ -61,16 +61,13 @@ public:
     //
     //
 
-    wl_client* client();
+    wl_client* native() const;
     D_isplay* display();
 
     pid_t processId() const;
     uid_t userId() const;
     gid_t groupId() const;
     std::string executablePath() const;
-
-    operator wl_client*();
-    operator wl_client*() const;
 
 Q_SIGNALS:
     void disconnected(Client*);

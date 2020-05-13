@@ -42,7 +42,7 @@ public:
     Private(LinuxDmabufV1* q, D_isplay* display);
     ~Private() override;
 
-    void bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind) override final;
+    void bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind) final;
 
     static const struct wl_buffer_interface* bufferInterface();
     static void createParamsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
@@ -87,7 +87,7 @@ public:
              uint32_t id,
              LinuxDmabufV1::Private* dmabuf,
              ParamsWrapperV1* q);
-    ~ParamsV1();
+    ~ParamsV1() override;
 
     void add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride, uint64_t modifier);
     void create(uint32_t bufferId, const QSize& size, uint32_t format, uint32_t flags);

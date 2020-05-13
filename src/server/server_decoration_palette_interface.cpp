@@ -68,7 +68,7 @@ void ServerSideDecorationPaletteManagerInterface::Private::createCallback(wl_cli
     auto p = reinterpret_cast<Private*>(wl_resource_get_user_data(resource));
     Q_ASSERT(p);
 
-    auto s = Wayland::Resource<Surface>::fromResource(surface)->handle();
+    auto s = Wayland::Resource<Surface>::handle(surface);
     if (!s) {
         // TODO: send error?
         qCWarning(WRAPLAND_SERVER) << "ServerSideDecorationPaletteInterface requested for non existing Surface";

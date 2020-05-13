@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2020 Roman Gilg <subdiff@gmail.com>
+
+WarningsAsErrors: "*"
+
+# Following checks are disabled:
+#
+# fuchsia-default-arguments-calls: We allow default arguments.
+# fuchsia-default-arguments-declarations: We allow default arguments.
+# fuchsia-overloaded-operator: We overload | for enum classes through
+#   Q_DECLARE_OPERATORS_FOR_FLAGS.
+# google-readability-namespace-comments: Often unnecessary verbose, with C++17
+#   namespaces there are not many braces after all.
+# hicpp-member-init: Produces false positives with template classes, see
+#   https://stackoverflow.com/q/55569776.
+# llvm-header-guard: We use #pragma once.
+# llvm-namespace-comment: Same as google-readability-namespace-comments.
+# llvm-qualified-auto: We use auto without any qualifiers when not needed like
+#   C++ Core Guiedelines do.
+# misc-non-private-member-variables-in-classes: We use public member variables in our
+#   pimpl-classes extensively. TODO: Could be enabled for API classes only or all
+#   Private classes be transformed into structs.
+# modernize-use-trailing-return-type: The non-trailing return type style is
+#   easier to read and is preferred.
+# readability-implicit-bool-conversion: We use it quite often, it does not really
+#   improve the readability to explicitly cast everywhere.
+# readability-qualified-auto: Same as llvm-qualified-auto.
+#
+
+Checks: "*,
+-fuchsia-default-arguments-calls,
+-fuchsia-default-arguments-declarations,
+-fuchsia-overloaded-operator,
+-google-readability-namespace-comments,
+-hicpp-member-init,
+-llvm-header-guard,
+-llvm-namespace-comment,
+-llvm-qualified-auto,
+-misc-non-private-member-variables-in-classes,
+-modernize-use-trailing-return-type,
+-readability-implicit-bool-conversion,
+-readability-qualified-auto
+"
+
+CheckOptions:
+  - key:   hicpp-signed-bitwise.IgnorePositiveIntegerLiterals
+    value: 1

@@ -45,13 +45,12 @@ void KdeIdle::Private::getIdleTimeoutCallback([[maybe_unused]] wl_client* wlClie
                                               wl_resource* wlSeat,
                                               uint32_t timeout)
 {
-    auto kdeidle = fromResource(wlResource);
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
-    auto seat = SeatGlobal::fromResource(wlSeat);
+    auto seat = SeatGlobal::handle(wlSeat);
 
     auto idleTimeout
-        = new IdleTimeout(bind->client()->handle(), bind->version(), id, seat, kdeidle);
+        = new IdleTimeout(bind->client()->handle(), bind->version(), id, seat, priv->handle());
     if (!idleTimeout->d_ptr->resource()) {
         wl_resource_post_no_memory(wlResource);
         delete idleTimeout;
@@ -128,11 +127,10 @@ IdleTimeout::Private::Private(Client* client,
 
 IdleTimeout::Private::~Private() = default;
 
-void IdleTimeout::Private::simulateUserActivityCallback([[maybe_unused]] wl_client* client,
-                                                        wl_resource* resource)
+void IdleTimeout::Private::simulateUserActivityCallback([[maybe_unused]] wl_client* wlClient,
+                                                        wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(resource));
-    priv->simulateUserActivity();
+    handle(wlResource)->d_ptr->simulateUserActivity();
 }
 
 void IdleTimeout::Private::simulateUserActivity()

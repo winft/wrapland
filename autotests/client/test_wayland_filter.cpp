@@ -77,7 +77,7 @@ TestDisplay::TestDisplay(QObject *parent):
 bool TestDisplay::allowInterface(Wrapland::Server::Client* client, const QByteArray& interfaceName)
 {
     if (interfaceName == "org_kde_kwin_blur_manager") {
-        return m_allowedClients.contains(client->client());
+        return m_allowedClients.contains(client->native());
     }
     return true;
 }
@@ -135,7 +135,7 @@ void TestFilter::testFilter()
     //been previous fetched via getConnection()
     if (accessAllowed) {
         wl_client *clientConnection;
-        wl_client_for_each(clientConnection, wl_display_get_client_list(*m_display)) {
+        wl_client_for_each(clientConnection, wl_display_get_client_list(m_display->native())) {
             m_display->m_allowedClients << clientConnection;
         }
     }

@@ -66,9 +66,8 @@ void Pointer::Private::setCursorCallback([[maybe_unused]] wl_client* wlClient,
                                          int32_t hotspot_x,
                                          int32_t hotspot_y)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto surface
-        = wlSurface ? Wayland::Resource<Surface>::fromResource(wlSurface)->handle() : nullptr;
+    auto priv = handle(wlResource)->d_ptr;
+    auto surface = wlSurface ? Wayland::Resource<Surface>::handle(wlSurface) : nullptr;
 
     priv->setCursor(serial, surface, QPoint(hotspot_x, hotspot_y));
 }
@@ -437,8 +436,7 @@ void Pointer::relativeMotion(const QSizeF& delta,
 
 Pointer* Pointer::get(void* data)
 {
-    auto priv = Private::fromResource(reinterpret_cast<wl_resource*>(data));
-    return static_cast<Private*>(priv)->handle();
+    return Private::handle(reinterpret_cast<wl_resource*>(data));
 }
 
 Cursor::Private::Private(Cursor* q, Pointer* _pointer)

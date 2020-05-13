@@ -53,7 +53,7 @@ void ContrastManager::Private::createCallback(wl_client* wlClient,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
-    auto manager = fromResource(wlResource);
+    auto manager = handle(wlResource);
     manager->d_ptr->createContrast(wlClient, wlResource, id, wlSurface);
 }
 
@@ -62,8 +62,8 @@ void ContrastManager::Private::createContrast([[maybe_unused]] wl_client* wlClie
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
-    auto bind = fromResource(wlResource)->d_ptr->getBind(wlResource);
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto bind = handle(wlResource)->d_ptr->getBind(wlResource);
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto contrast = new Contrast(bind->client()->handle(), bind->version(), id);
     if (!contrast->d_ptr->resource()) {
@@ -79,7 +79,7 @@ void ContrastManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClien
                                              [[maybe_unused]] wl_resource* wlResource,
                                              wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     surface->d_ptr->setContrast(QPointer<Contrast>());
 }
 
@@ -115,7 +115,7 @@ Contrast::Private::~Private() = default;
 void Contrast::Private::commitCallback([[maybe_unused]] wl_client* wlClient,
                                        wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->commit();
 }
 
@@ -131,8 +131,8 @@ void Contrast::Private::setRegionCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,
                                           wl_resource* wlRegion)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto region = Region::get(wlRegion);
+    auto priv = handle(wlResource)->d_ptr;
+    auto region = Wayland::Resource<Region>::handle(wlRegion);
 
     priv->pendingRegion = region ? region->region() : QRegion();
 }
@@ -141,7 +141,7 @@ void Contrast::Private::setContrastCallback([[maybe_unused]] wl_client* wlClient
                                             wl_resource* wlResource,
                                             wl_fixed_t contrast)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->pendingContrast = wl_fixed_to_double(contrast);
 }
 
@@ -149,7 +149,7 @@ void Contrast::Private::setIntensityCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlResource,
                                              wl_fixed_t intensity)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->pendingIntensity = wl_fixed_to_double(intensity);
 }
 
@@ -157,7 +157,7 @@ void Contrast::Private::setSaturationCallback([[maybe_unused]] wl_client* wlClie
                                               wl_resource* wlResource,
                                               wl_fixed_t saturation)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->pendingSaturation = wl_fixed_to_double(saturation);
 }
 

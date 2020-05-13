@@ -38,12 +38,11 @@ KeyState::Private::~Private() = default;
 void KeyState::Private::fetchStatesCallback(struct wl_client* wlClient,
                                             struct wl_resource* wlResource)
 {
-    auto handle = fromResource(wlResource);
-    auto bind = handle->d_ptr->getBind(wlResource);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    for (int i = 0; i < handle->d_ptr->m_keyStates.count(); ++i) {
-        handle->d_ptr->send<org_kde_kwin_keystate_send_stateChanged>(
-            bind, i, handle->d_ptr->m_keyStates[i]);
+    for (int i = 0; i < priv->m_keyStates.count(); ++i) {
+        priv->send<org_kde_kwin_keystate_send_stateChanged>(bind, i, priv->m_keyStates[i]);
     }
 }
 

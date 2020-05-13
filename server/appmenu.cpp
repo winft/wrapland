@@ -58,9 +58,9 @@ void AppMenuManager::Private::createCallback(wl_client* wlClient,
                                              uint32_t id,
                                              wl_resource* wlSurface)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto appmenu = new AppMenu(bind->client()->handle(), bind->version(), id, surface);
 
@@ -113,12 +113,13 @@ void AppMenu::Private::setAddressCallback([[maybe_unused]] wl_client* wlClient,
                                           const char* service_name,
                                           const char* object_path)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     if (priv->address.serviceName == QLatin1String(service_name)
         && priv->address.objectPath == QLatin1String(object_path)) {
         return;
     }
+
     priv->address.serviceName = QString::fromLatin1(service_name);
     priv->address.objectPath = QString::fromLatin1(object_path);
     Q_EMIT priv->handle()->addressChanged(priv->address);

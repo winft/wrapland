@@ -70,7 +70,7 @@ void XdgDecorationManager::Private::getToplevelDecorationCallback(
     uint32_t id,
     wl_resource* wlToplevel)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     auto toplevel = priv->m_shell->d_ptr->getToplevel(wlToplevel);
@@ -150,7 +150,7 @@ void XdgDecoration::Private::setModeCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlResource,
                                              uint32_t wlMode)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     Mode mode = Mode::Undefined;
     switch (wlMode) {
@@ -171,7 +171,7 @@ void XdgDecoration::Private::setModeCallback([[maybe_unused]] wl_client* wlClien
 void XdgDecoration::Private::unsetModeCallback([[maybe_unused]] wl_client* wlClient,
                                                wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     priv->m_requestedMode = Mode::Undefined;
     Q_EMIT priv->handle()->modeRequested();

@@ -55,7 +55,7 @@ public:
                                        uint32_t lifetime);
 
     template<class Constraint>
-    void createConstraint(wl_client* wlClient,
+    void createConstraint(wl_resource* wlResource,
                           uint32_t id,
                           wl_resource* wlSurface,
                           wl_resource* wlPointer,
@@ -72,7 +72,7 @@ class LockedPointerV1::Private : public Wayland::Resource<LockedPointerV1>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, LockedPointerV1* q);
-    ~Private();
+    ~Private() override;
 
     void update();
     void commit();
@@ -104,7 +104,7 @@ class ConfinedPointerV1::Private : public Wayland::Resource<ConfinedPointerV1>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, ConfinedPointerV1* q);
-    ~Private();
+    ~Private() override;
 
     void update();
     void commit();

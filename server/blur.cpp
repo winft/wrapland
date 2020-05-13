@@ -53,7 +53,7 @@ void BlurManager::Private::createCallback(wl_client* wlClient,
                                           uint32_t id,
                                           wl_resource* wlSurface)
 {
-    auto manager = fromResource(wlResource);
+    auto manager = handle(wlResource);
     manager->d_ptr->createBlur(wlClient, wlResource, id, wlSurface);
 }
 
@@ -62,8 +62,8 @@ void BlurManager::Private::createBlur([[maybe_unused]] wl_client* wlClient,
                                       uint32_t id,
                                       wl_resource* wlSurface)
 {
-    auto bind = fromResource(wlResource)->d_ptr->getBind(wlResource);
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto bind = handle(wlResource)->d_ptr->getBind(wlResource);
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto blur = new Blur(bind->client()->handle(), bind->version(), id);
     if (!blur->d_ptr->resource()) {
@@ -78,7 +78,7 @@ void BlurManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
                                          [[maybe_unused]] wl_resource* wlResource,
                                          wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     surface->d_ptr->setBlur(QPointer<Blur>());
 }
 
@@ -105,7 +105,7 @@ Blur::Private::~Private() = default;
 
 void Blur::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->commit();
 }
 
@@ -118,8 +118,8 @@ void Blur::Private::setRegionCallback([[maybe_unused]] wl_client* wlClient,
                                       wl_resource* wlResource,
                                       wl_resource* wlRegion)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto region = Wayland::Resource<Region>::fromResource(wlRegion)->handle();
+    auto priv = handle(wlResource)->d_ptr;
+    auto region = Wayland::Resource<Region>::handle(wlRegion);
     if (region) {
         priv->pendingRegion = region->region();
     } else {

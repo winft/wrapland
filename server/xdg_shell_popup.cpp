@@ -110,8 +110,8 @@ void XdgShellPopup::Private::grabCallback(wl_client* wlClient,
                                           wl_resource* wlSeat,
                                           uint32_t serial)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto seat = SeatGlobal::fromResource(wlSeat);
+    auto priv = handle(wlResource)->d_ptr;
+    auto seat = SeatGlobal::handle(wlSeat);
 
     priv->handle()->grabRequested(seat, serial);
 }

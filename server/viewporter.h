@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-
+class Client;
 class D_isplay;
 class Surface;
 class Viewport;
@@ -58,7 +58,7 @@ class WRAPLANDSERVER_EXPORT Viewport : public QObject
 public:
     ~Viewport() override;
 
-    explicit Viewport(Wayland::Client* client,
+    explicit Viewport(Client* client,
                       uint32_t version,
                       uint32_t id,
                       Surface* surface,

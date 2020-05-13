@@ -126,7 +126,7 @@ void PlasmaShellInterface::Private::bind(wl_client *client, uint32_t version, ui
 void PlasmaShellInterface::Private::createSurfaceCallback(wl_client *client, wl_resource *resource, uint32_t id, wl_resource *surface)
 {
     auto s = reinterpret_cast<PlasmaShellInterface::Private*>(wl_resource_get_user_data(resource));
-    s->createSurface(client, wl_resource_get_version(resource), id, Wayland::Resource<Surface>::fromResource(surface)->handle(), resource);
+    s->createSurface(client, wl_resource_get_version(resource), id, Wayland::Resource<Surface>::handle(surface), resource);
 }
 
 void PlasmaShellInterface::Private::createSurface(wl_client *client, uint32_t version, uint32_t id, Surface *surface, wl_resource *parentResource)

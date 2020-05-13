@@ -54,17 +54,16 @@ void RelativePointerManagerV1::Private::relativePointerCallback(wl_client* wlCli
                                                                 uint32_t id,
                                                                 wl_resource* wlPointer)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    auto relative = new RelativePointerV1(client, handle->d_ptr->version(), id);
+    auto relative = new RelativePointerV1(bind->client()->handle(), bind->version(), id);
     if (!relative) {
         return;
     }
 
-    auto pointer
-        = dynamic_cast<Pointer::Private*>(Wayland::Resource<Pointer>::fromResource(wlPointer));
-    pointer->registerRelativePointer(relative);
+    auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
+    pointer->d_ptr->registerRelativePointer(relative);
 }
 
 RelativePointerManagerV1::RelativePointerManagerV1(D_isplay* display, QObject* parent)

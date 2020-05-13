@@ -42,10 +42,10 @@ void IdleInhibitManagerV1::Private::createInhibitorCallback(wl_client* wlClient,
                                                             uint32_t id,
                                                             wl_resource* wlSurface)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
-    auto client = priv->display()->getClient(wlClient);
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
-    auto inhibitor = new IdleInhibitor(client, wl_resource_get_version(wlResource), id);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto inhibitor = new IdleInhibitor(bind->client()->handle(), bind->version(), id);
 
     surface->d_ptr->installIdleInhibitor(inhibitor);
 }
@@ -62,10 +62,7 @@ IdleInhibitManagerV1::~IdleInhibitManagerV1() = default;
 const struct zwp_idle_inhibitor_v1_interface IdleInhibitor::Private::s_interface
     = {destroyCallback};
 
-IdleInhibitor::Private::Private(Wayland::Client* client,
-                                uint32_t version,
-                                uint32_t id,
-                                IdleInhibitor* q)
+IdleInhibitor::Private::Private(Client* client, uint32_t version, uint32_t id, IdleInhibitor* q)
     : Wayland::Resource<IdleInhibitor>(client,
                                        version,
                                        id,
@@ -77,7 +74,7 @@ IdleInhibitor::Private::Private(Wayland::Client* client,
 
 IdleInhibitor::Private::~Private() = default;
 
-IdleInhibitor::IdleInhibitor(Wayland::Client* client, uint32_t version, uint32_t id)
+IdleInhibitor::IdleInhibitor(Client* client, uint32_t version, uint32_t id)
     : d_ptr(new Private(client, version, id, this))
 {
 }
