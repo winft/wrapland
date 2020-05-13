@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../../server/surface.h"
 
 #include "../../../server/kde_idle.h"
-#include "../../server/fakeinput_interface.h"
+#include "../../server/fakeinput.h"
 #include "../../../server/xdg_shell.h"
 #include "../../../server/xdg_shell_toplevel.h"
 
@@ -89,8 +89,7 @@ void TestServer::init()
     output->addMode(size);
 
     auto fakeInput = m_display->createFakeInput(m_display);
-    fakeInput->create();
-    connect(fakeInput, &FakeInputInterface::deviceCreated, this,
+    connect(fakeInput, &FakeInput::deviceCreated, this,
         [this] (FakeInputDevice *device) {
             device->setAuthentication(true);
             connect(device, &FakeInputDevice::pointerMotionRequested, this,
