@@ -44,8 +44,7 @@ public:
     ~Private() override;
 
 private:
-    void
-    getViewport(wl_client* wlClient, wl_resource* wlResource, uint32_t id, wl_resource* wlSurface);
+    void getViewport(wl_resource* wlResource, uint32_t id, wl_resource* wlSurface);
 
     static void getViewportCallback(wl_client* wlClient,
                                     wl_resource* wlResource,
@@ -58,7 +57,7 @@ private:
 class Viewport::Private : public Wayland::Resource<Viewport>
 {
 public:
-    Private(Wayland::Client* client, uint32_t version, uint32_t id, Surface* _surface, Viewport* q);
+    Private(Client* client, uint32_t version, uint32_t id, Surface* _surface, Viewport* q);
     ~Private() override;
 
     Surface* surface;

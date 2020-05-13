@@ -74,26 +74,26 @@ void Compositor::Private::createSurfaceCallback(wl_client* wlClient,
                                                 wl_resource* wlResource,
                                                 uint32_t id)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
+    auto compositor = handle(wlResource);
+    auto client = compositor->d_ptr->display()->handle()->getClient(wlClient);
 
-    auto surface = new Surface(client, handle->d_ptr->version(), id);
+    auto surface = new Surface(client, compositor->d_ptr->version(), id);
     // TODO: error handling (when resource not created)
 
-    Q_EMIT handle->surfaceCreated(surface);
+    Q_EMIT compositor->surfaceCreated(surface);
 }
 
 void Compositor::Private::createRegionCallback(wl_client* wlClient,
                                                wl_resource* wlResource,
                                                uint32_t id)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
+    auto compositor = handle(wlResource);
+    auto client = compositor->d_ptr->display()->handle()->getClient(wlClient);
 
-    auto region = new Region(client, handle->d_ptr->version(), id);
+    auto region = new Region(client, compositor->d_ptr->version(), id);
     // TODO: error handling (when resource not created)
 
-    Q_EMIT handle->regionCreated(region);
+    Q_EMIT compositor->regionCreated(region);
 }
 
 }

@@ -51,7 +51,7 @@ const struct xdg_wm_base_interface XdgShell::Private::s_interface = {
 
 void XdgShell::Private::destroyCallback(wl_client* wlClient, wl_resource* wlResource)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     if (auto it = priv->bindsObjects.find(bind); it != priv->bindsObjects.end()) {
@@ -68,7 +68,7 @@ void XdgShell::Private::createPositionerCallback([[maybe_unused]] wl_client* wlC
                                                  wl_resource* wlResource,
                                                  uint32_t id)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     auto positioner = new XdgShellPositioner(bind->client()->handle(), priv->version(), id);
@@ -95,10 +95,10 @@ void XdgShell::Private::getXdgSurfaceCallback([[maybe_unused]] wl_client* wlClie
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
-    auto surface = Surface::Private::fromResource(wlSurface)->handle();
+    auto surface = Surface::Private::handle(wlSurface);
 
     auto bindsIt = priv->bindsObjects.find(bind);
     if (bindsIt != priv->bindsObjects.end()) {
@@ -135,7 +135,7 @@ void XdgShell::Private::pongCallback([[maybe_unused]] wl_client* wlClient,
                                      wl_resource* wlResource,
                                      uint32_t serial)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
 
     auto timerIt = priv->pingTimers.find(serial);
     if (timerIt != priv->pingTimers.end() && (*timerIt).second->isActive()) {

@@ -94,7 +94,7 @@ public:
     QTimer* timer = nullptr;
 
 private:
-    static void simulateUserActivityCallback(wl_client* client, wl_resource* resource);
+    static void simulateUserActivityCallback(wl_client* wlClient, wl_resource* wlResource);
     static const struct org_kde_kwin_idle_timeout_interface s_interface;
 };
 

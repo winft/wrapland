@@ -69,7 +69,7 @@ void PlasmaVirtualDesktopManager::Private::getVirtualDesktopCallback(
     uint32_t serial,
     const char* id)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
     auto virtualDesktopIt = priv->constFindDesktop(QString::fromUtf8(id));
 
@@ -86,7 +86,7 @@ void PlasmaVirtualDesktopManager::Private::requestCreateVirtualDesktopCallback(
     const char* name,
     uint32_t position)
 {
-    auto manager = fromResource(wlResource);
+    auto manager = handle(wlResource);
     Q_EMIT manager->desktopCreateRequested(
         QString::fromUtf8(name),
         qBound<uint32_t>(0, position, (uint32_t)manager->desktops().count()));
@@ -97,7 +97,7 @@ void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
     wl_resource* wlResource,
     const char* id)
 {
-    auto manager = fromResource(wlResource);
+    auto manager = handle(wlResource);
     Q_EMIT manager->desktopRemoveRequested(QString::fromUtf8(id));
 }
 
@@ -323,7 +323,7 @@ const struct org_kde_plasma_virtual_desktop_interface PlasmaVirtualDesktopRes::P
 void PlasmaVirtualDesktopRes::Private::requestActivateCallback([[maybe_unused]] wl_client* wlClient,
                                                                wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     if (!priv->virtualDesktop) {
         return;
     }

@@ -92,7 +92,7 @@ class XdgOutputV1 : public QObject
 {
     Q_OBJECT
 public:
-    XdgOutputV1(Wayland::Client* client, uint32_t version, uint32_t id, XdgOutputManager* parent);
+    XdgOutputV1(Client* client, uint32_t version, uint32_t id, XdgOutputManager* parent);
     ~XdgOutputV1() override;
     void setLogicalSize(const QSize& size);
     void setLogicalPosition(const QPoint& pos);

@@ -55,7 +55,7 @@ public:
                                        uint32_t lifetime);
 
     template<class Constraint>
-    void createConstraint(wl_client* wlClient,
+    void createConstraint(wl_resource* wlResource,
                           uint32_t id,
                           wl_resource* wlSurface,
                           wl_resource* wlPointer,

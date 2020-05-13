@@ -133,9 +133,10 @@ public:
         m_client->flush();
     }
 
-    static ResourceType* fromResource(wl_resource* resource)
+    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
+    static Handle* handle(wl_resource* resource)
     {
-        return reinterpret_cast<ResourceType*>(wl_resource_get_user_data(resource));
+        return self(resource)->m_handle;
     }
 
     template<auto sender, uint32_t minVersion = 0, typename... Args>
@@ -167,7 +168,7 @@ public:
 
     static void destroyCallback([[maybe_unused]] wl_client* client, wl_resource* wlResource)
     {
-        auto resource = fromResource(wlResource);
+        auto resource = self(wlResource);
         wl_resource_destroy(resource->resource());
     }
 
@@ -178,9 +179,14 @@ public:
     }
 
 private:
+    static ResourceType* self(wl_resource* resource)
+    {
+        return static_cast<ResourceType*>(wl_resource_get_user_data(resource));
+    }
+
     static void destroy(wl_resource* wlResource)
     {
-        auto resource = fromResource(wlResource);
+        auto resource = self(wlResource);
 
         resource->onDestroy();
         delete resource;

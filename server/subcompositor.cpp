@@ -67,13 +67,13 @@ void Subcompositor::Private::subsurfaceCallback([[maybe_unused]] wl_client* wlCl
                                                 wl_resource* wlSurface,
                                                 wl_resource* wlParent)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
+    auto subcompositor = handle(wlResource);
+    auto client = subcompositor->d_ptr->display()->handle()->getClient(wlClient);
 
-    auto surface = Wayland::Resource<Surface>::fromResource(wlSurface)->handle();
-    auto parentSurface = Wayland::Resource<Surface>::fromResource(wlParent)->handle();
+    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto parentSurface = Wayland::Resource<Surface>::handle(wlParent);
 
-    handle->d_ptr->subsurface(client, id, surface, parentSurface);
+    subcompositor->d_ptr->subsurface(client, id, surface, parentSurface);
 }
 
 void Subcompositor::Private::subsurface(Client* client,
@@ -188,7 +188,7 @@ void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClie
                                               int32_t x,
                                               int32_t y)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     // TODO: is this a fixed position?
     priv->setPosition(QPoint(x, y));
@@ -214,8 +214,8 @@ void Subsurface::Private::placeAboveCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlResource,
                                              wl_resource* wlSibling)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto sibling = Wayland::Resource<Surface>::fromResource(wlSibling)->handle();
+    auto priv = handle(wlResource)->d_ptr;
+    auto sibling = Wayland::Resource<Surface>::handle(wlSibling);
     priv->placeAbove(sibling);
 }
 
@@ -234,8 +234,8 @@ void Subsurface::Private::placeBelowCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlResource,
                                              wl_resource* wlSibling)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto sibling = Wayland::Resource<Surface>::fromResource(wlSibling)->handle();
+    auto priv = handle(wlResource)->d_ptr;
+    auto sibling = Wayland::Resource<Surface>::handle(wlSibling);
     priv->placeBelow(sibling);
 }
 
@@ -253,14 +253,14 @@ void Subsurface::Private::placeBelow(Surface* sibling)
 void Subsurface::Private::setSyncCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->setMode(Mode::Synchronized);
 }
 
 void Subsurface::Private::setDeSyncCallback([[maybe_unused]] wl_client* wlClient,
                                             wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->setMode(Mode::Desynchronized);
 }
 

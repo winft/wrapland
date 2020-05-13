@@ -57,17 +57,16 @@ void PointerGesturesV1::Private::swipeGestureCallback(wl_client* wlClient,
                                                       uint32_t id,
                                                       wl_resource* wlPointer)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
-    auto pointer = Wayland::Resource<Pointer>::fromResource(wlPointer);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
+    auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
 
-    auto swiper
-        = new PointerSwipeGestureV1(client, handle->d_ptr->version(), id, pointer->handle());
+    auto swiper = new PointerSwipeGestureV1(bind->client()->handle(), bind->version(), id, pointer);
     if (!swiper) {
         return;
     }
 
-    static_cast<Pointer::Private*>(pointer)->registerSwipeGesture(swiper);
+    pointer->d_ptr->registerSwipeGesture(swiper);
 }
 
 void PointerGesturesV1::Private::pinchGestureCallback(wl_client* wlClient,
@@ -75,17 +74,17 @@ void PointerGesturesV1::Private::pinchGestureCallback(wl_client* wlClient,
                                                       uint32_t id,
                                                       wl_resource* wlPointer)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
-    auto pointer = Wayland::Resource<Pointer>::fromResource(wlPointer);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
+    auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
 
     auto pincher
-        = new PointerPinchGestureV1(client, handle->d_ptr->version(), id, pointer->handle());
+        = new PointerPinchGestureV1(bind->client()->handle(), bind->version(), id, pointer);
     if (!pincher) {
         return;
     }
 
-    static_cast<Pointer::Private*>(pointer)->registerPinchGesture(pincher);
+    pointer->d_ptr->registerPinchGesture(pincher);
 }
 
 PointerGesturesV1::PointerGesturesV1(D_isplay* display, QObject* parent)

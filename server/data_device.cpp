@@ -111,10 +111,10 @@ void DataDevice::Private::startDragCallback([[maybe_unused]] wl_client* wlClient
                                             wl_resource* wlIcon,
                                             uint32_t serial)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-    auto source = wlSource ? Resource<DataSource>::fromResource(wlSource)->handle() : nullptr;
-    auto origin = Resource<Surface>::fromResource(wlOrigin)->handle();
-    auto icon = wlIcon ? Resource<Surface>::fromResource(wlIcon)->handle() : nullptr;
+    auto priv = handle(wlResource)->d_ptr;
+    auto source = wlSource ? Resource<DataSource>::handle(wlSource) : nullptr;
+    auto origin = Resource<Surface>::handle(wlOrigin);
+    auto icon = wlIcon ? Resource<Surface>::handle(wlIcon) : nullptr;
 
     priv->startDrag(source, origin, icon, serial);
 }
@@ -163,8 +163,7 @@ void DataDevice::Private::setSelectionCallback([[maybe_unused]] wl_client* wlCli
                                                [[maybe_unused]] uint32_t serial)
 {
     // TODO: verify serial
-
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     priv->setSelection(wlSource);
 }
 
@@ -172,8 +171,7 @@ void DataDevice::Private::setSelection(wl_resource* sourceResource)
 {
     // TODO: verify serial
 
-    auto dataSource
-        = sourceResource ? Resource<DataSource>::fromResource(sourceResource)->handle() : nullptr;
+    auto dataSource = sourceResource ? Resource<DataSource>::handle(sourceResource) : nullptr;
 
     // TODO: move errors into Wayland namespace.
     if (dataSource && dataSource->supportedDragAndDropActions()

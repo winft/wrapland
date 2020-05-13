@@ -101,7 +101,7 @@ public:
         return *m_capsule;
     }
 
-    static Handle* fromResource(wl_resource* wlResource)
+    static Handle* handle(wl_resource* wlResource)
     {
         auto resource = static_cast<GlobalResource*>(wl_resource_get_user_data(wlResource));
         return resource->global()->handle();

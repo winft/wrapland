@@ -70,7 +70,7 @@ void OutputManagementV1::Private::createConfigurationCallback([[maybe_unused]] w
                                                               wl_resource* wlResource,
                                                               uint32_t id)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     auto config

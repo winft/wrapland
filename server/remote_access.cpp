@@ -89,7 +89,7 @@ void RemoteAccessManager::Private::getBufferCallback([[maybe_unused]] wl_client*
                                                      uint32_t id,
                                                      int32_t internalBufId)
 {
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     // Client asks for buffer we earlier announced, we must have it.

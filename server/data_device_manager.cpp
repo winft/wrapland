@@ -70,15 +70,15 @@ void DataDeviceManager::Private::createDataSourceCallback(wl_client* wlClient,
                                                           wl_resource* wlResource,
                                                           uint32_t id)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    auto dataSource = new DataSource(client, handle->d_ptr->version(), id);
+    auto dataSource = new DataSource(bind->client()->handle(), bind->version(), id);
     if (!dataSource) {
         return;
     }
 
-    Q_EMIT handle->dataSourceCreated(dataSource);
+    Q_EMIT priv->handle()->dataSourceCreated(dataSource);
 }
 
 void DataDeviceManager::Private::getDataDeviceCallback(wl_client* wlClient,
@@ -86,17 +86,17 @@ void DataDeviceManager::Private::getDataDeviceCallback(wl_client* wlClient,
                                                        uint32_t id,
                                                        wl_resource* wlSeat)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
-    auto seat = SeatGlobal::fromResource(wlSeat);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
+    auto seat = SeatGlobal::handle(wlSeat);
 
-    auto dataDevice = new DataDevice(client, handle->d_ptr->version(), id, seat);
+    auto dataDevice = new DataDevice(bind->client()->handle(), bind->version(), id, seat);
     if (!dataDevice) {
         return;
     }
 
     seat->d_ptr->registerDataDevice(dataDevice);
-    Q_EMIT handle->dataDeviceCreated(dataDevice);
+    Q_EMIT priv->handle()->dataDeviceCreated(dataDevice);
 }
 
 DataDeviceManager::DataDeviceManager(D_isplay* display, [[maybe_unused]] QObject* parent)

@@ -83,7 +83,7 @@ void LinuxDmabufV1::Private::createParamsCallback(wl_client* wlClient,
                                                   wl_resource* wlResource,
                                                   uint32_t id)
 {
-    auto priv = fromResource(wlResource)->d_ptr;
+    auto priv = handle(wlResource)->d_ptr;
     auto client = priv->display()->getClient(wlClient);
 
     auto params = new ParamsWrapperV1(client->handle(), priv->version(), id, priv);
@@ -163,7 +163,7 @@ void ParamsV1::addCallback(wl_client* wlClient,
                            uint32_t modifier_hi,
                            uint32_t modifier_lo)
 {
-    auto params = fromResource(wlResource)->handle();
+    auto params = handle(wlResource);
     params->d_ptr->add(fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << 32) | modifier_lo);
 }
 
@@ -174,7 +174,7 @@ void ParamsV1::createCallback(wl_client* wlClient,
                               uint32_t format,
                               uint32_t flags)
 {
-    auto params = fromResource(wlResource)->handle();
+    auto params = handle(wlResource);
     params->d_ptr->create(0, QSize(width, height), format, flags);
 }
 
@@ -186,7 +186,7 @@ void ParamsV1::createImmedCallback(wl_client* wlClient,
                                    uint32_t format,
                                    uint32_t flags)
 {
-    auto params = fromResource(wlResource)->handle();
+    auto params = handle(wlResource);
     params->d_ptr->create(new_id, QSize(width, height), format, flags);
 }
 

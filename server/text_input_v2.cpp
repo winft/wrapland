@@ -49,9 +49,9 @@ void TextInputManagerV2::Private::getTextInputCallback([[maybe_unused]] wl_clien
                                                        uint32_t id,
                                                        wl_resource* wlSeat)
 {
-    auto seat = SeatGlobal::fromResource(wlSeat);
-    auto priv = fromResource(wlResource)->d_ptr.get();
+    auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
+    auto seat = SeatGlobal::handle(wlSeat);
 
     auto textInput = new TextInputV2(bind->client()->handle(), bind->version(), id);
 
@@ -202,17 +202,15 @@ void TextInputV2::Private::enableCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,
                                           wl_resource* surface)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-
-    priv->enable(Surface::Private::fromResource(surface)->handle());
+    auto priv = handle(wlResource)->d_ptr;
+    priv->enable(Wayland::Resource<Surface>::handle(surface));
 }
 
 void TextInputV2::Private::disableCallback([[maybe_unused]] wl_client* wlClient,
                                            wl_resource* wlResource,
                                            [[maybe_unused]] wl_resource* surface)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-
+    auto priv = handle(wlResource)->d_ptr;
     priv->disable();
 }
 
@@ -221,7 +219,7 @@ void TextInputV2::Private::updateStateCallback([[maybe_unused]] wl_client* wlCli
                                                [[maybe_unused]] uint32_t serial,
                                                uint32_t reason)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     // TODO: use other reason values reason
     if (reason == ZWP_TEXT_INPUT_V2_UPDATE_STATE_RESET) {
@@ -232,16 +230,14 @@ void TextInputV2::Private::updateStateCallback([[maybe_unused]] wl_client* wlCli
 void TextInputV2::Private::showInputPanelCallback([[maybe_unused]] wl_client* wlClient,
                                                   wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-
+    auto priv = handle(wlResource)->d_ptr;
     Q_EMIT priv->handle()->requestShowInputPanel();
 }
 
 void TextInputV2::Private::hideInputPanelCallback([[maybe_unused]] wl_client* wlClient,
                                                   wl_resource* wlResource)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-
+    auto priv = handle(wlResource)->d_ptr;
     Q_EMIT priv->handle()->requestHideInputPanel();
 }
 
@@ -251,12 +247,12 @@ void TextInputV2::Private::setSurroundingTextCallback([[maybe_unused]] wl_client
                                                       int32_t cursor,
                                                       int32_t anchor)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
 
     priv->surroundingText = QByteArray(text);
-
     priv->surroundingTextCursorPosition = cursor;
     priv->surroundingTextSelectionAnchor = anchor;
+
     Q_EMIT priv->handle()->surroundingTextChanged();
 }
 
@@ -265,7 +261,7 @@ void TextInputV2::Private::setContentTypeCallback([[maybe_unused]] wl_client* wl
                                                   uint32_t hint,
                                                   uint32_t purpose)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     const auto contentHints = priv->convertContentHint(hint);
     const auto contentPurpose = priv->convertContentPurpose(purpose);
 
@@ -283,9 +279,9 @@ void TextInputV2::Private::setCursorRectangleCallback([[maybe_unused]] wl_client
                                                       int32_t width,
                                                       int32_t height)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
-
+    auto priv = handle(wlResource)->d_ptr;
     const QRect rect = QRect(x, y, width, height);
+
     if (priv->cursorRectangle != rect) {
         priv->cursorRectangle = rect;
         Q_EMIT priv->handle()->cursorRectangleChanged(priv->cursorRectangle);
@@ -296,7 +292,7 @@ void TextInputV2::Private::setPreferredLanguageCallback([[maybe_unused]] wl_clie
                                                         wl_resource* wlResource,
                                                         const char* language)
 {
-    auto priv = static_cast<Private*>(fromResource(wlResource));
+    auto priv = handle(wlResource)->d_ptr;
     const QByteArray preferredLanguage = QByteArray(language);
 
     if (priv->preferredLanguage != preferredLanguage) {

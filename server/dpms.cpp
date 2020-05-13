@@ -47,10 +47,11 @@ void DpmsManager::Private::getDpmsCallback(wl_client* wlClient,
                                            uint32_t id,
                                            wl_resource* output)
 {
-    auto handle = fromResource(wlResource);
-    auto client = handle->d_ptr->display()->handle()->getClient(wlClient);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    auto dpms = new Dpms(client, handle->d_ptr->version(), id, OutputGlobal::fromResource(output));
+    auto dpms
+        = new Dpms(bind->client()->handle(), bind->version(), id, OutputGlobal::handle(output));
     if (!dpms) {
         return;
     }
@@ -99,7 +100,7 @@ void Dpms::Private::setCallback(wl_client* client, wl_resource* wlResource, uint
     default:
         return;
     }
-    Q_EMIT static_cast<Private*>(fromResource(wlResource))->output->dpmsModeRequested(dpmsMode);
+    Q_EMIT handle(wlResource)->d_ptr->output->dpmsModeRequested(dpmsMode);
 }
 
 Dpms::Dpms(Client* client, uint32_t version, uint32_t id, Output* output)
