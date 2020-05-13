@@ -25,13 +25,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/fakeinput.h"
 #include "../../src/client/registry.h"
 // server
-#include "../../src/server/display.h"
-#include "../../src/server/fakeinput_interface.h"
+#include "../../server/display.h"
+#include "../../server/fakeinput.h"
 
 #include <linux/input.h>
 
 using namespace Wrapland::Client;
 using namespace Wrapland::Server;
+namespace Clt = Wrapland::Client;
+namespace Srv = Wrapland::Server;
 
 Q_DECLARE_METATYPE(Qt::MouseButton)
 
@@ -56,13 +58,13 @@ private Q_SLOTS:
     void testKeyboardKeyLinux();
 
 private:
-    Display *m_display = nullptr;
-    FakeInputInterface *m_fakeInputInterface = nullptr;
-    FakeInputDevice *m_device = nullptr;
+    Srv::D_isplay *m_display = nullptr;
+    Srv::FakeInput *m_fakeInputInterface = nullptr;
+    Srv::FakeInputDevice *m_device = nullptr;
     ConnectionThread *m_connection = nullptr;
     QThread *m_thread = nullptr;
     EventQueue *m_queue = nullptr;
-    FakeInput *m_fakeInput = nullptr;
+    Clt::FakeInput *m_fakeInput = nullptr;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-fake-input-0");
@@ -70,14 +72,13 @@ static const QString s_socketName = QStringLiteral("wrapland-test-fake-input-0")
 void FakeInputTest::init()
 {
     delete m_display;
-    m_display = new Display(this);
+    m_display = new D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
+    QVERIFY(m_display->running());
     m_display->createShm();
     m_fakeInputInterface = m_display->createFakeInput();
-    m_fakeInputInterface->create();
-    QSignalSpy deviceCreatedSpy(m_fakeInputInterface, &FakeInputInterface::deviceCreated);
+    QSignalSpy deviceCreatedSpy(m_fakeInputInterface, &Srv::FakeInput::deviceCreated);
     QVERIFY(deviceCreatedSpy.isValid());
 
     // setup connection
