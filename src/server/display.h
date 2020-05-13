@@ -92,7 +92,7 @@ class ServerSideDecorationPaletteManagerInterface;
 //class ViewporterInterface;
 class XdgOutputManagerInterface;
 //class XdgDecorationManagerInterface;
-class EglStreamControllerInterface;
+//class EglStreamControllerInterface;
 //class KeyState;
 //class LinuxDmabufUnstableV1Interface;
 
@@ -326,7 +326,7 @@ public:
      * @return the created EGL Stream controller
      * @since 0.0.558
      */
-    EglStreamControllerInterface *createEglStreamControllerInterface(QObject *parent = nullptr);
+   // EglStreamControllerInterface *createEglStreamControllerInterface(QObject *parent = nullptr);
 
     /**
      * Gets the ClientConnection for the given @p client.

@@ -31,6 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "contrast.h"
 #include "data_device_manager.h"
 #include "dpms.h"
+#include "eglstream_controller.h"
 #include "idle_inhibit_v1.h"
 #include "kde_idle.h"
 #include "keystate.h"
@@ -60,7 +61,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/display.h"
 
 #include "../server/shadow.h"
-#include "../src/server/eglstream_controller_interface.h"
 #include "../src/server/fakeinput_interface.h"
 #include "../src/server/plasmashell_interface.h"
 #include "../src/server/server_decoration_palette_interface.h"
@@ -354,9 +354,9 @@ XdgDecorationManager* D_isplay::createXdgDecorationManager(XdgShell* shell, QObj
     return new XdgDecorationManager(this, shell, parent);
 }
 
-EglStreamControllerInterface* D_isplay::createEglStreamControllerInterface(QObject* parent)
+EglStreamController* D_isplay::createEglStreamController(QObject* parent)
 {
-    return legacy->createEglStreamControllerInterface(parent);
+    return new EglStreamController(this, parent);
 }
 
 KeyState* D_isplay::createKeyState(QObject* parent)

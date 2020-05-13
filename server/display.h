@@ -84,7 +84,7 @@ class ServerSideDecorationPaletteManagerInterface;
 class Viewporter;
 class XdgOutputManager;
 class XdgDecorationManager;
-class EglStreamControllerInterface;
+class EglStreamController;
 class KeyState;
 class LinuxDmabufV1;
 //
@@ -175,7 +175,7 @@ public:
 
     PlasmaVirtualDesktopManager* createPlasmaVirtualDesktopManager(QObject* parent = nullptr);
     XdgDecorationManager* createXdgDecorationManager(XdgShell* shell, QObject* parent = nullptr);
-    EglStreamControllerInterface* createEglStreamControllerInterface(QObject* parent = nullptr);
+    EglStreamController* createEglStreamController(QObject* parent = nullptr);
 
     Server::ClientConnection* getClientLegacy(wl_client* client);
 
