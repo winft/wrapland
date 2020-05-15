@@ -118,7 +118,8 @@ void Display::addSocket()
         return;
     }
 
-    if (wl_display_add_socket_auto(m_display) == nullptr) {
+    m_socketName = wl_display_add_socket_auto(m_display);
+    if (m_socketName.empty()) {
         throw std::bad_exception();
     }
 }

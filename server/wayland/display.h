@@ -97,7 +97,7 @@ private:
     void addSocket();
     wl_display* m_display = nullptr;
     wl_event_loop* m_loop = nullptr;
-    std::string m_socketName{"wayland-0"};
+    std::string m_socketName;
 
     bool m_running = false;
 

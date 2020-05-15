@@ -53,7 +53,7 @@ void TestServerDisplay::init()
 void TestServerDisplay::testSocketName()
 {
     D_isplay display;
-    QCOMPARE(display.socketName(), std::string("wayland-0"));
+    QVERIFY(display.socketName().empty());
     const std::string testSName = "fooBar";
     display.setSocketName(testSName);
     QCOMPARE(display.socketName(), testSName);
@@ -67,22 +67,18 @@ void TestServerDisplay::testStartStop()
     QVERIFY(!runtimeDir.exists(testSocketName.c_str()));
 
     D_isplay display;
-    //    QSignalSpy runningSpy(&display, SIGNAL(runningChanged(bool)));
-    //    QVERIFY(runningSpy.isValid());
+    QSignalSpy runningSpy(&display, &D_isplay::started);
+    QVERIFY(runningSpy.isValid());
     display.setSocketName(testSocketName);
     QVERIFY(!display.running());
     display.start();
 
-    //    QCOMPARE(runningSpy.count(), 1);
-    //    QVERIFY(runningSpy.first().first().toBool());
+    QCOMPARE(runningSpy.count(), 1);
     QVERIFY(display.running());
     QVERIFY(runtimeDir.exists(testSocketName.c_str()));
 
     display.terminate();
     QVERIFY(!display.running());
-    //    QCOMPARE(runningSpy.count(), 2);
-    //    QVERIFY(runningSpy.first().first().toBool());
-    //    QVERIFY(!runningSpy.last().first().toBool());
     QVERIFY(!runtimeDir.exists(testSocketName.c_str()));
 }
 
@@ -161,10 +157,11 @@ void TestServerDisplay::testClientConnection()
     QCOMPARE(connection, display.getClient(wlClient));
     QCOMPARE(connectedSpy.count(), 1);
 
-    // create a second client
+    // Create a second client.
     int sv2[2];
     QVERIFY(socketpair(AF_UNIX, SOCK_STREAM, 0, sv2) >= 0);
-    auto* client2 = display.createClient(sv2[0]);
+
+    auto client2 = display.createClient(sv2[0]);
     QVERIFY(client2);
 
     auto connection2 = display.getClient(client2->native());
@@ -185,10 +182,10 @@ void TestServerDisplay::testClientConnection()
     QCOMPARE(disconnectedSpy.count(), 1);
     QSignalSpy clientDestroyedSpy(client2, &QObject::destroyed);
     QVERIFY(clientDestroyedSpy.isValid());
-    //    client2->destroy();
-    delete client2;
-    //    QVERIFY(clientDestroyedSpy.wait());
-    //    QCOMPARE(disconnectedSpy.count(), 2);
+    client2->destroy();
+
+    QCOMPARE(clientDestroyedSpy.count(), 1);
+    QCOMPARE(disconnectedSpy.count(), 2);
     close(sv[0]);
     close(sv[1]);
     close(sv2[0]);
@@ -228,14 +225,11 @@ void TestServerDisplay::testAutoSocketName()
     QVERIFY(qputenv("XDG_RUNTIME_DIR", runtimeDir.path().toUtf8()));
 
     D_isplay display0;
-    //    QSignalSpy socketNameChangedSpy0(&display0, SIGNAL(socketNameChanged(QString)));
     display0.start();
     QVERIFY(display0.running());
-    //    QCOMPARE(socketNameChangedSpy0.count(), 0);
     QCOMPARE(display0.socketName(), std::string("wayland-0"));
 
     D_isplay display1;
-    //    display1.setAutomaticSocketNaming(true);
     display1.start();
     QVERIFY(display1.running());
     QCOMPARE(display1.socketName(), std::string("wayland-1"));
