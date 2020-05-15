@@ -53,7 +53,7 @@ AppMenuManager::AppMenuManager(D_isplay* display, QObject* parent)
 
 AppMenuManager::~AppMenuManager() = default;
 
-void AppMenuManager::Private::createCallback(wl_client* wlClient,
+void AppMenuManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
                                              wl_resource* wlResource,
                                              uint32_t id,
                                              wl_resource* wlSurface)

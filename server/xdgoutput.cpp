@@ -69,7 +69,7 @@ void XdgOutputManager::Private::destroyCallback([[maybe_unused]] wl_client* clie
     wl_resource_destroy(resource);
 }
 
-void XdgOutputManager::Private::getXdgOutputCallback(wl_client* wlClient,
+void XdgOutputManager::Private::getXdgOutputCallback([[maybe_unused]] wl_client* wlClient,
                                                      wl_resource* wlResource,
                                                      uint32_t id,
                                                      wl_resource* outputResource)
