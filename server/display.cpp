@@ -203,6 +203,10 @@ Seat* D_isplay::createSeat(QObject* parent)
 {
     auto seat = new Seat(this, parent);
     d_ptr->seats.push_back(seat);
+    connect(seat, &QObject::destroyed, this, [this, seat] {
+        d_ptr->seats.erase(std::remove(d_ptr->seats.begin(), d_ptr->seats.end(), seat),
+                           d_ptr->seats.end());
+    });
     return seat;
 }
 

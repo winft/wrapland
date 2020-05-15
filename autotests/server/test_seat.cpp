@@ -100,16 +100,9 @@ void TestWaylandServerSeat::testName()
     auto seat = display.createSeat();
     QCOMPARE(seat->name().size(), 0);
 
-    QSignalSpy nameSpy(seat, SIGNAL(nameChanged(QString)));
-    QVERIFY(nameSpy.isValid());
-
     const std::string name = "foobar";
     seat->setName(name);
     QCOMPARE(seat->name(), name);
-    QCOMPARE(nameSpy.count(), 1);
-    QCOMPARE(nameSpy.first().first().toString(), QString::fromStdString(name));
-    seat->setName(name);
-    QCOMPARE(nameSpy.count(), 1);
 }
 
 void TestWaylandServerSeat::testPointerButton()
@@ -176,10 +169,12 @@ void TestWaylandServerSeat::testDestroyThroughTerminate()
     display.setSocketName(s_socketName);
     display.start();
     auto seat = display.createSeat();
-    QSignalSpy destroyedSpy(seat, SIGNAL(destroyed(QObject*)));
+    QSignalSpy destroyedSpy(seat, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     display.terminate();
-    QVERIFY(!destroyedSpy.isEmpty());
+    QVERIFY(!destroyedSpy.wait(100));
+    delete seat;
+    QCOMPARE(destroyedSpy.count(), 1);
 }
 
 void TestWaylandServerSeat::testRepeatInfo()
