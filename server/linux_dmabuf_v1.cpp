@@ -86,7 +86,7 @@ void LinuxDmabufV1::Private::createParamsCallback(wl_client* wlClient,
     auto priv = handle(wlResource)->d_ptr;
     auto client = priv->display()->getClient(wlClient);
 
-    auto params = new ParamsWrapperV1(client->handle(), priv->version(), id, priv);
+    [[maybe_unused]] auto params = new ParamsWrapperV1(client->handle(), priv->version(), id, priv);
 }
 
 LinuxDmabufV1::LinuxDmabufV1(D_isplay* display, QObject* parent)
@@ -154,7 +154,7 @@ struct zwp_linux_buffer_params_v1_interface const ParamsV1::s_interface = {
     createImmedCallback,
 };
 
-void ParamsV1::addCallback(wl_client* wlClient,
+void ParamsV1::addCallback([[maybe_unused]] wl_client* wlClient,
                            wl_resource* wlResource,
                            int fd,
                            uint32_t plane_idx,
@@ -167,7 +167,7 @@ void ParamsV1::addCallback(wl_client* wlClient,
     params->d_ptr->add(fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << 32) | modifier_lo);
 }
 
-void ParamsV1::createCallback(wl_client* wlClient,
+void ParamsV1::createCallback([[maybe_unused]] wl_client* wlClient,
                               wl_resource* wlResource,
                               int width,
                               int height,
@@ -178,7 +178,7 @@ void ParamsV1::createCallback(wl_client* wlClient,
     params->d_ptr->create(0, QSize(width, height), format, flags);
 }
 
-void ParamsV1::createImmedCallback(wl_client* wlClient,
+void ParamsV1::createImmedCallback([[maybe_unused]] wl_client* wlClient,
                                    wl_resource* wlResource,
                                    uint32_t new_id,
                                    int width,
@@ -344,7 +344,9 @@ void ParamsV1::add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride,
     m_planeCount++;
 }
 
-LinuxDmabufBufferV1::Private::Private(uint32_t format, const QSize& size, LinuxDmabufBufferV1* q)
+LinuxDmabufBufferV1::Private::Private(uint32_t format,
+                                      const QSize& size,
+                                      [[maybe_unused]] LinuxDmabufBufferV1* q)
     : format(format)
     , size(size)
     , buffer(nullptr)
@@ -353,7 +355,9 @@ LinuxDmabufBufferV1::Private::Private(uint32_t format, const QSize& size, LinuxD
 
 // TODO: This does not necessarily need to be a QObject. resourceDestroyed signal is not really
 // needed.
-LinuxDmabufBufferV1::LinuxDmabufBufferV1(uint32_t format, const QSize& size, QObject* parent)
+LinuxDmabufBufferV1::LinuxDmabufBufferV1(uint32_t format,
+                                         const QSize& size,
+                                         [[maybe_unused]] QObject* parent)
     : QObject()
     , d_ptr(new LinuxDmabufBufferV1::Private(format, size, this))
 {

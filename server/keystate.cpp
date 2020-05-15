@@ -35,7 +35,7 @@ KeyState::Private::Private(D_isplay* display, KeyState* q)
 
 KeyState::Private::~Private() = default;
 
-void KeyState::Private::fetchStatesCallback(struct wl_client* wlClient,
+void KeyState::Private::fetchStatesCallback([[maybe_unused]] struct wl_client* wlClient,
                                             struct wl_resource* wlResource)
 {
     auto priv = handle(wlResource)->d_ptr.get();

@@ -37,7 +37,7 @@ IdleInhibitManagerV1::Private::Private(D_isplay* display, IdleInhibitManagerV1* 
 }
 IdleInhibitManagerV1::Private::~Private() = default;
 
-void IdleInhibitManagerV1::Private::createInhibitorCallback(wl_client* wlClient,
+void IdleInhibitManagerV1::Private::createInhibitorCallback([[maybe_unused]] wl_client* wlClient,
                                                             wl_resource* wlResource,
                                                             uint32_t id,
                                                             wl_resource* wlSurface)

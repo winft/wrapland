@@ -55,7 +55,7 @@ const struct zwp_pointer_constraints_v1_interface PointerConstraintsV1::Private:
     confinePointerCallback,
 };
 
-void PointerConstraintsV1::Private::lockPointerCallback(wl_client* wlClient,
+void PointerConstraintsV1::Private::lockPointerCallback([[maybe_unused]] wl_client* wlClient,
                                                         wl_resource* wlResource,
                                                         uint32_t id,
                                                         wl_resource* wlSurface,
@@ -68,7 +68,7 @@ void PointerConstraintsV1::Private::lockPointerCallback(wl_client* wlClient,
         wlResource, id, wlSurface, wlPointer, wlRegion, lifetime);
 }
 
-void PointerConstraintsV1::Private::confinePointerCallback(wl_client* wlClient,
+void PointerConstraintsV1::Private::confinePointerCallback([[maybe_unused]] wl_client* wlClient,
                                                            wl_resource* wlResource,
                                                            uint32_t id,
                                                            wl_resource* wlSurface,
@@ -98,7 +98,7 @@ void PointerConstraintsV1::Private::createConstraint(wl_resource* wlResource,
     }
 
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
-    auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
+    // auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
 
     if (!surface->lockedPointer().isNull() || !surface->confinedPointer().isNull()) {
         surface->d_ptr->postError(ZWP_POINTER_CONSTRAINTS_V1_ERROR_ALREADY_CONSTRAINED,

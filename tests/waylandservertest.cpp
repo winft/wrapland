@@ -89,7 +89,7 @@ int main(int argc, char **argv)
     display.createShm();
     display.createCompositor(&display);
 
-    Wrapland::Server::XdgShell *shell = display.createXdgShell();
+    [[maybe_unused]] Wrapland::Server::XdgShell *shell = display.createXdgShell();
 
     Wrapland::Server::Output *output = display.createOutput(&display);
     output->setPhysicalSize(QSize(10, 10));

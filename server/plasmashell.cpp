@@ -129,7 +129,7 @@ void PlasmaShellSurface::Private::setOutputCallback([[maybe_unused]] wl_client* 
     // TODO: implement
 }
 
-void PlasmaShellSurface::Private::setPositionCallback(wl_client* wlClient,
+void PlasmaShellSurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClient,
                                                       wl_resource* wlResource,
                                                       int32_t x,
                                                       int32_t y)
@@ -148,7 +148,7 @@ void PlasmaShellSurface::Private::setPosition(const QPoint& globalPos)
     Q_EMIT handle()->positionChanged();
 }
 
-void PlasmaShellSurface::Private::setRoleCallback(wl_client* wlClient,
+void PlasmaShellSurface::Private::setRoleCallback([[maybe_unused]] wl_client* wlClient,
                                                   wl_resource* wlResource,
                                                   uint32_t role)
 {
@@ -190,7 +190,7 @@ void PlasmaShellSurface::Private::setRole(uint32_t role)
     Q_EMIT handle()->roleChanged();
 }
 
-void PlasmaShellSurface::Private::setPanelBehaviorCallback(wl_client* wlClient,
+void PlasmaShellSurface::Private::setPanelBehaviorCallback([[maybe_unused]] wl_client* wlClient,
                                                            wl_resource* wlResource,
                                                            uint32_t flag)
 {
@@ -198,7 +198,7 @@ void PlasmaShellSurface::Private::setPanelBehaviorCallback(wl_client* wlClient,
     priv->setPanelBehavior(org_kde_plasma_surface_panel_behavior(flag));
 }
 
-void PlasmaShellSurface::Private::setSkipTaskbarCallback(wl_client* wlClient,
+void PlasmaShellSurface::Private::setSkipTaskbarCallback([[maybe_unused]] wl_client* wlClient,
                                                          wl_resource* wlResource,
                                                          uint32_t skip)
 {
@@ -207,7 +207,7 @@ void PlasmaShellSurface::Private::setSkipTaskbarCallback(wl_client* wlClient,
     Q_EMIT priv->handle()->skipTaskbarChanged();
 }
 
-void PlasmaShellSurface::Private::setSkipSwitcherCallback(wl_client* wlClient,
+void PlasmaShellSurface::Private::setSkipSwitcherCallback([[maybe_unused]] wl_client* wlClient,
                                                           wl_resource* wlResource,
                                                           uint32_t skip)
 {
@@ -216,7 +216,7 @@ void PlasmaShellSurface::Private::setSkipSwitcherCallback(wl_client* wlClient,
     Q_EMIT priv->handle()->skipSwitcherChanged();
 }
 
-void PlasmaShellSurface::Private::panelAutoHideHideCallback(wl_client* wlClient,
+void PlasmaShellSurface::Private::panelAutoHideHideCallback([[maybe_unused]] wl_client* wlClient,
                                                             wl_resource* wlResource)
 {
     auto priv = handle(wlResource)->d_ptr;
@@ -227,7 +227,7 @@ void PlasmaShellSurface::Private::panelAutoHideHideCallback(wl_client* wlClient,
     Q_EMIT priv->handle()->panelAutoHideHideRequested();
 }
 
-void PlasmaShellSurface::Private::panelAutoHideShowCallback(wl_client* wlClient,
+void PlasmaShellSurface::Private::panelAutoHideShowCallback([[maybe_unused]] wl_client* wlClient,
                                                             wl_resource* wlResource)
 {
     auto priv = handle(wlResource)->d_ptr;
@@ -238,7 +238,7 @@ void PlasmaShellSurface::Private::panelAutoHideShowCallback(wl_client* wlClient,
     Q_EMIT priv->handle()->panelAutoHideShowRequested();
 }
 
-void PlasmaShellSurface::Private::panelTakesFocusCallback(wl_client* wlClient,
+void PlasmaShellSurface::Private::panelTakesFocusCallback([[maybe_unused]] wl_client* wlClient,
                                                           wl_resource* wlResource,
                                                           uint32_t takesFocus)
 {
