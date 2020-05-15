@@ -28,14 +28,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server::Wayland
 {
 
-BufferManager::BufferManager(Display* display)
+BufferManager::BufferManager()
     : m_accessedShmBuffer(nullptr)
     , m_accessCounter(0)
-    , m_display(display)
 {
 }
-
-BufferManager::~BufferManager() = default;
 
 Buffer* BufferManager::fromResource(wl_resource* resource) const
 {

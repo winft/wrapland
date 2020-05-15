@@ -57,7 +57,7 @@ Client* Display::castClient(Server::Client* client)
 }
 
 Display::Display(Server::D_isplay* parent)
-    : m_bufferManager{std::make_unique<BufferManager>(this)}
+    : m_bufferManager{std::make_unique<BufferManager>()}
     , m_handle(parent)
 {
 }

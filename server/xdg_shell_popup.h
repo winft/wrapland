@@ -41,9 +41,6 @@ class Surface;
 class XdgShellPopup;
 class XdgShellSurface;
 
-// template<typename T>
-// class BasicShellSurface;
-
 class WRAPLANDSERVER_EXPORT XdgShellPopup : public QObject
 {
     Q_OBJECT

@@ -23,12 +23,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QDebug>
 
-//
-// Legacy
-#include <QVector>
-//
-//
-
 #include <Wrapland/Server/wraplandserver_export.h>
 
 #include <cstdint>
@@ -36,8 +30,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 struct wl_client;
 struct wl_display;
-struct wl_event_loop;
-struct wl_resource;
 
 namespace Wrapland
 {
@@ -45,7 +37,6 @@ namespace Server
 {
 
 class Client;
-class Display;
 class Private;
 
 class DataDeviceManager;

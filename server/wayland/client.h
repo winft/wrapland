@@ -35,7 +35,6 @@ namespace Server
 {
 class Client;
 class D_isplay;
-class Display;
 
 namespace Wayland
 {
@@ -76,9 +75,6 @@ private:
     std::string m_executablePath;
 
     Server::Client* q_ptr;
-
-    // TODO: move this into Server::Client?
-    Server::D_isplay* m_display;
 };
 
 }

@@ -108,7 +108,7 @@ void RemoteAccessManager::Private::getBufferCallback([[maybe_unused]] wl_client*
     connect(buffer,
             &RemoteBuffer::resourceDestroyed,
             priv->handle(),
-            [priv, buffer, &bufferHolder, wlResource] {
+            [priv, &bufferHolder, wlResource] {
                 if (!priv->getBind(wlResource)) {
                     // Remote buffer destroy confirmed after client is already gone.
                     // All relevant buffers are already unreferenced.
