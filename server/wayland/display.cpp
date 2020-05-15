@@ -36,6 +36,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../display_p.h"
 
 #include <algorithm>
+#include <exception>
 #include <wayland-server.h>
 
 namespace Wrapland
@@ -111,14 +112,14 @@ void Display::removeGlobal(GlobalCapsule* capsule)
 void Display::addSocket()
 {
     if (!m_socketName.empty()) {
-        // TODO: check return value. Throw.
-        wl_display_add_socket(m_display, m_socketName.c_str());
+        if (wl_display_add_socket(m_display, m_socketName.c_str()) != 0) {
+            throw std::bad_exception();
+        }
         return;
     }
 
-    char const* socket = wl_display_add_socket_auto(m_display);
-    if (socket == nullptr) {
-        qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
+    if (wl_display_add_socket_auto(m_display) == nullptr) {
+        throw std::bad_exception();
     }
 }
 
@@ -130,7 +131,13 @@ void Display::start(bool createSocket)
     m_display = wl_display_create();
 
     if (createSocket) {
-        addSocket();
+        try {
+            addSocket();
+        } catch (std::bad_exception&) {
+            qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
+            // TODO: Shall we rethrow?
+            return;
+        }
     }
 
     m_loop = wl_display_get_event_loop(m_display);
