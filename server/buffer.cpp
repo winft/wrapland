@@ -248,13 +248,13 @@ QImage Buffer::Private::createImage()
         return QImage();
     }
 
-    return std::move(QImage((const uchar*)wl_shm_buffer_get_data(shmBuffer),
-                            size.width(),
-                            size.height(),
-                            wl_shm_buffer_get_stride(shmBuffer),
-                            imageFormat,
-                            &imageBufferCleanupHandler,
-                            this));
+    return QImage((const uchar*)wl_shm_buffer_get_data(shmBuffer),
+                  size.width(),
+                  size.height(),
+                  wl_shm_buffer_get_stride(shmBuffer),
+                  imageFormat,
+                  &imageBufferCleanupHandler,
+                  this);
 }
 
 Buffer::Buffer(wl_resource* wlResource, Surface* surface)
@@ -313,7 +313,7 @@ void Buffer::unref()
 
 QImage Buffer::data()
 {
-    return std::move(d_ptr->createImage());
+    return d_ptr->createImage();
 }
 
 bool Buffer::isReferenced() const
