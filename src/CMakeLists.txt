@@ -1,5 +1,4 @@
 add_subdirectory(client)
-add_subdirectory(server)
 add_subdirectory(tools)
 
 install( FILES org_kde_wrapland.categories DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR} )
@@ -19,7 +18,7 @@ if(BUILD_QCH)
     endmacro()
 
     _make_absolute(WraplandClient_APIDOX_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/client")
-    _make_absolute(WraplandServer_APIDOX_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/server")
+    _make_absolute(WraplandServer_APIDOX_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/../server")
 
     ecm_add_qch(
         Wrapland_QCH
