@@ -146,7 +146,12 @@ Stable image tag trigger:
     - when: never
   variables:
     TARGET_ID: 17539846
-  script: curl --request POST --form token=${CI_JOB_TOKEN} --form ref=master
+  script:
+    # Get Plasma version from commit tag.
+    - BRANCH_NAME=$(echo "${CI_COMMIT_TAG}" | sed -e 's,wrapland@\(\),\1,g' | sed -e 's,0.\(.\)\([^\.]*\).*,Plasma/\1.\2,g')
+    - echo $BRANCH_NAME
+    - curl --request POST --form token=${CI_JOB_TOKEN} --form ref=master
             --form "variables[TRIGGER_TYPE]=wrapland_rebuild"
             --form "variables[WRAPLAND_TAG]=${CI_COMMIT_TAG}"
+            --form "variables[PLASMA_VERSION]=${BRANCH_NAME}"
             ${CI_API_V4_URL}/projects/${TARGET_ID}/trigger/pipeline
