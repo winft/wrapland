@@ -51,6 +51,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "remote_access.h"
 #include "seat.h"
 #include "server_decoration_palette.h"
+#include "shadow.h"
 #include "slide.h"
 #include "subcompositor.h"
 #include "text_input_v2.h"
@@ -59,14 +60,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdg_foreign.h"
 #include "xdg_shell.h"
 #include "xdgoutput.h"
-
-// Legacy
-#include "../src/server/display.h"
-
-#include "../server/shadow.h"
-
-//
-//
 
 #include "logging.h"
 
@@ -102,15 +95,10 @@ Client* Private::createClientHandle(wl_client* wlClient)
     return clientHandle;
 }
 
-D_isplay::D_isplay(QObject* parent, bool legacyInvoked)
+D_isplay::D_isplay(QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this))
 {
-    if (!legacyInvoked) {
-        legacy = new Server::Display(nullptr, true);
-        legacy->newDisplay = this;
-        deleteLegacy = true;
-    }
 }
 
 D_isplay::~D_isplay()
@@ -123,11 +111,6 @@ D_isplay::~D_isplay()
     }
 
     delete d_ptr;
-
-    if (deleteLegacy) {
-        legacy->newDisplay = nullptr;
-        delete legacy;
-    }
 }
 
 void D_isplay::setSocketName(const std::string& name)

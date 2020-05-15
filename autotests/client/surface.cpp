@@ -31,13 +31,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/shm_pool.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/idle_inhibit_v1.h"
-#include "../../src/server/clientconnection.h"
-
 #include "../../server/buffer.h"
 #include "../../server/client.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/idle_inhibit_v1.h"
 #include "../../server/output.h"
 #include "../../server/surface.h"
 

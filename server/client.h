@@ -37,12 +37,6 @@ namespace Server
 
 class D_isplay;
 
-//
-// Legacy
-class ClientConnection;
-//
-//
-
 class WRAPLANDSERVER_EXPORT Client : public QObject
 {
     Q_OBJECT
@@ -52,14 +46,7 @@ public:
 
     void flush();
 
-    //
-    // Legacy (?)
-    wl_resource* createResource(const wl_interface* interface, quint32 version, quint32 id);
     wl_resource* getResource(quint32 id);
-
-    ClientConnection* legacy;
-    //
-    //
 
     wl_client* native() const;
     D_isplay* display();

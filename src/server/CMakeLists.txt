@@ -1,10 +1,4 @@
 set(SERVER_LIB_SRCS
-    clientconnection.cpp
-    display.cpp
-    global.cpp
-    resource.cpp
-    
-
     ../../server/buffer.cpp
     ../../server/filtered_display.cpp
     ../../server/linux_dmabuf_v1.cpp
@@ -302,12 +296,8 @@ install(TARGETS WraplandServer EXPORT WraplandTargets ${INSTALL_TARGETS_DEFAULT_
 
 set(SERVER_LIB_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/Wrapland/Server/wraplandserver_export.h
-  clientconnection.h
-  display.h
-  global.h
-  resource.h
-
   ../../server/buffer.h
+  ../../server/client.h
   ../../server/filtered_display.h
   ../../server/linux_dmabuf_v1.h
   ../../server/xdg_foreign.h

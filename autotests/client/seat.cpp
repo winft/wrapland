@@ -37,8 +37,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/touch.h"
 
-#include "../../src/server/clientconnection.h"
-
 #include "../../server/buffer.h"
 #include "../../server/client.h"
 #include "../../server/compositor.h"

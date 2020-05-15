@@ -22,7 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/registry.h"
-#include "../../src/server/display.h"
+
+#include "../../server/client.h"
+#include "../../server/display.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -51,7 +53,7 @@ private Q_SLOTS:
     void testConnectFdNoSocketName();
 
 private:
-    Srv::Display *m_display;
+    Srv::D_isplay *m_display;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-connection-0");
@@ -64,10 +66,10 @@ TestWaylandConnectionThread::TestWaylandConnectionThread(QObject *parent)
 
 void TestWaylandConnectionThread::init()
 {
-    m_display = new Srv::Display(this);
+    m_display = new Srv::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
-    QVERIFY(m_display->isRunning());
+    QVERIFY(m_display->running());
     m_display->createShm();
 }
 
@@ -201,7 +203,7 @@ void TestWaylandConnectionThread::testConnectionDying()
     QVERIFY(connection->display());
 
     m_display->terminate();
-    QVERIFY(!m_display->isRunning());
+    QVERIFY(!m_display->running());
 
     QVERIFY(connectedSpy.count() == 2 || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 2);
@@ -215,7 +217,7 @@ void TestWaylandConnectionThread::testConnectionDying()
 
     // Restart the server.
     m_display->start();
-    QVERIFY(m_display->isRunning());
+    QVERIFY(m_display->running());
 
     // Try to reuse the connection thread instance.
     connection->establishConnection();
@@ -229,7 +231,7 @@ void TestWaylandConnectionThread::testConnectFd()
     QVERIFY(socketpair(AF_UNIX, SOCK_STREAM, 0, sv) >= 0);
     auto c = m_display->createClient(sv[0]);
     QVERIFY(c);
-    QSignalSpy disconnectedSpy(c, &Srv::ClientConnection::disconnected);
+    QSignalSpy disconnectedSpy(c, &Srv::Client::disconnected);
     QVERIFY(disconnectedSpy.isValid());
 
     auto *connection = new Cnt::ConnectionThread;
@@ -271,9 +273,9 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
     delete m_display;
     m_display = nullptr;
 
-    Srv::Display display;
-    display.start(Srv::Display::StartMode::ConnectClientsOnly);
-    QVERIFY(display.isRunning());
+    Srv::D_isplay display;
+    display.start(Srv::D_isplay::StartMode::ConnectClientsOnly);
+    QVERIFY(display.running());
 
     int sv[2];
     QVERIFY(socketpair(AF_UNIX, SOCK_STREAM, 0, sv) >= 0);

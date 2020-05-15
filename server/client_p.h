@@ -34,7 +34,7 @@ class Client::Private : public Wayland::Client
 {
 public:
     Private(wl_client* wlClient, Server::Client* handle, Server::D_isplay* display)
-        : Wayland::Client(wlClient, handle, display->legacy)
+        : Wayland::Client(wlClient, handle)
         , m_display{display}
     {
     }

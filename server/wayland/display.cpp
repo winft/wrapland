@@ -35,9 +35,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../display.h"
 #include "../display_p.h"
 
-// Legacy
-#include "../../src/server/display.h"
-
 #include <algorithm>
 #include <wayland-server.h>
 
@@ -162,11 +159,6 @@ void Display::terminate()
     // a connection but not yet interacted with us in any way.
     wl_display_destroy_clients(m_display);
 
-    // Globals are also destroyed in wl_display_destroy automatically, but we need to remove all
-    // global interfaces first because otherwise they would call back into the Wayland connection
-    // with wl_global_destroy again. Can we do it differently?
-    Q_EMIT m_handle->legacy->aboutToTerminate();
-
     wl_display_destroy(m_display);
 
     m_display = nullptr;
@@ -269,13 +261,9 @@ void Display::setupClient(Client* client)
                 m_clients.erase(std::remove(m_clients.begin(), m_clients.end(), internal),
                                 m_clients.end());
                 Q_EMIT m_handle->clientDisconnected(client);
-
-                Q_EMIT m_handle->legacy->clientDisconnected(client->legacy);
             }
         });
     Q_EMIT m_handle->clientConnected(client->handle());
-
-    Q_EMIT m_handle->legacy->clientConnected(client->handle()->legacy);
 }
 
 std::vector<Client*> const& Display::clients() const

@@ -53,19 +53,10 @@ void Client::destroy()
     d_ptr->destroy();
 }
 
-//
-// Legacy
-wl_resource* Client::createResource(const wl_interface* interface, quint32 version, quint32 id)
-{
-    return d_ptr->createResource(interface, version, id);
-}
-
 wl_resource* Client::getResource(quint32 id)
 {
     return d_ptr->getResource(id);
 }
-//
-//
 
 wl_client* Client::native() const
 {

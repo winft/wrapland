@@ -44,7 +44,7 @@ class Display;
 class Client
 {
 public:
-    explicit Client(wl_client* wlClient, Server::Client* clientHandle, Server::Display* legacy);
+    explicit Client(wl_client* wlClient, Server::Client* clientHandle);
     virtual ~Client();
 
     void flush();

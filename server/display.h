@@ -59,10 +59,6 @@ class PlasmaWindowManager;
 class Seat;
 class XdgShell;
 
-//
-// Legacy
-class ClientConnection;
-
 class Compositor;
 class KdeIdle;
 class RemoteAccessManager;
@@ -87,14 +83,12 @@ class XdgDecorationManager;
 class EglStreamController;
 class KeyState;
 class LinuxDmabufV1;
-//
-//
 
 class WRAPLANDSERVER_EXPORT D_isplay : public QObject
 {
     Q_OBJECT
 public:
-    explicit D_isplay(QObject* parent = nullptr, bool legacyInvoked = false);
+    explicit D_isplay(QObject* parent = nullptr);
     ~D_isplay() override;
 
     void setSocketName(const std::string& name);
@@ -125,8 +119,6 @@ public:
     Seat* createSeat(QObject* parent = nullptr);
     std::vector<Seat*>& seats() const;
 
-    //
-    // Legacy
     void setSocketName(const QString& name);
 
     OutputDeviceV1* createOutputDeviceV1(QObject* parent = nullptr);
@@ -175,14 +167,8 @@ public:
     XdgDecorationManager* createXdgDecorationManager(XdgShell* shell, QObject* parent = nullptr);
     EglStreamController* createEglStreamController(QObject* parent = nullptr);
 
-    Server::ClientConnection* getClientLegacy(wl_client* client);
-
-    Server::Display* legacy = nullptr;
-    bool deleteLegacy = false;
     void dispatch();
     void flush();
-    //
-    //
 
     Client* createClient(int fd);
     Client* getClient(wl_client* client);
