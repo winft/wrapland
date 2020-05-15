@@ -160,7 +160,6 @@ public:
         sendTuple<sender, minVersion>(std::forward<decltype(tuple)>(tuple), indices);
     }
 
-    template<typename... Args>
     void postError(uint32_t code, char const* msg, ...)
     {
         va_list args;
