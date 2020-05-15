@@ -2,42 +2,72 @@
 #
 # Copyright (C) 2020 Roman Gilg <subdiff@gmail.com>
 
+HeaderFilterRegex: "server"
 WarningsAsErrors: "*"
 
 # Following checks are disabled:
 #
+# cert-dcl50-cpp: We need C-style variadic functions for message posting to the
+#   libwayland C-library.
+# cppcoreguidelines-non-private-member-variables-in-classes: We use public member variables in our
+#   pimpl-classes extensively. TODO: Could be enabled for API classes only or all Private classes be
+#   transformed into structs.
+# cppcoreguidelines-pro-bounds-array-to-pointer-decay: Need array decay for C-style variadic
+#   function.
+# cppcoreguidelines-pro-type-member-init: Produces false positives with template classes, see
+#   https://stackoverflow.com/q/55569776.
+# cppcoreguidelines-pro-type-vararg: See cert-dcl50-cpp.
 # fuchsia-default-arguments-calls: We allow default arguments.
 # fuchsia-default-arguments-declarations: We allow default arguments.
-# fuchsia-overloaded-operator: We overload | for enum classes through
-#   Q_DECLARE_OPERATORS_FOR_FLAGS.
-# google-readability-namespace-comments: Often unnecessary verbose, with C++17
-#   namespaces there are not many braces after all.
-# hicpp-member-init: Produces false positives with template classes, see
-#   https://stackoverflow.com/q/55569776.
+# fuchsia-overloaded-operator: We overload | for enum classes through Q_DECLARE_OPERATORS_FOR_FLAGS.
+# google-readability-namespace-comments: Often unnecessary verbose, with C++17 namespaces there are
+#   not many braces after all.
+# hicpp-member-init: See cppcoreguidelines-pro-type-member-init.
+# hicpp-no-array-decay: See cppcoreguidelines-pro-bounds-array-to-pointer-decay.
+# hicpp-vararg: Same as cppcoreguidelines-pro-type-vararg.
 # llvm-header-guard: We use #pragma once.
 # llvm-namespace-comment: Same as google-readability-namespace-comments.
-# llvm-qualified-auto: We use auto without any qualifiers when not needed like
-#   C++ Core Guiedelines do.
-# misc-non-private-member-variables-in-classes: We use public member variables in our
-#   pimpl-classes extensively. TODO: Could be enabled for API classes only or all
-#   Private classes be transformed into structs.
+# llvm-qualified-auto: We use auto without qualifiers when not needed like C++ Core Guiedelines do.
+# misc-non-private-member-variables-in-classes: See
+#   cppcoreguidelines-non-private-member-variables-in-classes.
+# modernize-use-nodiscard: Putting the nodiscard qualifier at every little getter seems
+#   weird. Other C++ libraries also don't seem to do that. For now disable it.
 # modernize-use-trailing-return-type: The non-trailing return type style is
 #   easier to read and is preferred.
 # readability-implicit-bool-conversion: We use it quite often, it does not really
 #   improve the readability to explicitly cast everywhere.
 # readability-qualified-auto: Same as llvm-qualified-auto.
 #
+# Temporarily suppress (might be possilbe to remove or limit to certain subdirectories later on):
+# cppcoreguidelines-pro-type-reinterpret-cast: Qt macros like Q_DECLARE_METATYPE use
+#   reinterpret_cast.
+# cppcoreguidelines-special-member-functions: Pimpl classes in public API need dtors, might be
+#   possible later on to remove Pimple or the need for dtors and use rule of zero.
+# hicpp-signed-bitwise: Qt macros like Q_DECLARE_OPERATORS_FOR_FLAGS conflict.
+#   hicpp-special-member-functions: See cppcoreguidelines-special-member-functions.
+#
 
 Checks: "*,
+-cert-dcl50-cpp,
+-cppcoreguidelines-non-private-member-variables-in-classes,
+-cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+-cppcoreguidelines-pro-type-reinterpret-cast,
+-cppcoreguidelines-pro-type-vararg,
+-cppcoreguidelines-special-member-functions,
 -fuchsia-default-arguments-calls,
 -fuchsia-default-arguments-declarations,
 -fuchsia-overloaded-operator,
 -google-readability-namespace-comments,
 -hicpp-member-init,
+-hicpp-no-array-decay,
+-hicpp-signed-bitwise,
+-hicpp-special-member-functions,
+-hicpp-vararg,
 -llvm-header-guard,
 -llvm-namespace-comment,
 -llvm-qualified-auto,
 -misc-non-private-member-variables-in-classes,
+-modernize-use-nodiscard,
 -modernize-use-trailing-return-type,
 -readability-implicit-bool-conversion,
 -readability-qualified-auto
