@@ -105,7 +105,7 @@ void XdgShellPopup::Private::setWindowGeometry(const QRect& rect)
     m_pendingState.windowGeometryIsSet = true;
 }
 
-void XdgShellPopup::Private::grabCallback(wl_client* wlClient,
+void XdgShellPopup::Private::grabCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,
                                           wl_resource* wlSeat,
                                           uint32_t serial)

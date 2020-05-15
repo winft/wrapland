@@ -52,7 +52,7 @@ const struct zwp_pointer_gestures_v1_interface PointerGesturesV1::Private::s_int
     resourceDestroyCallback,
 };
 
-void PointerGesturesV1::Private::swipeGestureCallback(wl_client* wlClient,
+void PointerGesturesV1::Private::swipeGestureCallback([[maybe_unused]] wl_client* wlClient,
                                                       wl_resource* wlResource,
                                                       uint32_t id,
                                                       wl_resource* wlPointer)
@@ -69,7 +69,7 @@ void PointerGesturesV1::Private::swipeGestureCallback(wl_client* wlClient,
     pointer->d_ptr->registerSwipeGesture(swiper);
 }
 
-void PointerGesturesV1::Private::pinchGestureCallback(wl_client* wlClient,
+void PointerGesturesV1::Private::pinchGestureCallback([[maybe_unused]] wl_client* wlClient,
                                                       wl_resource* wlResource,
                                                       uint32_t id,
                                                       wl_resource* wlPointer)

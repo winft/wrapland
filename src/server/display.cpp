@@ -212,7 +212,7 @@ void Display::terminate()
     newDisplay->terminate();
 }
 
-void Display::Private::setRunning(bool r)
+void Display::Private::setRunning([[maybe_unused]] bool r)
 {
 //    newDisplay->setRunning(r);
 //    Q_ASSERT(running != r);

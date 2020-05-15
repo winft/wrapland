@@ -206,7 +206,7 @@ void Buffer::Private::imageBufferCleanupHandler(void* info)
     priv->display->bufferManager()->endShmAccess();
 }
 
-void Buffer::Private::destroyListenerCallback(wl_listener* listener, void* data)
+void Buffer::Private::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] void* data)
 {
 
     struct DestroyWrapper* wrapper = wl_container_of(listener, wrapper, listener);

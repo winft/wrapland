@@ -42,7 +42,7 @@ DpmsManager::Private::Private(D_isplay* display, DpmsManager* q)
     create();
 }
 
-void DpmsManager::Private::getDpmsCallback(wl_client* wlClient,
+void DpmsManager::Private::getDpmsCallback([[maybe_unused]] wl_client* wlClient,
                                            wl_resource* wlResource,
                                            uint32_t id,
                                            wl_resource* output)

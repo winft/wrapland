@@ -66,7 +66,7 @@ DataDeviceManager::Private::Private(DataDeviceManager* q, D_isplay* display)
 {
 }
 
-void DataDeviceManager::Private::createDataSourceCallback(wl_client* wlClient,
+void DataDeviceManager::Private::createDataSourceCallback([[maybe_unused]] wl_client* wlClient,
                                                           wl_resource* wlResource,
                                                           uint32_t id)
 {
@@ -81,7 +81,7 @@ void DataDeviceManager::Private::createDataSourceCallback(wl_client* wlClient,
     Q_EMIT priv->handle()->dataSourceCreated(dataSource);
 }
 
-void DataDeviceManager::Private::getDataDeviceCallback(wl_client* wlClient,
+void DataDeviceManager::Private::getDataDeviceCallback([[maybe_unused]] wl_client* wlClient,
                                                        wl_resource* wlResource,
                                                        uint32_t id,
                                                        wl_resource* wlSeat)

@@ -428,7 +428,9 @@ void Seat::setName(const std::string& name)
     Q_EMIT nameChanged(d_ptr->name);
 }
 
-void Seat::Private::getPointerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id)
+void Seat::Private::getPointerCallback([[maybe_unused]] wl_client* wlClient,
+                                       wl_resource* wlResource,
+                                       uint32_t id)
 {
     auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
@@ -466,7 +468,9 @@ void Seat::Private::getPointer(SeatBind* bind, uint32_t id)
     Q_EMIT q_ptr->pointerCreated(pointer);
 }
 
-void Seat::Private::getKeyboardCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id)
+void Seat::Private::getKeyboardCallback([[maybe_unused]] wl_client* wlClient,
+                                        wl_resource* wlResource,
+                                        uint32_t id)
 {
     auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
@@ -502,7 +506,9 @@ void Seat::Private::getKeyboard(SeatBind* bind, uint32_t id)
     Q_EMIT q_ptr->keyboardCreated(keyboard);
 }
 
-void Seat::Private::getTouchCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id)
+void Seat::Private::getTouchCallback([[maybe_unused]] wl_client* wlClient,
+                                     wl_resource* wlResource,
+                                     uint32_t id)
 {
     auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);

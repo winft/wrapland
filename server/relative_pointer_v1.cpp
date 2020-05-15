@@ -49,10 +49,11 @@ const struct zwp_relative_pointer_manager_v1_interface
         relativePointerCallback,
 };
 
-void RelativePointerManagerV1::Private::relativePointerCallback(wl_client* wlClient,
-                                                                wl_resource* wlResource,
-                                                                uint32_t id,
-                                                                wl_resource* wlPointer)
+void RelativePointerManagerV1::Private::relativePointerCallback(
+    [[maybe_unused]] wl_client* wlClient,
+    wl_resource* wlResource,
+    uint32_t id,
+    wl_resource* wlPointer)
 {
     auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
