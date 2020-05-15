@@ -31,7 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/xdg_shell.h"
 
-#include "../../src/server/plasmashell_interface.h"
+#include "../../server/plasmashell.h"
 
 #include <wayland-client-protocol.h>
 
@@ -51,7 +51,7 @@ private:
     Wrapland::Server::D_isplay *m_display = nullptr;
     Wrapland::Server::Compositor *m_serverCompositor = nullptr;
     Wrapland::Server::XdgShell *m_serverXdgShell = nullptr;
-    Wrapland::Server::PlasmaShellInterface *m_psi = nullptr;
+    Wrapland::Server::PlasmaShell *m_psi = nullptr;
 
     Wrapland::Client::ConnectionThread *m_connection = nullptr;
     QThread *m_thread = nullptr;
@@ -74,7 +74,6 @@ void ErrorTest::init()
 
     m_serverXdgShell = m_display->createXdgShell(m_display);
     m_psi = m_display->createPlasmaShell(m_display);
-    m_psi->create();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;

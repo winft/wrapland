@@ -43,6 +43,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_p.h"
 #include "plasma_virtual_desktop.h"
 #include "plasma_window.h"
+#include "plasmashell.h"
 #include "pointer.h"
 #include "pointer_constraints_v1.h"
 #include "pointer_gestures_v1.h"
@@ -63,7 +64,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/server/display.h"
 
 #include "../server/shadow.h"
-#include "../src/server/plasmashell_interface.h"
 
 //
 //
@@ -233,9 +233,9 @@ DataDeviceManager* D_isplay::createDataDeviceManager(QObject* parent)
     return new DataDeviceManager(this, parent);
 }
 
-PlasmaShellInterface* D_isplay::createPlasmaShell(QObject* parent)
+PlasmaShell* D_isplay::createPlasmaShell(QObject* parent)
 {
-    return legacy->createPlasmaShell(parent);
+    return new PlasmaShell(this, parent);
 }
 
 PlasmaWindowManager* D_isplay::createPlasmaWindowManager(QObject* parent)

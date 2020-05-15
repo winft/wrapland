@@ -61,7 +61,7 @@ class IdleInterface;
 //class RemoteAccessManagerInterface;
 class IdleInhibitManagerInterface;
 //class FakeInputInterface;
-class PlasmaShellInterface;
+//class PlasmaShellInterface;
 //class PlasmaWindowManagementInterface;
 //class SeatInterface;
 //class ShadowManagerInterface;
@@ -196,7 +196,7 @@ public:
 //    SubCompositorInterface *createSubCompositor(QObject *parent = nullptr);
 //    DataDeviceManagerInterface *createDataDeviceManager(QObject *parent = nullptr);
     OutputManagementV1Interface *createOutputManagementV1(QObject *parent = nullptr);
-    PlasmaShellInterface *createPlasmaShell(QObject *parent = nullptr);
+//    PlasmaShellInterface *createPlasmaShell(QObject *parent = nullptr);
     //PlasmaWindowManagement *createPlasmaWindowManagement(QObject *parent = nullptr);
     IdleInterface *createIdle(QObject *parent = nullptr);
 //    RemoteAccessManagerInterface *createRemoteAccessManager(QObject *parent = nullptr);
