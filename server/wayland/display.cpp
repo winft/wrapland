@@ -64,9 +64,6 @@ Display::Display(Server::D_isplay* parent)
 
 Display::~Display()
 {
-    for (auto capsule : m_globals) {
-        capsule->release();
-    }
     terminate();
     if (m_display) {
         wl_display_destroy(m_display);
@@ -156,6 +153,10 @@ void Display::terminate()
 {
     if (!m_running) {
         return;
+    }
+
+    for (auto capsule : m_globals) {
+        capsule->release();
     }
 
     // That call is not really necessary because we run our own Qt-embedded event loop and do not
