@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 //#include "fakeinput_interface.h"
 #include "logging.h"
 //#include "output_interface.h"
-#include "plasmashell_interface.h"
+//#include "plasmashell_interface.h"
 //#include "plasmawindowmanagement_interface.h"
 //#include "pointerconstraints_interface_p.h"
 //#include "pointergestures_interface_p.h"
@@ -278,13 +278,13 @@ void Display::Private::setRunning(bool r)
 //    connect(this, &Display::aboutToTerminate, m, [this,m] { delete m; });
 //    return m;
 //}
-
+/*
 PlasmaShellInterface *Display::createPlasmaShell(QObject* parent)
 {
     auto s = new PlasmaShellInterface(this, parent);
     connect(this, &Display::aboutToTerminate, s, [this, s] { delete s; });
     return s;
-}
+}*/
 /*
 PlasmaWindowManagement *Display::createPlasmaWindowManagement(QObject *parent)
 {
