@@ -88,23 +88,23 @@ void TestServerDisplay::testAddRemoveOutput()
     display.setSocketName(std::string("kwin-wayland-server-display-test-output-0"));
     display.start();
 
-    Output* output = display.createOutput();
+    std::unique_ptr<Output> output1{display.createOutput()};
     QCOMPARE(display.outputs().size(), 1);
-    QCOMPARE(display.outputs()[0], output);
+    QCOMPARE(display.outputs()[0], output1.get());
 
     // create a second output
-    Output* output2 = display.createOutput();
+    std::unique_ptr<Output> output2{display.createOutput()};
     QCOMPARE(display.outputs().size(), 2);
-    QCOMPARE(display.outputs()[0], output);
-    QCOMPARE(display.outputs()[1], output2);
+    QCOMPARE(display.outputs()[0], output1.get());
+    QCOMPARE(display.outputs()[1], output2.get());
 
     // remove the first output
-    display.removeOutput(output);
+    display.removeOutput(output1.get());
     QCOMPARE(display.outputs().size(), 1);
-    QCOMPARE(display.outputs()[0], output2);
+    QCOMPARE(display.outputs()[0], output2.get());
 
     // and delete the second
-    delete output2;
+    output2.reset();
     QVERIFY(display.outputs().empty());
 }
 
