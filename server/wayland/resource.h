@@ -161,9 +161,12 @@ public:
     }
 
     template<typename... Args>
-    void postError(uint32_t code, Args&&... args)
+    void postError(uint32_t code, char const* msg, ...)
     {
-        wl_resource_post_error(m_resource, code, args...);
+        va_list args;
+        va_start(args, msg);
+        wl_resource_post_error(m_resource, code, msg, args);
+        va_end(args);
     }
 
     static void destroyCallback([[maybe_unused]] wl_client* client, wl_resource* wlResource)
