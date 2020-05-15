@@ -87,7 +87,7 @@ class OutputManagementV1Interface;
 //class PointerConstraintsInterface;
 //class XdgForeignInterface;
 //class AppMenuManagerInterface;
-class ServerSideDecorationPaletteManagerInterface;
+//class ServerSideDecorationPaletteManagerInterface;
 //class PlasmaVirtualDesktopManagementInterface;
 //class ViewporterInterface;
 class XdgOutputManagerInterface;
@@ -277,7 +277,7 @@ public:
      * @returns The created manager object
      * @since 0.0.542
      **/
-    ServerSideDecorationPaletteManagerInterface *createServerSideDecorationPaletteManager(QObject *parent = nullptr);
+    //ServerSideDecorationPaletteManagerInterface *createServerSideDecorationPaletteManager(QObject *parent = nullptr);
 
 //    /**
 //     * Creates the LinuxDmabufUnstableV1Interface in interface @p version.

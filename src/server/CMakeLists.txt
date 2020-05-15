@@ -4,7 +4,7 @@ set(SERVER_LIB_SRCS
     global.cpp
     plasmashell_interface.cpp
     resource.cpp
-    server_decoration_palette_interface.cpp
+    
 
     ../../server/buffer.cpp
     ../../server/filtered_display.cpp
@@ -60,6 +60,7 @@ set(SERVER_LIB_SRCS
     ../../server/output_management_v1.cpp
     ../../server/eglstream_controller.cpp
     ../../server/fakeinput.cpp
+    ../../server/server_decoration_palette.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -306,7 +307,6 @@ set(SERVER_LIB_HEADERS
   global.h
   plasmashell_interface.h
   resource.h
-  server_decoration_palette_interface.h
 
   ../../server/buffer.h
   ../../server/filtered_display.h
@@ -354,6 +354,7 @@ set(SERVER_LIB_HEADERS
   ../../server/output_management_v1.h
   ../../server/eglstream_controller.h
   ../../server/fakeinput.h
+  ../../server/server_decoration_palette.h
 )
 
 install(FILES

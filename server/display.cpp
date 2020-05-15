@@ -49,6 +49,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "relative_pointer_v1.h"
 #include "remote_access.h"
 #include "seat.h"
+#include "server_decoration_palette.h"
 #include "slide.h"
 #include "subcompositor.h"
 #include "text_input_v2.h"
@@ -63,7 +64,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../server/shadow.h"
 #include "../src/server/plasmashell_interface.h"
-#include "../src/server/server_decoration_palette_interface.h"
 
 //
 //
@@ -323,10 +323,10 @@ AppMenuManager* D_isplay::createAppMenuManager(QObject* parent)
     return new AppMenuManager(this, parent);
 }
 
-ServerSideDecorationPaletteManagerInterface*
+ServerSideDecorationPaletteManager*
 D_isplay::createServerSideDecorationPaletteManager(QObject* parent)
 {
-    return legacy->createServerSideDecorationPaletteManager(parent);
+    return new ServerSideDecorationPaletteManager(this, parent);
 }
 
 LinuxDmabufV1* D_isplay::createLinuxDmabuf(QObject* parent)

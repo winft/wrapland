@@ -80,7 +80,7 @@ class PointerGesturesV1;
 class PointerConstraintsV1;
 class XdgForeign;
 class AppMenuManager;
-class ServerSideDecorationPaletteManagerInterface;
+class ServerSideDecorationPaletteManager;
 class Viewporter;
 class XdgOutputManager;
 class XdgDecorationManager;
@@ -165,8 +165,8 @@ public:
     IdleInhibitManagerV1* createIdleInhibitManager(QObject* parent = nullptr);
     AppMenuManager* createAppMenuManager(QObject* parent = nullptr);
 
-    ServerSideDecorationPaletteManagerInterface*
-    createServerSideDecorationPaletteManager(QObject* parent = nullptr);
+    ServerSideDecorationPaletteManager* createServerSideDecorationPaletteManager(QObject* parent
+                                                                                 = nullptr);
     LinuxDmabufV1* createLinuxDmabuf(QObject* parent = nullptr);
     Viewporter* createViewporter(QObject* parent = nullptr);
     XdgOutputManager* createXdgOutputManager(QObject* parent = nullptr);
