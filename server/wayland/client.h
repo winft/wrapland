@@ -43,7 +43,13 @@ class Display;
 class Client
 {
 public:
-    explicit Client(wl_client* wlClient, Server::Client* clientHandle);
+    Client(wl_client* wlClient, Server::Client* clientHandle);
+
+    Client(Client&) = delete;
+    Client& operator=(Client) = delete;
+    Client(Client&&) noexcept = default;
+    Client& operator=(Client&&) noexcept = default;
+
     virtual ~Client();
 
     void flush();

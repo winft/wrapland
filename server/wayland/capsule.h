@@ -42,6 +42,11 @@ public:
     {
     }
 
+    Capsule(Capsule&) = delete;
+    Capsule& operator=(Capsule) = delete;
+    Capsule(Capsule&&) noexcept = default;
+    Capsule& operator=(Capsule&&) noexcept = default;
+
     ~Capsule()
     {
         if (m_object) {

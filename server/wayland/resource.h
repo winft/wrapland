@@ -94,6 +94,11 @@ public:
     {
     }
 
+    Resource(Resource&) = delete;
+    Resource& operator=(Resource) = delete;
+    Resource(Resource&&) noexcept = delete;
+    Resource& operator=(Resource&&) noexcept = delete;
+
     virtual ~Resource() = default;
 
     wl_resource* resource() const

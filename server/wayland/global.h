@@ -200,6 +200,11 @@ protected:
         //       create on ctor call?).
     }
 
+    Global(Global&) = delete;
+    Global& operator=(Global) = delete;
+    Global(Global&&) noexcept = delete;
+    Global& operator=(Global&&) noexcept = delete;
+
     void remove()
     {
         if (!m_capsule->valid()) {
