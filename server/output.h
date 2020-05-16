@@ -138,14 +138,8 @@ Q_SIGNALS:
     void currentModeChanged();
     void dpmsModeChanged();
     void dpmsSupportedChanged();
-    void removed();
-
-    /**
-     * Change of dpms @p mode is requested.
-     * A server is free to ignore this request.
-     * @since 5.5
-     **/
     void dpmsModeRequested(Wrapland::Server::Output::DpmsMode mode);
+    void removed();
 
 private:
     friend class D_isplay;

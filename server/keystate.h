@@ -29,11 +29,6 @@ namespace Wrapland::Server
 
 class D_isplay;
 
-/**
- * @brief Exposes key states to wayland clients
- *
- * @since 0.0.558
- **/
 class WRAPLANDSERVER_EXPORT KeyState : public QObject
 {
     Q_OBJECT

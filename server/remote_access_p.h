@@ -65,7 +65,7 @@ private:
     /**
      * Buffers that were sent but still not acked by server
      * Keys are fd numbers as they are unique
-     **/
+     */
     QHash<uint32_t, BufferHolder> sentBuffers;
 };
 

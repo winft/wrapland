@@ -40,9 +40,6 @@ public:
     ~Viewporter() override;
 
 Q_SIGNALS:
-    /**
-     * Emitted whenever this Viewporter created a Viewport.
-     **/
     void viewportCreated(Viewport*);
 
 private:

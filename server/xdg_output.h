@@ -52,32 +52,12 @@ class WRAPLANDSERVER_EXPORT XdgOutput : public QObject
 public:
     ~XdgOutput() override;
 
-    /**
-     * Sets the size of this output in logical co-ordinates.
-     * Users should call done() after setting all values
-     */
+    QSize logicalSize() const;
     void setLogicalSize(const QSize& size);
 
-    /**
-     * Returns the last set logical size on this output
-     */
-    QSize logicalSize() const;
-
-    /**
-     * Sets the topleft position of this output in logical co-ordinates.
-     * Users should call done() after setting all values
-     * @see OutputInterface::setPosition
-     */
+    QPoint logicalPosition() const;
     void setLogicalPosition(const QPoint& pos);
 
-    /**
-     * Returns the last set logical position on this output
-     */
-    QPoint logicalPosition() const;
-
-    /**
-     * Submit changes to all clients
-     */
     void done();
 
 private:
