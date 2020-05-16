@@ -1185,4 +1185,4 @@ void PlasmaWindowModelTest::testCreateWindowAfterModelDestroy()
 }
 
 QTEST_GUILESS_MAIN(PlasmaWindowModelTest)
-#include "test_plasma_window_model.moc"
+#include "plasma_window_model.moc"

@@ -532,4 +532,4 @@ void TestPlasmaShell::testWhileDestroying()
 }
 
 QTEST_GUILESS_MAIN(TestPlasmaShell)
-#include "test_plasmashell.moc"
+#include "plasma_shell.moc"

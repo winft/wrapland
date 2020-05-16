@@ -160,4 +160,4 @@ void TestWaylandFullscreenShell::testRegistryCreate()
 }
 
 QTEST_GUILESS_MAIN(TestWaylandFullscreenShell)
-#include "test_wayland_fullscreen_shell.moc"
+#include "fullscreen_shell.moc"

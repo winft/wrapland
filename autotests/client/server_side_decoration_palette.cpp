@@ -1,4 +1,5 @@
 /********************************************************************
+Copyright 2017  David Edmundson <davidedmundson@kde.org>
 Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
 
 This library is free software; you can redistribute it and/or
@@ -25,43 +26,42 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/slide.h"
+#include "../../src/client/server_decoration_palette.h"
 
 #include "../../server/display.h"
 #include "../../server/compositor.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
-#include "../../server/slide.h"
+#include "../../server/server_decoration_palette.h"
 
 using namespace Wrapland::Client;
 
-class TestSlide : public QObject
+class TestServerSideDecorationPalette : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestSlide(QObject *parent = nullptr);
+    explicit TestServerSideDecorationPalette(QObject *parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
 
-    void testCreate();
-    void testSurfaceDestroy();
+    void testCreateAndSet();
 
 private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::SlideManager *m_slideManagerInterface;
+    Wrapland::Server::ServerSideDecorationPaletteManager *m_paletteManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::SlideManager *m_slideManager;
+    Wrapland::Client::ServerSideDecorationPaletteManager *m_paletteManager;
     Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-slide-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-decopalette-0");
 
-TestSlide::TestSlide(QObject *parent)
+TestServerSideDecorationPalette::TestServerSideDecorationPalette(QObject *parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
@@ -72,16 +72,18 @@ TestSlide::TestSlide(QObject *parent)
 {
 }
 
-void TestSlide::init()
+void TestServerSideDecorationPalette::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
+    
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 
-    // Setup connection.
+    // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
+    QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
@@ -101,8 +103,8 @@ void TestSlide::init()
     QSignalSpy compositorSpy(&registry, &Registry::compositorAnnounced);
     QVERIFY(compositorSpy.isValid());
 
-    QSignalSpy slideSpy(&registry, &Registry::slideAnnounced);
-    QVERIFY(slideSpy.isValid());
+    QSignalSpy registrySpy(&registry, &Registry::serverSideDecorationPaletteManagerAnnounced);
+    QVERIFY(registrySpy.isValid());
 
     QVERIFY(!registry.eventQueue());
     registry.setEventQueue(m_queue);
@@ -116,13 +118,13 @@ void TestSlide::init()
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
 
-    m_slideManagerInterface = m_display->createSlideManager(m_display);
+    m_paletteManagerInterface = m_display->createServerSideDecorationPaletteManager(m_display);
 
-    QVERIFY(slideSpy.wait());
-    m_slideManager = registry.createSlideManager(slideSpy.first().first().value<quint32>(), slideSpy.first().last().value<quint32>(), this);
+    QVERIFY(registrySpy.wait());
+    m_paletteManager = registry.createServerSideDecorationPaletteManager(registrySpy.first().first().value<quint32>(), registrySpy.first().last().value<quint32>(), this);
 }
 
-void TestSlide::cleanup()
+void TestServerSideDecorationPalette::cleanup()
 {
 #define CLEANUP(variable) \
     if (variable) { \
@@ -130,7 +132,7 @@ void TestSlide::cleanup()
         variable = nullptr; \
     }
     CLEANUP(m_compositor)
-    CLEANUP(m_slideManager)
+    CLEANUP(m_paletteManager)
     CLEANUP(m_queue)
     if (m_connection) {
         m_connection->deleteLater();
@@ -143,12 +145,12 @@ void TestSlide::cleanup()
         m_thread = nullptr;
     }
     CLEANUP(m_serverCompositor)
-    CLEANUP(m_slideManagerInterface)
+    CLEANUP(m_paletteManagerInterface)
     CLEANUP(m_display)
 #undef CLEANUP
 }
 
-void TestSlide::testCreate()
+void TestServerSideDecorationPalette::testCreateAndSet()
 {
     QSignalSpy serverSurfaceCreated(m_serverCompositor, SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
@@ -157,56 +159,34 @@ void TestSlide::testCreate()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy slideChanged(serverSurface, &Wrapland::Server::Surface::slideOnShowHideChanged);
+    QSignalSpy paletteCreatedSpy(m_paletteManagerInterface, &Wrapland::Server::ServerSideDecorationPaletteManager::paletteCreated);
 
-    auto slide = m_slideManager->createSlide(surface.get(), surface.get());
-    slide->setLocation(Wrapland::Client::Slide::Location::Top);
-    slide->setOffset(15);
-    slide->commit();
-    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    QVERIFY(!m_paletteManagerInterface->paletteForSurface(serverSurface));
 
-    QVERIFY(slideChanged.wait());
-    QCOMPARE(serverSurface->slideOnShowHide()->location(), Wrapland::Server::Slide::Location::Top);
-    QCOMPARE(serverSurface->slideOnShowHide()->offset(), 15);
+    auto palette = m_paletteManager->create(surface.get(), surface.get());
+    QVERIFY(paletteCreatedSpy.wait());
+    auto paletteInterface = paletteCreatedSpy.first().first().value<Wrapland::Server::ServerSideDecorationPalette*>();
+
+    QCOMPARE(m_paletteManagerInterface->paletteForSurface(serverSurface), paletteInterface);
+
+    QCOMPARE(paletteInterface->palette(), QString());
+
+    QSignalSpy changedSpy(paletteInterface, &Wrapland::Server::ServerSideDecorationPalette::paletteChanged);
+
+    palette->setPalette("foobar");
+
+    QVERIFY(changedSpy.wait());
+    QCOMPARE(paletteInterface->palette(), QString("foobar"));
 
     // and destroy
-    QSignalSpy destroyedSpy(serverSurface->slideOnShowHide().data(), &QObject::destroyed);
+    QSignalSpy destroyedSpy(paletteInterface, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
-    delete slide;
+    delete palette;
     QVERIFY(destroyedSpy.wait());
+
+
+    QVERIFY(!m_paletteManagerInterface->paletteForSurface(serverSurface));
 }
 
-void TestSlide::testSurfaceDestroy()
-{
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
-    QVERIFY(serverSurfaceCreated.isValid());
-
-    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
-    QVERIFY(serverSurfaceCreated.wait());
-
-    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy slideChanged(serverSurface, &Wrapland::Server::Surface::slideOnShowHideChanged);
-    QVERIFY(slideChanged.isValid());
-
-    std::unique_ptr<Slide> slide(m_slideManager->createSlide(surface.get()));
-    slide->commit();
-    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(slideChanged.wait());
-    auto serverSlide = serverSurface->slideOnShowHide();
-    QVERIFY(!serverSlide.isNull());
-
-    // destroy the parent surface
-    QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
-    QVERIFY(surfaceDestroyedSpy.isValid());
-    QSignalSpy slideDestroyedSpy(serverSlide.data(), &QObject::destroyed);
-    QVERIFY(slideDestroyedSpy.isValid());
-    surface.reset();
-    QVERIFY(surfaceDestroyedSpy.wait());
-    QVERIFY(slideDestroyedSpy.isEmpty());
-    // destroy the slide
-    slide.reset();
-    QVERIFY(slideDestroyedSpy.wait());
-}
-
-QTEST_GUILESS_MAIN(TestSlide)
-#include "test_wayland_slide.moc"
+QTEST_GUILESS_MAIN(TestServerSideDecorationPalette)
+#include "server_side_decoration_palette.moc"

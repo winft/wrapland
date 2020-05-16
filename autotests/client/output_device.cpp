@@ -498,4 +498,4 @@ void TestOutputDevice::testDone()
 
 
 QTEST_GUILESS_MAIN(TestOutputDevice)
-#include "test_output_device.moc"
+#include "output_device.moc"

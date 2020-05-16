@@ -17,31 +17,30 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// KWin
+
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/blur.h"
+#include "../../src/client/slide.h"
 
 #include "../../server/display.h"
 #include "../../server/compositor.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
-#include "../../server/blur.h"
+#include "../../server/slide.h"
 
 using namespace Wrapland::Client;
 
-class TestBlur : public QObject
+class TestSlide : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestBlur(QObject *parent = nullptr);
+    explicit TestSlide(QObject *parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -52,17 +51,17 @@ private Q_SLOTS:
 private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::BlurManager *m_blurManagerInterface;
+    Wrapland::Server::SlideManager *m_slideManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::BlurManager *m_blurManager;
+    Wrapland::Client::SlideManager *m_slideManager;
     Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-blur-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-slide-0");
 
-TestBlur::TestBlur(QObject *parent)
+TestSlide::TestSlide(QObject *parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
@@ -73,19 +72,16 @@ TestBlur::TestBlur(QObject *parent)
 {
 }
 
-void TestBlur::init()
+void TestSlide::init()
 {
-    using namespace Wrapland::Server;
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    delete m_display;
-    m_display = new D_isplay(this);
+    m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 
-    // setup connection
+    // Setup connection.
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
-    QVERIFY(connectedSpy.isValid());
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
@@ -105,8 +101,8 @@ void TestBlur::init()
     QSignalSpy compositorSpy(&registry, &Registry::compositorAnnounced);
     QVERIFY(compositorSpy.isValid());
 
-    QSignalSpy blurSpy(&registry, &Registry::blurAnnounced);
-    QVERIFY(blurSpy.isValid());
+    QSignalSpy slideSpy(&registry, &Registry::slideAnnounced);
+    QVERIFY(slideSpy.isValid());
 
     QVERIFY(!registry.eventQueue());
     registry.setEventQueue(m_queue);
@@ -120,13 +116,13 @@ void TestBlur::init()
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
 
-    m_blurManagerInterface = m_display->createBlurManager(m_display);
+    m_slideManagerInterface = m_display->createSlideManager(m_display);
 
-    QVERIFY(blurSpy.wait());
-    m_blurManager = registry.createBlurManager(blurSpy.first().first().value<quint32>(), blurSpy.first().last().value<quint32>(), this);
+    QVERIFY(slideSpy.wait());
+    m_slideManager = registry.createSlideManager(slideSpy.first().first().value<quint32>(), slideSpy.first().last().value<quint32>(), this);
 }
 
-void TestBlur::cleanup()
+void TestSlide::cleanup()
 {
 #define CLEANUP(variable) \
     if (variable) { \
@@ -134,7 +130,7 @@ void TestBlur::cleanup()
         variable = nullptr; \
     }
     CLEANUP(m_compositor)
-    CLEANUP(m_blurManager)
+    CLEANUP(m_slideManager)
     CLEANUP(m_queue)
     if (m_connection) {
         m_connection->deleteLater();
@@ -147,38 +143,40 @@ void TestBlur::cleanup()
         m_thread = nullptr;
     }
     CLEANUP(m_serverCompositor)
-    CLEANUP(m_blurManagerInterface)
+    CLEANUP(m_slideManagerInterface)
     CLEANUP(m_display)
 #undef CLEANUP
 }
 
-void TestBlur::testCreate()
+void TestSlide::testCreate()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy blurChanged(serverSurface, &Wrapland::Server::Surface::blurChanged);
+    QSignalSpy slideChanged(serverSurface, &Wrapland::Server::Surface::slideOnShowHideChanged);
 
-    auto *blur = m_blurManager->createBlur(surface.get(), surface.get());
-    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur));
-    blur->commit();
+    auto slide = m_slideManager->createSlide(surface.get(), surface.get());
+    slide->setLocation(Wrapland::Client::Slide::Location::Top);
+    slide->setOffset(15);
+    slide->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(blurChanged.wait());
-    QCOMPARE(serverSurface->blur()->region(), QRegion(0, 0, 10, 20));
+    QVERIFY(slideChanged.wait());
+    QCOMPARE(serverSurface->slideOnShowHide()->location(), Wrapland::Server::Slide::Location::Top);
+    QCOMPARE(serverSurface->slideOnShowHide()->offset(), 15);
 
     // and destroy
-    QSignalSpy destroyedSpy(serverSurface->blur().data(), &QObject::destroyed);
+    QSignalSpy destroyedSpy(serverSurface->slideOnShowHide().data(), &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
-    delete blur;
+    delete slide;
     QVERIFY(destroyedSpy.wait());
 }
 
-void TestBlur::testSurfaceDestroy()
+void TestSlide::testSurfaceDestroy()
 {
     QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
@@ -187,29 +185,28 @@ void TestBlur::testSurfaceDestroy()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy blurChanged(serverSurface, &Wrapland::Server::Surface::blurChanged);
-    QVERIFY(blurChanged.isValid());
+    QSignalSpy slideChanged(serverSurface, &Wrapland::Server::Surface::slideOnShowHideChanged);
+    QVERIFY(slideChanged.isValid());
 
-    std::unique_ptr<Wrapland::Client::Blur> blur(m_blurManager->createBlur(surface.get()));
-    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur.get()));
-    blur->commit();
+    std::unique_ptr<Slide> slide(m_slideManager->createSlide(surface.get()));
+    slide->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-
-    QVERIFY(blurChanged.wait());
-    QCOMPARE(serverSurface->blur()->region(), QRegion(0, 0, 10, 20));
+    QVERIFY(slideChanged.wait());
+    auto serverSlide = serverSurface->slideOnShowHide();
+    QVERIFY(!serverSlide.isNull());
 
     // destroy the parent surface
     QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
     QVERIFY(surfaceDestroyedSpy.isValid());
-    QSignalSpy blurDestroyedSpy(serverSurface->blur().data(), &QObject::destroyed);
-    QVERIFY(blurDestroyedSpy.isValid());
+    QSignalSpy slideDestroyedSpy(serverSlide.data(), &QObject::destroyed);
+    QVERIFY(slideDestroyedSpy.isValid());
     surface.reset();
     QVERIFY(surfaceDestroyedSpy.wait());
-    QVERIFY(blurDestroyedSpy.isEmpty());
-    // destroy the blur
-    blur.reset();
-    QVERIFY(blurDestroyedSpy.wait());
+    QVERIFY(slideDestroyedSpy.isEmpty());
+    // destroy the slide
+    slide.reset();
+    QVERIFY(slideDestroyedSpy.wait());
 }
 
-QTEST_GUILESS_MAIN(TestBlur)
-#include "test_wayland_blur.moc"
+QTEST_GUILESS_MAIN(TestSlide)
+#include "slide.moc"

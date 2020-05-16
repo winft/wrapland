@@ -163,4 +163,4 @@ void TestFilter::testFilter()
 
 
 QTEST_GUILESS_MAIN(TestFilter)
-#include "test_wayland_filter.moc"
+#include "filter.moc"

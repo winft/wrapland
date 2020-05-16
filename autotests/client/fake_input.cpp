@@ -480,4 +480,4 @@ void FakeInputTest::testKeyboardKeyLinux()
 }
 
 QTEST_GUILESS_MAIN(FakeInputTest)
-#include "test_fake_input.moc"
+#include "fake_input.moc"

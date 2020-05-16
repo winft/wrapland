@@ -1,6 +1,5 @@
 /********************************************************************
 Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
-Copyright 2015  Marco Martin <mart@kde.org>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -27,22 +26,22 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/contrast.h"
+#include "../../src/client/blur.h"
 
 #include "../../server/display.h"
 #include "../../server/compositor.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
-#include "../../server/contrast.h"
+#include "../../server/blur.h"
 
-#include <wayland-util.h>
+using namespace Wrapland::Client;
 
-class TestContrast : public QObject
+class TestBlur : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestContrast(QObject *parent = nullptr);
+    explicit TestBlur(QObject *parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -53,17 +52,17 @@ private Q_SLOTS:
 private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::ContrastManager *m_contrastManagerInterface;
+    Wrapland::Server::BlurManager *m_blurManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::ContrastManager *m_contrastManager;
+    Wrapland::Client::BlurManager *m_blurManager;
     Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-contrast-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-blur-0");
 
-TestContrast::TestContrast(QObject *parent)
+TestBlur::TestBlur(QObject *parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
@@ -74,16 +73,19 @@ TestContrast::TestContrast(QObject *parent)
 {
 }
 
-void TestContrast::init()
+void TestBlur::init()
 {
+    using namespace Wrapland::Server;
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    m_display = new Wrapland::Server::D_isplay(this);
+    delete m_display;
+    m_display = new D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
+    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
+    QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
@@ -99,12 +101,12 @@ void TestContrast::init()
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
 
-    Wrapland::Client::Registry registry;
-    QSignalSpy compositorSpy(&registry, &Wrapland::Client::Registry::compositorAnnounced);
+    Registry registry;
+    QSignalSpy compositorSpy(&registry, &Registry::compositorAnnounced);
     QVERIFY(compositorSpy.isValid());
 
-    QSignalSpy contrastSpy(&registry, &Wrapland::Client::Registry::contrastAnnounced);
-    QVERIFY(contrastSpy.isValid());
+    QSignalSpy blurSpy(&registry, &Registry::blurAnnounced);
+    QVERIFY(blurSpy.isValid());
 
     QVERIFY(!registry.eventQueue());
     registry.setEventQueue(m_queue);
@@ -118,13 +120,13 @@ void TestContrast::init()
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
 
-    m_contrastManagerInterface = m_display->createContrastManager(m_display);
+    m_blurManagerInterface = m_display->createBlurManager(m_display);
 
-    QVERIFY(contrastSpy.wait());
-    m_contrastManager = registry.createContrastManager(contrastSpy.first().first().value<quint32>(), contrastSpy.first().last().value<quint32>(), this);
+    QVERIFY(blurSpy.wait());
+    m_blurManager = registry.createBlurManager(blurSpy.first().first().value<quint32>(), blurSpy.first().last().value<quint32>(), this);
 }
 
-void TestContrast::cleanup()
+void TestBlur::cleanup()
 {
 #define CLEANUP(variable) \
     if (variable) { \
@@ -132,7 +134,7 @@ void TestContrast::cleanup()
         variable = nullptr; \
     }
     CLEANUP(m_compositor)
-    CLEANUP(m_contrastManager)
+    CLEANUP(m_blurManager)
     CLEANUP(m_queue)
     if (m_connection) {
         m_connection->deleteLater();
@@ -145,12 +147,12 @@ void TestContrast::cleanup()
         m_thread = nullptr;
     }
     CLEANUP(m_serverCompositor)
-    CLEANUP(m_contrastManagerInterface)
+    CLEANUP(m_blurManagerInterface)
     CLEANUP(m_display)
 #undef CLEANUP
 }
 
-void TestContrast::testCreate()
+void TestBlur::testCreate()
 {
     QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
@@ -159,32 +161,24 @@ void TestContrast::testCreate()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy contrastChanged(serverSurface, SIGNAL(contrastChanged()));
+    QSignalSpy blurChanged(serverSurface, &Wrapland::Server::Surface::blurChanged);
 
-    auto *contrast = m_contrastManager->createContrast(surface.get(), surface.get());
-    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast));
-
-    contrast->setContrast(0.2);
-    contrast->setIntensity(2.0);
-    contrast->setSaturation(1.7);
-
-    contrast->commit();
+    auto *blur = m_blurManager->createBlur(surface.get(), surface.get());
+    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur));
+    blur->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(contrastChanged.wait());
-    QCOMPARE(serverSurface->contrast()->region(), QRegion(0, 0, 10, 20));
-    QCOMPARE(wl_fixed_from_double(serverSurface->contrast()->contrast()), wl_fixed_from_double(0.2));
-    QCOMPARE(wl_fixed_from_double(serverSurface->contrast()->intensity()), wl_fixed_from_double(2.0));
-    QCOMPARE(wl_fixed_from_double(serverSurface->contrast()->saturation()), wl_fixed_from_double(1.7));
+    QVERIFY(blurChanged.wait());
+    QCOMPARE(serverSurface->blur()->region(), QRegion(0, 0, 10, 20));
 
-    // And destroy.
-    QSignalSpy destroyedSpy(serverSurface->contrast().data(), &QObject::destroyed);
+    // and destroy
+    QSignalSpy destroyedSpy(serverSurface->blur().data(), &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
-    delete contrast;
+    delete blur;
     QVERIFY(destroyedSpy.wait());
 }
 
-void TestContrast::testSurfaceDestroy()
+void TestBlur::testSurfaceDestroy()
 {
     QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
@@ -193,29 +187,29 @@ void TestContrast::testSurfaceDestroy()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy contrastChanged(serverSurface, &Wrapland::Server::Surface::contrastChanged);
-    QVERIFY(contrastChanged.isValid());
+    QSignalSpy blurChanged(serverSurface, &Wrapland::Server::Surface::blurChanged);
+    QVERIFY(blurChanged.isValid());
 
-    std::unique_ptr<Wrapland::Client::Contrast> contrast(m_contrastManager->createContrast(surface.get()));
-    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast.get()));
-    contrast->commit();
+    std::unique_ptr<Wrapland::Client::Blur> blur(m_blurManager->createBlur(surface.get()));
+    blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur.get()));
+    blur->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(contrastChanged.wait());
-    QCOMPARE(serverSurface->contrast()->region(), QRegion(0, 0, 10, 20));
+    QVERIFY(blurChanged.wait());
+    QCOMPARE(serverSurface->blur()->region(), QRegion(0, 0, 10, 20));
 
     // destroy the parent surface
     QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
     QVERIFY(surfaceDestroyedSpy.isValid());
-    QSignalSpy contrastDestroyedSpy(serverSurface->contrast().data(), &QObject::destroyed);
-    QVERIFY(contrastDestroyedSpy.isValid());
+    QSignalSpy blurDestroyedSpy(serverSurface->blur().data(), &QObject::destroyed);
+    QVERIFY(blurDestroyedSpy.isValid());
     surface.reset();
     QVERIFY(surfaceDestroyedSpy.wait());
-    QVERIFY(contrastDestroyedSpy.isEmpty());
+    QVERIFY(blurDestroyedSpy.isEmpty());
     // destroy the blur
-    contrast.reset();
-    QVERIFY(contrastDestroyedSpy.wait());
+    blur.reset();
+    QVERIFY(blurDestroyedSpy.wait());
 }
 
-QTEST_GUILESS_MAIN(TestContrast)
-#include "test_wayland_contrast.moc"
+QTEST_GUILESS_MAIN(TestBlur)
+#include "blur.moc"

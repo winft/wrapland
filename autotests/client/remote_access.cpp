@@ -504,4 +504,4 @@ void RemoteAccessTest::testSendReceiveClientGone()
 }
 
 QTEST_GUILESS_MAIN(RemoteAccessTest)
-#include "test_remote_access.moc"
+#include "remote_access.moc"

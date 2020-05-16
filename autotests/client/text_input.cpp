@@ -763,4 +763,4 @@ void TextInputTest::testCommit()
 }
 
 QTEST_GUILESS_MAIN(TextInputTest)
-#include "test_text_input.moc"
+#include "text_input.moc"

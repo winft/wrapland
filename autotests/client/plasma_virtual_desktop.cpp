@@ -533,4 +533,4 @@ void TestVirtualDesktop::testRemoveRequested()
 }
 
 QTEST_GUILESS_MAIN(TestVirtualDesktop)
-#include "test_plasma_virtual_desktop.moc"
+#include "plasma_virtual_desktop.moc"

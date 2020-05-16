@@ -18,30 +18,31 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
+// Qt
 #include <QtTest>
-
+// KWin
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/server_decoration_palette.h"
+#include "../../src/client/appmenu.h"
 
 #include "../../server/display.h"
 #include "../../server/compositor.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
-#include "../../server/server_decoration_palette.h"
+#include "../../server/appmenu.h"
 
-using namespace Wrapland::Client;
+Q_DECLARE_METATYPE(Wrapland::Server::Appmenu::InterfaceAddress)
 
-class TestServerSideDecorationPalette : public QObject
+class TestAppmenu : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestServerSideDecorationPalette(QObject *parent = nullptr);
+    explicit TestAppmenu(QObject *parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -51,17 +52,17 @@ private Q_SLOTS:
 private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::ServerSideDecorationPaletteManager *m_paletteManagerInterface;
+    Wrapland::Server::AppmenuManager *m_appmenuManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::ServerSideDecorationPaletteManager *m_paletteManager;
+    Wrapland::Client::AppMenuManager *m_appmenuManager;
     Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-decopalette-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-appmenu-0");
 
-TestServerSideDecorationPalette::TestServerSideDecorationPalette(QObject *parent)
+TestAppmenu::TestAppmenu(QObject *parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
@@ -72,17 +73,18 @@ TestServerSideDecorationPalette::TestServerSideDecorationPalette(QObject *parent
 {
 }
 
-void TestServerSideDecorationPalette::init()
+void TestAppmenu::init()
 {
+    qRegisterMetaType<Wrapland::Server::Appmenu::InterfaceAddress>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    
+
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
+    QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
@@ -99,12 +101,12 @@ void TestServerSideDecorationPalette::init()
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
 
-    Registry registry;
-    QSignalSpy compositorSpy(&registry, &Registry::compositorAnnounced);
+    Wrapland::Client::Registry registry;
+    QSignalSpy compositorSpy(&registry, &Wrapland::Client::Registry::compositorAnnounced);
     QVERIFY(compositorSpy.isValid());
 
-    QSignalSpy registrySpy(&registry, &Registry::serverSideDecorationPaletteManagerAnnounced);
-    QVERIFY(registrySpy.isValid());
+    QSignalSpy appmenuSpy(&registry, &Wrapland::Client::Registry::appMenuAnnounced);
+    QVERIFY(appmenuSpy.isValid());
 
     QVERIFY(!registry.eventQueue());
     registry.setEventQueue(m_queue);
@@ -118,13 +120,13 @@ void TestServerSideDecorationPalette::init()
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
 
-    m_paletteManagerInterface = m_display->createServerSideDecorationPaletteManager(m_display);
+    m_appmenuManagerInterface = m_display->createAppmenuManager(m_display);
 
-    QVERIFY(registrySpy.wait());
-    m_paletteManager = registry.createServerSideDecorationPaletteManager(registrySpy.first().first().value<quint32>(), registrySpy.first().last().value<quint32>(), this);
+    QVERIFY(appmenuSpy.wait());
+    m_appmenuManager = registry.createAppMenuManager(appmenuSpy.first().first().value<quint32>(), appmenuSpy.first().last().value<quint32>(), this);
 }
 
-void TestServerSideDecorationPalette::cleanup()
+void TestAppmenu::cleanup()
 {
 #define CLEANUP(variable) \
     if (variable) { \
@@ -132,7 +134,7 @@ void TestServerSideDecorationPalette::cleanup()
         variable = nullptr; \
     }
     CLEANUP(m_compositor)
-    CLEANUP(m_paletteManager)
+    CLEANUP(m_appmenuManager)
     CLEANUP(m_queue)
     if (m_connection) {
         m_connection->deleteLater();
@@ -145,12 +147,12 @@ void TestServerSideDecorationPalette::cleanup()
         m_thread = nullptr;
     }
     CLEANUP(m_serverCompositor)
-    CLEANUP(m_paletteManagerInterface)
+    CLEANUP(m_appmenuManagerInterface)
     CLEANUP(m_display)
 #undef CLEANUP
 }
 
-void TestServerSideDecorationPalette::testCreateAndSet()
+void TestAppmenu::testCreateAndSet()
 {
     QSignalSpy serverSurfaceCreated(m_serverCompositor, SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
@@ -159,34 +161,33 @@ void TestServerSideDecorationPalette::testCreateAndSet()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy paletteCreatedSpy(m_paletteManagerInterface, &Wrapland::Server::ServerSideDecorationPaletteManager::paletteCreated);
+    QSignalSpy appmenuCreated(m_appmenuManagerInterface, &Wrapland::Server::AppmenuManager::appmenuCreated);
 
-    QVERIFY(!m_paletteManagerInterface->paletteForSurface(serverSurface));
+    QVERIFY(!m_appmenuManagerInterface->appmenuForSurface(serverSurface));
 
-    auto palette = m_paletteManager->create(surface.get(), surface.get());
-    QVERIFY(paletteCreatedSpy.wait());
-    auto paletteInterface = paletteCreatedSpy.first().first().value<Wrapland::Server::ServerSideDecorationPalette*>();
+    auto appmenu = m_appmenuManager->create(surface.get(), surface.get());
+    QVERIFY(appmenuCreated.wait());
+    auto serverAppmenu = appmenuCreated.first().first().value<Wrapland::Server::Appmenu*>();
+    QCOMPARE(m_appmenuManagerInterface->appmenuForSurface(serverSurface), serverAppmenu);
 
-    QCOMPARE(m_paletteManagerInterface->paletteForSurface(serverSurface), paletteInterface);
+    QCOMPARE(serverAppmenu->address().serviceName, QString());
+    QCOMPARE(serverAppmenu->address().objectPath, QString());
 
-    QCOMPARE(paletteInterface->palette(), QString());
+    QSignalSpy appMenuChangedSpy(serverAppmenu, &Wrapland::Server::Appmenu::addressChanged);
 
-    QSignalSpy changedSpy(paletteInterface, &Wrapland::Server::ServerSideDecorationPalette::paletteChanged);
+    appmenu->setAddress("net.somename", "/test/path");
 
-    palette->setPalette("foobar");
-
-    QVERIFY(changedSpy.wait());
-    QCOMPARE(paletteInterface->palette(), QString("foobar"));
+    QVERIFY(appMenuChangedSpy.wait());
+    QCOMPARE(serverAppmenu->address().serviceName, QString("net.somename"));
+    QCOMPARE(serverAppmenu->address().objectPath, QString("/test/path"));
 
     // and destroy
-    QSignalSpy destroyedSpy(paletteInterface, &QObject::destroyed);
+    QSignalSpy destroyedSpy(serverAppmenu, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
-    delete palette;
+    delete appmenu;
     QVERIFY(destroyedSpy.wait());
-
-
-    QVERIFY(!m_paletteManagerInterface->paletteForSurface(serverSurface));
+    QVERIFY(!m_appmenuManagerInterface->appmenuForSurface(serverSurface));
 }
 
-QTEST_GUILESS_MAIN(TestServerSideDecorationPalette)
-#include "test_server_side_decoration_palette.moc"
+QTEST_GUILESS_MAIN(TestAppmenu)
+#include "appmenu.moc"

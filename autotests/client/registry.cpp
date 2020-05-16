@@ -880,4 +880,4 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
 }
 
 QTEST_GUILESS_MAIN(TestWaylandRegistry)
-#include "test_wayland_registry.moc"
+#include "registry.moc"

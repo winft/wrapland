@@ -307,4 +307,4 @@ void ShadowTest::testSurfaceDestroy()
 }
 
 QTEST_GUILESS_MAIN(ShadowTest)
-#include "test_shadow.moc"
+#include "shadow.moc"

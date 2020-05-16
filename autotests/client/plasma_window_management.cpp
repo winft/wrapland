@@ -743,4 +743,4 @@ void TestWindowManagement::testPid()
 }
 
 QTEST_GUILESS_MAIN(TestWindowManagement)
-#include "test_wayland_windowmanagement.moc"
+#include "plasma_window_management.moc"

@@ -250,4 +250,4 @@ void TestShmPool::testDestroy()
 }
 
 QTEST_GUILESS_MAIN(TestShmPool)
-#include "test_shm_pool.moc"
+#include "shm_pool.moc"

@@ -179,4 +179,4 @@ void ErrorTest::testMultiplePlasmaShellSurfacesForSurface()
 }
 
 QTEST_GUILESS_MAIN(ErrorTest)
-#include "test_error.moc"
+#include "error.moc"

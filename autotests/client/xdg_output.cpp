@@ -166,4 +166,4 @@ void TestXdgOutput::testChanges()
 }
 
 QTEST_GUILESS_MAIN(TestXdgOutput)
-#include "test_xdg_output.moc"
+#include "xdg_output.moc"

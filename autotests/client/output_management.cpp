@@ -519,4 +519,4 @@ void TestOutputManagement::testExampleConfig()
 
 
 QTEST_GUILESS_MAIN(TestOutputManagement)
-#include "test_output_management.moc"
+#include "output_management.moc"

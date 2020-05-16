@@ -459,4 +459,4 @@ void TestPointerConstraints::testAlreadyConstrained()
 }
 
 QTEST_GUILESS_MAIN(TestPointerConstraints)
-#include "test_pointer_constraints.moc"
+#include "pointer_constraints.moc"

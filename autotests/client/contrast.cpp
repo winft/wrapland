@@ -1,6 +1,6 @@
 /********************************************************************
-Copyright 2017  David Edmundson <davidedmundson@kde.org>
 Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright 2015  Marco Martin <mart@kde.org>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -27,42 +27,43 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/appmenu.h"
+#include "../../src/client/contrast.h"
 
 #include "../../server/display.h"
 #include "../../server/compositor.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
-#include "../../server/appmenu.h"
+#include "../../server/contrast.h"
 
-Q_DECLARE_METATYPE(Wrapland::Server::Appmenu::InterfaceAddress)
+#include <wayland-util.h>
 
-class TestAppmenu : public QObject
+class TestContrast : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestAppmenu(QObject *parent = nullptr);
+    explicit TestContrast(QObject *parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
 
-    void testCreateAndSet();
+    void testCreate();
+    void testSurfaceDestroy();
 
 private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::AppmenuManager *m_appmenuManagerInterface;
+    Wrapland::Server::ContrastManager *m_contrastManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::AppMenuManager *m_appmenuManager;
+    Wrapland::Client::ContrastManager *m_contrastManager;
     Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-appmenu-0");
+static const QString s_socketName = QStringLiteral("wrapland-test-wayland-contrast-0");
 
-TestAppmenu::TestAppmenu(QObject *parent)
+TestContrast::TestContrast(QObject *parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
@@ -73,11 +74,9 @@ TestAppmenu::TestAppmenu(QObject *parent)
 {
 }
 
-void TestAppmenu::init()
+void TestContrast::init()
 {
-    qRegisterMetaType<Wrapland::Server::Appmenu::InterfaceAddress>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
-
     m_display = new Wrapland::Server::D_isplay(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
@@ -85,7 +84,6 @@ void TestAppmenu::init()
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    QVERIFY(connectedSpy.isValid());
     m_connection->setSocketName(s_socketName);
 
     m_thread = new QThread(this);
@@ -105,8 +103,8 @@ void TestAppmenu::init()
     QSignalSpy compositorSpy(&registry, &Wrapland::Client::Registry::compositorAnnounced);
     QVERIFY(compositorSpy.isValid());
 
-    QSignalSpy appmenuSpy(&registry, &Wrapland::Client::Registry::appMenuAnnounced);
-    QVERIFY(appmenuSpy.isValid());
+    QSignalSpy contrastSpy(&registry, &Wrapland::Client::Registry::contrastAnnounced);
+    QVERIFY(contrastSpy.isValid());
 
     QVERIFY(!registry.eventQueue());
     registry.setEventQueue(m_queue);
@@ -120,13 +118,13 @@ void TestAppmenu::init()
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
 
-    m_appmenuManagerInterface = m_display->createAppmenuManager(m_display);
+    m_contrastManagerInterface = m_display->createContrastManager(m_display);
 
-    QVERIFY(appmenuSpy.wait());
-    m_appmenuManager = registry.createAppMenuManager(appmenuSpy.first().first().value<quint32>(), appmenuSpy.first().last().value<quint32>(), this);
+    QVERIFY(contrastSpy.wait());
+    m_contrastManager = registry.createContrastManager(contrastSpy.first().first().value<quint32>(), contrastSpy.first().last().value<quint32>(), this);
 }
 
-void TestAppmenu::cleanup()
+void TestContrast::cleanup()
 {
 #define CLEANUP(variable) \
     if (variable) { \
@@ -134,7 +132,7 @@ void TestAppmenu::cleanup()
         variable = nullptr; \
     }
     CLEANUP(m_compositor)
-    CLEANUP(m_appmenuManager)
+    CLEANUP(m_contrastManager)
     CLEANUP(m_queue)
     if (m_connection) {
         m_connection->deleteLater();
@@ -147,47 +145,77 @@ void TestAppmenu::cleanup()
         m_thread = nullptr;
     }
     CLEANUP(m_serverCompositor)
-    CLEANUP(m_appmenuManagerInterface)
+    CLEANUP(m_contrastManagerInterface)
     CLEANUP(m_display)
 #undef CLEANUP
 }
 
-void TestAppmenu::testCreateAndSet()
+void TestContrast::testCreate()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy appmenuCreated(m_appmenuManagerInterface, &Wrapland::Server::AppmenuManager::appmenuCreated);
+    QSignalSpy contrastChanged(serverSurface, SIGNAL(contrastChanged()));
 
-    QVERIFY(!m_appmenuManagerInterface->appmenuForSurface(serverSurface));
+    auto *contrast = m_contrastManager->createContrast(surface.get(), surface.get());
+    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast));
 
-    auto appmenu = m_appmenuManager->create(surface.get(), surface.get());
-    QVERIFY(appmenuCreated.wait());
-    auto serverAppmenu = appmenuCreated.first().first().value<Wrapland::Server::Appmenu*>();
-    QCOMPARE(m_appmenuManagerInterface->appmenuForSurface(serverSurface), serverAppmenu);
+    contrast->setContrast(0.2);
+    contrast->setIntensity(2.0);
+    contrast->setSaturation(1.7);
 
-    QCOMPARE(serverAppmenu->address().serviceName, QString());
-    QCOMPARE(serverAppmenu->address().objectPath, QString());
+    contrast->commit();
+    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QSignalSpy appMenuChangedSpy(serverAppmenu, &Wrapland::Server::Appmenu::addressChanged);
+    QVERIFY(contrastChanged.wait());
+    QCOMPARE(serverSurface->contrast()->region(), QRegion(0, 0, 10, 20));
+    QCOMPARE(wl_fixed_from_double(serverSurface->contrast()->contrast()), wl_fixed_from_double(0.2));
+    QCOMPARE(wl_fixed_from_double(serverSurface->contrast()->intensity()), wl_fixed_from_double(2.0));
+    QCOMPARE(wl_fixed_from_double(serverSurface->contrast()->saturation()), wl_fixed_from_double(1.7));
 
-    appmenu->setAddress("net.somename", "/test/path");
-
-    QVERIFY(appMenuChangedSpy.wait());
-    QCOMPARE(serverAppmenu->address().serviceName, QString("net.somename"));
-    QCOMPARE(serverAppmenu->address().objectPath, QString("/test/path"));
-
-    // and destroy
-    QSignalSpy destroyedSpy(serverAppmenu, &QObject::destroyed);
+    // And destroy.
+    QSignalSpy destroyedSpy(serverSurface->contrast().data(), &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
-    delete appmenu;
+    delete contrast;
     QVERIFY(destroyedSpy.wait());
-    QVERIFY(!m_appmenuManagerInterface->appmenuForSurface(serverSurface));
 }
 
-QTEST_GUILESS_MAIN(TestAppmenu)
-#include "test_wayland_appmenu.moc"
+void TestContrast::testSurfaceDestroy()
+{
+    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QVERIFY(serverSurfaceCreated.isValid());
+
+    std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
+    QVERIFY(serverSurfaceCreated.wait());
+
+    auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
+    QSignalSpy contrastChanged(serverSurface, &Wrapland::Server::Surface::contrastChanged);
+    QVERIFY(contrastChanged.isValid());
+
+    std::unique_ptr<Wrapland::Client::Contrast> contrast(m_contrastManager->createContrast(surface.get()));
+    contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast.get()));
+    contrast->commit();
+    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+
+    QVERIFY(contrastChanged.wait());
+    QCOMPARE(serverSurface->contrast()->region(), QRegion(0, 0, 10, 20));
+
+    // destroy the parent surface
+    QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
+    QVERIFY(surfaceDestroyedSpy.isValid());
+    QSignalSpy contrastDestroyedSpy(serverSurface->contrast().data(), &QObject::destroyed);
+    QVERIFY(contrastDestroyedSpy.isValid());
+    surface.reset();
+    QVERIFY(surfaceDestroyedSpy.wait());
+    QVERIFY(contrastDestroyedSpy.isEmpty());
+    // destroy the blur
+    contrast.reset();
+    QVERIFY(contrastDestroyedSpy.wait());
+}
+
+QTEST_GUILESS_MAIN(TestContrast)
+#include "contrast.moc"

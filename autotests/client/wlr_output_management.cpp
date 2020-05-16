@@ -206,4 +206,4 @@ void TestWlrOutputManagement::cleanup()
 }
 
 QTEST_GUILESS_MAIN(TestWlrOutputManagement)
-#include "test_wlr_output_management.moc"
+#include "wlr_output_management.moc"

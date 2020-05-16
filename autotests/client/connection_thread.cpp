@@ -313,4 +313,4 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
 }
 
 QTEST_GUILESS_MAIN(TestWaylandConnectionThread)
-#include "test_wayland_connection_thread.moc"
+#include "connection_thread.moc"

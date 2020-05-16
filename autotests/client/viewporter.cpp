@@ -761,4 +761,4 @@ void TestViewporter::testNoSurface()
 }
 
 QTEST_GUILESS_MAIN(TestViewporter)
-#include "test_viewporter.moc"
+#include "viewporter.moc"
