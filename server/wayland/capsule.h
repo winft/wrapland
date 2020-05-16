@@ -36,7 +36,7 @@ template<typename WaylandObject>
 class Capsule
 {
 public:
-    Capsule(std::function<void(WaylandObject*)> dtor)
+    explicit Capsule(std::function<void(WaylandObject*)> dtor)
         : m_object{nullptr}
         , m_dtor(dtor)
     {
@@ -64,12 +64,7 @@ public:
         return m_object != nullptr;
     }
 
-    operator WaylandObject*() const
-    {
-        return m_object;
-    }
-
-    operator WaylandObject*()
+    auto get() const
     {
         return m_object;
     }

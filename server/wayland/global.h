@@ -93,12 +93,12 @@ public:
 
     explicit operator wl_global*() const
     {
-        return *m_capsule;
+        return m_capsule->get();
     }
 
     explicit operator wl_global*()
     {
-        return *m_capsule;
+        return m_capsule->get();
     }
 
     static Handle* handle(wl_resource* wlResource)
@@ -206,7 +206,7 @@ protected:
             return;
         }
 #if (WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR > 17)
-        wl_global_remove(*m_capsule);
+        wl_global_remove(m_capsule->get());
 #endif
         // TODO: call destroy with timer.
         destroy(std::move(m_capsule));
