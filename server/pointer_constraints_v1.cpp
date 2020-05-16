@@ -35,9 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-pointer-constraints-unstable-v1-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 PointerConstraintsV1::Private::Private(PointerConstraintsV1* q, D_isplay* display)
@@ -326,5 +324,4 @@ void ConfinedPointerV1::setConfined(bool confined)
     Q_EMIT confinedChanged();
 }
 
-}
 }

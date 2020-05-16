@@ -33,9 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "surface.h"
 #include "surface_p.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 PointerGesturesV1::Private::Private(PointerGesturesV1* q, D_isplay* display)
@@ -210,5 +208,4 @@ void PointerPinchGestureV1::cancel(quint32 serial)
     end(serial, true);
 }
 
-}
 }

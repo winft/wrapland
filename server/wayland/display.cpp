@@ -39,11 +39,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <exception>
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
-{
-namespace Wayland
+namespace Wrapland::Server::Wayland
 {
 
 Display* Display::backendCast(Server::D_isplay* display)
@@ -290,6 +286,4 @@ Server::D_isplay* Display::handle() const
     return m_handle;
 }
 
-}
-}
 }

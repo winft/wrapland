@@ -26,9 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-relativepointer-unstable-v1-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class RelativePointerManagerV1::Private : public Wayland::Global<RelativePointerManagerV1>
@@ -71,5 +69,4 @@ private:
     static const struct zwp_relative_pointer_v1_interface s_interface;
 };
 
-}
 }

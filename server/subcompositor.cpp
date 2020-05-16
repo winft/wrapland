@@ -28,9 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Subcompositor::Private : public Wayland::Global<Subcompositor>
@@ -352,5 +350,4 @@ Surface* Subsurface::mainSurface() const
     return d_ptr->parent;
 }
 
-}
 }

@@ -30,9 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 constexpr uint32_t DataDeviceManagerVersion = 3;
@@ -105,5 +103,4 @@ DataDeviceManager::DataDeviceManager(D_isplay* display, [[maybe_unused]] QObject
 
 DataDeviceManager::~DataDeviceManager() = default;
 
-}
 }

@@ -23,11 +23,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-namespace Wrapland
+namespace Wrapland::Server
 {
-namespace Server
-{
-
 class D_isplay;
 class Surface;
 class XdgExporterV2;
@@ -70,5 +67,4 @@ private:
     Private* d_ptr;
 };
 
-}
 }

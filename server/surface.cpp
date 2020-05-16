@@ -41,9 +41,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-server.h>
 #include <wayland-viewporter-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 Surface::Private::Private(Client* client, uint32_t version, uint32_t id, Surface* q)
@@ -1195,5 +1193,4 @@ wl_resource* Surface::resource() const
     return d_ptr->resource();
 }
 
-}
 }

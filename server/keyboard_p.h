@@ -25,9 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QPointer>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Keyboard::Private : public Wayland::Resource<Keyboard>
@@ -58,5 +56,4 @@ private:
     static const struct wl_keyboard_interface s_interface;
 };
 
-}
 }

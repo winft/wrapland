@@ -35,9 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-server.h>
 #include <wayland-version.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class D_isplay;
@@ -275,6 +273,5 @@ private:
     std::vector<GlobalResource*> m_binds;
 };
 
-}
 }
 }

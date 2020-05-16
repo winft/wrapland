@@ -29,9 +29,7 @@ struct wl_resource;
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class D_isplay;
@@ -83,6 +81,5 @@ private:
     Server::Client* q_ptr;
 };
 
-}
 }
 }

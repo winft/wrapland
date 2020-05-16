@@ -30,9 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include <wayland-keystate-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class KeyState;
@@ -47,5 +45,4 @@ public:
     static const struct org_kde_kwin_keystate_interface s_interface;
 };
 
-}
 }

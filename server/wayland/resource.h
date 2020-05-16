@@ -33,12 +33,7 @@ struct wl_client;
 struct wl_interface;
 struct wl_resource;
 
-namespace Wrapland
-{
-namespace Server
-{
-
-namespace Wayland
+namespace Wrapland::Server::Wayland
 {
 
 class Client;
@@ -226,6 +221,4 @@ private:
     wl_resource* m_resource;
 };
 
-}
-}
 }

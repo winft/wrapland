@@ -39,10 +39,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-
-namespace Server
+namespace Wrapland::Server
 {
 
 QPointF surfacePosition(Surface* surface)
@@ -500,5 +497,4 @@ QPointer<Surface> Cursor::surface() const
     return d_ptr->surface;
 }
 
-}
 }

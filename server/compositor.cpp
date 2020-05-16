@@ -25,9 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "wayland/global.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 constexpr uint32_t CompositorVersion = 4;
@@ -93,5 +91,4 @@ void Compositor::Private::createRegionCallback(wl_client* wlClient,
     Q_EMIT compositor->regionCreated(region);
 }
 
-}
 }

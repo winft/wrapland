@@ -32,9 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 struct wl_client;
 struct wl_display;
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Client;
@@ -181,7 +179,6 @@ private:
     std::unique_ptr<Private> d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(std::string)

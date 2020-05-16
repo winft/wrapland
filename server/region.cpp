@@ -26,9 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Region::Private : public Wayland::Resource<Region>
@@ -119,5 +117,4 @@ Client* Region::client() const
     return d_ptr->client()->handle();
 }
 
-}
 }

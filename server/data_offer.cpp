@@ -29,9 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <unistd.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 const struct wl_data_offer_interface DataOffer::Private::s_interface = {
@@ -197,5 +195,4 @@ void DataOffer::dndAction(DataDeviceManager::DnDAction action)
     d_ptr->send<wl_data_offer_send_action, WL_DATA_OFFER_ACTION_SINCE_VERSION>(wlAction);
 }
 
-}
 }

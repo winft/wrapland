@@ -19,9 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "keystate_p.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_keystate_interface KeyState::Private::s_interface
@@ -57,8 +55,6 @@ void KeyState::setState(KeyState::Key key, KeyState::State state)
 {
     d_ptr->m_keyStates[int(key)] = state;
     d_ptr->send<org_kde_kwin_keystate_send_stateChanged>(int(key), int(state));
-}
-
 }
 
 }

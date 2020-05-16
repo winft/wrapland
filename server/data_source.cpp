@@ -24,9 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <unistd.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 DataSource::Private::Private(Client* client, uint32_t version, uint32_t id, DataSource* q)
@@ -148,5 +146,4 @@ void DataSource::dndAction(DataDeviceManager::DnDAction action)
     d_ptr->send<wl_data_source_send_action, WL_DATA_SOURCE_ACTION_SINCE_VERSION>(wlAction);
 }
 
-}
 }

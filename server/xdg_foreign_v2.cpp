@@ -31,9 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QUuid>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 constexpr uint32_t XdgExporterV2Version = 1;
@@ -378,5 +376,4 @@ XdgImportedV2::Private::Private(Client* client,
 {
 }
 
-}
 }

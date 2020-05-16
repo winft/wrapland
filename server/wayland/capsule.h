@@ -24,12 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 #include <memory>
 
-namespace Wrapland
-{
-namespace Server
-{
-
-namespace Wayland
+namespace Wrapland::Server::Wayland
 {
 
 template<typename WaylandObject>
@@ -79,6 +74,4 @@ private:
     std::function<void(WaylandObject*)> m_dtor;
 };
 
-}
-}
 }

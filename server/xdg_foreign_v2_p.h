@@ -22,9 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class D_isplay;
@@ -114,5 +112,4 @@ private:
     Private* d_ptr;
 };
 
-}
 }

@@ -26,9 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 Client::Client(wl_client* wlClient, D_isplay* display)
@@ -85,5 +83,4 @@ std::string Client::executablePath() const
     return d_ptr->executablePath();
 }
 
-}
 }

@@ -27,9 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-pointer-constraints-unstable-v1-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class PointerConstraintsV1::Private : public Wayland::Global<PointerConstraintsV1>
@@ -122,5 +120,4 @@ private:
     ConfinedPointerV1* q_ptr;
 };
 
-}
 }

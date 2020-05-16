@@ -31,9 +31,7 @@ struct wl_client;
 struct wl_interface;
 struct wl_resource;
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class D_isplay;
@@ -69,7 +67,6 @@ private:
     std::unique_ptr<Private> d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Client*)

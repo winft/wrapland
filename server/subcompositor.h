@@ -25,9 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Server/wraplandserver_export.h>
 #include <memory>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class D_isplay;
@@ -89,7 +87,6 @@ private:
     Private* d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Subsurface::Mode)

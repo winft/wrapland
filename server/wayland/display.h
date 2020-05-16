@@ -33,9 +33,7 @@ struct wl_global;
 
 class QObject;
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class D_isplay;
@@ -108,6 +106,5 @@ private:
     Server::D_isplay* m_handle;
 };
 
-}
 }
 }

@@ -26,9 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 #include <QPointer>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class PointerPinchGestureV1;
 class PointerSwipeGestureV1;
@@ -101,5 +99,4 @@ private:
     static const struct wl_pointer_interface s_interface;
 };
 
-}
 }

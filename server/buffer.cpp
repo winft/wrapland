@@ -38,9 +38,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "system/drm_fourcc.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 namespace EGL
@@ -358,5 +356,4 @@ bool Buffer::hasAlphaChannel() const
     return d_ptr->alpha;
 }
 
-}
 }

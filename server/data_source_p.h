@@ -23,9 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class DataSource::Private : public Wayland::Resource<DataSource>
@@ -48,5 +46,4 @@ private:
     const static struct wl_data_source_interface s_interface;
 };
 
-}
 }

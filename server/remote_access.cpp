@@ -32,9 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <functional>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 RemoteAccessManager::Private::Private(D_isplay* display, RemoteAccessManager* q)
@@ -272,5 +270,4 @@ uint32_t RemoteBufferHandle::format() const
     return d_ptr->format;
 }
 
-}
 }

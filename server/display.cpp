@@ -70,9 +70,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 Private* Private::castDisplay(D_isplay* display)
@@ -418,5 +416,4 @@ void* D_isplay::eglDisplay() const
     return d_ptr->eglDisplay;
 }
 
-}
 }

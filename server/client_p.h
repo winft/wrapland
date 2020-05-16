@@ -22,12 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "client.h"
 #include "wayland/client.h"
 
-// legacy
-#include "display.h"
-
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Client::Private : public Wayland::Client
@@ -41,5 +36,4 @@ public:
     Server::D_isplay* m_display;
 };
 
-}
 }
