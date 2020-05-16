@@ -25,9 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-pointer-gestures-unstable-v1-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Pointer;
@@ -55,7 +53,6 @@ class PointerSwipeGestureV1 : public QObject
     Q_OBJECT
 public:
     PointerSwipeGestureV1(Client* client, uint32_t version, uint32_t id, Pointer* pointer);
-    ~PointerSwipeGestureV1() override;
 
     void start(quint32 serial, quint32 fingerCount);
     void update(const QSizeF& delta);
@@ -80,7 +77,6 @@ public:
             uint32_t id,
             Pointer* _pointer,
             PointerSwipeGestureV1* q);
-    ~Private() override;
 
     Pointer* pointer;
 
@@ -102,7 +98,6 @@ class PointerPinchGestureV1 : public QObject
     Q_OBJECT
 public:
     PointerPinchGestureV1(Client* client, uint32_t version, uint32_t id, Pointer* pointer);
-    ~PointerPinchGestureV1() override;
 
     void start(quint32 serial, quint32 fingerCount);
     void update(const QSizeF& delta, qreal scale, qreal rotation);
@@ -125,7 +120,6 @@ public:
             uint32_t id,
             Pointer* pointer,
             PointerPinchGestureV1* q);
-    ~Private() override;
 
     Pointer* pointer;
 
@@ -133,5 +127,4 @@ private:
     static const struct zwp_pointer_gesture_pinch_v1_interface s_interface;
 };
 
-}
 }

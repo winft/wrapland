@@ -46,7 +46,6 @@ class RemoteAccessManager::Private : public RemoteAccessManagerGlobal
 {
 public:
     Private(D_isplay* display, RemoteAccessManager* q);
-    ~Private() override;
 
     void sendBufferReady(Output* output, RemoteBufferHandle* buf);
 
@@ -87,8 +86,6 @@ class RemoteBuffer : public QObject
 {
     Q_OBJECT
 public:
-    ~RemoteBuffer() override;
-
     void passFd();
 
 Q_SIGNALS:
@@ -115,7 +112,6 @@ public:
             RemoteAccessManager* manager,
             const RemoteBufferHandle* bufferHandle,
             RemoteBuffer* q);
-    ~Private() override;
 
     void passFd();
 

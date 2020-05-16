@@ -106,8 +106,6 @@ AppMenu::AppMenu(Client* client, uint32_t version, uint32_t id, Surface* surface
 {
 }
 
-AppMenu::~AppMenu() = default;
-
 void AppMenu::Private::setAddressCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,
                                           const char* service_name,

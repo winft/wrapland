@@ -287,8 +287,6 @@ PlasmaShellSurface::PlasmaShellSurface(Client* client,
     connect(surface, &Surface::resourceDestroyed, this, unsetSurface);
 }
 
-PlasmaShellSurface::~PlasmaShellSurface() = default;
-
 Surface* PlasmaShellSurface::surface() const
 {
     return d_ptr->surface;

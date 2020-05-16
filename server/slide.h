@@ -52,8 +52,6 @@ public:
         Bottom,
     };
 
-    ~Slide() override;
-
     Location location() const;
     int offset() const;
 

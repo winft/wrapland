@@ -35,7 +35,6 @@ class XdgShellToplevel::Private : public Wayland::Resource<XdgShellToplevel>
 {
 public:
     Private(uint32_t version, uint32_t id, XdgShellSurface* surface, XdgShellToplevel* q);
-    ~Private() override;
 
     QRect windowGeometry() const;
     void setWindowGeometry(const QRect& rect);

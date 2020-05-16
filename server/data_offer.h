@@ -25,9 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "data_device_manager.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Client;
@@ -38,8 +36,6 @@ class WRAPLANDSERVER_EXPORT DataOffer : public QObject
 {
     Q_OBJECT
 public:
-    ~DataOffer() override;
-
     void sendAllOffers();
 
     DataDeviceManager::DnDActions supportedDragAndDropActions() const;
@@ -59,7 +55,6 @@ private:
     Private* d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::DataOffer*)

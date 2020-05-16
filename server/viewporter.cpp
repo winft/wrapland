@@ -43,7 +43,7 @@ Viewporter::Private::Private(D_isplay* display, Viewporter* qptr)
 {
     create();
 }
-Viewporter::Private::~Private() = default;
+
 void Viewporter::Private::getViewportCallback([[maybe_unused]] wl_client* wlClient,
                                               wl_resource* wlResource,
                                               uint32_t id,
@@ -102,16 +102,12 @@ Viewport::Private::Private(Client* client,
 {
 }
 
-Viewport::Private::~Private() = default;
-
 Viewport::Viewport(Client* client, uint32_t version, uint32_t id, Surface* surface, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(client, version, id, surface, this))
 {
     connect(surface, &Surface::resourceDestroyed, this, [this] { d_ptr->surface = nullptr; });
 }
-
-Viewport::~Viewport() = default;
 
 void Viewport::Private::setSourceCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,

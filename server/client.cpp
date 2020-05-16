@@ -26,9 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 Client::Client(wl_client* wlClient, D_isplay* display)
@@ -38,10 +36,7 @@ Client::Client(wl_client* wlClient, D_isplay* display)
 {
 }
 
-Client::~Client()
-{
-    delete d_ptr;
-}
+Client::~Client() = default;
 
 void Client::flush()
 {
@@ -53,19 +48,10 @@ void Client::destroy()
     d_ptr->destroy();
 }
 
-//
-// Legacy
-wl_resource* Client::createResource(const wl_interface* interface, quint32 version, quint32 id)
-{
-    return d_ptr->createResource(interface, version, id);
-}
-
 wl_resource* Client::getResource(quint32 id)
 {
     return d_ptr->getResource(id);
 }
-//
-//
 
 wl_client* Client::native() const
 {
@@ -97,5 +83,4 @@ std::string Client::executablePath() const
     return d_ptr->executablePath();
 }
 
-}
 }

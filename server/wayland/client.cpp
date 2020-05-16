@@ -23,29 +23,18 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "display.h"
 
-// For legacy
-#include "../../src/server/display.h"
-#include "../display.h"
-//
-
 #include <QFileInfo>
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
-{
-namespace Wayland
+namespace Wrapland::Server::Wayland
 {
 
-Client::Client(wl_client* wlClient, Server::Client* clientHandle, Server::Display* legacy)
+Client::Client(wl_client* wlClient, Server::Client* clientHandle)
     : m_client{wlClient}
     , q_ptr{clientHandle}
 {
     allClients.push_back(this);
-    q_ptr->legacy = new Server::ClientConnection(m_client, legacy);
-    q_ptr->legacy->newClient = q_ptr;
 
     m_listener.notify = destroyListenerCallback;
     wl_client_add_destroy_listener(wlClient, &m_listener);
@@ -105,7 +94,6 @@ void Client::destroyListenerCallback(wl_listener* listener, void* data)
     wl_list_remove(&client->m_listener.link);
     client->m_client = nullptr;
     Q_EMIT client->q_ptr->disconnected(client->q_ptr);
-    Q_EMIT client->q_ptr->legacy->disconnected(client->q_ptr->legacy);
     delete client->handle();
 }
 
@@ -150,6 +138,4 @@ std::string Client::executablePath() const
     return m_executablePath;
 }
 
-}
-}
 }

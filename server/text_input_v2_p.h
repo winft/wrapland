@@ -38,7 +38,6 @@ class TextInputManagerV2::Private : public TextInputManagerV2Global
 {
 public:
     Private(D_isplay* display, TextInputManagerV2* q);
-    ~Private() override;
 
 private:
     static void getTextInputCallback(wl_client* wlClient,
@@ -53,7 +52,6 @@ class TextInputV2::Private : public Wayland::Resource<TextInputV2>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, TextInputV2* q);
-    ~Private() override;
 
     void sendEnter(Surface* surface, quint32 serial);
     void sendLeave(quint32 serial, Surface* surface);

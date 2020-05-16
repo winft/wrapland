@@ -29,9 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 struct wl_resource;
 struct wl_shm_buffer;
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class D_isplay;
 class Surface;
@@ -73,7 +71,6 @@ private:
     std::unique_ptr<Private> d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Buffer*)

@@ -23,29 +23,19 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QDebug>
 
-//
-// Legacy
-#include <QVector>
-//
-//
-
 #include <Wrapland/Server/wraplandserver_export.h>
 
 #include <cstdint>
+#include <memory>
 #include <string>
 
 struct wl_client;
 struct wl_display;
-struct wl_event_loop;
-struct wl_resource;
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Client;
-class Display;
 class Private;
 
 class DataDeviceManager;
@@ -58,10 +48,6 @@ class PlasmaVirtualDesktopManager;
 class PlasmaWindowManager;
 class Seat;
 class XdgShell;
-
-//
-// Legacy
-class ClientConnection;
 
 class Compositor;
 class KdeIdle;
@@ -87,14 +73,13 @@ class XdgDecorationManager;
 class EglStreamController;
 class KeyState;
 class LinuxDmabufV1;
-//
-//
 
 class WRAPLANDSERVER_EXPORT D_isplay : public QObject
 {
     Q_OBJECT
 public:
-    explicit D_isplay(QObject* parent = nullptr, bool legacyInvoked = false);
+    explicit D_isplay(QObject* parent = nullptr);
+
     ~D_isplay() override;
 
     void setSocketName(const std::string& name);
@@ -125,8 +110,6 @@ public:
     Seat* createSeat(QObject* parent = nullptr);
     std::vector<Seat*>& seats() const;
 
-    //
-    // Legacy
     void setSocketName(const QString& name);
 
     OutputDeviceV1* createOutputDeviceV1(QObject* parent = nullptr);
@@ -175,14 +158,8 @@ public:
     XdgDecorationManager* createXdgDecorationManager(XdgShell* shell, QObject* parent = nullptr);
     EglStreamController* createEglStreamController(QObject* parent = nullptr);
 
-    Server::ClientConnection* getClientLegacy(wl_client* client);
-
-    Server::Display* legacy = nullptr;
-    bool deleteLegacy = false;
     void dispatch();
     void flush();
-    //
-    //
 
     Client* createClient(int fd);
     Client* getClient(wl_client* client);
@@ -199,10 +176,9 @@ Q_SIGNALS:
 
 private:
     friend class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(std::string)

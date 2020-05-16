@@ -24,23 +24,23 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 #include <memory>
 
-namespace Wrapland
-{
-namespace Server
-{
-
-namespace Wayland
+namespace Wrapland::Server::Wayland
 {
 
 template<typename WaylandObject>
 class Capsule
 {
 public:
-    Capsule(std::function<void(WaylandObject*)> dtor)
+    explicit Capsule(std::function<void(WaylandObject*)> dtor)
         : m_object{nullptr}
         , m_dtor(dtor)
     {
     }
+
+    Capsule(Capsule&) = delete;
+    Capsule& operator=(Capsule) = delete;
+    Capsule(Capsule&&) noexcept = default;
+    Capsule& operator=(Capsule&&) noexcept = default;
 
     ~Capsule()
     {
@@ -64,12 +64,7 @@ public:
         return m_object != nullptr;
     }
 
-    operator WaylandObject*() const
-    {
-        return m_object;
-    }
-
-    operator WaylandObject*()
+    auto get() const
     {
         return m_object;
     }
@@ -79,6 +74,4 @@ private:
     std::function<void(WaylandObject*)> m_dtor;
 };
 
-}
-}
 }

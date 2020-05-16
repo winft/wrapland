@@ -24,9 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class Compositor;
@@ -35,8 +33,6 @@ class WRAPLANDSERVER_EXPORT Region : public QObject
 {
     Q_OBJECT
 public:
-    ~Region() override;
-
     QRegion region() const;
 
     Client* client() const;
@@ -57,5 +53,5 @@ private:
 };
 
 }
-}
+
 Q_DECLARE_METATYPE(Wrapland::Server::Region*)

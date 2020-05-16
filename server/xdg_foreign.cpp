@@ -26,9 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "wayland-xdg-foreign-unstable-v2-server-protocol.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 XdgForeign::Private::Private(D_isplay* display, XdgForeign* q)
@@ -58,5 +56,4 @@ Surface* XdgForeign::parentOf(Surface* surface)
     return d_ptr->importer->parentOf(surface);
 }
 
-}
 }

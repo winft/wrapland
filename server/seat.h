@@ -24,15 +24,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 
 #include <Wrapland/Server/wraplandserver_export.h>
+#include <memory>
 
-#include "global.h"
-
-struct wl_client;
-struct wl_resource;
-
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class DataDevice;
@@ -190,7 +184,6 @@ private:
     std::unique_ptr<Private> d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Seat*)

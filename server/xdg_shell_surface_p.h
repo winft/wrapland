@@ -42,7 +42,6 @@ public:
             XdgShell* shell,
             Surface* surface,
             XdgShellSurface* q);
-    ~Private() override;
 
     // Implement here?
     void close();

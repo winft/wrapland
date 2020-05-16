@@ -26,16 +26,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Region::Private : public Wayland::Resource<Region>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, Region* q);
-    ~Private() override;
 
     QRegion qtRegion;
 
@@ -66,8 +63,6 @@ Region::Private::Private(Client* client, uint32_t version, uint32_t id, Region* 
     : Wayland::Resource<Region>(client, version, id, &wl_region_interface, &s_interface, q)
 {
 }
-
-Region::Private::~Private() = default;
 
 void Region::Private::addCallback([[maybe_unused]] wl_client* client,
                                   wl_resource* wlResource,
@@ -104,8 +99,6 @@ Region::Region(Client* client, uint32_t version, uint32_t id)
 {
 }
 
-Region::~Region() = default;
-
 QRegion Region::region() const
 {
     return d_ptr->qtRegion;
@@ -124,5 +117,4 @@ Client* Region::client() const
     return d_ptr->client()->handle();
 }
 
-}
 }

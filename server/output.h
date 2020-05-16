@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -154,7 +155,7 @@ private:
     explicit Output(Wrapland::Server::D_isplay* display, QObject* parent = nullptr);
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

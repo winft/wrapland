@@ -32,9 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <functional>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 RemoteAccessManager::Private::Private(D_isplay* display, RemoteAccessManager* q)
@@ -108,7 +106,7 @@ void RemoteAccessManager::Private::getBufferCallback([[maybe_unused]] wl_client*
     connect(buffer,
             &RemoteBuffer::resourceDestroyed,
             priv->handle(),
-            [priv, buffer, &bufferHolder, wlResource] {
+            [priv, &bufferHolder, wlResource] {
                 if (!priv->getBind(wlResource)) {
                     // Remote buffer destroy confirmed after client is already gone.
                     // All relevant buffers are already unreferenced.
@@ -153,8 +151,6 @@ int RemoteAccessManager::Private::unref(BufferHolder& bufferHolder)
     return bufferHolder.counter;
 }
 
-RemoteAccessManager::Private::~Private() = default;
-
 RemoteAccessManager::RemoteAccessManager(D_isplay* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
@@ -195,8 +191,6 @@ RemoteBuffer::Private::Private(Client* client,
 {
 }
 
-RemoteBuffer::Private::~Private() = default;
-
 void RemoteBuffer::Private::passFd()
 {
     send<org_kde_kwin_remote_buffer_send_gbm_handle>(bufferHandle->fd(),
@@ -215,8 +209,6 @@ RemoteBuffer::RemoteBuffer(Client* client,
 {
 }
 
-RemoteBuffer::~RemoteBuffer() = default;
-
 void RemoteBuffer::passFd()
 {
     d_ptr->passFd();
@@ -230,9 +222,7 @@ RemoteBufferHandle::RemoteBufferHandle()
 {
 }
 
-RemoteBufferHandle::~RemoteBufferHandle()
-{
-}
+RemoteBufferHandle::~RemoteBufferHandle() = default;
 
 void RemoteBufferHandle::setFd(uint32_t fd)
 {
@@ -280,5 +270,4 @@ uint32_t RemoteBufferHandle::format() const
     return d_ptr->format;
 }
 
-}
 }

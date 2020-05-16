@@ -44,7 +44,7 @@ class XdgOutputManager::Private : public Wayland::Global<XdgOutputManager>
 {
 public:
     Private(D_isplay* display, XdgOutputManager* qptr);
-    ~Private() override = default;
+
     std::map<Output*, XdgOutput*> outputs;
 
 private:
@@ -72,7 +72,7 @@ class XdgOutputV1::Private : public Wayland::Resource<XdgOutputV1>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q);
-    ~Private() override = default;
+
     void setLogicalSize(const QSize& size);
     void setLogicalPosition(const QPoint& pos);
     void done();

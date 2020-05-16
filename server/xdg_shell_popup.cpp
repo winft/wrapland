@@ -32,9 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 const struct xdg_popup_interface XdgShellPopup::Private::s_interface = {
@@ -57,8 +55,6 @@ XdgShellPopup::Private::Private(uint32_t version,
     , parent{parent}
 {
 }
-
-XdgShellPopup::Private::~Private() = default;
 
 void XdgShellPopup::Private::ackConfigure(uint32_t serial)
 {
@@ -143,8 +139,6 @@ XdgShellPopup::XdgShellPopup(uint32_t version,
     , d_ptr(new Private(version, id, surface, parent, this))
 {
 }
-
-XdgShellPopup::~XdgShellPopup() = default;
 
 XdgShellSurface* XdgShellPopup::surface() const
 {
@@ -232,5 +226,4 @@ uint32_t XdgShellPopup::configure(const QRect& rect)
     return d_ptr->configure(rect);
 }
 
-}
 }

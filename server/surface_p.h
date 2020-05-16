@@ -28,9 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class IdleInhibitor;
@@ -199,5 +197,4 @@ private:
     Surface* q_ptr;
 };
 
-}
 }

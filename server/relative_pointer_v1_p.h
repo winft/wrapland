@@ -26,9 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-relativepointer-unstable-v1-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class RelativePointerManagerV1::Private : public Wayland::Global<RelativePointerManagerV1>
@@ -50,7 +48,6 @@ class RelativePointerV1 : public QObject
     Q_OBJECT
 public:
     explicit RelativePointerV1(Client* client, uint32_t version, uint32_t id);
-    ~RelativePointerV1() override;
 
     void
     relativeMotion(quint64 microseconds, const QSizeF& delta, const QSizeF& deltaNonAccelerated);
@@ -67,11 +64,9 @@ class RelativePointerV1::Private : public Wayland::Resource<RelativePointerV1>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, RelativePointerV1* q);
-    ~Private() override;
 
 private:
     static const struct zwp_relative_pointer_v1_interface s_interface;
 };
 
-}
 }

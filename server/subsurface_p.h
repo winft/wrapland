@@ -27,9 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Subsurface::Private : public Wayland::Resource<Subsurface>
@@ -41,7 +39,6 @@ public:
             Surface* surface,
             Surface* parent,
             Subsurface* q);
-    ~Private() override;
 
     /**
      * Initializes the subsurface in relation to its parent. Needs to be after the subsurface
@@ -77,5 +74,4 @@ private:
     static const struct wl_subsurface_interface s_interface;
 };
 
-}
 }

@@ -47,8 +47,6 @@ class WRAPLANDSERVER_EXPORT Shadow : public QObject
 {
     Q_OBJECT
 public:
-    ~Shadow() override;
-
     Buffer* left() const;
     Buffer* topLeft() const;
     Buffer* top() const;

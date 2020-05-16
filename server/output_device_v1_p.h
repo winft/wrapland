@@ -43,7 +43,6 @@ public:
         uint32_t version;
     };
     Private(OutputDeviceV1* q, D_isplay* display);
-    ~Private() override;
 
     void bindInit(OutputDeviceV1Bind* bind) override;
 

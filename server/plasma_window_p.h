@@ -115,7 +115,6 @@ class PlasmaWindowRes : public QObject
     Q_OBJECT
 public:
     PlasmaWindowRes(Wayland::Client* client, uint32_t version, uint32_t id, PlasmaWindow* parent);
-    ~PlasmaWindowRes() override;
 
     void unmap();
 
@@ -136,7 +135,6 @@ public:
             uint32_t id,
             PlasmaWindow* window,
             PlasmaWindowRes* q);
-    ~Private() override;
 
     void unmap();
 

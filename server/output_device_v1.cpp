@@ -34,8 +34,6 @@ OutputDeviceV1::Private::Private(OutputDeviceV1* q, D_isplay* display)
     create();
 }
 
-OutputDeviceV1::Private::~Private() = default;
-
 QSize OutputDeviceV1::modeSize() const
 {
     if (d_ptr->pending.mode.id == -1) {

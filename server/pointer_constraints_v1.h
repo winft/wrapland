@@ -25,9 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Server/wraplandserver_export.h>
 #include <memory>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class D_isplay;
@@ -51,8 +49,6 @@ class WRAPLANDSERVER_EXPORT LockedPointerV1 : public QObject
 {
     Q_OBJECT
 public:
-    ~LockedPointerV1() override;
-
     enum class LifeTime {
         OneShot,
         Persistent,
@@ -86,8 +82,6 @@ class WRAPLANDSERVER_EXPORT ConfinedPointerV1 : public QObject
 {
     Q_OBJECT
 public:
-    ~ConfinedPointerV1() override;
-
     enum class LifeTime {
         OneShot,
         Persistent,
@@ -115,5 +109,4 @@ private:
     Private* d_ptr;
 };
 
-}
 }

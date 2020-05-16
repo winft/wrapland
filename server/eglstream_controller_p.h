@@ -30,11 +30,10 @@ namespace Wrapland::Server
 constexpr uint32_t EglStreamControllerrVersion = 1;
 using EglStreamControllerGlobal = Wayland::Global<EglStreamController, EglStreamControllerrVersion>;
 
-class Q_DECL_HIDDEN EglStreamController::Private : public EglStreamControllerGlobal
+class EglStreamController::Private : public EglStreamControllerGlobal
 {
 public:
     Private(D_isplay* display, const wl_interface* interface, EglStreamController* controller);
-    ~Private() override;
 
 private:
     static void attachStreamConsumer(wl_client* wlClient,

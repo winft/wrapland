@@ -35,17 +35,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../display.h"
 #include "../display_p.h"
 
-// Legacy
-#include "../../src/server/display.h"
-
 #include <algorithm>
+#include <exception>
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
-{
-namespace Wayland
+namespace Wrapland::Server::Wayland
 {
 
 Display* Display::backendCast(Server::D_isplay* display)
@@ -59,16 +53,13 @@ Client* Display::castClient(Server::Client* client)
 }
 
 Display::Display(Server::D_isplay* parent)
-    : m_bufferManager{std::make_unique<BufferManager>(this)}
+    : m_bufferManager{std::make_unique<BufferManager>()}
     , m_handle(parent)
 {
 }
 
 Display::~Display()
 {
-    for (auto capsule : m_globals) {
-        capsule->release();
-    }
     terminate();
     if (m_display) {
         wl_display_destroy(m_display);
@@ -114,14 +105,15 @@ void Display::removeGlobal(GlobalCapsule* capsule)
 void Display::addSocket()
 {
     if (!m_socketName.empty()) {
-        // TODO: check return value. Throw.
-        wl_display_add_socket(m_display, m_socketName.c_str());
+        if (wl_display_add_socket(m_display, m_socketName.c_str()) != 0) {
+            throw std::bad_exception();
+        }
         return;
     }
 
-    char const* socket = wl_display_add_socket_auto(m_display);
-    if (socket == nullptr) {
-        qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
+    m_socketName = wl_display_add_socket_auto(m_display);
+    if (m_socketName.empty()) {
+        throw std::bad_exception();
     }
 }
 
@@ -133,7 +125,13 @@ void Display::start(bool createSocket)
     m_display = wl_display_create();
 
     if (createSocket) {
-        addSocket();
+        try {
+            addSocket();
+        } catch (std::bad_exception&) {
+            qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
+            // TODO: Shall we rethrow?
+            return;
+        }
     }
 
     m_loop = wl_display_get_event_loop(m_display);
@@ -153,6 +151,10 @@ void Display::terminate()
         return;
     }
 
+    for (auto capsule : m_globals) {
+        capsule->release();
+    }
+
     // That call is not really necessary because we run our own Qt-embedded event loop and do not
     // call wl_display_run() in the beginning. That being said leave it in here as a reminder that
     // there is this possibility.
@@ -161,11 +163,6 @@ void Display::terminate()
     // Then we destroy all remaining clients. There might be clients that have established
     // a connection but not yet interacted with us in any way.
     wl_display_destroy_clients(m_display);
-
-    // Globals are also destroyed in wl_display_destroy automatically, but we need to remove all
-    // global interfaces first because otherwise they would call back into the Wayland connection
-    // with wl_global_destroy again. Can we do it differently?
-    Q_EMIT m_handle->legacy->aboutToTerminate();
 
     wl_display_destroy(m_display);
 
@@ -269,13 +266,9 @@ void Display::setupClient(Client* client)
                 m_clients.erase(std::remove(m_clients.begin(), m_clients.end(), internal),
                                 m_clients.end());
                 Q_EMIT m_handle->clientDisconnected(client);
-
-                Q_EMIT m_handle->legacy->clientDisconnected(client->legacy);
             }
         });
     Q_EMIT m_handle->clientConnected(client->handle());
-
-    Q_EMIT m_handle->legacy->clientConnected(client->handle()->legacy);
 }
 
 std::vector<Client*> const& Display::clients() const
@@ -293,6 +286,4 @@ Server::D_isplay* Display::handle() const
     return m_handle;
 }
 
-}
-}
 }

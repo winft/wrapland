@@ -166,8 +166,6 @@ Contrast::Contrast(Client* client, uint32_t version, uint32_t id)
 {
 }
 
-Contrast::~Contrast() = default;
-
 QRegion Contrast::region() const
 {
     return d_ptr->currentRegion;

@@ -51,6 +51,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "remote_access.h"
 #include "seat.h"
 #include "server_decoration_palette.h"
+#include "shadow.h"
 #include "slide.h"
 #include "subcompositor.h"
 #include "text_input_v2.h"
@@ -59,14 +60,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdg_foreign.h"
 #include "xdg_shell.h"
 #include "xdgoutput.h"
-
-// Legacy
-#include "../src/server/display.h"
-
-#include "../server/shadow.h"
-
-//
-//
 
 #include "logging.h"
 
@@ -77,19 +70,17 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 Private* Private::castDisplay(D_isplay* display)
 {
-    return display->d_ptr;
+    return display->d_ptr.get();
 }
 
 Wayland::Client* Private::castClientImpl(Server::Client* client)
 {
-    return client->d_ptr;
+    return client->d_ptr.get();
 }
 
 Client* Private::createClientHandle(wl_client* wlClient)
@@ -98,19 +89,14 @@ Client* Private::createClientHandle(wl_client* wlClient)
         return client->handle();
     }
     auto* clientHandle = new Client(wlClient, q_ptr);
-    setupClient(clientHandle->d_ptr);
+    setupClient(clientHandle->d_ptr.get());
     return clientHandle;
 }
 
-D_isplay::D_isplay(QObject* parent, bool legacyInvoked)
+D_isplay::D_isplay(QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this))
 {
-    if (!legacyInvoked) {
-        legacy = new Server::Display(nullptr, true);
-        legacy->newDisplay = this;
-        deleteLegacy = true;
-    }
 }
 
 D_isplay::~D_isplay()
@@ -120,13 +106,6 @@ D_isplay::~D_isplay()
     }
     for (auto output : d_ptr->outputDevices) {
         output->d_ptr->displayHandle = nullptr;
-    }
-
-    delete d_ptr;
-
-    if (deleteLegacy) {
-        legacy->newDisplay = nullptr;
-        delete legacy;
     }
 }
 
@@ -220,6 +199,10 @@ Seat* D_isplay::createSeat(QObject* parent)
 {
     auto seat = new Seat(this, parent);
     d_ptr->seats.push_back(seat);
+    connect(seat, &QObject::destroyed, this, [this, seat] {
+        d_ptr->seats.erase(std::remove(d_ptr->seats.begin(), d_ptr->seats.end(), seat),
+                           d_ptr->seats.end());
+    });
     return seat;
 }
 
@@ -433,5 +416,4 @@ void* D_isplay::eglDisplay() const
     return d_ptr->eglDisplay;
 }
 
-}
 }

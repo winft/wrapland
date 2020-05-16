@@ -26,16 +26,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class DataOffer::Private : public Wayland::Resource<DataOffer>
 {
 public:
     Private(Client* client, uint32_t version, DataSource* source, DataOffer* q);
-    ~Private() override;
 
     DataSource* source;
 
@@ -65,5 +62,4 @@ private:
     DataOffer* q_ptr;
 };
 
-}
 }

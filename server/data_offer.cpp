@@ -29,9 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <unistd.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 const struct wl_data_offer_interface DataOffer::Private::s_interface = {
@@ -49,8 +47,6 @@ DataOffer::Private::Private(Client* client, uint32_t version, DataSource* source
 {
     // TODO: connect to new selections.
 }
-
-DataOffer::Private::~Private() = default;
 
 void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
                                         wl_resource* wlResource,
@@ -169,8 +165,6 @@ DataOffer::DataOffer(Client* client, uint32_t version, DataSource* source)
         source, &DataSource::resourceDestroyed, this, [this] { d_ptr->source = nullptr; });
 }
 
-DataOffer::~DataOffer() = default;
-
 void DataOffer::sendAllOffers()
 {
     for (auto const& mimeType : d_ptr->source->mimeTypes()) {
@@ -201,5 +195,4 @@ void DataOffer::dndAction(DataDeviceManager::DnDAction action)
     d_ptr->send<wl_data_offer_send_action, WL_DATA_OFFER_ACTION_SINCE_VERSION>(wlAction);
 }
 
-}
 }

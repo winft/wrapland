@@ -41,7 +41,6 @@ class ServerSideDecorationPaletteManager::Private : public ServerSideDecorationP
 {
 public:
     Private(D_isplay* display, ServerSideDecorationPaletteManager* qptr);
-    ~Private() override;
 
     std::vector<ServerSideDecorationPalette*> palettes;
 
@@ -60,7 +59,6 @@ public:
             uint32_t id,
             Surface* surface,
             ServerSideDecorationPalette* qptr);
-    ~Private() override;
 
     Surface* surface;
     QString palette;

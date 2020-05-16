@@ -42,8 +42,6 @@ TextInputManagerV2::Private::Private(D_isplay* display, TextInputManagerV2* q)
     create();
 }
 
-TextInputManagerV2::Private::~Private() = default;
-
 void TextInputManagerV2::Private::getTextInputCallback([[maybe_unused]] wl_client* wlClient,
                                                        wl_resource* wlResource,
                                                        uint32_t id,
@@ -90,8 +88,6 @@ TextInputV2::Private::Private(Client* client, uint32_t version, uint32_t id, Tex
                                      q)
 {
 }
-
-TextInputV2::Private::~Private() = default;
 
 void TextInputV2::Private::enable(Surface* s)
 {
@@ -378,8 +374,6 @@ TextInputV2::TextInputV2(Client* client, uint32_t version, uint32_t id)
     , d_ptr(new Private(client, version, id, this))
 {
 }
-
-TextInputV2::~TextInputV2() = default;
 
 QByteArray TextInputV2::preferredLanguage() const
 {

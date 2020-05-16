@@ -51,7 +51,6 @@ class Dpms : public QObject
     Q_OBJECT
 public:
     Dpms(Client* client, uint32_t version, uint32_t id, Output* output);
-    ~Dpms() override;
 
     void sendSupported();
     void sendMode();

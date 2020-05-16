@@ -28,9 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Subcompositor::Private : public Wayland::Global<Subcompositor>
@@ -112,10 +110,7 @@ Subcompositor::Subcompositor(D_isplay* display, QObject* parent)
     d_ptr->create();
 }
 
-Subcompositor::~Subcompositor()
-{
-    delete d_ptr;
-}
+Subcompositor::~Subcompositor() = default;
 
 Subsurface::Private::Private(Client* client,
                              uint32_t version,
@@ -128,8 +123,6 @@ Subsurface::Private::Private(Client* client,
     , parent{parent}
 {
 }
-
-Subsurface::Private::~Private() = default;
 
 void Subsurface::Private::init()
 {
@@ -357,5 +350,4 @@ Surface* Subsurface::mainSurface() const
     return d_ptr->parent;
 }
 
-}
 }

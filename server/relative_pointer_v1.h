@@ -24,9 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Server/wraplandserver_export.h>
 #include <memory>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class D_isplay;
@@ -45,5 +43,4 @@ private:
     std::unique_ptr<Private> d_ptr;
 };
 
-}
 }

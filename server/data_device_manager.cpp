@@ -30,9 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 constexpr uint32_t DataDeviceManagerVersion = 3;
@@ -51,8 +49,6 @@ private:
                                       wl_resource* wlSeat);
 
     static const struct wl_data_device_manager_interface s_interface;
-
-    DataDeviceManager* q_ptr;
 };
 
 const struct wl_data_device_manager_interface DataDeviceManager::Private::s_interface = {
@@ -62,7 +58,6 @@ const struct wl_data_device_manager_interface DataDeviceManager::Private::s_inte
 
 DataDeviceManager::Private::Private(DataDeviceManager* q, D_isplay* display)
     : DataDeviceManagerGlobal(q, display, &wl_data_device_manager_interface, &s_interface)
-    , q_ptr{q}
 {
 }
 
@@ -108,5 +103,4 @@ DataDeviceManager::DataDeviceManager(D_isplay* display, [[maybe_unused]] QObject
 
 DataDeviceManager::~DataDeviceManager() = default;
 
-}
 }

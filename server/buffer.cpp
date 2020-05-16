@@ -36,11 +36,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <EGL/egl.h>
 #include <QtGui/qopengl.h>
 
-#include "drm_fourcc.h"
+#include "system/drm_fourcc.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 namespace EGL
@@ -196,6 +194,10 @@ Buffer::Private::Private(Buffer* q,
 
 Buffer::Private::~Private()
 {
+    if (refCount != 0) {
+        qCWarning(WRAPLAND_SERVER)
+            << "Buffer destroyed while still being referenced, ref count:" << refCount;
+    }
     display->bufferManager()->removeBuffer(q_ptr);
     wl_list_remove(&destroyWrapper.listener.link);
 }
@@ -248,13 +250,13 @@ QImage Buffer::Private::createImage()
         return QImage();
     }
 
-    return std::move(QImage((const uchar*)wl_shm_buffer_get_data(shmBuffer),
-                            size.width(),
-                            size.height(),
-                            wl_shm_buffer_get_stride(shmBuffer),
-                            imageFormat,
-                            &imageBufferCleanupHandler,
-                            this));
+    return QImage((const uchar*)wl_shm_buffer_get_data(shmBuffer),
+                  size.width(),
+                  size.height(),
+                  wl_shm_buffer_get_stride(shmBuffer),
+                  imageFormat,
+                  &imageBufferCleanupHandler,
+                  this);
 }
 
 Buffer::Buffer(wl_resource* wlResource, Surface* surface)
@@ -285,13 +287,7 @@ Buffer* Buffer::get(D_isplay* display, wl_resource* resource)
     return new Buffer(resource, display);
 }
 
-Buffer::~Buffer()
-{
-    if (d_ptr->refCount != 0) {
-        qCWarning(WRAPLAND_SERVER)
-            << "Buffer destroyed while still being referenced, ref count:" << d_ptr->refCount;
-    }
-}
+Buffer::~Buffer() = default;
 
 void Buffer::ref()
 {
@@ -313,7 +309,7 @@ void Buffer::unref()
 
 QImage Buffer::data()
 {
-    return std::move(d_ptr->createImage());
+    return d_ptr->createImage();
 }
 
 bool Buffer::isReferenced() const
@@ -360,5 +356,4 @@ bool Buffer::hasAlphaChannel() const
     return d_ptr->alpha;
 }
 
-}
 }

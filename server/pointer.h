@@ -24,9 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Server/wraplandserver_export.h>
 #include <memory>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class Seat;
@@ -41,8 +39,6 @@ class WRAPLANDSERVER_EXPORT Pointer : public QObject
 {
     Q_OBJECT
 public:
-    ~Pointer() override;
-
     Seat* seat() const;
     Surface* focusedSurface() const;
 
@@ -105,7 +101,6 @@ private:
     std::unique_ptr<Private> d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Pointer*)
