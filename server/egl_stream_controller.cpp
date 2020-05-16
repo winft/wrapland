@@ -18,7 +18,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include "display.h"
-#include "eglstream_controller_p.h"
+#include "egl_stream_controller_p.h"
 #include "logging.h"
 
 #include "surface.h"

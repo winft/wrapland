@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 // server
 #include "../../server/display.h"
-#include "../../server/fakeinput.h"
+#include "../../server/fake_input.h"
 
 #include <linux/input.h>
 

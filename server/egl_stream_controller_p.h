@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
-#include "eglstream_controller.h"
+#include "egl_stream_controller.h"
 #include "wayland/global.h"
 
 #include <wayland-eglstream-controller-server-protocol.h>

@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <memory>
 
-#include "plasmashell.h"
+#include "plasma_shell.h"
 
 #include "display.h"
 #include "wayland/global.h"

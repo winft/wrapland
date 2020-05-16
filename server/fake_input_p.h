@@ -20,7 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "display.h"
-#include "fakeinput.h"
+#include "fake_input.h"
 
 #include "wayland/global.h"
 #include "wayland/resource.h"

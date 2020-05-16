@@ -31,7 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/xdg_shell.h"
 
-#include "../../server/plasmashell.h"
+#include "../../server/plasma_shell.h"
 
 #include <wayland-client-protocol.h>
 

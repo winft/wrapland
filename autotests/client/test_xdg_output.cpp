@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/output.h"
 #include "../../src/client/xdgoutput.h"
 #include "../../src/client/registry.h"
-#include "../../server/xdgoutput.h"
+#include "../../server/xdg_output.h"
 
 class TestXdgOutput : public QObject
 {

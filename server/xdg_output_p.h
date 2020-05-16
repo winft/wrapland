@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "display.h"
 #include "output.h"
-#include "xdgoutput.h"
+#include "xdg_output.h"
 
 #include "wayland/client.h"
 #include "wayland/display.h"

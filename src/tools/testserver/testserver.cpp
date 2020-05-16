@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../../server/surface.h"
 
 #include "../../../server/kde_idle.h"
-#include "../../../server/fakeinput.h"
+#include "../../../server/fake_input.h"
 #include "../../../server/xdg_shell.h"
 #include "../../../server/xdg_shell_toplevel.h"
 

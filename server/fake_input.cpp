@@ -18,7 +18,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "display.h"
-#include "fakeinput_p.h"
+#include "fake_input_p.h"
 
 #include <QPointF>
 #include <QSizeF>
