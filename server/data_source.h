@@ -34,8 +34,6 @@ class WRAPLANDSERVER_EXPORT DataSource : public QObject
 {
     Q_OBJECT
 public:
-    ~DataSource() override;
-
     void accept(std::string mimeType);
     void requestData(std::string mimeType, qint32 fd);
     void cancel();

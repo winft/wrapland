@@ -89,8 +89,6 @@ RelativePointerV1::Private::Private(Client* client,
 {
 }
 
-RelativePointerV1::Private::~Private() = default;
-
 const struct zwp_relative_pointer_v1_interface RelativePointerV1::Private::s_interface = {
     destroyCallback,
 };
@@ -100,8 +98,6 @@ RelativePointerV1::RelativePointerV1(Client* client, uint32_t version, uint32_t 
     , d_ptr(new Private(client, version, id, this))
 {
 }
-
-RelativePointerV1::~RelativePointerV1() = default;
 
 void RelativePointerV1::relativeMotion(quint64 microseconds,
                                        const QSizeF& delta,

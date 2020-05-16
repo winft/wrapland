@@ -56,8 +56,6 @@ class WRAPLANDSERVER_EXPORT Viewport : public QObject
 {
     Q_OBJECT
 public:
-    ~Viewport() override;
-
     explicit Viewport(Client* client,
                       uint32_t version,
                       uint32_t id,

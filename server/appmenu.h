@@ -37,6 +37,7 @@ class WRAPLANDSERVER_EXPORT AppMenuManager : public QObject
     Q_OBJECT
 public:
     ~AppMenuManager() override;
+
     AppMenu* appMenuForSurface(Surface*);
 
 Q_SIGNALS:
@@ -57,7 +58,6 @@ public:
         QString serviceName;
         QString objectPath;
     };
-    ~AppMenu() override;
 
     InterfaceAddress address() const;
     Surface* surface() const;

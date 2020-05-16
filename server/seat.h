@@ -24,6 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 
 #include <Wrapland/Server/wraplandserver_export.h>
+#include <memory>
 
 namespace Wrapland
 {

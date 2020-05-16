@@ -39,7 +39,6 @@ class ShadowManager::Private : public ShadowManagerGlobal
 {
 public:
     Private(D_isplay* display, ShadowManager* qptr);
-    ~Private() override;
 
 private:
     void createShadow(wl_client* client, wl_resource* resource, uint32_t id, wl_resource* surface);

@@ -375,8 +375,6 @@ Surface::Surface(Client* client, uint32_t version, uint32_t id)
 {
 }
 
-Surface::~Surface() = default;
-
 void Surface::frameRendered(quint32 msec)
 {
 

@@ -55,8 +55,6 @@ OutputConfigurationV1::Private::Private(Client* client,
 {
 }
 
-OutputConfigurationV1::Private::~Private() = default;
-
 void OutputConfigurationV1::Private::enableCallback([[maybe_unused]] wl_client* wlClient,
                                                     wl_resource* wlResource,
                                                     wl_resource* wlOutputDevice,

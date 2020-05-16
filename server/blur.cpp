@@ -132,8 +132,6 @@ Blur::Blur(Client* client, uint32_t version, uint32_t id)
 {
 }
 
-Blur::~Blur() = default;
-
 QRegion Blur::region()
 {
     return d_ptr->currentRegion;

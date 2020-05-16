@@ -320,8 +320,6 @@ Pointer::Pointer(Client* client, uint32_t version, uint32_t id, Seat* seat)
 {
 }
 
-Pointer::~Pointer() = default;
-
 void Pointer::setFocusedSurface(quint32 serial, Surface* surface)
 {
     d_ptr->setFocusedSurface(serial, surface);

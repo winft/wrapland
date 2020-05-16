@@ -196,6 +196,10 @@ Buffer::Private::Private(Buffer* q,
 
 Buffer::Private::~Private()
 {
+    if (refCount != 0) {
+        qCWarning(WRAPLAND_SERVER)
+            << "Buffer destroyed while still being referenced, ref count:" << refCount;
+    }
     display->bufferManager()->removeBuffer(q_ptr);
     wl_list_remove(&destroyWrapper.listener.link);
 }
@@ -285,13 +289,7 @@ Buffer* Buffer::get(D_isplay* display, wl_resource* resource)
     return new Buffer(resource, display);
 }
 
-Buffer::~Buffer()
-{
-    if (d_ptr->refCount != 0) {
-        qCWarning(WRAPLAND_SERVER)
-            << "Buffer destroyed while still being referenced, ref count:" << d_ptr->refCount;
-    }
-}
+Buffer::~Buffer() = default;
 
 void Buffer::ref()
 {

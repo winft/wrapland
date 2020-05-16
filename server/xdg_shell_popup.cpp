@@ -58,8 +58,6 @@ XdgShellPopup::Private::Private(uint32_t version,
 {
 }
 
-XdgShellPopup::Private::~Private() = default;
-
 void XdgShellPopup::Private::ackConfigure(uint32_t serial)
 {
     auto& serials = shellSurface->d_ptr->configureSerials;
@@ -143,8 +141,6 @@ XdgShellPopup::XdgShellPopup(uint32_t version,
     , d_ptr(new Private(version, id, surface, parent, this))
 {
 }
-
-XdgShellPopup::~XdgShellPopup() = default;
 
 XdgShellSurface* XdgShellPopup::surface() const
 {

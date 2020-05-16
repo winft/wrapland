@@ -82,7 +82,6 @@ public:
                   uint32_t id,
                   Surface* surface,
                   const QString& protocolHandle);
-    ~XdgExportedV2() override;
 
     Surface* surface() const;
 

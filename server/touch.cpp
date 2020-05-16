@@ -59,8 +59,6 @@ Touch::Touch(Client* client, uint32_t version, uint32_t id, Seat* seat)
 {
 }
 
-Touch::~Touch() = default;
-
 void Touch::cancel()
 {
     d_ptr->send<wl_touch_send_cancel>();

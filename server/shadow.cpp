@@ -45,8 +45,6 @@ ShadowManager::Private::Private(D_isplay* display, ShadowManager* qptr)
     create();
 }
 
-ShadowManager::Private::~Private() = default;
-
 void ShadowManager::Private::createCallback(wl_client* wlClient,
                                             wl_resource* wlResource,
                                             uint32_t id,
@@ -277,8 +275,6 @@ Shadow::Shadow(Client* client, uint32_t version, uint32_t id)
     , d_ptr(new Shadow::Private(client, version, id, this))
 {
 }
-
-Shadow::~Shadow() = default;
 
 QMarginsF Shadow::offset() const
 {

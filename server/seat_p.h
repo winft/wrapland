@@ -49,7 +49,6 @@ class Seat::Private : public SeatGlobal
 {
 public:
     Private(Seat* q, D_isplay* d);
-    ~Private() override = default;
 
     void bindInit(Wayland::Resource<Seat, SeatGlobal>* bind) override;
 

@@ -51,8 +51,6 @@ class WRAPLANDSERVER_EXPORT LockedPointerV1 : public QObject
 {
     Q_OBJECT
 public:
-    ~LockedPointerV1() override;
-
     enum class LifeTime {
         OneShot,
         Persistent,
@@ -86,8 +84,6 @@ class WRAPLANDSERVER_EXPORT ConfinedPointerV1 : public QObject
 {
     Q_OBJECT
 public:
-    ~ConfinedPointerV1() override;
-
     enum class LifeTime {
         OneShot,
         Persistent,

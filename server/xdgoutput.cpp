@@ -45,7 +45,9 @@ XdgOutputManager::XdgOutputManager(D_isplay* display, QObject* parent)
     , d_ptr(new Private(display, this))
 {
 }
+
 XdgOutputManager::~XdgOutputManager() = default;
+
 XdgOutput* XdgOutputManager::createXdgOutput(Output* output, QObject* parent)
 {
     if (d_ptr->outputs.find(output) == d_ptr->outputs.end()) {
@@ -189,8 +191,6 @@ XdgOutputV1::XdgOutputV1(Client* client, uint32_t version, uint32_t id, XdgOutpu
     , d_ptr(new XdgOutputV1::Private(client, version, id, this))
 {
 }
-
-XdgOutputV1::~XdgOutputV1() = default;
 
 void XdgOutputV1::setLogicalSize(const QSize& size)
 {

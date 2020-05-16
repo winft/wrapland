@@ -59,8 +59,6 @@ public:
         ServerSide,
     };
 
-    ~XdgDecoration() override;
-
     void configure(Mode requestedMode);
     Mode requestedMode() const;
     XdgShellToplevel* toplevel() const;

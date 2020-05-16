@@ -45,8 +45,6 @@ class WRAPLANDSERVER_EXPORT XdgShellPopup : public QObject
 {
     Q_OBJECT
 public:
-    ~XdgShellPopup() override;
-
     XdgShellSurface* surface() const;
 
     uint32_t configure(const QRect& rect);

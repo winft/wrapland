@@ -55,7 +55,6 @@ class PointerSwipeGestureV1 : public QObject
     Q_OBJECT
 public:
     PointerSwipeGestureV1(Client* client, uint32_t version, uint32_t id, Pointer* pointer);
-    ~PointerSwipeGestureV1() override;
 
     void start(quint32 serial, quint32 fingerCount);
     void update(const QSizeF& delta);
@@ -80,7 +79,6 @@ public:
             uint32_t id,
             Pointer* _pointer,
             PointerSwipeGestureV1* q);
-    ~Private() override;
 
     Pointer* pointer;
 
@@ -102,7 +100,6 @@ class PointerPinchGestureV1 : public QObject
     Q_OBJECT
 public:
     PointerPinchGestureV1(Client* client, uint32_t version, uint32_t id, Pointer* pointer);
-    ~PointerPinchGestureV1() override;
 
     void start(quint32 serial, quint32 fingerCount);
     void update(const QSizeF& delta, qreal scale, qreal rotation);
@@ -125,7 +122,6 @@ public:
             uint32_t id,
             Pointer* pointer,
             PointerPinchGestureV1* q);
-    ~Private() override;
 
     Pointer* pointer;
 

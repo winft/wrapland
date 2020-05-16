@@ -38,7 +38,6 @@ public:
             uint32_t id,
             OutputManagementV1* manager,
             OutputConfigurationV1* q);
-    ~Private() override;
 
     void sendApplied();
     void sendFailed();

@@ -65,10 +65,7 @@ Compositor::Compositor(D_isplay* display, QObject* parent)
     d_ptr->create();
 }
 
-Compositor::~Compositor()
-{
-    delete d_ptr;
-}
+Compositor::~Compositor() = default;
 
 void Compositor::Private::createSurfaceCallback(wl_client* wlClient,
                                                 wl_resource* wlResource,

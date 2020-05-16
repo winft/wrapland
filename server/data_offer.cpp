@@ -50,8 +50,6 @@ DataOffer::Private::Private(Client* client, uint32_t version, DataSource* source
     // TODO: connect to new selections.
 }
 
-DataOffer::Private::~Private() = default;
-
 void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
                                         wl_resource* wlResource,
                                         [[maybe_unused]] uint32_t serial,
@@ -168,8 +166,6 @@ DataOffer::DataOffer(Client* client, uint32_t version, DataSource* source)
     QObject::connect(
         source, &DataSource::resourceDestroyed, this, [this] { d_ptr->source = nullptr; });
 }
-
-DataOffer::~DataOffer() = default;
 
 void DataOffer::sendAllOffers()
 {

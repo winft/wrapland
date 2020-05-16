@@ -38,10 +38,7 @@ Client::Client(wl_client* wlClient, D_isplay* display)
 {
 }
 
-Client::~Client()
-{
-    delete d_ptr;
-}
+Client::~Client() = default;
 
 void Client::flush()
 {

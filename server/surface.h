@@ -53,8 +53,6 @@ class WRAPLANDSERVER_EXPORT Surface : public QObject
 {
     Q_OBJECT
 public:
-    ~Surface() override;
-
     void frameRendered(quint32 msec);
 
     QRegion damage() const;

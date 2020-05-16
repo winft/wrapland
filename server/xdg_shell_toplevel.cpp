@@ -62,8 +62,6 @@ XdgShellToplevel::Private::Private(uint32_t version,
 {
 }
 
-XdgShellToplevel::Private::~Private() = default;
-
 void XdgShellToplevel::Private::setTitleCallback([[maybe_unused]] wl_client* wlClient,
                                                  wl_resource* wlResource,
                                                  const char* title)
@@ -424,7 +422,5 @@ std::string XdgShellToplevel::appId() const
 {
     return d_ptr->appId;
 }
-
-XdgShellToplevel::~XdgShellToplevel() = default;
 
 }

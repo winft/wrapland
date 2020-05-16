@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <memory>
 #include <string>
 #include <sys/types.h>
 
@@ -42,6 +43,7 @@ class WRAPLANDSERVER_EXPORT Client : public QObject
     Q_OBJECT
 public:
     ~Client() override;
+
     void destroy();
 
     void flush();
@@ -64,7 +66,7 @@ private:
     friend class Private;
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

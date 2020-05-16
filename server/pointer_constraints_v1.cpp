@@ -144,8 +144,6 @@ LockedPointerV1::Private::Private(Client* client, uint32_t version, uint32_t id,
 {
 }
 
-LockedPointerV1::Private::~Private() = default;
-
 const struct zwp_locked_pointer_v1_interface LockedPointerV1::Private::s_interface = {
     destroyCallback,
     setCursorPositionHintCallback,
@@ -208,8 +206,6 @@ LockedPointerV1::LockedPointerV1(Client* client,
     connect(this, &LockedPointerV1::resourceDestroyed, this, [this]() { setLocked(false); });
 }
 
-LockedPointerV1::~LockedPointerV1() = default;
-
 LockedPointerV1::LifeTime LockedPointerV1::lifeTime() const
 {
     return d_ptr->lifeTime;
@@ -256,8 +252,6 @@ ConfinedPointerV1::Private::Private(Client* client,
     , q_ptr(q)
 {
 }
-
-ConfinedPointerV1::Private::~Private() = default;
 
 const struct zwp_confined_pointer_v1_interface ConfinedPointerV1::Private::s_interface = {
     destroyCallback,
@@ -306,8 +300,6 @@ ConfinedPointerV1::ConfinedPointerV1(Client* client,
 {
     connect(this, &ConfinedPointerV1::resourceDestroyed, this, [this]() { setConfined(false); });
 }
-
-ConfinedPointerV1::~ConfinedPointerV1() = default;
 
 ConfinedPointerV1::LifeTime ConfinedPointerV1::lifeTime() const
 {

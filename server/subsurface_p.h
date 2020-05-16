@@ -41,7 +41,6 @@ public:
             Surface* surface,
             Surface* parent,
             Subsurface* q);
-    ~Private() override;
 
     /**
      * Initializes the subsurface in relation to its parent. Needs to be after the subsurface

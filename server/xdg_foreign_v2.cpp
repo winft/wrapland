@@ -43,7 +43,6 @@ class Q_DECL_HIDDEN XdgExporterV2::Private
 {
 public:
     Private(XdgExporterV2* q, D_isplay* display);
-    ~Private() override = default;
 
     QHash<QString, XdgExportedV2*> exportedSurfaces;
 
@@ -249,8 +248,6 @@ XdgExportedV2::XdgExportedV2(Client* client,
     d_ptr->send<zxdg_exported_v2_send_handle>(protocolHandle.toUtf8().constData());
 }
 
-XdgExportedV2::~XdgExportedV2() = default;
-
 Surface* XdgExportedV2::surface() const
 {
     return d_ptr->exportedSurface;
@@ -279,7 +276,6 @@ public:
             uint32_t id,
             XdgExportedV2* exported,
             XdgImportedV2* q);
-    ~Private() override = default;
 
     void setChild(Surface* surface);
 

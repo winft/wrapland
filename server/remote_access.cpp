@@ -153,8 +153,6 @@ int RemoteAccessManager::Private::unref(BufferHolder& bufferHolder)
     return bufferHolder.counter;
 }
 
-RemoteAccessManager::Private::~Private() = default;
-
 RemoteAccessManager::RemoteAccessManager(D_isplay* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
@@ -195,8 +193,6 @@ RemoteBuffer::Private::Private(Client* client,
 {
 }
 
-RemoteBuffer::Private::~Private() = default;
-
 void RemoteBuffer::Private::passFd()
 {
     send<org_kde_kwin_remote_buffer_send_gbm_handle>(bufferHandle->fd(),
@@ -215,8 +211,6 @@ RemoteBuffer::RemoteBuffer(Client* client,
 {
 }
 
-RemoteBuffer::~RemoteBuffer() = default;
-
 void RemoteBuffer::passFd()
 {
     d_ptr->passFd();
@@ -230,9 +224,7 @@ RemoteBufferHandle::RemoteBufferHandle()
 {
 }
 
-RemoteBufferHandle::~RemoteBufferHandle()
-{
-}
+RemoteBufferHandle::~RemoteBufferHandle() = default;
 
 void RemoteBufferHandle::setFd(uint32_t fd)
 {

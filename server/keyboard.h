@@ -36,8 +36,6 @@ class WRAPLANDSERVER_EXPORT Keyboard : public QObject
 {
     Q_OBJECT
 public:
-    ~Keyboard() override;
-
     Client* client() const;
     Surface* focusedSurface() const;
 

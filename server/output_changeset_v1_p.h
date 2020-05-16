@@ -30,7 +30,6 @@ class OutputChangesetV1::Private
 {
 public:
     Private(OutputDeviceV1* outputDevice, OutputChangesetV1* parent);
-    ~Private();
 
     OutputDeviceV1* device;
 

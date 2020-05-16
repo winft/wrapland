@@ -38,8 +38,6 @@ class WRAPLANDSERVER_EXPORT DataOffer : public QObject
 {
     Q_OBJECT
 public:
-    ~DataOffer() override;
-
     void sendAllOffers();
 
     DataDeviceManager::DnDActions supportedDragAndDropActions() const;

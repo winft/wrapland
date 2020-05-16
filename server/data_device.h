@@ -37,8 +37,6 @@ class WRAPLANDSERVER_EXPORT DataDevice : public QObject
 {
     Q_OBJECT
 public:
-    ~DataDevice() override;
-
     Seat* seat() const;
     Client* client() const;
 

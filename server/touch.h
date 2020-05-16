@@ -38,8 +38,6 @@ class WRAPLANDSERVER_EXPORT Touch : public QObject
 {
     Q_OBJECT
 public:
-    ~Touch() override;
-
     Client* client() const;
 
 Q_SIGNALS:

@@ -41,8 +41,6 @@ class WRAPLANDSERVER_EXPORT Pointer : public QObject
 {
     Q_OBJECT
 public:
-    ~Pointer() override;
-
     Seat* seat() const;
     Surface* focusedSurface() const;
 

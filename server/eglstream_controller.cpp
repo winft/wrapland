@@ -42,8 +42,6 @@ EglStreamController::Private::Private(D_isplay* display,
     create();
 }
 
-EglStreamController::Private::~Private() = default;
-
 void EglStreamController::Private::attachStreamConsumer(wl_client* wlClient,
                                                         wl_resource* wlResource,
                                                         wl_resource* wlSurface,

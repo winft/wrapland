@@ -35,7 +35,6 @@ class DataOffer::Private : public Wayland::Resource<DataOffer>
 {
 public:
     Private(Client* client, uint32_t version, DataSource* source, DataOffer* q);
-    ~Private() override;
 
     DataSource* source;
 

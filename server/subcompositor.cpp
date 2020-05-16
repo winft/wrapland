@@ -112,10 +112,7 @@ Subcompositor::Subcompositor(D_isplay* display, QObject* parent)
     d_ptr->create();
 }
 
-Subcompositor::~Subcompositor()
-{
-    delete d_ptr;
-}
+Subcompositor::~Subcompositor() = default;
 
 Subsurface::Private::Private(Client* client,
                              uint32_t version,
@@ -128,8 +125,6 @@ Subsurface::Private::Private(Client* client,
     , parent{parent}
 {
 }
-
-Subsurface::Private::~Private() = default;
 
 void Subsurface::Private::init()
 {

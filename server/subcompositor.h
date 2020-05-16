@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPointer>
 
 #include <Wrapland/Server/wraplandserver_export.h>
+#include <memory>
 
 namespace Wrapland
 {
@@ -47,7 +48,7 @@ private:
     explicit Subcompositor(D_isplay* display, QObject* parent = nullptr);
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 class WRAPLANDSERVER_EXPORT Subsurface : public QObject

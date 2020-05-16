@@ -45,8 +45,6 @@ PlasmaVirtualDesktopManager::Private::Private(D_isplay* display, PlasmaVirtualDe
     create();
 }
 
-PlasmaVirtualDesktopManager::Private::~Private() = default;
-
 QList<PlasmaVirtualDesktop*>::const_iterator
 PlasmaVirtualDesktopManager::Private::constFindDesktop(const QString& id)
 {
@@ -315,8 +313,6 @@ PlasmaVirtualDesktopRes::Private::Private(Client* client,
 {
 }
 
-PlasmaVirtualDesktopRes::Private::~Private() = default;
-
 const struct org_kde_plasma_virtual_desktop_interface PlasmaVirtualDesktopRes::Private::s_interface
     = {requestActivateCallback};
 
@@ -338,7 +334,5 @@ PlasmaVirtualDesktopRes::PlasmaVirtualDesktopRes(Client* client,
     , d_ptr(new Private(client, version, id, virtualDesktop, this))
 {
 }
-
-PlasmaVirtualDesktopRes::~PlasmaVirtualDesktopRes() = default;
 
 }

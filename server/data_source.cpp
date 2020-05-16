@@ -38,8 +38,6 @@ DataSource::Private::Private(Client* client, uint32_t version, uint32_t id, Data
     }
 }
 
-DataSource::Private::~Private() = default;
-
 const struct wl_data_source_interface DataSource::Private::s_interface = {
     offerCallback,
     destroyCallback,
@@ -94,8 +92,6 @@ DataSource::DataSource(Client* client, uint32_t version, uint32_t id)
     : d_ptr(new Private(client, version, id, this))
 {
 }
-
-DataSource::~DataSource() = default;
 
 void DataSource::accept(std::string mimeType)
 {

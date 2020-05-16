@@ -77,12 +77,12 @@ namespace Server
 
 Private* Private::castDisplay(D_isplay* display)
 {
-    return display->d_ptr;
+    return display->d_ptr.get();
 }
 
 Wayland::Client* Private::castClientImpl(Server::Client* client)
 {
-    return client->d_ptr;
+    return client->d_ptr.get();
 }
 
 Client* Private::createClientHandle(wl_client* wlClient)
@@ -91,7 +91,7 @@ Client* Private::createClientHandle(wl_client* wlClient)
         return client->handle();
     }
     auto* clientHandle = new Client(wlClient, q_ptr);
-    setupClient(clientHandle->d_ptr);
+    setupClient(clientHandle->d_ptr.get());
     return clientHandle;
 }
 
@@ -109,8 +109,6 @@ D_isplay::~D_isplay()
     for (auto output : d_ptr->outputDevices) {
         output->d_ptr->displayHandle = nullptr;
     }
-
-    delete d_ptr;
 }
 
 void D_isplay::setSocketName(const std::string& name)

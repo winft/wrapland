@@ -35,8 +35,6 @@ class WRAPLANDSERVER_EXPORT Region : public QObject
 {
     Q_OBJECT
 public:
-    ~Region() override;
-
     QRegion region() const;
 
     Client* client() const;

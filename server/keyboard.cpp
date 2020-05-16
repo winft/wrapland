@@ -107,8 +107,6 @@ Keyboard::Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat)
 {
 }
 
-Keyboard::~Keyboard() = default;
-
 void Keyboard::setKeymap(int fd, quint32 size)
 {
     d_ptr->sendKeymap(fd, size);

@@ -230,8 +230,6 @@ DataDevice::DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat
 {
 }
 
-DataDevice::~DataDevice() = default;
-
 Seat* DataDevice::seat() const
 {
     return d_ptr->seat;

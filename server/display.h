@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Server/wraplandserver_export.h>
 
 #include <cstdint>
+#include <memory>
 #include <string>
 
 struct wl_client;
@@ -80,6 +81,7 @@ class WRAPLANDSERVER_EXPORT D_isplay : public QObject
     Q_OBJECT
 public:
     explicit D_isplay(QObject* parent = nullptr);
+
     ~D_isplay() override;
 
     void setSocketName(const std::string& name);
@@ -176,7 +178,7 @@ Q_SIGNALS:
 
 private:
     friend class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

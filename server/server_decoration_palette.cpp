@@ -41,8 +41,6 @@ ServerSideDecorationPaletteManager::Private::Private(D_isplay* display,
     create();
 }
 
-ServerSideDecorationPaletteManager::Private::~Private() = default;
-
 void ServerSideDecorationPaletteManager::Private::createCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource,
@@ -128,8 +126,6 @@ ServerSideDecorationPalette::Private::Private(Client* client,
 {
 }
 
-ServerSideDecorationPalette::Private::~Private() = default;
-
 ServerSideDecorationPalette::ServerSideDecorationPalette(Client* client,
                                                          uint32_t version,
                                                          uint32_t id,
@@ -137,8 +133,6 @@ ServerSideDecorationPalette::ServerSideDecorationPalette(Client* client,
     : d_ptr(new Private(client, version, id, surface, this))
 {
 }
-
-ServerSideDecorationPalette::~ServerSideDecorationPalette() = default;
 
 QString ServerSideDecorationPalette::palette() const
 {

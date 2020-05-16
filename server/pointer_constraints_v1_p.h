@@ -36,7 +36,6 @@ class PointerConstraintsV1::Private : public Wayland::Global<PointerConstraintsV
 {
 public:
     Private(PointerConstraintsV1* q, D_isplay* display);
-    ~Private() override = default;
 
     static void destroyCallback(wl_client* client, wl_resource* resource);
     static void lockPointerCallback(wl_client* wlClient,
@@ -72,7 +71,6 @@ class LockedPointerV1::Private : public Wayland::Resource<LockedPointerV1>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, LockedPointerV1* q);
-    ~Private() override;
 
     void update();
     void commit();
@@ -104,7 +102,6 @@ class ConfinedPointerV1::Private : public Wayland::Resource<ConfinedPointerV1>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, ConfinedPointerV1* q);
-    ~Private() override;
 
     void update();
     void commit();

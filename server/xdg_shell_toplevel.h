@@ -41,8 +41,6 @@ class WRAPLANDSERVER_EXPORT XdgShellToplevel : public QObject
 {
     Q_OBJECT
 public:
-    ~XdgShellToplevel() override;
-
     std::string title() const;
     std::string appId() const;
 

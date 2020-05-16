@@ -34,7 +34,6 @@ class Output::Private : public OutputGlobal
 {
 public:
     Private(Output* q, D_isplay* display);
-    ~Private() override;
 
     void bindInit(Wayland::Resource<Output, OutputGlobal>* bind) override;
 
