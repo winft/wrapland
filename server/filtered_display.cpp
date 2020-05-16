@@ -54,7 +54,7 @@ bool FilteredDisplay::Private::filterCallback(const wl_client* wlClient,
     auto name = QByteArray::fromRawData(interface->name, strlen(interface->name));
 
     return priv->q_ptr->allowInterface(client, name);
-};
+}
 
 FilteredDisplay::FilteredDisplay(QObject* parent)
     : D_isplay(parent)
