@@ -32,8 +32,6 @@ OutputChangesetV1::Private::Private(OutputDeviceV1* outputDevice, OutputChangese
 {
 }
 
-OutputChangesetV1::Private::~Private() = default;
-
 OutputChangesetV1::OutputChangesetV1(OutputDeviceV1* outputDevice, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(outputDevice, this))

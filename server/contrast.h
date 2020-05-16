@@ -39,6 +39,7 @@ public:
 private:
     explicit ContrastManager(D_isplay* display, QObject* parent = nullptr);
     friend class D_isplay;
+
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
@@ -47,8 +48,6 @@ class WRAPLANDSERVER_EXPORT Contrast : public QObject
 {
     Q_OBJECT
 public:
-    ~Contrast() override;
-
     QRegion region() const;
     qreal contrast() const;
     qreal intensity() const;

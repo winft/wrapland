@@ -25,9 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "wayland/global.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 constexpr uint32_t CompositorVersion = 4;
@@ -65,10 +63,7 @@ Compositor::Compositor(D_isplay* display, QObject* parent)
     d_ptr->create();
 }
 
-Compositor::~Compositor()
-{
-    delete d_ptr;
-}
+Compositor::~Compositor() = default;
 
 void Compositor::Private::createSurfaceCallback(wl_client* wlClient,
                                                 wl_resource* wlResource,
@@ -96,5 +91,4 @@ void Compositor::Private::createRegionCallback(wl_client* wlClient,
     Q_EMIT compositor->regionCreated(region);
 }
 
-}
 }

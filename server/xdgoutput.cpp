@@ -21,9 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "output_p.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 const struct zxdg_output_manager_v1_interface XdgOutputManager::Private::s_interface = {
@@ -45,7 +43,9 @@ XdgOutputManager::XdgOutputManager(D_isplay* display, QObject* parent)
     , d_ptr(new Private(display, this))
 {
 }
+
 XdgOutputManager::~XdgOutputManager() = default;
+
 XdgOutput* XdgOutputManager::createXdgOutput(Output* output, QObject* parent)
 {
     if (d_ptr->outputs.find(output) == d_ptr->outputs.end()) {
@@ -190,8 +190,6 @@ XdgOutputV1::XdgOutputV1(Client* client, uint32_t version, uint32_t id, XdgOutpu
 {
 }
 
-XdgOutputV1::~XdgOutputV1() = default;
-
 void XdgOutputV1::setLogicalSize(const QSize& size)
 {
     d_ptr->send<zxdg_output_v1_send_logical_size>(size.width(), size.height());
@@ -207,5 +205,4 @@ void XdgOutputV1::done()
     d_ptr->send<zxdg_output_v1_send_done>();
 }
 
-}
 }

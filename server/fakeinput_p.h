@@ -83,7 +83,7 @@ private:
                                     uint32_t button,
                                     uint32_t state);
 
-    static FakeInputDevice* device(wl_resource* r);
+    static FakeInputDevice* device(wl_resource* wlResource);
 
     static const struct org_kde_kwin_fake_input_interface s_interface;
     static QList<quint32> touchIds;
@@ -93,7 +93,7 @@ class FakeInputDevice::Private
 {
 public:
     Private(wl_resource* wlResource, FakeInput* interface);
-    ~Private();
+
     wl_resource* resource;
     FakeInput* interface;
     bool authenticated = false;

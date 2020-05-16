@@ -40,10 +40,7 @@ class Display;
 class BufferManager
 {
 public:
-    explicit BufferManager(Display* display);
-    BufferManager(BufferManager& manager) = delete;
-
-    ~BufferManager();
+    BufferManager();
 
     Buffer* fromResource(wl_resource* resource) const;
 
@@ -58,8 +55,6 @@ private:
     int m_accessCounter;
 
     std::vector<Buffer*> m_buffers;
-
-    Display* m_display;
 };
 
 }

@@ -24,9 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "data_device_manager.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 
@@ -34,8 +32,6 @@ class WRAPLANDSERVER_EXPORT DataSource : public QObject
 {
     Q_OBJECT
 public:
-    ~DataSource() override;
-
     void accept(std::string mimeType);
     void requestData(std::string mimeType, qint32 fd);
     void cancel();
@@ -62,7 +58,6 @@ private:
     Private* d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::DataSource*)

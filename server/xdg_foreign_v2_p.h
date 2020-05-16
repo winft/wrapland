@@ -22,9 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class D_isplay;
@@ -82,7 +80,6 @@ public:
                   uint32_t id,
                   Surface* surface,
                   const QString& protocolHandle);
-    ~XdgExportedV2() override;
 
     Surface* surface() const;
 
@@ -115,5 +112,4 @@ private:
     Private* d_ptr;
 };
 
-}
 }

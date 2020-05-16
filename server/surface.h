@@ -27,9 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class BlurManager;
 class Blur;
@@ -53,8 +51,6 @@ class WRAPLANDSERVER_EXPORT Surface : public QObject
 {
     Q_OBJECT
 public:
-    ~Surface() override;
-
     void frameRendered(quint32 msec);
 
     QRegion damage() const;
@@ -157,7 +153,6 @@ private:
     Private* d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Surface*)

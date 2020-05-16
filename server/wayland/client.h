@@ -29,13 +29,10 @@ struct wl_resource;
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class D_isplay;
-class Display;
 
 namespace Wayland
 {
@@ -44,7 +41,13 @@ class Display;
 class Client
 {
 public:
-    explicit Client(wl_client* wlClient, Server::Client* clientHandle, Server::Display* legacy);
+    Client(wl_client* wlClient, Server::Client* clientHandle);
+
+    Client(Client&) = delete;
+    Client& operator=(Client) = delete;
+    Client(Client&&) noexcept = default;
+    Client& operator=(Client&&) noexcept = default;
+
     virtual ~Client();
 
     void flush();
@@ -76,11 +79,7 @@ private:
     std::string m_executablePath;
 
     Server::Client* q_ptr;
-
-    // TODO: move this into Server::Client?
-    Server::D_isplay* m_display;
 };
 
-}
 }
 }

@@ -32,9 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class DataDevice::Private : public Wayland::Resource<DataDevice>
@@ -229,8 +227,6 @@ DataDevice::DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat
     : d_ptr(new Private(client, version, id, seat, this))
 {
 }
-
-DataDevice::~DataDevice() = default;
 
 Seat* DataDevice::seat() const
 {
@@ -439,5 +435,4 @@ Client* DataDevice::client() const
     return d_ptr->client()->handle();
 }
 
-}
 }

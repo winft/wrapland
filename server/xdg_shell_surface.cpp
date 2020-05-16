@@ -59,8 +59,6 @@ XdgShellSurface::Private::Private(Client* client,
 {
 }
 
-XdgShellSurface::Private::~Private() = default;
-
 void XdgShellSurface::Private::getTopLevelCallback([[maybe_unused]] wl_client* wlClient,
                                                    wl_resource* wlResource,
                                                    uint32_t id)
@@ -198,8 +196,6 @@ XdgShellSurface::XdgShellSurface(Client* client,
     , d_ptr(new Private(client, version, id, shell, surface, this))
 {
 }
-
-XdgShellSurface::~XdgShellSurface() = default;
 
 bool XdgShellSurface::configurePending() const
 {

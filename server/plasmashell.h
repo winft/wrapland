@@ -54,8 +54,6 @@ class WRAPLANDSERVER_EXPORT PlasmaShellSurface : public QObject
 {
     Q_OBJECT
 public:
-    ~PlasmaShellSurface() override;
-
     Surface* surface() const;
     PlasmaShell* shell() const;
     wl_resource* resource() const;

@@ -33,12 +33,7 @@ struct wl_client;
 struct wl_interface;
 struct wl_resource;
 
-namespace Wrapland
-{
-namespace Server
-{
-
-namespace Wayland
+namespace Wrapland::Server::Wayland
 {
 
 class Client;
@@ -93,6 +88,11 @@ public:
         : Resource(client, version, id, interface, impl, nullptr)
     {
     }
+
+    Resource(Resource&) = delete;
+    Resource& operator=(Resource) = delete;
+    Resource(Resource&&) noexcept = delete;
+    Resource& operator=(Resource&&) noexcept = delete;
 
     virtual ~Resource() = default;
 
@@ -160,7 +160,6 @@ public:
         sendTuple<sender, minVersion>(std::forward<decltype(tuple)>(tuple), indices);
     }
 
-    template<typename... Args>
     void postError(uint32_t code, char const* msg, ...)
     {
         va_list args;
@@ -222,6 +221,4 @@ private:
     wl_resource* m_resource;
 };
 
-}
-}
 }

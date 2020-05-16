@@ -25,9 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <EGL/egl.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class Private : public Wayland::Display
@@ -55,5 +53,4 @@ private:
     D_isplay* q_ptr;
 };
 
-}
 }

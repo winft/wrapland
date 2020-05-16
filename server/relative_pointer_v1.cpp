@@ -29,9 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QRectF>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 RelativePointerManagerV1::Private::Private(RelativePointerManagerV1* q, D_isplay* display)
@@ -89,8 +87,6 @@ RelativePointerV1::Private::Private(Client* client,
 {
 }
 
-RelativePointerV1::Private::~Private() = default;
-
 const struct zwp_relative_pointer_v1_interface RelativePointerV1::Private::s_interface = {
     destroyCallback,
 };
@@ -100,8 +96,6 @@ RelativePointerV1::RelativePointerV1(Client* client, uint32_t version, uint32_t 
     , d_ptr(new Private(client, version, id, this))
 {
 }
-
-RelativePointerV1::~RelativePointerV1() = default;
 
 void RelativePointerV1::relativeMotion(quint64 microseconds,
                                        const QSizeF& delta,
@@ -116,5 +110,4 @@ void RelativePointerV1::relativeMotion(quint64 microseconds,
         wl_fixed_from_double(deltaNonAccelerated.height()));
 }
 
-}
 }

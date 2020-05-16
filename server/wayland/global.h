@@ -35,9 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-server.h>
 #include <wayland-version.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class D_isplay;
@@ -93,12 +91,12 @@ public:
 
     explicit operator wl_global*() const
     {
-        return *m_capsule;
+        return m_capsule->get();
     }
 
     explicit operator wl_global*()
     {
-        return *m_capsule;
+        return m_capsule->get();
     }
 
     static Handle* handle(wl_resource* wlResource)
@@ -200,13 +198,18 @@ protected:
         //       create on ctor call?).
     }
 
+    Global(Global&) = delete;
+    Global& operator=(Global) = delete;
+    Global(Global&&) noexcept = delete;
+    Global& operator=(Global&&) noexcept = delete;
+
     void remove()
     {
         if (!m_capsule->valid()) {
             return;
         }
 #if (WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR > 17)
-        wl_global_remove(*m_capsule);
+        wl_global_remove(m_capsule->get());
 #endif
         // TODO: call destroy with timer.
         destroy(std::move(m_capsule));
@@ -270,6 +273,5 @@ private:
     std::vector<GlobalResource*> m_binds;
 };
 
-}
 }
 }

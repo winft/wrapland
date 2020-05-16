@@ -39,7 +39,6 @@ public:
             XdgShellSurface* surface,
             XdgShellSurface* parent,
             XdgShellPopup* q);
-    ~Private() override;
 
     QRect windowGeometry() const;
     void setWindowGeometry(const QRect& rect);

@@ -111,7 +111,6 @@ public:
             uint32_t id,
             XdgShellToplevel* toplevel,
             XdgDecoration* q);
-    ~Private() override;
 
     XdgDecoration::Mode m_requestedMode = XdgDecoration::Mode::Undefined;
     XdgShellToplevel* toplevel;
@@ -137,8 +136,6 @@ XdgDecoration::Private::Private(Client* client,
     , toplevel{toplevel}
 {
 }
-
-XdgDecoration::Private::~Private() = default;
 
 const struct zxdg_toplevel_decoration_v1_interface XdgDecoration::Private::s_interface = {
     destroyCallback,
@@ -185,8 +182,6 @@ XdgDecoration::XdgDecoration(Client* client,
     , d_ptr(new Private(client, version, id, toplevel, this))
 {
 }
-
-XdgDecoration::~XdgDecoration() = default;
 
 void XdgDecoration::configure(XdgDecoration::Mode mode)
 {

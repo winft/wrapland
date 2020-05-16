@@ -44,10 +44,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <functional>
 
-namespace Wrapland
-{
-
-namespace Server
+namespace Wrapland::Server
 {
 
 Seat::Private::Private(Seat* q, D_isplay* display)
@@ -1534,5 +1531,4 @@ void Seat::setSelection(DataDevice* dataDevice)
     Q_EMIT selectionChanged(dataDevice);
 }
 
-}
 }

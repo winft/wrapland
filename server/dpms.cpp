@@ -116,8 +116,6 @@ Dpms::Dpms(Client* client, uint32_t version, uint32_t id, Output* output)
     });
 }
 
-Dpms::~Dpms() = default;
-
 void Dpms::sendSupported()
 {
     d_ptr->send<org_kde_kwin_dpms_send_supported>(d_ptr->output->isDpmsSupported());

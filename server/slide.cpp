@@ -44,8 +44,6 @@ SlideManager::Private::Private(D_isplay* display, SlideManager* qptr)
     create();
 }
 
-SlideManager::Private::~Private() = default;
-
 void SlideManager::Private::createCallback(wl_client* wlClient,
                                            wl_resource* wlResource,
                                            uint32_t id,
@@ -105,8 +103,6 @@ Slide::Private::Private(Client* client, uint32_t version, uint32_t id, Slide* qp
 {
 }
 
-Slide::Private::~Private() = default;
-
 void Slide::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)
 {
     auto priv = handle(wlResource)->d_ptr;
@@ -134,8 +130,6 @@ Slide::Slide(Client* client, uint32_t version, uint32_t id)
     : d_ptr(new Private(client, version, id, this))
 {
 }
-
-Slide::~Slide() = default;
 
 Slide::Location Slide::location() const
 {

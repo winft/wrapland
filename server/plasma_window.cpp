@@ -643,8 +643,6 @@ PlasmaWindowRes::Private::Private(Wayland::Client* client,
 {
 }
 
-PlasmaWindowRes::Private::~Private() = default;
-
 void PlasmaWindowRes::Private::unmap()
 {
     window = nullptr;
@@ -915,8 +913,6 @@ PlasmaWindowRes::PlasmaWindowRes(Wayland::Client* client,
     , d_ptr(new Private(client, version, id, window, this))
 {
 }
-
-PlasmaWindowRes::~PlasmaWindowRes() = default;
 
 void PlasmaWindowRes::unmap()
 {

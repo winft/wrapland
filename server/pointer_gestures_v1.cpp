@@ -33,9 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "surface.h"
 #include "surface_p.h"
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 PointerGesturesV1::Private::Private(PointerGesturesV1* q, D_isplay* display)
@@ -111,8 +109,6 @@ PointerSwipeGestureV1::Private::Private(Client* client,
 {
 }
 
-PointerSwipeGestureV1::Private::~Private() = default;
-
 const struct zwp_pointer_gesture_swipe_v1_interface PointerSwipeGestureV1::Private::s_interface = {
     destroyCallback,
 };
@@ -154,8 +150,6 @@ PointerSwipeGestureV1::PointerSwipeGestureV1(Client* client,
 {
 }
 
-PointerSwipeGestureV1::~PointerSwipeGestureV1() = default;
-
 PointerPinchGestureV1::Private::Private(Client* client,
                                         uint32_t version,
                                         uint32_t id,
@@ -171,8 +165,6 @@ PointerPinchGestureV1::Private::Private(Client* client,
 {
 }
 
-PointerPinchGestureV1::Private::~Private() = default;
-
 const struct zwp_pointer_gesture_pinch_v1_interface PointerPinchGestureV1::Private::s_interface = {
     destroyCallback,
 };
@@ -184,8 +176,6 @@ PointerPinchGestureV1::PointerPinchGestureV1(Client* client,
     : d_ptr(new Private(client, version, id, pointer, this))
 {
 }
-
-PointerPinchGestureV1::~PointerPinchGestureV1() = default;
 
 void PointerPinchGestureV1::start(quint32 serial, quint32 fingerCount)
 {
@@ -218,5 +208,4 @@ void PointerPinchGestureV1::cancel(quint32 serial)
     end(serial, true);
 }
 
-}
 }

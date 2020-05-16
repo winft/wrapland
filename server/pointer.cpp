@@ -39,10 +39,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-
-namespace Server
+namespace Wrapland::Server
 {
 
 QPointF surfacePosition(Surface* surface)
@@ -320,8 +317,6 @@ Pointer::Pointer(Client* client, uint32_t version, uint32_t id, Seat* seat)
 {
 }
 
-Pointer::~Pointer() = default;
-
 void Pointer::setFocusedSurface(quint32 serial, Surface* surface)
 {
     d_ptr->setFocusedSurface(serial, surface);
@@ -502,5 +497,4 @@ QPointer<Surface> Cursor::surface() const
     return d_ptr->surface;
 }
 
-}
 }

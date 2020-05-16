@@ -54,8 +54,6 @@ public:
     };
     Q_DECLARE_FLAGS(ConstraintAdjustments, ConstraintAdjustment)
 
-    ~XdgShellSurface() override;
-
     bool configurePending() const;
 
     Surface* surface() const;

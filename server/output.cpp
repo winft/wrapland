@@ -39,8 +39,6 @@ Output::Private::Private(Output* q, D_isplay* display)
 {
 }
 
-Output::Private::~Private() = default;
-
 const struct wl_output_interface Output::Private::s_interface = {resourceDestroyCallback};
 
 Output::Output(D_isplay* display, QObject* parent)
@@ -83,7 +81,6 @@ Output::~Output()
     if (d_ptr->displayHandle) {
         d_ptr->displayHandle->removeOutput(this);
     }
-    delete d_ptr;
 }
 
 QSize Output::pixelSize() const

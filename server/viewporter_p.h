@@ -41,7 +41,6 @@ class Viewporter::Private : public Wayland::Global<Viewporter>
 {
 public:
     Private(D_isplay* display, Viewporter* qptr);
-    ~Private() override;
 
 private:
     void getViewport(wl_resource* wlResource, uint32_t id, wl_resource* wlSurface);
@@ -58,7 +57,6 @@ class Viewport::Private : public Wayland::Resource<Viewport>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, Surface* _surface, Viewport* q);
-    ~Private() override;
 
     Surface* surface;
 

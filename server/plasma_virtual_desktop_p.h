@@ -44,7 +44,6 @@ class PlasmaVirtualDesktopManager::Private : public PlasmaVirtualDesktopManagerG
 {
 public:
     Private(D_isplay* display, PlasmaVirtualDesktopManager* q);
-    ~Private() override;
 
     void bindInit(PlasmaVirtualDesktopManagerBind* bind) override;
 
@@ -100,7 +99,6 @@ public:
                             uint32_t version,
                             uint32_t id,
                             PlasmaVirtualDesktop* parent);
-    ~PlasmaVirtualDesktopRes() override;
 
     void activated();
     void done();
@@ -124,7 +122,6 @@ public:
             uint32_t id,
             PlasmaVirtualDesktop* virtualDesktop,
             PlasmaVirtualDesktopRes* q);
-    ~Private() override;
 
     PlasmaVirtualDesktop* virtualDesktop;
 

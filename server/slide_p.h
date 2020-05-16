@@ -38,7 +38,6 @@ class SlideManager::Private : public SlideManagerGlobal
 {
 public:
     Private(D_isplay* display, SlideManager* qptr);
-    ~Private() override;
 
 private:
     void
@@ -57,7 +56,6 @@ class Slide::Private : public Wayland::Resource<Slide>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, Slide* qptr);
-    ~Private() override;
 
     Slide::Location pendingLocation;
     Slide::Location currentLocation;

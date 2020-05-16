@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <Wrapland/Server/wraplandserver_export.h>
+#include <memory>
 
 namespace Wrapland::Server
 {
@@ -31,8 +32,6 @@ class WRAPLANDSERVER_EXPORT TextInputV2 : public QObject
 {
     Q_OBJECT
 public:
-    ~TextInputV2() override;
-
     enum class ContentHint : uint32_t {
         None = 0,
         AutoCompletion = 1 << 0,

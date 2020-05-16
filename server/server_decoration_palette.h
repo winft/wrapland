@@ -53,8 +53,6 @@ class WRAPLANDSERVER_EXPORT ServerSideDecorationPalette : public QObject
 {
     Q_OBJECT
 public:
-    ~ServerSideDecorationPalette() override;
-
     QString palette() const;
     Surface* surface() const;
 

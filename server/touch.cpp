@@ -28,10 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-
-namespace Server
+namespace Wrapland::Server
 {
 
 class Touch::Private : public Wayland::Resource<Touch>
@@ -58,8 +55,6 @@ Touch::Touch(Client* client, uint32_t version, uint32_t id, Seat* seat)
     , d_ptr(new Private(client, version, id, seat, this))
 {
 }
-
-Touch::~Touch() = default;
 
 void Touch::cancel()
 {
@@ -108,5 +103,4 @@ Client* Touch::client() const
     return d_ptr->client()->handle();
 }
 
-}
 }

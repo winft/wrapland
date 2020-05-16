@@ -23,9 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 class Client;
 class Seat;
@@ -38,8 +36,6 @@ class WRAPLANDSERVER_EXPORT Touch : public QObject
 {
     Q_OBJECT
 public:
-    ~Touch() override;
-
     Client* client() const;
 
 Q_SIGNALS:
@@ -59,7 +55,6 @@ private:
     Private* d_ptr;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Touch*)

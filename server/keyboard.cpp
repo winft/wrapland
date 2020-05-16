@@ -29,10 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
-namespace Wrapland
-{
-
-namespace Server
+namespace Wrapland::Server
 {
 
 Keyboard::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Keyboard* q)
@@ -107,8 +104,6 @@ Keyboard::Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat)
 {
 }
 
-Keyboard::~Keyboard() = default;
-
 void Keyboard::setKeymap(int fd, quint32 size)
 {
     d_ptr->sendKeymap(fd, size);
@@ -176,5 +171,4 @@ Client* Keyboard::client() const
     return d_ptr->client()->handle();
 }
 
-}
 }

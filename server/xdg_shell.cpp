@@ -40,8 +40,6 @@ XdgShell::Private::Private(XdgShell* q, D_isplay* display)
 {
 }
 
-XdgShell::Private::~Private() = default;
-
 const struct xdg_wm_base_interface XdgShell::Private::s_interface = {
     destroyCallback,
     createPositionerCallback,
