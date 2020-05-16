@@ -25,7 +25,7 @@ namespace Wrapland::Server
 {
 
 const struct zxdg_output_manager_v1_interface XdgOutputManager::Private::s_interface = {
-    destroyCallback,
+    resourceDestroyCallback,
     getXdgOutputCallback,
 };
 
@@ -61,12 +61,6 @@ XdgOutput* XdgOutputManager::createXdgOutput(Output* output, QObject* parent)
         });
     }
     return d_ptr->outputs[output];
-}
-
-void XdgOutputManager::Private::destroyCallback([[maybe_unused]] wl_client* client,
-                                                wl_resource* resource)
-{
-    wl_resource_destroy(resource);
 }
 
 void XdgOutputManager::Private::getXdgOutputCallback([[maybe_unused]] wl_client* wlClient,

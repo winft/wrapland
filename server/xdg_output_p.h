@@ -48,7 +48,6 @@ public:
     std::map<Output*, XdgOutput*> outputs;
 
 private:
-    static void destroyCallback(wl_client* client, wl_resource* resource);
     static void getXdgOutputCallback(wl_client* client,
                                      wl_resource* resource,
                                      uint32_t id,
