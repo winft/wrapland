@@ -36,7 +36,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/appmenu.h"
 
-Q_DECLARE_METATYPE(Wrapland::Server::AppMenu::InterfaceAddress)
+Q_DECLARE_METATYPE(Wrapland::Server::Appmenu::InterfaceAddress)
 
 class TestAppmenu : public QObject
 {
@@ -52,7 +52,7 @@ private Q_SLOTS:
 private:
     Wrapland::Server::D_isplay *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::AppMenuManager *m_appmenuManagerInterface;
+    Wrapland::Server::AppmenuManager *m_appmenuManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
     Wrapland::Client::AppMenuManager *m_appmenuManager;
@@ -75,7 +75,7 @@ TestAppmenu::TestAppmenu(QObject *parent)
 
 void TestAppmenu::init()
 {
-    qRegisterMetaType<Wrapland::Server::AppMenu::InterfaceAddress>();
+    qRegisterMetaType<Wrapland::Server::Appmenu::InterfaceAddress>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::D_isplay(this);
@@ -120,7 +120,7 @@ void TestAppmenu::init()
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
 
-    m_appmenuManagerInterface = m_display->createAppMenuManager(m_display);
+    m_appmenuManagerInterface = m_display->createAppmenuManager(m_display);
 
     QVERIFY(appmenuSpy.wait());
     m_appmenuManager = registry.createAppMenuManager(appmenuSpy.first().first().value<quint32>(), appmenuSpy.first().last().value<quint32>(), this);
@@ -161,32 +161,32 @@ void TestAppmenu::testCreateAndSet()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy appMenuCreated(m_appmenuManagerInterface, &Wrapland::Server::AppMenuManager::appMenuCreated);
+    QSignalSpy appmenuCreated(m_appmenuManagerInterface, &Wrapland::Server::AppmenuManager::appmenuCreated);
 
-    QVERIFY(!m_appmenuManagerInterface->appMenuForSurface(serverSurface));
+    QVERIFY(!m_appmenuManagerInterface->appmenuForSurface(serverSurface));
 
     auto appmenu = m_appmenuManager->create(surface.get(), surface.get());
-    QVERIFY(appMenuCreated.wait());
-    auto appMenuInterface = appMenuCreated.first().first().value<Wrapland::Server::AppMenu*>();
-    QCOMPARE(m_appmenuManagerInterface->appMenuForSurface(serverSurface), appMenuInterface);
+    QVERIFY(appmenuCreated.wait());
+    auto serverAppmenu = appmenuCreated.first().first().value<Wrapland::Server::Appmenu*>();
+    QCOMPARE(m_appmenuManagerInterface->appmenuForSurface(serverSurface), serverAppmenu);
 
-    QCOMPARE(appMenuInterface->address().serviceName, QString());
-    QCOMPARE(appMenuInterface->address().objectPath, QString());
+    QCOMPARE(serverAppmenu->address().serviceName, QString());
+    QCOMPARE(serverAppmenu->address().objectPath, QString());
 
-    QSignalSpy appMenuChangedSpy(appMenuInterface, &Wrapland::Server::AppMenu::addressChanged);
+    QSignalSpy appMenuChangedSpy(serverAppmenu, &Wrapland::Server::Appmenu::addressChanged);
 
     appmenu->setAddress("net.somename", "/test/path");
 
     QVERIFY(appMenuChangedSpy.wait());
-    QCOMPARE(appMenuInterface->address().serviceName, QString("net.somename"));
-    QCOMPARE(appMenuInterface->address().objectPath, QString("/test/path"));
+    QCOMPARE(serverAppmenu->address().serviceName, QString("net.somename"));
+    QCOMPARE(serverAppmenu->address().objectPath, QString("/test/path"));
 
     // and destroy
-    QSignalSpy destroyedSpy(appMenuInterface, &QObject::destroyed);
+    QSignalSpy destroyedSpy(serverAppmenu, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     delete appmenu;
     QVERIFY(destroyedSpy.wait());
-    QVERIFY(!m_appmenuManagerInterface->appMenuForSurface(serverSurface));
+    QVERIFY(!m_appmenuManagerInterface->appmenuForSurface(serverSurface));
 }
 
 QTEST_GUILESS_MAIN(TestAppmenu)

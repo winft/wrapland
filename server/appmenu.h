@@ -29,28 +29,28 @@ namespace Wrapland::Server
 
 class D_isplay;
 class Surface;
-class AppMenu;
+class Appmenu;
 class Client;
 
-class WRAPLANDSERVER_EXPORT AppMenuManager : public QObject
+class WRAPLANDSERVER_EXPORT AppmenuManager : public QObject
 {
     Q_OBJECT
 public:
-    ~AppMenuManager() override;
+    ~AppmenuManager() override;
 
-    AppMenu* appMenuForSurface(Surface*);
+    Appmenu* appmenuForSurface(Surface*);
 
 Q_SIGNALS:
-    void appMenuCreated(Wrapland::Server::AppMenu*);
+    void appmenuCreated(Wrapland::Server::Appmenu*);
 
 private:
-    explicit AppMenuManager(D_isplay* display, QObject* parent = nullptr);
+    explicit AppmenuManager(D_isplay* display, QObject* parent = nullptr);
     friend class D_isplay;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT AppMenu : public QObject
+class WRAPLANDSERVER_EXPORT Appmenu : public QObject
 {
     Q_OBJECT
 public:
@@ -63,12 +63,12 @@ public:
     Surface* surface() const;
 
 Q_SIGNALS:
-    void addressChanged(Wrapland::Server::AppMenu::InterfaceAddress);
+    void addressChanged(Wrapland::Server::Appmenu::InterfaceAddress);
     void resourceDestroyed();
 
 private:
-    explicit AppMenu(Client* client, uint32_t version, uint32_t id, Surface* s);
-    friend class AppMenuManager;
+    explicit Appmenu(Client* client, uint32_t version, uint32_t id, Surface* s);
+    friend class AppmenuManager;
 
     class Private;
     Private* d_ptr;

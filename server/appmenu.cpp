@@ -33,27 +33,27 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-const struct org_kde_kwin_appmenu_manager_interface AppMenuManager::Private::s_interface = {
+const struct org_kde_kwin_appmenu_manager_interface AppmenuManager::Private::s_interface = {
     createCallback,
 };
 
-AppMenuManager::Private::Private(D_isplay* display, AppMenuManager* qptr)
-    : AppMenuManagerGlobal(qptr, display, &org_kde_kwin_appmenu_manager_interface, &s_interface)
+AppmenuManager::Private::Private(D_isplay* display, AppmenuManager* qptr)
+    : AppmenuManagerGlobal(qptr, display, &org_kde_kwin_appmenu_manager_interface, &s_interface)
 {
     create();
 }
 
-AppMenuManager::Private::~Private() = default;
+AppmenuManager::Private::~Private() = default;
 
-AppMenuManager::AppMenuManager(D_isplay* display, QObject* parent)
+AppmenuManager::AppmenuManager(D_isplay* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {
 }
 
-AppMenuManager::~AppMenuManager() = default;
+AppmenuManager::~AppmenuManager() = default;
 
-void AppMenuManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
+void AppmenuManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
                                              wl_resource* wlResource,
                                              uint32_t id,
                                              wl_resource* wlSurface)
@@ -62,7 +62,7 @@ void AppMenuManager::Private::createCallback([[maybe_unused]] wl_client* wlClien
     auto bind = priv->getBind(wlResource);
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
-    auto appmenu = new AppMenu(bind->client()->handle(), bind->version(), id, surface);
+    auto appmenu = new Appmenu(bind->client()->handle(), bind->version(), id, surface);
 
     if (!appmenu->d_ptr->resource()) {
         wl_resource_post_no_memory(wlResource);
@@ -71,25 +71,25 @@ void AppMenuManager::Private::createCallback([[maybe_unused]] wl_client* wlClien
     }
     priv->appmenus.push_back(appmenu);
 
-    QObject::connect(appmenu, &AppMenu::resourceDestroyed, priv->handle(), [=]() {
+    QObject::connect(appmenu, &Appmenu::resourceDestroyed, priv->handle(), [=]() {
         priv->appmenus.erase(std::remove(priv->appmenus.begin(), priv->appmenus.end(), appmenu),
                              priv->appmenus.end());
     });
 
-    Q_EMIT priv->handle()->appMenuCreated(appmenu);
+    Q_EMIT priv->handle()->appmenuCreated(appmenu);
 }
 
-const struct org_kde_kwin_appmenu_interface AppMenu::Private::s_interface = {
+const struct org_kde_kwin_appmenu_interface Appmenu::Private::s_interface = {
     setAddressCallback,
     destroyCallback,
 };
 
-AppMenu::Private::Private(Client* client,
+Appmenu::Private::Private(Client* client,
                           uint32_t version,
                           uint32_t id,
                           Surface* surface,
-                          AppMenu* qptr)
-    : Wayland::Resource<AppMenu>(client,
+                          Appmenu* qptr)
+    : Wayland::Resource<Appmenu>(client,
                                  version,
                                  id,
                                  &org_kde_kwin_appmenu_interface,
@@ -99,14 +99,14 @@ AppMenu::Private::Private(Client* client,
 {
 }
 
-AppMenu::Private::~Private() = default;
+Appmenu::Private::~Private() = default;
 
-AppMenu::AppMenu(Client* client, uint32_t version, uint32_t id, Surface* surface)
+Appmenu::Appmenu(Client* client, uint32_t version, uint32_t id, Surface* surface)
     : d_ptr(new Private(client, version, id, surface, this))
 {
 }
 
-void AppMenu::Private::setAddressCallback([[maybe_unused]] wl_client* wlClient,
+void Appmenu::Private::setAddressCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,
                                           const char* service_name,
                                           const char* object_path)
@@ -123,9 +123,9 @@ void AppMenu::Private::setAddressCallback([[maybe_unused]] wl_client* wlClient,
     Q_EMIT priv->handle()->addressChanged(priv->address);
 }
 
-AppMenu* AppMenuManager::appMenuForSurface(Surface* surface)
+Appmenu* AppmenuManager::appmenuForSurface(Surface* surface)
 {
-    for (AppMenu* menu : d_ptr->appmenus) {
+    for (auto menu : d_ptr->appmenus) {
         if (menu->surface() == surface) {
             return menu;
         }
@@ -133,12 +133,12 @@ AppMenu* AppMenuManager::appMenuForSurface(Surface* surface)
     return nullptr;
 }
 
-AppMenu::InterfaceAddress AppMenu::address() const
+Appmenu::InterfaceAddress Appmenu::address() const
 {
     return d_ptr->address;
 }
 
-Surface* AppMenu::surface() const
+Surface* Appmenu::surface() const
 {
     return d_ptr->surface;
 }

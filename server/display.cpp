@@ -301,9 +301,9 @@ IdleInhibitManagerV1* D_isplay::createIdleInhibitManager(QObject* parent)
     return new IdleInhibitManagerV1(this, parent);
 }
 
-AppMenuManager* D_isplay::createAppMenuManager(QObject* parent)
+AppmenuManager* D_isplay::createAppmenuManager(QObject* parent)
 {
-    return new AppMenuManager(this, parent);
+    return new AppmenuManager(this, parent);
 }
 
 ServerSideDecorationPaletteManager*

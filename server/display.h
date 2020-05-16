@@ -65,7 +65,7 @@ class RelativePointerManagerV1;
 class PointerGesturesV1;
 class PointerConstraintsV1;
 class XdgForeign;
-class AppMenuManager;
+class AppmenuManager;
 class ServerSideDecorationPaletteManager;
 class Viewporter;
 class XdgOutputManager;
@@ -146,7 +146,7 @@ public:
     XdgForeign* createXdgForeign(QObject* parent = nullptr);
 
     IdleInhibitManagerV1* createIdleInhibitManager(QObject* parent = nullptr);
-    AppMenuManager* createAppMenuManager(QObject* parent = nullptr);
+    AppmenuManager* createAppmenuManager(QObject* parent = nullptr);
 
     ServerSideDecorationPaletteManager* createServerSideDecorationPaletteManager(QObject* parent
                                                                                  = nullptr);
