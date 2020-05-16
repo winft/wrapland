@@ -63,7 +63,7 @@ private Q_SLOTS:
     void testDestroyParentSurface();
 
 private:
-    Wrapland::Server::D_isplay* m_display;
+    Wrapland::Server::Display* m_display;
     Wrapland::Server::Compositor* m_serverCompositor;
     Wrapland::Server::Subcompositor* m_serverSubcompositor;
     Wrapland::Client::ConnectionThread* m_connection;
@@ -94,7 +94,7 @@ void TestSubsurface::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

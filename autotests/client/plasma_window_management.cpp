@@ -86,7 +86,7 @@ private Q_SLOTS:
     void testPid();
 
 private:
-    Srv::D_isplay *m_display;
+    Srv::Display *m_display;
     Srv::Compositor *m_serverCompositor;
     Srv::PlasmaWindowManager *m_windowManagementInterface;
     Srv::PlasmaWindow *m_windowInterface;
@@ -121,7 +121,7 @@ void TestWindowManagement::init()
     qRegisterMetaType<Srv::PlasmaWindowManager::ShowingDesktopState>
             ("ShowingDesktopState");
 
-    m_display = new Srv::D_isplay(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

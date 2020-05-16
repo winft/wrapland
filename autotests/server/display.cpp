@@ -52,7 +52,7 @@ void TestServerDisplay::init()
 
 void TestServerDisplay::testSocketName()
 {
-    D_isplay display;
+    Display display;
     QVERIFY(display.socketName().empty());
     const std::string testSName = "fooBar";
     display.setSocketName(testSName);
@@ -66,8 +66,8 @@ void TestServerDisplay::testStartStop()
     QVERIFY(runtimeDir.exists());
     QVERIFY(!runtimeDir.exists(testSocketName.c_str()));
 
-    D_isplay display;
-    QSignalSpy runningSpy(&display, &D_isplay::started);
+    Display display;
+    QSignalSpy runningSpy(&display, &Display::started);
     QVERIFY(runningSpy.isValid());
     display.setSocketName(testSocketName);
     QVERIFY(!display.running());
@@ -84,7 +84,7 @@ void TestServerDisplay::testStartStop()
 
 void TestServerDisplay::testAddRemoveOutput()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(std::string("kwin-wayland-server-display-test-output-0"));
     display.start();
 
@@ -110,13 +110,13 @@ void TestServerDisplay::testAddRemoveOutput()
 
 void TestServerDisplay::testClientConnection()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(std::string("kwin-wayland-server-display-test-client-connection"));
     display.start();
 
-    QSignalSpy connectedSpy(&display, &D_isplay::clientConnected);
+    QSignalSpy connectedSpy(&display, &Display::clientConnected);
     QVERIFY(connectedSpy.isValid());
-    QSignalSpy disconnectedSpy(&display, &D_isplay::clientDisconnected);
+    QSignalSpy disconnectedSpy(&display, &Display::clientDisconnected);
     QVERIFY(disconnectedSpy.isValid());
 
     int sv[2];
@@ -195,8 +195,8 @@ void TestServerDisplay::testClientConnection()
 
 void TestServerDisplay::testConnectNoSocket()
 {
-    D_isplay display;
-    display.start(D_isplay::StartMode::ConnectClientsOnly);
+    Display display;
+    display.start(Display::StartMode::ConnectClientsOnly);
     QVERIFY(display.running());
 
     // let's try connecting a client
@@ -212,7 +212,7 @@ void TestServerDisplay::testConnectNoSocket()
 
 void TestServerDisplay::testOutputManagement()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(std::string("wrapland-test-0"));
     display.start();
     display.createOutputManagementV1(this);
@@ -224,12 +224,12 @@ void TestServerDisplay::testAutoSocketName()
     QVERIFY(runtimeDir.isValid());
     QVERIFY(qputenv("XDG_RUNTIME_DIR", runtimeDir.path().toUtf8()));
 
-    D_isplay display0;
+    Display display0;
     display0.start();
     QVERIFY(display0.running());
     QCOMPARE(display0.socketName(), std::string("wayland-0"));
 
-    D_isplay display1;
+    Display display1;
     display1.start();
     QVERIFY(display1.running());
     QCOMPARE(display1.socketName(), std::string("wayland-1"));

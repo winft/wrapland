@@ -54,7 +54,7 @@ private Q_SLOTS:
     void testWhileDestroying();
 
 private:
-    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Display *m_display = nullptr;
     Wrapland::Server::Compositor *m_serverCompositor = nullptr;
     Wrapland::Server::PlasmaShell *m_plasmaShellInterface = nullptr;
 
@@ -71,7 +71,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-wayland-plasma
 void TestPlasmaShell::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

@@ -42,7 +42,7 @@ using PlasmaShellGlobal = Wayland::Global<PlasmaShell, PlasmaShellVersion>;
 class PlasmaShell::Private : public PlasmaShellGlobal
 {
 public:
-    Private(D_isplay* display, PlasmaShell* qptr);
+    Private(Display* display, PlasmaShell* qptr);
     ~Private() override;
 
     QList<PlasmaShellSurface*> surfaces;

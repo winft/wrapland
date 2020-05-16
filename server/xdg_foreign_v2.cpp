@@ -40,7 +40,7 @@ class Q_DECL_HIDDEN XdgExporterV2::Private
     : public Wayland::Global<XdgExporterV2, XdgExporterV2Version>
 {
 public:
-    Private(XdgExporterV2* q, D_isplay* display);
+    Private(XdgExporterV2* q, Display* display);
 
     QHash<QString, XdgExportedV2*> exportedSurfaces;
 
@@ -53,7 +53,7 @@ private:
     static const struct zxdg_exporter_v2_interface s_interface;
 };
 
-XdgExporterV2::Private::Private(XdgExporterV2* q, D_isplay* display)
+XdgExporterV2::Private::Private(XdgExporterV2* q, Display* display)
     : Wayland::Global<XdgExporterV2, XdgExporterV2Version>(q,
                                                            display,
                                                            &zxdg_exporter_v2_interface,
@@ -98,7 +98,7 @@ void XdgExporterV2::Private::exportToplevelCallback([[maybe_unused]] wl_client* 
     priv->exportedSurfaces[protocolHandle] = exported;
 }
 
-XdgExporterV2::XdgExporterV2(D_isplay* display, QObject* parent)
+XdgExporterV2::XdgExporterV2(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {
@@ -116,7 +116,7 @@ class Q_DECL_HIDDEN XdgImporterV2::Private
     : public Wayland::Global<XdgImporterV2, XdgImporterV2Version>
 {
 public:
-    Private(XdgImporterV2* q, D_isplay* display);
+    Private(XdgImporterV2* q, Display* display);
 
     void parentChange(XdgImportedV2* imported, XdgExportedV2* exported);
 
@@ -176,7 +176,7 @@ void XdgImporterV2::Private::importToplevelCallback(wl_client* wlClient,
             });
 }
 
-XdgImporterV2::Private::Private(XdgImporterV2* q, D_isplay* display)
+XdgImporterV2::Private::Private(XdgImporterV2* q, Display* display)
     : Wayland::Global<XdgImporterV2, XdgImporterV2Version>(q,
                                                            display,
                                                            &zxdg_importer_v2_interface,
@@ -197,7 +197,7 @@ void XdgImporterV2::Private::childChange(Surface* parent, Surface* prevChild, Su
     Q_EMIT handle()->parentChanged(parent, nextChild);
 }
 
-XdgImporterV2::XdgImporterV2(D_isplay* display, QObject* parent)
+XdgImporterV2::XdgImporterV2(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

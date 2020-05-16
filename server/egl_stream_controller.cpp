@@ -34,7 +34,7 @@ const struct wl_eglstream_controller_interface EglStreamController::Private::s_i
     attachStreamConsumerAttribs,
 };
 
-EglStreamController::Private::Private(D_isplay* display,
+EglStreamController::Private::Private(Display* display,
                                       const wl_interface* interface,
                                       EglStreamController* qptr)
     : EglStreamControllerGlobal(qptr, display, interface, &s_interface)
@@ -61,7 +61,7 @@ void EglStreamController::Private::attachStreamConsumerAttribs([[maybe_unused]] 
     Q_EMIT handle(wlResource)->streamConsumerAttached(surface, eglStream, attribs);
 }
 
-EglStreamController::EglStreamController(D_isplay* display, QObject* parent)
+EglStreamController::EglStreamController(Display* display, QObject* parent)
     : QObject(parent)
 {
     // libnvidia-egl-wayland.so.1 may not be present on all systems, so we load it dynamically

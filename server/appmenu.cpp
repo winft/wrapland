@@ -37,7 +37,7 @@ const struct org_kde_kwin_appmenu_manager_interface AppmenuManager::Private::s_i
     createCallback,
 };
 
-AppmenuManager::Private::Private(D_isplay* display, AppmenuManager* qptr)
+AppmenuManager::Private::Private(Display* display, AppmenuManager* qptr)
     : AppmenuManagerGlobal(qptr, display, &org_kde_kwin_appmenu_manager_interface, &s_interface)
 {
     create();
@@ -45,7 +45,7 @@ AppmenuManager::Private::Private(D_isplay* display, AppmenuManager* qptr)
 
 AppmenuManager::Private::~Private() = default;
 
-AppmenuManager::AppmenuManager(D_isplay* display, QObject* parent)
+AppmenuManager::AppmenuManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

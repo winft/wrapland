@@ -44,7 +44,7 @@ const struct org_kde_kwin_fake_input_interface FakeInput::Private::s_interface =
     keyboardKeyCallback,
 };
 
-FakeInput::Private::Private(D_isplay* display, FakeInput* q)
+FakeInput::Private::Private(Display* display, FakeInput* q)
     : FakeInputGlobal(q, display, &org_kde_kwin_fake_input_interface, &s_interface)
 {
     create();
@@ -284,7 +284,7 @@ void FakeInput::Private::keyboardKeyCallback([[maybe_unused]] wl_client* wlClien
     }
 }
 
-FakeInput::FakeInput(D_isplay* display, QObject* parent)
+FakeInput::FakeInput(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

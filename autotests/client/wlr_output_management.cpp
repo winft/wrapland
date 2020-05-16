@@ -47,7 +47,7 @@ private Q_SLOTS:
     void cleanup();
 
 private:
-    Srv::D_isplay *m_display;
+    Srv::Display *m_display;
     Srv::OutputManagementV1 *m_outputManagementInterface;
     QList<Srv::OutputDeviceV1 *> m_serverOutputs;
 
@@ -83,7 +83,7 @@ TestWlrOutputManagement::TestWlrOutputManagement(QObject *parent)
 
 void TestWlrOutputManagement::init()
 {
-    m_display = new Srv::D_isplay(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->createCompositor(this);
 

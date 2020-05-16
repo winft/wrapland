@@ -34,7 +34,7 @@ class XdgShellPositioner;
 class XdgShell::Private : public Wayland::Global<XdgShell>
 {
 public:
-    Private(XdgShell* q, D_isplay* display);
+    Private(XdgShell* q, Display* display);
 
     void setupTimer(uint32_t serial);
 

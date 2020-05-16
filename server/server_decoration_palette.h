@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class Surface;
 class Client;
 class ServerSideDecorationPalette;
@@ -43,8 +43,8 @@ Q_SIGNALS:
     void paletteCreated(Wrapland::Server::ServerSideDecorationPalette*);
 
 private:
-    explicit ServerSideDecorationPaletteManager(D_isplay* display, QObject* parent = nullptr);
-    friend class D_isplay;
+    explicit ServerSideDecorationPaletteManager(Display* display, QObject* parent = nullptr);
+    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

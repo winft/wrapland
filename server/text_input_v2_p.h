@@ -37,7 +37,7 @@ using TextInputManagerV2Global = Wayland::Global<TextInputManagerV2, TextInputMa
 class TextInputManagerV2::Private : public TextInputManagerV2Global
 {
 public:
-    Private(D_isplay* display, TextInputManagerV2* q);
+    Private(Display* display, TextInputManagerV2* q);
 
 private:
     static void getTextInputCallback(wl_client* wlClient,

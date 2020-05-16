@@ -83,7 +83,7 @@ private Q_SLOTS:
     void testWindowGeometry();
 
 private:
-    Server::D_isplay* m_display;
+    Server::Display* m_display;
     Server::Compositor* m_serverCompositor;
     Server::XdgShell* m_serverXdgShell;
     Server::Output* m_o1Interface;
@@ -133,7 +133,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-xdg-shell-0");
 
 void XdgShellTest::init()
 {
-    m_display = new Server::D_isplay(this);
+    m_display = new Server::Display(this);
     m_display->setSocketName(s_socketName);
 
     m_display->start();

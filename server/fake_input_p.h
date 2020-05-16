@@ -40,7 +40,7 @@ using FakeInputBind = Wayland::Resource<FakeInput, FakeInputGlobal>;
 class FakeInput::Private : public FakeInputGlobal
 {
 public:
-    Private(D_isplay* display, FakeInput* q);
+    Private(Display* display, FakeInput* q);
     ~Private() override;
 
     std::vector<FakeInputDevice*> devices;

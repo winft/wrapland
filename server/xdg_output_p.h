@@ -36,14 +36,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class OutputInterface;
 class XdgOutput;
 
 class XdgOutputManager::Private : public Wayland::Global<XdgOutputManager>
 {
 public:
-    Private(D_isplay* display, XdgOutputManager* qptr);
+    Private(Display* display, XdgOutputManager* qptr);
 
     std::map<Output*, XdgOutput*> outputs;
 

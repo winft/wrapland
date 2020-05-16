@@ -56,7 +56,7 @@ private Q_SLOTS:
     void testRemoveRequested();
 
 private:
-    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Display *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
     Wrapland::Server::PlasmaVirtualDesktopManager *m_serverPlasmaVirtualDesktopManager;
     Wrapland::Server::PlasmaWindowManager *m_serverWindowManager;
@@ -88,7 +88,7 @@ TestVirtualDesktop::TestVirtualDesktop(QObject *parent)
 
 void TestVirtualDesktop::init()
 {
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

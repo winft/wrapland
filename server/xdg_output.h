@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-class D_isplay;
+class Display;
 class OutputInterface;
 class XdgOutput;
 
@@ -39,8 +39,8 @@ public:
     XdgOutput* createXdgOutput(Output* output, QObject* parent);
 
 private:
-    explicit XdgOutputManager(D_isplay* display, QObject* parent = nullptr);
-    friend class D_isplay;
+    explicit XdgOutputManager(Display* display, QObject* parent = nullptr);
+    friend class Display;
 
     class Private;
     std::unique_ptr<Private> d_ptr;

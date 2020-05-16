@@ -67,7 +67,7 @@ private:
     void testEnable();
     void applyPendingChanges(Srv::OutputConfigurationV1 *configurationInterface);
 
-    Srv::D_isplay *m_display;
+    Srv::Display *m_display;
     Srv::OutputManagementV1 *m_outputManagementInterface;
     QList<Srv::OutputDeviceV1 *> m_serverOutputs;
 
@@ -106,7 +106,7 @@ void TestOutputManagement::init()
     using namespace Wrapland::Server;
 
     delete m_display;
-    m_display = new D_isplay(this);
+    m_display = new Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

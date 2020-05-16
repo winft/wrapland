@@ -48,7 +48,7 @@ using SeatBind = Wayland::Resource<Seat, SeatGlobal>;
 class Seat::Private : public SeatGlobal
 {
 public:
-    Private(Seat* q, D_isplay* d);
+    Private(Seat* q, Display* d);
 
     void bindInit(Wayland::Resource<Seat, SeatGlobal>* bind) override;
 

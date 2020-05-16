@@ -48,7 +48,7 @@ private Q_SLOTS:
     void testMultiplePlasmaShellSurfacesForSurface();
 
 private:
-    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Display *m_display = nullptr;
     Wrapland::Server::Compositor *m_serverCompositor = nullptr;
     Wrapland::Server::XdgShell *m_serverXdgShell = nullptr;
     Wrapland::Server::PlasmaShell *m_psi = nullptr;
@@ -65,7 +65,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-error-0");
 
 void ErrorTest::init()
 {
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

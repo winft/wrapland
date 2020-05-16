@@ -58,7 +58,7 @@ private Q_SLOTS:
     void testKeyboardKeyLinux();
 
 private:
-    Srv::D_isplay *m_display = nullptr;
+    Srv::Display *m_display = nullptr;
     Srv::FakeInput *m_fakeInputInterface = nullptr;
     Srv::FakeInputDevice *m_device = nullptr;
     ConnectionThread *m_connection = nullptr;
@@ -72,7 +72,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-fake-input-0")
 void FakeInputTest::init()
 {
     delete m_display;
-    m_display = new D_isplay(this);
+    m_display = new Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     QVERIFY(m_display->running());

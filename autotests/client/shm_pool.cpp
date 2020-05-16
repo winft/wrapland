@@ -52,7 +52,7 @@ private Q_SLOTS:
     void testDestroy();
 
 private:
-    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Display *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::Compositor *m_compositor;
@@ -76,7 +76,7 @@ TestShmPool::TestShmPool(QObject *parent)
 
 void TestShmPool::init()
 {
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

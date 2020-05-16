@@ -29,7 +29,7 @@ const struct zxdg_output_manager_v1_interface XdgOutputManager::Private::s_inter
     getXdgOutputCallback,
 };
 
-XdgOutputManager::Private::Private(D_isplay* display, XdgOutputManager* qptr)
+XdgOutputManager::Private::Private(Display* display, XdgOutputManager* qptr)
     : Wayland::Global<XdgOutputManager>(qptr,
                                         display,
                                         &zxdg_output_manager_v1_interface,
@@ -38,7 +38,7 @@ XdgOutputManager::Private::Private(D_isplay* display, XdgOutputManager* qptr)
     create();
 }
 
-XdgOutputManager::XdgOutputManager(D_isplay* display, QObject* parent)
+XdgOutputManager::XdgOutputManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

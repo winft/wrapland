@@ -44,7 +44,7 @@ private Q_SLOTS:
     void testCast();
 
 private:
-    Wrapland::Server::D_isplay* m_display;
+    Wrapland::Server::Display* m_display;
     Wrapland::Server::Compositor* m_serverCompositor;
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
@@ -66,7 +66,7 @@ TestCompositor::TestCompositor(QObject* parent)
 
 void TestCompositor::init()
 {
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 
@@ -86,7 +86,7 @@ void TestCompositor::init()
     m_queue = new Wrapland::Client::EventQueue(this);
     m_queue->setup(m_connection);
 
-    QSignalSpy clientConnectedSpy(m_display, &Wrapland::Server::D_isplay::clientConnected);
+    QSignalSpy clientConnectedSpy(m_display, &Wrapland::Server::Display::clientConnected);
     QVERIFY(clientConnectedSpy.isValid());
 
     Wrapland::Client::Registry registry;

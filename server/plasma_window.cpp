@@ -43,7 +43,7 @@ const struct org_kde_plasma_window_management_interface PlasmaWindowManager::Pri
         getWindowCallback,
 };
 
-PlasmaWindowManager::Private::Private(D_isplay* display, PlasmaWindowManager* qptr)
+PlasmaWindowManager::Private::Private(Display* display, PlasmaWindowManager* qptr)
     : PlasmaWindowManagerGlobal(qptr,
                                 display,
                                 &org_kde_plasma_window_management_interface,
@@ -52,7 +52,7 @@ PlasmaWindowManager::Private::Private(D_isplay* display, PlasmaWindowManager* qp
     create();
 }
 
-PlasmaWindowManager::PlasmaWindowManager(D_isplay* display, QObject* parent)
+PlasmaWindowManager::PlasmaWindowManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

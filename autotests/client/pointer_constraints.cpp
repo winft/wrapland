@@ -57,7 +57,7 @@ private Q_SLOTS:
     void testAlreadyConstrained();
 
 private:
-    Wrapland::Server::D_isplay* m_display = nullptr;
+    Wrapland::Server::Display* m_display = nullptr;
     Wrapland::Server::Compositor* m_serverCompositor = nullptr;
     Wrapland::Server::Seat* m_serverSeat = nullptr;
     Wrapland::Server::PointerConstraintsV1* m_pointerConstraintsServer = nullptr;
@@ -76,7 +76,7 @@ void TestPointerConstraints::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

@@ -53,7 +53,7 @@ private Q_SLOTS:
     void testConnectFdNoSocketName();
 
 private:
-    Srv::D_isplay *m_display;
+    Srv::Display *m_display;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-connection-0");
@@ -66,7 +66,7 @@ TestWaylandConnectionThread::TestWaylandConnectionThread(QObject *parent)
 
 void TestWaylandConnectionThread::init()
 {
-    m_display = new Srv::D_isplay(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     QVERIFY(m_display->running());
@@ -273,8 +273,8 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
     delete m_display;
     m_display = nullptr;
 
-    Srv::D_isplay display;
-    display.start(Srv::D_isplay::StartMode::ConnectClientsOnly);
+    Srv::Display display;
+    display.start(Srv::Display::StartMode::ConnectClientsOnly);
     QVERIFY(display.running());
 
     int sv[2];

@@ -29,7 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-XdgForeign::Private::Private(D_isplay* display, XdgForeign* q)
+XdgForeign::Private::Private(Display* display, XdgForeign* q)
 {
     exporter = new XdgExporterV2(display, q);
     importer = new XdgImporterV2(display, q);
@@ -38,7 +38,7 @@ XdgForeign::Private::Private(D_isplay* display, XdgForeign* q)
     connect(importer, &XdgImporterV2::parentChanged, q, &XdgForeign::parentChanged);
 }
 
-XdgForeign::XdgForeign(D_isplay* display, QObject* parent)
+XdgForeign::XdgForeign(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

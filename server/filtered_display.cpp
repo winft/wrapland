@@ -57,10 +57,10 @@ bool FilteredDisplay::Private::filterCallback(const wl_client* wlClient,
 }
 
 FilteredDisplay::FilteredDisplay(QObject* parent)
-    : D_isplay(parent)
+    : Display(parent)
     , d_ptr{new Private(this)}
 {
-    connect(this, &D_isplay::started, [this]() {
+    connect(this, &Display::started, [this]() {
         wl_display_set_global_filter(native(), Private::filterCallback, d_ptr.get());
     });
 }

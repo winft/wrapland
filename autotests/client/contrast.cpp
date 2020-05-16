@@ -51,7 +51,7 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Display *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
     Wrapland::Server::ContrastManager *m_contrastManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
@@ -77,7 +77,7 @@ TestContrast::TestContrast(QObject *parent)
 void TestContrast::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

@@ -30,7 +30,7 @@ namespace Wrapland::Server
 {
 
 class DataDevice;
-class D_isplay;
+class Display;
 class Keyboard;
 class Pointer;
 class Surface;
@@ -174,11 +174,11 @@ Q_SIGNALS:
     void focusedTextInputChanged();
 
 private:
-    friend class D_isplay;
+    friend class Display;
     friend class DataDeviceManager;
     friend class TextInputManagerV2;
 
-    Seat(D_isplay* display, QObject* parent);
+    Seat(Display* display, QObject* parent);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

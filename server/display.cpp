@@ -73,7 +73,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Private* Private::castDisplay(D_isplay* display)
+Private* Private::castDisplay(Server::Display* display)
 {
     return display->d_ptr.get();
 }
@@ -93,13 +93,13 @@ Client* Private::createClientHandle(wl_client* wlClient)
     return clientHandle;
 }
 
-D_isplay::D_isplay(QObject* parent)
+Display::Display(QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this))
 {
 }
 
-D_isplay::~D_isplay()
+Display::~Display()
 {
     for (auto output : d_ptr->outputs) {
         output->d_ptr->displayHandle = nullptr;
@@ -109,60 +109,60 @@ D_isplay::~D_isplay()
     }
 }
 
-void D_isplay::setSocketName(const std::string& name)
+void Display::setSocketName(const std::string& name)
 {
     d_ptr->setSocketName(name);
 }
 
-void D_isplay::setSocketName(const QString& name)
+void Display::setSocketName(const QString& name)
 {
     d_ptr->setSocketName(name.toUtf8().constData());
 }
 
-std::string const D_isplay::socketName() const
+std::string const Display::socketName() const
 {
     return d_ptr->socketName();
 }
 
-void D_isplay::start(StartMode mode)
+void Display::start(StartMode mode)
 {
     d_ptr->start(mode == StartMode::ConnectToSocket);
     Q_EMIT started();
 }
 
-void D_isplay::startLoop()
+void Display::startLoop()
 {
     d_ptr->startLoop();
 }
 
-void D_isplay::dispatchEvents(int msecTimeout)
+void Display::dispatchEvents(int msecTimeout)
 {
     d_ptr->dispatchEvents(msecTimeout);
 }
 
-void D_isplay::dispatch()
+void Display::dispatch()
 {
     d_ptr->dispatch();
 }
 
-void D_isplay::flush()
+void Display::flush()
 {
     d_ptr->flush();
 }
 
-void D_isplay::terminate()
+void Display::terminate()
 {
     d_ptr->terminate();
 }
 
-Output* D_isplay::createOutput(QObject* parent)
+Output* Display::createOutput(QObject* parent)
 {
     auto* output = new Output(this, parent);
     d_ptr->outputs.push_back(output);
     return output;
 }
 
-void D_isplay::removeOutput(Output* output)
+void Display::removeOutput(Output* output)
 {
     // TODO: this does not clean up. But it should be also possible to just delete the output.
     d_ptr->outputs.erase(std::remove(d_ptr->outputs.begin(), d_ptr->outputs.end(), output),
@@ -171,31 +171,31 @@ void D_isplay::removeOutput(Output* output)
     // delete output;
 }
 
-void D_isplay::removeOutputDevice(OutputDeviceV1* outputDevice)
+void Display::removeOutputDevice(OutputDeviceV1* outputDevice)
 {
     d_ptr->outputDevices.erase(
         std::remove(d_ptr->outputDevices.begin(), d_ptr->outputDevices.end(), outputDevice),
         d_ptr->outputDevices.end());
 }
 
-Compositor* D_isplay::createCompositor(QObject* parent)
+Compositor* Display::createCompositor(QObject* parent)
 {
     return new Compositor(this, parent);
 }
 
-OutputDeviceV1* D_isplay::createOutputDeviceV1(QObject* parent)
+OutputDeviceV1* Display::createOutputDeviceV1(QObject* parent)
 {
     auto device = new OutputDeviceV1(this, parent);
     d_ptr->outputDevices.push_back(device);
     return device;
 }
 
-OutputManagementV1* D_isplay::createOutputManagementV1(QObject* parent)
+OutputManagementV1* Display::createOutputManagementV1(QObject* parent)
 {
     return new OutputManagementV1(this, parent);
 }
 
-Seat* D_isplay::createSeat(QObject* parent)
+Seat* Display::createSeat(QObject* parent)
 {
     auto seat = new Seat(this, parent);
     d_ptr->seats.push_back(seat);
@@ -206,189 +206,189 @@ Seat* D_isplay::createSeat(QObject* parent)
     return seat;
 }
 
-Subcompositor* D_isplay::createSubCompositor(QObject* parent)
+Subcompositor* Display::createSubCompositor(QObject* parent)
 {
     return new Subcompositor(this, parent);
 }
 
-DataDeviceManager* D_isplay::createDataDeviceManager(QObject* parent)
+DataDeviceManager* Display::createDataDeviceManager(QObject* parent)
 {
     return new DataDeviceManager(this, parent);
 }
 
-PlasmaShell* D_isplay::createPlasmaShell(QObject* parent)
+PlasmaShell* Display::createPlasmaShell(QObject* parent)
 {
     return new PlasmaShell(this, parent);
 }
 
-PlasmaWindowManager* D_isplay::createPlasmaWindowManager(QObject* parent)
+PlasmaWindowManager* Display::createPlasmaWindowManager(QObject* parent)
 {
     return new PlasmaWindowManager(this, parent);
 }
 
-RemoteAccessManager* D_isplay::createRemoteAccessManager(QObject* parent)
+RemoteAccessManager* Display::createRemoteAccessManager(QObject* parent)
 {
     return new RemoteAccessManager(this, parent);
 }
 
-KdeIdle* D_isplay::createIdle(QObject* parent)
+KdeIdle* Display::createIdle(QObject* parent)
 {
     return new KdeIdle(this, parent);
 }
 
-FakeInput* D_isplay::createFakeInput(QObject* parent)
+FakeInput* Display::createFakeInput(QObject* parent)
 {
     return new FakeInput(this, parent);
 }
 
-ShadowManager* D_isplay::createShadowManager(QObject* parent)
+ShadowManager* Display::createShadowManager(QObject* parent)
 {
     return new ShadowManager(this, parent);
 }
 
-BlurManager* D_isplay::createBlurManager(QObject* parent)
+BlurManager* Display::createBlurManager(QObject* parent)
 {
     return new BlurManager(this, parent);
 }
 
-ContrastManager* D_isplay::createContrastManager(QObject* parent)
+ContrastManager* Display::createContrastManager(QObject* parent)
 {
     return new ContrastManager(this, parent);
 }
 
-SlideManager* D_isplay::createSlideManager(QObject* parent)
+SlideManager* Display::createSlideManager(QObject* parent)
 {
     return new SlideManager(this, parent);
 }
 
-DpmsManager* D_isplay::createDpmsManager(QObject* parent)
+DpmsManager* Display::createDpmsManager(QObject* parent)
 {
     return new DpmsManager(this, parent);
 }
 
-TextInputManagerV2* D_isplay::createTextInputManager(QObject* parent)
+TextInputManagerV2* Display::createTextInputManager(QObject* parent)
 {
     return new TextInputManagerV2(this, parent);
 }
 
-XdgShell* D_isplay::createXdgShell(QObject* parent)
+XdgShell* Display::createXdgShell(QObject* parent)
 {
     return new XdgShell(this, parent);
 }
 
-RelativePointerManagerV1* D_isplay::createRelativePointerManager(QObject* parent)
+RelativePointerManagerV1* Display::createRelativePointerManager(QObject* parent)
 {
     return new RelativePointerManagerV1(this, parent);
 }
 
-PointerGesturesV1* D_isplay::createPointerGestures(QObject* parent)
+PointerGesturesV1* Display::createPointerGestures(QObject* parent)
 {
     return new PointerGesturesV1(this, parent);
 }
 
-PointerConstraintsV1* D_isplay::createPointerConstraints(QObject* parent)
+PointerConstraintsV1* Display::createPointerConstraints(QObject* parent)
 {
     return new PointerConstraintsV1(this, parent);
 }
 
-XdgForeign* D_isplay::createXdgForeign(QObject* parent)
+XdgForeign* Display::createXdgForeign(QObject* parent)
 {
     return new XdgForeign(this, parent);
 }
 
-IdleInhibitManagerV1* D_isplay::createIdleInhibitManager(QObject* parent)
+IdleInhibitManagerV1* Display::createIdleInhibitManager(QObject* parent)
 {
     return new IdleInhibitManagerV1(this, parent);
 }
 
-AppmenuManager* D_isplay::createAppmenuManager(QObject* parent)
+AppmenuManager* Display::createAppmenuManager(QObject* parent)
 {
     return new AppmenuManager(this, parent);
 }
 
 ServerSideDecorationPaletteManager*
-D_isplay::createServerSideDecorationPaletteManager(QObject* parent)
+Display::createServerSideDecorationPaletteManager(QObject* parent)
 {
     return new ServerSideDecorationPaletteManager(this, parent);
 }
 
-LinuxDmabufV1* D_isplay::createLinuxDmabuf(QObject* parent)
+LinuxDmabufV1* Display::createLinuxDmabuf(QObject* parent)
 {
     return new LinuxDmabufV1(this, parent);
 }
 
-PlasmaVirtualDesktopManager* D_isplay::createPlasmaVirtualDesktopManager(QObject* parent)
+PlasmaVirtualDesktopManager* Display::createPlasmaVirtualDesktopManager(QObject* parent)
 {
     return new PlasmaVirtualDesktopManager(this, parent);
 }
 
-Viewporter* D_isplay::createViewporter(QObject* parent)
+Viewporter* Display::createViewporter(QObject* parent)
 {
     return new Viewporter(this, parent);
 }
 
-XdgOutputManager* D_isplay::createXdgOutputManager(QObject* parent)
+XdgOutputManager* Display::createXdgOutputManager(QObject* parent)
 {
     return new XdgOutputManager(this, parent);
 }
 
-XdgDecorationManager* D_isplay::createXdgDecorationManager(XdgShell* shell, QObject* parent)
+XdgDecorationManager* Display::createXdgDecorationManager(XdgShell* shell, QObject* parent)
 {
     return new XdgDecorationManager(this, shell, parent);
 }
 
-EglStreamController* D_isplay::createEglStreamController(QObject* parent)
+EglStreamController* Display::createEglStreamController(QObject* parent)
 {
     return new EglStreamController(this, parent);
 }
 
-KeyState* D_isplay::createKeyState(QObject* parent)
+KeyState* Display::createKeyState(QObject* parent)
 {
     return new KeyState(this, parent);
 }
 
-void D_isplay::createShm()
+void Display::createShm()
 {
     Q_ASSERT(d_ptr->native());
     wl_display_init_shm(d_ptr->native());
 }
 
-quint32 D_isplay::nextSerial()
+quint32 Display::nextSerial()
 {
     return wl_display_next_serial(d_ptr->native());
 }
 
-quint32 D_isplay::serial()
+quint32 Display::serial()
 {
     return wl_display_get_serial(d_ptr->native());
 }
 
-bool D_isplay::running() const
+bool Display::running() const
 {
     return d_ptr->running();
 }
 
-wl_display* D_isplay::native() const
+wl_display* Display::native() const
 {
     return d_ptr->native();
 }
 
-std::vector<Output*>& D_isplay::outputs() const
+std::vector<Output*>& Display::outputs() const
 {
     return d_ptr->outputs;
 }
 
-std::vector<Seat*>& D_isplay::seats() const
+std::vector<Seat*>& Display::seats() const
 {
     return d_ptr->seats;
 }
 
-Client* D_isplay::getClient(wl_client* wlClient)
+Client* Display::getClient(wl_client* wlClient)
 {
     return d_ptr->createClientHandle(wlClient);
 }
 
-std::vector<Client*> D_isplay::clients() const
+std::vector<Client*> Display::clients() const
 {
     std::vector<Client*> ret;
     for (auto* client : d_ptr->clients()) {
@@ -397,12 +397,12 @@ std::vector<Client*> D_isplay::clients() const
     return ret;
 }
 
-Client* D_isplay::createClient(int fd)
+Client* Display::createClient(int fd)
 {
     return getClient(d_ptr->createClient(fd));
 }
 
-void D_isplay::setEglDisplay(void* display)
+void Display::setEglDisplay(void* display)
 {
     if (d_ptr->eglDisplay != EGL_NO_DISPLAY) {
         qCWarning(WRAPLAND_SERVER) << "EGLDisplay cannot be changed";
@@ -411,7 +411,7 @@ void D_isplay::setEglDisplay(void* display)
     d_ptr->eglDisplay = (EGLDisplay)display;
 }
 
-void* D_isplay::eglDisplay() const
+void* Display::eglDisplay() const
 {
     return d_ptr->eglDisplay;
 }

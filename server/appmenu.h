@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class Surface;
 class Appmenu;
 class Client;
@@ -44,8 +44,8 @@ Q_SIGNALS:
     void appmenuCreated(Wrapland::Server::Appmenu*);
 
 private:
-    explicit AppmenuManager(D_isplay* display, QObject* parent = nullptr);
-    friend class D_isplay;
+    explicit AppmenuManager(Display* display, QObject* parent = nullptr);
+    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

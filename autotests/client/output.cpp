@@ -60,7 +60,7 @@ private Q_SLOTS:
     void testDpmsRequestMode();
 
 private:
-    Srv::D_isplay* m_display;
+    Srv::Display* m_display;
     Srv::Output* m_serverOutput;
     Clt::ConnectionThread* m_connection;
     Clt::EventQueue* m_queue;
@@ -80,7 +80,7 @@ TestOutput::TestOutput(QObject* parent)
 
 void TestOutput::init()
 {
-    m_display = new Srv::D_isplay(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     QVERIFY(m_display->running());

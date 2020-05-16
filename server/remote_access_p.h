@@ -45,7 +45,7 @@ using RemoteAccessManagerBind = Wayland::Resource<RemoteAccessManager, RemoteAcc
 class RemoteAccessManager::Private : public RemoteAccessManagerGlobal
 {
 public:
-    Private(D_isplay* display, RemoteAccessManager* q);
+    Private(Display* display, RemoteAccessManager* q);
 
     void sendBufferReady(Output* output, RemoteBufferHandle* buf);
 

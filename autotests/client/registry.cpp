@@ -118,7 +118,7 @@ private Q_SLOTS:
     void testAnnounceMultipleOutputDeviceV1s();
 
 private:
-    std::unique_ptr<Wrapland::Server::D_isplay> m_display;
+    std::unique_ptr<Wrapland::Server::Display> m_display;
     std::unique_ptr<Wrapland::Server::Compositor> m_compositor;
     std::unique_ptr<Wrapland::Server::Output> m_output;
     std::unique_ptr<Wrapland::Server::OutputDeviceV1> m_outputDevice;
@@ -147,7 +147,7 @@ TestWaylandRegistry::TestWaylandRegistry(QObject *parent)
 
 void TestWaylandRegistry::init()
 {
-    m_display.reset(new Wrapland::Server::D_isplay());
+    m_display.reset(new Wrapland::Server::Display());
     m_display->setSocketName(s_socketName);
     m_display->start();
 

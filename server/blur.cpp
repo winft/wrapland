@@ -40,7 +40,7 @@ const struct org_kde_kwin_blur_manager_interface BlurManager::Private::s_interfa
     unsetCallback,
 };
 
-BlurManager::Private::Private(D_isplay* display, BlurManager* qptr)
+BlurManager::Private::Private(Display* display, BlurManager* qptr)
     : BlurManagerGlobal(qptr, display, &org_kde_kwin_blur_manager_interface, &s_interface)
 {
     create();
@@ -82,7 +82,7 @@ void BlurManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
     surface->d_ptr->setBlur(QPointer<Blur>());
 }
 
-BlurManager::BlurManager(D_isplay* display, QObject* parent)
+BlurManager::BlurManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

@@ -55,8 +55,8 @@ TestServer::~TestServer() = default;
 void TestServer::init()
 {
     Q_ASSERT(!m_display);
-    m_display = new D_isplay(this);
-    m_display->start(D_isplay::StartMode::ConnectClientsOnly);
+    m_display = new Display(this);
+    m_display->start(Display::StartMode::ConnectClientsOnly);
     m_display->createShm();
     m_display->createCompositor();
     m_shell = m_display->createXdgShell(m_display);

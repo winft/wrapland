@@ -64,7 +64,7 @@ private Q_SLOTS:
     void testNoSurface();
 
 private:
-    Srv::D_isplay *m_display;
+    Srv::Display *m_display;
     Srv::Compositor *m_serverCompositor;
     Srv::Viewporter *m_viewporterInterface;
     Clt::ConnectionThread *m_connection;
@@ -91,7 +91,7 @@ void TestViewporter::init()
 {
     qRegisterMetaType<Srv::Surface*>();
 
-    m_display = new Srv::D_isplay(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     m_display->createShm();

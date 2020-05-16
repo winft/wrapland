@@ -34,7 +34,7 @@ struct wl_resource;
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 
 class WRAPLANDSERVER_EXPORT Client : public QObject
 {
@@ -49,7 +49,7 @@ public:
     wl_resource* getResource(quint32 id);
 
     wl_client* native() const;
-    D_isplay* display();
+    Display* display();
 
     pid_t processId() const;
     uid_t userId() const;
@@ -60,7 +60,7 @@ Q_SIGNALS:
     void disconnected(Client*);
 
 private:
-    Client(wl_client* wlClient, D_isplay* display);
+    Client(wl_client* wlClient, Display* display);
     friend class Private;
 
     class Private;

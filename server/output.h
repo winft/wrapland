@@ -39,7 +39,7 @@ struct wl_resource;
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 class OutputInterface;
 
 class WRAPLANDSERVER_EXPORT Output : public QObject
@@ -142,11 +142,11 @@ Q_SIGNALS:
     void removed();
 
 private:
-    friend class D_isplay;
+    friend class Display;
     friend class RemoteAccessManager;
     friend class Surface;
 
-    explicit Output(Wrapland::Server::D_isplay* display, QObject* parent = nullptr);
+    explicit Output(Wrapland::Server::Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

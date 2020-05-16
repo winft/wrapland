@@ -40,7 +40,7 @@ const struct org_kde_kwin_contrast_manager_interface ContrastManager::Private::s
     unsetCallback,
 };
 
-ContrastManager::Private::Private(D_isplay* display, ContrastManager* q)
+ContrastManager::Private::Private(Display* display, ContrastManager* q)
     : ContrastManagerGlobal(q, display, &org_kde_kwin_contrast_manager_interface, &s_interface)
 {
     create();
@@ -83,7 +83,7 @@ void ContrastManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClien
     surface->d_ptr->setContrast(QPointer<Contrast>());
 }
 
-ContrastManager::ContrastManager(D_isplay* display, QObject* parent)
+ContrastManager::ContrastManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

@@ -32,7 +32,7 @@ namespace Wrapland::Server
 class RelativePointerManagerV1::Private : public Wayland::Global<RelativePointerManagerV1>
 {
 public:
-    Private(RelativePointerManagerV1* q, D_isplay* display);
+    Private(RelativePointerManagerV1* q, Display* display);
 
 private:
     static void relativePointerCallback(wl_client* wlClient,

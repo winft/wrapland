@@ -30,7 +30,7 @@ class QSize;
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class PlasmaWindow;
 class Surface;
 class PlasmaVirtualDesktopManager;
@@ -56,8 +56,8 @@ Q_SIGNALS:
     void requestChangeShowingDesktop(ShowingDesktopState requestedState);
 
 private:
-    friend class D_isplay;
-    explicit PlasmaWindowManager(D_isplay* display, QObject* parent);
+    friend class Display;
+    explicit PlasmaWindowManager(Display* display, QObject* parent);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

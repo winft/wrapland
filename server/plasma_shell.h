@@ -28,7 +28,7 @@ struct wl_resource;
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class Client;
 class Surface;
 class PlasmaShellSurface;
@@ -43,9 +43,9 @@ Q_SIGNALS:
     void surfaceCreated(Wrapland::Server::PlasmaShellSurface*);
 
 private:
-    friend class D_isplay;
+    friend class Display;
 
-    explicit PlasmaShell(D_isplay* display, QObject* parent);
+    explicit PlasmaShell(Display* display, QObject* parent);
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

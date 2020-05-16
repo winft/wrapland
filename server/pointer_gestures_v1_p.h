@@ -33,7 +33,7 @@ class Pointer;
 class PointerGesturesV1::Private : public Wayland::Global<PointerGesturesV1>
 {
 public:
-    Private(PointerGesturesV1* q, D_isplay* display);
+    Private(PointerGesturesV1* q, Display* display);
 
 private:
     static void swipeGestureCallback(wl_client* wlClient,

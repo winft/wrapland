@@ -35,7 +35,7 @@ class Output;
 class DpmsManager::Private : public Wayland::Global<DpmsManager>
 {
 public:
-    Private(D_isplay* display, DpmsManager* q);
+    Private(Display* display, DpmsManager* q);
 
 private:
     static void

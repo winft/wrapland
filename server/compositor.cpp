@@ -34,7 +34,7 @@ using CompositorGlobal = Wayland::Global<Compositor, CompositorVersion>;
 class Compositor::Private : public CompositorGlobal
 {
 public:
-    Private(Compositor* q, D_isplay* display);
+    Private(Compositor* q, Display* display);
     ~Private() override;
 
 private:
@@ -44,7 +44,7 @@ private:
     static const struct wl_compositor_interface s_interface;
 };
 
-Compositor::Private::Private(Compositor* q, D_isplay* display)
+Compositor::Private::Private(Compositor* q, Display* display)
     : CompositorGlobal(q, display, &wl_compositor_interface, &s_interface)
 {
 }
@@ -56,7 +56,7 @@ const struct wl_compositor_interface Compositor::Private::s_interface = {
     createRegionCallback,
 };
 
-Compositor::Compositor(D_isplay* display, QObject* parent)
+Compositor::Compositor(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

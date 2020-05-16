@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-class D_isplay;
+class Display;
 class Surface;
 
 class WRAPLANDSERVER_EXPORT EglStreamController : public QObject
@@ -39,10 +39,10 @@ Q_SIGNALS:
     void streamConsumerAttached(Surface* surface, void* eglStream, wl_array* attribs);
 
 private:
-    explicit EglStreamController(D_isplay* display, QObject* parent = nullptr);
+    explicit EglStreamController(Display* display, QObject* parent = nullptr);
 
     class Private;
-    friend class D_isplay;
+    friend class Display;
     std::unique_ptr<Private> d_ptr;
 };
 

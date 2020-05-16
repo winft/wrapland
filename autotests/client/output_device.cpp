@@ -56,7 +56,7 @@ private Q_SLOTS:
     void testDone();
 
 private:
-    Srv::D_isplay *m_display;
+    Srv::Display *m_display;
     Srv::OutputDeviceV1 *m_serverOutputDevice;
     QByteArray m_edid;
     QString m_serialNumber;
@@ -82,7 +82,7 @@ TestOutputDevice::TestOutputDevice(QObject *parent)
 
 void TestOutputDevice::init()
 {
-    m_display = new Srv::D_isplay(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     QVERIFY(m_display->running());

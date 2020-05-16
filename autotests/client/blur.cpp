@@ -50,7 +50,7 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Display *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
     Wrapland::Server::BlurManager *m_blurManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
@@ -78,7 +78,7 @@ void TestBlur::init()
     using namespace Wrapland::Server;
     qRegisterMetaType<Wrapland::Server::Surface*>();
     delete m_display;
-    m_display = new D_isplay(this);
+    m_display = new Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

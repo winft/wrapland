@@ -48,7 +48,7 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Display *m_display = nullptr;
 
     Wrapland::Client::ConnectionThread *m_connection = nullptr;
     Wrapland::Server::Compositor *m_serverCompositor = nullptr;
@@ -66,7 +66,7 @@ void ShadowTest::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

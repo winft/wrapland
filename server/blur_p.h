@@ -31,7 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 
 constexpr uint32_t BlurManagerVersion = 1;
 using BlurManagerGlobal = Wayland::Global<BlurManager, BlurManagerVersion>;
@@ -39,7 +39,7 @@ using BlurManagerGlobal = Wayland::Global<BlurManager, BlurManagerVersion>;
 class BlurManager::Private : public BlurManagerGlobal
 {
 public:
-    Private(D_isplay* display, BlurManager* qptr);
+    Private(Display* display, BlurManager* qptr);
     ~Private() override;
 
 private:

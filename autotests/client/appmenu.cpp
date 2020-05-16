@@ -50,7 +50,7 @@ private Q_SLOTS:
     void testCreateAndSet();
 
 private:
-    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Display *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
     Wrapland::Server::AppmenuManager *m_appmenuManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
@@ -78,7 +78,7 @@ void TestAppmenu::init()
     qRegisterMetaType<Wrapland::Server::Appmenu::InterfaceAddress>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

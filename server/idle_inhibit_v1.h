@@ -26,17 +26,17 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 
 class WRAPLANDSERVER_EXPORT IdleInhibitManagerV1 : public QObject
 {
     Q_OBJECT
 public:
-    explicit IdleInhibitManagerV1(D_isplay* D_isplay, QObject* parent = nullptr);
+    explicit IdleInhibitManagerV1(Display* Display, QObject* parent = nullptr);
     ~IdleInhibitManagerV1() override;
 
 private:
-    friend class D_isplay;
+    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

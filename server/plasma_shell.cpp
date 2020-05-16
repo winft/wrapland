@@ -28,7 +28,7 @@ const struct org_kde_plasma_shell_interface PlasmaShell::Private::s_interface = 
     createSurfaceCallback,
 };
 
-PlasmaShell::Private::Private(D_isplay* display, PlasmaShell* qptr)
+PlasmaShell::Private::Private(Display* display, PlasmaShell* qptr)
     : PlasmaShellGlobal(qptr, display, &org_kde_plasma_shell_interface, &s_interface)
 {
     create();
@@ -77,7 +77,7 @@ void PlasmaShell::Private::createSurface([[maybe_unused]] wl_client* wlClient,
     Q_EMIT handle()->surfaceCreated(shellSurface);
 }
 
-PlasmaShell::PlasmaShell(D_isplay* display, QObject* parent)
+PlasmaShell::PlasmaShell(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

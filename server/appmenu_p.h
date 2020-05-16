@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class Surface;
 class Appmenu;
 
@@ -42,7 +42,7 @@ using AppmenuManagerGlobal = Wayland::Global<AppmenuManager, AppmenuManagerVersi
 class AppmenuManager::Private : public AppmenuManagerGlobal
 {
 public:
-    Private(D_isplay* display, AppmenuManager* qpt);
+    Private(Display* display, AppmenuManager* qpt);
     ~Private() override;
 
     std::vector<Appmenu*> appmenus;

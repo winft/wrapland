@@ -32,7 +32,7 @@ struct wl_resource;
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 
 namespace Wayland
 {

@@ -55,7 +55,7 @@ private Q_SLOTS:
     void testSendReceiveClientGone();
 
 private:
-    Srv::D_isplay *m_display = nullptr;
+    Srv::Display *m_display = nullptr;
     Srv::Output *m_serverOutput[2] = {nullptr};
     Srv::RemoteAccessManager *m_serverRemoteAccess = nullptr;
 };
@@ -165,7 +165,7 @@ void RemoteAccessTest::init()
 //    qRegisterMetaType<void const*>();
 
     delete m_display;
-    m_display = new Srv::D_isplay(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     QVERIFY(m_display->running());

@@ -35,7 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-XdgShell::Private::Private(XdgShell* q, D_isplay* display)
+XdgShell::Private::Private(XdgShell* q, Display* display)
     : Wayland::Global<XdgShell>(q, display, &xdg_wm_base_interface, &s_interface)
 {
 }
@@ -254,7 +254,7 @@ XdgShellPositioner* XdgShell::Private::getPositioner(wl_resource* wlPositioner)
     return foundPositioner;
 }
 
-XdgShell::XdgShell(D_isplay* display, QObject* parent)
+XdgShell::XdgShell(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

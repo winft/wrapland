@@ -41,7 +41,7 @@ private Q_SLOTS:
     void testCast();
 
 private:
-    Wrapland::Server::D_isplay* m_display;
+    Wrapland::Server::Display* m_display;
     Wrapland::Server::Subcompositor* m_serverSubcompositor;
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::SubCompositor* m_subCompositor;
@@ -64,7 +64,7 @@ TestSubCompositor::TestSubCompositor(QObject* parent)
 
 void TestSubCompositor::init()
 {
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

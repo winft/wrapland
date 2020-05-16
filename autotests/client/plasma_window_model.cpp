@@ -111,7 +111,7 @@ private:
     bool testBooleanData(Clt::PlasmaWindowModel::AdditionalRoles role,
                          void (Srv::PlasmaWindow::*function)(bool));
 
-    Srv::D_isplay *m_display = nullptr;
+    Srv::Display *m_display = nullptr;
 
     Srv::PlasmaWindowManager *m_serverWindowManager = nullptr;
     Clt::PlasmaWindowManagement *m_pw = nullptr;
@@ -128,7 +128,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-fake-input-0")
 void PlasmaWindowModelTest::init()
 {
     delete m_display;
-    m_display = new Srv::D_isplay(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     QVERIFY(m_display->running());

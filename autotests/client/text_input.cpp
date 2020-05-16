@@ -64,7 +64,7 @@ private Q_SLOTS:
 private:
     Wrapland::Server::Surface *waitForSurface();
     Wrapland::Client::TextInput *createTextInput();
-    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Display *m_display = nullptr;
     Wrapland::Server::Seat *m_serverSeat = nullptr;
     Wrapland::Server::Compositor *m_serverCompositor = nullptr;
     Wrapland::Server::TextInputManagerV2 *m_textInputManagerV2Interface = nullptr;
@@ -84,7 +84,7 @@ void TextInputTest::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
     delete m_display;
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

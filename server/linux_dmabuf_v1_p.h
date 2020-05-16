@@ -39,7 +39,7 @@ using LinuxDmabufV1Global = Wayland::Global<LinuxDmabufV1, LinuxDmabufV1Version>
 class LinuxDmabufV1::Private : public LinuxDmabufV1Global
 {
 public:
-    Private(LinuxDmabufV1* q, D_isplay* display);
+    Private(LinuxDmabufV1* q, Display* display);
     ~Private() override;
 
     void bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind) final;

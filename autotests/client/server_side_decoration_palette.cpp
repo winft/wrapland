@@ -49,7 +49,7 @@ private Q_SLOTS:
     void testCreateAndSet();
 
 private:
-    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Display *m_display;
     Wrapland::Server::Compositor *m_serverCompositor;
     Wrapland::Server::ServerSideDecorationPaletteManager *m_paletteManagerInterface;
     Wrapland::Client::ConnectionThread *m_connection;
@@ -76,7 +76,7 @@ void TestServerSideDecorationPalette::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
     
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

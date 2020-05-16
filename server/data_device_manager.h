@@ -29,7 +29,7 @@ namespace Wrapland::Server
 
 class DataDevice;
 class DataSource;
-class D_isplay;
+class Display;
 
 class WRAPLANDSERVER_EXPORT DataDeviceManager : public QObject
 {
@@ -50,8 +50,8 @@ Q_SIGNALS:
     void dataDeviceCreated(Wrapland::Server::DataDevice* device);
 
 private:
-    friend class D_isplay;
-    explicit DataDeviceManager(D_isplay* display, QObject* parent = nullptr);
+    friend class Display;
+    explicit DataDeviceManager(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

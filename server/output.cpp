@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Output::Private::Private(Output* q, D_isplay* display)
+Output::Private::Private(Output* q, Display* display)
     : OutputGlobal(q, display, &wl_output_interface, &s_interface)
     , displayHandle(display)
     , q_ptr(q)
@@ -41,7 +41,7 @@ Output::Private::Private(Output* q, D_isplay* display)
 
 const struct wl_output_interface Output::Private::s_interface = {resourceDestroyCallback};
 
-Output::Output(D_isplay* display, QObject* parent)
+Output::Output(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

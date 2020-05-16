@@ -40,7 +40,7 @@ private Q_SLOTS:
     void cleanup();
     void testChanges();
 private:
-    Wrapland::Server::D_isplay *m_display;
+    Wrapland::Server::Display *m_display;
     Wrapland::Server::Output* m_serverOutput;
     Wrapland::Server::XdgOutputManager *m_serverXdgOutputManager;
     Wrapland::Server::XdgOutput *m_serverXdgOutput;
@@ -64,7 +64,7 @@ void TestXdgOutput::init()
 {
     using namespace Wrapland::Server;
     delete m_display;
-    m_display = new D_isplay(this);
+    m_display = new Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

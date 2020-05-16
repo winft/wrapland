@@ -38,7 +38,7 @@ const struct org_kde_kwin_slide_manager_interface SlideManager::Private::s_inter
     unsetCallback,
 };
 
-SlideManager::Private::Private(D_isplay* display, SlideManager* qptr)
+SlideManager::Private::Private(Display* display, SlideManager* qptr)
     : SlideManagerGlobal(qptr, display, &org_kde_kwin_slide_manager_interface, &s_interface)
 {
     create();
@@ -78,7 +78,7 @@ void SlideManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
     surface->d_ptr->setSlide(QPointer<Slide>());
 }
 
-SlideManager::SlideManager(D_isplay* display, QObject* parent)
+SlideManager::SlideManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {
