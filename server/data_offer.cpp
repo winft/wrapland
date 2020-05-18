@@ -55,7 +55,7 @@ void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
 {
     // TODO: verify serial?
     auto priv = handle(wlResource)->d_ptr;
-    priv->source->accept(mimeType);
+    priv->source->accept(mimeType ? mimeType : std::string());
 }
 
 void DataOffer::Private::receiveCallback([[maybe_unused]] wl_client* wlClient,
