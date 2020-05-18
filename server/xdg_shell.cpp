@@ -27,39 +27,44 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdg_shell_surface_p.h"
 #include "xdg_shell_toplevel_p.h"
 
-#include "wayland/global.h"
-#include "wayland/resource.h"
-
+#include <cassert>
 #include <map>
 
 namespace Wrapland::Server
 {
 
 XdgShell::Private::Private(XdgShell* q, Display* display)
-    : Wayland::Global<XdgShell>(q, display, &xdg_wm_base_interface, &s_interface)
+    : XdgShellGlobal(q, display, &xdg_wm_base_interface, &s_interface)
 {
 }
 
 const struct xdg_wm_base_interface XdgShell::Private::s_interface = {
-    destroyCallback,
+    resourceDestroyCallback,
     createPositionerCallback,
     getXdgSurfaceCallback,
     pongCallback,
 };
 
-void XdgShell::Private::destroyCallback(wl_client* wlClient, wl_resource* wlResource)
+void XdgShell::Private::prepareUnbind(XdgShellBind* bind)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
-
-    if (auto it = priv->bindsObjects.find(bind); it != priv->bindsObjects.end()) {
-        if (!(*it).second.surfaces.empty()) {
+    if (auto it = bindsObjects.find(bind); it != bindsObjects.end()) {
+        auto& surfaces = it->second.surfaces;
+        auto& positioners = it->second.positioners;
+        for (auto surface : surfaces) {
+            // We remove the bind, so disconnect destroy connection.
+            QObject::disconnect(surface, &XdgShellSurface::resourceDestroyed, handle(), nullptr);
+        }
+        for (auto positioner : positioners) {
+            // We remove the bind, so disconnect destroy connection.
+            QObject::disconnect(
+                positioner, &XdgShellPositioner::resourceDestroyed, handle(), nullptr);
+        }
+        if (!surfaces.empty()) {
             bind->postError(XDG_WM_BASE_ERROR_DEFUNCT_SURFACES,
                             "xdg_wm_base destroyed before surfaces");
         }
-        priv->bindsObjects.erase(it);
+        bindsObjects.erase(it);
     }
-    Global<XdgShell>::resourceDestroyCallback(wlClient, wlResource);
 }
 
 void XdgShell::Private::createPositionerCallback([[maybe_unused]] wl_client* wlClient,
@@ -100,7 +105,7 @@ void XdgShell::Private::getXdgSurfaceCallback([[maybe_unused]] wl_client* wlClie
 
     auto bindsIt = priv->bindsObjects.find(bind);
     if (bindsIt != priv->bindsObjects.end()) {
-        auto& surfaces = (*bindsIt).second.surfaces;
+        auto const& surfaces = (*bindsIt).second.surfaces;
         auto surfaceIt = std::find_if(surfaces.cbegin(), surfaces.cend(), [surface](auto s) {
             return surface == s->surface();
         });
@@ -121,12 +126,17 @@ void XdgShell::Private::getXdgSurfaceCallback([[maybe_unused]] wl_client* wlClie
         (*bindsIt).second.surfaces.push_back(shellSurface);
     }
 
-    QObject::connect(
-        shellSurface, &XdgShellSurface::resourceDestroyed, priv->handle(), [bindsIt, shellSurface] {
-            auto& surfaces = (*bindsIt).second.surfaces;
-            surfaces.erase(std::remove(surfaces.begin(), surfaces.end(), shellSurface),
-                           surfaces.end());
-        });
+    QObject::connect(shellSurface,
+                     &XdgShellSurface::resourceDestroyed,
+                     priv->handle(),
+                     [priv, bind, shellSurface] {
+                         auto bindsIt = priv->bindsObjects.find(bind);
+
+                         auto& surfaces = bindsIt->second.surfaces;
+                         auto surfaceIt = std::find(surfaces.begin(), surfaces.end(), shellSurface);
+                         assert(surfaceIt != surfaces.end());
+                         surfaces.erase(surfaceIt);
+                     });
 }
 
 void XdgShell::Private::pongCallback([[maybe_unused]] wl_client* wlClient,
