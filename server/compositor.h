@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-
+class Client;
 class Display;
 class Region;
 class Surface;
@@ -36,6 +36,8 @@ class WRAPLANDSERVER_EXPORT Compositor : public QObject
     Q_OBJECT
 public:
     ~Compositor() override;
+
+    Surface* getSurface(uint32_t id, Client* client);
 
 Q_SIGNALS:
     void surfaceCreated(Wrapland::Server::Surface*);
