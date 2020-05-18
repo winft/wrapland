@@ -34,7 +34,7 @@ namespace Wrapland
 {
 namespace Server
 {
-
+class Client;
 class Output;
 class Seat;
 class Surface;
@@ -46,6 +46,7 @@ class WRAPLANDSERVER_EXPORT XdgShellPopup : public QObject
     Q_OBJECT
 public:
     XdgShellSurface* surface() const;
+    Client* client() const;
 
     uint32_t configure(const QRect& rect);
 

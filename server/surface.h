@@ -92,6 +92,7 @@ public:
 
     bool inhibitsIdle() const;
 
+    uint32_t id() const;
     Client* client() const;
 
     void setDataProxy(Surface* surface);
