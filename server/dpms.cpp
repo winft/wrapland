@@ -36,7 +36,7 @@ const struct org_kde_kwin_dpms_manager_interface DpmsManager::Private::s_interfa
     getDpmsCallback,
 };
 
-DpmsManager::Private::Private(D_isplay* display, DpmsManager* q)
+DpmsManager::Private::Private(Display* display, DpmsManager* q)
     : DpmsManagerGlobal(q, display, &org_kde_kwin_dpms_manager_interface, &s_interface)
 {
     create();
@@ -61,7 +61,7 @@ void DpmsManager::Private::getDpmsCallback([[maybe_unused]] wl_client* wlClient,
     dpms->sendDone();
 }
 
-DpmsManager::DpmsManager(D_isplay* display, QObject* parent)
+DpmsManager::DpmsManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

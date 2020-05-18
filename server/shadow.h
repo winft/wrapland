@@ -26,9 +26,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-
 class Buffer;
-class D_isplay;
+class Client;
+class Display;
 
 class WRAPLANDSERVER_EXPORT ShadowManager : public QObject
 {
@@ -37,8 +37,8 @@ public:
     ~ShadowManager() override;
 
 private:
-    explicit ShadowManager(D_isplay* display, QObject* parent = nullptr);
-    friend class D_isplay;
+    explicit ShadowManager(Display* display, QObject* parent = nullptr);
+    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

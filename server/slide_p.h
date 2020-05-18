@@ -29,7 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 
 constexpr uint32_t SlideManagerVersion = 1;
 using SlideManagerGlobal = Wayland::Global<SlideManager, SlideManagerVersion>;
@@ -37,7 +37,7 @@ using SlideManagerGlobal = Wayland::Global<SlideManager, SlideManagerVersion>;
 class SlideManager::Private : public SlideManagerGlobal
 {
 public:
-    Private(D_isplay* display, SlideManager* qptr);
+    Private(Display* display, SlideManager* qptr);
 
 private:
     void

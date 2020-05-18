@@ -30,7 +30,7 @@ class QRectF;
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 
 class WRAPLANDSERVER_EXPORT OutputDeviceV1 : public QObject
 {
@@ -124,8 +124,8 @@ Q_SIGNALS:
     void geometryChanged(const QRectF&);
 
 private:
-    explicit OutputDeviceV1(D_isplay* display, QObject* parent = nullptr);
-    friend class D_isplay;
+    explicit OutputDeviceV1(Display* display, QObject* parent = nullptr);
+    friend class Display;
 
     class Private;
     std::unique_ptr<Private> d_ptr;

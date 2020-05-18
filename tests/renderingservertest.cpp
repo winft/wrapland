@@ -261,7 +261,7 @@ int main(int argc, char **argv)
     parser.addOption(xwaylandOption);
     parser.process(app);
 
-    D_isplay display;
+    Display display;
     display.start();
 
     display.createDataDeviceManager();

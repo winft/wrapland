@@ -106,7 +106,7 @@ private Q_SLOTS:
     // TODO: add test for keymap
 
 private:
-    Srv::D_isplay* m_display;
+    Srv::Display* m_display;
     Srv::Compositor* m_serverCompositor;
     Srv::Seat* m_serverSeat;
     Srv::Subcompositor* m_serverSubcompositor;
@@ -152,7 +152,7 @@ TestSeat::TestSeat(QObject* parent)
 
 void TestSeat::init()
 {
-    m_display = new Srv::D_isplay(this);
+    m_display = new Srv::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     m_display->createShm();

@@ -32,14 +32,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class Seat;
 class IdleTimeout;
 
 class KdeIdle::Private : public Wayland::Global<KdeIdle>
 {
 public:
-    Private(D_isplay* display, KdeIdle* q);
+    Private(Display* display, KdeIdle* q);
     ~Private() override;
     int inhibitCount = 0;
     std::vector<IdleTimeout*> idleTimeouts;

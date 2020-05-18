@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 class XdgDecoration;
 class XdgShell;
 class XdgShellToplevel;
@@ -42,8 +42,8 @@ Q_SIGNALS:
     void decorationCreated(XdgDecoration* decoration);
 
 private:
-    friend class D_isplay;
-    XdgDecorationManager(D_isplay* display, XdgShell* shell, QObject* parent = nullptr);
+    friend class Display;
+    XdgDecorationManager(Display* display, XdgShell* shell, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

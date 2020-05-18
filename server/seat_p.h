@@ -39,8 +39,6 @@ namespace Server
 class DataDevice;
 class TextInputV2;
 
-using Sender = std::function<void(wl_resource*)>;
-
 constexpr uint32_t SeatVersion = 5;
 using SeatGlobal = Wayland::Global<Seat, SeatVersion>;
 using SeatBind = Wayland::Resource<Seat, SeatGlobal>;
@@ -48,7 +46,7 @@ using SeatBind = Wayland::Resource<Seat, SeatGlobal>;
 class Seat::Private : public SeatGlobal
 {
 public:
-    Private(Seat* q, D_isplay* d);
+    Private(Seat* q, Display* d);
 
     void bindInit(Wayland::Resource<Seat, SeatGlobal>* bind) override;
 

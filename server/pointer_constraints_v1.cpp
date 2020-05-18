@@ -38,7 +38,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-PointerConstraintsV1::Private::Private(PointerConstraintsV1* q, D_isplay* display)
+PointerConstraintsV1::Private::Private(PointerConstraintsV1* q, Display* display)
     : Wayland::Global<PointerConstraintsV1>(q,
                                             display,
                                             &zwp_pointer_constraints_v1_interface,
@@ -122,7 +122,7 @@ void PointerConstraintsV1::Private::createConstraint(wl_resource* wlResource,
     surface->d_ptr->installPointerConstraint(constraint);
 }
 
-PointerConstraintsV1::PointerConstraintsV1(D_isplay* display, QObject* parent)
+PointerConstraintsV1::PointerConstraintsV1(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

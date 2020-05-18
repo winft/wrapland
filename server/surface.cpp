@@ -1193,4 +1193,9 @@ wl_resource* Surface::resource() const
     return d_ptr->resource();
 }
 
+uint32_t Surface::id() const
+{
+    return d_ptr->id();
+}
+
 }

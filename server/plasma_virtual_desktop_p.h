@@ -31,7 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class PlasmaVirtualDesktop;
 
 constexpr uint32_t PlasmaVirtualDesktopManagerVersion = 2;
@@ -43,7 +43,7 @@ using PlasmaVirtualDesktopManagerBind
 class PlasmaVirtualDesktopManager::Private : public PlasmaVirtualDesktopManagerGlobal
 {
 public:
-    Private(D_isplay* display, PlasmaVirtualDesktopManager* q);
+    Private(Display* display, PlasmaVirtualDesktopManager* q);
 
     void bindInit(PlasmaVirtualDesktopManagerBind* bind) override;
 

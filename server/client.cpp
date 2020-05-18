@@ -29,7 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Client::Client(wl_client* wlClient, D_isplay* display)
+Client::Client(wl_client* wlClient, Display* display)
     : QObject(display)
     , d_ptr(new Private(wlClient, this, display))
 
@@ -58,7 +58,7 @@ wl_client* Client::native() const
     return d_ptr->native();
 }
 
-D_isplay* Client::display()
+Display* Client::display()
 {
     return d_ptr->m_display;
 }

@@ -31,7 +31,7 @@ struct wl_shm_buffer;
 
 namespace Wrapland::Server
 {
-class D_isplay;
+class Display;
 class Surface;
 class LinuxDmabufBufferV1;
 
@@ -56,7 +56,7 @@ public:
 
     bool hasAlphaChannel() const;
 
-    static Buffer* get(D_isplay* display, wl_resource* resource);
+    static Buffer* get(Display* display, wl_resource* resource);
 
 Q_SIGNALS:
     void sizeChanged();
@@ -65,7 +65,7 @@ Q_SIGNALS:
 private:
     friend class Surface;
     Buffer(wl_resource* wlResource, Surface* parent);
-    Buffer(wl_resource* wlResource, D_isplay* display);
+    Buffer(wl_resource* wlResource, Display* display);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

@@ -44,6 +44,8 @@ public:
     void dndFinished();
     void dndAction(DataDeviceManager::DnDAction action);
 
+    Client* client() const;
+
 Q_SIGNALS:
     void mimeTypeOffered(std::string);
     void supportedDragAndDropActionsChanged();

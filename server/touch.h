@@ -28,10 +28,6 @@ namespace Wrapland::Server
 class Client;
 class Seat;
 
-/**
- * @brief Resource for the wl_touch interface.
- *
- **/
 class WRAPLANDSERVER_EXPORT Touch : public QObject
 {
     Q_OBJECT

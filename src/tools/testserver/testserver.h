@@ -35,7 +35,7 @@ namespace Wrapland
 {
 namespace Server
 {
-class D_isplay;
+class Display;
 class Seat;
 class XdgShell;
 class XdgShellToplevel;
@@ -55,7 +55,7 @@ public:
 private:
     void repaint();
 
-    Wrapland::Server::D_isplay *m_display = nullptr;
+    Wrapland::Server::Display *m_display = nullptr;
     Wrapland::Server::XdgShell *m_shell = nullptr;
     Wrapland::Server::Seat *m_seat = nullptr;
     QVector<Wrapland::Server::XdgShellToplevel*> m_shellSurfaces;

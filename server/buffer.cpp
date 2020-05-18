@@ -268,13 +268,13 @@ Buffer::Buffer(wl_resource* wlResource, Surface* surface)
 {
 }
 
-Buffer::Buffer(wl_resource* wlResource, D_isplay* display)
+Buffer::Buffer(wl_resource* wlResource, Display* display)
     : QObject()
     , d_ptr(new Private(this, wlResource, nullptr, Wayland::Display::backendCast(display)))
 {
 }
 
-Buffer* Buffer::get(D_isplay* display, wl_resource* resource)
+Buffer* Buffer::get(Display* display, wl_resource* resource)
 {
     if (!resource) {
         return nullptr;

@@ -29,7 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 class Surface;
 class Viewport;
 
@@ -40,14 +40,11 @@ public:
     ~Viewporter() override;
 
 Q_SIGNALS:
-    /**
-     * Emitted whenever this Viewporter created a Viewport.
-     **/
     void viewportCreated(Viewport*);
 
 private:
-    explicit Viewporter(D_isplay* display, QObject* parent = nullptr);
-    friend class D_isplay;
+    explicit Viewporter(Display* display, QObject* parent = nullptr);
+    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

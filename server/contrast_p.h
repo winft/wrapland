@@ -33,7 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 
 constexpr uint32_t ContrastManagerVersion = 1;
 using ContrastManagerGlobal = Wayland::Global<ContrastManager, ContrastManagerVersion>;
@@ -41,7 +41,7 @@ using ContrastManagerGlobal = Wayland::Global<ContrastManager, ContrastManagerVe
 class ContrastManager::Private : public ContrastManagerGlobal
 {
 public:
-    Private(D_isplay* display, ContrastManager* q);
+    Private(Display* display, ContrastManager* q);
     ~Private() override;
 
 private:

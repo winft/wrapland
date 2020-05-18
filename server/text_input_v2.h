@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Seat;
-class D_isplay;
+class Display;
 class Surface;
 
 class WRAPLANDSERVER_EXPORT TextInputV2 : public QObject
@@ -109,7 +109,7 @@ class WRAPLANDSERVER_EXPORT TextInputManagerV2 : public QObject
 {
     Q_OBJECT
 public:
-    explicit TextInputManagerV2(D_isplay* display, QObject* parent = nullptr);
+    explicit TextInputManagerV2(Display* display, QObject* parent = nullptr);
     ~TextInputManagerV2() override;
 
 private:

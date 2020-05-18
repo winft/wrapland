@@ -57,7 +57,7 @@ private Q_SLOTS:
 private:
     void doExport();
 
-    Wrapland::Server::D_isplay* m_display;
+    Wrapland::Server::Display* m_display;
     Wrapland::Server::Compositor* m_serverCompositor;
     Wrapland::Server::XdgForeign* m_serverForeign;
     Wrapland::Client::ConnectionThread* m_connection;
@@ -96,7 +96,7 @@ TestForeign::TestForeign(QObject* parent)
 
 void TestForeign::init()
 {
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

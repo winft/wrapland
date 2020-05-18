@@ -30,7 +30,7 @@ const struct org_kde_kwin_server_decoration_palette_manager_interface
         createCallback,
 };
 
-ServerSideDecorationPaletteManager::Private::Private(D_isplay* display,
+ServerSideDecorationPaletteManager::Private::Private(Display* display,
                                                      ServerSideDecorationPaletteManager* qptr)
     : ServerSideDecorationPaletteManagerGlobal(
         qptr,
@@ -71,7 +71,7 @@ void ServerSideDecorationPaletteManager::Private::createCallback(
     Q_EMIT priv->handle()->paletteCreated(palette);
 }
 
-ServerSideDecorationPaletteManager::ServerSideDecorationPaletteManager(D_isplay* display,
+ServerSideDecorationPaletteManager::ServerSideDecorationPaletteManager(Display* display,
                                                                        QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))

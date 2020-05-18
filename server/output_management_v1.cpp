@@ -38,7 +38,7 @@ using OutputManagementV1Bind = Wayland::Resource<OutputManagementV1, OutputManag
 class OutputManagementV1::Private : public OutputManagementV1Global
 {
 public:
-    Private(OutputManagementV1* q, D_isplay* display);
+    Private(OutputManagementV1* q, Display* display);
     ~Private() override;
 
 private:
@@ -53,7 +53,7 @@ private:
 struct zkwinft_output_management_v1_interface const OutputManagementV1::Private::s_interface
     = {createConfigurationCallback};
 
-OutputManagementV1::Private::Private(OutputManagementV1* q, D_isplay* display)
+OutputManagementV1::Private::Private(OutputManagementV1* q, Display* display)
     : OutputManagementV1Global(q, display, &zkwinft_output_management_v1_interface, &s_interface)
 {
     create();
@@ -83,7 +83,7 @@ void OutputManagementV1::Private::createConfigurationCallback([[maybe_unused]] w
     });
 }
 
-OutputManagementV1::OutputManagementV1(D_isplay* display, QObject* parent)
+OutputManagementV1::OutputManagementV1(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

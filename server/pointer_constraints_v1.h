@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 class Pointer;
 
 class WRAPLANDSERVER_EXPORT PointerConstraintsV1 : public QObject
@@ -38,8 +38,8 @@ public:
     ~PointerConstraintsV1() override;
 
 private:
-    friend class D_isplay;
-    explicit PointerConstraintsV1(D_isplay* display, QObject* parent = nullptr);
+    friend class Display;
+    explicit PointerConstraintsV1(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

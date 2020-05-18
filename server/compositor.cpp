@@ -19,11 +19,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "compositor.h"
 
+#include "client.h"
 #include "display.h"
 #include "region.h"
-#include "surface.h"
+#include "surface_p.h"
 
 #include "wayland/global.h"
+
+#include <algorithm>
+#include <vector>
 
 namespace Wrapland::Server
 {
@@ -34,8 +38,10 @@ using CompositorGlobal = Wayland::Global<Compositor, CompositorVersion>;
 class Compositor::Private : public CompositorGlobal
 {
 public:
-    Private(Compositor* q, D_isplay* display);
+    Private(Compositor* q, Display* display);
     ~Private() override;
+
+    std::vector<Surface*> surfaces;
 
 private:
     static void createSurfaceCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
@@ -44,7 +50,7 @@ private:
     static const struct wl_compositor_interface s_interface;
 };
 
-Compositor::Private::Private(Compositor* q, D_isplay* display)
+Compositor::Private::Private(Compositor* q, Display* display)
     : CompositorGlobal(q, display, &wl_compositor_interface, &s_interface)
 {
 }
@@ -56,7 +62,7 @@ const struct wl_compositor_interface Compositor::Private::s_interface = {
     createRegionCallback,
 };
 
-Compositor::Compositor(D_isplay* display, QObject* parent)
+Compositor::Compositor(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {
@@ -65,17 +71,23 @@ Compositor::Compositor(D_isplay* display, QObject* parent)
 
 Compositor::~Compositor() = default;
 
-void Compositor::Private::createSurfaceCallback(wl_client* wlClient,
+void Compositor::Private::createSurfaceCallback([[maybe_unused]] wl_client* wlClient,
                                                 wl_resource* wlResource,
                                                 uint32_t id)
 {
-    auto compositor = handle(wlResource);
-    auto client = compositor->d_ptr->display()->handle()->getClient(wlClient);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    auto surface = new Surface(client, compositor->d_ptr->version(), id);
+    auto surface = new Surface(bind->client()->handle(), bind->version(), id);
     // TODO: error handling (when resource not created)
 
-    Q_EMIT compositor->surfaceCreated(surface);
+    priv->surfaces.push_back(surface);
+    connect(surface, &Surface::resourceDestroyed, priv->handle(), [priv, surface] {
+        priv->surfaces.erase(std::remove(priv->surfaces.begin(), priv->surfaces.end(), surface),
+                             priv->surfaces.end());
+    });
+
+    Q_EMIT priv->handle()->surfaceCreated(surface);
 }
 
 void Compositor::Private::createRegionCallback(wl_client* wlClient,
@@ -89,6 +101,15 @@ void Compositor::Private::createRegionCallback(wl_client* wlClient,
     // TODO: error handling (when resource not created)
 
     Q_EMIT compositor->regionCreated(region);
+}
+
+Surface* Compositor::getSurface(uint32_t id, Client* client)
+{
+    auto it = std::find_if(
+        d_ptr->surfaces.cbegin(), d_ptr->surfaces.cend(), [id, client](Surface* surface) {
+            return surface->d_ptr->client()->handle() == client && surface->d_ptr->id() == id;
+        });
+    return it != d_ptr->surfaces.cend() ? *it : nullptr;
 }
 
 }

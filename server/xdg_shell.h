@@ -33,7 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 class XdgShellPopup;
 class XdgShellToplevel;
 
@@ -54,10 +54,10 @@ Q_SIGNALS:
     void pingTimeout(uint32_t serial);
 
 private:
-    friend class D_isplay;
+    friend class Display;
     friend class XdgShellSurface;
     friend class XdgDecorationManager;
-    explicit XdgShell(D_isplay* display, QObject* parent = nullptr);
+    explicit XdgShell(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

@@ -50,7 +50,7 @@ private Q_SLOTS:
     void testIdleInhibitBlocksTimeout();
 
 private:
-    D_isplay *m_display = nullptr;
+    Display *m_display = nullptr;
     Srv::Seat *m_seatInterface = nullptr;
     KdeIdle *m_kdeIdle = nullptr;
     ConnectionThread *m_connection = nullptr;
@@ -65,7 +65,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-idle-0");
 void IdleTest::init()
 {
     delete m_display;
-    m_display = new D_isplay(this);
+    m_display = new Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
     QVERIFY(m_display->running());

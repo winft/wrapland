@@ -39,7 +39,7 @@ struct wl_resource;
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 class OutputInterface;
 
 class WRAPLANDSERVER_EXPORT Output : public QObject
@@ -138,21 +138,15 @@ Q_SIGNALS:
     void currentModeChanged();
     void dpmsModeChanged();
     void dpmsSupportedChanged();
+    void dpmsModeRequested(Wrapland::Server::Output::DpmsMode mode);
     void removed();
 
-    /**
-     * Change of dpms @p mode is requested.
-     * A server is free to ignore this request.
-     * @since 5.5
-     **/
-    void dpmsModeRequested(Wrapland::Server::Output::DpmsMode mode);
-
 private:
-    friend class D_isplay;
+    friend class Display;
     friend class RemoteAccessManager;
     friend class Surface;
 
-    explicit Output(Wrapland::Server::D_isplay* display, QObject* parent = nullptr);
+    explicit Output(Wrapland::Server::Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

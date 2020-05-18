@@ -52,7 +52,7 @@ private Q_SLOTS:
     void testDecoration();
 
 private:
-    Wrapland::Server::D_isplay* m_display = nullptr;
+    Wrapland::Server::Display* m_display = nullptr;
     Wrapland::Server::Compositor* m_serverCompositor = nullptr;
     Wrapland::Server::XdgShell* m_serverXdgShell = nullptr;
     Wrapland::Server::XdgDecorationManager* m_serverXdgDecorationManager = nullptr;
@@ -79,7 +79,7 @@ TestXdgDecoration::TestXdgDecoration(QObject* parent)
 void TestXdgDecoration::init()
 {
     delete m_display;
-    m_display = new Server::D_isplay(this);
+    m_display = new Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

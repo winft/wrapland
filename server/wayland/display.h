@@ -36,7 +36,7 @@ class QObject;
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 
 namespace Wayland
 {
@@ -48,7 +48,7 @@ using GlobalCapsule = Capsule<wl_global>;
 class Display
 {
 public:
-    explicit Display(Wrapland::Server::D_isplay* parent);
+    explicit Display(Server::Display* parent);
     virtual ~Display();
 
     void setSocketName(const std::string& name);
@@ -82,9 +82,9 @@ public:
 
     std::vector<Client*> const& clients() const;
 
-    Server::D_isplay* handle() const;
+    Server::Display* handle() const;
 
-    static Display* backendCast(Server::D_isplay* display);
+    static Display* backendCast(Server::Display* display);
 
     BufferManager* bufferManager() const;
 
@@ -103,7 +103,7 @@ private:
     std::vector<Client*> m_clients;
     std::unique_ptr<BufferManager> m_bufferManager;
 
-    Server::D_isplay* m_handle;
+    Server::Display* m_handle;
 };
 
 }

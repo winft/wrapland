@@ -31,7 +31,7 @@ namespace Wrapland::Server
 class Private : public Wayland::Display
 {
 public:
-    Private(D_isplay* display)
+    Private(Server::Display* display)
         : Wayland::Display(display)
         , q_ptr(display)
     {
@@ -46,11 +46,11 @@ public:
 
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 
-    static Private* castDisplay(D_isplay* display);
+    static Private* castDisplay(Server::Display* display);
 
 private:
     friend class Wayland::Display;
-    D_isplay* q_ptr;
+    Server::Display* q_ptr;
 };
 
 }

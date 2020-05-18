@@ -34,7 +34,7 @@ namespace Wrapland::Server
 class IdleInhibitManagerV1::Private : public Wayland::Global<IdleInhibitManagerV1>
 {
 public:
-    Private(D_isplay* display, IdleInhibitManagerV1* q);
+    Private(Display* display, IdleInhibitManagerV1* q);
     ~Private() override;
 
 private:

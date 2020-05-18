@@ -27,13 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 
-/**
- * @brief Exposes key states to wayland clients
- *
- * @since 0.0.558
- **/
 class WRAPLANDSERVER_EXPORT KeyState : public QObject
 {
     Q_OBJECT
@@ -56,9 +51,9 @@ public:
     void setState(Key k, State s);
 
 private:
-    explicit KeyState(D_isplay* display, QObject* parent = nullptr);
+    explicit KeyState(Display* display, QObject* parent = nullptr);
 
-    friend class D_isplay;
+    friend class Display;
 
     class Private;
     std::unique_ptr<Private> d_ptr;
