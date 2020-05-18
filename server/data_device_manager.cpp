@@ -39,7 +39,7 @@ using DataDeviceManagerGlobal = Wayland::Global<DataDeviceManager, DataDeviceMan
 class DataDeviceManager::Private : public DataDeviceManagerGlobal
 {
 public:
-    Private(DataDeviceManager* q, D_isplay* display);
+    Private(DataDeviceManager* q, Display* display);
 
 private:
     static void createDataSourceCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
@@ -56,7 +56,7 @@ const struct wl_data_device_manager_interface DataDeviceManager::Private::s_inte
     getDataDeviceCallback,
 };
 
-DataDeviceManager::Private::Private(DataDeviceManager* q, D_isplay* display)
+DataDeviceManager::Private::Private(DataDeviceManager* q, Display* display)
     : DataDeviceManagerGlobal(q, display, &wl_data_device_manager_interface, &s_interface)
 {
 }
@@ -94,7 +94,7 @@ void DataDeviceManager::Private::getDataDeviceCallback([[maybe_unused]] wl_clien
     Q_EMIT priv->handle()->dataDeviceCreated(dataDevice);
 }
 
-DataDeviceManager::DataDeviceManager(D_isplay* display, [[maybe_unused]] QObject* parent)
+DataDeviceManager::DataDeviceManager(Display* display, [[maybe_unused]] QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class Client;
 
 class WRAPLANDSERVER_EXPORT BlurManager : public QObject
@@ -37,8 +37,8 @@ public:
     ~BlurManager() override;
 
 private:
-    explicit BlurManager(D_isplay* display, QObject* parent = nullptr);
-    friend class D_isplay;
+    explicit BlurManager(Display* display, QObject* parent = nullptr);
+    friend class Display;
 
     class Private;
     std::unique_ptr<Private> d_ptr;

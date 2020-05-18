@@ -43,7 +43,7 @@ static const QString s_socketName = QStringLiteral("kwin-wayland-server-seat-tes
 
 void TestWaylandServerSeat::testCapabilities()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(s_socketName);
     display.start();
     std::unique_ptr<Seat> seat{display.createSeat()};
@@ -93,7 +93,7 @@ void TestWaylandServerSeat::testCapabilities()
 
 void TestWaylandServerSeat::testName()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(s_socketName);
     display.start();
     std::unique_ptr<Seat> seat{display.createSeat()};
@@ -106,7 +106,7 @@ void TestWaylandServerSeat::testName()
 
 void TestWaylandServerSeat::testPointerButton()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(s_socketName);
     display.start();
     std::unique_ptr<Seat> seat{display.createSeat()};
@@ -136,7 +136,7 @@ void TestWaylandServerSeat::testPointerButton()
 
 void TestWaylandServerSeat::testPointerPos()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(s_socketName);
     display.start();
 
@@ -165,7 +165,7 @@ void TestWaylandServerSeat::testPointerPos()
 
 void TestWaylandServerSeat::testDestroyThroughTerminate()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(s_socketName);
     display.start();
 
@@ -180,7 +180,7 @@ void TestWaylandServerSeat::testDestroyThroughTerminate()
 
 void TestWaylandServerSeat::testRepeatInfo()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(s_socketName);
     display.start();
 
@@ -198,7 +198,7 @@ void TestWaylandServerSeat::testRepeatInfo()
 
 void TestWaylandServerSeat::testMultiple()
 {
-    D_isplay display;
+    Display display;
     display.setSocketName(s_socketName);
     display.start();
     QVERIFY(display.seats().empty());

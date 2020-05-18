@@ -33,14 +33,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class Surface;
 class Viewport;
 
 class Viewporter::Private : public Wayland::Global<Viewporter>
 {
 public:
-    Private(D_isplay* display, Viewporter* qptr);
+    Private(Display* display, Viewporter* qptr);
 
 private:
     void getViewport(wl_resource* wlResource, uint32_t id, wl_resource* wlSurface);

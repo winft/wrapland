@@ -146,4 +146,9 @@ void DataSource::dndAction(DataDeviceManager::DnDAction action)
     d_ptr->send<wl_data_source_send_action, WL_DATA_SOURCE_ACTION_SINCE_VERSION>(wlAction);
 }
 
+Client* DataSource::client() const
+{
+    return d_ptr->client()->handle();
+}
+
 }

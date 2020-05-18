@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-class D_isplay;
+class Display;
 class Surface;
 class XdgExporterV2;
 class XdgImporterV2;
@@ -34,7 +34,7 @@ class WRAPLANDSERVER_EXPORT XdgForeign : public QObject
 {
     Q_OBJECT
 public:
-    XdgForeign(D_isplay* display, QObject* parent = nullptr);
+    XdgForeign(Display* display, QObject* parent = nullptr);
     ~XdgForeign() override;
 
     /**
@@ -62,7 +62,7 @@ Q_SIGNALS:
     void parentChanged(Wrapland::Server::Surface* parent, Wrapland::Server::Surface* child);
 
 private:
-    friend class D_isplay;
+    friend class Display;
     class Private;
     Private* d_ptr;
 };

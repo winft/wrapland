@@ -34,7 +34,7 @@ namespace Wrapland::Server
 class Subcompositor::Private : public Wayland::Global<Subcompositor>
 {
 public:
-    Private(Subcompositor* q, D_isplay* display);
+    Private(Subcompositor* q, Display* display);
 
 private:
     void subsurface(Client* client, uint32_t id, Surface* surface, Surface* parentSurface);
@@ -54,7 +54,7 @@ const struct wl_subcompositor_interface Subcompositor::Private::s_interface = {
     subsurfaceCallback,
 };
 
-Subcompositor::Private::Private(Subcompositor* q, D_isplay* display)
+Subcompositor::Private::Private(Subcompositor* q, Display* display)
     : Wayland::Global<Subcompositor>(q, display, &wl_subcompositor_interface, &s_interface)
 {
 }
@@ -103,7 +103,7 @@ void Subcompositor::Private::subsurface(Client* client,
     Q_EMIT handle()->subsurfaceCreated(subsurface);
 }
 
-Subcompositor::Subcompositor(D_isplay* display, QObject* parent)
+Subcompositor::Subcompositor(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

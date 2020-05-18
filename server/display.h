@@ -65,7 +65,7 @@ class RelativePointerManagerV1;
 class PointerGesturesV1;
 class PointerConstraintsV1;
 class XdgForeign;
-class AppMenuManager;
+class AppmenuManager;
 class ServerSideDecorationPaletteManager;
 class Viewporter;
 class XdgOutputManager;
@@ -74,13 +74,13 @@ class EglStreamController;
 class KeyState;
 class LinuxDmabufV1;
 
-class WRAPLANDSERVER_EXPORT D_isplay : public QObject
+class WRAPLANDSERVER_EXPORT Display : public QObject
 {
     Q_OBJECT
 public:
-    explicit D_isplay(QObject* parent = nullptr);
+    explicit Display(QObject* parent = nullptr);
 
-    ~D_isplay() override;
+    ~Display() override;
 
     void setSocketName(const std::string& name);
     const std::string socketName() const;
@@ -146,7 +146,7 @@ public:
     XdgForeign* createXdgForeign(QObject* parent = nullptr);
 
     IdleInhibitManagerV1* createIdleInhibitManager(QObject* parent = nullptr);
-    AppMenuManager* createAppMenuManager(QObject* parent = nullptr);
+    AppmenuManager* createAppmenuManager(QObject* parent = nullptr);
 
     ServerSideDecorationPaletteManager* createServerSideDecorationPaletteManager(QObject* parent
                                                                                  = nullptr);

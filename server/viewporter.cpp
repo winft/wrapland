@@ -38,7 +38,7 @@ const struct wp_viewporter_interface Viewporter::Private::s_interface = {
     getViewportCallback,
 };
 
-Viewporter::Private::Private(D_isplay* display, Viewporter* qptr)
+Viewporter::Private::Private(Display* display, Viewporter* qptr)
     : Wayland::Global<Viewporter>(qptr, display, &wp_viewporter_interface, &s_interface)
 {
     create();
@@ -78,7 +78,7 @@ void Viewporter::Private::getViewport(wl_resource* wlResource, uint32_t id, wl_r
     Q_EMIT handle()->viewportCreated(viewport);
 }
 
-Viewporter::Viewporter(D_isplay* display, QObject* parent)
+Viewporter::Viewporter(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

@@ -35,7 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-RemoteAccessManager::Private::Private(D_isplay* display, RemoteAccessManager* q)
+RemoteAccessManager::Private::Private(Display* display, RemoteAccessManager* q)
     : RemoteAccessManagerGlobal(q,
                                 display,
                                 &org_kde_kwin_remote_access_manager_interface,
@@ -151,7 +151,7 @@ int RemoteAccessManager::Private::unref(BufferHolder& bufferHolder)
     return bufferHolder.counter;
 }
 
-RemoteAccessManager::RemoteAccessManager(D_isplay* display, QObject* parent)
+RemoteAccessManager::RemoteAccessManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

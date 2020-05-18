@@ -45,7 +45,7 @@ using RemoteAccessManagerBind = Wayland::Resource<RemoteAccessManager, RemoteAcc
 class RemoteAccessManager::Private : public RemoteAccessManagerGlobal
 {
 public:
-    Private(D_isplay* display, RemoteAccessManager* q);
+    Private(Display* display, RemoteAccessManager* q);
 
     void sendBufferReady(Output* output, RemoteBufferHandle* buf);
 
@@ -65,7 +65,7 @@ private:
     /**
      * Buffers that were sent but still not acked by server
      * Keys are fd numbers as they are unique
-     **/
+     */
     QHash<uint32_t, BufferHolder> sentBuffers;
 };
 

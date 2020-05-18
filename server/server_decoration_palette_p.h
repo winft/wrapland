@@ -40,7 +40,7 @@ using ServerSideDecorationPaletteManagerGlobal
 class ServerSideDecorationPaletteManager::Private : public ServerSideDecorationPaletteManagerGlobal
 {
 public:
-    Private(D_isplay* display, ServerSideDecorationPaletteManager* qptr);
+    Private(Display* display, ServerSideDecorationPaletteManager* qptr);
 
     std::vector<ServerSideDecorationPalette*> palettes;
 

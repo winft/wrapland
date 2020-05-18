@@ -28,12 +28,12 @@ namespace Wrapland::Server
 class Client::Private : public Wayland::Client
 {
 public:
-    Private(wl_client* wlClient, Server::Client* handle, Server::D_isplay* display)
+    Private(wl_client* wlClient, Server::Client* handle, Server::Display* display)
         : Wayland::Client(wlClient, handle)
         , m_display{display}
     {
     }
-    Server::D_isplay* m_display;
+    Server::Display* m_display;
 };
 
 }

@@ -36,7 +36,7 @@ const struct zwp_text_input_manager_v2_interface TextInputManagerV2::Private::s_
     getTextInputCallback,
 };
 
-TextInputManagerV2::Private::Private(D_isplay* display, TextInputManagerV2* q)
+TextInputManagerV2::Private::Private(Display* display, TextInputManagerV2* q)
     : TextInputManagerV2Global(q, display, &zwp_text_input_manager_v2_interface, &s_interface)
 {
     create();
@@ -58,7 +58,7 @@ void TextInputManagerV2::Private::getTextInputCallback([[maybe_unused]] wl_clien
     seat->d_ptr->registerTextInput(textInput);
 }
 
-TextInputManagerV2::TextInputManagerV2(D_isplay* display, QObject* parent)
+TextInputManagerV2::TextInputManagerV2(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

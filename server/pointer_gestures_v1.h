@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-class D_isplay;
+class Display;
 
 class WRAPLANDSERVER_EXPORT PointerGesturesV1 : public QObject
 {
@@ -35,8 +35,8 @@ public:
     ~PointerGesturesV1() override;
 
 private:
-    friend class D_isplay;
-    explicit PointerGesturesV1(D_isplay* display, QObject* parent = nullptr);
+    friend class Display;
+    explicit PointerGesturesV1(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

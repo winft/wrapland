@@ -84,7 +84,7 @@ int main(int argc, char **argv)
     QCoreApplication::setEventDispatcher(eventDispatcher);
 
     // first create the Server and setup with minimum to get an XWayland connected
-    Wrapland::Server::D_isplay display;
+    Wrapland::Server::Display display;
     display.start();
     display.createShm();
     display.createCompositor(&display);

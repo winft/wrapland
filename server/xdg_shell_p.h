@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdg_shell.h"
 
 #include "wayland/global.h"
+#include "wayland/resource.h"
 
 #include <wayland-xdg-shell-server-protocol.h>
 
@@ -31,10 +32,14 @@ namespace Wrapland::Server
 {
 class XdgShellPositioner;
 
-class XdgShell::Private : public Wayland::Global<XdgShell>
+constexpr uint32_t XdgShellVersion = 1;
+using XdgShellGlobal = Wayland::Global<XdgShell, XdgShellVersion>;
+using XdgShellBind = Wayland::Resource<XdgShell, XdgShellGlobal>;
+
+class XdgShell::Private : public XdgShellGlobal
 {
 public:
-    Private(XdgShell* q, D_isplay* display);
+    Private(XdgShell* q, Display* display);
 
     void setupTimer(uint32_t serial);
 
@@ -48,13 +53,15 @@ public:
         std::vector<XdgShellSurface*> surfaces;
         std::vector<XdgShellPositioner*> positioners;
     };
-    std::map<Wayland::Resource<XdgShell, Global<XdgShell>>*, BindResources> bindsObjects;
+    std::map<XdgShellBind*, BindResources> bindsObjects;
 
     // ping-serial to timer
     std::map<uint32_t, QTimer*> pingTimers;
 
+protected:
+    void prepareUnbind(XdgShellBind* bind) override;
+
 private:
-    static void destroyCallback(wl_client* wlClient, wl_resource* wlResource);
     static void createPositionerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
     static void getXdgSurfaceCallback(wl_client* wlClient,
                                       wl_resource* wlResource,

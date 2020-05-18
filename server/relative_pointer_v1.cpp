@@ -32,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-RelativePointerManagerV1::Private::Private(RelativePointerManagerV1* q, D_isplay* display)
+RelativePointerManagerV1::Private::Private(RelativePointerManagerV1* q, Display* display)
     : Wayland::Global<RelativePointerManagerV1>(q,
                                                 display,
                                                 &zwp_relative_pointer_manager_v1_interface,
@@ -65,7 +65,7 @@ void RelativePointerManagerV1::Private::relativePointerCallback(
     pointer->d_ptr->registerRelativePointer(relative);
 }
 
-RelativePointerManagerV1::RelativePointerManagerV1(D_isplay* display, QObject* parent)
+RelativePointerManagerV1::RelativePointerManagerV1(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

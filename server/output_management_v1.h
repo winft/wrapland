@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-class D_isplay;
+class Display;
 class OutputConfigurationV1;
 
 class WRAPLANDSERVER_EXPORT OutputManagementV1 : public QObject
@@ -43,8 +43,8 @@ Q_SIGNALS:
     void configurationChangeRequested(OutputConfigurationV1* configuration);
 
 private:
-    explicit OutputManagementV1(D_isplay* display, QObject* parent = nullptr);
-    friend class D_isplay;
+    explicit OutputManagementV1(Display* display, QObject* parent = nullptr);
+    friend class Display;
 
     class Private;
     std::unique_ptr<Private> d_ptr;

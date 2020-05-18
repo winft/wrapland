@@ -40,7 +40,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-LinuxDmabufV1::Private::Private(LinuxDmabufV1* q, D_isplay* display)
+LinuxDmabufV1::Private::Private(LinuxDmabufV1* q, Display* display)
     : LinuxDmabufV1Global(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
 {
 }
@@ -88,7 +88,7 @@ void LinuxDmabufV1::Private::createParamsCallback(wl_client* wlClient,
     [[maybe_unused]] auto params = new ParamsWrapperV1(client->handle(), priv->version(), id, priv);
 }
 
-LinuxDmabufV1::LinuxDmabufV1(D_isplay* display, QObject* parent)
+LinuxDmabufV1::LinuxDmabufV1(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

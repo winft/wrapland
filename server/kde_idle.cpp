@@ -32,7 +32,7 @@ namespace Wrapland::Server
 
 const struct org_kde_kwin_idle_interface KdeIdle::Private::s_interface = {getIdleTimeoutCallback};
 
-KdeIdle::Private::Private(D_isplay* display, KdeIdle* qptr)
+KdeIdle::Private::Private(Display* display, KdeIdle* qptr)
     : Wayland::Global<KdeIdle>(qptr, display, &org_kde_kwin_idle_interface, &s_interface)
 {
     create();
@@ -67,7 +67,7 @@ void KdeIdle::Private::getIdleTimeoutCallback([[maybe_unused]] wl_client* wlClie
     idleTimeout->d_ptr->setup(timeout);
 }
 
-KdeIdle::KdeIdle(D_isplay* display, QObject* parent)
+KdeIdle::KdeIdle(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

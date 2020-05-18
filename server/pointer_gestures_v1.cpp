@@ -36,7 +36,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-PointerGesturesV1::Private::Private(PointerGesturesV1* q, D_isplay* display)
+PointerGesturesV1::Private::Private(PointerGesturesV1* q, Display* display)
     : Wayland::Global<PointerGesturesV1>(q,
                                          display,
                                          &zwp_pointer_gestures_v1_interface,
@@ -85,7 +85,7 @@ void PointerGesturesV1::Private::pinchGestureCallback([[maybe_unused]] wl_client
     pointer->d_ptr->registerPinchGesture(pincher);
 }
 
-PointerGesturesV1::PointerGesturesV1(D_isplay* display, QObject* parent)
+PointerGesturesV1::PointerGesturesV1(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

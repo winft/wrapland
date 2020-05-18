@@ -226,4 +226,9 @@ uint32_t XdgShellPopup::configure(const QRect& rect)
     return d_ptr->configure(rect);
 }
 
+Client* XdgShellPopup::client() const
+{
+    return d_ptr->client()->handle();
+}
+
 }

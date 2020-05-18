@@ -38,7 +38,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 
 namespace Wayland
 {
@@ -183,7 +183,7 @@ public:
 
 protected:
     Global(Handle* handle,
-           D_isplay* display,
+           Server::Display* display,
            const wl_interface* interface,
            void const* implementation)
         : m_handle(handle)

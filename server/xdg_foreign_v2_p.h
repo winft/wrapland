@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 class Surface;
 class XdgExportedV2;
 class XdgImportedV2;
@@ -33,7 +33,7 @@ class XdgImportedV2;
 class Q_DECL_HIDDEN XdgForeign::Private
 {
 public:
-    Private(D_isplay* display, XdgForeign* q);
+    Private(Display* display, XdgForeign* q);
 
     XdgExporterV2* exporter;
     XdgImporterV2* importer;
@@ -43,7 +43,7 @@ class Q_DECL_HIDDEN XdgExporterV2 : public QObject
 {
     Q_OBJECT
 public:
-    explicit XdgExporterV2(D_isplay* display, QObject* parent = nullptr);
+    explicit XdgExporterV2(Display* display, QObject* parent = nullptr);
     ~XdgExporterV2() override;
 
     XdgExportedV2* exportedSurface(const QString& handle);
@@ -57,7 +57,7 @@ class Q_DECL_HIDDEN XdgImporterV2 : public QObject
 {
     Q_OBJECT
 public:
-    explicit XdgImporterV2(D_isplay* display, QObject* parent = nullptr);
+    explicit XdgImporterV2(Display* display, QObject* parent = nullptr);
     ~XdgImporterV2() override;
     void setExporter(XdgExporterV2* exporter);
 

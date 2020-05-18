@@ -47,7 +47,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Seat::Private::Private(Seat* q, D_isplay* display)
+Seat::Private::Private(Seat* q, Display* display)
     : SeatGlobal(q, display, &wl_seat_interface, &s_interface)
     , q_ptr(q)
 {
@@ -60,7 +60,7 @@ const struct wl_seat_interface Seat::Private::s_interface = {
     resourceDestroyCallback,
 };
 
-Seat::Seat(D_isplay* display, QObject* parent)
+Seat::Seat(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {

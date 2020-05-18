@@ -42,7 +42,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server::Wayland
 {
 
-Display* Display::backendCast(Server::D_isplay* display)
+Display* Display::backendCast(Server::Display* display)
 {
     return Private::castDisplay(display);
 }
@@ -52,7 +52,7 @@ Client* Display::castClient(Server::Client* client)
     return backendCast(client->display())->castClientImpl(client);
 }
 
-Display::Display(Server::D_isplay* parent)
+Display::Display(Server::Display* parent)
     : m_bufferManager{std::make_unique<BufferManager>()}
     , m_handle(parent)
 {
@@ -281,7 +281,7 @@ BufferManager* Display::bufferManager() const
     return m_bufferManager.get();
 }
 
-Server::D_isplay* Display::handle() const
+Server::Display* Display::handle() const
 {
     return m_handle;
 }

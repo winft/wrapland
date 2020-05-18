@@ -33,7 +33,7 @@ namespace Wrapland::Server
  *
  * Users of this class must implement the virtual @method allowInterface method.
  */
-class WRAPLANDSERVER_EXPORT FilteredDisplay : public D_isplay
+class WRAPLANDSERVER_EXPORT FilteredDisplay : public Display
 {
     Q_OBJECT
 public:

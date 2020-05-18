@@ -52,7 +52,7 @@ private Q_SLOTS:
     void testDestroy();
 
 private:
-    Wrapland::Server::D_isplay* m_display = nullptr;
+    Wrapland::Server::Display* m_display = nullptr;
     Wrapland::Server::DataDeviceManager* m_serverDataDeviceManager = nullptr;
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
     Wrapland::Client::DataDeviceManager* m_dataDeviceManager = nullptr;
@@ -65,7 +65,7 @@ static const std::string s_socketName = "kwayland-test-wayland-datasource-0";
 void TestDataSource::init()
 {
     qRegisterMetaType<std::string>();
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

@@ -32,20 +32,20 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class Surface;
-class AppMenu;
+class Appmenu;
 
-constexpr uint32_t AppMenuManagerVersion = 1;
-using AppMenuManagerGlobal = Wayland::Global<AppMenuManager, AppMenuManagerVersion>;
+constexpr uint32_t AppmenuManagerVersion = 1;
+using AppmenuManagerGlobal = Wayland::Global<AppmenuManager, AppmenuManagerVersion>;
 
-class AppMenuManager::Private : public AppMenuManagerGlobal
+class AppmenuManager::Private : public AppmenuManagerGlobal
 {
 public:
-    Private(D_isplay* display, AppMenuManager* qpt);
+    Private(Display* display, AppmenuManager* qpt);
     ~Private() override;
 
-    std::vector<AppMenu*> appmenus;
+    std::vector<Appmenu*> appmenus;
 
 private:
     static void
@@ -54,10 +54,10 @@ private:
     static const struct org_kde_kwin_appmenu_manager_interface s_interface;
 };
 
-class AppMenu::Private : public Wayland::Resource<AppMenu>
+class Appmenu::Private : public Wayland::Resource<Appmenu>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Surface* surface, AppMenu* qptr);
+    Private(Client* client, uint32_t version, uint32_t id, Surface* surface, Appmenu* qptr);
     ~Private() override;
 
     Surface* surface;

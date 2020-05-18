@@ -35,7 +35,7 @@ namespace Wrapland::Server
 class XdgDecorationManager::Private : public Wayland::Global<XdgDecorationManager>
 {
 public:
-    Private(XdgDecorationManager* q, D_isplay* display, XdgShell* shell);
+    Private(XdgDecorationManager* q, Display* display, XdgShell* shell);
 
     std::map<XdgShellToplevel*, XdgDecoration*> m_decorations;
 
@@ -50,7 +50,7 @@ private:
     static const struct zxdg_decoration_manager_v1_interface s_interface;
 };
 
-XdgDecorationManager::Private::Private(XdgDecorationManager* q, D_isplay* display, XdgShell* shell)
+XdgDecorationManager::Private::Private(XdgDecorationManager* q, Display* display, XdgShell* shell)
     : Wayland::Global<XdgDecorationManager>(q,
                                             display,
                                             &zxdg_decoration_manager_v1_interface,
@@ -94,7 +94,7 @@ void XdgDecorationManager::Private::getToplevelDecorationCallback(
     Q_EMIT priv->handle()->decorationCreated(deco);
 }
 
-XdgDecorationManager::XdgDecorationManager(D_isplay* display, XdgShell* shell, QObject* parent)
+XdgDecorationManager::XdgDecorationManager(Display* display, XdgShell* shell, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display, shell))
 {

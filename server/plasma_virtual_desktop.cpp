@@ -36,7 +36,7 @@ const struct org_kde_plasma_virtual_desktop_management_interface
         requestRemoveVirtualDesktopCallback,
 };
 
-PlasmaVirtualDesktopManager::Private::Private(D_isplay* display, PlasmaVirtualDesktopManager* q)
+PlasmaVirtualDesktopManager::Private::Private(Display* display, PlasmaVirtualDesktopManager* q)
     : PlasmaVirtualDesktopManagerGlobal(q,
                                         display,
                                         &org_kde_plasma_virtual_desktop_management_interface,
@@ -113,7 +113,7 @@ void PlasmaVirtualDesktopManager::Private::bindInit(PlasmaVirtualDesktopManagerB
     bind->send<org_kde_plasma_virtual_desktop_management_send_done>();
 }
 
-PlasmaVirtualDesktopManager::PlasmaVirtualDesktopManager(D_isplay* display, QObject* parent)
+PlasmaVirtualDesktopManager::PlasmaVirtualDesktopManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

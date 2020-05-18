@@ -42,7 +42,7 @@ public:
         wl_resource* resource;
         uint32_t version;
     };
-    Private(OutputDeviceV1* q, D_isplay* display);
+    Private(OutputDeviceV1* q, Display* display);
 
     void bindInit(OutputDeviceV1Bind* bind) override;
 
@@ -86,7 +86,7 @@ public:
 
     QList<Mode> modes;
 
-    D_isplay* displayHandle;
+    Display* displayHandle;
 
 private:
     bool broadcastInfo();

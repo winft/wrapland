@@ -37,7 +37,7 @@ class KeyState;
 class KeyState::Private : public Wayland::Global<KeyState>
 {
 public:
-    Private(D_isplay* d, KeyState* q);
+    Private(Display* d, KeyState* q);
     ~Private() override;
     static void fetchStatesCallback(struct wl_client* client, struct wl_resource* wlResource);
 

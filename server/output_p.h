@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-class D_isplay;
+class Display;
 
 constexpr uint32_t OutputVersion = 3;
 using OutputGlobal = Wayland::Global<Output, OutputVersion>;
@@ -33,7 +33,7 @@ using OutputGlobal = Wayland::Global<Output, OutputVersion>;
 class Output::Private : public OutputGlobal
 {
 public:
-    Private(Output* q, D_isplay* display);
+    Private(Output* q, Display* display);
 
     void bindInit(Wayland::Resource<Output, OutputGlobal>* bind) override;
 
@@ -46,7 +46,7 @@ public:
     void updateGeometry();
     void updateScale();
 
-    D_isplay* displayHandle;
+    Display* displayHandle;
 
     QSize physicalSize;
     QPoint globalPosition;

@@ -11,8 +11,8 @@ set(SERVER_LIB_SRCS
     data_source.cpp
     display.cpp
     dpms.cpp
-    eglstream_controller.cpp
-    fakeinput.cpp
+    egl_stream_controller.cpp
+    fake_input.cpp
     filtered_display.cpp
     idle_inhibit_v1.cpp
     kde_idle.cpp
@@ -24,7 +24,7 @@ set(SERVER_LIB_SRCS
     output_configuration_v1.cpp
     output_device_v1.cpp
     output_management_v1.cpp
-    plasmashell.cpp
+    plasma_shell.cpp
     plasma_virtual_desktop.cpp
     plasma_window.cpp
     pointer.cpp
@@ -48,12 +48,12 @@ set(SERVER_LIB_SRCS
     xdg_decoration.cpp
     xdg_foreign.cpp
     xdg_foreign_v2.cpp
-    xdgoutput.cpp
+    xdg_output.cpp
     xdg_shell.cpp
-    xdg_shell_surface.cpp
-    xdg_shell_toplevel.cpp
     xdg_shell_popup.cpp
     xdg_shell_positioner.cpp
+    xdg_shell_surface.cpp
+    xdg_shell_toplevel.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -307,8 +307,8 @@ set(SERVER_LIB_HEADERS
   data_source.h
   display.h
   dpms.h
-  eglstream_controller.h
-  fakeinput.h
+  egl_stream_controller.h
+  fake_input.h
   filtered_display.h
   idle_inhibit_v1.h
   kde_idle.h
@@ -320,7 +320,7 @@ set(SERVER_LIB_HEADERS
   output_configuration_v1.h
   output_device_v1.h
   output_management_v1.h
-  plasmashell.h
+  plasma_shell.h
   plasma_virtual_desktop.h
   plasma_window.h
   pointer.h
@@ -339,9 +339,12 @@ set(SERVER_LIB_HEADERS
   touch.h
   viewporter.h
   xdg_decoration.h
-  xdgoutput.h
+  xdg_output.h
   xdg_foreign.h
   xdg_shell.h
+  xdg_shell_popup.h
+  xdg_shell_surface.h
+  xdg_shell_toplevel.h
 )
 
 install(FILES

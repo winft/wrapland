@@ -33,7 +33,7 @@ namespace Wrapland::Server
 class PointerConstraintsV1::Private : public Wayland::Global<PointerConstraintsV1>
 {
 public:
-    Private(PointerConstraintsV1* q, D_isplay* display);
+    Private(PointerConstraintsV1* q, Display* display);
 
     static void destroyCallback(wl_client* client, wl_resource* resource);
     static void lockPointerCallback(wl_client* wlClient,

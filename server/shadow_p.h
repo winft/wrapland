@@ -30,7 +30,7 @@ namespace Wrapland::Server
 {
 
 class Buffer;
-class D_isplay;
+class Display;
 
 constexpr uint32_t ShadowManagerVersion = 2;
 using ShadowManagerGlobal = Wayland::Global<ShadowManager, ShadowManagerVersion>;
@@ -38,7 +38,7 @@ using ShadowManagerGlobal = Wayland::Global<ShadowManager, ShadowManagerVersion>
 class ShadowManager::Private : public ShadowManagerGlobal
 {
 public:
-    Private(D_isplay* display, ShadowManager* qptr);
+    Private(Display* display, ShadowManager* qptr);
 
 private:
     void createShadow(wl_client* client, wl_resource* resource, uint32_t id, wl_resource* surface);

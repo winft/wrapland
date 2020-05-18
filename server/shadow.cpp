@@ -39,7 +39,7 @@ const struct org_kde_kwin_shadow_manager_interface ShadowManager::Private::s_int
     resourceDestroyCallback,
 };
 
-ShadowManager::Private::Private(D_isplay* display, ShadowManager* qptr)
+ShadowManager::Private::Private(Display* display, ShadowManager* qptr)
     : ShadowManagerGlobal(qptr, display, &org_kde_kwin_shadow_manager_interface, &s_interface)
 {
     create();
@@ -79,7 +79,7 @@ void ShadowManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
     surface->d_ptr->setShadow(QPointer<Shadow>());
 }
 
-ShadowManager::ShadowManager(D_isplay* display, QObject* parent)
+ShadowManager::ShadowManager(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(display, this))
 {

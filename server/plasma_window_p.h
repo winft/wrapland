@@ -34,7 +34,7 @@ class QSize;
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class PlasmaWindow;
 class Surface;
 class PlasmaVirtualDesktopManager;
@@ -47,7 +47,7 @@ using PlasmaWindowManagerBind = Wayland::Resource<PlasmaWindowManager, PlasmaWin
 class PlasmaWindowManager::Private : public PlasmaWindowManagerGlobal
 {
 public:
-    Private(D_isplay* display, PlasmaWindowManager* qptr);
+    Private(Display* display, PlasmaWindowManager* qptr);
     void sendShowingDesktopState();
 
     void bindInit(PlasmaWindowManagerBind* bind) override;

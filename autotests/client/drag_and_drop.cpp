@@ -58,7 +58,7 @@ private:
     Wrapland::Client::Surface* createSurface();
     Wrapland::Server::Surface* getServerSurface();
 
-    Wrapland::Server::D_isplay* m_display = nullptr;
+    Wrapland::Server::Display* m_display = nullptr;
     Wrapland::Server::Compositor* m_serverCompositor = nullptr;
     Wrapland::Server::DataDeviceManager* m_serverDataDeviceManager = nullptr;
     Wrapland::Server::Seat* m_serverSeat = nullptr;
@@ -82,7 +82,7 @@ void TestDragAndDrop::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::D_isplay(this);
+    m_display = new Wrapland::Server::Display(this);
     m_display->setSocketName(s_socketName);
     m_display->start();
 

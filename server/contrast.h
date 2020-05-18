@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class D_isplay;
+class Display;
 class Client;
 
 class WRAPLANDSERVER_EXPORT ContrastManager : public QObject
@@ -37,8 +37,8 @@ public:
     ~ContrastManager() override;
 
 private:
-    explicit ContrastManager(D_isplay* display, QObject* parent = nullptr);
-    friend class D_isplay;
+    explicit ContrastManager(Display* display, QObject* parent = nullptr);
+    friend class Display;
 
     class Private;
     std::unique_ptr<Private> d_ptr;

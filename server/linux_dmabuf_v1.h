@@ -34,7 +34,7 @@ namespace Wrapland
 namespace Server
 {
 class Buffer;
-class D_isplay;
+class Display;
 class LinuxDmabufBufferV1;
 
 /**
@@ -104,9 +104,9 @@ public:
     void setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> set);
 
 private:
-    explicit LinuxDmabufV1(D_isplay* display, QObject* parent = nullptr);
+    explicit LinuxDmabufV1(Display* display, QObject* parent = nullptr);
 
-    friend class D_isplay;
+    friend class Display;
     friend class Buffer;
     friend class ParamsWrapperV1;
     friend class ParamsV1;

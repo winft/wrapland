@@ -55,6 +55,7 @@ include(CheckIncludeFile)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 check_include_file("linux/input.h" HAVE_LINUX_INPUT_H)
 configure_file(config-wrapland.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-wrapland.h)

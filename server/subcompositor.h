@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class D_isplay;
+class Display;
 class Subsurface;
 class Surface;
 
@@ -42,8 +42,8 @@ Q_SIGNALS:
     void subsurfaceCreated(Wrapland::Server::Subsurface*);
 
 private:
-    friend class D_isplay;
-    explicit Subcompositor(D_isplay* display, QObject* parent = nullptr);
+    friend class Display;
+    explicit Subcompositor(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;
