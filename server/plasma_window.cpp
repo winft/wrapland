@@ -877,8 +877,8 @@ void PlasmaWindowRes::Private::setMinimizedGeometryCallback([[maybe_unused]] wl_
 
     priv->window->d_ptr->minimizedGeometries[panel] = QRect(x, y, width, height);
     Q_EMIT priv->window->minimizedGeometriesChanged();
-    connect(panel, &QObject::destroyed, priv->handle(), [priv, panel]() {
-        if (priv->window->d_ptr->minimizedGeometries.remove(panel)) {
+    connect(panel, &Surface::resourceDestroyed, priv->handle(), [priv, panel]() {
+        if (priv->window && priv->window->d_ptr->minimizedGeometries.remove(panel)) {
             Q_EMIT priv->window->minimizedGeometriesChanged();
         }
     });
