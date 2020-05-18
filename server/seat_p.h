@@ -39,8 +39,6 @@ namespace Server
 class DataDevice;
 class TextInputV2;
 
-using Sender = std::function<void(wl_resource*)>;
-
 constexpr uint32_t SeatVersion = 5;
 using SeatGlobal = Wayland::Global<Seat, SeatVersion>;
 using SeatBind = Wayland::Resource<Seat, SeatGlobal>;

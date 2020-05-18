@@ -19,14 +19,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
-#include "wayland/client.h"
-
 #include <memory>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
 namespace Wrapland::Server
 {
+class Client;
 class Display;
 class OutputInterface;
 class XdgOutput;
