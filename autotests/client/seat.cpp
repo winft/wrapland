@@ -838,8 +838,8 @@ void TestSeat::testPointerButton()
     QCOMPARE(buttonChangedSpy.last().at(3).value<Clt::Pointer::ButtonState>(),
              Clt::Pointer::ButtonState::Pressed);
 
-    msec = QDateTime::currentMSecsSinceEpoch();
-    m_serverSeat->setTimestamp(QDateTime::currentMSecsSinceEpoch());
+    msec++;
+    m_serverSeat->setTimestamp(msec);
     m_serverSeat->pointerButtonReleased(qtButton);
     QCOMPARE(m_serverSeat->isPointerButtonPressed(waylandButton), false);
     QCOMPARE(m_serverSeat->isPointerButtonPressed(qtButton), false);
