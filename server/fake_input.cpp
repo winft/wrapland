@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPointF>
 #include <QSizeF>
 
+#include <cassert>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
@@ -52,7 +53,7 @@ FakeInput::Private::Private(Display* display, FakeInput* q)
 
 FakeInput::Private::~Private()
 {
-    for (auto* device : devices) {
+    for (auto device : devices) {
         delete device;
     }
     devices.clear();
@@ -60,37 +61,37 @@ FakeInput::Private::~Private()
 
 void FakeInput::Private::bindInit(FakeInputBind* bind)
 {
-    auto parent = handle();
-    auto device = new FakeInputDevice(bind->resource(), parent);
+    auto devicePriv = std::make_unique<FakeInputDevice::Private>(bind);
+    auto device = new FakeInputDevice(std::move(devicePriv));
     devices.push_back(device);
-
-    QObject::connect(device, &FakeInputDevice::destroyed, parent, [device, this] {
-        devices.erase(std::remove(devices.begin(), devices.end(), device), devices.end());
-    });
-
-    Q_EMIT parent->deviceCreated(device);
+    Q_EMIT handle()->deviceCreated(device);
 }
 
 void FakeInput::Private::prepareUnbind(FakeInputBind* bind)
 {
-    if (auto fakeDevice = device(bind->resource())) {
-        auto priv = bind->handle()->d_ptr.get();
+    auto priv = bind->global()->handle()->d_ptr.get();
+    auto fakeDevice = device(bind);
 
-        priv->devices.erase(std::remove(priv->devices.begin(), priv->devices.end(), fakeDevice),
-                            priv->devices.end());
+    priv->devices.erase(std::remove(priv->devices.begin(), priv->devices.end(), fakeDevice),
+                        priv->devices.end());
 
-        delete fakeDevice;
-    }
+    delete fakeDevice;
 }
 
 FakeInputDevice* FakeInput::Private::device(wl_resource* wlResource)
 {
     auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
+    return priv->device(bind);
+}
 
-    auto it
-        = std::find_if(priv->devices.begin(), priv->devices.end(), [wlResource](auto fakeDevice) {
-              return fakeDevice->resource() == wlResource;
-          });
+FakeInputDevice* FakeInput::Private::device(FakeInputBind* bind) const
+{
+    auto priv = bind->global()->handle()->d_ptr.get();
+
+    auto it = std::find_if(priv->devices.begin(), priv->devices.end(), [bind](auto fakeDevice) {
+        return fakeDevice->d_ptr->bind == bind;
+    });
     if (it != priv->devices.end()) {
         return *it;
     }
@@ -103,16 +104,14 @@ void FakeInput::Private::authenticateCallback([[maybe_unused]] wl_client* wlClie
                                               const char* reason)
 {
     auto fakeDevice = device(wlResource);
-    if (!fakeDevice) {
-        return;
-    }
     Q_EMIT fakeDevice->authenticationRequested(QString::fromUtf8(application),
                                                QString::fromUtf8(reason));
 }
 
 bool check(FakeInputDevice* device)
 {
-    return device && device->isAuthenticated();
+    assert(device);
+    return device->isAuthenticated();
 }
 
 void FakeInput::Private::pointerMotionCallback([[maybe_unused]] wl_client* wlClient,
@@ -292,15 +291,14 @@ FakeInput::FakeInput(Display* display, QObject* parent)
 
 FakeInput::~FakeInput() = default;
 
-FakeInputDevice::Private::Private(wl_resource* wlResource, FakeInput* interface)
-    : resource(wlResource)
-    , interface(interface)
+FakeInputDevice::Private::Private(FakeInputBind* bind)
+    : bind(bind)
 {
 }
 
-FakeInputDevice::FakeInputDevice(wl_resource* wlResource, FakeInput* parent)
+FakeInputDevice::FakeInputDevice(std::unique_ptr<FakeInputDevice::Private> p)
     : QObject(nullptr)
-    , d_ptr(new Private(wlResource, parent))
+    , d_ptr(std::move(p))
 {
 }
 
@@ -309,11 +307,6 @@ FakeInputDevice::~FakeInputDevice() = default;
 void FakeInputDevice::setAuthentication(bool authenticated)
 {
     d_ptr->authenticated = authenticated;
-}
-
-wl_resource* FakeInputDevice::resource()
-{
-    return d_ptr->resource;
 }
 
 bool FakeInputDevice::isAuthenticated() const

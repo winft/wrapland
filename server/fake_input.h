@@ -26,8 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-struct wl_resource;
-
 namespace Wrapland::Server
 {
 
@@ -56,7 +54,6 @@ class WRAPLANDSERVER_EXPORT FakeInputDevice : public QObject
 public:
     ~FakeInputDevice() override;
 
-    wl_resource* resource();
     void setAuthentication(bool authenticated);
     bool isAuthenticated() const;
 
@@ -77,9 +74,9 @@ Q_SIGNALS:
 
 private:
     friend class FakeInput;
-    FakeInputDevice(wl_resource* resource, FakeInput* parent);
-
     class Private;
+
+    FakeInputDevice(std::unique_ptr<Private> p);
     std::unique_ptr<Private> d_ptr;
 };
 
