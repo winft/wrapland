@@ -204,7 +204,7 @@ Buffer::Private::~Private()
 
 void Buffer::Private::imageBufferCleanupHandler(void* info)
 {
-    auto priv = reinterpret_cast<Private*>(info);
+    auto priv = static_cast<Private*>(info);
     priv->display->bufferManager()->endShmAccess();
 }
 
