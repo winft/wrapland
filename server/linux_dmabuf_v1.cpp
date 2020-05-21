@@ -52,6 +52,8 @@ const struct zwp_linux_dmabuf_v1_interface LinuxDmabufV1::Private::s_interface =
     createParamsCallback,
 };
 
+constexpr size_t modifierShift = 32;
+
 void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind)
 {
     // Send formats & modifiers.
@@ -66,7 +68,7 @@ void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmab
         for (uint64_t modifier : qAsConst(modifiers)) {
             if (bind->version() >= ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
                 const uint32_t modifier_lo = modifier & 0xFFFFFFFF;
-                const uint32_t modifier_hi = modifier >> 32;
+                const uint32_t modifier_hi = modifier >> modifierShift;
                 send<zwp_linux_dmabuf_v1_send_modifier, ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION>(
                     it.key(), modifier_hi, modifier_lo);
             } else if (modifier == DRM_FORMAT_MOD_LINEAR || modifier == DRM_FORMAT_MOD_INVALID) {
@@ -163,7 +165,8 @@ void ParamsV1::addCallback([[maybe_unused]] wl_client* wlClient,
                            uint32_t modifier_lo)
 {
     auto params = handle(wlResource);
-    params->d_ptr->add(fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << 32) | modifier_lo);
+    params->d_ptr->add(
+        fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << modifierShift) | modifier_lo);
 }
 
 void ParamsV1::createCallback([[maybe_unused]] wl_client* wlClient,

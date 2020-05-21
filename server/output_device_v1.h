@@ -54,7 +54,8 @@ public:
 
     struct Mode {
         QSize size = QSize();
-        int refreshRate = 60000;
+        static constexpr int defaultRefreshRate = 60000;
+        int refreshRate = defaultRefreshRate;
         ModeFlags flags;
         int id = -1;
     };

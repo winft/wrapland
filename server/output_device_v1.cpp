@@ -45,7 +45,7 @@ QSize OutputDeviceV1::modeSize() const
 int OutputDeviceV1::refreshRate() const
 {
     if (d_ptr->pending.mode.id == -1) {
-        return 60000;
+        return Mode::defaultRefreshRate;
     }
     return d_ptr->pending.mode.refreshRate;
 }

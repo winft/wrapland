@@ -81,7 +81,8 @@ public:
 
     struct Mode {
         QSize size = QSize();
-        int refreshRate = 60000;
+        static constexpr int defaultRefreshRate = 60000;
+        int refreshRate = defaultRefreshRate;
         ModeFlags flags;
     };
 
@@ -112,8 +113,10 @@ public:
     void setScale(int scale);
     void setSubPixel(SubPixel subPixel);
     void setTransform(Transform transform);
-    void addMode(const QSize& size, ModeFlags flags = ModeFlags(), int refreshRate = 60000);
-    void setCurrentMode(const QSize& size, int refreshRate = 60000);
+    void addMode(const QSize& size,
+                 ModeFlags flags = ModeFlags(),
+                 int refreshRate = Mode::defaultRefreshRate);
+    void setCurrentMode(const QSize& size, int refreshRate = Mode::defaultRefreshRate);
 
     void setDpmsSupported(bool supported);
     void setDpmsMode(DpmsMode mode);

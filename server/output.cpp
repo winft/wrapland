@@ -100,7 +100,7 @@ int Output::refreshRate() const
         return mode.flags.testFlag(ModeFlag::Current);
     });
     if (it == d_ptr->modes.cend()) {
-        return 60000;
+        return Mode::defaultRefreshRate;
     }
     return (*it).refreshRate;
 }
