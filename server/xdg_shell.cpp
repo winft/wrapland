@@ -155,7 +155,7 @@ void XdgShell::Private::pongCallback([[maybe_unused]] wl_client* wlClient,
 
 void XdgShell::Private::setupTimer(uint32_t serial)
 {
-    QTimer* pingTimer = new QTimer();
+    auto pingTimer = new QTimer();
     pingTimer->setSingleShot(false);
     pingTimer->setInterval(1000);
 

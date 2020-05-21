@@ -66,8 +66,8 @@ void Keyboard::Private::sendEnter(quint32 serial, Surface* surface)
     wl_array_init(&keys);
     const auto states = seat->pressedKeys();
     for (auto it = states.constBegin(); it != states.constEnd(); ++it) {
-        uint32_t* k = reinterpret_cast<uint32_t*>(wl_array_add(&keys, sizeof(uint32_t)));
-        *k = *it;
+        auto key = static_cast<uint32_t*>(wl_array_add(&keys, sizeof(uint32_t)));
+        *key = *it;
     }
     send<wl_keyboard_send_enter>(serial, surface->d_ptr->resource(), &keys);
     wl_array_release(&keys);

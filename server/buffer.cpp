@@ -210,8 +210,9 @@ void Buffer::Private::imageBufferCleanupHandler(void* info)
 
 void Buffer::Private::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] void* data)
 {
-
-    struct DestroyWrapper* wrapper = wl_container_of(listener, wrapper, listener);
+    // The wl_container_of macro can not be used with auto keyword.
+    // NOLINTNEXTLINE(hicpp-use-auto)
+    DestroyWrapper* wrapper = wl_container_of(listener, wrapper, listener);
 
     wrapper->buffer->d_ptr->resource = nullptr;
 
