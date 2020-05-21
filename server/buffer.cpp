@@ -31,12 +31,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "linux_dmabuf_v1.h"
 #include "linux_dmabuf_v1_p.h"
 
+#include <drm_fourcc.h>
 #include <wayland-server.h>
 
 #include <EGL/egl.h>
 #include <QtGui/qopengl.h>
-
-#include "system/drm_fourcc.h"
 
 namespace Wrapland::Server
 {

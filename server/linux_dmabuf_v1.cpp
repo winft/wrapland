@@ -26,8 +26,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "wayland/display.h"
 
-#include "system/drm_fourcc.h"
 #include "wayland-server-protocol.h"
+#include <drm_fourcc.h>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
