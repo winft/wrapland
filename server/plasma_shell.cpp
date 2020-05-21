@@ -203,7 +203,7 @@ void PlasmaShellSurface::Private::setSkipTaskbarCallback([[maybe_unused]] wl_cli
                                                          uint32_t skip)
 {
     auto priv = handle(wlResource)->d_ptr;
-    priv->m_skipTaskbar = (bool)skip;
+    priv->m_skipTaskbar = static_cast<bool>(skip);
     Q_EMIT priv->handle()->skipTaskbarChanged();
 }
 
@@ -212,7 +212,7 @@ void PlasmaShellSurface::Private::setSkipSwitcherCallback([[maybe_unused]] wl_cl
                                                           uint32_t skip)
 {
     auto priv = handle(wlResource)->d_ptr;
-    priv->m_skipSwitcher = (bool)skip;
+    priv->m_skipSwitcher = static_cast<bool>(skip);
     Q_EMIT priv->handle()->skipSwitcherChanged();
 }
 

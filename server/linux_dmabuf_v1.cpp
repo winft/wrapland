@@ -286,7 +286,7 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
         planes << m_planes[i];
     }
 
-    auto buffer = m_dmabuf->impl->importBuffer(planes, format, size, (LinuxDmabufV1::Flags)flags);
+    auto buffer = m_dmabuf->impl->importBuffer(planes, format, size, LinuxDmabufV1::Flags(flags));
     if (!buffer) {
         if (bufferId == 0) {
             send<zwp_linux_buffer_params_v1_send_failed>();

@@ -69,12 +69,14 @@ EglStreamController::EglStreamController(Display* display, QObject* parent)
     //                for now since it is legacy code and a solution is not directly apparent. But
     //                can we make this clang-tidy check pass somehow?
     // NOLINTNEXTLINE(clang-diagnostic-cast-align)
-    auto interface = (wl_interface*)QLibrary::resolve(QLatin1String("libnvidia-egl-wayland.so.1"),
-                                                      "wl_eglstream_controller_interface");
+    auto interface = reinterpret_cast<wl_interface*>(QLibrary::resolve(
+        QLatin1String("libnvidia-egl-wayland.so.1"), "wl_eglstream_controller_interface"));
+
     if (interface == nullptr) {
         qCWarning(WRAPLAND_SERVER, "failed to resolve wl_eglstream_controller_interface");
         return;
     }
+
     d_ptr.reset(new Private(display, interface, this));
 }
 

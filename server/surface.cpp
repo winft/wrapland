@@ -410,7 +410,8 @@ void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
     const double width = sourceRectangle.width();
     const double height = sourceRectangle.height();
 
-    if (!qFuzzyCompare(width, (int)width) || !qFuzzyCompare(height, (int)height)) {
+    if (!qFuzzyCompare(width, static_cast<int>(width))
+        || !qFuzzyCompare(height, static_cast<int>(height))) {
         viewport->d_ptr->postError(WP_VIEWPORT_ERROR_BAD_SIZE,
                                    "Source rectangle not integer valued");
     }

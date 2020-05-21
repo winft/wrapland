@@ -87,7 +87,7 @@ void PlasmaVirtualDesktopManager::Private::requestCreateVirtualDesktopCallback(
     auto manager = handle(wlResource);
     Q_EMIT manager->desktopCreateRequested(
         QString::fromUtf8(name),
-        qBound<uint32_t>(0, position, (uint32_t)manager->desktops().count()));
+        qBound<uint32_t>(0, position, static_cast<uint32_t>(manager->desktops().count())));
 }
 
 void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
@@ -151,7 +151,7 @@ PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::createDesktop(const QString& 
         return *it;
     }
 
-    uint32_t const actualPosition = qMin(position, (uint32_t)d_ptr->desktops.count());
+    uint32_t const actualPosition = qMin(position, static_cast<uint32_t>(d_ptr->desktops.count()));
 
     auto desktop = new PlasmaVirtualDesktop(this);
     desktop->d_ptr->id = id;

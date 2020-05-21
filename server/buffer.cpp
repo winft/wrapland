@@ -163,8 +163,8 @@ Buffer::Private::Private(Buffer* q,
         static bool resolved = false;
         using namespace EGL;
         if (!resolved && eglDisplay != EGL_NO_DISPLAY) {
-            eglQueryWaylandBufferWL
-                = (eglQueryWaylandBufferWL_func)eglGetProcAddress("eglQueryWaylandBufferWL");
+            eglQueryWaylandBufferWL = reinterpret_cast<eglQueryWaylandBufferWL_func>(
+                eglGetProcAddress("eglQueryWaylandBufferWL"));
             resolved = true;
         }
         if (eglQueryWaylandBufferWL) {
@@ -253,7 +253,7 @@ QImage Buffer::Private::createImage()
         return QImage();
     }
 
-    return QImage((const uchar*)wl_shm_buffer_get_data(shmBuffer),
+    return QImage(static_cast<const uchar*>(wl_shm_buffer_get_data(shmBuffer)),
                   size.width(),
                   size.height(),
                   wl_shm_buffer_get_stride(shmBuffer),

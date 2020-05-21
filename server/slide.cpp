@@ -115,7 +115,7 @@ void Slide::Private::setLocationCallback([[maybe_unused]] wl_client* wlClient,
                                          uint32_t location)
 {
     auto priv = handle(wlResource)->d_ptr;
-    priv->pendingLocation = (Slide::Location)location;
+    priv->pendingLocation = static_cast<Slide::Location>(location);
 }
 
 void Slide::Private::setOffsetCallback([[maybe_unused]] wl_client* wlClient,

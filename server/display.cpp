@@ -415,7 +415,7 @@ void Display::setEglDisplay(void* display)
         qCWarning(WRAPLAND_SERVER, "EGLDisplay cannot be changed");
         return;
     }
-    d_ptr->eglDisplay = (EGLDisplay)display;
+    d_ptr->eglDisplay = static_cast<EGLDisplay>(display);
 }
 
 void* Display::eglDisplay() const
