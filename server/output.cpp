@@ -397,16 +397,4 @@ bool Output::isDpmsSupported() const
     return d_ptr->dpms.supported;
 }
 
-Output* Output::get(void* data)
-{
-    auto resource = reinterpret_cast<Wayland::Resource<Output, OutputGlobal>*>(data);
-    auto outputPriv = static_cast<Output::Private*>(resource->global());
-    return outputPriv->q_ptr;
-}
-
-QVector<wl_resource*> Output::getResources(Client* client)
-{
-    return d_ptr->getResources(client);
-}
-
 }

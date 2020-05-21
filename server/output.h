@@ -40,7 +40,6 @@ namespace Wrapland::Server
 {
 class Client;
 class Display;
-class OutputInterface;
 
 class WRAPLANDSERVER_EXPORT Output : public QObject
 {
@@ -120,12 +119,6 @@ public:
 
     void setDpmsSupported(bool supported);
     void setDpmsMode(DpmsMode mode);
-
-    // legacy
-    OutputInterface* legacy;
-    static Output* get(void* data);
-    QVector<wl_resource*> getResources(Client* client);
-    //
 
 Q_SIGNALS:
     void physicalSizeChanged(const QSize&);
