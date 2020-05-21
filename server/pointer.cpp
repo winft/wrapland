@@ -200,8 +200,8 @@ void Pointer::Private::startSwipeGesture(quint32 serial, quint32 fingerCount)
     if (swipeGestures.empty()) {
         return;
     }
-    for (auto it = swipeGestures.cbegin(), end = swipeGestures.cend(); it != end; it++) {
-        (*it)->start(serial, fingerCount);
+    for (auto gesture : swipeGestures) {
+        gesture->start(serial, fingerCount);
     }
 }
 
@@ -210,8 +210,8 @@ void Pointer::Private::updateSwipeGesture(const QSizeF& delta)
     if (swipeGestures.empty()) {
         return;
     }
-    for (auto it = swipeGestures.cbegin(), end = swipeGestures.cend(); it != end; it++) {
-        (*it)->update(delta);
+    for (auto gesture : swipeGestures) {
+        gesture->update(delta);
     }
 }
 
@@ -220,8 +220,8 @@ void Pointer::Private::endSwipeGesture(quint32 serial)
     if (swipeGestures.empty()) {
         return;
     }
-    for (auto it = swipeGestures.cbegin(), end = swipeGestures.cend(); it != end; it++) {
-        (*it)->end(serial);
+    for (auto gesture : swipeGestures) {
+        gesture->end(serial);
     }
 }
 
@@ -230,8 +230,8 @@ void Pointer::Private::cancelSwipeGesture(quint32 serial)
     if (swipeGestures.empty()) {
         return;
     }
-    for (auto it = swipeGestures.cbegin(), end = swipeGestures.cend(); it != end; it++) {
-        (*it)->cancel(serial);
+    for (auto gesture : swipeGestures) {
+        gesture->cancel(serial);
     }
 }
 
@@ -240,8 +240,8 @@ void Pointer::Private::startPinchGesture(quint32 serial, quint32 fingerCount)
     if (pinchGestures.empty()) {
         return;
     }
-    for (auto it = pinchGestures.cbegin(), end = pinchGestures.cend(); it != end; it++) {
-        (*it)->start(serial, fingerCount);
+    for (auto gesture : pinchGestures) {
+        gesture->start(serial, fingerCount);
     }
 }
 
@@ -250,8 +250,8 @@ void Pointer::Private::updatePinchGesture(const QSizeF& delta, qreal scale, qrea
     if (pinchGestures.empty()) {
         return;
     }
-    for (auto it = pinchGestures.cbegin(), end = pinchGestures.cend(); it != end; it++) {
-        (*it)->update(delta, scale, rotation);
+    for (auto gesture : pinchGestures) {
+        gesture->update(delta, scale, rotation);
     }
 }
 
@@ -260,8 +260,8 @@ void Pointer::Private::endPinchGesture(quint32 serial)
     if (pinchGestures.empty()) {
         return;
     }
-    for (auto it = pinchGestures.cbegin(), end = pinchGestures.cend(); it != end; it++) {
-        (*it)->end(serial);
+    for (auto gesture : pinchGestures) {
+        gesture->end(serial);
     }
 }
 
@@ -270,8 +270,8 @@ void Pointer::Private::cancelPinchGesture(quint32 serial)
     if (pinchGestures.empty()) {
         return;
     }
-    for (auto it = pinchGestures.cbegin(), end = pinchGestures.cend(); it != end; it++) {
-        (*it)->cancel(serial);
+    for (auto gesture : pinchGestures) {
+        gesture->cancel(serial);
     }
 }
 
@@ -421,10 +421,8 @@ void Pointer::relativeMotion(const QSizeF& delta,
     if (d_ptr->relativePointers.empty()) {
         return;
     }
-    for (auto it = d_ptr->relativePointers.cbegin(), end = d_ptr->relativePointers.cend();
-         it != end;
-         it++) {
-        (*it)->relativeMotion(microseconds, delta, deltaNonAccelerated);
+    for (auto relativePointer : d_ptr->relativePointers) {
+        relativePointer->relativeMotion(microseconds, delta, deltaNonAccelerated);
     }
     d_ptr->sendFrame();
 }

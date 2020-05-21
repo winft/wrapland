@@ -65,8 +65,8 @@ Surface::Private::~Private()
     callbacksToDestroy << subsurfacePending.callbacks;
     subsurfacePending.callbacks.clear();
 
-    for (auto it = callbacksToDestroy.cbegin(), end = callbacksToDestroy.cend(); it != end; it++) {
-        wl_resource_destroy(*it);
+    for (auto callback : callbacksToDestroy) {
+        wl_resource_destroy(callback);
     }
 
     if (current.buffer) {
@@ -383,8 +383,7 @@ void Surface::frameRendered(quint32 msec)
         wl_callback_send_done(r, msec);
         wl_resource_destroy(r);
     }
-    for (auto it = d_ptr->current.children.cbegin(); it != d_ptr->current.children.cend(); ++it) {
-        const auto& subsurface = *it;
+    for (auto subsurface : d_ptr->current.children) {
         if (!subsurface || !subsurface->d_ptr->surface) {
             continue;
         }
@@ -688,8 +687,7 @@ void Surface::Private::commit()
         // "The cached state is applied to the sub-surface immediately after the parent surface's
         // state is applied"
 
-        for (auto it = current.children.cbegin(); it != current.children.cend(); ++it) {
-            const auto& subsurface = *it;
+        for (auto subsurface : current.children) {
             if (!subsurface) {
                 continue;
             }
@@ -713,8 +711,7 @@ void Surface::Private::commitSubsurface()
 
     // "The cached state is applied to the sub-surface immediately after the parent surface's state
     // is applied"
-    for (auto it = current.children.cbegin(); it != current.children.cend(); ++it) {
-        const auto& subsurface = *it;
+    for (auto subsurface : current.children) {
         if (!subsurface || !subsurface->isSynchronized()) {
             continue;
         }
@@ -1051,30 +1048,26 @@ void Surface::setOutputs(std::vector<Output*> outputs)
 {
     std::vector<Output*> removedOutputs = d_ptr->outputs;
 
-    for (auto it = outputs.cbegin(), end = outputs.cend(); it != end; ++it) {
-        auto stays = *it;
+    for (auto stays : outputs) {
         removedOutputs.erase(std::remove(removedOutputs.begin(), removedOutputs.end(), stays),
                              removedOutputs.end());
     }
 
-    for (auto it = removedOutputs.cbegin(), end = removedOutputs.cend(); it != end; ++it) {
-        auto const binds = (*it)->d_ptr->getBinds(d_ptr->client()->handle());
+    for (auto output : removedOutputs) {
+        auto const binds = output->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_leave>(bind->resource());
         }
-        disconnect(d_ptr->outputDestroyedConnections.take(*it));
+        disconnect(d_ptr->outputDestroyedConnections.take(output));
     }
 
     std::vector<Output*> addedOutputs = outputs;
-    for (auto it = d_ptr->outputs.cbegin(), end = d_ptr->outputs.cend(); it != end; ++it) {
-        auto const keeping = *it;
+    for (auto keeping : d_ptr->outputs) {
         addedOutputs.erase(std::remove(addedOutputs.begin(), addedOutputs.end(), keeping),
                            addedOutputs.end());
     }
 
-    for (auto it = addedOutputs.cbegin(), end = addedOutputs.cend(); it != end; ++it) {
-        auto const add = *it;
-
+    for (auto add : addedOutputs) {
         auto const binds = add->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_enter>(bind->resource());
