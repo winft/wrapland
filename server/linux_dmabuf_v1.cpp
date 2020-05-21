@@ -24,6 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "linux_dmabuf_v1.h"
 #include "linux_dmabuf_v1_p.h"
 
+#include "display.h"
 #include "wayland/display.h"
 
 #include "wayland-server-protocol.h"
@@ -43,6 +44,7 @@ namespace Wrapland::Server
 LinuxDmabufV1::Private::Private(LinuxDmabufV1* q, Display* display)
     : LinuxDmabufV1Global(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
 {
+    create();
 }
 
 LinuxDmabufV1::Private::~Private() = default;
