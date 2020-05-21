@@ -104,15 +104,15 @@ public:
     bool isDpmsSupported() const;
     DpmsMode dpmsMode() const;
 
-    void setPhysicalSize(const QSize& size);
-    void setGlobalPosition(const QPoint& pos);
+    void setPhysicalSize(const QSize& size);   // NOLINT
+    void setGlobalPosition(const QPoint& pos); // NOLINT
 
-    void setManufacturer(std::string const& manufacturer);
-    void setModel(std::string const& model);
+    void setManufacturer(std::string const& manufacturer); // NOLINT
+    void setModel(std::string const& model);               // NOLINT
 
-    void setScale(int scale);
-    void setSubPixel(SubPixel subPixel);
-    void setTransform(Transform transform);
+    void setScale(int scale);               // NOLINT
+    void setSubPixel(SubPixel subPixel);    // NOLINT
+    void setTransform(Transform transform); // NOLINT
     void addMode(const QSize& size,
                  ModeFlags flags = ModeFlags(),
                  int refreshRate = Mode::defaultRefreshRate);

@@ -82,22 +82,21 @@ public:
 
     QRectF geometry() const;
 
-    void setUuid(const QByteArray& uuid);
-    void setEisaId(const QString& eisaId);
-    void setSerialNumber(const QString& serialNumber);
-    void setEdid(const QByteArray& edid);
-    void setManufacturer(const QString& manufacturer);
-    void setModel(const QString& model);
-    void setPhysicalSize(const QSize& size);
+    void setUuid(const QByteArray& uuid);              // NOLINT
+    void setEisaId(const QString& eisaId);             // NOLINT
+    void setSerialNumber(const QString& serialNumber); // NOLINT
+    void setEdid(const QByteArray& edid);              // NOLINT
+    void setManufacturer(const QString& manufacturer); // NOLINT
+    void setModel(const QString& model);               // NOLINT
+    void setPhysicalSize(const QSize& size);           // NOLINT
 
-    void setEnabled(Enablement enabled);
+    void setEnabled(Enablement enabled); // NOLINT
 
     void addMode(Mode& mode);
     void setMode(int id);
 
-    void setTransform(Transform transform);
-
-    void setGeometry(const QRectF& rect);
+    void setTransform(Transform transform); // NOLINT
+    void setGeometry(const QRectF& rect);   // NOLINT
 
     /**
      * Sends all pending changes out to connected clients. Must only be called when all atomic

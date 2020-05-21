@@ -438,7 +438,7 @@ Cursor::Private::Private(Cursor* q, Pointer* _pointer)
 {
 }
 
-void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const QPoint& p)
+void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const QPoint& _hotspot)
 {
     bool emitChanged = false;
     if (enteredSerial != serial) {
@@ -446,8 +446,8 @@ void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const Q
         emitChanged = true;
         Q_EMIT q_ptr->enteredSerialChanged();
     }
-    if (hotspot != p) {
-        hotspot = p;
+    if (hotspot != _hotspot) {
+        hotspot = _hotspot;
         emitChanged = true;
         Q_EMIT q_ptr->hotspotChanged();
     }

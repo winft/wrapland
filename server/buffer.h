@@ -64,7 +64,7 @@ Q_SIGNALS:
 
 private:
     friend class Surface;
-    Buffer(wl_resource* wlResource, Surface* parent);
+    Buffer(wl_resource* wlResource, Surface* surface);
     Buffer(wl_resource* wlResource, Display* display);
 
     class Private;

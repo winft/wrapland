@@ -35,11 +35,11 @@ public:
 
     void sendKeymap(int fd, quint32 size);
     void sendModifiers();
-    void sendModifiers(quint32 depressed,
+    void sendModifiers(quint32 serial,
+                       quint32 depressed,
                        quint32 latched,
                        quint32 locked,
-                       quint32 group,
-                       quint32 serial);
+                       quint32 group);
 
     void focusChildSurface(quint32 serial, const QPointer<Surface>& childSurface);
     void sendLeave(quint32 serial, Surface* surface);

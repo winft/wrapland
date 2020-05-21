@@ -534,9 +534,9 @@ void PlasmaWindow::setSkipTaskbar(bool set)
     d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_SKIPTASKBAR, set);
 }
 
-void PlasmaWindow::setSkipSwitcher(bool skip)
+void PlasmaWindow::setSkipSwitcher(bool set)
 {
-    d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_SKIPSWITCHER, skip);
+    d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_SKIPSWITCHER, set);
 }
 
 void PlasmaWindow::setIcon(const QIcon& icon)

@@ -196,10 +196,10 @@ void PlasmaVirtualDesktopManager::sendDone()
 
 /////////////////////////// Plasma Virtual Desktop ///////////////////////////
 
-PlasmaVirtualDesktop::Private::Private(PlasmaVirtualDesktop* qptr,
+PlasmaVirtualDesktop::Private::Private(PlasmaVirtualDesktop* q,
                                        PlasmaVirtualDesktopManager* manager)
     : manager(manager)
-    , q_ptr(qptr)
+    , q_ptr(q)
 {
 }
 

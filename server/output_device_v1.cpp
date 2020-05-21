@@ -275,16 +275,16 @@ void OutputDeviceV1::Private::sendDone(OutputDeviceV1Bind* bind)
 
 #define SETTER2(setterName, type, argumentName) SETTER(setterName, type, argumentName, argumentName)
 
-SETTER(setSerialNumber, const QString&, info.serialNumber, serialNumber)
-SETTER(setEisaId, const QString&, info.eisaId, eisaId)
-SETTER(setUuid, const QByteArray&, info.uuid, uuid)
-SETTER(setEdid, const QByteArray&, info.edid, edid)
-SETTER(setManufacturer, const QString&, info.manufacturer, manufacturer)
-SETTER(setModel, const QString&, info.model, model)
-SETTER(setPhysicalSize, const QSize&, info.physicalSize, physicalSize)
-SETTER2(setEnabled, Enablement, enabled)
-SETTER2(setTransform, Transform, transform)
-SETTER2(setGeometry, const QRectF&, geometry)
+SETTER(setSerialNumber, const QString&, info.serialNumber, serialNumber) // NOLINT
+SETTER(setEisaId, const QString&, info.eisaId, eisaId)                   // NOLINT
+SETTER(setUuid, const QByteArray&, info.uuid, uuid)                      // NOLINT
+SETTER(setEdid, const QByteArray&, info.edid, edid)                      // NOLINT
+SETTER(setManufacturer, const QString&, info.manufacturer, manufacturer) // NOLINT
+SETTER(setModel, const QString&, info.model, model)                      // NOLINT
+SETTER(setPhysicalSize, const QSize&, info.physicalSize, physicalSize)   // NOLINT
+SETTER2(setEnabled, Enablement, enabled)                                 // NOLINT
+SETTER2(setTransform, Transform, transform)                              // NOLINT
+SETTER2(setGeometry, const QRectF&, geometry)                            // NOLINT
 
 #undef SETTER
 #undef SETTER2

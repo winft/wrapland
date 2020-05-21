@@ -36,8 +36,8 @@ const struct wl_eglstream_controller_interface EglStreamController::Private::s_i
 
 EglStreamController::Private::Private(Display* display,
                                       const wl_interface* interface,
-                                      EglStreamController* qptr)
-    : EglStreamControllerGlobal(qptr, display, interface, &s_interface)
+                                      EglStreamController* q)
+    : EglStreamControllerGlobal(q, display, interface, &s_interface)
 {
     create();
 }
