@@ -78,6 +78,12 @@ Private* Private::castDisplay(Server::Display* display)
     return display->d_ptr.get();
 }
 
+Private::Private(Server::Display* display)
+    : Wayland::Display(display)
+    , q_ptr(display)
+{
+}
+
 Wayland::Client* Private::castClientImpl(Server::Client* client)
 {
     return client->d_ptr.get();

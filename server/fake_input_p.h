@@ -93,7 +93,7 @@ private:
 class FakeInputDevice::Private
 {
 public:
-    Private(FakeInputBind* bind);
+    explicit Private(FakeInputBind* bind);
 
     FakeInputBind* bind;
     bool authenticated = false;
