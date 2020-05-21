@@ -83,7 +83,7 @@ public:
     ~Display() override;
 
     void setSocketName(const std::string& name);
-    const std::string socketName() const;
+    std::string socketName() const;
 
     uint32_t serial();
     uint32_t nextSerial();

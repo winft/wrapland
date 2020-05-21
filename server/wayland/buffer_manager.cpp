@@ -44,7 +44,7 @@ void BufferManager::addBuffer(Buffer* buffer)
 
 void BufferManager::removeBuffer(Buffer* buffer)
 {
-    m_buffers.erase(std::remove(m_buffers.begin(), m_buffers.end(), buffer));
+    m_buffers.erase(std::remove(m_buffers.begin(), m_buffers.end(), buffer), m_buffers.end());
 }
 
 bool BufferManager::beginShmAccess(wl_shm_buffer* buffer)

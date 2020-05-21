@@ -349,7 +349,7 @@ void Seat::Private::endDrag(quint32 serial)
     Q_EMIT q_ptr->dragEnded();
 }
 
-void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice)
+void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice) const
 {
     if (!currentSelection) {
         return;
@@ -612,7 +612,6 @@ void Seat::setDragTarget(Surface* surface,
         d_ptr->drag.surface = nullptr;
     }
     Q_EMIT dragSurfaceChanged();
-    return;
 }
 
 void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation)
@@ -741,7 +740,7 @@ QMatrix4x4 Seat::focusedPointerSurfaceTransformation() const
 
 namespace
 {
-static quint32 qtToWaylandButton(Qt::MouseButton button)
+quint32 qtToWaylandButton(Qt::MouseButton button)
 {
 #if HAVE_LINUX_INPUT_H
     static const QHash<Qt::MouseButton, quint32> s_buttons({
@@ -781,7 +780,7 @@ bool Seat::isPointerButtonPressed(quint32 button) const
     if (it == d_ptr->globalPointer.buttonStates.constEnd()) {
         return false;
     }
-    return it.value() == Private::SeatPointer::State::Pressed ? true : false;
+    return it.value() == Private::SeatPointer::State::Pressed;
 }
 
 void Seat::pointerAxisV5(Qt::Orientation orientation,
@@ -1126,7 +1125,7 @@ void Seat::updateKeyboardModifiers(quint32 depressed,
 {
     bool changed = false;
 #define UPDATE(value)                                                                              \
-    if (d_ptr->keys.modifiers.value != value) {                                                    \
+    if (d_ptr->keys.modifiers.value != (value)) {                                                  \
         d_ptr->keys.modifiers.value = value;                                                       \
         changed = true;                                                                            \
     }

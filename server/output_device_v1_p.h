@@ -62,7 +62,7 @@ public:
 
     struct State {
         struct Info {
-            bool operator==(struct Info& i)
+            bool operator==(struct Info& i) const
             {
                 return uuid == i.uuid && eisaId == i.eisaId && serialNumber == i.serialNumber
                     && edid == i.edid && manufacturer == i.manufacturer && model == i.model
@@ -72,8 +72,8 @@ public:
             QString eisaId;
             QString serialNumber;
             QByteArray edid;
-            QString manufacturer = QStringLiteral("kwinft");
-            QString model = QStringLiteral("none");
+            QString manufacturer{QStringLiteral("kwinft")}; // NOLINT(performance-no-automatic-move)
+            QString model{QStringLiteral("none")};          // NOLINT(performance-no-automatic-move)
             QSize physicalSize;
         } info;
 

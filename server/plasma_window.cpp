@@ -31,7 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 #include <QtConcurrentRun>
 
-#include <signal.h>
+#include <csignal>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
@@ -60,7 +60,7 @@ PlasmaWindowManager::PlasmaWindowManager(Display* display, QObject* parent)
     // kill off the compositor.
     // TODO(romangg): Replace the pipe with a Unix domain socket and set on it to ignore the SIGPIPE
     //                signal. See issue #7.
-    signal(SIGPIPE, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN); // NOLINT
 }
 
 PlasmaWindowManager::~PlasmaWindowManager() = default;
@@ -325,7 +325,7 @@ void PlasmaWindow::Private::setTitle(const QString& title)
     }
 }
 
-void PlasmaWindow::Private::unmap()
+void PlasmaWindow::Private::unmap() const
 {
     for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
         (*it)->unmap();

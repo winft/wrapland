@@ -52,7 +52,7 @@ public:
 
     QList<PlasmaVirtualDesktop*> desktops;
 
-    QList<PlasmaVirtualDesktop*>::const_iterator constFindDesktop(const QString& id);
+    QList<PlasmaVirtualDesktop*>::const_iterator constFindDesktop(const QString& id) const;
     QList<PlasmaVirtualDesktop*>::iterator findDesktop(const QString& id);
 
 private:

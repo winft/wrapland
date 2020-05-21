@@ -39,7 +39,11 @@ Client::Client(wl_client* wlClient, Server::Client* clientHandle)
     m_listener.notify = destroyListenerCallback;
     wl_client_add_destroy_listener(wlClient, &m_listener);
     wl_client_get_credentials(wlClient, &m_pid, &m_user, &m_group);
+
     m_executablePath
+        // Qt types have limited compatibility with modern C++. Remove this clang-tidy exception
+        // once it is ported to std::string.
+        // NOLINTNEXTLINE(performance-no-automatic-move)
         = QFileInfo(QStringLiteral("/proc/%1/exe").arg(m_pid)).symLinkTarget().toUtf8().constData();
 }
 

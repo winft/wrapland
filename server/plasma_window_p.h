@@ -80,7 +80,7 @@ public:
     void setPid(uint32_t pid);
     void setThemedIconName(const QString& iconName);
     void setIcon(const QIcon& icon);
-    void unmap();
+    void unmap() const;
     void setState(org_kde_plasma_window_management_state flag, bool set);
     void setParentWindow(PlasmaWindow* window);
     void setGeometry(const QRect& geometry);

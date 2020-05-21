@@ -29,8 +29,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-QList<quint32> FakeInput::Private::touchIds = QList<quint32>();
-
 const struct org_kde_kwin_fake_input_interface FakeInput::Private::s_interface = {
     authenticateCallback,
     pointerMotionCallback,
@@ -198,10 +196,11 @@ void FakeInput::Private::touchDownCallback([[maybe_unused]] wl_client* wlClient,
     if (!check(fakeDevice)) {
         return;
     }
-    if (touchIds.contains(id)) {
+    auto priv = handle(wlResource)->d_ptr.get();
+    if (priv->touchIds.contains(id)) {
         return;
     }
-    touchIds << id;
+    priv->touchIds << id;
     Q_EMIT fakeDevice->touchDownRequested(id,
                                           QPointF(wl_fixed_to_double(x), wl_fixed_to_double(y)));
 }
@@ -216,7 +215,8 @@ void FakeInput::Private::touchMotionCallback([[maybe_unused]] wl_client* wlClien
     if (!check(fakeDevice)) {
         return;
     }
-    if (!touchIds.contains(id)) {
+    auto priv = handle(wlResource)->d_ptr.get();
+    if (!priv->touchIds.contains(id)) {
         return;
     }
     Q_EMIT fakeDevice->touchMotionRequested(id,
@@ -231,10 +231,11 @@ void FakeInput::Private::touchUpCallback([[maybe_unused]] wl_client* wlClient,
     if (!check(fakeDevice)) {
         return;
     }
-    if (!touchIds.contains(id)) {
+    auto priv = handle(wlResource)->d_ptr.get();
+    if (!priv->touchIds.contains(id)) {
         return;
     }
-    touchIds.removeOne(id);
+    priv->touchIds.removeOne(id);
     Q_EMIT fakeDevice->touchUpRequested(id);
 }
 
@@ -245,7 +246,8 @@ void FakeInput::Private::touchCancelCallback([[maybe_unused]] wl_client* wlClien
     if (!check(fakeDevice)) {
         return;
     }
-    touchIds.clear();
+    auto priv = handle(wlResource)->d_ptr.get();
+    priv->touchIds.clear();
     Q_EMIT fakeDevice->touchCancelRequested();
 }
 

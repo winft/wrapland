@@ -63,7 +63,7 @@ public:
     void registerDataDevice(DataDevice* dataDevice);
     void registerTextInput(TextInputV2* ti);
     void endDrag(quint32 serial);
-    void cancelPreviousSelection(DataDevice* newlySelectedDataDevice);
+    void cancelPreviousSelection(DataDevice* newlySelectedDataDevice) const;
 
     std::string name;
     bool pointer = false;

@@ -108,22 +108,27 @@ public:
         {
             if (side == AttachSide::Left) {
                 return left;
-            } else if (side == AttachSide::TopLeft) {
-                return topLeft;
-            } else if (side == AttachSide::Top) {
-                return top;
-            } else if (side == AttachSide::TopRight) {
-                return topRight;
-            } else if (side == AttachSide::Right) {
-                return right;
-            } else if (side == AttachSide::BottomRight) {
-                return bottomRight;
-            } else if (side == AttachSide::Bottom) {
-                return bottom;
-            } else {
-                assert(side == AttachSide::BottomLeft);
-                return bottomLeft;
             }
+            if (side == AttachSide::TopLeft) {
+                return topLeft;
+            }
+            if (side == AttachSide::Top) {
+                return top;
+            }
+            if (side == AttachSide::TopRight) {
+                return topRight;
+            }
+            if (side == AttachSide::Right) {
+                return right;
+            }
+            if (side == AttachSide::BottomRight) {
+                return bottomRight;
+            }
+            if (side == AttachSide::Bottom) {
+                return bottom;
+            }
+            assert(side == AttachSide::BottomLeft);
+            return bottomLeft;
         }
 
         template<OffsetSide side>

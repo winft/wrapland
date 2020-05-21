@@ -46,7 +46,7 @@ PlasmaVirtualDesktopManager::Private::Private(Display* display, PlasmaVirtualDes
 }
 
 QList<PlasmaVirtualDesktop*>::const_iterator
-PlasmaVirtualDesktopManager::Private::constFindDesktop(const QString& id)
+PlasmaVirtualDesktopManager::Private::constFindDesktop(const QString& id) const
 {
     return std::find_if(desktops.constBegin(),
                         desktops.constEnd(),

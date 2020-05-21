@@ -140,7 +140,6 @@ void Surface::Private::removeChild(Subsurface* child)
 
 bool Surface::Private::raiseChild(Subsurface* subsurface, Surface* sibling)
 {
-
     auto it = std::find(pending.children.begin(), pending.children.end(), subsurface);
 
     if (it == pending.children.end()) {
@@ -184,7 +183,6 @@ bool Surface::Private::raiseChild(Subsurface* subsurface, Surface* sibling)
 
 bool Surface::Private::lowerChild(Subsurface* subsurface, Surface* sibling)
 {
-
     auto it = std::find(pending.children.begin(), pending.children.end(), subsurface);
     if (it == pending.children.end()) {
         return false;
@@ -762,9 +760,7 @@ void Surface::Private::attachBuffer(wl_resource* buffer, const QPoint& offset)
     pending.bufferIsSet = true;
     pending.offset = offset;
 
-    if (pending.buffer) {
-        delete pending.buffer;
-    }
+    delete pending.buffer;
 
     if (!buffer) {
         // Got a null buffer, deletes content in next frame.

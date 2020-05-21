@@ -34,7 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 
 #include <array>
-#include <assert.h>
+#include <cassert>
 #include <unistd.h>
 
 namespace Wrapland::Server
@@ -214,7 +214,7 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
 
     // Check for holes in the dmabufs set (e.g. [0, 1, 3])
     for (uint32_t i = 0; i < m_planeCount; i++) {
-        if (m_planes[i].fd != -1) {
+        if (m_planes.at(i).fd != -1) {
             continue;
         }
         postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INCOMPLETE,
@@ -232,7 +232,7 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
     }
 
     for (uint32_t i = 0; i < m_planeCount; i++) {
-        auto& plane = m_planes[i];
+        auto& plane = m_planes.at(i);
 
         if (uint64_t(plane.offset) + plane.stride > UINT32_MAX) {
             postError(
@@ -249,8 +249,9 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
         // Don't report an error as it might be caused by the kernel not supporting seeking on
         // dmabuf
         off_t size = ::lseek(plane.fd, 0, SEEK_END);
-        if (size == -1)
+        if (size == -1) {
             continue;
+        }
 
         if (plane.offset >= size) {
             postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS,
@@ -283,7 +284,7 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
     QVector<LinuxDmabufV1::Plane> planes;
     planes.reserve(m_planeCount);
     for (uint32_t i = 0; i < m_planeCount; i++) {
-        planes << m_planes[i];
+        planes << m_planes.at(i);
     }
 
     auto buffer = m_dmabuf->impl->importBuffer(planes, format, size, LinuxDmabufV1::Flags(flags));
@@ -330,7 +331,7 @@ void ParamsV1::add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride,
         return;
     }
 
-    auto& plane = m_planes[plane_idx];
+    auto& plane = m_planes.at(plane_idx);
 
     if (plane.fd != -1) {
         postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_PLANE_SET,

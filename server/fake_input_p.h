@@ -87,7 +87,7 @@ private:
     FakeInputDevice* device(FakeInputBind* bind) const;
 
     static const struct org_kde_kwin_fake_input_interface s_interface;
-    static QList<quint32> touchIds;
+    QList<quint32> touchIds;
 };
 
 class FakeInputDevice::Private

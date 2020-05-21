@@ -125,7 +125,7 @@ void Display::setSocketName(const QString& name)
     d_ptr->setSocketName(name.toUtf8().constData());
 }
 
-std::string const Display::socketName() const
+std::string Display::socketName() const
 {
     return d_ptr->socketName();
 }

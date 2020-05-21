@@ -77,7 +77,7 @@ EglStreamController::EglStreamController(Display* display, QObject* parent)
         return;
     }
 
-    d_ptr.reset(new Private(display, interface, this));
+    d_ptr = std::make_unique<Private>(display, interface, this);
 }
 
 EglStreamController::~EglStreamController() = default;
