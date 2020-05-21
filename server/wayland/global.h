@@ -50,6 +50,11 @@ class Global
 public:
     using GlobalResource = Resource<Handle, Global<Handle, Version>>;
 
+    Global(Global const&) = delete;
+    Global& operator=(Global const&) = delete;
+    Global(Global&&) noexcept = delete;
+    Global& operator=(Global&&) noexcept = delete;
+
     virtual ~Global()
     {
         if (m_capsule->valid()) {
@@ -197,11 +202,6 @@ protected:
         // TODO(romangg): allow to create and destroy Globals while keeping the object existing (but
         //                always create on ctor call?).
     }
-
-    Global(Global&) = delete;
-    Global& operator=(Global) = delete;
-    Global(Global&&) noexcept = delete;
-    Global& operator=(Global&&) noexcept = delete;
 
     void remove()
     {

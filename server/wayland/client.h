@@ -43,8 +43,8 @@ class Client
 public:
     Client(wl_client* wlClient, Server::Client* clientHandle);
 
-    Client(Client&) = delete;
-    Client& operator=(Client) = delete;
+    Client(Client const&) = delete;
+    Client& operator=(Client const&) = delete;
     Client(Client&&) noexcept = default;
     Client& operator=(Client&&) noexcept = default;
 
