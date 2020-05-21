@@ -65,6 +65,10 @@ EglStreamController::EglStreamController(Display* display, QObject* parent)
     : QObject(parent)
 {
     // libnvidia-egl-wayland.so.1 may not be present on all systems, so we load it dynamically
+    // TODO(romangg): Cast from QFunctionPointer changes alignment from 4 to 8. Disable the check
+    //                for now since it is legacy code and a solution is not directly apparent. But
+    //                can we make this clang-tidy check pass somehow?
+    // NOLINTNEXTLINE(clang-diagnostic-cast-align)
     auto interface = (wl_interface*)QLibrary::resolve(QLatin1String("libnvidia-egl-wayland.so.1"),
                                                       "wl_eglstream_controller_interface");
     if (interface == nullptr) {

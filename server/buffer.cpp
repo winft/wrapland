@@ -211,8 +211,9 @@ void Buffer::Private::imageBufferCleanupHandler(void* info)
 
 void Buffer::Private::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] void* data)
 {
-    // The wl_container_of macro can not be used with auto keyword.
-    // NOLINTNEXTLINE(hicpp-use-auto)
+    // The wl_container_of macro can not be used with auto keyword and in the macro from libwayland
+    // the alignment is increased.
+    // NOLINTNEXTLINE(hicpp-use-auto, clang-diagnostic-cast-align)
     DestroyWrapper* wrapper = wl_container_of(listener, wrapper, listener);
 
     wrapper->buffer->d_ptr->resource = nullptr;
