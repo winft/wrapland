@@ -350,7 +350,7 @@ void PlasmaWindow::Private::setState(org_kde_plasma_window_management_state flag
 }
 
 PlasmaWindowRes* PlasmaWindow::Private::getResourceOfParent(PlasmaWindow* parent,
-                                                            PlasmaWindowRes* childRes) const
+                                                            PlasmaWindowRes* childRes)
 {
     if (!parent) {
         return nullptr;

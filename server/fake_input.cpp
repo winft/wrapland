@@ -87,12 +87,10 @@ FakeInputDevice* FakeInput::Private::device(wl_resource* wlResource)
 
 FakeInputDevice* FakeInput::Private::device(FakeInputBind* bind) const
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
-
-    auto it = std::find_if(priv->devices.begin(), priv->devices.end(), [bind](auto fakeDevice) {
+    auto it = std::find_if(devices.begin(), devices.end(), [bind](auto fakeDevice) {
         return fakeDevice->d_ptr->bind == bind;
     });
-    if (it != priv->devices.end()) {
+    if (it != devices.end()) {
         return *it;
     }
     return nullptr;

@@ -250,13 +250,13 @@ void Output::Private::bindInit(Wayland::Resource<Output, OutputGlobal>* bind)
     bind->client()->flush();
 }
 
-int32_t Output::Private::getFlags(const Mode& mode)
+int32_t getFlags(const Output::Mode& mode)
 {
     int32_t flags = 0;
-    if (mode.flags.testFlag(ModeFlag::Current)) {
+    if (mode.flags.testFlag(Output::ModeFlag::Current)) {
         flags |= WL_OUTPUT_MODE_CURRENT;
     }
-    if (mode.flags.testFlag(ModeFlag::Preferred)) {
+    if (mode.flags.testFlag(Output::ModeFlag::Preferred)) {
         flags |= WL_OUTPUT_MODE_PREFERRED;
     }
     return flags;

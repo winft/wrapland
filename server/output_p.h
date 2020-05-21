@@ -73,8 +73,6 @@ private:
     std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
     geometryArgs() const;
 
-    int32_t getFlags(const Mode& mode);
-
     static const struct wl_output_interface s_interface;
 };
 
