@@ -155,7 +155,7 @@ void TextInputV2::Private::setCursorPosition(qint32 index, qint32 anchor)
 
 void TextInputV2::Private::setTextDirection(Qt::LayoutDirection direction)
 {
-    zwp_text_input_v2_text_direction wlDirection;
+    zwp_text_input_v2_text_direction wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_AUTO;
     switch (direction) {
     case Qt::LeftToRight:
         wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_LTR;

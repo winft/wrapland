@@ -330,7 +330,7 @@ PlasmaVirtualDesktopRes::PlasmaVirtualDesktopRes(Client* client,
                                                  uint32_t version,
                                                  uint32_t id,
                                                  PlasmaVirtualDesktop* virtualDesktop)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new Private(client, version, id, virtualDesktop, this))
 {
 }

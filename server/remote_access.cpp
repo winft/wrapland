@@ -219,7 +219,7 @@ void RemoteBuffer::passFd()
 /////////////////////////// Remote buffer handle ///////////////////////////
 
 RemoteBufferHandle::RemoteBufferHandle()
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new Private)
 {
 }

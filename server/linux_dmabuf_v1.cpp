@@ -112,7 +112,7 @@ ParamsWrapperV1::ParamsWrapperV1(Client* client,
                                  uint32_t version,
                                  uint32_t id,
                                  LinuxDmabufV1::Private* dmabuf)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new ParamsV1(client, version, id, dmabuf, this))
 {
 }
@@ -362,7 +362,7 @@ LinuxDmabufBufferV1::Private::Private(uint32_t format,
 LinuxDmabufBufferV1::LinuxDmabufBufferV1(uint32_t format,
                                          const QSize& size,
                                          [[maybe_unused]] QObject* parent)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new LinuxDmabufBufferV1::Private(format, size, this))
 {
 }

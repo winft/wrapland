@@ -351,7 +351,7 @@ void Pointer::axis(Qt::Orientation orientation,
                                                              : WL_POINTER_AXIS_HORIZONTAL_SCROLL;
 
     auto getWlSource = [source] {
-        wl_pointer_axis_source wlSource;
+        wl_pointer_axis_source wlSource = WL_POINTER_AXIS_SOURCE_WHEEL;
         switch (source) {
         case PointerAxisSource::Wheel:
             wlSource = WL_POINTER_AXIS_SOURCE_WHEEL;

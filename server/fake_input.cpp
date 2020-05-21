@@ -150,7 +150,7 @@ void FakeInput::Private::axisCallback([[maybe_unused]] wl_client* wlClient,
         return;
     }
 
-    Qt::Orientation orientation;
+    Qt::Orientation orientation = Qt::Horizontal;
     switch (axis) {
     case WL_POINTER_AXIS_HORIZONTAL_SCROLL:
         orientation = Qt::Horizontal;

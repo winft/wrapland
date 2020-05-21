@@ -168,7 +168,8 @@ Buffer::Private::Private(Buffer* q,
             resolved = true;
         }
         if (eglQueryWaylandBufferWL) {
-            EGLint width, height;
+            EGLint width = 0;
+            EGLint height = 0;
             bool valid = false;
             valid = eglQueryWaylandBufferWL(eglDisplay, resource, EGL_WIDTH, &width);
             valid = valid && eglQueryWaylandBufferWL(eglDisplay, resource, EGL_HEIGHT, &height);
@@ -176,7 +177,7 @@ Buffer::Private::Private(Buffer* q,
                 size = QSize(width, height);
             }
             // check alpha
-            EGLint format;
+            EGLint format = 0;
             if (eglQueryWaylandBufferWL(eglDisplay, resource, EGL_TEXTURE_FORMAT, &format)) {
                 switch (format) {
                 case EGL_TEXTURE_RGBA:
@@ -263,7 +264,7 @@ QImage Buffer::Private::createImage()
 }
 
 Buffer::Buffer(wl_resource* wlResource, Surface* surface)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new Private(this,
                         wlResource,
                         surface,
@@ -272,7 +273,7 @@ Buffer::Buffer(wl_resource* wlResource, Surface* surface)
 }
 
 Buffer::Buffer(wl_resource* wlResource, Display* display)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new Private(this, wlResource, nullptr, Wayland::Display::backendCast(display)))
 {
 }
