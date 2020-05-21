@@ -20,8 +20,11 @@ WarningsAsErrors: "*"
 # fuchsia-default-arguments-calls: We allow default arguments.
 # fuchsia-default-arguments-declarations: We allow default arguments.
 # fuchsia-overloaded-operator: We overload | for enum classes through Q_DECLARE_OPERATORS_FOR_FLAGS.
+# google-build-using-namespace: We do allow using namespaces for now. Might make sense to
+#   reevaluate this decision at some point in the future.
 # google-readability-namespace-comments: Often unnecessary verbose, with C++17 namespaces there are
 #   not many braces after all.
+# google-runtime-references: We generally allow reference parameter passing as is common in C++.
 # hicpp-member-init: See cppcoreguidelines-pro-type-member-init.
 # hicpp-no-array-decay: See cppcoreguidelines-pro-bounds-array-to-pointer-decay.
 # hicpp-vararg: Same as cppcoreguidelines-pro-type-vararg.
@@ -39,6 +42,11 @@ WarningsAsErrors: "*"
 # readability-qualified-auto: Same as llvm-qualified-auto.
 #
 # Temporarily suppress (might be possilbe to remove or limit to certain subdirectories later on):
+# cppcoreguidelines-macro-usage: We currently still depend on some macros in Output implementation
+#   and some other classes where the Qt functionality can't be easily migrated to templates.
+# cppcoreguidelines-owning-memory: We have yet to fully define a structure without the need of raw
+#   owning pointers. This is a long-term goal that needs more work on the layering of the server
+#   structure until complete.
 # cppcoreguidelines-pro-type-reinterpret-cast: Qt macros like Q_DECLARE_METATYPE use
 #   reinterpret_cast.
 # cppcoreguidelines-special-member-functions: Pimpl classes in public API need dtors, might be
@@ -49,15 +57,20 @@ WarningsAsErrors: "*"
 
 Checks: "*,
 -cert-dcl50-cpp,
+-cppcoreguidelines-macro-usage,
 -cppcoreguidelines-non-private-member-variables-in-classes,
+-cppcoreguidelines-owning-memory,
 -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+-cppcoreguidelines-pro-type-member-init,
 -cppcoreguidelines-pro-type-reinterpret-cast,
 -cppcoreguidelines-pro-type-vararg,
 -cppcoreguidelines-special-member-functions,
 -fuchsia-default-arguments-calls,
 -fuchsia-default-arguments-declarations,
 -fuchsia-overloaded-operator,
+-google-build-using-namespace,
 -google-readability-namespace-comments,
+-google-runtime-references,
 -hicpp-member-init,
 -hicpp-no-array-decay,
 -hicpp-signed-bitwise,
