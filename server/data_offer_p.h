@@ -44,7 +44,7 @@ public:
     void sendSourceActions();
 
 private:
-    void receive(std::string mimeType, int32_t fd);
+    void receive(std::string const& mimeType, int32_t fd);
     static void acceptCallback(wl_client* wlClient,
                                wl_resource* wlResource,
                                uint32_t serial,

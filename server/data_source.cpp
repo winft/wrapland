@@ -50,7 +50,7 @@ void DataSource::Private::offerCallback([[maybe_unused]] wl_client* wlClient,
     priv->offer(mimeType);
 }
 
-void DataSource::Private::offer(std::string mimeType)
+void DataSource::Private::offer(std::string const& mimeType)
 {
     mimeTypes.push_back(mimeType);
     Q_EMIT q_ptr->mimeTypeOffered(mimeType);
@@ -91,13 +91,13 @@ DataSource::DataSource(Client* client, uint32_t version, uint32_t id)
 {
 }
 
-void DataSource::accept(std::string mimeType)
+void DataSource::accept(std::string const& mimeType)
 {
     // TODO(unknown author): does this require a sanity check on the possible mimeType?
     d_ptr->send<wl_data_source_send_target>(mimeType.empty() ? nullptr : mimeType.c_str());
 }
 
-void DataSource::requestData(std::string mimeType, int32_t fd)
+void DataSource::requestData(std::string const& mimeType, int32_t fd)
 {
     // TODO(unknown author): does this require a sanity check on the possible mimeType?
     d_ptr->send<wl_data_source_send_send>(mimeType.c_str(), fd);

@@ -479,7 +479,8 @@ void PlasmaWindow::setOnAllDesktops(bool set)
             return;
         }
         // leaving everything means on all desktops
-        for (auto desk : plasmaVirtualDesktops()) {
+        auto const desktops = plasmaVirtualDesktops();
+        for (auto const& desk : desktops) {
             for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
                 (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(
                     desk.toUtf8().constData());

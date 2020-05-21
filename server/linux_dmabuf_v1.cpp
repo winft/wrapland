@@ -103,7 +103,7 @@ void LinuxDmabufV1::setImpl(LinuxDmabufV1::Impl* impl)
     d_ptr->impl = impl;
 }
 
-void LinuxDmabufV1::setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> set)
+void LinuxDmabufV1::setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> const& set)
 {
     d_ptr->supportedFormatsWithModifiers = set;
 }

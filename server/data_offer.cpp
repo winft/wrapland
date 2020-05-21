@@ -67,7 +67,7 @@ void DataOffer::Private::receiveCallback([[maybe_unused]] wl_client* wlClient,
     priv->receive(mimeType, fd);
 }
 
-void DataOffer::Private::receive(std::string mimeType, int32_t fd)
+void DataOffer::Private::receive(std::string const& mimeType, int32_t fd)
 {
     if (!source) {
         close(fd);
@@ -158,7 +158,7 @@ DataOffer::DataOffer(Client* client, uint32_t version, DataSource* source)
     : d_ptr(new Private(client, version, source, this))
 {
     assert(source);
-    connect(source, &DataSource::mimeTypeOffered, this, [this](std::string mimeType) {
+    connect(source, &DataSource::mimeTypeOffered, this, [this](std::string const& mimeType) {
         d_ptr->send<wl_data_offer_send_offer>(mimeType.c_str());
     });
     QObject::connect(

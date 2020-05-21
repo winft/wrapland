@@ -953,16 +953,6 @@ QRectF Surface::sourceRectangle() const
     return d_ptr->current.sourceRectangle;
 }
 
-// Surface *Surface::get(wl_resource *native)
-//{
-//    return Private::get<Surface>(native);
-//}
-
-// Surface *Surface::get(quint32 id, const Client* client)
-//{
-//    return Private::get<Surface>(id, client);
-//}
-
 std::vector<Subsurface*> Surface::childSubsurfaces() const
 {
 
@@ -1045,7 +1035,7 @@ std::vector<Output*> Surface::outputs() const
     return d_ptr->outputs;
 }
 
-void Surface::setOutputs(std::vector<Output*> outputs)
+void Surface::setOutputs(std::vector<Output*> const& outputs)
 {
     std::vector<Output*> removedOutputs = d_ptr->outputs;
 
