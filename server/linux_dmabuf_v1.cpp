@@ -300,6 +300,8 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
         plane.fd = -1;
     }
 
+    // We import the buffer from the consumer. The consumer ensures the buffer exists.
+    // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
     buffer->d_ptr->buffer = new BufferV1(client()->handle(), 1, bufferId, buffer);
     // TODO(romangg): error handling
 
