@@ -68,10 +68,8 @@ public:
 
 private:
     static void destroyListenerCallback(wl_listener* listener, void* data);
-    static std::vector<Client*> allClients;
 
     wl_client* m_client;
-    wl_listener m_listener;
 
     pid_t m_pid = 0;
     uid_t m_user = 0;
@@ -79,6 +77,12 @@ private:
     std::string m_executablePath;
 
     Server::Client* q_ptr;
+
+    struct DestroyWrapper {
+        Client* client;
+        struct wl_listener listener;
+    };
+    DestroyWrapper m_destroyWrapper;
 };
 
 }

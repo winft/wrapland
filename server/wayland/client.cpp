@@ -34,10 +34,9 @@ Client::Client(wl_client* wlClient, Server::Client* clientHandle)
     : m_client{wlClient}
     , q_ptr{clientHandle}
 {
-    allClients.push_back(this);
-
-    m_listener.notify = destroyListenerCallback;
-    wl_client_add_destroy_listener(wlClient, &m_listener);
+    m_destroyWrapper.client = this;
+    m_destroyWrapper.listener.notify = destroyListenerCallback;
+    wl_client_add_destroy_listener(wlClient, &m_destroyWrapper.listener);
     wl_client_get_credentials(wlClient, &m_pid, &m_user, &m_group);
 
     m_executablePath
@@ -50,9 +49,8 @@ Client::Client(wl_client* wlClient, Server::Client* clientHandle)
 Client::~Client()
 {
     if (m_client) {
-        wl_list_remove(&m_listener.link);
+        wl_list_remove(&m_destroyWrapper.listener.link);
     }
-    allClients.erase(std::remove(allClients.begin(), allClients.end(), this), allClients.end());
 }
 
 Display* Client::display() const
@@ -81,21 +79,20 @@ void Client::destroy()
     wl_client_destroy(m_client);
 }
 
-std::vector<Client*> Client::allClients;
-
-void Client::destroyListenerCallback(wl_listener* listener, void* data)
+void Client::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] void* data)
 {
-    Q_UNUSED(listener);
+    // The wl_container_of macro can not be used with auto keyword and in the macro from libwayland
+    // the alignment is increased.
+    // Relevant clang-tidy checks are:
+    // * clang-diagnostic-cast-align
+    // * cppcoreguidelines-pro-bounds-pointer-arithmetic
+    // * hicpp-use-auto
+    // * modernize-use-auto
+    // NOLINTNEXTLINE
+    DestroyWrapper* wrapper = wl_container_of(listener, wrapper, listener);
+    auto client = wrapper->client;
 
-    auto* wlClient = reinterpret_cast<wl_client*>(data);
-
-    auto it = std::find_if(allClients.cbegin(), allClients.cend(), [wlClient](Client* client) {
-        return client->native() == wlClient;
-    });
-    Q_ASSERT(it != allClients.cend());
-    auto* client = *it;
-
-    wl_list_remove(&client->m_listener.link);
+    wl_list_remove(&client->m_destroyWrapper.listener.link);
     client->m_client = nullptr;
     Q_EMIT client->q_ptr->disconnected(client->q_ptr);
     delete client->handle();
