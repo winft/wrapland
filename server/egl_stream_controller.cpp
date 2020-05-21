@@ -36,8 +36,8 @@ const struct wl_eglstream_controller_interface EglStreamController::Private::s_i
 
 EglStreamController::Private::Private(Display* display,
                                       const wl_interface* interface,
-                                      EglStreamController* qptr)
-    : EglStreamControllerGlobal(qptr, display, interface, &s_interface)
+                                      EglStreamController* q)
+    : EglStreamControllerGlobal(q, display, interface, &s_interface)
 {
     create();
 }
@@ -65,13 +65,19 @@ EglStreamController::EglStreamController(Display* display, QObject* parent)
     : QObject(parent)
 {
     // libnvidia-egl-wayland.so.1 may not be present on all systems, so we load it dynamically
-    auto interface = (wl_interface*)QLibrary::resolve(QLatin1String("libnvidia-egl-wayland.so.1"),
-                                                      "wl_eglstream_controller_interface");
+    // TODO(romangg): Cast from QFunctionPointer changes alignment from 4 to 8. Disable the check
+    //                for now since it is legacy code and a solution is not directly apparent. But
+    //                can we make this clang-tidy check pass somehow?
+    // NOLINTNEXTLINE(clang-diagnostic-cast-align)
+    auto interface = reinterpret_cast<wl_interface*>(QLibrary::resolve(
+        QLatin1String("libnvidia-egl-wayland.so.1"), "wl_eglstream_controller_interface"));
+
     if (interface == nullptr) {
-        qCWarning(WRAPLAND_SERVER) << "failed to resolve wl_eglstream_controller_interface";
+        qCWarning(WRAPLAND_SERVER, "failed to resolve wl_eglstream_controller_interface");
         return;
     }
-    d_ptr.reset(new Private(display, interface, this));
+
+    d_ptr = std::make_unique<Private>(display, interface, this);
 }
 
 EglStreamController::~EglStreamController() = default;

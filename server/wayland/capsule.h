@@ -33,7 +33,7 @@ class Capsule
 public:
     explicit Capsule(std::function<void(WaylandObject*)> dtor)
         : m_object{nullptr}
-        , m_dtor(dtor)
+        , m_dtor(std::move(dtor))
     {
     }
 

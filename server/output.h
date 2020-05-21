@@ -40,7 +40,6 @@ namespace Wrapland::Server
 {
 class Client;
 class Display;
-class OutputInterface;
 
 class WRAPLANDSERVER_EXPORT Output : public QObject
 {
@@ -81,7 +80,8 @@ public:
 
     struct Mode {
         QSize size = QSize();
-        int refreshRate = 60000;
+        static constexpr int defaultRefreshRate = 60000;
+        int refreshRate = defaultRefreshRate;
         ModeFlags flags;
     };
 
@@ -103,26 +103,22 @@ public:
     bool isDpmsSupported() const;
     DpmsMode dpmsMode() const;
 
-    void setPhysicalSize(const QSize& size);
-    void setGlobalPosition(const QPoint& pos);
+    void setPhysicalSize(const QSize& size);   // NOLINT
+    void setGlobalPosition(const QPoint& pos); // NOLINT
 
-    void setManufacturer(std::string const& manufacturer);
-    void setModel(std::string const& model);
+    void setManufacturer(std::string const& manufacturer); // NOLINT
+    void setModel(std::string const& model);               // NOLINT
 
-    void setScale(int scale);
-    void setSubPixel(SubPixel subPixel);
-    void setTransform(Transform transform);
-    void addMode(const QSize& size, ModeFlags flags = ModeFlags(), int refreshRate = 60000);
-    void setCurrentMode(const QSize& size, int refreshRate = 60000);
+    void setScale(int scale);               // NOLINT
+    void setSubPixel(SubPixel subPixel);    // NOLINT
+    void setTransform(Transform transform); // NOLINT
+    void addMode(const QSize& size,
+                 ModeFlags flags = ModeFlags(),
+                 int refreshRate = Mode::defaultRefreshRate);
+    void setCurrentMode(const QSize& size, int refreshRate = Mode::defaultRefreshRate);
 
     void setDpmsSupported(bool supported);
     void setDpmsMode(DpmsMode mode);
-
-    // legacy
-    OutputInterface* legacy;
-    static Output* get(void* data);
-    QVector<wl_resource*> getResources(Client* client);
-    //
 
 Q_SIGNALS:
     void physicalSizeChanged(const QSize&);

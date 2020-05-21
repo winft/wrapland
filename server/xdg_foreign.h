@@ -34,7 +34,7 @@ class WRAPLANDSERVER_EXPORT XdgForeign : public QObject
 {
     Q_OBJECT
 public:
-    XdgForeign(Display* display, QObject* parent = nullptr);
+    explicit XdgForeign(Display* display, QObject* parent = nullptr);
     ~XdgForeign() override;
 
     /**

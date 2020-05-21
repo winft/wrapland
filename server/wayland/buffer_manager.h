@@ -40,8 +40,6 @@ class Display;
 class BufferManager
 {
 public:
-    BufferManager();
-
     Buffer* fromResource(wl_resource* resource) const;
 
     void addBuffer(Buffer* buffer);
@@ -51,8 +49,8 @@ public:
     void endShmAccess();
 
 private:
-    wl_shm_buffer* m_accessedShmBuffer;
-    int m_accessCounter;
+    wl_shm_buffer* m_accessedShmBuffer{nullptr};
+    int m_accessCounter{0};
 
     std::vector<Buffer*> m_buffers;
 };

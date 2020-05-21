@@ -31,11 +31,7 @@ namespace Wrapland::Server
 class Private : public Wayland::Display
 {
 public:
-    Private(Server::Display* display)
-        : Wayland::Display(display)
-        , q_ptr(display)
-    {
-    }
+    explicit Private(Server::Display* display);
 
     Client* createClientHandle(wl_client* wlClient);
     Wayland::Client* castClientImpl(Server::Client* client) override;

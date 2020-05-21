@@ -283,6 +283,7 @@ target_link_libraries(WraplandServer
         Wayland::Server
         EGL::EGL
         Qt5::Concurrent
+        external::external
 )
 
 set_target_properties(WraplandServer PROPERTIES VERSION   ${WRAPLAND_VERSION_STRING}

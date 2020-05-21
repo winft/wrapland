@@ -78,6 +78,12 @@ Private* Private::castDisplay(Server::Display* display)
     return display->d_ptr.get();
 }
 
+Private::Private(Server::Display* display)
+    : Wayland::Display(display)
+    , q_ptr(display)
+{
+}
+
 Wayland::Client* Private::castClientImpl(Server::Client* client)
 {
     return client->d_ptr.get();
@@ -119,7 +125,7 @@ void Display::setSocketName(const QString& name)
     d_ptr->setSocketName(name.toUtf8().constData());
 }
 
-std::string const Display::socketName() const
+std::string Display::socketName() const
 {
     return d_ptr->socketName();
 }
@@ -164,7 +170,8 @@ Output* Display::createOutput(QObject* parent)
 
 void Display::removeOutput(Output* output)
 {
-    // TODO: this does not clean up. But it should be also possible to just delete the output.
+    // TODO(romangg): This does not clean up. But it should be also possible to just delete the
+    //                output.
     d_ptr->outputs.erase(std::remove(d_ptr->outputs.begin(), d_ptr->outputs.end(), output),
                          d_ptr->outputs.end());
     // d_ptr->removeGlobal(output);
@@ -405,10 +412,10 @@ Client* Display::createClient(int fd)
 void Display::setEglDisplay(void* display)
 {
     if (d_ptr->eglDisplay != EGL_NO_DISPLAY) {
-        qCWarning(WRAPLAND_SERVER) << "EGLDisplay cannot be changed";
+        qCWarning(WRAPLAND_SERVER, "EGLDisplay cannot be changed");
         return;
     }
-    d_ptr->eglDisplay = (EGLDisplay)display;
+    d_ptr->eglDisplay = static_cast<EGLDisplay>(display);
 }
 
 void* Display::eglDisplay() const

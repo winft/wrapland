@@ -125,8 +125,8 @@ private:
     bool m_createRequested = false;
 };
 
-// TODO: Make this wrapper go away! For that Wayland::Resource can't depend any longer on the
-// resourceDestroy signal being available.
+// TODO(romangg): Make this wrapper go away! For that Wayland::Resource can't depend any longer on
+//                the resourceDestroy signal being available.
 class ParamsWrapperV1 : public QObject
 {
     Q_OBJECT

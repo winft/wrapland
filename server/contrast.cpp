@@ -48,16 +48,7 @@ ContrastManager::Private::Private(Display* display, ContrastManager* q)
 
 ContrastManager::Private::~Private() = default;
 
-void ContrastManager::Private::createCallback(wl_client* wlClient,
-                                              wl_resource* wlResource,
-                                              uint32_t id,
-                                              wl_resource* wlSurface)
-{
-    auto manager = handle(wlResource);
-    manager->d_ptr->createContrast(wlClient, wlResource, id, wlSurface);
-}
-
-void ContrastManager::Private::createContrast([[maybe_unused]] wl_client* wlClient,
+void ContrastManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
                                               wl_resource* wlResource,
                                               uint32_t id,
                                               wl_resource* wlSurface)

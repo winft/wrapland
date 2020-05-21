@@ -46,7 +46,7 @@ PlasmaVirtualDesktopManager::Private::Private(Display* display, PlasmaVirtualDes
 }
 
 QList<PlasmaVirtualDesktop*>::const_iterator
-PlasmaVirtualDesktopManager::Private::constFindDesktop(const QString& id)
+PlasmaVirtualDesktopManager::Private::constFindDesktop(const QString& id) const
 {
     return std::find_if(desktops.constBegin(),
                         desktops.constEnd(),
@@ -87,7 +87,7 @@ void PlasmaVirtualDesktopManager::Private::requestCreateVirtualDesktopCallback(
     auto manager = handle(wlResource);
     Q_EMIT manager->desktopCreateRequested(
         QString::fromUtf8(name),
-        qBound<uint32_t>(0, position, (uint32_t)manager->desktops().count()));
+        qBound<uint32_t>(0, position, static_cast<uint32_t>(manager->desktops().count())));
 }
 
 void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
@@ -151,13 +151,13 @@ PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::createDesktop(const QString& 
         return *it;
     }
 
-    uint32_t const actualPosition = qMin(position, (uint32_t)d_ptr->desktops.count());
+    uint32_t const actualPosition = qMin(position, static_cast<uint32_t>(d_ptr->desktops.count()));
 
     auto desktop = new PlasmaVirtualDesktop(this);
     desktop->d_ptr->id = id;
 
     // Activate the first desktop.
-    // TODO: to be done here?
+    // TODO(unknown author): to be done here?
     if (d_ptr->desktops.isEmpty()) {
         desktop->d_ptr->active = true;
     }
@@ -196,10 +196,10 @@ void PlasmaVirtualDesktopManager::sendDone()
 
 /////////////////////////// Plasma Virtual Desktop ///////////////////////////
 
-PlasmaVirtualDesktop::Private::Private(PlasmaVirtualDesktop* qptr,
+PlasmaVirtualDesktop::Private::Private(PlasmaVirtualDesktop* q,
                                        PlasmaVirtualDesktopManager* manager)
     : manager(manager)
-    , q_ptr(qptr)
+    , q_ptr(q)
 {
 }
 
@@ -330,7 +330,7 @@ PlasmaVirtualDesktopRes::PlasmaVirtualDesktopRes(Client* client,
                                                  uint32_t version,
                                                  uint32_t id,
                                                  PlasmaVirtualDesktop* virtualDesktop)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new Private(client, version, id, virtualDesktop, this))
 {
 }

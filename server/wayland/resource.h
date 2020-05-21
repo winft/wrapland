@@ -207,7 +207,7 @@ private:
     }
 
     template<auto sender, uint32_t minVersion, typename Tuple, std::size_t... Indices>
-    void sendTuple(Tuple&& tuple, std::index_sequence<Indices...>)
+    void sendTuple(Tuple&& tuple, [[maybe_unused]] std::index_sequence<Indices...> indices)
     {
         send<sender, minVersion>(std::get<Indices>(tuple)...);
     }

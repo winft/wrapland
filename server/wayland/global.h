@@ -50,6 +50,11 @@ class Global
 public:
     using GlobalResource = Resource<Handle, Global<Handle, Version>>;
 
+    Global(Global const&) = delete;
+    Global& operator=(Global const&) = delete;
+    Global(Global&&) noexcept = delete;
+    Global& operator=(Global&&) noexcept = delete;
+
     virtual ~Global()
     {
         if (m_capsule->valid()) {
@@ -194,14 +199,9 @@ protected:
     {
         m_display->addGlobal(m_capsule.get());
 
-        // TODO: allow to create and destroy Globals while keeping the object existing (but always
-        //       create on ctor call?).
+        // TODO(romangg): allow to create and destroy Globals while keeping the object existing (but
+        //                always create on ctor call?).
     }
-
-    Global(Global&) = delete;
-    Global& operator=(Global) = delete;
-    Global(Global&&) noexcept = delete;
-    Global& operator=(Global&&) noexcept = delete;
 
     void remove()
     {
@@ -211,7 +211,7 @@ protected:
 #if (WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR > 17)
         wl_global_remove(m_capsule->get());
 #endif
-        // TODO: call destroy with timer.
+        // TODO(romangg): call destroy with timer.
         destroy(std::move(m_capsule));
     }
 
@@ -247,11 +247,11 @@ private:
             return;
         }
         // Client not yet known to the server.
-        // TODO: Create backend representation only?
+        // TODO(romangg): Create backend representation only?
         global->display()->handle()->getClient(wlClient);
 
         // Now the client must be available.
-        // TODO: otherwise send protocol error (oom)
+        // TODO(romangg): otherwise send protocol error (oom)
         auto* client = getClient();
         bindToGlobal(client);
     }

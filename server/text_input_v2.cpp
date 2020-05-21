@@ -155,7 +155,7 @@ void TextInputV2::Private::setCursorPosition(qint32 index, qint32 anchor)
 
 void TextInputV2::Private::setTextDirection(Qt::LayoutDirection direction)
 {
-    zwp_text_input_v2_text_direction wlDirection;
+    zwp_text_input_v2_text_direction wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_AUTO;
     switch (direction) {
     case Qt::LeftToRight:
         wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_LTR;
@@ -217,7 +217,7 @@ void TextInputV2::Private::updateStateCallback([[maybe_unused]] wl_client* wlCli
 {
     auto priv = handle(wlResource)->d_ptr;
 
-    // TODO: use other reason values reason
+    // TODO(unknown author): use other reason values reason
     if (reason == ZWP_TEXT_INPUT_V2_UPDATE_STATE_RESET) {
         Q_EMIT priv->handle()->requestReset();
     }
@@ -252,52 +252,7 @@ void TextInputV2::Private::setSurroundingTextCallback([[maybe_unused]] wl_client
     Q_EMIT priv->handle()->surroundingTextChanged();
 }
 
-void TextInputV2::Private::setContentTypeCallback([[maybe_unused]] wl_client* wlClient,
-                                                  wl_resource* wlResource,
-                                                  uint32_t hint,
-                                                  uint32_t purpose)
-{
-    auto priv = handle(wlResource)->d_ptr;
-    const auto contentHints = priv->convertContentHint(hint);
-    const auto contentPurpose = priv->convertContentPurpose(purpose);
-
-    if (contentHints != priv->contentHints || contentPurpose != priv->contentPurpose) {
-        priv->contentHints = contentHints;
-        priv->contentPurpose = contentPurpose;
-        Q_EMIT priv->handle()->contentTypeChanged();
-    }
-}
-
-void TextInputV2::Private::setCursorRectangleCallback([[maybe_unused]] wl_client* wlClient,
-                                                      wl_resource* wlResource,
-                                                      int32_t x,
-                                                      int32_t y,
-                                                      int32_t width,
-                                                      int32_t height)
-{
-    auto priv = handle(wlResource)->d_ptr;
-    const QRect rect = QRect(x, y, width, height);
-
-    if (priv->cursorRectangle != rect) {
-        priv->cursorRectangle = rect;
-        Q_EMIT priv->handle()->cursorRectangleChanged(priv->cursorRectangle);
-    }
-}
-
-void TextInputV2::Private::setPreferredLanguageCallback([[maybe_unused]] wl_client* wlClient,
-                                                        wl_resource* wlResource,
-                                                        const char* language)
-{
-    auto priv = handle(wlResource)->d_ptr;
-    const QByteArray preferredLanguage = QByteArray(language);
-
-    if (priv->preferredLanguage != preferredLanguage) {
-        priv->preferredLanguage = preferredLanguage;
-        Q_EMIT priv->handle()->preferredLanguageChanged(priv->preferredLanguage);
-    }
-}
-
-TextInputV2::ContentHints TextInputV2::Private::convertContentHint(uint32_t hint) const
+TextInputV2::ContentHints convertContentHint(uint32_t hint)
 {
     const auto hints = zwp_text_input_v2_content_hint(hint);
     TextInputV2::ContentHints ret = TextInputV2::ContentHint::None;
@@ -335,7 +290,7 @@ TextInputV2::ContentHints TextInputV2::Private::convertContentHint(uint32_t hint
     return ret;
 }
 
-TextInputV2::ContentPurpose TextInputV2::Private::convertContentPurpose(uint32_t purpose) const
+TextInputV2::ContentPurpose convertContentPurpose(uint32_t purpose)
 {
     const auto wlPurpose = zwp_text_input_v2_content_purpose(purpose);
 
@@ -369,6 +324,52 @@ TextInputV2::ContentPurpose TextInputV2::Private::convertContentPurpose(uint32_t
         return TextInputV2::ContentPurpose::Normal;
     }
 }
+
+void TextInputV2::Private::setContentTypeCallback([[maybe_unused]] wl_client* wlClient,
+                                                  wl_resource* wlResource,
+                                                  uint32_t hint,
+                                                  uint32_t purpose)
+{
+    auto priv = handle(wlResource)->d_ptr;
+    const auto contentHints = convertContentHint(hint);
+    const auto contentPurpose = convertContentPurpose(purpose);
+
+    if (contentHints != priv->contentHints || contentPurpose != priv->contentPurpose) {
+        priv->contentHints = contentHints;
+        priv->contentPurpose = contentPurpose;
+        Q_EMIT priv->handle()->contentTypeChanged();
+    }
+}
+
+void TextInputV2::Private::setCursorRectangleCallback([[maybe_unused]] wl_client* wlClient,
+                                                      wl_resource* wlResource,
+                                                      int32_t x,
+                                                      int32_t y,
+                                                      int32_t width,
+                                                      int32_t height)
+{
+    auto priv = handle(wlResource)->d_ptr;
+    const QRect rect = QRect(x, y, width, height);
+
+    if (priv->cursorRectangle != rect) {
+        priv->cursorRectangle = rect;
+        Q_EMIT priv->handle()->cursorRectangleChanged(priv->cursorRectangle);
+    }
+}
+
+void TextInputV2::Private::setPreferredLanguageCallback([[maybe_unused]] wl_client* wlClient,
+                                                        wl_resource* wlResource,
+                                                        const char* language)
+{
+    auto priv = handle(wlResource)->d_ptr;
+    const QByteArray preferredLanguage = QByteArray(language);
+
+    if (priv->preferredLanguage != preferredLanguage) {
+        priv->preferredLanguage = preferredLanguage;
+        Q_EMIT priv->handle()->preferredLanguageChanged(priv->preferredLanguage);
+    }
+}
+
 TextInputV2::TextInputV2(Client* client, uint32_t version, uint32_t id)
     : QObject(nullptr)
     , d_ptr(new Private(client, version, id, this))

@@ -111,10 +111,6 @@ private:
                                              wl_resource* wlResource,
                                              const char* language);
 
-    // helpers
-    TextInputV2::ContentHints convertContentHint(uint32_t hint) const;
-    TextInputV2::ContentPurpose convertContentPurpose(uint32_t purpose) const;
-
     void enable(Surface* s);
     void disable();
 };

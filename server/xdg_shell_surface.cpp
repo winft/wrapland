@@ -98,7 +98,7 @@ void XdgShellSurface::Private::getPopupCallback([[maybe_unused]] wl_client* wlCl
         return;
     }
 
-    // TODO: Allow to set parent surface via side-channel (see protocol description).
+    // TODO(romangg): Allow to set parent surface via side-channel (see protocol description).
     auto parent = priv->m_shell->d_ptr->getSurface(wlParent);
     if (!parent) {
         priv->postError(XDG_WM_BASE_ERROR_INVALID_POPUP_PARENT, "Invalid popup parent");

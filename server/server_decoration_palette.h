@@ -37,7 +37,7 @@ class WRAPLANDSERVER_EXPORT ServerSideDecorationPaletteManager : public QObject
     Q_OBJECT
 public:
     ~ServerSideDecorationPaletteManager() override;
-    ServerSideDecorationPalette* paletteForSurface(Surface*);
+    ServerSideDecorationPalette* paletteForSurface(Surface* surface);
 
 Q_SIGNALS:
     void paletteCreated(Wrapland::Server::ServerSideDecorationPalette*);

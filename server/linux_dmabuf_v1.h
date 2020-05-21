@@ -101,7 +101,7 @@ public:
      */
     void setImpl(Impl* impl);
 
-    void setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> set);
+    void setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> const& set);
 
 private:
     explicit LinuxDmabufV1(Display* display, QObject* parent = nullptr);

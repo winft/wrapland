@@ -122,7 +122,7 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
                                     Surface* _icon,
                                     quint32 serial)
 {
-    // TODO: verify serial
+    // TODO(unknown author): verify serial
 
     auto focusSurface = origin;
 
@@ -160,18 +160,18 @@ void DataDevice::Private::setSelectionCallback([[maybe_unused]] wl_client* wlCli
                                                wl_resource* wlSource,
                                                [[maybe_unused]] uint32_t serial)
 {
-    // TODO: verify serial
+    // TODO(unknown author): verify serial
     auto priv = handle(wlResource)->d_ptr;
     priv->setSelection(wlSource);
 }
 
 void DataDevice::Private::setSelection(wl_resource* sourceResource)
 {
-    // TODO: verify serial
+    // TODO(unknown author): verify serial
 
     auto dataSource = sourceResource ? Resource<DataSource>::handle(sourceResource) : nullptr;
 
-    // TODO: move errors into Wayland namespace.
+    // TODO(romangg): move errors into Wayland namespace.
     if (dataSource && dataSource->supportedDragAndDropActions()
         && wl_resource_get_version(sourceResource) >= WL_DATA_SOURCE_ACTION_SINCE_VERSION) {
         wl_resource_post_error(sourceResource,
@@ -213,7 +213,7 @@ DataOffer* DataDevice::Private::createDataOffer(DataSource* source)
     auto offer = new DataOffer(client()->handle(), version(), source);
 
     if (!offer->d_ptr->resource()) {
-        // TODO: send error?
+        // TODO(unknown author): send error?
         delete offer;
         return nullptr;
     }
@@ -288,7 +288,7 @@ void DataDevice::drop()
     d_ptr->drag.destroyConnection = QMetaObject::Connection();
     d_ptr->drag.surface = nullptr;
 
-    // TODO: do we need to flush the client here?
+    // TODO(romangg): do we need to flush the client here?
 }
 
 void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
@@ -367,7 +367,7 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
               d_ptr->drag = Private::Drag();
           });
 
-    // TODO: handle touch position
+    // TODO(unknown author): handle touch position
     const QPointF pos = d_ptr->seat->dragSurfaceTransformation().map(d_ptr->seat->pointerPos());
     d_ptr->send<wl_data_device_send_enter>(serial,
                                            surface->d_ptr->resource(),
@@ -426,7 +426,7 @@ quint32 DataDevice::dragImplicitGrabSerial() const
 
 void DataDevice::updateProxy(Surface* remote)
 {
-    // TODO: connect destroy signal?
+    // TODO(romangg): connect destroy signal?
     d_ptr->proxyRemoteSurface = remote;
 }
 

@@ -33,8 +33,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-// TODO: The QObject dependency is only necessary because of the resourceDestroyed signal.
-//       Refactor Resource, such that it is not necessary anymore.
+// TODO(romangg): The QObject dependency is only necessary because of the resourceDestroyed signal.
+//                Refactor Resource, such that it is not necessary anymore.
 class XdgShellPositioner : public QObject
 {
     Q_OBJECT

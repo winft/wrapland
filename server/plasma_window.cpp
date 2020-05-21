@@ -31,7 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 #include <QtConcurrentRun>
 
-#include <signal.h>
+#include <csignal>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
@@ -58,9 +58,9 @@ PlasmaWindowManager::PlasmaWindowManager(Display* display, QObject* parent)
 {
     // Needed because the icon is sent via a pipe and when it closes while being written to would
     // kill off the compositor.
-    // TODO: Replace the pipe with a Unix domain socket and set on it to ignore the SIGPIPE signal.
-    //       See issue #7.
-    signal(SIGPIPE, SIG_IGN);
+    // TODO(romangg): Replace the pipe with a Unix domain socket and set on it to ignore the SIGPIPE
+    //                signal. See issue #7.
+    signal(SIGPIPE, SIG_IGN); // NOLINT
 }
 
 PlasmaWindowManager::~PlasmaWindowManager() = default;
@@ -144,7 +144,7 @@ PlasmaWindow* PlasmaWindowManager::createWindow(QObject* parent)
 {
     auto window = new PlasmaWindow(this, parent);
 
-    // TODO: improve window ids so that it cannot wrap around
+    // TODO(unknown author): improve window ids so that it cannot wrap around
     window->d_ptr->windowId = ++d_ptr->windowIdCounter;
 
     d_ptr->send<org_kde_plasma_window_management_send_window>(window->d_ptr->windowId);
@@ -325,7 +325,7 @@ void PlasmaWindow::Private::setTitle(const QString& title)
     }
 }
 
-void PlasmaWindow::Private::unmap()
+void PlasmaWindow::Private::unmap() const
 {
     for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
         (*it)->unmap();
@@ -350,7 +350,7 @@ void PlasmaWindow::Private::setState(org_kde_plasma_window_management_state flag
 }
 
 PlasmaWindowRes* PlasmaWindow::Private::getResourceOfParent(PlasmaWindow* parent,
-                                                            PlasmaWindowRes* childRes) const
+                                                            PlasmaWindowRes* childRes)
 {
     if (!parent) {
         return nullptr;
@@ -479,7 +479,8 @@ void PlasmaWindow::setOnAllDesktops(bool set)
             return;
         }
         // leaving everything means on all desktops
-        for (auto desk : plasmaVirtualDesktops()) {
+        auto const desktops = plasmaVirtualDesktops();
+        for (auto const& desk : desktops) {
             for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
                 (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(
                     desk.toUtf8().constData());
@@ -534,9 +535,9 @@ void PlasmaWindow::setSkipTaskbar(bool set)
     d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_SKIPTASKBAR, set);
 }
 
-void PlasmaWindow::setSkipSwitcher(bool skip)
+void PlasmaWindow::setSkipSwitcher(bool set)
 {
-    d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_SKIPSWITCHER, skip);
+    d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_SKIPSWITCHER, set);
 }
 
 void PlasmaWindow::setIcon(const QIcon& icon)
@@ -877,8 +878,8 @@ void PlasmaWindowRes::Private::setMinimizedGeometryCallback([[maybe_unused]] wl_
 
     priv->window->d_ptr->minimizedGeometries[panel] = QRect(x, y, width, height);
     Q_EMIT priv->window->minimizedGeometriesChanged();
-    connect(panel, &QObject::destroyed, priv->handle(), [priv, panel]() {
-        if (priv->window->d_ptr->minimizedGeometries.remove(panel)) {
+    connect(panel, &Surface::resourceDestroyed, priv->handle(), [priv, panel]() {
+        if (priv->window && priv->window->d_ptr->minimizedGeometries.remove(panel)) {
             Q_EMIT priv->window->minimizedGeometriesChanged();
         }
     });

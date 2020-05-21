@@ -44,18 +44,10 @@ SlideManager::Private::Private(Display* display, SlideManager* qptr)
     create();
 }
 
-void SlideManager::Private::createCallback(wl_client* wlClient,
+void SlideManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
                                            wl_resource* wlResource,
                                            uint32_t id,
                                            wl_resource* wlSurface)
-{
-    handle(wlResource)->d_ptr->createSlide(wlClient, wlResource, id, wlSurface);
-}
-
-void SlideManager::Private::createSlide([[maybe_unused]] wl_client* wlClient,
-                                        wl_resource* wlResource,
-                                        uint32_t id,
-                                        wl_resource* wlSurface)
 {
     auto bind = handle(wlResource)->d_ptr->getBind(wlResource);
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
@@ -115,7 +107,7 @@ void Slide::Private::setLocationCallback([[maybe_unused]] wl_client* wlClient,
                                          uint32_t location)
 {
     auto priv = handle(wlResource)->d_ptr;
-    priv->pendingLocation = (Slide::Location)location;
+    priv->pendingLocation = static_cast<Slide::Location>(location);
 }
 
 void Slide::Private::setOffsetCallback([[maybe_unused]] wl_client* wlClient,
