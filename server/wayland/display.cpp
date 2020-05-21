@@ -128,7 +128,7 @@ void Display::start(bool createSocket)
         try {
             addSocket();
         } catch (std::bad_exception&) {
-            qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
+            qCWarning(WRAPLAND_SERVER, "Failed to create Wayland socket");
             // TODO(romangg): Shall we rethrow?
             return;
         }
@@ -179,7 +179,7 @@ void Display::installSocketNotifier(QObject* parent)
 
     int fd = wl_event_loop_get_fd(m_loop);
     if (fd == -1) {
-        qCWarning(WRAPLAND_SERVER) << "Did not get the file descriptor for the event loop";
+        qCWarning(WRAPLAND_SERVER, "Did not get the file descriptor for the event loop");
         return;
     }
 
@@ -219,7 +219,7 @@ void Display::dispatch()
         return;
     }
     if (wl_event_loop_dispatch(m_loop, 0) != 0) {
-        qCWarning(WRAPLAND_SERVER) << "Error on dispatching Wayland event loop";
+        qCWarning(WRAPLAND_SERVER, "Error on dispatching Wayland event loop");
     }
 }
 

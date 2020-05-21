@@ -195,8 +195,9 @@ Buffer::Private::Private(Buffer* q,
 Buffer::Private::~Private()
 {
     if (refCount != 0) {
-        qCWarning(WRAPLAND_SERVER)
-            << "Buffer destroyed while still being referenced, ref count:" << refCount;
+        qCWarning(WRAPLAND_SERVER,
+                  "Buffer destroyed while still being referenced, ref count: %d",
+                  refCount);
     }
     display->bufferManager()->removeBuffer(q_ptr);
     wl_list_remove(&destroyWrapper.listener.link);

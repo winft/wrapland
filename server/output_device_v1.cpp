@@ -66,6 +66,8 @@ void OutputDeviceV1::Private::addMode(Mode& mode)
     if (mode.flags.testFlag(ModeFlag::Current)) {
         Q_ASSERT(published.mode.id < 0);
         if (published.mode.id >= 0 && published.mode.id != mode.id) {
+            // TODO(romangg): Make the clang-tidy check pass here and below too.
+            // NOLINTNEXTLINE(clang-diagnostic-gnu-zero-variadic-macro-arguments)
             qCWarning(WRAPLAND_SERVER)
                 << "Duplicate current Mode id" << published.mode.id << "and" << mode.id << mode.size
                 << mode.refreshRate << ": setting current mode to:" << mode.size
@@ -83,6 +85,7 @@ void OutputDeviceV1::Private::addMode(Mode& mode)
             return mode.flags.testFlag(ModeFlag::Preferred);
         });
         if (preferredIt != modes.end()) {
+            // NOLINTNEXTLINE(clang-diagnostic-gnu-zero-variadic-macro-arguments)
             qCWarning(WRAPLAND_SERVER)
                 << "Duplicate preferred Mode id" << (*preferredIt).id << "and" << mode.id
                 << mode.size << mode.refreshRate
@@ -119,6 +122,7 @@ void OutputDeviceV1::Private::addMode(Mode& mode)
         return mode.id == mode_it.id;
     });
     if (idIt != modes.constEnd()) {
+        // NOLINTNEXTLINE(clang-diagnostic-gnu-zero-variadic-macro-arguments)
         qCWarning(WRAPLAND_SERVER) << "Duplicate Mode id" << mode.id << ": not adding mode"
                                    << mode.size << mode.refreshRate;
         return;

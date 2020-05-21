@@ -68,7 +68,7 @@ EglStreamController::EglStreamController(Display* display, QObject* parent)
     auto interface = (wl_interface*)QLibrary::resolve(QLatin1String("libnvidia-egl-wayland.so.1"),
                                                       "wl_eglstream_controller_interface");
     if (interface == nullptr) {
-        qCWarning(WRAPLAND_SERVER) << "failed to resolve wl_eglstream_controller_interface";
+        qCWarning(WRAPLAND_SERVER, "failed to resolve wl_eglstream_controller_interface");
         return;
     }
     d_ptr.reset(new Private(display, interface, this));

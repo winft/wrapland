@@ -87,7 +87,7 @@ void OutputConfigurationV1::Private::modeCallback([[maybe_unused]] wl_client* wl
     }
 
     if (!modeValid) {
-        qCWarning(WRAPLAND_SERVER) << "Set invalid mode id:" << mode_id;
+        qCWarning(WRAPLAND_SERVER, "Set invalid mode id: %d", mode_id);
         return;
     }
 

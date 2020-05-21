@@ -406,7 +406,7 @@ Client* Display::createClient(int fd)
 void Display::setEglDisplay(void* display)
 {
     if (d_ptr->eglDisplay != EGL_NO_DISPLAY) {
-        qCWarning(WRAPLAND_SERVER) << "EGLDisplay cannot be changed";
+        qCWarning(WRAPLAND_SERVER, "EGLDisplay cannot be changed");
         return;
     }
     d_ptr->eglDisplay = (EGLDisplay)display;

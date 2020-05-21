@@ -49,7 +49,7 @@ void RemoteAccessManager::Private::sendBufferReady(Output* output, RemoteBufferH
     BufferHolder holder{buf, 0};
 
     // Notify clients.
-    qCDebug(WRAPLAND_SERVER) << "Server buffer sent: fd" << buf->fd();
+    qCDebug(WRAPLAND_SERVER, "Server buffer sent, fd: %d", buf->fd());
 
     for (auto bind : getBinds()) {
         auto boundOutputs = output->d_ptr->getBinds(bind->client()->handle());
@@ -112,6 +112,8 @@ void RemoteAccessManager::Private::getBufferCallback([[maybe_unused]] wl_client*
                     // All relevant buffers are already unreferenced.
                     return;
                 }
+                // TODO(romangg): Make the clang-tidy check pass here and below too.
+                // NOLINTNEXTLINE(clang-diagnostic-gnu-zero-variadic-macro-arguments)
                 qCDebug(WRAPLAND_SERVER)
                     << "Remote buffer returned, client" << wl_resource_get_id(wlResource) << ", fd"
                     << bufferHolder.buf->fd();
@@ -143,7 +145,7 @@ int RemoteAccessManager::Private::unref(BufferHolder& bufferHolder)
 
     if (bufferHolder.counter == 0) {
         // No more clients using this buffer.
-        qCDebug(WRAPLAND_SERVER) << "Buffer released, fd:" << bufferHolder.buf->fd();
+        qCDebug(WRAPLAND_SERVER, "Buffer released, fd: %d", bufferHolder.buf->fd());
         Q_EMIT handle()->bufferReleased(bufferHolder.buf);
         return 0;
     }
