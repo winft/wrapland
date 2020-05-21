@@ -157,7 +157,7 @@ PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::createDesktop(const QString& 
     desktop->d_ptr->id = id;
 
     // Activate the first desktop.
-    // TODO: to be done here?
+    // TODO(unknown author): to be done here?
     if (d_ptr->desktops.isEmpty()) {
         desktop->d_ptr->active = true;
     }

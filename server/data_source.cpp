@@ -93,13 +93,13 @@ DataSource::DataSource(Client* client, uint32_t version, uint32_t id)
 
 void DataSource::accept(std::string mimeType)
 {
-    // TODO: does this require a sanity check on the possible mimeType?
+    // TODO(unknown author): does this require a sanity check on the possible mimeType?
     d_ptr->send<wl_data_source_send_target>(mimeType.empty() ? nullptr : mimeType.c_str());
 }
 
 void DataSource::requestData(std::string mimeType, int32_t fd)
 {
-    // TODO: does this require a sanity check on the possible mimeType?
+    // TODO(unknown author): does this require a sanity check on the possible mimeType?
     d_ptr->send<wl_data_source_send_send>(mimeType.c_str(), fd);
     close(fd);
 }

@@ -217,7 +217,7 @@ void TextInputV2::Private::updateStateCallback([[maybe_unused]] wl_client* wlCli
 {
     auto priv = handle(wlResource)->d_ptr;
 
-    // TODO: use other reason values reason
+    // TODO(unknown author): use other reason values reason
     if (reason == ZWP_TEXT_INPUT_V2_UPDATE_STATE_RESET) {
         Q_EMIT priv->handle()->requestReset();
     }

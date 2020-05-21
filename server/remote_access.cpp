@@ -63,7 +63,7 @@ void RemoteAccessManager::Private::sendBufferReady(Output* output, RemoteBufferH
             bind, buf->fd(), boundOutputs[0]->resource());
         holder.counter++;
 
-        // TODO: how to count back in case client goes away before buffer got by it?
+        // TODO(unknown author): how to count back in case client goes away before buffer got by it?
     }
 
     if (holder.counter == 0) {
@@ -101,7 +101,7 @@ void RemoteAccessManager::Private::getBufferCallback([[maybe_unused]] wl_client*
 
     auto buffer = new RemoteBuffer(
         bind->client()->handle(), bind->version(), id, priv->handle(), bufferHolder.buf);
-    // TODO: check if created.
+    // TODO(romangg): check if created.
 
     connect(buffer,
             &RemoteBuffer::resourceDestroyed,

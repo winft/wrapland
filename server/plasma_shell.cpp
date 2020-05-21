@@ -126,7 +126,7 @@ void PlasmaShellSurface::Private::setOutputCallback([[maybe_unused]] wl_client* 
                                                     [[maybe_unused]] wl_resource* wlResource,
                                                     [[maybe_unused]] wl_resource* output)
 {
-    // TODO: implement
+    // TODO(unknown author): implement
 }
 
 void PlasmaShellSurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClient,

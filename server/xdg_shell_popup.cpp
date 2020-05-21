@@ -126,7 +126,7 @@ uint32_t XdgShellPopup::Private::configure(const QRect& rect)
 
 void XdgShellPopup::Private::popupDone()
 {
-    // TODO: dismiss all child popups
+    // TODO(unknown author): dismiss all child popups
     send<xdg_popup_send_popup_done>();
     client()->flush();
 }

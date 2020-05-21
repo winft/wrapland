@@ -129,7 +129,7 @@ void Display::start(bool createSocket)
             addSocket();
         } catch (std::bad_exception&) {
             qCWarning(WRAPLAND_SERVER) << "Failed to create Wayland socket";
-            // TODO: Shall we rethrow?
+            // TODO(romangg): Shall we rethrow?
             return;
         }
     }
@@ -230,7 +230,7 @@ wl_client* Display::createClient(int fd)
 
     auto* wlClient = wl_client_create(m_display, fd);
 
-    // TODO: throw instead?
+    // TODO(romangg): throw instead?
     if (!wlClient) {
         return nullptr;
     }

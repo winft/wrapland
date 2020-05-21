@@ -464,7 +464,7 @@ void Surface::Private::swapStates(State* source, State* target, bool emitChanged
     auto buffer = target->buffer;
 
     if (bufferChanged) {
-        // TODO: is the reffing correct for subsurfaces?
+        // TODO(unknown author): is the reffing correct for subsurfaces?
 
         QSize oldSize;
         if (target->buffer) {
@@ -553,10 +553,10 @@ void Surface::Private::swapStates(State* source, State* target, bool emitChanged
     }
     if (sourceRectangleChanged) {
         if (buffer && !target->destinationSize.isValid() && source->sourceRectangle.isValid()) {
-            // TODO: We should make this dependent on the previous size being different.
-            //       But looking at above sizeChanged calculation when setting the buffer
-            //       we need to do fix this there as well (does not look at buffer transform
-            //       and destination size).
+            // TODO(unknown author): We should make this dependent on the previous size being
+            //      different. But looking at above sizeChanged calculation when setting the buffer
+            //      we need to do fix this there as well (does not look at buffer transform
+            //      and destination size).
             sizeChanged = true;
         }
         target->sourceRectangle = source->sourceRectangle;
@@ -730,7 +730,7 @@ void Surface::Private::damage(const QRect& rect)
 void Surface::Private::damageBuffer(const QRect& rect)
 {
     if (!pending.bufferIsSet || (pending.bufferIsSet && !pending.buffer)) {
-        // TODO: should we send an error?
+        // TODO(unknown author): should we send an error?
         return;
     }
     pending.bufferDamage = pending.bufferDamage.united(rect);
@@ -749,7 +749,7 @@ void Surface::Private::setTransform(Output::Transform transform)
 
 void Surface::Private::addFrameCallback(uint32_t callback)
 {
-    // TODO: put the frame callback in a separate class inheriting Resource.
+    // TODO(unknown author): put the frame callback in a separate class inheriting Resource.
     wl_resource* frameCallback = client()->createResource(&wl_callback_interface, 1, callback);
     if (!frameCallback) {
         wl_resource_post_no_memory(resource());
@@ -989,7 +989,7 @@ QSize Surface::size() const
     if (d_ptr->current.sourceRectangle.isValid()) {
         return d_ptr->current.sourceRectangle.size().toSize();
     }
-    // TODO: Apply transform to the buffer size.
+    // TODO(unknown author): Apply transform to the buffer size.
     return d_ptr->current.buffer->size() / scale();
 }
 
@@ -1099,7 +1099,7 @@ void Surface::setOutputs(std::vector<Output*> outputs)
             }
         });
     }
-    // TODO: send enter when the client binds the Output another time
+    // TODO(unknown author): send enter when the client binds the Output another time
 
     d_ptr->outputs = outputs;
 }
@@ -1131,8 +1131,8 @@ Surface* Surface::surfaceAt(const QPointF& position)
 
 Surface* Surface::inputSurfaceAt(const QPointF& position)
 {
-    // TODO: Most of this is very similar to Surface::surfaceAt
-    //       Is there a way to reduce the code duplication?
+    // TODO(unknown author): Most of this is very similar to Surface::surfaceAt
+    //                       Is there a way to reduce the code duplication?
     if (!isMapped()) {
         return nullptr;
     }

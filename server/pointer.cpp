@@ -73,7 +73,7 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
     : Wayland::Resource<Pointer>(client, version, id, &wl_pointer_interface, &s_interface, q)
     , seat{_seat}
 {
-    // TODO: handle touch
+    // TODO(unknown author): handle touch
     connect(seat, &Seat::pointerPosChanged, q, [this] {
         if (!focusedSurface) {
             return;

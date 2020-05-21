@@ -164,7 +164,8 @@ Output* Display::createOutput(QObject* parent)
 
 void Display::removeOutput(Output* output)
 {
-    // TODO: this does not clean up. But it should be also possible to just delete the output.
+    // TODO(romangg): This does not clean up. But it should be also possible to just delete the
+    //                output.
     d_ptr->outputs.erase(std::remove(d_ptr->outputs.begin(), d_ptr->outputs.end(), output),
                          d_ptr->outputs.end());
     // d_ptr->removeGlobal(output);

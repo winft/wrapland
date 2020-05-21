@@ -58,8 +58,8 @@ PlasmaWindowManager::PlasmaWindowManager(Display* display, QObject* parent)
 {
     // Needed because the icon is sent via a pipe and when it closes while being written to would
     // kill off the compositor.
-    // TODO: Replace the pipe with a Unix domain socket and set on it to ignore the SIGPIPE signal.
-    //       See issue #7.
+    // TODO(romangg): Replace the pipe with a Unix domain socket and set on it to ignore the SIGPIPE
+    //                signal. See issue #7.
     signal(SIGPIPE, SIG_IGN);
 }
 
@@ -144,7 +144,7 @@ PlasmaWindow* PlasmaWindowManager::createWindow(QObject* parent)
 {
     auto window = new PlasmaWindow(this, parent);
 
-    // TODO: improve window ids so that it cannot wrap around
+    // TODO(unknown author): improve window ids so that it cannot wrap around
     window->d_ptr->windowId = ++d_ptr->windowIdCounter;
 
     d_ptr->send<org_kde_plasma_window_management_send_window>(window->d_ptr->windowId);

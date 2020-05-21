@@ -86,7 +86,7 @@ public:
     void hideAutoHidingPanel();
     void showAutoHidingPanel();
 
-    // TODO KF6 rename to something generic
+    // TODO(unknown author): KF6 rename to something generic
     bool panelTakesFocus() const;
 
     static PlasmaShellSurface* get(wl_resource* native);

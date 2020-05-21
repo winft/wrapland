@@ -166,7 +166,7 @@ public:
             }
         }
 
-        // TODO: unique_ptr?
+        // TODO(romangg): unique_ptr?
         Buffer* left = nullptr;
         Buffer* topLeft = nullptr;
         Buffer* top = nullptr;

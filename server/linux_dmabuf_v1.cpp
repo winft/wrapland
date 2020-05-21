@@ -301,7 +301,7 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
     }
 
     buffer->d_ptr->buffer = new BufferV1(client()->handle(), 1, bufferId, buffer);
-    // TODO: error handling
+    // TODO(romangg): error handling
 
     // Send a 'created' event when the request is not for an immediate import, i.e. bufferId is 0.
     if (bufferId == 0) {
@@ -352,8 +352,8 @@ LinuxDmabufBufferV1::Private::Private(uint32_t format,
 {
 }
 
-// TODO: This does not necessarily need to be a QObject. resourceDestroyed signal is not really
-// needed.
+// TODO(romangg): This does not necessarily need to be a QObject. resourceDestroyed signal is not
+//                really needed.
 LinuxDmabufBufferV1::LinuxDmabufBufferV1(uint32_t format,
                                          const QSize& size,
                                          [[maybe_unused]] QObject* parent)

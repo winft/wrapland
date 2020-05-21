@@ -175,7 +175,7 @@ QMarginsF Shadow::offset() const
     return d_ptr->current.offset;
 }
 
-// TODO: replace this with template function once we can use headers-only classes.
+// TODO(romangg): replace this with template function once we can use headers-only classes.
 #define BUFFER(__PART__, __UPPER_)                                                                 \
     Buffer* Shadow::__PART__() const                                                               \
     {                                                                                              \

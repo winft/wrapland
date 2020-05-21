@@ -280,7 +280,7 @@ Buffer* Buffer::get(Display* display, wl_resource* resource)
     if (!resource) {
         return nullptr;
     }
-    // TODO: verify it's a buffer
+    // TODO(unknown author): verify it's a buffer
     auto buffer = Wayland::Display::backendCast(display)->bufferManager()->fromResource(resource);
     if (buffer) {
         return buffer;
