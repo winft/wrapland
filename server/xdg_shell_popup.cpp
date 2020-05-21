@@ -38,6 +38,8 @@ namespace Wrapland::Server
 const struct xdg_popup_interface XdgShellPopup::Private::s_interface = {
     destroyCallback,
     grabCallback,
+    // TODO(romangg): Update xdg-shell protocol version (currently at 1).
+    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
 };
 
 XdgShellPopup::Private::Private(uint32_t version,
