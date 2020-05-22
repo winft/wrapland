@@ -18,15 +18,18 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "testserver.h"
-#include "../../server/display.h"
-#include "../../server/compositor_interface.h"
-#include "../../server/datadevicemanager_interface.h"
-#include "../../server/idle_interface.h"
-#include "../../server/fakeinput_interface.h"
-#include "../../server/seat_interface.h"
-#include "../../server/shell_interface.h"
-#include "../../server/surface_interface.h"
-#include "../../server/subcompositor_interface.h"
+
+#include "../../../server/display.h"
+#include "../../../server/compositor.h"
+#include "../../../server/subcompositor.h"
+#include "../../../server/output.h"
+#include "../../../server/seat.h"
+#include "../../../server/surface.h"
+
+#include "../../../server/kde_idle.h"
+#include "../../../server/fake_input.h"
+#include "../../../server/xdg_shell.h"
+#include "../../../server/xdg_shell_toplevel.h"
 
 #include <QCoreApplication>
 #include <QElapsedTimer>
@@ -55,13 +58,14 @@ void TestServer::init()
     m_display = new Display(this);
     m_display->start(Display::StartMode::ConnectClientsOnly);
     m_display->createShm();
-    m_display->createCompositor()->create();
-    m_shell = m_display->createShell(m_display);
-    connect(m_shell, &ShellInterface::surfaceCreated, this,
-        [this] (ShellSurfaceInterface *surface) {
+    m_display->createCompositor();
+    m_shell = m_display->createXdgShell(m_display);
+
+    connect(m_shell, &XdgShell::toplevelCreated, this,
+        [this] (XdgShellToplevel *surface) {
             m_shellSurfaces << surface;
             // TODO: pass keyboard/pointer/touch focus on mapped
-            connect(surface, &QObject::destroyed, this,
+            connect(surface, &XdgShellToplevel::resourceDestroyed, this,
                 [this, surface] {
                     m_shellSurfaces.removeOne(surface);
                 }
@@ -69,26 +73,23 @@ void TestServer::init()
         }
     );
 
-    m_shell->create();
     m_seat = m_display->createSeat(m_display);
     m_seat->setHasKeyboard(true);
     m_seat->setHasPointer(true);
     m_seat->setHasTouch(true);
-    m_seat->create();
-    m_display->createDataDeviceManager(m_display)->create();
-    m_display->createIdle(m_display)->create();
-    m_display->createSubCompositor(m_display)->create();
-    // output
+
+    m_display->createDataDeviceManager(m_display);
+    m_display->createIdle(m_display);
+    m_display->createSubCompositor(m_display);
+
     auto output = m_display->createOutput(m_display);
     const QSize size(1280, 1024);
     output->setGlobalPosition(QPoint(0, 0));
     output->setPhysicalSize(size / 3.8);
     output->addMode(size);
-    output->create();
 
     auto fakeInput = m_display->createFakeInput(m_display);
-    fakeInput->create();
-    connect(fakeInput, &FakeInputInterface::deviceCreated, this,
+    connect(fakeInput, &FakeInput::deviceCreated, this,
         [this] (FakeInputDevice *device) {
             device->setAuthentication(true);
             connect(device, &FakeInputDevice::pointerMotionRequested, this,
@@ -194,6 +195,6 @@ void TestServer::startTestApp(const QString &app, const QStringList &arguments)
 void TestServer::repaint()
 {
     for (auto it = m_shellSurfaces.constBegin(), end = m_shellSurfaces.constEnd(); it != end; ++it) {
-        (*it)->surface()->frameRendered(m_timeSinceStart->elapsed());
+        (*it)->surface()->surface()->frameRendered(m_timeSinceStart->elapsed());
     }
 }

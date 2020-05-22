@@ -29,6 +29,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct wl_output;
+struct wl_resource;
+
 class QPoint;
 class QRect;
 

@@ -1,6 +1,7 @@
 stages:
-  - Compliance
+  - Compliance 1
   - Build
+  - Compliance 2
   - Test
   - Integration
 
@@ -13,7 +14,7 @@ workflow:
 
 
 Message lint:
-  stage: Compliance
+  stage: Compliance 1
   image: node:latest
   rules:
     - if: $CI_MERGE_REQUEST_IID
@@ -31,10 +32,17 @@ Message lint:
     - yarn add conventional-changelog-conventionalcommits
     - git remote add _upstream $UPSTREAM || git remote set-url _upstream $UPSTREAM
     - git fetch -q _upstream $COMPARE_BRANCH
-    - commitlint --verbose --config=ci/commitlint.config.js --from=_upstream/$COMPARE_BRANCH
+    - commitlint --verbose --config=ci/compliance/commitlint.config.js --from=_upstream/$COMPARE_BRANCH
   cache:
     paths:
       - node_modules/
+
+clang-format:
+  stage: Compliance 1
+  image: ${IMAGE_BASE}
+  script:
+    # Run clang-format via wrapper script.
+    - bash ci/compliance/clang-format.sh
 
 
 .common-build: &common-build
@@ -50,7 +58,8 @@ Normal build:
   script:
     - pacman -Sy extra-cmake-modules --noconfirm --needed
     - mkdir ci-build && cd ci-build
-    - cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ../
+    - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      -DCMAKE_INSTALL_PREFIX:PATH=/usr ../
     - make -j$(nproc)
     - make install -j$(nproc)
 
@@ -63,6 +72,18 @@ Sanitizers build:
       -DCMAKE_CXX_COMPILER=clang++ ../
     - make -j$(nproc)
     - make install -j$(nproc)
+
+
+clang-tidy:
+  stage: Compliance 2
+  image: ${IMAGE_BASE}
+  needs:
+    - job: Normal build
+      artifacts: true
+  script:
+    - pacman -Sy python2 --noconfirm --needed
+    # Run clang-tidy via wrapper script.
+    - bash ci/compliance/clang-tidy.sh ci-build
 
 
 .common-test: &common-test
