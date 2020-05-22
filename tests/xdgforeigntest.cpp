@@ -24,9 +24,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/client/registry.h"
 #include "../src/client/shell.h"
 #include "../src/client/shm_pool.h"
-#include "../src/client/server_decoration.h"
 #include "../src/client/xdgshell.h"
 #include "../src/client/xdgforeign.h"
+#include "../src/client/xdgdecoration.h"
 // Qt
 #include <QCommandLineParser>
 #include <QGuiApplication>
@@ -43,7 +43,6 @@ public:
     virtual ~XdgForeignTest();
 
     void init();
-
 
 private:
     void setupRegistry(Registry *registry);
@@ -64,7 +63,7 @@ private:
     Wrapland::Client::XdgImporter *m_importer = nullptr;
     Wrapland::Client::XdgExported *m_exported = nullptr;
     Wrapland::Client::XdgImported *m_imported = nullptr;
-    Wrapland::Client::ServerSideDecorationManager *m_decoration = nullptr;
+    Wrapland::Client::XdgDecorationManager *m_decoration = nullptr;
 };
 
 XdgForeignTest::XdgForeignTest(QObject *parent)
@@ -131,9 +130,9 @@ void XdgForeignTest::setupRegistry(Registry *registry)
             m_importer->setEventQueue(m_eventQueue);
         }
     );
-    connect(registry, &Registry::serverSideDecorationManagerAnnounced, this,
+    connect(registry, &Registry::xdgDecorationAnnounced, this,
         [this, registry](quint32 name, quint32 version) {
-            m_decoration = registry->createServerSideDecorationManager(name, version, this);
+            m_decoration = registry->createXdgDecorationManager(name, version, this);
             m_decoration->setEventQueue(m_eventQueue);
         }
     );
@@ -146,14 +145,14 @@ void XdgForeignTest::setupRegistry(Registry *registry)
             Q_ASSERT(m_importer);
             m_surface = m_compositor->createSurface(this);
             Q_ASSERT(m_surface);
-            auto parentDeco = m_decoration->create(m_surface, this);
+            auto parentDeco = m_decoration->getToplevelDecoration(m_shellSurface, this);
             m_shellSurface = m_shell->createSurface(m_surface, this);
             Q_ASSERT(m_shellSurface);
             connect(m_shellSurface, &XdgShellSurface::sizeChanged, this, &XdgForeignTest::render);
 
             m_childSurface = m_compositor->createSurface(this);
             Q_ASSERT(m_childSurface);
-            auto childDeco = m_decoration->create(m_childSurface, this);
+            auto childDeco = m_decoration->getToplevelDecoration(m_childShellSurface, this);
             m_childShellSurface = m_shell->createSurface(m_childSurface, this);
             Q_ASSERT(m_childShellSurface);
             connect(m_childShellSurface, &XdgShellSurface::sizeChanged, this, &XdgForeignTest::render);

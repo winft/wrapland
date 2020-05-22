@@ -50,7 +50,12 @@ set_package_properties(EGL PROPERTIES TYPE REQUIRED)
 include(KDEInstallDirs)
 include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
 include(KDECMakeSettings)
+include(KDECompilerSettings NO_POLICY_SCOPE)
 include(CheckIncludeFile)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 check_include_file("linux/input.h" HAVE_LINUX_INPUT_H)
 configure_file(config-wrapland.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-wrapland.h)
@@ -65,6 +70,9 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050d00)
 if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/po")
     ecm_install_po_files_as_qm(po)
 endif()
+
+add_subdirectory(extern)
+add_subdirectory(server)
 add_subdirectory(src)
 
 if (BUILD_TESTING)

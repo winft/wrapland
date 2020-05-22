@@ -17,10 +17,9 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// WaylandServer
-#include "../../src/server/display.h"
+
+#include "../../server/display.h"
 
 using namespace Wrapland::Server;
 
@@ -43,12 +42,11 @@ void NoXdgRuntimeDirTest::testCreate()
     // the server cannot start, but should not crash
     const QString testSocketName = QStringLiteral("wrapland-test-no-xdg-runtime-dir-0");
     Display display;
-    QSignalSpy runningSpy(&display, &Display::runningChanged);
-    QVERIFY(runningSpy.isValid());
+
     display.setSocketName(testSocketName);
-    QVERIFY(!display.isRunning());
+    QVERIFY(!display.running());
     display.start();
-    QVERIFY(!display.isRunning());
+    QVERIFY(!display.running());
 
     // call into dispatchEvents should not crash
     display.dispatchEvents();

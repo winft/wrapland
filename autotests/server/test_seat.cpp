@@ -1,5 +1,6 @@
 /********************************************************************
-Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2014 Martin Gräßlin <mgraesslin@kde.org>
+Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,15 +18,13 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// WaylandServer
-#include "../../src/server/display.h"
-#include "../../src/server/pointer_interface.h"
-#include "../../src/server/seat_interface.h"
+
+#include "../../server/display.h"
+#include "../../server/pointer.h"
+#include "../../server/seat.h"
 
 using namespace Wrapland::Server;
-
 
 class TestWaylandServerSeat : public QObject
 {
@@ -47,12 +46,12 @@ void TestWaylandServerSeat::testCapabilities()
     Display display;
     display.setSocketName(s_socketName);
     display.start();
-    SeatInterface *seat = display.createSeat();
+    std::unique_ptr<Seat> seat{display.createSeat()};
     QVERIFY(!seat->hasKeyboard());
     QVERIFY(!seat->hasPointer());
     QVERIFY(!seat->hasTouch());
 
-    QSignalSpy keyboardSpy(seat, SIGNAL(hasKeyboardChanged(bool)));
+    QSignalSpy keyboardSpy(seat.get(), SIGNAL(hasKeyboardChanged(bool)));
     QVERIFY(keyboardSpy.isValid());
     seat->setHasKeyboard(true);
     QCOMPARE(keyboardSpy.count(), 1);
@@ -65,7 +64,7 @@ void TestWaylandServerSeat::testCapabilities()
     seat->setHasKeyboard(false);
     QCOMPARE(keyboardSpy.count(), 2);
 
-    QSignalSpy pointerSpy(seat, SIGNAL(hasPointerChanged(bool)));
+    QSignalSpy pointerSpy(seat.get(), SIGNAL(hasPointerChanged(bool)));
     QVERIFY(pointerSpy.isValid());
     seat->setHasPointer(true);
     QCOMPARE(pointerSpy.count(), 1);
@@ -78,7 +77,7 @@ void TestWaylandServerSeat::testCapabilities()
     seat->setHasPointer(false);
     QCOMPARE(pointerSpy.count(), 2);
 
-    QSignalSpy touchSpy(seat, SIGNAL(hasTouchChanged(bool)));
+    QSignalSpy touchSpy(seat.get(), SIGNAL(hasTouchChanged(bool)));
     QVERIFY(touchSpy.isValid());
     seat->setHasTouch(true);
     QCOMPARE(touchSpy.count(), 1);
@@ -97,18 +96,12 @@ void TestWaylandServerSeat::testName()
     Display display;
     display.setSocketName(s_socketName);
     display.start();
-    SeatInterface *seat = display.createSeat();
-    QCOMPARE(seat->name(), QString());
+    std::unique_ptr<Seat> seat{display.createSeat()};
+    QCOMPARE(seat->name().size(), 0);
 
-    QSignalSpy nameSpy(seat, SIGNAL(nameChanged(QString)));
-    QVERIFY(nameSpy.isValid());
-    const QString name = QStringLiteral("foobar");
+    const std::string name = "foobar";
     seat->setName(name);
     QCOMPARE(seat->name(), name);
-    QCOMPARE(nameSpy.count(), 1);
-    QCOMPARE(nameSpy.first().first().toString(), name);
-    seat->setName(name);
-    QCOMPARE(nameSpy.count(), 1);
 }
 
 void TestWaylandServerSeat::testPointerButton()
@@ -116,8 +109,8 @@ void TestWaylandServerSeat::testPointerButton()
     Display display;
     display.setSocketName(s_socketName);
     display.start();
-    SeatInterface *seat = display.createSeat();
-    PointerInterface *pointer = seat->focusedPointer();
+    std::unique_ptr<Seat> seat{display.createSeat()};
+    auto pointer = seat->focusedPointer();
     QVERIFY(!pointer);
 
     // no button pressed yet, should be released and no serial
@@ -146,10 +139,11 @@ void TestWaylandServerSeat::testPointerPos()
     Display display;
     display.setSocketName(s_socketName);
     display.start();
-    SeatInterface *seat = display.createSeat();
-    QSignalSpy seatPosSpy(seat, SIGNAL(pointerPosChanged(QPointF)));
+
+    std::unique_ptr<Seat> seat{display.createSeat()};
+    QSignalSpy seatPosSpy(seat.get(), SIGNAL(pointerPosChanged(QPointF)));
     QVERIFY(seatPosSpy.isValid());
-    PointerInterface *pointer = seat->focusedPointer();
+    auto pointer = seat->focusedPointer();
     QVERIFY(!pointer);
 
     QCOMPARE(seat->pointerPos(), QPointF());
@@ -174,11 +168,14 @@ void TestWaylandServerSeat::testDestroyThroughTerminate()
     Display display;
     display.setSocketName(s_socketName);
     display.start();
-    SeatInterface *seat = display.createSeat();
-    QSignalSpy destroyedSpy(seat, SIGNAL(destroyed(QObject*)));
+
+    std::unique_ptr<Seat> seat{display.createSeat()};
+    QSignalSpy destroyedSpy(seat.get(), &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     display.terminate();
-    QVERIFY(!destroyedSpy.isEmpty());
+    QVERIFY(!destroyedSpy.wait(100));
+    seat.reset();
+    QCOMPARE(destroyedSpy.count(), 1);
 }
 
 void TestWaylandServerSeat::testRepeatInfo()
@@ -186,7 +183,8 @@ void TestWaylandServerSeat::testRepeatInfo()
     Display display;
     display.setSocketName(s_socketName);
     display.start();
-    SeatInterface *seat = display.createSeat();
+
+    std::unique_ptr<Seat> seat{display.createSeat()};
     QCOMPARE(seat->keyRepeatRate(), 0);
     QCOMPARE(seat->keyRepeatDelay(), 0);
     seat->setKeyRepeatInfo(25, 660);
@@ -203,31 +201,34 @@ void TestWaylandServerSeat::testMultiple()
     Display display;
     display.setSocketName(s_socketName);
     display.start();
-    QVERIFY(display.seats().isEmpty());
-    SeatInterface *seat1 = display.createSeat();
-    QCOMPARE(display.seats().count(), 1);
-    QCOMPARE(display.seats().at(0), seat1);
-    SeatInterface *seat2 = display.createSeat();
-    QCOMPARE(display.seats().count(), 2);
-    QCOMPARE(display.seats().at(0), seat1);
-    QCOMPARE(display.seats().at(1), seat2);
-    SeatInterface *seat3 = display.createSeat();
-    QCOMPARE(display.seats().count(), 3);
-    QCOMPARE(display.seats().at(0), seat1);
-    QCOMPARE(display.seats().at(1), seat2);
-    QCOMPARE(display.seats().at(2), seat3);
+    QVERIFY(display.seats().empty());
 
-    delete seat3;
-    QCOMPARE(display.seats().count(), 2);
-    QCOMPARE(display.seats().at(0), seat1);
-    QCOMPARE(display.seats().at(1), seat2);
+    std::unique_ptr<Seat> seat1{display.createSeat()};
+    QCOMPARE(display.seats().size(), 1);
+    QCOMPARE(display.seats().at(0), seat1.get());
 
-    delete seat2;
-    QCOMPARE(display.seats().count(), 1);
-    QCOMPARE(display.seats().at(0), seat1);
+    std::unique_ptr<Seat> seat2{display.createSeat()};
+    QCOMPARE(display.seats().size(), 2);
+    QCOMPARE(display.seats().at(0), seat1.get());
+    QCOMPARE(display.seats().at(1), seat2.get());
 
-    delete seat1;
-    QCOMPARE(display.seats().count(), 0);
+    std::unique_ptr<Seat> seat3{display.createSeat()};
+    QCOMPARE(display.seats().size(), 3);
+    QCOMPARE(display.seats().at(0), seat1.get());
+    QCOMPARE(display.seats().at(1), seat2.get());
+    QCOMPARE(display.seats().at(2), seat3.get());
+
+    seat3.reset();
+    QCOMPARE(display.seats().size(), 2);
+    QCOMPARE(display.seats().at(0), seat1.get());
+    QCOMPARE(display.seats().at(1), seat2.get());
+
+    seat2.reset();
+    QCOMPARE(display.seats().size(), 1);
+    QCOMPARE(display.seats().at(0), seat1.get());
+
+    seat1.reset();
+    QCOMPARE(display.seats().size(), 0);
 }
 
 QTEST_GUILESS_MAIN(TestWaylandServerSeat)

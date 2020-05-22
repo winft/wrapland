@@ -17,11 +17,11 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#include "../src/server/compositor_interface.h"
-#include "../src/server/display.h"
-#include "../src/server/output_interface.h"
-#include "../src/server/seat_interface.h"
-#include "../src/server/shell_interface.h"
+#include "../server/compositor.h"
+#include "../server/display.h"
+#include "../server/output.h"
+#include "../server/seat.h"
+#include "../server/xdg_shell.h"
 
 #include <QGuiApplication>
 #include <QFile>
@@ -79,24 +79,21 @@ static void readDisplayFromPipe(int pipe)
 
 int main(int argc, char **argv)
 {
-    using namespace Wrapland::Server;
-
     // set our own event dispatcher to be able to dispatch events before the event loop is started
     QAbstractEventDispatcher *eventDispatcher = new QEventDispatcherGlib();
     QCoreApplication::setEventDispatcher(eventDispatcher);
 
     // first create the Server and setup with minimum to get an XWayland connected
-    Display display;
+    Wrapland::Server::Display display;
     display.start();
     display.createShm();
-    CompositorInterface *compositor = display.createCompositor(&display);
-    compositor->create();
-    ShellInterface *shell = display.createShell();
-    shell->create();
-    OutputInterface *output = display.createOutput(&display);
+    display.createCompositor(&display);
+
+    [[maybe_unused]] Wrapland::Server::XdgShell *shell = display.createXdgShell();
+
+    Wrapland::Server::Output *output = display.createOutput(&display);
     output->setPhysicalSize(QSize(10, 10));
     output->addMode(QSize(1024, 768));
-    output->create();
 
     // starts XWayland by forking and opening a pipe
     const int pipe = startXServer();
@@ -119,9 +116,8 @@ int main(int argc, char **argv)
 
     QGuiApplication app(argc, argv);
 
-    SeatInterface *seat = display.createSeat();
-    seat->setName(QStringLiteral("testSeat0"));
-    seat->create();
+    auto seat = display.createSeat();
+    seat->setName("testSeat0");
 
     return app.exec();
 }

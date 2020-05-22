@@ -116,7 +116,7 @@ Q_SIGNALS:
      * Buffer from server is ready to be delivered to this client
      * @param buffer_id internal buffer id to be created
      **/
-    void bufferReady(const void* output, const RemoteBuffer *rbuf);
+    void bufferReady(void* output, RemoteBuffer *rbuf);
 
 private:
     class Private;
