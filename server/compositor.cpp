@@ -79,7 +79,7 @@ void Compositor::Private::createSurfaceCallback([[maybe_unused]] wl_client* wlCl
     auto bind = priv->getBind(wlResource);
 
     auto surface = new Surface(bind->client()->handle(), bind->version(), id);
-    // TODO: error handling (when resource not created)
+    // TODO(romangg): error handling (when resource not created)
 
     priv->surfaces.push_back(surface);
     connect(surface, &Surface::resourceDestroyed, priv->handle(), [priv, surface] {
@@ -98,7 +98,7 @@ void Compositor::Private::createRegionCallback(wl_client* wlClient,
     auto client = compositor->d_ptr->display()->handle()->getClient(wlClient);
 
     auto region = new Region(client, compositor->d_ptr->version(), id);
-    // TODO: error handling (when resource not created)
+    // TODO(romangg): error handling (when resource not created)
 
     Q_EMIT compositor->regionCreated(region);
 }

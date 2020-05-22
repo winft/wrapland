@@ -19,7 +19,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
-// TODO: For registring uint32_t with the Qt meta object system. Remove when not needed anymore.
+// TODO(romangg): For registring uint32_t with the Qt meta object system. Remove when not needed
+//                anymore.
 #include "display.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>

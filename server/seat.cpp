@@ -256,7 +256,7 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
         } else if (q_ptr->hasImplicitTouchGrab(dragSerial)) {
             drag.mode = Drag::Mode::Touch;
             drag.sourceTouch = interfaceForSurface(dragSurface, touchs);
-            // TODO: touch transformation
+            // TODO(unknown author): touch transformation
         } else {
             // no implicit grab, abort drag
             return;
@@ -267,7 +267,7 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
             // origin surface
             drag.target = dataDevice;
             drag.surface = originSurface;
-            // TODO: transformation needs to be either pointer or touch
+            // TODO(unknown author): transformation needs to be either pointer or touch
             drag.transformation = globalPointer.focus.transformation;
         }
         drag.source = dataDevice;
@@ -349,7 +349,7 @@ void Seat::Private::endDrag(quint32 serial)
     Q_EMIT q_ptr->dragEnded();
 }
 
-void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice)
+void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice) const
 {
     if (!currentSelection) {
         return;
@@ -479,7 +479,7 @@ void Seat::Private::getKeyboard(SeatBind* bind, uint32_t id)
 {
     auto client = bind->client()->handle();
 
-    // TODO: only create if seat has keyboard?
+    // TODO(unknown author): only create if seat has keyboard?
     auto keyboard = new Keyboard(client, bind->version(), id, q_ptr);
 
     keyboard->repeatInfo(keys.keyRepeat.charactersPerSecond, keys.keyRepeat.delay);
@@ -517,9 +517,9 @@ void Seat::Private::getTouch(SeatBind* bind, uint32_t id)
 {
     auto client = bind->client()->handle();
 
-    // TODO: only create if seat has touch?
+    // TODO(unknown author): only create if seat has touch?
     auto touch = new Touch(client, bind->version(), id, q_ptr);
-    // TODO: check for error
+    // TODO(romangg): check for error
 
     touchs << touch;
 
@@ -527,7 +527,7 @@ void Seat::Private::getTouch(SeatBind* bind, uint32_t id)
         // this is a touch for the currently focused touch surface
         globalTouch.focus.touchs << touch;
         if (!globalTouch.ids.isEmpty()) {
-            // TODO: send out all the points
+            // TODO(unknown author): send out all the points
         }
     }
     QObject::connect(touch, &Touch::resourceDestroyed, q_ptr, [touch, this] {
@@ -612,7 +612,6 @@ void Seat::setDragTarget(Surface* surface,
         d_ptr->drag.surface = nullptr;
     }
     Q_EMIT dragSurfaceChanged();
-    return;
 }
 
 void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation)
@@ -690,7 +689,7 @@ void Seat::setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transfor
         return;
     }
 
-    // TODO: signal with all pointers
+    // TODO(unknown author): signal with all pointers
     Q_EMIT focusedPointerChanged(pointers.first());
 
     for (auto it = pointers.constBegin(), end = pointers.constEnd(); it != end; ++it) {
@@ -741,7 +740,7 @@ QMatrix4x4 Seat::focusedPointerSurfaceTransformation() const
 
 namespace
 {
-static quint32 qtToWaylandButton(Qt::MouseButton button)
+quint32 qtToWaylandButton(Qt::MouseButton button)
 {
 #if HAVE_LINUX_INPUT_H
     static const QHash<Qt::MouseButton, quint32> s_buttons({
@@ -781,7 +780,7 @@ bool Seat::isPointerButtonPressed(quint32 button) const
     if (it == d_ptr->globalPointer.buttonStates.constEnd()) {
         return false;
     }
-    return it.value() == Private::SeatPointer::State::Pressed ? true : false;
+    return it.value() == Private::SeatPointer::State::Pressed;
 }
 
 void Seat::pointerAxisV5(Qt::Orientation orientation,
@@ -1126,7 +1125,7 @@ void Seat::updateKeyboardModifiers(quint32 depressed,
 {
     bool changed = false;
 #define UPDATE(value)                                                                              \
-    if (d_ptr->keys.modifiers.value != value) {                                                    \
+    if (d_ptr->keys.modifiers.value != (value)) {                                                  \
         d_ptr->keys.modifiers.value = value;                                                       \
         changed = true;                                                                            \
     }
@@ -1469,7 +1468,7 @@ void Seat::setFocusedTextInputSurface(Surface* surface)
     const quint32 serial = d_ptr->display()->handle()->nextSerial();
     const auto old = d_ptr->textInput.focus.textInput;
     if (d_ptr->textInput.focus.textInput) {
-        // TODO: setFocusedSurface like in other interfaces
+        // TODO(unknown author): setFocusedSurface like in other interfaces
         d_ptr->textInput.focus.textInput->d_ptr->sendLeave(serial, d_ptr->textInput.focus.surface);
     }
     if (d_ptr->textInput.focus.surface) {
@@ -1490,7 +1489,7 @@ void Seat::setFocusedTextInputSurface(Surface* surface)
         d_ptr->textInput.focus.serial = serial;
     }
     if (t) {
-        // TODO: setFocusedSurface like in other interfaces
+        // TODO(unknown author): setFocusedSurface like in other interfaces
         t->d_ptr->sendEnter(surface, serial);
     }
     if (old != t) {

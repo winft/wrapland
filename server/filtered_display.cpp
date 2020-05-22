@@ -30,7 +30,7 @@ namespace Wrapland::Server
 class FilteredDisplay::Private
 {
 public:
-    Private(FilteredDisplay* q);
+    explicit Private(FilteredDisplay* q);
 
     static bool filterCallback(const wl_client* wlClient, const wl_global* wlGlobal, void* data);
 
@@ -49,6 +49,10 @@ bool FilteredDisplay::Private::filterCallback(const wl_client* wlClient,
 {
     auto priv = static_cast<FilteredDisplay::Private*>(data);
 
+    // The wl_display_global_filter_func_t function type has wl_client const* signature
+    // but internally we need it non-const. The quick solution is to make an exception to the
+    // respective clang-tidy check.
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
     auto client = priv->q_ptr->getClient(const_cast<wl_client*>(wlClient));
     auto interface = wl_global_get_interface(wlGlobal);
     auto name = QByteArray::fromRawData(interface->name, strlen(interface->name));

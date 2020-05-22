@@ -73,9 +73,9 @@ class XdgOutputV1 : public QObject
 public:
     XdgOutputV1(Client* client, uint32_t version, uint32_t id, XdgOutputManager* parent);
 
-    void setLogicalSize(const QSize& size);
-    void setLogicalPosition(const QPoint& pos);
-    void done();
+    void setLogicalSize(const QSize& size) const;
+    void setLogicalPosition(const QPoint& pos) const;
+    void done() const;
 
     class Private;
     Private* d_ptr;

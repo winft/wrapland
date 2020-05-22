@@ -38,7 +38,7 @@ class WRAPLANDSERVER_EXPORT AppmenuManager : public QObject
 public:
     ~AppmenuManager() override;
 
-    Appmenu* appmenuForSurface(Surface*);
+    Appmenu* appmenuForSurface(Surface* surface);
 
 Q_SIGNALS:
     void appmenuCreated(Wrapland::Server::Appmenu*);

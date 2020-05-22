@@ -32,8 +32,8 @@ class WRAPLANDSERVER_EXPORT DataSource : public QObject
 {
     Q_OBJECT
 public:
-    void accept(std::string mimeType);
-    void requestData(std::string mimeType, qint32 fd);
+    void accept(std::string const& mimeType);
+    void requestData(std::string const& mimeType, qint32 fd);
     void cancel();
 
     std::vector<std::string> mimeTypes() const;

@@ -80,8 +80,8 @@ public:
     Private(Client* client, uint32_t version, uint32_t id, Surface* q);
     ~Private() override;
 
-    void addChild(Subsurface* subsurface);
-    void removeChild(Subsurface* subsurface);
+    void addChild(Subsurface* child);
+    void removeChild(Subsurface* child);
 
     bool raiseChild(Subsurface* subsurface, Surface* sibling);
     bool lowerChild(Subsurface* subsurface, Surface* sibling);
@@ -157,7 +157,7 @@ private:
                                     qint32 scale,
                                     const QRectF& sourceRectangle) const;
 
-    static void destroyFrameCallback(wl_resource* r);
+    static void destroyFrameCallback(wl_resource* wlResource);
 
     static void attachCallback(wl_client* wlClient,
                                wl_resource* wlResource,

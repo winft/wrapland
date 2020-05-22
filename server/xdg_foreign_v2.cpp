@@ -88,7 +88,7 @@ void XdgExporterV2::Private::exportToplevelCallback([[maybe_unused]] wl_client* 
 
     auto exported = new XdgExportedV2(
         bind->client()->handle(), wl_resource_get_version(wlResource), id, surface, protocolHandle);
-    // TODO: error handling
+    // TODO(romangg): error handling
 
     // Surface not exported anymore.
     connect(exported, &XdgExportedV2::destroyed, priv->handle(), [priv, protocolHandle] {
@@ -166,7 +166,7 @@ void XdgImporterV2::Private::importToplevelCallback(wl_client* wlClient,
     }
 
     auto imported = new XdgImportedV2(client, importerHandle->d_ptr->version(), id, exported);
-    // TODO: error handling
+    // TODO(romangg): error handling
 
     connect(imported,
             &XdgImportedV2::childChanged,

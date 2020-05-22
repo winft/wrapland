@@ -28,8 +28,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "shadow_p.h"
 
-#include <wayland-server.h>
-
 namespace Wrapland::Server
 {
 
@@ -89,18 +87,18 @@ ShadowManager::~ShadowManager() = default;
 
 const struct org_kde_kwin_shadow_interface Shadow::Private::s_interface = {
     commitCallback,
-    attachLeftCallback,
-    attachTopLeftCallback,
-    attachTopCallback,
-    attachTopRightCallback,
-    attachRightCallback,
-    attachBottomRightCallback,
-    attachBottomCallback,
-    attachBottomLeftCallback,
-    offsetLeftCallback,
-    offsetTopCallback,
-    offsetRightCallback,
-    offsetBottomCallback,
+    attachCallback<AttachSide::Left>,
+    attachCallback<AttachSide::TopLeft>,
+    attachCallback<AttachSide::Top>,
+    attachCallback<AttachSide::TopRight>,
+    attachCallback<AttachSide::Right>,
+    attachCallback<AttachSide::BottomRight>,
+    attachCallback<AttachSide::Bottom>,
+    attachCallback<AttachSide::BottomLeft>,
+    offsetCallback<OffsetSide::Left>,
+    offsetCallback<OffsetSide::Top>,
+    offsetCallback<OffsetSide::Right>,
+    offsetCallback<OffsetSide::Bottom>,
     destroyCallback,
 };
 
@@ -112,135 +110,37 @@ void Shadow::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_re
 
 void Shadow::Private::commit()
 {
-#define BUFFER(__FLAG__, __PART__)                                                                 \
-    if (pending.flags & State::Flags::__FLAG__##Buffer) {                                          \
-        if (current.__PART__) {                                                                    \
-            current.__PART__->unref();                                                             \
-        }                                                                                          \
-        if (pending.__PART__) {                                                                    \
-            pending.__PART__->ref();                                                               \
-        }                                                                                          \
-        current.__PART__ = pending.__PART__;                                                       \
-    }
-    BUFFER(Left, left)
-    BUFFER(TopLeft, topLeft)
-    BUFFER(Top, top)
-    BUFFER(TopRight, topRight)
-    BUFFER(Right, right)
-    BUFFER(BottomRight, bottomRight)
-    BUFFER(Bottom, bottom)
-    BUFFER(BottomLeft, bottomLeft)
-#undef BUFFER
+    current.commit<AttachSide::Left>(pending);
+    current.commit<AttachSide::TopLeft>(pending);
+    current.commit<AttachSide::Top>(pending);
+    current.commit<AttachSide::TopRight>(pending);
+    current.commit<AttachSide::Right>(pending);
+    current.commit<AttachSide::BottomRight>(pending);
+    current.commit<AttachSide::Bottom>(pending);
+    current.commit<AttachSide::BottomLeft>(pending);
 
-    if (pending.flags & State::Offset) {
+    if (pending.offsetIsSet) {
         current.offset = pending.offset;
     }
     pending = State();
 }
 
-void Shadow::Private::attach(Shadow::Private::State::Flags flag, wl_resource* wlBuffer)
+void Shadow::Private::attachConnect(AttachSide side, Buffer* buffer)
 {
-    auto display = client()->display()->handle();
-    auto buffer = Buffer::get(display, wlBuffer);
-    if (buffer) {
-        QObject::connect(buffer, &Buffer::resourceDestroyed, handle(), [this, buffer]() {
-#define PENDING(__PART__)                                                                          \
-    if (pending.__PART__ == buffer) {                                                              \
-        pending.__PART__ = nullptr;                                                                \
+    if (!buffer) {
+        return;
     }
-            PENDING(left)
-            PENDING(topLeft)
-            PENDING(top)
-            PENDING(topRight)
-            PENDING(right)
-            PENDING(bottomRight)
-            PENDING(bottom)
-            PENDING(bottomLeft)
-#undef PENDING
 
-#define CURRENT(__PART__)                                                                          \
-    if (current.__PART__ == buffer) {                                                              \
-        current.__PART__->unref();                                                                 \
-        current.__PART__ = nullptr;                                                                \
-    }
-            CURRENT(left)
-            CURRENT(topLeft)
-            CURRENT(top)
-            CURRENT(topRight)
-            CURRENT(right)
-            CURRENT(bottomRight)
-            CURRENT(bottom)
-            CURRENT(bottomLeft)
-#undef CURRENT
-        });
-    }
-    switch (flag) {
-    case State::LeftBuffer:
-        pending.left = buffer;
-        break;
-    case State::TopLeftBuffer:
-        pending.topLeft = buffer;
-        break;
-    case State::TopBuffer:
-        pending.top = buffer;
-        break;
-    case State::TopRightBuffer:
-        pending.topRight = buffer;
-        break;
-    case State::RightBuffer:
-        pending.right = buffer;
-        break;
-    case State::BottomRightBuffer:
-        pending.bottomRight = buffer;
-        break;
-    case State::BottomBuffer:
-        pending.bottom = buffer;
-        break;
-    case State::BottomLeftBuffer:
-        pending.bottomLeft = buffer;
-        break;
-    default:
-        Q_UNREACHABLE();
-        break;
-    }
-    pending.flags = State::Flags(pending.flags | flag);
+    QObject::connect(buffer, &Buffer::resourceDestroyed, handle(), [this, buffer, side]() {
+        if (auto& buf = pending.get(side); buf == buffer) {
+            buf = nullptr;
+        }
+        if (auto& buf = current.get(side); buf == buffer) {
+            buf->unref();
+            buf = nullptr;
+        }
+    });
 }
-
-#define ATTACH(__PART__)                                                                           \
-    void Shadow::Private::attach##__PART__##Callback(                                              \
-        [[maybe_unused]] wl_client* wlClient, wl_resource* wlResource, wl_resource* wlBuffer)      \
-    {                                                                                              \
-        auto priv = handle(wlResource)->d_ptr;                                                     \
-        priv->attach(State::__PART__##Buffer, wlBuffer);                                           \
-    }
-
-ATTACH(Left)
-ATTACH(TopLeft)
-ATTACH(Top)
-ATTACH(TopRight)
-ATTACH(Right)
-ATTACH(BottomRight)
-ATTACH(Bottom)
-ATTACH(BottomLeft)
-
-#undef ATTACH
-
-#define OFFSET(__PART__)                                                                           \
-    void Shadow::Private::offset##__PART__##Callback([[maybe_unused]] wl_client* wlClient,         \
-                                                     [[maybe_unused]] wl_resource* wlResource,     \
-                                                     wl_fixed_t offset)                            \
-    {                                                                                              \
-        auto priv = handle(wlResource)->d_ptr;                                                     \
-        priv->pending.flags = State::Flags(priv->pending.flags | State::Offset);                   \
-        priv->pending.offset.set##__PART__(wl_fixed_to_double(offset));                            \
-    }
-
-OFFSET(Left)
-OFFSET(Top)
-OFFSET(Right)
-OFFSET(Bottom)
-
-#undef OFFSET
 
 Shadow::Private::Private(Client* client, uint32_t version, uint32_t id, Shadow* q)
     : Wayland::Resource<Shadow>(client,
@@ -254,20 +154,14 @@ Shadow::Private::Private(Client* client, uint32_t version, uint32_t id, Shadow* 
 
 Shadow::Private::~Private()
 {
-
-#define CURRENT(__PART__)                                                                          \
-    if (current.__PART__) {                                                                        \
-        current.__PART__->unref();                                                                 \
-    }
-    CURRENT(left)
-    CURRENT(topLeft)
-    CURRENT(top)
-    CURRENT(topRight)
-    CURRENT(right)
-    CURRENT(bottomRight)
-    CURRENT(bottom)
-    CURRENT(bottomLeft)
-#undef CURRENT
+    current.unref<AttachSide::Left>();
+    current.unref<AttachSide::TopLeft>();
+    current.unref<AttachSide::Top>();
+    current.unref<AttachSide::TopRight>();
+    current.unref<AttachSide::Right>();
+    current.unref<AttachSide::BottomRight>();
+    current.unref<AttachSide::Bottom>();
+    current.unref<AttachSide::BottomLeft>();
 }
 
 Shadow::Shadow(Client* client, uint32_t version, uint32_t id)
@@ -281,19 +175,20 @@ QMarginsF Shadow::offset() const
     return d_ptr->current.offset;
 }
 
-#define BUFFER(__PART__)                                                                           \
+// TODO(romangg): replace this with template function once we can use headers-only classes.
+#define BUFFER(__PART__, __UPPER_)                                                                 \
     Buffer* Shadow::__PART__() const                                                               \
     {                                                                                              \
-        return d_ptr->current.__PART__;                                                            \
+        return d_ptr->current.get<Private::AttachSide::__UPPER_>();                                \
     }
 
-BUFFER(left)
-BUFFER(topLeft)
-BUFFER(top)
-BUFFER(topRight)
-BUFFER(right)
-BUFFER(bottomRight)
-BUFFER(bottom)
-BUFFER(bottomLeft)
+BUFFER(left, Left)
+BUFFER(topLeft, TopLeft)
+BUFFER(top, Top)
+BUFFER(topRight, TopRight)
+BUFFER(right, Right)
+BUFFER(bottomRight, BottomRight)
+BUFFER(bottom, Bottom)
+BUFFER(bottomLeft, BottomLeft)
 
 }

@@ -100,7 +100,7 @@ int Output::refreshRate() const
         return mode.flags.testFlag(ModeFlag::Current);
     });
     if (it == d_ptr->modes.cend()) {
-        return 60000;
+        return Mode::defaultRefreshRate;
     }
     return (*it).refreshRate;
 }
@@ -250,13 +250,13 @@ void Output::Private::bindInit(Wayland::Resource<Output, OutputGlobal>* bind)
     bind->client()->flush();
 }
 
-int32_t Output::Private::getFlags(const Mode& mode)
+int32_t getFlags(const Output::Mode& mode)
 {
     int32_t flags = 0;
-    if (mode.flags.testFlag(ModeFlag::Current)) {
+    if (mode.flags.testFlag(Output::ModeFlag::Current)) {
         flags |= WL_OUTPUT_MODE_CURRENT;
     }
-    if (mode.flags.testFlag(ModeFlag::Preferred)) {
+    if (mode.flags.testFlag(Output::ModeFlag::Preferred)) {
         flags |= WL_OUTPUT_MODE_PREFERRED;
     }
     return flags;
@@ -395,18 +395,6 @@ Output::DpmsMode Output::dpmsMode() const
 bool Output::isDpmsSupported() const
 {
     return d_ptr->dpms.supported;
-}
-
-Output* Output::get(void* data)
-{
-    auto resource = reinterpret_cast<Wayland::Resource<Output, OutputGlobal>*>(data);
-    auto outputPriv = static_cast<Output::Private*>(resource->global());
-    return outputPriv->q_ptr;
-}
-
-QVector<wl_resource*> Output::getResources(Client* client)
-{
-    return d_ptr->getResources(client);
 }
 
 }

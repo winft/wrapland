@@ -45,6 +45,8 @@ const struct xdg_positioner_interface XdgShellPositioner::Private::s_interface =
     setGravityCallback,
     setConstraintAdjustmentCallback,
     setOffsetCallback,
+    // TODO(romangg): Update xdg-shell protocol version (currently at 1).
+    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
 };
 
 void XdgShellPositioner::Private::setSizeCallback([[maybe_unused]] wl_client* wlClient,

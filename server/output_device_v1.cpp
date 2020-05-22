@@ -45,7 +45,7 @@ QSize OutputDeviceV1::modeSize() const
 int OutputDeviceV1::refreshRate() const
 {
     if (d_ptr->pending.mode.id == -1) {
-        return 60000;
+        return Mode::defaultRefreshRate;
     }
     return d_ptr->pending.mode.refreshRate;
 }
@@ -66,6 +66,8 @@ void OutputDeviceV1::Private::addMode(Mode& mode)
     if (mode.flags.testFlag(ModeFlag::Current)) {
         Q_ASSERT(published.mode.id < 0);
         if (published.mode.id >= 0 && published.mode.id != mode.id) {
+            // TODO(romangg): Make the clang-tidy check pass here and below too.
+            // NOLINTNEXTLINE(clang-diagnostic-gnu-zero-variadic-macro-arguments)
             qCWarning(WRAPLAND_SERVER)
                 << "Duplicate current Mode id" << published.mode.id << "and" << mode.id << mode.size
                 << mode.refreshRate << ": setting current mode to:" << mode.size
@@ -83,6 +85,7 @@ void OutputDeviceV1::Private::addMode(Mode& mode)
             return mode.flags.testFlag(ModeFlag::Preferred);
         });
         if (preferredIt != modes.end()) {
+            // NOLINTNEXTLINE(clang-diagnostic-gnu-zero-variadic-macro-arguments)
             qCWarning(WRAPLAND_SERVER)
                 << "Duplicate preferred Mode id" << (*preferredIt).id << "and" << mode.id
                 << mode.size << mode.refreshRate
@@ -119,6 +122,7 @@ void OutputDeviceV1::Private::addMode(Mode& mode)
         return mode.id == mode_it.id;
     });
     if (idIt != modes.constEnd()) {
+        // NOLINTNEXTLINE(clang-diagnostic-gnu-zero-variadic-macro-arguments)
         qCWarning(WRAPLAND_SERVER) << "Duplicate Mode id" << mode.id << ": not adding mode"
                                    << mode.size << mode.refreshRate;
         return;
@@ -271,16 +275,16 @@ void OutputDeviceV1::Private::sendDone(OutputDeviceV1Bind* bind)
 
 #define SETTER2(setterName, type, argumentName) SETTER(setterName, type, argumentName, argumentName)
 
-SETTER(setSerialNumber, const QString&, info.serialNumber, serialNumber)
-SETTER(setEisaId, const QString&, info.eisaId, eisaId)
-SETTER(setUuid, const QByteArray&, info.uuid, uuid)
-SETTER(setEdid, const QByteArray&, info.edid, edid)
-SETTER(setManufacturer, const QString&, info.manufacturer, manufacturer)
-SETTER(setModel, const QString&, info.model, model)
-SETTER(setPhysicalSize, const QSize&, info.physicalSize, physicalSize)
-SETTER2(setEnabled, Enablement, enabled)
-SETTER2(setTransform, Transform, transform)
-SETTER2(setGeometry, const QRectF&, geometry)
+SETTER(setSerialNumber, const QString&, info.serialNumber, serialNumber) // NOLINT
+SETTER(setEisaId, const QString&, info.eisaId, eisaId)                   // NOLINT
+SETTER(setUuid, const QByteArray&, info.uuid, uuid)                      // NOLINT
+SETTER(setEdid, const QByteArray&, info.edid, edid)                      // NOLINT
+SETTER(setManufacturer, const QString&, info.manufacturer, manufacturer) // NOLINT
+SETTER(setModel, const QString&, info.model, model)                      // NOLINT
+SETTER(setPhysicalSize, const QSize&, info.physicalSize, physicalSize)   // NOLINT
+SETTER2(setEnabled, Enablement, enabled)                                 // NOLINT
+SETTER2(setTransform, Transform, transform)                              // NOLINT
+SETTER2(setGeometry, const QRectF&, geometry)                            // NOLINT
 
 #undef SETTER
 #undef SETTER2

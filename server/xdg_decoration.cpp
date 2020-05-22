@@ -85,7 +85,7 @@ void XdgDecorationManager::Private::getToplevelDecorationCallback(
     }
 
     auto deco = new XdgDecoration(bind->client()->handle(), priv->version(), id, toplevel);
-    // TODO: check resource
+    // TODO(romangg): check resource
 
     priv->m_decorations[toplevel] = deco;
     QObject::connect(deco, &XdgDecoration::resourceDestroyed, priv->handle(), [toplevel, priv]() {

@@ -172,19 +172,19 @@ uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, co
     wl_array_init(&configureStates);
 
     if (states.testFlag(XdgShellSurface::State::Maximized)) {
-        uint32_t* s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
         *s = XDG_TOPLEVEL_STATE_MAXIMIZED;
     }
     if (states.testFlag(XdgShellSurface::State::Fullscreen)) {
-        uint32_t* s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
         *s = XDG_TOPLEVEL_STATE_FULLSCREEN;
     }
     if (states.testFlag(XdgShellSurface::State::Resizing)) {
-        uint32_t* s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
         *s = XDG_TOPLEVEL_STATE_RESIZING;
     }
     if (states.testFlag(XdgShellSurface::State::Activated)) {
-        uint32_t* s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
         *s = XDG_TOPLEVEL_STATE_ACTIVATED;
     }
 

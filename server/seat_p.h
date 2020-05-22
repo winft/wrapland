@@ -61,9 +61,9 @@ public:
     DataDevice* dataDeviceForSurface(Surface* surface) const;
     TextInputV2* textInputForSurface(Surface* surface) const;
     void registerDataDevice(DataDevice* dataDevice);
-    void registerTextInput(TextInputV2* textInput);
+    void registerTextInput(TextInputV2* ti);
     void endDrag(quint32 serial);
-    void cancelPreviousSelection(DataDevice* newlySelectedDataDevice);
+    void cancelPreviousSelection(DataDevice* newlySelectedDataDevice) const;
 
     std::string name;
     bool pointer = false;

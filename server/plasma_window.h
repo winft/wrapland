@@ -84,8 +84,8 @@ public:
     void setMinimizeable(bool set);
     void setMaximizeable(bool set);
     void setFullscreenable(bool set);
-    void setSkipTaskbar(bool skip);
-    void setSkipSwitcher(bool skip);
+    void setSkipTaskbar(bool set);
+    void setSkipSwitcher(bool set);
     void setShadeable(bool set);
     void setShaded(bool set);
     void setMovable(bool set);

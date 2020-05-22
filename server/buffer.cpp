@@ -31,12 +31,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "linux_dmabuf_v1.h"
 #include "linux_dmabuf_v1_p.h"
 
+#include <drm_fourcc.h>
 #include <wayland-server.h>
 
 #include <EGL/egl.h>
 #include <QtGui/qopengl.h>
-
-#include "system/drm_fourcc.h"
 
 namespace Wrapland::Server
 {
@@ -100,7 +99,7 @@ Buffer::Private::Private(Buffer* q,
 
     if (!shmBuffer
         && wl_resource_instance_of(resource, &wl_buffer_interface, BufferV1::interface())) {
-        dmabufBuffer = static_cast<LinuxDmabufBufferV1*>(wl_resource_get_user_data(resource));
+        dmabufBuffer = Wayland::Resource<LinuxDmabufBufferV1>::handle(resource);
     }
 
     destroyWrapper.buffer = q;
@@ -163,12 +162,13 @@ Buffer::Private::Private(Buffer* q,
         static bool resolved = false;
         using namespace EGL;
         if (!resolved && eglDisplay != EGL_NO_DISPLAY) {
-            eglQueryWaylandBufferWL
-                = (eglQueryWaylandBufferWL_func)eglGetProcAddress("eglQueryWaylandBufferWL");
+            eglQueryWaylandBufferWL = reinterpret_cast<eglQueryWaylandBufferWL_func>(
+                eglGetProcAddress("eglQueryWaylandBufferWL"));
             resolved = true;
         }
         if (eglQueryWaylandBufferWL) {
-            EGLint width, height;
+            EGLint width = 0;
+            EGLint height = 0;
             bool valid = false;
             valid = eglQueryWaylandBufferWL(eglDisplay, resource, EGL_WIDTH, &width);
             valid = valid && eglQueryWaylandBufferWL(eglDisplay, resource, EGL_HEIGHT, &height);
@@ -176,7 +176,7 @@ Buffer::Private::Private(Buffer* q,
                 size = QSize(width, height);
             }
             // check alpha
-            EGLint format;
+            EGLint format = 0;
             if (eglQueryWaylandBufferWL(eglDisplay, resource, EGL_TEXTURE_FORMAT, &format)) {
                 switch (format) {
                 case EGL_TEXTURE_RGBA:
@@ -195,8 +195,9 @@ Buffer::Private::Private(Buffer* q,
 Buffer::Private::~Private()
 {
     if (refCount != 0) {
-        qCWarning(WRAPLAND_SERVER)
-            << "Buffer destroyed while still being referenced, ref count:" << refCount;
+        qCWarning(WRAPLAND_SERVER,
+                  "Buffer destroyed while still being referenced, ref count: %d",
+                  refCount);
     }
     display->bufferManager()->removeBuffer(q_ptr);
     wl_list_remove(&destroyWrapper.listener.link);
@@ -204,14 +205,21 @@ Buffer::Private::~Private()
 
 void Buffer::Private::imageBufferCleanupHandler(void* info)
 {
-    auto priv = reinterpret_cast<Private*>(info);
+    auto priv = static_cast<Private*>(info);
     priv->display->bufferManager()->endShmAccess();
 }
 
 void Buffer::Private::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] void* data)
 {
-
-    struct DestroyWrapper* wrapper = wl_container_of(listener, wrapper, listener);
+    // The wl_container_of macro can not be used with auto keyword and in the macro from libwayland
+    // the alignment is increased.
+    // Relevant clang-tidy checks are:
+    // * clang-diagnostic-cast-align
+    // * cppcoreguidelines-pro-bounds-pointer-arithmetic
+    // * hicpp-use-auto
+    // * modernize-use-auto
+    // NOLINTNEXTLINE
+    DestroyWrapper* wrapper = wl_container_of(listener, wrapper, listener);
 
     wrapper->buffer->d_ptr->resource = nullptr;
 
@@ -250,7 +258,7 @@ QImage Buffer::Private::createImage()
         return QImage();
     }
 
-    return QImage((const uchar*)wl_shm_buffer_get_data(shmBuffer),
+    return QImage(static_cast<const uchar*>(wl_shm_buffer_get_data(shmBuffer)),
                   size.width(),
                   size.height(),
                   wl_shm_buffer_get_stride(shmBuffer),
@@ -260,7 +268,7 @@ QImage Buffer::Private::createImage()
 }
 
 Buffer::Buffer(wl_resource* wlResource, Surface* surface)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new Private(this,
                         wlResource,
                         surface,
@@ -269,7 +277,7 @@ Buffer::Buffer(wl_resource* wlResource, Surface* surface)
 }
 
 Buffer::Buffer(wl_resource* wlResource, Display* display)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new Private(this, wlResource, nullptr, Wayland::Display::backendCast(display)))
 {
 }
@@ -279,7 +287,7 @@ Buffer* Buffer::get(Display* display, wl_resource* resource)
     if (!resource) {
         return nullptr;
     }
-    // TODO: verify it's a buffer
+    // TODO(unknown author): verify it's a buffer
     auto buffer = Wayland::Display::backendCast(display)->bufferManager()->fromResource(resource);
     if (buffer) {
         return buffer;

@@ -45,7 +45,7 @@ DataOffer::Private::Private(Client* client, uint32_t version, DataSource* source
     , source(source)
     , q_ptr{q}
 {
-    // TODO: connect to new selections.
+    // TODO(unknown author): connect to new selections.
 }
 
 void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
@@ -53,9 +53,9 @@ void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
                                         [[maybe_unused]] uint32_t serial,
                                         char const* mimeType)
 {
-    // TODO: verify serial?
+    // TODO(unknown author): verify serial?
     auto priv = handle(wlResource)->d_ptr;
-    priv->source->accept(mimeType);
+    priv->source->accept(mimeType ? mimeType : std::string());
 }
 
 void DataOffer::Private::receiveCallback([[maybe_unused]] wl_client* wlClient,
@@ -67,7 +67,7 @@ void DataOffer::Private::receiveCallback([[maybe_unused]] wl_client* wlClient,
     priv->receive(mimeType, fd);
 }
 
-void DataOffer::Private::receive(std::string mimeType, int32_t fd)
+void DataOffer::Private::receive(std::string const& mimeType, int32_t fd) const
 {
     if (!source) {
         close(fd);
@@ -81,8 +81,8 @@ void DataOffer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
 {
     auto priv = handle(wlResource)->d_ptr;
     priv->source->dndFinished();
-    // TODO: It is a client error to perform other requests than wl_data_offer.destroy after this
-    // one.
+    // TODO(unknown author): It is a client error to perform other requests than
+    //                       wl_data_offer.destroy after this one.
 }
 
 void DataOffer::Private::setActionsCallback(wl_client* wlClient,
@@ -90,7 +90,7 @@ void DataOffer::Private::setActionsCallback(wl_client* wlClient,
                                             uint32_t dnd_actions,
                                             uint32_t preferred_action)
 {
-    // TODO: check it's drag and drop, otherwise send error
+    // TODO(unknown author): check it's drag and drop, otherwise send error
     Q_UNUSED(wlClient)
     DataDeviceManager::DnDActions supportedActions;
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
@@ -158,7 +158,7 @@ DataOffer::DataOffer(Client* client, uint32_t version, DataSource* source)
     : d_ptr(new Private(client, version, source, this))
 {
     assert(source);
-    connect(source, &DataSource::mimeTypeOffered, this, [this](std::string mimeType) {
+    connect(source, &DataSource::mimeTypeOffered, this, [this](std::string const& mimeType) {
         d_ptr->send<wl_data_offer_send_offer>(mimeType.c_str());
     });
     QObject::connect(

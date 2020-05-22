@@ -80,11 +80,13 @@ public:
     void setPid(uint32_t pid);
     void setThemedIconName(const QString& iconName);
     void setIcon(const QIcon& icon);
-    void unmap();
+    void unmap() const;
     void setState(org_kde_plasma_window_management_state flag, bool set);
-    void setParentWindow(PlasmaWindow* parent);
+    void setParentWindow(PlasmaWindow* window);
     void setGeometry(const QRect& geometry);
-    PlasmaWindowRes* getResourceOfParent(PlasmaWindow* parent, PlasmaWindowRes* childRes) const;
+
+    // TODO(romangg): Might make sense to have this as a non-static member function instead.
+    static PlasmaWindowRes* getResourceOfParent(PlasmaWindow* parent, PlasmaWindowRes* childRes);
 
     QVector<PlasmaWindowRes*> resources;
     uint32_t windowId = 0;
@@ -114,7 +116,7 @@ class PlasmaWindowRes : public QObject
 {
     Q_OBJECT
 public:
-    PlasmaWindowRes(Wayland::Client* client, uint32_t version, uint32_t id, PlasmaWindow* parent);
+    PlasmaWindowRes(Wayland::Client* client, uint32_t version, uint32_t id, PlasmaWindow* window);
 
     void unmap();
 

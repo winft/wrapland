@@ -28,12 +28,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server::Wayland
 {
 
-BufferManager::BufferManager()
-    : m_accessedShmBuffer(nullptr)
-    , m_accessCounter(0)
-{
-}
-
 Buffer* BufferManager::fromResource(wl_resource* resource) const
 {
     auto it = std::find_if(m_buffers.cbegin(), m_buffers.cend(), [resource](Buffer* buffer) {
@@ -50,7 +44,7 @@ void BufferManager::addBuffer(Buffer* buffer)
 
 void BufferManager::removeBuffer(Buffer* buffer)
 {
-    m_buffers.erase(std::remove(m_buffers.begin(), m_buffers.end(), buffer));
+    m_buffers.erase(std::remove(m_buffers.begin(), m_buffers.end(), buffer), m_buffers.end());
 }
 
 bool BufferManager::beginShmAccess(wl_shm_buffer* buffer)

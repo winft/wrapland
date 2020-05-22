@@ -49,7 +49,7 @@ void RemoteAccessManager::Private::sendBufferReady(Output* output, RemoteBufferH
     BufferHolder holder{buf, 0};
 
     // Notify clients.
-    qCDebug(WRAPLAND_SERVER) << "Server buffer sent: fd" << buf->fd();
+    qCDebug(WRAPLAND_SERVER, "Server buffer sent, fd: %d", buf->fd());
 
     for (auto bind : getBinds()) {
         auto boundOutputs = output->d_ptr->getBinds(bind->client()->handle());
@@ -63,7 +63,7 @@ void RemoteAccessManager::Private::sendBufferReady(Output* output, RemoteBufferH
             bind, buf->fd(), boundOutputs[0]->resource());
         holder.counter++;
 
-        // TODO: how to count back in case client goes away before buffer got by it?
+        // TODO(unknown author): how to count back in case client goes away before buffer got by it?
     }
 
     if (holder.counter == 0) {
@@ -101,7 +101,7 @@ void RemoteAccessManager::Private::getBufferCallback([[maybe_unused]] wl_client*
 
     auto buffer = new RemoteBuffer(
         bind->client()->handle(), bind->version(), id, priv->handle(), bufferHolder.buf);
-    // TODO: check if created.
+    // TODO(romangg): check if created.
 
     connect(buffer,
             &RemoteBuffer::resourceDestroyed,
@@ -112,6 +112,8 @@ void RemoteAccessManager::Private::getBufferCallback([[maybe_unused]] wl_client*
                     // All relevant buffers are already unreferenced.
                     return;
                 }
+                // TODO(romangg): Make the clang-tidy check pass here and below too.
+                // NOLINTNEXTLINE(clang-diagnostic-gnu-zero-variadic-macro-arguments)
                 qCDebug(WRAPLAND_SERVER)
                     << "Remote buffer returned, client" << wl_resource_get_id(wlResource) << ", fd"
                     << bufferHolder.buf->fd();
@@ -143,7 +145,7 @@ int RemoteAccessManager::Private::unref(BufferHolder& bufferHolder)
 
     if (bufferHolder.counter == 0) {
         // No more clients using this buffer.
-        qCDebug(WRAPLAND_SERVER) << "Buffer released, fd:" << bufferHolder.buf->fd();
+        qCDebug(WRAPLAND_SERVER, "Buffer released, fd: %d", bufferHolder.buf->fd());
         Q_EMIT handle()->bufferReleased(bufferHolder.buf);
         return 0;
     }
@@ -217,7 +219,7 @@ void RemoteBuffer::passFd()
 /////////////////////////// Remote buffer handle ///////////////////////////
 
 RemoteBufferHandle::RemoteBufferHandle()
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new Private)
 {
 }

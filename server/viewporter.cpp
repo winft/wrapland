@@ -57,7 +57,7 @@ void Viewporter::Private::getViewport(wl_resource* wlResource, uint32_t id, wl_r
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     auto bind = getBind(wlResource);
     if (!surface) {
-        // TODO: send error msg?
+        // TODO(romangg): send error msg?
         return;
     }
 

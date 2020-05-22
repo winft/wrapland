@@ -33,7 +33,7 @@ using EglStreamControllerGlobal = Wayland::Global<EglStreamController, EglStream
 class EglStreamController::Private : public EglStreamControllerGlobal
 {
 public:
-    Private(Display* display, const wl_interface* interface, EglStreamController* controller);
+    Private(Display* display, const wl_interface* interface, EglStreamController* q);
 
 private:
     static void attachStreamConsumer(wl_client* wlClient,

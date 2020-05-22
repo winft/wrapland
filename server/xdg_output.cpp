@@ -184,17 +184,17 @@ XdgOutputV1::XdgOutputV1(Client* client, uint32_t version, uint32_t id, XdgOutpu
 {
 }
 
-void XdgOutputV1::setLogicalSize(const QSize& size)
+void XdgOutputV1::setLogicalSize(const QSize& size) const
 {
     d_ptr->send<zxdg_output_v1_send_logical_size>(size.width(), size.height());
 }
 
-void XdgOutputV1::setLogicalPosition(const QPoint& pos)
+void XdgOutputV1::setLogicalPosition(const QPoint& pos) const
 {
     d_ptr->send<zxdg_output_v1_send_logical_position>(pos.x(), pos.y());
 }
 
-void XdgOutputV1::done()
+void XdgOutputV1::done() const
 {
     d_ptr->send<zxdg_output_v1_send_done>();
 }

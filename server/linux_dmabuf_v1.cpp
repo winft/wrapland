@@ -24,17 +24,18 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "linux_dmabuf_v1.h"
 #include "linux_dmabuf_v1_p.h"
 
+#include "display.h"
 #include "wayland/display.h"
 
-#include "system/drm_fourcc.h"
 #include "wayland-server-protocol.h"
+#include <drm_fourcc.h>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
 #include <QVector>
 
 #include <array>
-#include <assert.h>
+#include <cassert>
 #include <unistd.h>
 
 namespace Wrapland::Server
@@ -43,6 +44,7 @@ namespace Wrapland::Server
 LinuxDmabufV1::Private::Private(LinuxDmabufV1* q, Display* display)
     : LinuxDmabufV1Global(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
 {
+    create();
 }
 
 LinuxDmabufV1::Private::~Private() = default;
@@ -51,6 +53,8 @@ const struct zwp_linux_dmabuf_v1_interface LinuxDmabufV1::Private::s_interface =
     resourceDestroyCallback,
     createParamsCallback,
 };
+
+constexpr size_t modifierShift = 32;
 
 void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind)
 {
@@ -66,7 +70,7 @@ void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmab
         for (uint64_t modifier : qAsConst(modifiers)) {
             if (bind->version() >= ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
                 const uint32_t modifier_lo = modifier & 0xFFFFFFFF;
-                const uint32_t modifier_hi = modifier >> 32;
+                const uint32_t modifier_hi = modifier >> modifierShift;
                 send<zwp_linux_dmabuf_v1_send_modifier, ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION>(
                     it.key(), modifier_hi, modifier_lo);
             } else if (modifier == DRM_FORMAT_MOD_LINEAR || modifier == DRM_FORMAT_MOD_INVALID) {
@@ -101,7 +105,7 @@ void LinuxDmabufV1::setImpl(LinuxDmabufV1::Impl* impl)
     d_ptr->impl = impl;
 }
 
-void LinuxDmabufV1::setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> set)
+void LinuxDmabufV1::setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> const& set)
 {
     d_ptr->supportedFormatsWithModifiers = set;
 }
@@ -110,7 +114,7 @@ ParamsWrapperV1::ParamsWrapperV1(Client* client,
                                  uint32_t version,
                                  uint32_t id,
                                  LinuxDmabufV1::Private* dmabuf)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new ParamsV1(client, version, id, dmabuf, this))
 {
 }
@@ -163,7 +167,8 @@ void ParamsV1::addCallback([[maybe_unused]] wl_client* wlClient,
                            uint32_t modifier_lo)
 {
     auto params = handle(wlResource);
-    params->d_ptr->add(fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << 32) | modifier_lo);
+    params->d_ptr->add(
+        fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << modifierShift) | modifier_lo);
 }
 
 void ParamsV1::createCallback([[maybe_unused]] wl_client* wlClient,
@@ -211,7 +216,7 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
 
     // Check for holes in the dmabufs set (e.g. [0, 1, 3])
     for (uint32_t i = 0; i < m_planeCount; i++) {
-        if (m_planes[i].fd != -1) {
+        if (m_planes.at(i).fd != -1) {
             continue;
         }
         postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INCOMPLETE,
@@ -229,7 +234,7 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
     }
 
     for (uint32_t i = 0; i < m_planeCount; i++) {
-        auto& plane = m_planes[i];
+        auto& plane = m_planes.at(i);
 
         if (uint64_t(plane.offset) + plane.stride > UINT32_MAX) {
             postError(
@@ -246,8 +251,9 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
         // Don't report an error as it might be caused by the kernel not supporting seeking on
         // dmabuf
         off_t size = ::lseek(plane.fd, 0, SEEK_END);
-        if (size == -1)
+        if (size == -1) {
             continue;
+        }
 
         if (plane.offset >= size) {
             postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS,
@@ -280,10 +286,10 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
     QVector<LinuxDmabufV1::Plane> planes;
     planes.reserve(m_planeCount);
     for (uint32_t i = 0; i < m_planeCount; i++) {
-        planes << m_planes[i];
+        planes << m_planes.at(i);
     }
 
-    auto buffer = m_dmabuf->impl->importBuffer(planes, format, size, (LinuxDmabufV1::Flags)flags);
+    auto buffer = m_dmabuf->impl->importBuffer(planes, format, size, LinuxDmabufV1::Flags(flags));
     if (!buffer) {
         if (bufferId == 0) {
             send<zwp_linux_buffer_params_v1_send_failed>();
@@ -300,8 +306,10 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
         plane.fd = -1;
     }
 
+    // We import the buffer from the consumer. The consumer ensures the buffer exists.
+    // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
     buffer->d_ptr->buffer = new BufferV1(client()->handle(), 1, bufferId, buffer);
-    // TODO: error handling
+    // TODO(romangg): error handling
 
     // Send a 'created' event when the request is not for an immediate import, i.e. bufferId is 0.
     if (bufferId == 0) {
@@ -325,7 +333,7 @@ void ParamsV1::add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride,
         return;
     }
 
-    auto& plane = m_planes[plane_idx];
+    auto& plane = m_planes.at(plane_idx);
 
     if (plane.fd != -1) {
         postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_PLANE_SET,
@@ -352,12 +360,12 @@ LinuxDmabufBufferV1::Private::Private(uint32_t format,
 {
 }
 
-// TODO: This does not necessarily need to be a QObject. resourceDestroyed signal is not really
-// needed.
+// TODO(romangg): This does not necessarily need to be a QObject. resourceDestroyed signal is not
+//                really needed.
 LinuxDmabufBufferV1::LinuxDmabufBufferV1(uint32_t format,
                                          const QSize& size,
                                          [[maybe_unused]] QObject* parent)
-    : QObject()
+    : QObject(nullptr)
     , d_ptr(new LinuxDmabufBufferV1::Private(format, size, this))
 {
 }

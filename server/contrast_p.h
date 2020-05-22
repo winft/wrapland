@@ -45,11 +45,6 @@ public:
     ~Private() override;
 
 private:
-    void createContrast(wl_client* wlClient,
-                        wl_resource* wlResource,
-                        uint32_t id,
-                        wl_resource* wlSurface);
-
     static void createCallback(wl_client* wlClient,
                                wl_resource* wlResource,
                                uint32_t id,

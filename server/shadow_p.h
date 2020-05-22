@@ -24,7 +24,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QMarginsF>
 #include <QObject>
 
+#include <cassert>
+#include <type_traits>
 #include <wayland-shadow-server-protocol.h>
+
+#include <wayland-server.h>
 
 namespace Wrapland::Server
 {
@@ -56,19 +60,118 @@ public:
     Private(Client* client, uint32_t version, uint32_t id, Shadow* q);
     ~Private() override;
 
+    enum class AttachSide {
+        Left,
+        TopLeft,
+        Top,
+        TopRight,
+        Right,
+        BottomRight,
+        Bottom,
+        BottomLeft,
+    };
+
+    enum class OffsetSide {
+        Left,
+        Top,
+        Right,
+        Bottom,
+    };
+
     struct State {
-        enum Flags {
-            None = 0,
-            LeftBuffer = 1 << 0,
-            TopLeftBuffer = 1 << 1,
-            TopBuffer = 1 << 2,
-            TopRightBuffer = 1 << 3,
-            RightBuffer = 1 << 4,
-            BottomRightBuffer = 1 << 5,
-            BottomBuffer = 1 << 6,
-            BottomLeftBuffer = 1 << 7,
-            Offset = 1 << 8
-        };
+        template<AttachSide side>
+        Buffer*& get()
+        {
+            if constexpr (side == AttachSide::Left) {
+                return left;
+            } else if constexpr (side == AttachSide::TopLeft) {
+                return topLeft;
+            } else if constexpr (side == AttachSide::Top) {
+                return top;
+            } else if constexpr (side == AttachSide::TopRight) {
+                return topRight;
+            } else if constexpr (side == AttachSide::Right) {
+                return right;
+            } else if constexpr (side == AttachSide::BottomRight) {
+                return bottomRight;
+            } else if constexpr (side == AttachSide::Bottom) {
+                return bottom;
+            } else {
+                static_assert(side == AttachSide::BottomLeft);
+                return bottomLeft;
+            }
+        }
+
+        // We need this for our QObject connections. Once we use a signal system with good template
+        // support it can be replaced by above templated getter.
+        Buffer*& get(AttachSide side)
+        {
+            if (side == AttachSide::Left) {
+                return left;
+            }
+            if (side == AttachSide::TopLeft) {
+                return topLeft;
+            }
+            if (side == AttachSide::Top) {
+                return top;
+            }
+            if (side == AttachSide::TopRight) {
+                return topRight;
+            }
+            if (side == AttachSide::Right) {
+                return right;
+            }
+            if (side == AttachSide::BottomRight) {
+                return bottomRight;
+            }
+            if (side == AttachSide::Bottom) {
+                return bottom;
+            }
+            assert(side == AttachSide::BottomLeft);
+            return bottomLeft;
+        }
+
+        template<OffsetSide side>
+        void setOffset(double _offset)
+        {
+            if constexpr (side == OffsetSide::Left) {
+                offset.setLeft(_offset);
+            } else if constexpr (side == OffsetSide::Top) {
+                offset.setTop(_offset);
+            } else if constexpr (side == OffsetSide::Right) {
+                offset.setRight(_offset);
+            } else {
+                static_assert(side == OffsetSide::Bottom);
+                offset.setBottom(_offset);
+            }
+            offsetIsSet = true;
+        }
+
+        template<AttachSide side>
+        void commit(State& pending)
+        {
+            auto& currentBuf = get<side>();
+            auto& pendingBuf = pending.get<side>();
+
+            if (currentBuf) {
+                currentBuf->unref();
+            }
+            if (pendingBuf) {
+                pendingBuf->ref();
+            }
+            currentBuf = pendingBuf;
+            pendingBuf = nullptr;
+        }
+
+        template<AttachSide side>
+        void unref()
+        {
+            if (auto buf = get<side>()) {
+                buf->unref();
+            }
+        }
+
+        // TODO(romangg): unique_ptr?
         Buffer* left = nullptr;
         Buffer* topLeft = nullptr;
         Buffer* top = nullptr;
@@ -77,33 +180,46 @@ public:
         Buffer* bottomRight = nullptr;
         Buffer* bottom = nullptr;
         Buffer* bottomLeft = nullptr;
+
         QMarginsF offset;
-        Flags flags = Flags::None;
+        bool offsetIsSet = false;
     };
     State current;
     State pending;
 
 private:
-    void commit();
-    void attach(State::Flags flag, wl_resource* wlBuffer);
+    template<AttachSide side>
+    static void attachCallback([[maybe_unused]] wl_client* wlClient,
+                               wl_resource* wlResource,
+                               wl_resource* wlBuffer)
+    {
+        auto priv = handle(wlResource)->d_ptr;
+        priv->attach<side>(wlBuffer);
+    }
+
+    template<OffsetSide side>
+    static void offsetCallback([[maybe_unused]] wl_client* wlClient,
+                               wl_resource* wlResource,
+                               wl_fixed_t wlOffset)
+    {
+        auto priv = handle(wlResource)->d_ptr;
+        priv->pending.setOffset<side>(wl_fixed_to_double(wlOffset));
+    }
 
     static void commitCallback(wl_client* client, wl_resource* resource);
-    static void attachLeftCallback(wl_client* client, wl_resource* resource, wl_resource* buffer);
-    static void
-    attachTopLeftCallback(wl_client* client, wl_resource* resource, wl_resource* buffer);
-    static void attachTopCallback(wl_client* client, wl_resource* resource, wl_resource* buffer);
-    static void
-    attachTopRightCallback(wl_client* client, wl_resource* resource, wl_resource* buffer);
-    static void attachRightCallback(wl_client* client, wl_resource* resource, wl_resource* buffer);
-    static void
-    attachBottomRightCallback(wl_client* client, wl_resource* resource, wl_resource* buffer);
-    static void attachBottomCallback(wl_client* client, wl_resource* resource, wl_resource* buffer);
-    static void
-    attachBottomLeftCallback(wl_client* client, wl_resource* resource, wl_resource* buffer);
-    static void offsetLeftCallback(wl_client* client, wl_resource* resource, wl_fixed_t offset);
-    static void offsetTopCallback(wl_client* client, wl_resource* resource, wl_fixed_t offset);
-    static void offsetRightCallback(wl_client* client, wl_resource* resource, wl_fixed_t offset);
-    static void offsetBottomCallback(wl_client* client, wl_resource* resource, wl_fixed_t offset);
+
+    template<AttachSide side>
+    void attach(wl_resource* wlBuffer)
+    {
+        auto display = client()->display()->handle();
+        auto buffer = Buffer::get(display, wlBuffer);
+
+        attachConnect(side, buffer);
+        pending.get<side>() = buffer;
+    }
+
+    void attachConnect(AttachSide side, Buffer* buffer);
+    void commit();
 
     static const struct org_kde_kwin_shadow_interface s_interface;
 };

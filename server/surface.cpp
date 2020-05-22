@@ -65,8 +65,8 @@ Surface::Private::~Private()
     callbacksToDestroy << subsurfacePending.callbacks;
     subsurfacePending.callbacks.clear();
 
-    for (auto it = callbacksToDestroy.cbegin(), end = callbacksToDestroy.cend(); it != end; it++) {
-        wl_resource_destroy(*it);
+    for (auto callback : callbacksToDestroy) {
+        wl_resource_destroy(callback);
     }
 
     if (current.buffer) {
@@ -140,7 +140,6 @@ void Surface::Private::removeChild(Subsurface* child)
 
 bool Surface::Private::raiseChild(Subsurface* subsurface, Surface* sibling)
 {
-
     auto it = std::find(pending.children.begin(), pending.children.end(), subsurface);
 
     if (it == pending.children.end()) {
@@ -184,7 +183,6 @@ bool Surface::Private::raiseChild(Subsurface* subsurface, Surface* sibling)
 
 bool Surface::Private::lowerChild(Subsurface* subsurface, Surface* sibling)
 {
-
     auto it = std::find(pending.children.begin(), pending.children.end(), subsurface);
     if (it == pending.children.end()) {
         return false;
@@ -383,8 +381,7 @@ void Surface::frameRendered(quint32 msec)
         wl_callback_send_done(r, msec);
         wl_resource_destroy(r);
     }
-    for (auto it = d_ptr->current.children.cbegin(); it != d_ptr->current.children.cend(); ++it) {
-        const auto& subsurface = *it;
+    for (auto subsurface : d_ptr->current.children) {
         if (!subsurface || !subsurface->d_ptr->surface) {
             continue;
         }
@@ -411,7 +408,8 @@ void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
     const double width = sourceRectangle.width();
     const double height = sourceRectangle.height();
 
-    if (!qFuzzyCompare(width, (int)width) || !qFuzzyCompare(height, (int)height)) {
+    if (!qFuzzyCompare(width, static_cast<int>(width))
+        || !qFuzzyCompare(height, static_cast<int>(height))) {
         viewport->d_ptr->postError(WP_VIEWPORT_ERROR_BAD_SIZE,
                                    "Source rectangle not integer valued");
     }
@@ -464,7 +462,7 @@ void Surface::Private::swapStates(State* source, State* target, bool emitChanged
     auto buffer = target->buffer;
 
     if (bufferChanged) {
-        // TODO: is the reffing correct for subsurfaces?
+        // TODO(unknown author): is the reffing correct for subsurfaces?
 
         QSize oldSize;
         if (target->buffer) {
@@ -553,10 +551,10 @@ void Surface::Private::swapStates(State* source, State* target, bool emitChanged
     }
     if (sourceRectangleChanged) {
         if (buffer && !target->destinationSize.isValid() && source->sourceRectangle.isValid()) {
-            // TODO: We should make this dependent on the previous size being different.
-            //       But looking at above sizeChanged calculation when setting the buffer
-            //       we need to do fix this there as well (does not look at buffer transform
-            //       and destination size).
+            // TODO(unknown author): We should make this dependent on the previous size being
+            //      different. But looking at above sizeChanged calculation when setting the buffer
+            //      we need to do fix this there as well (does not look at buffer transform
+            //      and destination size).
             sizeChanged = true;
         }
         target->sourceRectangle = source->sourceRectangle;
@@ -688,8 +686,7 @@ void Surface::Private::commit()
         // "The cached state is applied to the sub-surface immediately after the parent surface's
         // state is applied"
 
-        for (auto it = current.children.cbegin(); it != current.children.cend(); ++it) {
-            const auto& subsurface = *it;
+        for (auto subsurface : current.children) {
             if (!subsurface) {
                 continue;
             }
@@ -713,8 +710,7 @@ void Surface::Private::commitSubsurface()
 
     // "The cached state is applied to the sub-surface immediately after the parent surface's state
     // is applied"
-    for (auto it = current.children.cbegin(); it != current.children.cend(); ++it) {
-        const auto& subsurface = *it;
+    for (auto subsurface : current.children) {
         if (!subsurface || !subsurface->isSynchronized()) {
             continue;
         }
@@ -730,7 +726,7 @@ void Surface::Private::damage(const QRect& rect)
 void Surface::Private::damageBuffer(const QRect& rect)
 {
     if (!pending.bufferIsSet || (pending.bufferIsSet && !pending.buffer)) {
-        // TODO: should we send an error?
+        // TODO(unknown author): should we send an error?
         return;
     }
     pending.bufferDamage = pending.bufferDamage.united(rect);
@@ -749,7 +745,7 @@ void Surface::Private::setTransform(Output::Transform transform)
 
 void Surface::Private::addFrameCallback(uint32_t callback)
 {
-    // TODO: put the frame callback in a separate class inheriting Resource.
+    // TODO(unknown author): put the frame callback in a separate class inheriting Resource.
     wl_resource* frameCallback = client()->createResource(&wl_callback_interface, 1, callback);
     if (!frameCallback) {
         wl_resource_post_no_memory(resource());
@@ -764,9 +760,7 @@ void Surface::Private::attachBuffer(wl_resource* buffer, const QPoint& offset)
     pending.bufferIsSet = true;
     pending.offset = offset;
 
-    if (pending.buffer) {
-        delete pending.buffer;
-    }
+    delete pending.buffer;
 
     if (!buffer) {
         // Got a null buffer, deletes content in next frame.
@@ -955,16 +949,6 @@ QRectF Surface::sourceRectangle() const
     return d_ptr->current.sourceRectangle;
 }
 
-// Surface *Surface::get(wl_resource *native)
-//{
-//    return Private::get<Surface>(native);
-//}
-
-// Surface *Surface::get(quint32 id, const Client* client)
-//{
-//    return Private::get<Surface>(id, client);
-//}
-
 std::vector<Subsurface*> Surface::childSubsurfaces() const
 {
 
@@ -989,7 +973,7 @@ QSize Surface::size() const
     if (d_ptr->current.sourceRectangle.isValid()) {
         return d_ptr->current.sourceRectangle.size().toSize();
     }
-    // TODO: Apply transform to the buffer size.
+    // TODO(unknown author): Apply transform to the buffer size.
     return d_ptr->current.buffer->size() / scale();
 }
 
@@ -1047,34 +1031,30 @@ std::vector<Output*> Surface::outputs() const
     return d_ptr->outputs;
 }
 
-void Surface::setOutputs(std::vector<Output*> outputs)
+void Surface::setOutputs(std::vector<Output*> const& outputs)
 {
     std::vector<Output*> removedOutputs = d_ptr->outputs;
 
-    for (auto it = outputs.cbegin(), end = outputs.cend(); it != end; ++it) {
-        auto stays = *it;
+    for (auto stays : outputs) {
         removedOutputs.erase(std::remove(removedOutputs.begin(), removedOutputs.end(), stays),
                              removedOutputs.end());
     }
 
-    for (auto it = removedOutputs.cbegin(), end = removedOutputs.cend(); it != end; ++it) {
-        auto const binds = (*it)->d_ptr->getBinds(d_ptr->client()->handle());
+    for (auto output : removedOutputs) {
+        auto const binds = output->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_leave>(bind->resource());
         }
-        disconnect(d_ptr->outputDestroyedConnections.take(*it));
+        disconnect(d_ptr->outputDestroyedConnections.take(output));
     }
 
     std::vector<Output*> addedOutputs = outputs;
-    for (auto it = d_ptr->outputs.cbegin(), end = d_ptr->outputs.cend(); it != end; ++it) {
-        auto const keeping = *it;
+    for (auto keeping : d_ptr->outputs) {
         addedOutputs.erase(std::remove(addedOutputs.begin(), addedOutputs.end(), keeping),
                            addedOutputs.end());
     }
 
-    for (auto it = addedOutputs.cbegin(), end = addedOutputs.cend(); it != end; ++it) {
-        auto const add = *it;
-
+    for (auto add : addedOutputs) {
         auto const binds = add->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_enter>(bind->resource());
@@ -1099,7 +1079,7 @@ void Surface::setOutputs(std::vector<Output*> outputs)
             }
         });
     }
-    // TODO: send enter when the client binds the Output another time
+    // TODO(unknown author): send enter when the client binds the Output another time
 
     d_ptr->outputs = outputs;
 }
@@ -1131,8 +1111,8 @@ Surface* Surface::surfaceAt(const QPointF& position)
 
 Surface* Surface::inputSurfaceAt(const QPointF& position)
 {
-    // TODO: Most of this is very similar to Surface::surfaceAt
-    //       Is there a way to reduce the code duplication?
+    // TODO(unknown author): Most of this is very similar to Surface::surfaceAt
+    //                       Is there a way to reduce the code duplication?
     if (!isMapped()) {
         return nullptr;
     }

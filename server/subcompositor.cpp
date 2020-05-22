@@ -80,23 +80,23 @@ void Subcompositor::Private::subsurface(Client* client,
                                         Surface* parentSurface)
 {
     if (!surface || !parentSurface) {
-        // TODO: post error in backend
+        // TODO(romangg): post error in backend
         wl_resource_post_error(getResources(client)[0],
                                WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE,
                                "Surface or parent surface not found");
         return;
     }
     if (surface == parentSurface) {
-        // TODO: post error in backend
+        // TODO(romangg): post error in backend
         wl_resource_post_error(getResources(client)[0],
                                WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE,
                                "Cannot become sub composite to same surface");
         return;
     }
 
-    // TODO: add check that surface is not already used in an interface (e.g. Shell)
-    // TODO: add check that parentSurface is not a child of surface
-    // TODO: handle error
+    // TODO(romangg): add check that surface is not already used in an interface (e.g. Shell)
+    // TODO(romangg): add check that parentSurface is not a child of surface
+    // TODO(romangg): handle error
     auto subsurface
         = new Subsurface(client, handle()->d_ptr->version(), id, surface, parentSurface);
 
@@ -183,7 +183,7 @@ void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClie
 {
     auto priv = handle(wlResource)->d_ptr;
 
-    // TODO: is this a fixed position?
+    // TODO(unknown author): is this a fixed position?
     priv->setPosition(QPoint(x, y));
 }
 
@@ -215,7 +215,7 @@ void Subsurface::Private::placeAboveCallback([[maybe_unused]] wl_client* wlClien
 void Subsurface::Private::placeAbove(Surface* sibling)
 {
     if (!parent) {
-        // TODO: raise error
+        // TODO(unknown author): raise error
         return;
     }
     if (!parent->d_ptr->raiseChild(handle(), sibling)) {
@@ -235,7 +235,7 @@ void Subsurface::Private::placeBelowCallback([[maybe_unused]] wl_client* wlClien
 void Subsurface::Private::placeBelow(Surface* sibling)
 {
     if (!parent) {
-        // TODO: raise error
+        // TODO(unknown author): raise error
         return;
     }
     if (!parent->d_ptr->lowerChild(handle(), sibling)) {

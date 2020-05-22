@@ -52,7 +52,7 @@ public:
 
     QList<PlasmaVirtualDesktop*> desktops;
 
-    QList<PlasmaVirtualDesktop*>::const_iterator constFindDesktop(const QString& id);
+    QList<PlasmaVirtualDesktop*>::const_iterator constFindDesktop(const QString& id) const;
     QList<PlasmaVirtualDesktop*>::iterator findDesktop(const QString& id);
 
 private:
@@ -75,7 +75,7 @@ class PlasmaVirtualDesktopRes;
 class PlasmaVirtualDesktop::Private
 {
 public:
-    Private(PlasmaVirtualDesktop* qptr, PlasmaVirtualDesktopManager* c);
+    Private(PlasmaVirtualDesktop* q, PlasmaVirtualDesktopManager* manager);
     ~Private();
 
     void createResource(Wayland::Client* client, uint32_t version, uint32_t serial);
@@ -98,7 +98,7 @@ public:
     PlasmaVirtualDesktopRes(Client* client,
                             uint32_t version,
                             uint32_t id,
-                            PlasmaVirtualDesktop* parent);
+                            PlasmaVirtualDesktop* virtualDesktop);
 
     void activated();
     void done();
