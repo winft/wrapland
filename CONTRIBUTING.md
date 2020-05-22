@@ -71,7 +71,8 @@ pattern *Plasma/\**.
 Code contributions to later branches than the current stable branch are not possible.
 
 ## Commit Message Guideline
-The [Conventional Commits 1.0.0-beta.4][conventional-commits] specification is applied with the following amendments:
+The [Conventional Commits 1.0.0][conventional-commits] specification is applied with the following
+amendments:
 
 * Only the following types are allowed:
   * build: changes to the CMake build system, dependencies or other build-related tooling
@@ -87,7 +88,6 @@ The [Conventional Commits 1.0.0-beta.4][conventional-commits] specification is a
   * client
   * server
 * Angular's [Revert][angular-revert] and [Subject][angular-subject] policies are applied.
-* Breaking changes are supposed to be pointed out only in prose in the commit body.
 
 Commits deliberately ignoring this guideline will not be merged and in case reverted.
 
@@ -98,14 +98,27 @@ Commits deliberately ignoring this guideline will not be merged and in case reve
     For function exampleFunction the return value was incorrect.
     Instead provide the correct value A by changing B to C.
 
+### Tooling
+There is a linter on merge requests checking every included commit for being in line with this
+specification. This linter can also be used locally before opening a merge request:
+
+    yarn global add commitlint
+    yarn add conventional-changelog-conventionalcommits
+    commitlint --verbose --config ci/commitlint.config.js -f origin/master
+
 ## Contact
-Real-time communication about the project happens on the IRC channel `#plasma` on freenode and the bridged Matrix room `#plasma:kde.org`.
+When you have a quick question about contributing to Wrapland join our [Gitter room][gitter-room].
+For more complex questions open a separate [issue ticket][issue].
+
+In case you are unsure if your question should go into a separate issue ticket drop by in our Gitter
+room first and if a separate issue ticket would make sense for your question you will then be
+referred to doing that.
 
 [merge-request]: https://gitlab.com/kwinft/wrapland/-/merge_requests
 [issue]: https://gitlab.com/kwinft/wrapland/-/issues
 [frameworks-style]: https://community.kde.org/Policies/Frameworks_Coding_Style
 [plasma-schedule]: https://community.kde.org/Schedules/Plasma_5
-[conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0-beta.4/#specification
+[conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/#specification
 [angular-revert]: https://github.com/angular/angular/blob/3cf2005a936bec2058610b0786dd0671dae3d358/CONTRIBUTING.md#revert
 [angular-subject]: https://github.com/angular/angular/blob/3cf2005a936bec2058610b0786dd0671dae3d358/CONTRIBUTING.md#subject
-
+[gitter-room]: https://gitter.im/kwinft/community
