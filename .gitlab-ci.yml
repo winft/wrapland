@@ -141,7 +141,7 @@ Stable image trigger:
 Stable image tag trigger:
   stage: Integration
   rules:
-    - if: '$CI_PROJECT_NAMESPACE == "kwinft" && $CI_COMMIT_TAG != null && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PROJECT_NAMESPACE == "kwinft" && $CI_COMMIT_TAG =~ /^wrapland@/ && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
     - when: never
   variables:
