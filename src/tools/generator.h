@@ -17,8 +17,7 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#ifndef WRAPLAND_TOOLS_GENERATOR_H
-#define WRAPLAND_TOOLS_GENERATOR_H
+#pragma once
 
 #include <QObject>
 #include <QMap>
@@ -29,9 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 class QTextStream;
 
-namespace Wrapland
-{
-namespace Tools
+namespace Wrapland::Tools
 {
 
 class Argument
@@ -158,7 +155,7 @@ public:
         return m_clientName;
     }
     QString wraplandServerName() const {
-        return m_clientName + QStringLiteral("Interface");
+        return m_clientName;
     }
 
     QVector<Request> requests() const {
@@ -224,10 +221,12 @@ private:
     void generateClientPrivateClass(const Interface &interface);
     void generateClientPrivateResourceClass(const Interface &interface);
     void generateClientPrivateGlobalClass(const Interface &interface);
-    void generateServerPrivateGlobalClass(const Interface &interface);
-    void generateServerPrivateResourceClass(const Interface &interface);
+    void generateServerPrivateGlobalFunction(const Interface &interface);
+    void generateServerPrivateHeaderGlobalClass(const Interface &interface);
+    void generateServerPrivateResourceFunction(const Interface &interface);
+    void generateServerPrivateHeaderResourceClass(const Interface &interface);
     void generateServerPrivateInterfaceClass(const Interface &interface);
-    void generateServerPrivateGlobalCtorBindClass(const Interface &interface);
+    void generateServerPrivateGlobalConstructor(const Interface &interface);
     void generateServerPrivateResourceCtorDtorClass(const Interface &interface);
     void generateServerPrivateCallbackDefinitions(const Interface &interface);
     void generateServerPrivateCallbackImpl(const Interface &interface);
@@ -262,6 +261,7 @@ private:
     void startGenerateHeaderFile();
     void startGenerateCppFile();
     void startGenerateServerHeaderFile();
+    void startGenerateServerPrivateHeaderFile();
     void startGenerateServerCppFile();
 
     void checkEnd();
@@ -277,7 +277,8 @@ private:
     QString m_xmlFileName;
     enum class Project {
         Client,
-        Server
+        Server,
+        ServerPrivate
     };
     QThreadStorage<Project> m_project;
     QString m_authorName;
@@ -293,6 +294,3 @@ private:
 };
 
 }
-}
-
-#endif
