@@ -122,6 +122,15 @@ add_test(NAME wrapland-testOutputDevice COMMAND testOutputDevice)
 ecm_mark_as_test(testOutputDevice)
 
 ########################################################
+# Test KWin Primary Selection
+########################################################
+set( testPrimarySelection_SRCS primary_selection.cpp )
+add_executable(testPrimarySelection ${testPrimarySelection_SRCS})
+target_link_libraries( testPrimarySelection Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testPrimarySelection COMMAND testPrimarySelection)
+ecm_mark_as_test(testPrimarySelection)
+
+########################################################
 # Test wlroots based OutputManagement
 ########################################################
 set( testWlrOutputManagement_SRCS wlr_output_management.cpp )

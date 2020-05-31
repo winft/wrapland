@@ -54,6 +54,7 @@ set(SERVER_LIB_SRCS
     xdg_shell_positioner.cpp
     xdg_shell_surface.cpp
     xdg_shell_toplevel.cpp
+    primary_selection.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -158,6 +159,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/primary-selection/primary-selection-unstable-v1.xml
+    BASENAME primary-selection-unstable-v1
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/appmenu.xml
     BASENAME appmenu
 )
@@ -259,6 +265,7 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-foreign-unstable-v2-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-shell-server-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-primary-selection-unstable-v1-server-protocol.h
 )
 
 set_source_files_properties(${SERVER_GENERATED_SRCS} PROPERTIES SKIP_AUTOMOC ON)
@@ -346,6 +353,7 @@ set(SERVER_LIB_HEADERS
   xdg_shell_popup.h
   xdg_shell_surface.h
   xdg_shell_toplevel.h
+  primary_selection.h
 )
 
 install(FILES

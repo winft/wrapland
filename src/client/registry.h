@@ -68,6 +68,7 @@ struct zxdg_importer_v2;
 struct zwp_idle_inhibit_manager_v1;
 struct zxdg_output_manager_v1;
 struct zxdg_decoration_manager_v1;
+struct zwp_primary_selection_device_manager_v1;
 
 namespace Wrapland
 {
@@ -116,6 +117,7 @@ class XdgExporter;
 class XdgImporter;
 class XdgOutputManager;
 class XdgDecorationManager;
+class PrimarySelectionDeviceManager;
 
 /**
  * @short Wrapper for the wl_registry interface.
@@ -192,6 +194,7 @@ public:
         XdgDecorationUnstableV1, ///refers to zxdg_decoration_manager_v1, @since 0.0.554
         Keystate,///<refers to org_kwin_keystate, @since 0.0.557
         Viewporter, ///< Refers to wp_viewporter, @since 0.518.0
+        PrimarySelectionDeviceManager,
     };
     explicit Registry(QObject *parent = nullptr);
     virtual ~Registry();
@@ -388,6 +391,17 @@ public:
      * @see createDataDeviceManager
      **/
     wl_data_device_manager *bindDataDeviceManager(uint32_t name, uint32_t version) const;
+
+    /**
+     * Binds the wl_data_device_manager with @p name and @p version.
+     * If the @p name does not exist or is not for the data device manager interface,
+     * @c null will be returned.
+     *
+     * Prefer using createPrimarySelectionDeviceManager instead.
+     * @see createPrimarySelectionDeviceManager
+     **/
+    zwp_primary_selection_device_manager_v1 *bindPrimarySelectionDeviceManager(uint32_t name, uint32_t version) const;
+
     /**
      * Binds the org_kde_plasma_shell with @p name and @p version.
      * If the @p name does not exist or is not for the Plasma shell interface,
@@ -849,6 +863,23 @@ public:
      * @returns The created DataDeviceManager.
      **/
     DataDeviceManager *createDataDeviceManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    
+    /**
+     * Creates a PrimarySelectionDeviceManager and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the wl_data_device_manager interface,
+     * the returned PrimarySelectionDeviceManager will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the wl_data_device_manager interface to bind
+     * @param version The version or the wl_data_device_manager interface to use
+     * @param parent The parent for PrimarySelectionDeviceManager
+     *
+     * @returns The created PrimarySelectionDeviceManager.
+     **/
+    PrimarySelectionDeviceManager *createPrimarySelectionDeviceManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    
     /**
      * Creates a PlasmaShell and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1333,6 +1364,13 @@ Q_SIGNALS:
     void dataDeviceManagerAnnounced(quint32 name, quint32 version);
 
     /**
+     * Emitted whenever a zwp_primary_selection_device_manager_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     **/
+    void primarySelectionDeviceManagerAnnounced(quint32 name, quint32 version);
+
+    /**
      * Emitted whenever a zkwinft_output_management_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1602,6 +1640,13 @@ Q_SIGNALS:
      * @param name The name for the removed interface
      **/
     void outputManagementV1Removed(quint32 name);
+
+    /**
+     * Emitted whenever a zwp_primary_selection_device_manager_v1 interface gets removed.
+     * @param name The name for the removed interface
+     **/
+    void primarySelectionDeviceManagerRemoved(quint32 name);
+
     /**
      * Emitted whenever a zkwinft_output_device_v1 interface gets removed.
      * @param name The name for the removed interface

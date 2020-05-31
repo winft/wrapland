@@ -73,6 +73,7 @@ class XdgDecorationManager;
 class EglStreamController;
 class KeyState;
 class LinuxDmabufV1;
+class PrimarySelectionDeviceManager;
 
 class WRAPLANDSERVER_EXPORT Display : public QObject
 {
@@ -121,6 +122,7 @@ public:
 
     Subcompositor* createSubCompositor(QObject* parent = nullptr);
     DataDeviceManager* createDataDeviceManager(QObject* parent = nullptr);
+    PrimarySelectionDeviceManager* createPrimarySelectionDeviceManager(QObject* parent = nullptr);
     OutputManagementV1* createOutputManagementV1(QObject* parent = nullptr);
     PlasmaShell* createPlasmaShell(QObject* parent = nullptr);
     PlasmaWindowManager* createPlasmaWindowManager(QObject* parent = nullptr);

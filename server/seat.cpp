@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keyboard_p.h"
 #include "pointer.h"
 #include "pointer_p.h"
+#include "primary_selection.h"
 #include "surface.h"
 #include "text_input_v2_p.h"
 #include "touch.h"
@@ -214,6 +215,11 @@ DataDevice* Seat::Private::dataDeviceForSurface(Surface* surface) const
     return interfaceForSurface(surface, dataDevices);
 }
 
+PrimarySelectionDevice* Seat::Private::primarySelectionDeviceForSurface(Surface* surface) const
+{
+    return interfaceForSurface(surface, primarySelectionDevices);
+}
+
 TextInputV2* Seat::Private::textInputForSurface(Surface* surface) const
 {
     return interfaceForSurface(surface, textInputs);
@@ -304,6 +310,91 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
                 dataDevice->sendSelection(currentSelection);
             }
         }
+    }
+}
+
+void Seat::Private::cleanupPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice)
+{
+    primarySelectionDevices.removeOne(primarySelectionDevice);
+    if (keys.focus.selectionPrimarySelection == primarySelectionDevice) {
+        keys.focus.selectionPrimarySelection = nullptr;
+    }
+    if (currentSelectionPrimarySelectionDevice == primarySelectionDevice) {
+        // current selection is cleared
+        currentSelectionPrimarySelectionDevice = nullptr;
+        Q_EMIT q_ptr->selectionChangedPrimarySelection(nullptr);
+        if (keys.focus.selectionPrimarySelection) {
+            keys.focus.selectionPrimarySelection->sendClearSelection();
+        }
+    }
+}
+
+void Seat::Private::registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice)
+{
+    primarySelectionDevices << primarySelectionDevice;
+    auto DeviceCleanup
+        = [this, primarySelectionDevice] { cleanupPrimarySelectionDevice(primarySelectionDevice); };
+    QObject::connect(
+        primarySelectionDevice, &PrimarySelectionDevice::resourceDestroyed, q_ptr, DeviceCleanup);
+    QObject::connect(
+        primarySelectionDevice,
+        &PrimarySelectionDevice::selectionChanged,
+        q_ptr,
+        [this, primarySelectionDevice] { updateSelection(primarySelectionDevice, true); });
+    QObject::connect(
+        primarySelectionDevice,
+        &PrimarySelectionDevice::selectionCleared,
+        q_ptr,
+        [this, primarySelectionDevice] { updateSelection(primarySelectionDevice, false); });
+
+    // Is the new DataDevice for the current keyoard focus?
+    if (keys.focus.surface && !keys.focus.selectionPrimarySelection) {
+        // Same client?
+        if (keys.focus.surface->client() == primarySelectionDevice->client()) {
+            keys.focus.selectionPrimarySelection = primarySelectionDevice;
+            if (currentSelectionPrimarySelectionDevice
+                && currentSelectionPrimarySelectionDevice->selection()) {
+                primarySelectionDevice->sendSelection(currentSelectionPrimarySelectionDevice);
+            }
+        }
+    }
+}
+
+void Seat::Private::cancelPreviousSelection(PrimarySelectionDevice* dataDevice) const
+{
+    if (!currentSelectionPrimarySelectionDevice) {
+        return;
+    }
+    if (auto s = currentSelectionPrimarySelectionDevice->selection()) {
+        if (currentSelectionPrimarySelectionDevice != dataDevice) {
+            s->cancel();
+        }
+    }
+}
+
+void Seat::Private::updateSelection(PrimarySelectionDevice* dataDevice, bool set)
+{
+    bool selChanged = currentSelectionPrimarySelectionDevice != dataDevice;
+    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client())) {
+        // cancel the previous selection
+        cancelPreviousSelection(dataDevice);
+        // new selection on a data device belonging to current keyboard focus
+        currentSelectionPrimarySelectionDevice = dataDevice;
+    }
+    if (dataDevice == currentSelectionPrimarySelectionDevice) {
+        // need to send out the selection
+        if (keys.focus.selectionPrimarySelection) {
+            if (set) {
+                keys.focus.selectionPrimarySelection->sendSelection(dataDevice);
+            } else {
+                keys.focus.selectionPrimarySelection->sendClearSelection();
+                currentSelectionPrimarySelectionDevice = nullptr;
+                selChanged = true;
+            }
+        }
+    }
+    if (selChanged) {
+        Q_EMIT q_ptr->selectionChangedPrimarySelection(currentSelectionPrimarySelectionDevice);
     }
 }
 
@@ -1093,6 +1184,18 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
                 d_ptr->keys.focus.selection->sendClearSelection();
             }
         }
+        // PrimarySelection ?
+        d_ptr->keys.focus.selectionPrimarySelection
+            = d_ptr->primarySelectionDeviceForSurface(surface);
+        if (d_ptr->keys.focus.selectionPrimarySelection) {
+            if (d_ptr->currentSelectionPrimarySelectionDevice
+                && d_ptr->currentSelectionPrimarySelectionDevice->selection()) {
+                d_ptr->keys.focus.selectionPrimarySelection->sendSelection(
+                    d_ptr->currentSelectionPrimarySelectionDevice);
+            } else {
+                d_ptr->keys.focus.selectionPrimarySelection->sendClearSelection();
+            }
+        }
     }
 
     for (auto it = d_ptr->keys.focus.keyboards.constBegin(),
@@ -1528,6 +1631,29 @@ void Seat::setSelection(DataDevice* dataDevice)
         }
     }
     Q_EMIT selectionChanged(dataDevice);
+}
+
+PrimarySelectionDevice* Seat::primarySelectionSelection() const
+{
+    return d_ptr->currentSelectionPrimarySelectionDevice;
+}
+
+void Seat::setPrimarySelectionSelection(PrimarySelectionDevice* dataDevice)
+{
+    if (d_ptr->currentSelectionPrimarySelectionDevice == dataDevice) {
+        return;
+    }
+    // cancel the previous selection
+    d_ptr->cancelPreviousSelection(dataDevice);
+    d_ptr->currentSelectionPrimarySelectionDevice = dataDevice;
+    if (d_ptr->keys.focus.selectionPrimarySelection) {
+        if (dataDevice && dataDevice->selection()) {
+            d_ptr->keys.focus.selectionPrimarySelection->sendSelection(dataDevice);
+        } else {
+            d_ptr->keys.focus.selectionPrimarySelection->sendClearSelection();
+        }
+    }
+    Q_EMIT selectionChangedPrimarySelection(dataDevice);
 }
 
 }

@@ -36,6 +36,7 @@ class Pointer;
 class Surface;
 class TextInputV2;
 class Touch;
+class PrimarySelectionDevice;
 
 enum class PointerAxisSource {
     Unknown,
@@ -152,6 +153,9 @@ public:
     DataDevice* selection() const;
     void setSelection(DataDevice* dataDevice);
 
+    void setPrimarySelectionSelection(PrimarySelectionDevice* dataDevice);
+    PrimarySelectionDevice* primarySelectionSelection() const;
+
 Q_SIGNALS:
     void nameChanged(std::string);
     void hasPointerChanged(bool);
@@ -168,6 +172,7 @@ Q_SIGNALS:
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 
     void selectionChanged(DataDevice*);
+    void selectionChangedPrimarySelection(PrimarySelectionDevice*);
     void dragStarted();
     void dragEnded();
     void dragSurfaceChanged();
@@ -177,6 +182,7 @@ private:
     friend class Display;
     friend class DataDeviceManager;
     friend class TextInputManagerV2;
+    friend class PrimarySelectionDeviceManager;
 
     Seat(Display* display, QObject* parent);
 

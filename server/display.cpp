@@ -47,6 +47,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer.h"
 #include "pointer_constraints_v1.h"
 #include "pointer_gestures_v1.h"
+#include "primary_selection.h"
 #include "relative_pointer_v1.h"
 #include "remote_access.h"
 #include "seat.h"
@@ -221,6 +222,11 @@ Subcompositor* Display::createSubCompositor(QObject* parent)
 DataDeviceManager* Display::createDataDeviceManager(QObject* parent)
 {
     return new DataDeviceManager(this, parent);
+}
+
+PrimarySelectionDeviceManager* Display::createPrimarySelectionDeviceManager(QObject* parent)
+{
+    return new PrimarySelectionDeviceManager(this, parent);
 }
 
 PlasmaShell* Display::createPlasmaShell(QObject* parent)

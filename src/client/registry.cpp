@@ -60,6 +60,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "server_decoration_palette.h"
 #include "xdgoutput.h"
 #include "xdgdecoration.h"
+#include "primary_selection.h"
 // Qt
 #include <QDebug>
 // wayland
@@ -95,6 +96,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-xdg-output-unstable-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-keystate-client-protocol.h>
+#include <wayland-primary-selection-unstable-v1-client-protocol.h>
 
 /*****
  * How to add another interface:
@@ -136,6 +138,13 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &wl_data_device_manager_interface,
         &Registry::dataDeviceManagerAnnounced,
         &Registry::dataDeviceManagerRemoved
+    }},
+    {Registry::Interface::PrimarySelectionDeviceManager, {
+        1,
+        QByteArrayLiteral("zwp_primary_selection_device_manager_v1"),
+        &zwp_primary_selection_device_manager_v1_interface,
+        &Registry::primarySelectionDeviceManagerAnnounced,
+        &Registry::primarySelectionDeviceManagerRemoved
     }},
     {Registry::Interface::Output, {
         3,
@@ -712,6 +721,7 @@ BIND2(AppMenuManager, AppMenu, org_kde_kwin_appmenu_manager)
 BIND2(ServerSideDecorationPaletteManager, ServerSideDecorationPalette, org_kde_kwin_server_decoration_palette_manager)
 BIND(XdgOutputUnstableV1, zxdg_output_manager_v1)
 BIND(XdgDecorationUnstableV1, zxdg_decoration_manager_v1)
+BIND(PrimarySelectionDeviceManager, zwp_primary_selection_device_manager_v1)
 
 #undef BIND
 #undef BIND2
@@ -767,6 +777,7 @@ CREATE(AppMenuManager)
 CREATE(Keystate)
 CREATE(ServerSideDecorationPaletteManager)
 CREATE(Viewporter)
+CREATE(PrimarySelectionDeviceManager)
 
 #undef CREATE
 #undef CREATE2

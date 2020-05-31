@@ -59,11 +59,14 @@ public:
     QVector<Keyboard*> keyboardsForSurface(Surface* surface) const;
     QVector<Touch*> touchsForSurface(Surface* surface) const;
     DataDevice* dataDeviceForSurface(Surface* surface) const;
+    PrimarySelectionDevice* primarySelectionDeviceForSurface(Surface* surface) const;
     TextInputV2* textInputForSurface(Surface* surface) const;
     void registerDataDevice(DataDevice* dataDevice);
+    void registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
     void registerTextInput(TextInputV2* ti);
     void endDrag(quint32 serial);
     void cancelPreviousSelection(DataDevice* newlySelectedDataDevice) const;
+    void cancelPreviousSelection(PrimarySelectionDevice* dataDevice) const;
 
     std::string name;
     bool pointer = false;
@@ -75,8 +78,10 @@ public:
     QVector<Keyboard*> keyboards;
     QVector<Touch*> touchs;
     QVector<DataDevice*> dataDevices;
+    QVector<PrimarySelectionDevice*> primarySelectionDevices;
     QVector<TextInputV2*> textInputs;
     DataDevice* currentSelection = nullptr;
+    PrimarySelectionDevice* currentSelectionPrimarySelectionDevice = nullptr;
 
     // Pointer related members
     struct SeatPointer {
@@ -130,6 +135,7 @@ public:
             QMetaObject::Connection destroyConnection;
             quint32 serial = 0;
             DataDevice* selection = nullptr;
+            PrimarySelectionDevice* selectionPrimarySelection = nullptr;
         };
         Focus focus;
         quint32 lastStateSerial = 0;
@@ -197,7 +203,10 @@ private:
     void getTouch(SeatBind* bind, uint32_t id);
 
     void updateSelection(DataDevice* dataDevice, bool set);
+    void updateSelection(PrimarySelectionDevice* dataDevice, bool set);
+
     void cleanupDataDevice(DataDevice* dataDevice);
+    void cleanupPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
 
     static void getPointerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
     static void getKeyboardCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
