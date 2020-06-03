@@ -99,7 +99,7 @@ void TestOutput::init()
     QCOMPARE(m_serverOutput->refreshRate(), 60000);
 
     QCOMPARE(m_serverOutput->isDpmsSupported(), false);
-    QCOMPARE(m_serverOutput->dpmsMode(), Srv::Output::DpmsMode::On);
+    QCOMPARE(m_serverOutput->dpmsMode(), Srv::Output::DpmsMode::Off);
 
     // setup connection
     m_connection = new Clt::ConnectionThread;
@@ -501,7 +501,7 @@ void TestOutput::testDpms_data()
 
     QTest::newRow("Standby") << Clt::Dpms::Mode::Standby << Srv::Output::DpmsMode::Standby;
     QTest::newRow("Suspend") << Clt::Dpms::Mode::Suspend << Srv::Output::DpmsMode::Suspend;
-    QTest::newRow("Off") << Clt::Dpms::Mode::Off << Srv::Output::DpmsMode::Off;
+    QTest::newRow("On") << Clt::Dpms::Mode::On << Srv::Output::DpmsMode::On;
 }
 
 void TestOutput::testDpms()
@@ -562,7 +562,7 @@ void TestOutput::testDpms()
     QSignalSpy clientDpmsModeChangedSpy(dpms, &Clt::Dpms::modeChanged);
     QVERIFY(clientDpmsModeChangedSpy.isValid());
 
-    QCOMPARE(m_serverOutput->dpmsMode(), Srv::Output::DpmsMode::On);
+    QCOMPARE(m_serverOutput->dpmsMode(), Srv::Output::DpmsMode::Off);
     QFETCH(Srv::Output::DpmsMode, server);
     m_serverOutput->setDpmsMode(server);
     QCOMPARE(m_serverOutput->dpmsMode(), server);
@@ -584,11 +584,11 @@ void TestOutput::testDpms()
     QCOMPARE(supportedChangedSpy.count(), 2);
     QVERIFY(dpms->isSupported());
 
-    // and switch back to on
-    m_serverOutput->setDpmsMode(Srv::Output::DpmsMode::On);
+    // and switch back to off
+    m_serverOutput->setDpmsMode(Srv::Output::DpmsMode::Off);
     QVERIFY(clientDpmsModeChangedSpy.wait());
     QCOMPARE(clientDpmsModeChangedSpy.count(), 2);
-    QCOMPARE(dpms->mode(), Clt::Dpms::Mode::On);
+    QCOMPARE(dpms->mode(), Clt::Dpms::Mode::Off);
 }
 
 void TestOutput::testDpmsRequestMode_data()
