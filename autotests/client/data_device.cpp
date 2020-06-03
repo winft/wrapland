@@ -196,9 +196,10 @@ void TestDataDevice::testCreate()
     QVERIFY(!serverDevice->icon());
     QVERIFY(!serverDevice->selection());
 
+    // this will probably fail, we need to make a selection client side
     QVERIFY(!m_serverSeat->selection());
-    m_serverSeat->setSelection(serverDevice);
-    QCOMPARE(m_serverSeat->selection(), serverDevice);
+    m_serverSeat->setSelection(serverDevice->selection());
+    QCOMPARE(m_serverSeat->selection(), serverDevice->selection());
 
     // and destroy
     QSignalSpy destroyedSpy(serverDevice, &QObject::destroyed);
@@ -439,7 +440,7 @@ void TestDataDevice::testSetSelection()
     QSignalSpy selectionOfferedSpy(dataDevice.get(),
                                    &Wrapland::Client::DataDevice::selectionOffered);
     QVERIFY(selectionOfferedSpy.isValid());
-    serverDevice->sendSelection(serverDevice);
+    serverDevice->sendSelection(serverDevice->selection());
     QVERIFY(selectionOfferedSpy.wait());
     QCOMPARE(selectionOfferedSpy.count(), 1);
 
@@ -474,12 +475,6 @@ void TestDataDevice::testSetSelection()
     QVERIFY(unboundSpy.isValid());
     dataDevice.reset();
     QVERIFY(unboundSpy.wait());
-
-    // TODO: This should be impossible to happen in the first place, correct?
-#if 0
-    // send a selection to the unbound data device
-    serverDevice->sendSelection(serverDevice);
-#endif
 }
 
 void TestDataDevice::testSendSelectionOnSeat()

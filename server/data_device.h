@@ -30,6 +30,7 @@ class DataDeviceManager;
 class DataSource;
 class Seat;
 class Surface;
+class AbstractDataSource;
 
 class WRAPLANDSERVER_EXPORT DataDevice : public QObject
 {
@@ -46,7 +47,7 @@ public:
 
     DataSource* selection() const;
 
-    void sendSelection(DataDevice* other);
+    void sendSelection(AbstractDataSource* other);
     void sendClearSelection();
 
     void drop();

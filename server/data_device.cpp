@@ -41,7 +41,7 @@ public:
     Private(Client* client, uint32_t version, uint32_t id, Seat* seat, DataDevice* q);
     ~Private() override;
 
-    DataOffer* createDataOffer(DataSource* source);
+    DataOffer* createDataOffer(AbstractDataSource* source);
 
     Seat* seat;
     DataSource* source = nullptr;
@@ -203,7 +203,7 @@ void DataDevice::Private::setSelection(wl_resource* sourceResource)
     }
 }
 
-DataOffer* DataDevice::Private::createDataOffer(DataSource* source)
+DataOffer* DataDevice::Private::createDataOffer(AbstractDataSource* source)
 {
     if (!source) {
         // A data offer can only exist together with a source.
@@ -254,15 +254,9 @@ DataSource* DataDevice::selection() const
     return d_ptr->selection;
 }
 
-void DataDevice::sendSelection(DataDevice* other)
+void DataDevice::sendSelection(AbstractDataSource* other)
 {
-    auto otherSelection = other->selection();
-    if (!otherSelection) {
-        sendClearSelection();
-        return;
-    }
-
-    auto offer = d_ptr->createDataOffer(otherSelection);
+    auto offer = d_ptr->createDataOffer(other);
     if (!offer) {
         return;
     }

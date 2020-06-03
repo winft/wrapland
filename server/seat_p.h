@@ -36,6 +36,7 @@ namespace Wrapland
 namespace Server
 {
 
+class AbstractDataSource;
 class DataDevice;
 class TextInputV2;
 
@@ -63,7 +64,6 @@ public:
     void registerDataDevice(DataDevice* dataDevice);
     void registerTextInput(TextInputV2* ti);
     void endDrag(quint32 serial);
-    void cancelPreviousSelection(DataDevice* newlySelectedDataDevice) const;
 
     std::string name;
     bool pointer = false;
@@ -76,7 +76,9 @@ public:
     QVector<Touch*> touchs;
     QVector<DataDevice*> dataDevices;
     QVector<TextInputV2*> textInputs;
-    DataDevice* currentSelection = nullptr;
+
+    // the last thing copied into the clipboard content
+    AbstractDataSource* currentSelection = nullptr;
 
     // Pointer related members
     struct SeatPointer {
@@ -196,8 +198,7 @@ private:
     void getKeyboard(SeatBind* bind, uint32_t id);
     void getTouch(SeatBind* bind, uint32_t id);
 
-    void updateSelection(DataDevice* dataDevice, bool set);
-    void cleanupDataDevice(DataDevice* dataDevice);
+    void updateSelection(DataDevice* dataDevice) const;
 
     static void getPointerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
     static void getKeyboardCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);

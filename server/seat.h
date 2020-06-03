@@ -29,7 +29,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
+class AbstractDataSource;
 class DataDevice;
+class DataSource;
 class Display;
 class Keyboard;
 class Pointer;
@@ -149,8 +151,8 @@ public:
     Surface* focusedTextInputSurface() const;
     TextInputV2* focusedTextInput() const;
 
-    DataDevice* selection() const;
-    void setSelection(DataDevice* dataDevice);
+    AbstractDataSource* selection() const;
+    void setSelection(AbstractDataSource* selection);
 
 Q_SIGNALS:
     void nameChanged(std::string);
@@ -167,7 +169,7 @@ Q_SIGNALS:
 
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 
-    void selectionChanged(DataDevice*);
+    void selectionChanged(AbstractDataSource*);
     void dragStarted();
     void dragEnded();
     void dragSurfaceChanged();

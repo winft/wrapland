@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright © 2020 Roman Gilg <subdiff@gmail.com>
+Copyright © 2020 Adrien Faveraux <ad1rie3@hotmail.fr>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,44 +17,18 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#pragma once
-#include <QObject>
-
 #include "abstract_data_source.h"
-#include "data_device_manager.h"
-#include <Wrapland/Server/wraplandserver_export.h>
+
+#include <unistd.h>
 
 namespace Wrapland::Server
 {
-class Client;
 
-class WRAPLANDSERVER_EXPORT DataSource : public AbstractDataSource
+AbstractDataSource::AbstractDataSource(QObject* parent)
+    : QObject(parent)
 {
-    Q_OBJECT
-public:
-    void accept(std::string const& mimeType) override;
-    void requestData(std::string const& mimeType, qint32 fd) override;
-    void cancel() override;
-
-    std::vector<std::string> mimeTypes() const override;
-
-    DataDeviceManager::DnDActions supportedDragAndDropActions() const override;
-
-    void dropPerformed() override;
-    void dndFinished() override;
-    void dndAction(DataDeviceManager::DnDAction action) override;
-
-    Client* client() const override;
-
-private:
-    friend class DataDeviceManager;
-    friend class DataDevice;
-    explicit DataSource(Client* client, uint32_t version, uint32_t id);
-
-    class Private;
-    Private* d_ptr;
-};
-
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::DataSource*)
+AbstractDataSource::~AbstractDataSource() = default;
+
+}

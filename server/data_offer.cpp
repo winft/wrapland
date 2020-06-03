@@ -40,7 +40,10 @@ const struct wl_data_offer_interface DataOffer::Private::s_interface = {
     setActionsCallback,
 };
 
-DataOffer::Private::Private(Client* client, uint32_t version, DataSource* source, DataOffer* q)
+DataOffer::Private::Private(Client* client,
+                            uint32_t version,
+                            AbstractDataSource* source,
+                            DataOffer* q)
     : Wayland::Resource<DataOffer>(client, version, 0, &wl_data_offer_interface, &s_interface, q)
     , source(source)
     , q_ptr{q}
@@ -154,7 +157,7 @@ void DataOffer::Private::sendSourceActions()
     send<wl_data_offer_send_source_actions, WL_DATA_OFFER_SOURCE_ACTIONS_SINCE_VERSION>(wlActions);
 }
 
-DataOffer::DataOffer(Client* client, uint32_t version, DataSource* source)
+DataOffer::DataOffer(Client* client, uint32_t version, AbstractDataSource* source)
     : d_ptr(new Private(client, version, source, this))
 {
     assert(source);

@@ -55,6 +55,7 @@ set(SERVER_LIB_SRCS
     xdg_shell_positioner.cpp
     xdg_shell_surface.cpp
     xdg_shell_toplevel.cpp
+    abstract_data_source.cpp
 )
 
 ecm_qt_declare_logging_category(SERVER_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_SERVER CATEGORY_NAME wrapland-server DEFAULT_SEVERITY Critical)
@@ -354,6 +355,7 @@ set(SERVER_LIB_HEADERS
   xdg_shell_popup.h
   xdg_shell_surface.h
   xdg_shell_toplevel.h
+  abstract_data_source.h
 )
 
 install(FILES

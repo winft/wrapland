@@ -30,7 +30,7 @@ namespace Wrapland::Server
 
 class Client;
 class DataDevice;
-class DataSource;
+class AbstractDataSource;
 
 class WRAPLANDSERVER_EXPORT DataOffer : public QObject
 {
@@ -49,7 +49,7 @@ Q_SIGNALS:
 private:
     friend class DataDevice;
 
-    explicit DataOffer(Client* client, uint32_t version, DataSource* source);
+    explicit DataOffer(Client* client, uint32_t version, AbstractDataSource* source);
 
     class Private;
     Private* d_ptr;

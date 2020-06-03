@@ -87,7 +87,8 @@ void DataSource::Private::setActionsCallback([[maybe_unused]] wl_client* wlClien
 }
 
 DataSource::DataSource(Client* client, uint32_t version, uint32_t id)
-    : d_ptr(new Private(client, version, id, this))
+    : AbstractDataSource(nullptr)
+    , d_ptr(new Private(client, version, id, this))
 {
 }
 
@@ -107,7 +108,6 @@ void DataSource::requestData(std::string const& mimeType, int32_t fd)
 void DataSource::cancel()
 {
     d_ptr->send<wl_data_source_send_cancelled>();
-    d_ptr->client()->flush();
 }
 
 std::vector<std::string> DataSource::mimeTypes() const

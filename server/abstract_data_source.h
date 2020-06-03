@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright © 2020 Roman Gilg <subdiff@gmail.com>
+Copyright © 2020 Adrien Faveraux <ad1rie3@hotmail.fr>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -19,42 +19,47 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 #include <QObject>
+#include <memory>
 
-#include "abstract_data_source.h"
 #include "data_device_manager.h"
+
 #include <Wrapland/Server/wraplandserver_export.h>
 
 namespace Wrapland::Server
 {
+class DataDeviceManager;
 class Client;
 
-class WRAPLANDSERVER_EXPORT DataSource : public AbstractDataSource
+class WRAPLANDSERVER_EXPORT AbstractDataSource : public QObject
 {
     Q_OBJECT
 public:
-    void accept(std::string const& mimeType) override;
-    void requestData(std::string const& mimeType, qint32 fd) override;
-    void cancel() override;
+    virtual void accept([[maybe_unused]] std::string const& mimeType){};
 
-    std::vector<std::string> mimeTypes() const override;
+    virtual void requestData(std::string const& mimeType, qint32 fd) = 0;
+    virtual void cancel() = 0;
 
-    DataDeviceManager::DnDActions supportedDragAndDropActions() const override;
+    virtual std::vector<std::string> mimeTypes() const = 0;
 
-    void dropPerformed() override;
-    void dndFinished() override;
-    void dndAction(DataDeviceManager::DnDAction action) override;
+    virtual DataDeviceManager::DnDActions supportedDragAndDropActions() const
+    {
+        return {};
+    };
 
-    Client* client() const override;
+    virtual void dropPerformed(){};
+    virtual void dndFinished(){};
+    virtual void dndAction([[maybe_unused]] DataDeviceManager::DnDAction action){};
 
-private:
-    friend class DataDeviceManager;
-    friend class DataDevice;
-    explicit DataSource(Client* client, uint32_t version, uint32_t id);
+    virtual Client* client() const = 0;
 
-    class Private;
-    Private* d_ptr;
+Q_SIGNALS:
+    void mimeTypeOffered(std::string);
+    void supportedDragAndDropActionsChanged();
+    void resourceDestroyed();
+
+protected:
+    ~AbstractDataSource() override;
+    explicit AbstractDataSource(QObject* parent = nullptr);
 };
 
 }
-
-Q_DECLARE_METATYPE(Wrapland::Server::DataSource*)

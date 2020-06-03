@@ -32,9 +32,9 @@ namespace Wrapland::Server
 class DataOffer::Private : public Wayland::Resource<DataOffer>
 {
 public:
-    Private(Client* client, uint32_t version, DataSource* source, DataOffer* q);
+    Private(Client* client, uint32_t version, AbstractDataSource* source, DataOffer* q);
 
-    DataSource* source;
+    AbstractDataSource* source;
 
     // Defaults are set to sensible values for < version 3 interfaces.
     DataDeviceManager::DnDActions supportedDnDActions
