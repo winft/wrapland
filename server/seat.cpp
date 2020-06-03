@@ -209,9 +209,9 @@ QVector<Touch*> Seat::Private::touchsForSurface(Surface* surface) const
     return interfacesForSurface(surface, touchs);
 }
 
-DataDevice* Seat::Private::dataDeviceForSurface(Surface* surface) const
+QVector<DataDevice*> Seat::Private::dataDevicesForSurface(Surface* surface) const
 {
-    return interfaceForSurface(surface, dataDevices);
+    return interfacesForSurface(surface, dataDevices);
 }
 
 TextInputV2* Seat::Private::textInputForSurface(Surface* surface) const
@@ -222,15 +222,13 @@ TextInputV2* Seat::Private::textInputForSurface(Surface* surface) const
 void Seat::Private::cleanupDataDevice(DataDevice* dataDevice)
 {
     dataDevices.removeOne(dataDevice);
-    if (keys.focus.selection == dataDevice) {
-        keys.focus.selection = nullptr;
-    }
+    keys.focus.selections.removeOne(dataDevice);
     if (currentSelection == dataDevice) {
         // current selection is cleared
         currentSelection = nullptr;
         Q_EMIT q_ptr->selectionChanged(nullptr);
-        if (keys.focus.selection) {
-            keys.focus.selection->sendClearSelection();
+        for (auto selection : keys.focus.selections) {
+            selection->sendClearSelection();
         }
     }
 }
@@ -296,10 +294,10 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
     });
 
     // Is the new DataDevice for the current keyoard focus?
-    if (keys.focus.surface && !keys.focus.selection) {
+    if (keys.focus.surface) {
         // Same client?
         if (keys.focus.surface->client() == dataDevice->client()) {
-            keys.focus.selection = dataDevice;
+            keys.focus.selections.append(dataDevice);
             if (currentSelection && currentSelection->selection()) {
                 dataDevice->sendSelection(currentSelection);
             }
@@ -374,11 +372,11 @@ void Seat::Private::updateSelection(DataDevice* dataDevice, bool set)
     }
     if (dataDevice == currentSelection) {
         // need to send out the selection
-        if (keys.focus.selection) {
+        for (auto focussedDevice : qAsConst(keys.focus.selections)) {
             if (set) {
-                keys.focus.selection->sendSelection(dataDevice);
+                focussedDevice->sendSelection(dataDevice);
             } else {
-                keys.focus.selection->sendClearSelection();
+                focussedDevice->sendClearSelection();
                 currentSelection = nullptr;
                 selChanged = true;
             }
@@ -597,7 +595,15 @@ void Seat::setDragTarget(Surface* surface,
     if (d_ptr->drag.target) {
         d_ptr->drag.target->updateDragTarget(nullptr, serial);
     }
-    d_ptr->drag.target = d_ptr->dataDeviceForSurface(surface);
+
+    // In theory we can have multiple data devices and we should send the drag to all of them, but
+    // that seems overly complicated. In practice so far the only case for multiple data devices is
+    // for clipboard overriding.
+    d_ptr->drag.target = nullptr;
+    if (!d_ptr->dataDevicesForSurface(surface).empty()) {
+        d_ptr->drag.target = d_ptr->dataDevicesForSurface(surface).first();
+    }
+
     if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
         setPointerPos(globalPosition);
     } else if (d_ptr->drag.mode == Private::Drag::Mode::Touch
@@ -1084,13 +1090,13 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
               });
         d_ptr->keys.focus.serial = serial;
 
-        // selection?
-        d_ptr->keys.focus.selection = d_ptr->dataDeviceForSurface(surface);
-        if (d_ptr->keys.focus.selection) {
-            if (d_ptr->currentSelection && d_ptr->currentSelection->selection()) {
-                d_ptr->keys.focus.selection->sendSelection(d_ptr->currentSelection);
+        auto dataDevices = d_ptr->dataDevicesForSurface(surface);
+        d_ptr->keys.focus.selections = dataDevices;
+        for (auto dataDevice : dataDevices) {
+            if (d_ptr->currentSelection) {
+                dataDevice->sendSelection(d_ptr->currentSelection);
             } else {
-                d_ptr->keys.focus.selection->sendClearSelection();
+                dataDevice->sendClearSelection();
             }
         }
     }
@@ -1520,11 +1526,12 @@ void Seat::setSelection(DataDevice* dataDevice)
     // cancel the previous selection
     d_ptr->cancelPreviousSelection(dataDevice);
     d_ptr->currentSelection = dataDevice;
-    if (d_ptr->keys.focus.selection) {
+
+    for (auto focusedDevice : qAsConst(d_ptr->keys.focus.selections)) {
         if (dataDevice && dataDevice->selection()) {
-            d_ptr->keys.focus.selection->sendSelection(dataDevice);
+            focusedDevice->sendSelection(dataDevice);
         } else {
-            d_ptr->keys.focus.selection->sendClearSelection();
+            focusedDevice->sendClearSelection();
         }
     }
     Q_EMIT selectionChanged(dataDevice);
