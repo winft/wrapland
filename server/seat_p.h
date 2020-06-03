@@ -58,7 +58,7 @@ public:
     QVector<Pointer*> pointersForSurface(Surface* surface) const;
     QVector<Keyboard*> keyboardsForSurface(Surface* surface) const;
     QVector<Touch*> touchsForSurface(Surface* surface) const;
-    DataDevice* dataDeviceForSurface(Surface* surface) const;
+    QVector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
     TextInputV2* textInputForSurface(Surface* surface) const;
     void registerDataDevice(DataDevice* dataDevice);
     void registerTextInput(TextInputV2* ti);
@@ -129,7 +129,7 @@ public:
             QVector<Keyboard*> keyboards;
             QMetaObject::Connection destroyConnection;
             quint32 serial = 0;
-            DataDevice* selection = nullptr;
+            QVector<DataDevice*> selections;
         };
         Focus focus;
         quint32 lastStateSerial = 0;
