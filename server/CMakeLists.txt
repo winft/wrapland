@@ -18,6 +18,7 @@ set(SERVER_LIB_SRCS
     kde_idle.cpp
     keyboard.cpp
     keystate.cpp
+    keyboard_shortcuts_inhibit.cpp
     linux_dmabuf_v1.cpp
     output.cpp
     output_changeset_v1.cpp
@@ -193,6 +194,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/keyboard-shortcuts-inhibit/keyboard-shortcuts-inhibit-unstable-v1.xml
+    BASENAME keyboard-shortcuts-inhibit
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wayland-eglstream-controller.xml
     BASENAME eglstream-controller
 )
@@ -315,6 +321,7 @@ set(SERVER_LIB_HEADERS
   kde_idle.h
   keyboard.h
   keystate.h
+  keyboard_shortcuts_inhibit.h
   linux_dmabuf_v1.h
   output.h
   output_changeset_v1.h

@@ -68,6 +68,7 @@ struct zxdg_importer_v2;
 struct zwp_idle_inhibit_manager_v1;
 struct zxdg_output_manager_v1;
 struct zxdg_decoration_manager_v1;
+struct zwp_keyboard_shortcuts_inhibit_manager_v1;
 
 namespace Wrapland
 {
@@ -116,6 +117,7 @@ class XdgExporter;
 class XdgImporter;
 class XdgOutputManager;
 class XdgDecorationManager;
+class KeyboardShortcutsInhibitManagerV1;
 
 /**
  * @short Wrapper for the wl_registry interface.
@@ -192,6 +194,7 @@ public:
         XdgDecorationUnstableV1, ///refers to zxdg_decoration_manager_v1, @since 0.0.554
         Keystate,///<refers to org_kwin_keystate, @since 0.0.557
         Viewporter, ///< Refers to wp_viewporter, @since 0.518.0
+        KeyboardShortcutsInhibitManagerV1,
     };
     explicit Registry(QObject *parent = nullptr);
     virtual ~Registry();
@@ -674,6 +677,17 @@ public:
      * @since 0.0.554
      **/
     zxdg_decoration_manager_v1 *bindXdgDecorationUnstableV1(uint32_t name, uint32_t version) const;
+
+    /**
+     * Binds the zwp_keyboard_shortcuts_inhibit_manager_v1 with @p name and @p version.
+     * If the @p name does not exist,
+     * @c null will be returned.
+     *
+     * Prefer using createXdgDecorationManager instead.
+     * @see createXdgDecorationManager
+     * @since 0.0.554
+     **/
+    zwp_keyboard_shortcuts_inhibit_manager_v1 *bindKeyboardShortcutsInhibitManagerV1(uint32_t name, uint32_t version) const;
 
     ///@}
 
@@ -1262,6 +1276,25 @@ public:
      **/
     XdgDecorationManager *createXdgDecorationManager(quint32 name, quint32 version, QObject *parent = nullptr);
 
+    /**
+     * Creates an KeyboardShortcutsInhibitManagerV1 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the zxdg_decoration_manager_v1 interface,
+     * the returned KeyboardShortcutsInhibitManagerV1 will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the zxdg_decoration_manager_v1 interface to bind
+     * @param version The version or the zxdg_decoration_manager_v1 interface to use
+     * @param parent The parent for KeyboardShortcutsInhibitManagerV1
+     *
+     * @returns The created KeyboardShortcutsInhibitManagerV1.
+     * @since 0.0.554
+     **/
+    KeyboardShortcutsInhibitManagerV1 *createKeyboardShortcutsInhibitManagerV1(quint32 name, quint32 version, QObject *parent = nullptr);
+
+
+
     ///@}
 
 
@@ -1551,6 +1584,14 @@ Q_SIGNALS:
      **/
     void xdgDecorationAnnounced(quint32 name, quint32 version);
 
+    /**
+     * Emitted whenever a zxdg_decoration_manager_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.0.554
+     **/
+    void keyboardShortcutsInhibitManagerAnnounced(quint32 name, quint32 version);
+
     ///@}
 
     /**
@@ -1783,6 +1824,13 @@ Q_SIGNALS:
      * @since 0.0.554
      **/
     void xdgDecorationRemoved(quint32 name);
+
+    /**
+     * Emitted whenever a zxdg_decoration_manager_v1 gets removed.
+     * @param name The name of the removed interface
+     * @since 0.0.554
+     **/
+    void keyboardShortcutsInhibitManagerRemoved(quint32 name);
 
     void keystateAnnounced(quint32 name, quint32 version);
     void keystateRemoved(quint32 name);

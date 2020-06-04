@@ -25,6 +25,7 @@ set(CLIENT_LIB_SRCS
     idleinhibit.cpp
     keyboard.cpp
     keystate.cpp
+    keyboard_shortcuts_inhibit.cpp
     remote_access.cpp
     output.cpp
     output_configuration_v1.cpp
@@ -202,6 +203,12 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     BASENAME keystate
 )
 
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/keyboard-shortcuts-inhibit/keyboard-shortcuts-inhibit-unstable-v1.xml
+    BASENAME keyboard-shortcuts-inhibit
+)
+
+
 set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-fullscreen-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-client-protocol.h
@@ -286,6 +293,7 @@ set(CLIENT_LIB_HEADERS
   idleinhibit.h
   keyboard.h
   keystate.h
+  keyboard_shortcuts_inhibit.h
   remote_access.h
   output.h
   output_configuration_v1.h

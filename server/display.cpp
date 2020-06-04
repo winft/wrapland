@@ -35,6 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "fake_input.h"
 #include "idle_inhibit_v1.h"
 #include "kde_idle.h"
+#include "keyboard_shortcuts_inhibit.h"
 #include "keystate.h"
 #include "linux_dmabuf_v1.h"
 #include "output_configuration_v1.h"
@@ -241,6 +242,11 @@ RemoteAccessManager* Display::createRemoteAccessManager(QObject* parent)
 KdeIdle* Display::createIdle(QObject* parent)
 {
     return new KdeIdle(this, parent);
+}
+
+KeyboardShortcutsInhibitManagerV1* Display::createKeyboardShortcutsInhibitManager(QObject* parent)
+{
+    return new KeyboardShortcutsInhibitManagerV1(this, parent);
 }
 
 FakeInput* Display::createFakeInput(QObject* parent)
