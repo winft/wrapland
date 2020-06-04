@@ -60,6 +60,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "server_decoration_palette.h"
 #include "xdgoutput.h"
 #include "xdgdecoration.h"
+#include "keyboard_shortcuts_inhibit.h"
 // Qt
 #include <QDebug>
 // wayland
@@ -95,7 +96,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-xdg-output-unstable-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-keystate-client-protocol.h>
-
+#include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
 /*****
  * How to add another interface:
  * * define a new enum value in Registry::Interface
@@ -395,6 +396,13 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &org_kde_kwin_keystate_interface,
         &Registry::keystateAnnounced,
         &Registry::keystateRemoved
+    }},
+    {Registry::Interface::KeyboardShortcutsInhibitManagerV1, {
+        1,
+        QByteArrayLiteral("zwp_keyboard_shortcuts_inhibit_manager_v1"),
+        &zwp_keyboard_shortcuts_inhibit_manager_v1_interface,
+        &Registry::keyboardShortcutsInhibitManagerAnnounced,
+        &Registry::keyboardShortcutsInhibitManagerRemoved
     }}
 };
 
@@ -712,6 +720,7 @@ BIND2(AppMenuManager, AppMenu, org_kde_kwin_appmenu_manager)
 BIND2(ServerSideDecorationPaletteManager, ServerSideDecorationPalette, org_kde_kwin_server_decoration_palette_manager)
 BIND(XdgOutputUnstableV1, zxdg_output_manager_v1)
 BIND(XdgDecorationUnstableV1, zxdg_decoration_manager_v1)
+BIND(KeyboardShortcutsInhibitManagerV1, zwp_keyboard_shortcuts_inhibit_manager_v1)
 
 #undef BIND
 #undef BIND2
@@ -767,6 +776,7 @@ CREATE(AppMenuManager)
 CREATE(Keystate)
 CREATE(ServerSideDecorationPaletteManager)
 CREATE(Viewporter)
+CREATE(KeyboardShortcutsInhibitManagerV1)
 
 #undef CREATE
 #undef CREATE2

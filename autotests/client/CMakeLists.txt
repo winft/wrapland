@@ -298,6 +298,17 @@ add_test(NAME wrapland-testKdeIdle COMMAND testKdeIdle)
 ecm_mark_as_test(testKdeIdle)
 
 ########################################################
+# Test Keyboard Shortcuts Inhibitor
+########################################################
+set( testKeyboardShortcutsInhibitor_SRCS
+        keyboard_shortcuts_inhibitor.cpp
+    )
+add_executable(testKeyboardShortcutsInhibitor ${testKeyboardShortcutsInhibitor_SRCS})
+target_link_libraries( testKeyboardShortcutsInhibitor Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testKeyboardShortcutsInhibitor COMMAND testKeyboardShortcutsInhibitor)
+ecm_mark_as_test(testKeyboardShortcutsInhibitor)
+
+########################################################
 # Test Shadow
 ########################################################
 set( testShadow_SRCS
