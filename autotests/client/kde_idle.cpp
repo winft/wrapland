@@ -150,7 +150,7 @@ void IdleTest::testTimeout()
     QVERIFY(resumedFormIdleSpy.isValid());
 
     // we requested a timeout of 1 msec, but the minimum the server sets is 5 sec
-    QVERIFY(!idleSpy.wait(500));
+    QVERIFY(!idleSpy.wait(1000));
     // the default of 5 sec will now pass
     QVERIFY(idleSpy.wait());
 
