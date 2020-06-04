@@ -87,6 +87,7 @@ amendments:
 * Only the following optional scopes are allowed:
   * client
   * server
+* Any line of the message must be 90 characters or shorter.
 * Angular's [Revert][angular-revert] and [Subject][angular-subject] policies are applied.
 
 Commits deliberately ignoring this guideline will not be merged and in case reverted.
