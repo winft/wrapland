@@ -60,7 +60,7 @@ public:
     std::vector<Mode> modes;
 
     struct {
-        DpmsMode mode = DpmsMode::On;
+        DpmsMode mode = DpmsMode::Off;
         bool supported = false;
     } dpms;
 
