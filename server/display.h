@@ -73,6 +73,7 @@ class XdgDecorationManager;
 class EglStreamController;
 class KeyState;
 class LinuxDmabufV1;
+class KeyboardShortcutsInhibitManagerV1;
 
 class WRAPLANDSERVER_EXPORT Display : public QObject
 {
@@ -146,6 +147,8 @@ public:
     XdgForeign* createXdgForeign(QObject* parent = nullptr);
 
     IdleInhibitManagerV1* createIdleInhibitManager(QObject* parent = nullptr);
+    KeyboardShortcutsInhibitManagerV1* createKeyboardShortcutsInhibitManager(QObject* parent
+                                                                             = nullptr);
     AppmenuManager* createAppmenuManager(QObject* parent = nullptr);
 
     ServerSideDecorationPaletteManager* createServerSideDecorationPaletteManager(QObject* parent
