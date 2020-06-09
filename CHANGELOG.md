@@ -1,5 +1,12 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.519.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.519.0-beta.0...wrapland@0.519.0) (2020-06-09)
+
+
+### Bug Fixes
+
+* **server:** support multiple data devices on a single client ([21dcac7](https://gitlab.com/kwinft/wrapland/commit/21dcac7aa9a33034dc9f4a5b923a0052cb5bc35b))
+
 ## [0.519.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.518.0-beta.0...wrapland@0.519.0-beta.0) (2020-05-24)
 
 
