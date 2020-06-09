@@ -14,7 +14,7 @@ git checkout master
 LAST_TAG=$(git describe --abbrev=0)
 CURRENT_BETA_VERSION=$(echo $LAST_TAG | sed -e 's,wrapland@\(\),\1,g')
 
-echo "Last beta version was: $CURRENT_BETA_VERSION"
+echo "Current beta version is: $CURRENT_BETA_VERSION"
 
 # We always release from stable branch.
 BRANCH_NAME="Plasma/$(echo $CURRENT_BETA_VERSION | sed -e 's,^\w.\(\w\)\(\w*\).*,\1.\2,g')"
@@ -39,12 +39,12 @@ set_cmake_version $CMAKE_VERSION
 git add CMakeLists.txt CHANGELOG.md
 
 # Commit and tag it.
-git commit -m "build: create release ${RELEASE_VERSION}" -m "Update changelog and raise CMake project version to ${CMAKE_VERSION}."
-git tag -a "wrapland@${RELEASE_VERSION}" -m "Create beta release ${RELEASE_VERSION}."
+git commit -m "build: create minor release ${RELEASE_VERSION}" -m "Update changelog and raise CMake project version to ${CMAKE_VERSION}."
+git tag -a "wrapland@${RELEASE_VERSION}" -m "Create minor release ${RELEASE_VERSION}."
 
 # Go back to master branch and update changelog.
 git checkout master
 git checkout $BRANCH_NAME CHANGELOG.md
-git commit -m "docs: update changelog" -m "Update changelog from branch $BRANCH_NAME at release ${RELEASE_VERSION}."
+git commit -m "docs: update changelog" -m "Update changelog from branch $BRANCH_NAME at minor release ${RELEASE_VERSION}."
 
 echo "Changes applied. Check integrity of master and $BRANCH_NAME branches. Then issue 'git push --follow-tags' on both."
