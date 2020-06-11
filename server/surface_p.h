@@ -100,14 +100,16 @@ public:
     void installIdleInhibitor(IdleInhibitor* inhibitor);
     void installViewport(Viewport* vp);
 
-    void commitSubsurface();
     void commit();
+
+    void updateCurrentState(bool forceChildren);
+    void updateCurrentState(SurfaceState& source, bool forceChildren);
 
     XdgShellSurface* shellSurface = nullptr;
 
     SurfaceState current;
     SurfaceState pending;
-    SurfaceState subsurfacePending;
+
     Subsurface* subsurface = nullptr;
     QRegion trackedDamage;
 
@@ -115,7 +117,7 @@ public:
     // A subsurface needs to be considered mapped even if it doesn't have a buffer attached.
     // Otherwise Qt's sub-surfaces will never be visible and the client will freeze due to
     // waiting on the frame callback of the never visible surface.
-    bool subsurfaceIsMapped = true;
+    //    bool subsurfaceIsMapped = true;
 
     std::vector<Output*> outputs;
 
@@ -128,7 +130,7 @@ public:
     Surface* dataProxy = nullptr;
 
 private:
-    void swapStates(SurfaceState* source, SurfaceState* target, bool emitChanged);
+    void updateCurrentBuffer(SurfaceState const& source, bool& damaged, bool& resized);
 
     void damage(const QRect& rect);
     void damageBuffer(const QRect& rect);
