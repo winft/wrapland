@@ -891,79 +891,66 @@ void Surface::Private::bufferScaleCallback([[maybe_unused]] wl_client* wlClient,
 
 QRegion Surface::damage() const
 {
-
     return d_ptr->current.damage;
 }
 
 QRegion Surface::opaque() const
 {
-
     return d_ptr->current.opaque;
 }
 
 QRegion Surface::input() const
 {
-
     return d_ptr->current.input;
 }
 
 bool Surface::inputIsInfinite() const
 {
-
     return d_ptr->current.inputIsInfinite;
 }
 
 qint32 Surface::scale() const
 {
-
     return d_ptr->current.scale;
 }
 
 Output::Transform Surface::transform() const
 {
-
     return d_ptr->current.transform;
 }
 
 Buffer* Surface::buffer()
 {
-
     return d_ptr->current.buffer;
 }
 
 Buffer* Surface::buffer() const
 {
-
     return d_ptr->current.buffer;
 }
 
 QPoint Surface::offset() const
 {
-
     return d_ptr->current.offset;
 }
 
 QRectF Surface::sourceRectangle() const
 {
-
     return d_ptr->current.sourceRectangle;
 }
 
 std::vector<Subsurface*> Surface::childSubsurfaces() const
 {
-
     return d_ptr->current.children;
 }
 
 Subsurface* Surface::subsurface() const
 {
-
     return d_ptr->subsurface;
 }
 
 QSize Surface::size() const
 {
-
     if (!d_ptr->current.buffer) {
         return QSize();
     }
@@ -979,31 +966,26 @@ QSize Surface::size() const
 
 QPointer<Shadow> Surface::shadow() const
 {
-
     return d_ptr->current.shadow;
 }
 
 QPointer<Blur> Surface::blur() const
 {
-
     return d_ptr->current.blur;
 }
 
 QPointer<Contrast> Surface::contrast() const
 {
-
     return d_ptr->current.contrast;
 }
 
 QPointer<Slide> Surface::slideOnShowHide() const
 {
-
     return d_ptr->current.slide;
 }
 
 bool Surface::isMapped() const
 {
-
     if (d_ptr->subsurface) {
         // From the spec: "A sub-surface becomes mapped, when a non-NULL wl_buffer is applied and
         // the parent surface is mapped."
@@ -1015,19 +997,16 @@ bool Surface::isMapped() const
 
 QRegion Surface::trackedDamage() const
 {
-
     return d_ptr->trackedDamage;
 }
 
 void Surface::resetTrackedDamage()
 {
-
     d_ptr->trackedDamage = QRegion();
 }
 
 std::vector<Output*> Surface::outputs() const
 {
-
     return d_ptr->outputs;
 }
 
@@ -1154,7 +1133,6 @@ bool Surface::inhibitsIdle() const
 
 void Surface::setDataProxy(Surface* surface)
 {
-
     d_ptr->dataProxy = surface;
 }
 
