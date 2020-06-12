@@ -118,6 +118,8 @@ Q_SIGNALS:
     void subsurfaceTreeChanged();
     void pointerConstraintsChanged();
     void inhibitsIdleChanged();
+    void childSubSurfaceAdded(Subsurface* subSurface);
+    void childSubSurfaceRemoved(Subsurface* subSurface);
     void committed();
     void resourceDestroyed();
 
