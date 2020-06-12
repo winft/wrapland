@@ -236,14 +236,18 @@ void Seat::Private::cleanupDataDevice(DataDevice* dataDevice)
 void Seat::Private::registerDataDevice(DataDevice* dataDevice)
 {
     dataDevices << dataDevice;
-    auto dataDeviceCleanup = [this, dataDevice] { cleanupDataDevice(dataDevice); };
-    QObject::connect(dataDevice, &DataDevice::resourceDestroyed, q_ptr, dataDeviceCleanup);
+
+    QObject::connect(dataDevice, &DataDevice::resourceDestroyed, q_ptr, [this, dataDevice] {
+        cleanupDataDevice(dataDevice);
+    });
+
     QObject::connect(dataDevice, &DataDevice::selectionChanged, q_ptr, [this, dataDevice] {
         updateSelection(dataDevice, true);
     });
     QObject::connect(dataDevice, &DataDevice::selectionCleared, q_ptr, [this, dataDevice] {
         updateSelection(dataDevice, false);
     });
+
     QObject::connect(dataDevice, &DataDevice::dragStarted, q_ptr, [this, dataDevice] {
         const auto dragSerial = dataDevice->dragImplicitGrabSerial();
         auto* dragSurface = dataDevice->origin();
