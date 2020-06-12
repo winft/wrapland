@@ -96,6 +96,7 @@ void Surface::Private::addChild(Subsurface* child)
     current.children.push_back(child);
 
     Q_EMIT handle()->subsurfaceTreeChanged();
+    Q_EMIT handle()->childSubSurfaceAdded(child);
 
     QObject::connect(
         child, &Subsurface::positionChanged, handle(), &Surface::subsurfaceTreeChanged);
@@ -122,6 +123,7 @@ void Surface::Private::removeChild(Subsurface* child)
                            current.children.end());
 
     Q_EMIT handle()->subsurfaceTreeChanged();
+    Q_EMIT handle()->childSubSurfaceRemoved(child);
 
     QObject::disconnect(
         child, &Subsurface::positionChanged, handle(), &Surface::subsurfaceTreeChanged);
