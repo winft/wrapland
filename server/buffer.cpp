@@ -71,6 +71,7 @@ public:
     int refCount;
     QSize size;
     bool alpha;
+    bool committed;
 
 private:
     static void destroyListenerCallback(wl_listener* listener, void* data);
@@ -78,7 +79,6 @@ private:
 
     Wayland::Display* display;
     Buffer* q_ptr;
-
     DestroyWrapper destroyWrapper;
 };
 
@@ -92,11 +92,10 @@ Buffer::Private::Private(Buffer* q,
     , surface(surface)
     , refCount(0)
     , alpha(false)
+    , committed{!surface}
     , display(display)
     , q_ptr{q}
 {
-    display->bufferManager()->addBuffer(q_ptr);
-
     if (!shmBuffer
         && wl_resource_instance_of(resource, &wl_buffer_interface, BufferV1::interface())) {
         dmabufBuffer = Wayland::Resource<LinuxDmabufBufferV1>::handle(resource);
@@ -194,19 +193,30 @@ Buffer::Private::Private(Buffer* q,
 
 Buffer::Private::~Private()
 {
-    if (refCount != 0) {
-        qCWarning(WRAPLAND_SERVER,
-                  "Buffer destroyed while still being referenced, ref count: %d",
-                  refCount);
-    }
-    display->bufferManager()->removeBuffer(q_ptr);
     wl_list_remove(&destroyWrapper.listener.link);
+    display->bufferManager()->removeBuffer(q_ptr);
 }
 
 void Buffer::Private::imageBufferCleanupHandler(void* info)
 {
     auto priv = static_cast<Private*>(info);
     priv->display->bufferManager()->endShmAccess();
+}
+
+std::shared_ptr<Buffer> Buffer::make(wl_resource* wlResource, Surface* surface)
+{
+    auto backendDisplay = Wayland::Display::backendCast(surface->client()->display());
+    auto buffer = std::shared_ptr<Buffer>{new Buffer(wlResource, surface)};
+    backendDisplay->bufferManager()->addBuffer(buffer);
+    return buffer;
+}
+
+std::shared_ptr<Buffer> Buffer::make(wl_resource* wlResource, Display* display)
+{
+    auto backendDisplay = Wayland::Display::backendCast(display);
+    auto buffer = std::shared_ptr<Buffer>{new Buffer(wlResource, display)};
+    backendDisplay->bufferManager()->addBuffer(buffer);
+    return buffer;
 }
 
 void Buffer::Private::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] void* data)
@@ -222,9 +232,7 @@ void Buffer::Private::destroyListenerCallback(wl_listener* listener, [[maybe_unu
     DestroyWrapper* wrapper = wl_container_of(listener, wrapper, listener);
 
     wrapper->buffer->d_ptr->resource = nullptr;
-
     Q_EMIT wrapper->buffer->resourceDestroyed();
-    delete wrapper->buffer;
 }
 
 QImage::Format Buffer::Private::format() const
@@ -282,47 +290,27 @@ Buffer::Buffer(wl_resource* wlResource, Display* display)
 {
 }
 
-Buffer* Buffer::get(Display* display, wl_resource* resource)
+std::shared_ptr<Buffer> Buffer::get(Display* display, wl_resource* resource)
 {
     if (!resource) {
         return nullptr;
     }
-    // TODO(unknown author): verify it's a buffer
+    // TODO(unknown author): verify resource is a buffer
     auto buffer = Wayland::Display::backendCast(display)->bufferManager()->fromResource(resource);
-    if (buffer) {
-        return buffer;
-    }
-    return new Buffer(resource, display);
+    return buffer ? buffer.value() : make(resource, display);
 }
 
-Buffer::~Buffer() = default;
-
-void Buffer::ref()
+Buffer::~Buffer()
 {
-    d_ptr->refCount++;
-}
-
-void Buffer::unref()
-{
-    Q_ASSERT(d_ptr->refCount > 0);
-    d_ptr->refCount--;
-    if (d_ptr->refCount == 0) {
-        if (d_ptr->resource) {
-            wl_buffer_send_release(d_ptr->resource);
-            wl_client_flush(wl_resource_get_client(d_ptr->resource));
-        }
-        deleteLater();
+    if (d_ptr->committed && d_ptr->resource) {
+        wl_buffer_send_release(d_ptr->resource);
+        wl_client_flush(wl_resource_get_client(d_ptr->resource));
     }
 }
 
 QImage Buffer::data()
 {
     return d_ptr->createImage();
-}
-
-bool Buffer::isReferenced() const
-{
-    return d_ptr->refCount > 0;
 }
 
 Surface* Buffer::surface() const
@@ -362,6 +350,11 @@ void Buffer::setSize(const QSize& size)
 bool Buffer::hasAlphaChannel() const
 {
     return d_ptr->alpha;
+}
+
+void Buffer::setCommitted()
+{
+    d_ptr->committed = true;
 }
 
 }

@@ -80,7 +80,7 @@ public:
 
     struct State {
         template<AttachSide side>
-        Buffer*& get()
+        std::shared_ptr<Buffer>& get()
         {
             if constexpr (side == AttachSide::Left) {
                 return left;
@@ -104,7 +104,7 @@ public:
 
         // We need this for our QObject connections. Once we use a signal system with good template
         // support it can be replaced by above templated getter.
-        Buffer*& get(AttachSide side)
+        std::shared_ptr<Buffer>& get(AttachSide side)
         {
             if (side == AttachSide::Left) {
                 return left;
@@ -153,33 +153,27 @@ public:
             auto& currentBuf = get<side>();
             auto& pendingBuf = pending.get<side>();
 
-            if (currentBuf) {
-                currentBuf->unref();
-            }
-            if (pendingBuf) {
-                pendingBuf->ref();
-            }
             currentBuf = pendingBuf;
-            pendingBuf = nullptr;
+            pendingBuf.reset();
         }
 
         template<AttachSide side>
         void unref()
         {
             if (auto buf = get<side>()) {
-                buf->unref();
+                buf.reset();
             }
         }
 
         // TODO(romangg): unique_ptr?
-        Buffer* left = nullptr;
-        Buffer* topLeft = nullptr;
-        Buffer* top = nullptr;
-        Buffer* topRight = nullptr;
-        Buffer* right = nullptr;
-        Buffer* bottomRight = nullptr;
-        Buffer* bottom = nullptr;
-        Buffer* bottomLeft = nullptr;
+        std::shared_ptr<Buffer> left = nullptr;
+        std::shared_ptr<Buffer> topLeft = nullptr;
+        std::shared_ptr<Buffer> top = nullptr;
+        std::shared_ptr<Buffer> topRight = nullptr;
+        std::shared_ptr<Buffer> right = nullptr;
+        std::shared_ptr<Buffer> bottomRight = nullptr;
+        std::shared_ptr<Buffer> bottom = nullptr;
+        std::shared_ptr<Buffer> bottomLeft = nullptr;
 
         QMarginsF offset;
         bool offsetIsSet = false;
@@ -214,7 +208,7 @@ private:
         auto display = client()->display()->handle();
         auto buffer = Buffer::get(display, wlBuffer);
 
-        attachConnect(side, buffer);
+        attachConnect(side, buffer.get());
         pending.get<side>() = buffer;
     }
 

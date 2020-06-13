@@ -68,10 +68,6 @@ Surface::Private::~Private()
         wl_resource_destroy(callback);
     }
 
-    if (current.buffer) {
-        current.buffer->unref();
-    }
-
     if (subsurface) {
         subsurface->d_ptr->surface = nullptr;
         subsurface = nullptr;
@@ -449,8 +445,8 @@ void Surface::Private::updateCurrentBuffer(SurfaceState const& source, bool& dam
     if (wasMapped) {
         oldSize = current.buffer->size();
 
-        current.buffer->unref();
-        QObject::disconnect(current.buffer, &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
+        QObject::disconnect(
+            current.buffer.get(), &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
     }
 
     current.buffer = source.buffer;
@@ -463,8 +459,8 @@ void Surface::Private::updateCurrentBuffer(SurfaceState const& source, bool& dam
         return;
     }
 
-    current.buffer->ref();
-    QObject::connect(current.buffer, &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
+    current.buffer->setCommitted();
+    QObject::connect(current.buffer.get(), &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
 
     current.offset = source.offset;
     current.damage = source.damage;
@@ -586,7 +582,7 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
 
     if (source.destinationSizeIsSet) {
         current.destinationSize = source.destinationSize;
-        resized = current.buffer;
+        resized = current.buffer != nullptr;
     }
 
     if (source.sourceRectangleIsSet) {
@@ -604,7 +600,7 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
     // Now check that source rectangle is (still) well defined.
     soureRectangleIntegerCheck(current.destinationSize, current.sourceRectangle);
     soureRectangleContainCheck(
-        current.buffer, current.transform, current.scale, current.sourceRectangle);
+        current.buffer.get(), current.transform, current.scale, current.sourceRectangle);
 
     if (!lockedPointer.isNull()) {
         lockedPointer->d_ptr->commit();
@@ -622,7 +618,7 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
 
     if (scaleFactorChanged) {
         Q_EMIT handle()->scaleChanged(current.scale);
-        resized = current.buffer;
+        resized = current.buffer != nullptr;
     }
     if (transformChanged) {
         Q_EMIT handle()->transformChanged(current.transform);
@@ -724,31 +720,29 @@ void Surface::Private::attachBuffer(wl_resource* wlBuffer, const QPoint& offset)
     pending.bufferIsSet = true;
     pending.offset = offset;
 
-    delete pending.buffer;
-
     if (!wlBuffer) {
         // Got a null buffer, deletes content in next frame.
-        pending.buffer = nullptr;
+        pending.buffer.reset();
         pending.damage = QRegion();
         pending.bufferDamage = QRegion();
         return;
     }
 
-    pending.buffer = new Buffer(wlBuffer, q_ptr);
+    pending.buffer = Buffer::make(wlBuffer, q_ptr);
 
-    QObject::connect(
-        pending.buffer, &Buffer::resourceDestroyed, handle(), [this, buffer = pending.buffer]() {
-            if (pending.buffer == buffer) {
-                pending.buffer = nullptr;
-            }
-            if (subsurface && subsurface->d_ptr->cached.buffer == buffer) {
-                subsurface->d_ptr->cached.buffer = nullptr;
-            }
-            if (current.buffer == buffer) {
-                current.buffer->unref();
-                current.buffer = nullptr;
-            }
-        });
+    QObject::connect(pending.buffer.get(),
+                     &Buffer::resourceDestroyed,
+                     handle(),
+                     [this, buffer = pending.buffer.get()]() {
+                         if (pending.buffer.get() == buffer) {
+                             pending.buffer.reset();
+                         } else if (current.buffer.get() == buffer) {
+                             current.buffer.reset();
+                         } else if (subsurface
+                                    && subsurface->d_ptr->cached.buffer.get() == buffer) {
+                             subsurface->d_ptr->cached.buffer.reset();
+                         }
+                     });
 }
 
 void Surface::Private::destroyFrameCallback(wl_resource* wlResource)
@@ -892,12 +886,7 @@ Output::Transform Surface::transform() const
     return d_ptr->current.transform;
 }
 
-Buffer* Surface::buffer()
-{
-    return d_ptr->current.buffer;
-}
-
-Buffer* Surface::buffer() const
+std::shared_ptr<Buffer> Surface::buffer() const
 {
     return d_ptr->current.buffer;
 }

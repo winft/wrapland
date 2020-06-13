@@ -41,10 +41,6 @@ class WRAPLANDSERVER_EXPORT Buffer : public QObject
 public:
     ~Buffer() override;
 
-    void ref();
-    void unref();
-    bool isReferenced() const;
-
     Surface* surface() const;
     wl_shm_buffer* shmBuffer();
     LinuxDmabufBufferV1* linuxDmabufBuffer();
@@ -53,17 +49,20 @@ public:
     QImage data();
     QSize size() const;
     void setSize(const QSize& size);
+    void setCommitted();
 
     bool hasAlphaChannel() const;
 
-    static Buffer* get(Display* display, wl_resource* resource);
+    static std::shared_ptr<Buffer> get(Display* display, wl_resource* resource);
+
+    static std::shared_ptr<Buffer> make(wl_resource* wlResource, Surface* surface);
+    static std::shared_ptr<Buffer> make(wl_resource* wlResource, Display* display);
 
 Q_SIGNALS:
     void sizeChanged();
     void resourceDestroyed();
 
 private:
-    friend class Surface;
     Buffer(wl_resource* wlResource, Surface* surface);
     Buffer(wl_resource* wlResource, Display* display);
 

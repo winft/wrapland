@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "subcompositor.h"
 
+#include "buffer.h"
 #include "display.h"
 #include "subsurface_p.h"
 #include "surface_p.h"
@@ -174,6 +175,9 @@ void Subsurface::Private::commit()
     if (handle()->isSynchronized()) {
         // Sync mode. We cache the pending state and wait for the parent surface to commit.
         cached = surface->d_ptr->pending;
+        if (cached.buffer) {
+            cached.buffer->setCommitted();
+        }
         surface->d_ptr->pending = SurfaceState();
         surface->d_ptr->pending.children = cached.children;
         return;

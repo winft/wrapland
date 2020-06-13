@@ -62,8 +62,7 @@ public:
     qint32 scale() const;
     Output::Transform transform() const;
 
-    Buffer* buffer();
-    Buffer* buffer() const;
+    std::shared_ptr<Buffer> buffer() const;
 
     QPoint offset() const;
     QSize size() const;

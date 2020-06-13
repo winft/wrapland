@@ -61,7 +61,7 @@ struct SurfaceState {
     std::deque<wl_resource*> callbacks;
 
     QPoint offset = QPoint();
-    Buffer* buffer = nullptr;
+    std::shared_ptr<Buffer> buffer;
 
     QRectF sourceRectangle = QRectF();
     QSize destinationSize = QSize();

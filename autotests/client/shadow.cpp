@@ -254,9 +254,12 @@ void ShadowTest::testShadowElements()
     // try to destroy the buffer
     // first attach one buffer
     shadow->attachTopLeft(m_shm->createBuffer(topLeftImage));
-    // create a destroyed signal
-    QSignalSpy destroyedSpy(serverShadow->topLeft(), &Wrapland::Server::Buffer::resourceDestroyed);
+
+    // We need to reference the shared_ptr buffer to guarantee receiving the destroyed signal.
+    auto buf = serverShadow->topLeft();
+    QSignalSpy destroyedSpy(serverShadow->topLeft().get(), &Wrapland::Server::Buffer::resourceDestroyed);
     QVERIFY(destroyedSpy.isValid());
+
     delete m_shm;
     m_shm = nullptr;
     QVERIFY(destroyedSpy.wait());
