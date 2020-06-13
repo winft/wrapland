@@ -55,14 +55,18 @@ Surface::Private::~Private()
     // Copy all existing callbacks to new list and clear existing lists.
     // The wl_resource_destroy on the callback resource goes into destroyFrameCallback which would
     // modify the list we are iterating on.
-    QList<wl_resource*> callbacksToDestroy;
-    callbacksToDestroy << current.callbacks;
+    std::vector<wl_resource*> callbacksToDestroy;
+    callbacksToDestroy.insert(
+        callbacksToDestroy.end(), current.callbacks.begin(), current.callbacks.end());
     current.callbacks.clear();
 
-    callbacksToDestroy << pending.callbacks;
+    callbacksToDestroy.insert(
+        callbacksToDestroy.end(), pending.callbacks.begin(), pending.callbacks.end());
     pending.callbacks.clear();
 
-    callbacksToDestroy << subsurfacePending.callbacks;
+    callbacksToDestroy.insert(callbacksToDestroy.end(),
+                              subsurfacePending.callbacks.begin(),
+                              subsurfacePending.callbacks.end());
     subsurfacePending.callbacks.clear();
 
     for (auto callback : callbacksToDestroy) {
@@ -373,13 +377,13 @@ Surface::Surface(Client* client, uint32_t version, uint32_t id)
 
 void Surface::frameRendered(quint32 msec)
 {
-
-    // notify all callbacks
-    const bool needsFlush = !d_ptr->current.callbacks.isEmpty();
-    while (!d_ptr->current.callbacks.isEmpty()) {
-        wl_resource* r = d_ptr->current.callbacks.takeFirst();
-        wl_callback_send_done(r, msec);
-        wl_resource_destroy(r);
+    // Notify all callbacks.
+    const bool needsFlush = !d_ptr->current.callbacks.empty();
+    while (!d_ptr->current.callbacks.empty()) {
+        auto resource = d_ptr->current.callbacks.front();
+        d_ptr->current.callbacks.pop_front();
+        wl_callback_send_done(resource, msec);
+        wl_resource_destroy(resource);
     }
     for (auto subsurface : d_ptr->current.children) {
         if (!subsurface || !subsurface->d_ptr->surface) {
@@ -508,7 +512,8 @@ void Surface::Private::swapStates(SurfaceState* source, SurfaceState* target, bo
         target->childrenChanged = source->childrenChanged;
         target->children = source->children;
     }
-    target->callbacks.append(source->callbacks);
+    target->callbacks.insert(
+        target->callbacks.end(), source->callbacks.begin(), source->callbacks.end());
 
     if (shadowChanged) {
         target->shadow = source->shadow;
@@ -752,7 +757,7 @@ void Surface::Private::addFrameCallback(uint32_t callback)
         return;
     }
     wl_resource_set_implementation(frameCallback, nullptr, this, destroyFrameCallback);
-    pending.callbacks << frameCallback;
+    pending.callbacks.push_back(frameCallback);
 }
 
 void Surface::Private::attachBuffer(wl_resource* buffer, const QPoint& offset)
@@ -791,9 +796,16 @@ void Surface::Private::destroyFrameCallback(wl_resource* wlResource)
 {
     auto priv = static_cast<Private*>(wl_resource_get_user_data(wlResource));
 
-    priv->current.callbacks.removeAll(wlResource);
-    priv->pending.callbacks.removeAll(wlResource);
-    priv->subsurfacePending.callbacks.removeAll(wlResource);
+    auto removeCallback = [wlResource](SurfaceState& state) {
+        auto it = std::find(state.callbacks.begin(), state.callbacks.end(), wlResource);
+        if (it != state.callbacks.end()) {
+            state.callbacks.erase(it);
+        }
+    };
+
+    removeCallback(priv->current);
+    removeCallback(priv->pending);
+    removeCallback(priv->subsurfacePending);
 }
 
 void Surface::Private::attachCallback([[maybe_unused]] wl_client* wlClient,

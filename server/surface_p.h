@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QHash>
 #include <QVector>
 
+#include <deque>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
@@ -57,7 +58,7 @@ struct SurfaceState {
     qint32 scale = 1;
     Output::Transform transform = Output::Transform::Normal;
 
-    QList<wl_resource*> callbacks = QList<wl_resource*>();
+    std::deque<wl_resource*> callbacks;
 
     QPoint offset = QPoint();
     Buffer* buffer = nullptr;
