@@ -128,9 +128,6 @@ public:
     Surface* dataProxy = nullptr;
 
 private:
-    QMetaObject::Connection constrainsOneShotConnection;
-    QMetaObject::Connection constrainsUnboundConnection;
-
     void swapStates(SurfaceState* source, SurfaceState* target, bool emitChanged);
 
     void damage(const QRect& rect);
@@ -140,7 +137,7 @@ private:
     void setTransform(Output::Transform transform);
 
     void addFrameCallback(uint32_t callback);
-    void attachBuffer(wl_resource* buffer, const QPoint& offset);
+    void attachBuffer(wl_resource* wlBuffer, const QPoint& offset);
 
     void setOpaque(const QRegion& region);
     void setInput(const QRegion& region, bool isInfinite);
@@ -194,6 +191,9 @@ private:
                                      int32_t height);
 
     static const struct wl_surface_interface s_interface;
+
+    QMetaObject::Connection constrainsOneShotConnection;
+    QMetaObject::Connection constrainsUnboundConnection;
 
     Surface* q_ptr;
 };

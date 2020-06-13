@@ -760,14 +760,14 @@ void Surface::Private::addFrameCallback(uint32_t callback)
     pending.callbacks.push_back(frameCallback);
 }
 
-void Surface::Private::attachBuffer(wl_resource* buffer, const QPoint& offset)
+void Surface::Private::attachBuffer(wl_resource* wlBuffer, const QPoint& offset)
 {
     pending.bufferIsSet = true;
     pending.offset = offset;
 
     delete pending.buffer;
 
-    if (!buffer) {
+    if (!wlBuffer) {
         // Got a null buffer, deletes content in next frame.
         pending.buffer = nullptr;
         pending.damage = QRegion();
@@ -775,7 +775,7 @@ void Surface::Private::attachBuffer(wl_resource* buffer, const QPoint& offset)
         return;
     }
 
-    pending.buffer = new Buffer(buffer, q_ptr);
+    pending.buffer = new Buffer(wlBuffer, q_ptr);
 
     QObject::connect(
         pending.buffer, &Buffer::resourceDestroyed, handle(), [this, buffer = pending.buffer]() {
@@ -1120,6 +1120,7 @@ Surface* Surface::inputSurfaceAt(const QPointF& position)
             return s;
         }
     }
+
     // Check whether the geometry and input region contain the pos.
     if (!size().isEmpty() && QRectF(QPoint(0, 0), size()).contains(position)
         && (inputIsInfinite() || input().contains(position.toPoint()))) {
