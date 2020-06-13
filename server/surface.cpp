@@ -437,7 +437,7 @@ void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
     }
 }
 
-void Surface::Private::swapStates(State* source, State* target, bool emitChanged)
+void Surface::Private::swapStates(SurfaceState* source, SurfaceState* target, bool emitChanged)
 {
     bool bufferChanged = source->bufferIsSet;
 
@@ -572,7 +572,7 @@ void Surface::Private::swapStates(State* source, State* target, bool emitChanged
         confinedPointer->d_ptr->commit();
     }
 
-    *source = State{};
+    *source = SurfaceState{};
     source->children = target->children;
 
     if (opaqueRegionChanged) {
