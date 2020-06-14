@@ -112,7 +112,7 @@ private:
     friend class ParamsV1;
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 class WRAPLANDSERVER_EXPORT LinuxDmabufBufferV1 : public QObject

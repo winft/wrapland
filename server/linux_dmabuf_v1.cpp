@@ -30,8 +30,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland-server-protocol.h"
 #include <drm_fourcc.h>
 
-#include <Wrapland/Server/wraplandserver_export.h>
-
 #include <QVector>
 
 #include <array>
@@ -86,7 +84,7 @@ void LinuxDmabufV1::Private::createParamsCallback(wl_client* wlClient,
                                                   wl_resource* wlResource,
                                                   uint32_t id)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = handle(wlResource)->d_ptr.get();
     auto client = priv->display()->getClient(wlClient);
 
     [[maybe_unused]] auto params = new ParamsWrapperV1(client->handle(), priv->version(), id, priv);
