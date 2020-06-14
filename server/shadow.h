@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
+#include <memory>
 
 namespace Wrapland::Server
 {
@@ -47,14 +48,14 @@ class WRAPLANDSERVER_EXPORT Shadow : public QObject
 {
     Q_OBJECT
 public:
-    Buffer* left() const;
-    Buffer* topLeft() const;
-    Buffer* top() const;
-    Buffer* topRight() const;
-    Buffer* right() const;
-    Buffer* bottomRight() const;
-    Buffer* bottom() const;
-    Buffer* bottomLeft() const;
+    std::shared_ptr<Buffer> left() const;
+    std::shared_ptr<Buffer> topLeft() const;
+    std::shared_ptr<Buffer> top() const;
+    std::shared_ptr<Buffer> topRight() const;
+    std::shared_ptr<Buffer> right() const;
+    std::shared_ptr<Buffer> bottomRight() const;
+    std::shared_ptr<Buffer> bottom() const;
+    std::shared_ptr<Buffer> bottomLeft() const;
 
     QMarginsF offset() const;
 

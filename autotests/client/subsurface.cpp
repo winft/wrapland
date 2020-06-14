@@ -226,8 +226,6 @@ void TestSubsurface::testCreate()
     QCOMPARE(serverSubsurface->mainSurface(), serverParentSurface);
 
     // children are only added after committing the surface
-    QEXPECT_FAIL(
-        "", "Incorrect adding of child windows to workaround QtWayland behavior", Continue);
     QCOMPARE(serverParentSurface->childSubsurfaces().size(), 0);
 
     // so let's commit the surface, to apply the stacking change
@@ -244,15 +242,11 @@ void TestSubsurface::testCreate()
     subsurface.reset();
     QVERIFY(destroyedSpy.wait());
     QCOMPARE(serverSurface->subsurface(), QPointer<Wrapland::Server::Subsurface>());
-    // only applied after next commit
-    QEXPECT_FAIL(
-        "", "Incorrect removing of child windows to workaround QtWayland behavior", Continue);
-    QCOMPARE(serverParentSurface->childSubsurfaces().size(), 1);
-    // but the surface should be invalid
-    if (!serverParentSurface->childSubsurfaces().empty()) {
-        QVERIFY(!serverParentSurface->childSubsurfaces().front());
-    }
-    // committing the state should solve it
+
+    // Applied immediately.
+    QCOMPARE(serverParentSurface->childSubsurfaces().size(), 0);
+
+    // Make sure committing on parent still works.
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -366,7 +360,7 @@ void TestSubsurface::testPosition()
     QCOMPARE(positionChangedSpy.count(), 1);
     QCOMPARE(positionChangedSpy.first().first().toPoint(), QPoint(20, 30));
     QCOMPARE(serverSubsurface->position(), QPoint(20, 30));
-    QCOMPARE(subsurfaceTreeChanged.count(), 1);
+    QCOMPARE(subsurfaceTreeChanged.count(), 2);
 }
 
 void TestSubsurface::testPlaceAbove()
@@ -413,8 +407,6 @@ void TestSubsurface::testPlaceAbove()
     subsurfaceCreatedSpy.clear();
 
     // So far the stacking order should still be empty.
-    QEXPECT_FAIL(
-        "", "Incorrect adding of child windows to workaround QtWayland behavior", Continue);
     QVERIFY(serverSubsurface1->parentSurface()->childSubsurfaces().empty());
 
     // Committing the parent should create the stacking order.
@@ -529,8 +521,6 @@ void TestSubsurface::testPlaceBelow()
     subsurfaceCreatedSpy.clear();
 
     // so far the stacking order should still be empty
-    QEXPECT_FAIL(
-        "", "Incorrect adding of child windows to workaround QtWayland behavior", Continue);
     QVERIFY(serverSubsurface1->parentSurface()->childSubsurfaces().empty());
 
     // committing the parent should create the stacking order
@@ -717,7 +707,7 @@ void TestSubsurface::testSyncMode()
     parent->commit();
     QVERIFY(childDamagedSpy.wait());
     QCOMPARE(childDamagedSpy.count(), 1);
-    QCOMPARE(subsurfaceTreeChangedSpy.count(), 2);
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 3);
     QCOMPARE(childSurface->buffer()->data(), image);
     QCOMPARE(parentSurface->buffer()->data(), image2);
     QVERIFY(childSurface->isMapped());
@@ -773,8 +763,9 @@ void TestSubsurface::testDeSyncMode()
     QVERIFY(!parentSurface->isMapped());
 
     // setting to desync should apply the state directly
+    QVERIFY(childDamagedSpy.isEmpty());
     subsurface->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
-    QVERIFY(childDamagedSpy.wait());
+    QVERIFY(childDamagedSpy.count() || childDamagedSpy.wait());
     QCOMPARE(subsurfaceTreeChangedSpy.count(), 2);
     QCOMPARE(childSurface->buffer()->data(), image);
     QVERIFY(!childSurface->isMapped());
@@ -800,20 +791,24 @@ void TestSubsurface::testMainSurfaceFromTree()
 
     std::unique_ptr<Wrapland::Client::Surface> parentSurface(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
+
     auto parentServerSurface = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(parentServerSurface);
     std::unique_ptr<Wrapland::Client::Surface> childLevel1Surface(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
+
     auto childLevel1ServerSurface
         = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(childLevel1ServerSurface);
     std::unique_ptr<Wrapland::Client::Surface> childLevel2Surface(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
+
     auto childLevel2ServerSurface
         = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(childLevel2ServerSurface);
     std::unique_ptr<Wrapland::Client::Surface> childLevel3Surface(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
+
     auto childLevel3ServerSurface
         = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(childLevel3ServerSurface);
@@ -828,18 +823,23 @@ void TestSubsurface::testMainSurfaceFromTree()
     auto* sub3
         = m_subCompositor->createSubSurface(childLevel3Surface.get(), childLevel2Surface.get());
 
+    childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     parentSurface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(subsurfaceTreeChangedSpy.wait());
 
     QCOMPARE(parentServerSurface->childSubsurfaces().size(), 1);
+
     auto child = parentServerSurface->childSubsurfaces().front();
     QCOMPARE(child->parentSurface(), parentServerSurface);
     QCOMPARE(child->mainSurface(), parentServerSurface);
     QCOMPARE(child->surface()->childSubsurfaces().size(), 1);
+
     auto child2 = child->surface()->childSubsurfaces().front();
     QCOMPARE(child2->parentSurface(), child->surface());
     QCOMPARE(child2->mainSurface(), parentServerSurface);
     QCOMPARE(child2->surface()->childSubsurfaces().size(), 1);
+
     auto child3 = child2->surface()->childSubsurfaces().front();
     QCOMPARE(child3->parentSurface(), child2->surface());
     QCOMPARE(child3->mainSurface(), parentServerSurface);
@@ -924,6 +924,9 @@ void TestSubsurface::testMappingOfSurfaceTree()
     auto subsurfaceLevel3
         = m_subCompositor->createSubSurface(childLevel3Surface.get(), childLevel2Surface.get());
 
+    childLevel3Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     parentSurface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(subsurfaceTreeChangedSpy.wait());
 
@@ -937,22 +940,33 @@ void TestSubsurface::testMappingOfSurfaceTree()
     QCOMPARE(child3->mainSurface(), parentServerSurface);
     QCOMPARE(child3->surface()->childSubsurfaces().size(), 0);
 
-    // so far no surface is mapped
+    // So far no surface is mapped.
     QVERIFY(!parentServerSurface->isMapped());
     QVERIFY(!child->surface()->isMapped());
     QVERIFY(!child2->surface()->isMapped());
     QVERIFY(!child3->surface()->isMapped());
 
-    // first set all subsurfaces to desync, to simplify
+    // First set all subsurfaces to desync to simplify.
     subsurfaceLevel1->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
     subsurfaceLevel2->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
     subsurfaceLevel3->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
 
-    // first map the child, should not map it
-    QSignalSpy child3DamageSpy(child3->surface(), &Wrapland::Server::Surface::damaged);
-    QVERIFY(child3DamageSpy.isValid());
     QImage image(QSize(200, 200), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::black);
+
+    // Attach a buffer to the first child. Should not map.
+    QSignalSpy child1DamageSpy(child->surface(), &Wrapland::Server::Surface::damaged);
+    QVERIFY(child1DamageSpy.isValid());
+    childLevel1Surface->attachBuffer(m_shm->createBuffer(image));
+    childLevel1Surface->damage(QRect(0, 0, 200, 200));
+    childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    QVERIFY(child1DamageSpy.wait());
+    QVERIFY(child->surface()->buffer());
+    QVERIFY(!child->surface()->isMapped());
+
+    // Attach a buffer to the third child. Should not map.
+    QSignalSpy child3DamageSpy(child3->surface(), &Wrapland::Server::Surface::damaged);
+    QVERIFY(child3DamageSpy.isValid());
     childLevel3Surface->attachBuffer(m_shm->createBuffer(image));
     childLevel3Surface->damage(QRect(0, 0, 200, 200));
     childLevel3Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
@@ -960,7 +974,7 @@ void TestSubsurface::testMappingOfSurfaceTree()
     QVERIFY(child3->surface()->buffer());
     QVERIFY(!child3->surface()->isMapped());
 
-    // let's map the top level
+    // Map the top level.
     QSignalSpy parentSpy(parentServerSurface, &Wrapland::Server::Surface::damaged);
     QVERIFY(parentSpy.isValid());
     parentSurface->attachBuffer(m_shm->createBuffer(image));
@@ -968,18 +982,13 @@ void TestSubsurface::testMappingOfSurfaceTree()
     parentSurface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(parentSpy.wait());
     QVERIFY(parentServerSurface->isMapped());
-    // children should not yet be mapped
-    QEXPECT_FAIL(
-        "", "Workaround for QtWayland bug https://bugreports.qt.io/browse/QTBUG-52192", Continue);
-    QVERIFY(!child->surface()->isMapped());
-    QEXPECT_FAIL(
-        "", "Workaround for QtWayland bug https://bugreports.qt.io/browse/QTBUG-52192", Continue);
+
+    // First child should now be mapped automatically too but not second or third one.
+    QVERIFY(child->surface()->isMapped());
     QVERIFY(!child2->surface()->isMapped());
-    QEXPECT_FAIL(
-        "", "Workaround for QtWayland bug https://bugreports.qt.io/browse/QTBUG-52192", Continue);
     QVERIFY(!child3->surface()->isMapped());
 
-    // next level
+    // Now map the second level. This should automatically also map the thrid one.
     QSignalSpy child2DamageSpy(child2->surface(), &Wrapland::Server::Surface::damaged);
     QVERIFY(child2DamageSpy.isValid());
     childLevel2Surface->attachBuffer(m_shm->createBuffer(image));
@@ -987,41 +996,23 @@ void TestSubsurface::testMappingOfSurfaceTree()
     childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(child2DamageSpy.wait());
     QVERIFY(parentServerSurface->isMapped());
-    // children should not yet be mapped
-    QEXPECT_FAIL(
-        "", "Workaround for QtWayland bug https://bugreports.qt.io/browse/QTBUG-52192", Continue);
-    QVERIFY(!child->surface()->isMapped());
-    QEXPECT_FAIL(
-        "", "Workaround for QtWayland bug https://bugreports.qt.io/browse/QTBUG-52192", Continue);
-    QVERIFY(!child2->surface()->isMapped());
-    QEXPECT_FAIL(
-        "", "Workaround for QtWayland bug https://bugreports.qt.io/browse/QTBUG-52192", Continue);
-    QVERIFY(!child3->surface()->isMapped());
 
-    // last but not least the first child level, which should map all our subsurfaces
-    QSignalSpy child1DamageSpy(child->surface(), &Wrapland::Server::Surface::damaged);
-    QVERIFY(child1DamageSpy.isValid());
-    childLevel1Surface->attachBuffer(m_shm->createBuffer(image));
-    childLevel1Surface->damage(QRect(0, 0, 200, 200));
-    childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(child1DamageSpy.wait());
-
-    // everything is mapped
+    // Everything is mapped now.
     QVERIFY(parentServerSurface->isMapped());
     QVERIFY(child->surface()->isMapped());
     QVERIFY(child2->surface()->isMapped());
     QVERIFY(child3->surface()->isMapped());
 
-    // unmapping a parent should unmap the complete tree
-    QSignalSpy unmappedSpy(child->surface(), &Wrapland::Server::Surface::unmapped);
+    // Unmapping a parent should unmap the complete tree.
+    QSignalSpy unmappedSpy(child2->surface(), &Wrapland::Server::Surface::unmapped);
     QVERIFY(unmappedSpy.isValid());
-    childLevel1Surface->attachBuffer(Wrapland::Client::Buffer::Ptr());
-    childLevel1Surface->damage(QRect(0, 0, 200, 200));
-    childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    childLevel2Surface->attachBuffer(Wrapland::Client::Buffer::Ptr());
+    childLevel2Surface->damage(QRect(0, 0, 200, 200));
+    childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(unmappedSpy.wait());
 
     QVERIFY(parentServerSurface->isMapped());
-    QVERIFY(!child->surface()->isMapped());
+    QVERIFY(child->surface()->isMapped());
     QVERIFY(!child2->surface()->isMapped());
     QVERIFY(!child3->surface()->isMapped());
 
@@ -1032,118 +1023,210 @@ void TestSubsurface::testMappingOfSurfaceTree()
 
 void TestSubsurface::testSurfaceAt()
 {
-    // this test verifies that the correct surface is picked in a sub-surface tree
-    using namespace Wrapland::Client;
-    using namespace Wrapland::Server;
-    // first create a parent surface and map it
+    // This test verifies that the correct surface is picked in a subsurface tree.
+    //
+    //     -----------------------------
+    //    |                             |
+    //    |      grandchild1(50x50)     |
+    //    |                             |
+    //    |                             |
+    //    |                             |-----------------------------------------
+    //    |                             |                          |              |
+    //    |                             |                          |              |
+    //    |                             |                          |              |
+    //    |                             |                          |              |
+    //     -----------------------------                           |              |
+    //                   |                                         |              |
+    //                   |              child1(75x75)              |              |
+    //                   |                                         |              |
+    //                   |                                         |              |
+    //                   |                             ------------------------------------------
+    //                   |                            |                                          |
+    //                   |                            |              child2(75x75)               |
+    //                   |                            |                                          |
+    //                   |----------------------------|             -----------------------------|
+    //                   |                            |            |              |              |
+    //                   |                            |            |    input1    | grandhchild2 |
+    //                   |       parent(100x100)      |            |    (25x25)   |   (50x50)    |
+    //                   |                            |            |              |              |
+    //                    ----------------------------|            |--------------+--------------|
+    //                                                |            |              |              |
+    //                                                |            |              |    input2    |
+    //                                                |            |              |    (25x25)   |
+    //                                                |            |              |              |
+    //                                                 ------------------------------------------
+    //
+
+    QImage parentimage(QSize(100, 100), QImage::Format_ARGB32_Premultiplied);
+    parentimage.fill(Qt::red);
+    QImage childImage(QSize(75, 75), QImage::Format_ARGB32_Premultiplied);
+    childImage.fill(Qt::green);
+    QImage grandchildImage(QSize(50, 50), QImage::Format_ARGB32_Premultiplied);
+    childImage.fill(Qt::blue);
+
+    // First create a parent surface and map it.
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> parent(m_compositor->createSurface());
-    QImage image(QSize(100, 100), QImage::Format_ARGB32_Premultiplied);
-    image.fill(Qt::red);
-    parent->attachBuffer(m_shm->createBuffer(image));
+    parent->attachBuffer(m_shm->createBuffer(parentimage));
     parent->damage(QRect(0, 0, 100, 100));
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(serverSurfaceCreated.wait());
-    auto parentServerSurface
-        = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
+    auto serverParent = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
 
-    // create two child sub surfaces, those won't be mapped, just added to the parent
-    // this is to simulate the behavior of QtWayland
-    std::unique_ptr<Wrapland::Client::Surface> directChild1(m_compositor->createSurface());
+    // Create two child subsurfaces, just added to the parent this is to simulate the behavior of
+    // QtWayland (might have changed in the meantime).
+    std::unique_ptr<Wrapland::Client::Surface> child1(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
-    auto directChild1ServerSurface
-        = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
-    QVERIFY(directChild1ServerSurface);
-    std::unique_ptr<Wrapland::Client::Surface> directChild2(m_compositor->createSurface());
+    auto serverChild1 = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
+    QVERIFY(serverChild1);
+
+    std::unique_ptr<Wrapland::Client::Surface> child2(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
-    auto directChild2ServerSurface
-        = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
-    QVERIFY(directChild2ServerSurface);
+    auto serverChild2 = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
+    QVERIFY(serverChild2);
 
-    // create the sub surfaces for them
-    std::unique_ptr<Wrapland::Client::SubSurface> directChild1Subsurface(
-        m_subCompositor->createSubSurface(directChild1.get(), parent.get()));
-    directChild1Subsurface->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
-    std::unique_ptr<Wrapland::Client::SubSurface> directChild2Subsurface(
-        m_subCompositor->createSubSurface(directChild2.get(), parent.get()));
-    directChild2Subsurface->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
+    // Create the subsurfaces for the children.
+    std::unique_ptr<Wrapland::Client::SubSurface> child1Sub(
+        m_subCompositor->createSubSurface(child1.get(), parent.get()));
+    child1Sub->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
 
-    // each of the children gets a child
-    std::unique_ptr<Wrapland::Client::Surface> childFor1(m_compositor->createSurface());
+    child1->attachBuffer(m_shm->createBuffer(childImage));
+    child1->damage(QRect(0, 0, 75, 75));
+    child1->commit(Wrapland::Client::Surface::CommitFlag::None);
+
+    // Note: child2Sub is initially above child1Sub since it is added after.
+    std::unique_ptr<Wrapland::Client::SubSurface> child2Sub(
+        m_subCompositor->createSubSurface(child2.get(), parent.get()));
+    child2Sub->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
+    child2Sub->setPosition(QPoint(50, 50));
+
+    child2->attachBuffer(m_shm->createBuffer(childImage));
+    child2->damage(QRect(0, 0, 75, 75));
+    child2->commit(Wrapland::Client::Surface::CommitFlag::None);
+
+    // Each of the children gets a child.
+    std::unique_ptr<Wrapland::Client::Surface> grandchild1(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
-    auto childFor1ServerSurface
+    auto serverGrandchild1
         = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
-    std::unique_ptr<Wrapland::Client::Surface> childFor2(m_compositor->createSurface());
+
+    std::unique_ptr<Wrapland::Client::Surface> grandchild2(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
-    auto childFor2ServerSurface
+    auto serverGrandchild2
         = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
 
-    // create sub surfaces for them
-    std::unique_ptr<Wrapland::Client::SubSurface> childFor1Subsurface(
-        m_subCompositor->createSubSurface(childFor1.get(), directChild1.get()));
-    childFor1Subsurface->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
-    std::unique_ptr<Wrapland::Client::SubSurface> childFor2Subsurface(
-        m_subCompositor->createSubSurface(childFor2.get(), directChild2.get()));
-    childFor2Subsurface->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
+    // Create subsurfaces for the grandchildren.
+    std::unique_ptr<Wrapland::Client::SubSurface> grandchild1Sub(
+        m_subCompositor->createSubSurface(grandchild1.get(), child1.get()));
+    grandchild1Sub->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
+    grandchild1Sub->setPosition(QPoint(-25, -25));
 
-    // both get a quarter of the grand-parent surface
-    childFor2Subsurface->setPosition(QPoint(50, 50));
-    childFor2->commit(Wrapland::Client::Surface::CommitFlag::None);
-    directChild2->commit(Wrapland::Client::Surface::CommitFlag::None);
-    parent->commit(Wrapland::Client::Surface::CommitFlag::None);
+    std::unique_ptr<Wrapland::Client::SubSurface> grandchild2Sub(
+        m_subCompositor->createSubSurface(grandchild2.get(), child2.get()));
+    grandchild2Sub->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
+    grandchild2Sub->setPosition(QPoint(25, 25));
 
-    // now let's render both grand children
-    QImage partImage(QSize(50, 50), QImage::Format_ARGB32_Premultiplied);
-    partImage.fill(Qt::green);
-    childFor1->attachBuffer(m_shm->createBuffer(partImage));
-    childFor1->damage(QRect(0, 0, 50, 50));
-    childFor1->commit(Wrapland::Client::Surface::CommitFlag::None);
-    partImage.fill(Qt::blue);
+    // Now let's render both grandchildren.
+    grandchild1->attachBuffer(m_shm->createBuffer(grandchildImage));
+    grandchild1->damage(QRect(0, 0, 50, 50));
+    grandchild1->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    childFor2->attachBuffer(m_shm->createBuffer(partImage));
-    // child for 2's input region is subdivided into quadrants, with input mask on the top left and
-    // bottom right
+    // Second grandchild's input region is subdivided into quadrants, with input mask on the top
+    // left and bottom right.
     QRegion region;
     region += QRect(0, 0, 25, 25);
     region += QRect(25, 25, 25, 25);
-    childFor2->setInputRegion(m_compositor->createRegion(region).get());
-    childFor2->damage(QRect(0, 0, 50, 50));
-    childFor2->commit(Wrapland::Client::Surface::CommitFlag::None);
+    grandchild2->setInputRegion(m_compositor->createRegion(region).get());
 
-    QSignalSpy treeChangedSpy(parentServerSurface,
-                              &Wrapland::Server::Surface::subsurfaceTreeChanged);
+    grandchild2->attachBuffer(m_shm->createBuffer(grandchildImage));
+    grandchild2->damage(QRect(0, 0, 50, 50));
+    grandchild2->commit(Wrapland::Client::Surface::CommitFlag::None);
+
+    QSignalSpy treeChangedSpy(serverParent, &Wrapland::Server::Surface::subsurfaceTreeChanged);
     QVERIFY(treeChangedSpy.isValid());
     QVERIFY(treeChangedSpy.wait());
 
-    QCOMPARE(directChild1ServerSurface->subsurface()->parentSurface(), parentServerSurface);
-    QCOMPARE(directChild2ServerSurface->subsurface()->parentSurface(), parentServerSurface);
-    QCOMPARE(childFor1ServerSurface->subsurface()->parentSurface(), directChild1ServerSurface);
-    QCOMPARE(childFor2ServerSurface->subsurface()->parentSurface(), directChild2ServerSurface);
+    QCOMPARE(serverChild1->subsurface()->parentSurface(), serverParent);
+    QCOMPARE(serverChild2->subsurface()->parentSurface(), serverParent);
+    QCOMPARE(serverGrandchild1->subsurface()->parentSurface(), serverChild1);
+    QCOMPARE(serverGrandchild2->subsurface()->parentSurface(), serverChild2);
 
-    // now let's test a few positions
-    QCOMPARE(parentServerSurface->surfaceAt(QPointF(0, 0)), childFor1ServerSurface);
-    QCOMPARE(parentServerSurface->surfaceAt(QPointF(49, 49)), childFor1ServerSurface);
-    QCOMPARE(parentServerSurface->surfaceAt(QPointF(50, 50)), childFor2ServerSurface);
-    QCOMPARE(parentServerSurface->surfaceAt(QPointF(100, 100)), childFor2ServerSurface);
-    QCOMPARE(parentServerSurface->surfaceAt(QPointF(100, 50)), childFor2ServerSurface);
-    QCOMPARE(parentServerSurface->surfaceAt(QPointF(50, 100)), childFor2ServerSurface);
-    QCOMPARE(parentServerSurface->surfaceAt(QPointF(25, 75)), parentServerSurface);
-    QCOMPARE(parentServerSurface->surfaceAt(QPointF(75, 25)), parentServerSurface);
+    QVERIFY(serverChild1->isMapped());
+    QVERIFY(serverChild2->isMapped());
+    QVERIFY(serverGrandchild1->isMapped());
+    QVERIFY(serverGrandchild2->isMapped());
 
-    QCOMPARE(parentServerSurface->inputSurfaceAt(QPointF(0, 0)), childFor1ServerSurface);
-    QCOMPARE(parentServerSurface->inputSurfaceAt(QPointF(49, 49)), childFor1ServerSurface);
-    QCOMPARE(parentServerSurface->inputSurfaceAt(QPointF(50, 50)), childFor2ServerSurface);
-    QCOMPARE(parentServerSurface->inputSurfaceAt(QPointF(99, 99)), childFor2ServerSurface);
-    QCOMPARE(parentServerSurface->inputSurfaceAt(QPointF(99, 50)), parentServerSurface);
-    QCOMPARE(parentServerSurface->inputSurfaceAt(QPointF(50, 99)), parentServerSurface);
-    QCOMPARE(parentServerSurface->inputSurfaceAt(QPointF(25, 75)), parentServerSurface);
-    QCOMPARE(parentServerSurface->inputSurfaceAt(QPointF(75, 25)), parentServerSurface);
+    // Now test some positions.
+    // Around top-left.
+    QVERIFY(!serverParent->surfaceAt(QPointF(-26, -25)));
+    QVERIFY(!serverParent->surfaceAt(QPointF(-25, -26)));
+    QCOMPARE(serverParent->surfaceAt(QPointF(-25, -25)), serverGrandchild1);
+    QCOMPARE(serverParent->surfaceAt(QPointF(0, 0)), serverGrandchild1);
 
-    // outside the geometries should be no surface
-    QVERIFY(!parentServerSurface->surfaceAt(QPointF(-1, -1)));
-    QVERIFY(!parentServerSurface->surfaceAt(QPointF(101, 101)));
+    // Around middle.
+    QCOMPARE(serverParent->surfaceAt(QPointF(49, 49)), serverChild1);
+    QCOMPARE(serverParent->surfaceAt(QPointF(49, 75)), serverChild1);
+    QCOMPARE(serverParent->surfaceAt(QPointF(75, 49)), serverChild1);
+    QCOMPARE(serverParent->surfaceAt(QPointF(76, 49)), serverParent);
+    QCOMPARE(serverParent->surfaceAt(QPointF(49, 76)), serverParent);
+    QCOMPARE(serverParent->surfaceAt(QPointF(49, 100)), serverParent);
+    QCOMPARE(serverParent->surfaceAt(QPointF(100, 49)), serverParent);
+    QCOMPARE(serverParent->surfaceAt(QPointF(50, 50)), serverChild2);
+    QCOMPARE(serverParent->surfaceAt(QPointF(100, 50)), serverChild2);
+    QCOMPARE(serverParent->surfaceAt(QPointF(50, 100)), serverChild2);
+    QCOMPARE(serverParent->surfaceAt(QPointF(75, 75)), serverGrandchild2);
+
+    // Around bottom-right.
+    QCOMPARE(serverParent->surfaceAt(QPointF(100, 100)), serverGrandchild2);
+    QCOMPARE(serverParent->surfaceAt(QPointF(125, 100)), serverGrandchild2);
+    QCOMPARE(serverParent->surfaceAt(QPointF(100, 125)), serverGrandchild2);
+    QVERIFY(!serverParent->surfaceAt(QPointF(126, 125)));
+    QVERIFY(!serverParent->surfaceAt(QPointF(125, 126)));
+
+    // Now test some input positions.
+    // Around top-left.
+    QVERIFY(!serverParent->inputSurfaceAt(QPointF(-26, -25)));
+    QVERIFY(!serverParent->inputSurfaceAt(QPointF(-25, -26)));
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(-25, -25)), serverGrandchild1);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(0, 0)), serverGrandchild1);
+
+    // Around middle.
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(49, 49)), serverChild1);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(49, 75)), serverChild1);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(75, 49)), serverChild1);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(76, 49)), serverParent);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(49, 76)), serverParent);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(49, 100)), serverParent);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 49)), serverParent);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(50, 50)), serverChild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 50)), serverChild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(50, 100)), serverChild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(75, 75)), serverGrandchild2);
+
+    // Around bottom-right.
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(99, 99)), serverGrandchild2);
+
+    // In Qt QRegions do not contain the right and bottom edge.
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(99, 100)), serverChild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 99)), serverChild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(125, 100)), serverChild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 125)), serverChild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(125, 125)), serverChild2);
+
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(99, 101)), serverChild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(101, 99)), serverChild2);
+
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(75, 75)), serverGrandchild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 100)), serverGrandchild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(101, 100)), serverGrandchild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 101)), serverGrandchild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(101, 101)), serverGrandchild2);
+    QCOMPARE(serverParent->inputSurfaceAt(QPointF(124, 124)), serverGrandchild2);
+
+    QVERIFY(!serverParent->inputSurfaceAt(QPointF(126, 125)));
+    QVERIFY(!serverParent->inputSurfaceAt(QPointF(125, 126)));
 }
 
 void TestSubsurface::testDestroyAttachedBuffer()

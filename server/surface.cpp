@@ -55,26 +55,22 @@ Surface::Private::~Private()
     // Copy all existing callbacks to new list and clear existing lists.
     // The wl_resource_destroy on the callback resource goes into destroyFrameCallback which would
     // modify the list we are iterating on.
-    QList<wl_resource*> callbacksToDestroy;
-    callbacksToDestroy << current.callbacks;
+    std::vector<wl_resource*> callbacksToDestroy;
+    callbacksToDestroy.insert(
+        callbacksToDestroy.end(), current.callbacks.begin(), current.callbacks.end());
     current.callbacks.clear();
 
-    callbacksToDestroy << pending.callbacks;
+    callbacksToDestroy.insert(
+        callbacksToDestroy.end(), pending.callbacks.begin(), pending.callbacks.end());
     pending.callbacks.clear();
-
-    callbacksToDestroy << subsurfacePending.callbacks;
-    subsurfacePending.callbacks.clear();
 
     for (auto callback : callbacksToDestroy) {
         wl_resource_destroy(callback);
     }
 
-    if (current.buffer) {
-        current.buffer->unref();
-    }
-
     if (subsurface) {
         subsurface->d_ptr->surface = nullptr;
+        subsurface = nullptr;
     }
 
     for (auto child : current.children) {
@@ -83,19 +79,19 @@ Surface::Private::~Private()
     for (auto child : pending.children) {
         child->d_ptr->parent = nullptr;
     }
-    for (auto child : subsurfacePending.children) {
-        child->d_ptr->parent = nullptr;
-    }
 }
 
 void Surface::Private::addChild(Subsurface* child)
 {
-    // Protocol is not precise on how to handle the addition of new subsurfaces.
+    if (subsurface) {
+        // We add it indiscriminately to the cached state. If the subsurface state is synchronized
+        // on next parent commit it is added, if not it will be ignored here.
+        subsurface->d_ptr->cached.children.push_back(child);
+    }
     pending.children.push_back(child);
-    subsurfacePending.children.push_back(child);
-    current.children.push_back(child);
+    pending.childrenChanged = true;
 
-    Q_EMIT handle()->subsurfaceTreeChanged();
+    // TODO(romangg): Should all below only be changed on commit?
 
     QObject::connect(
         child, &Subsurface::positionChanged, handle(), &Surface::subsurfaceTreeChanged);
@@ -108,16 +104,19 @@ void Surface::Private::addChild(Subsurface* child)
                      &Surface::subsurfaceTreeChanged,
                      handle(),
                      &Surface::subsurfaceTreeChanged);
+
+    Q_EMIT handle()->subsurfaceTreeChanged();
 }
 
 void Surface::Private::removeChild(Subsurface* child)
 {
-    // Protocol is not precise on how to handle the removal of new subsurfaces.
+    if (subsurface) {
+        auto& cached = subsurface->d_ptr->cached;
+        cached.children.erase(std::remove(cached.children.begin(), cached.children.end(), child),
+                              cached.children.end());
+    }
     pending.children.erase(std::remove(pending.children.begin(), pending.children.end(), child),
                            pending.children.end());
-    subsurfacePending.children.erase(
-        std::remove(subsurfacePending.children.begin(), subsurfacePending.children.end(), child),
-        subsurfacePending.children.end());
     current.children.erase(std::remove(current.children.begin(), current.children.end(), child),
                            current.children.end());
 
@@ -373,18 +372,15 @@ Surface::Surface(Client* client, uint32_t version, uint32_t id)
 
 void Surface::frameRendered(quint32 msec)
 {
-
-    // notify all callbacks
-    const bool needsFlush = !d_ptr->current.callbacks.isEmpty();
-    while (!d_ptr->current.callbacks.isEmpty()) {
-        wl_resource* r = d_ptr->current.callbacks.takeFirst();
-        wl_callback_send_done(r, msec);
-        wl_resource_destroy(r);
+    // Notify all callbacks.
+    const bool needsFlush = !d_ptr->current.callbacks.empty();
+    while (!d_ptr->current.callbacks.empty()) {
+        auto resource = d_ptr->current.callbacks.front();
+        d_ptr->current.callbacks.pop_front();
+        wl_callback_send_done(resource, msec);
+        wl_resource_destroy(resource);
     }
     for (auto subsurface : d_ptr->current.children) {
-        if (!subsurface || !subsurface->d_ptr->surface) {
-            continue;
-        }
         subsurface->d_ptr->surface->frameRendered(msec);
     }
     if (needsFlush) {
@@ -437,133 +433,174 @@ void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
     }
 }
 
-void Surface::Private::swapStates(State* source, State* target, bool emitChanged)
+void Surface::Private::updateCurrentBuffer(SurfaceState const& source, bool& damaged, bool& resized)
 {
-    bool bufferChanged = source->bufferIsSet;
+    if (!source.bufferIsSet) {
+        return;
+    }
 
-    const bool opaqueRegionChanged = source->opaqueIsSet;
-    const bool inputRegionChanged = source->inputIsSet;
+    QSize oldSize;
 
-    const bool scaleFactorChanged = source->scaleIsSet && (target->scale != source->scale);
-    const bool transformChanged
-        = source->transformIsSet && (target->transform != source->transform);
+    auto const wasMapped = current.buffer != nullptr;
+    if (wasMapped) {
+        oldSize = current.buffer->size();
 
-    const bool shadowChanged = source->shadowIsSet;
-    const bool blurChanged = source->blurIsSet;
-    const bool contrastChanged = source->contrastIsSet;
-    const bool slideChanged = source->slideIsSet;
+        QObject::disconnect(
+            current.buffer.get(), &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
+    }
 
-    const bool sourceRectangleChanged = source->sourceRectangleIsSet;
-    const bool destinationSizeChanged = source->destinationSizeIsSet;
+    current.buffer = source.buffer;
 
-    const bool childrenChanged = source->childrenChanged;
+    if (!current.buffer) {
+        //        subsurfaceIsMapped = false;
+        if (wasMapped) {
+            Q_EMIT handle()->unmapped();
+        }
+        return;
+    }
 
-    bool sizeChanged = false;
-    auto buffer = target->buffer;
+    current.buffer->setCommitted();
+    QObject::connect(current.buffer.get(), &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
 
-    if (bufferChanged) {
-        // TODO(unknown author): is the reffing correct for subsurfaces?
+    current.offset = source.offset;
+    current.damage = source.damage;
+    current.bufferDamage = source.bufferDamage;
 
-        QSize oldSize;
-        if (target->buffer) {
-            oldSize = target->buffer->size();
+    auto const newSize = current.buffer->size();
+    resized = newSize.isValid() && newSize != oldSize;
 
-            if (emitChanged) {
-                target->buffer->unref();
-                QObject::disconnect(
-                    target->buffer, &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
-            } else {
-                delete target->buffer;
-                target->buffer = nullptr;
+    if (current.damage.isEmpty() && current.bufferDamage.isEmpty()) {
+        // No damage submitted yet for the new buffer.
+
+        // TODO(romangg): Does this mean size is not change, i.e. return false always?
+        return;
+    }
+
+    auto const surfaceSize = handle()->size();
+    auto const surfaceRegion = QRegion(0, 0, surfaceSize.width(), surfaceSize.height());
+    if (surfaceRegion.isEmpty()) {
+        return;
+    }
+
+    auto bufferDamage = QRegion();
+
+    if (!current.bufferDamage.isEmpty()) {
+        auto const tr = current.transform;
+        auto const sc = current.scale;
+
+        using Tr = Output::Transform;
+        if (tr == Tr::Rotated90 || tr == Tr::Rotated270 || tr == Tr::Flipped90
+            || tr == Tr::Flipped270) {
+
+            // Calculate transformed + scaled buffer damage.
+            for (const auto& rect : current.bufferDamage) {
+                const auto add
+                    = QRegion(rect.x() / sc, rect.y() / sc, rect.height() / sc, rect.width() / sc);
+                bufferDamage = bufferDamage.united(add);
             }
-        }
 
-        if (source->buffer) {
-            if (emitChanged) {
-                source->buffer->ref();
-                QObject::connect(
-                    source->buffer, &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
+        } else if (sc != 1) {
+
+            // Calculate scaled buffer damage.
+            for (auto const& rect : current.bufferDamage) {
+                auto const add
+                    = QRegion(rect.x() / sc, rect.y() / sc, rect.width() / sc, rect.height() / sc);
+                bufferDamage = bufferDamage.united(add);
             }
-            const QSize newSize = source->buffer->size();
-            sizeChanged = newSize.isValid() && newSize != oldSize;
+
+        } else {
+            bufferDamage = current.bufferDamage;
         }
+    }
 
-        if (!target->buffer && !source->buffer && emitChanged) {
-            // Null buffer set on a not mapped surface, don't emit unmapped.
-            bufferChanged = false;
+    current.damage = surfaceRegion.intersected(current.damage.united(bufferDamage));
+
+    //    subsurfaceIsMapped = true;
+    trackedDamage = trackedDamage.united(current.damage);
+    damaged = true;
+
+    // TODO(romangg): Confirm that this workaround is not needed anymore.
+#if 0
+    // workaround for https://bugreports.qt.io/browse/QTBUG-52092
+    // if the surface is a sub-surface, but the main surface is not yet mapped, fake
+    // frame rendered
+    if (subsurface) {
+        const auto mainSurface = subsurface->mainSurface();
+        if (!mainSurface || !mainSurface->buffer()) {
+            handle()->frameRendered(0);
         }
+    }
+#endif
+}
 
-        buffer = source->buffer;
-    }
+void Surface::Private::updateCurrentState(bool forceChildren)
+{
+    updateCurrentState(pending, forceChildren);
+}
 
-    // Copy values.
-    if (bufferChanged) {
-        target->buffer = buffer;
-        target->offset = source->offset;
-        target->damage = source->damage;
-        target->bufferDamage = source->bufferDamage;
-        target->bufferIsSet = source->bufferIsSet;
-    }
-    if (childrenChanged) {
-        target->childrenChanged = source->childrenChanged;
-        target->children = source->children;
-    }
-    target->callbacks.append(source->callbacks);
+void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildren)
+{
+    bool const scaleFactorChanged = source.scaleIsSet && (current.scale != source.scale);
+    bool const transformChanged = source.transformIsSet && (current.transform != source.transform);
 
-    if (shadowChanged) {
-        target->shadow = source->shadow;
-        target->shadowIsSet = true;
+    bool damaged = false;
+    bool resized = false;
+
+    updateCurrentBuffer(source, damaged, resized);
+
+    if (source.childrenChanged) {
+        current.children = source.children;
     }
-    if (blurChanged) {
-        target->blur = source->blur;
-        target->blurIsSet = true;
+    current.callbacks.insert(
+        current.callbacks.end(), source.callbacks.begin(), source.callbacks.end());
+
+    if (source.shadowIsSet) {
+        current.shadow = source.shadow;
     }
-    if (contrastChanged) {
-        target->contrast = source->contrast;
-        target->contrastIsSet = true;
+    if (source.blurIsSet) {
+        current.blur = source.blur;
     }
-    if (slideChanged) {
-        target->slide = source->slide;
-        target->slideIsSet = true;
+    if (source.contrastIsSet) {
+        current.contrast = source.contrast;
     }
-    if (inputRegionChanged) {
-        target->input = source->input;
-        target->inputIsInfinite = source->inputIsInfinite;
-        target->inputIsSet = true;
+    if (source.slideIsSet) {
+        current.slide = source.slide;
     }
-    if (opaqueRegionChanged) {
-        target->opaque = source->opaque;
-        target->opaqueIsSet = true;
+    if (source.inputIsSet) {
+        current.input = source.input;
+        current.inputIsInfinite = source.inputIsInfinite;
+    }
+    if (source.opaqueIsSet) {
+        current.opaque = source.opaque;
     }
     if (scaleFactorChanged) {
-        target->scale = source->scale;
-        target->scaleIsSet = true;
+        current.scale = source.scale;
     }
     if (transformChanged) {
-        target->transform = source->transform;
-        target->transformIsSet = true;
+        current.transform = source.transform;
     }
 
-    if (destinationSizeChanged) {
-        target->destinationSize = source->destinationSize;
-        target->destinationSizeIsSet = true;
-        sizeChanged |= static_cast<bool>(buffer);
+    if (source.destinationSizeIsSet) {
+        current.destinationSize = source.destinationSize;
+        resized = current.buffer != nullptr;
     }
-    if (sourceRectangleChanged) {
-        if (buffer && !target->destinationSize.isValid() && source->sourceRectangle.isValid()) {
+
+    if (source.sourceRectangleIsSet) {
+        if (current.buffer && !source.destinationSize.isValid()
+            && source.sourceRectangle.isValid()) {
             // TODO(unknown author): We should make this dependent on the previous size being
-            //      different. But looking at above sizeChanged calculation when setting the buffer
+            //      different. But looking at above resized calculation when setting the buffer
             //      we need to do fix this there as well (does not look at buffer transform
             //      and destination size).
-            sizeChanged = true;
+            resized = true;
         }
-        target->sourceRectangle = source->sourceRectangle;
-        target->sourceRectangleIsSet = true;
+        current.sourceRectangle = source.sourceRectangle;
     }
 
     // Now check that source rectangle is (still) well defined.
-    soureRectangleIntegerCheck(target->destinationSize, target->sourceRectangle);
-    soureRectangleContainCheck(buffer, target->transform, target->scale, target->sourceRectangle);
+    soureRectangleIntegerCheck(current.destinationSize, current.sourceRectangle);
+    soureRectangleContainCheck(
+        current.buffer.get(), current.transform, current.scale, current.sourceRectangle);
 
     if (!lockedPointer.isNull()) {
         lockedPointer->d_ptr->commit();
@@ -572,150 +609,73 @@ void Surface::Private::swapStates(State* source, State* target, bool emitChanged
         confinedPointer->d_ptr->commit();
     }
 
-    *source = State{};
-    source->children = target->children;
-
-    if (opaqueRegionChanged) {
-        Q_EMIT handle()->opaqueChanged(target->opaque);
+    if (source.opaqueIsSet) {
+        Q_EMIT handle()->opaqueChanged(current.opaque);
     }
-    if (inputRegionChanged) {
-        Q_EMIT handle()->inputChanged(target->input);
+    if (source.inputIsSet) {
+        Q_EMIT handle()->inputChanged(current.input);
     }
 
     if (scaleFactorChanged) {
-        Q_EMIT handle()->scaleChanged(target->scale);
-        if (buffer && !sizeChanged) {
-            Q_EMIT handle()->sizeChanged();
-        }
+        Q_EMIT handle()->scaleChanged(current.scale);
+        resized = current.buffer != nullptr;
     }
     if (transformChanged) {
-        Q_EMIT handle()->transformChanged(target->transform);
+        Q_EMIT handle()->transformChanged(current.transform);
     }
-
-    if (bufferChanged && emitChanged) {
-        if (target->buffer && (!target->damage.isEmpty() || !target->bufferDamage.isEmpty())) {
-            const QRegion windowRegion
-                = QRegion(0, 0, handle()->size().width(), handle()->size().height());
-            if (!windowRegion.isEmpty()) {
-                QRegion bufferDamage;
-                if (!target->bufferDamage.isEmpty()) {
-                    typedef Output::Transform Tr;
-                    const Tr tr = target->transform;
-                    const qint32 sc = target->scale;
-                    if (tr == Tr::Rotated90 || tr == Tr::Rotated270 || tr == Tr::Flipped90
-                        || tr == Tr::Flipped270) {
-                        // calculate transformed + scaled buffer damage
-                        for (const auto& rect : target->bufferDamage) {
-                            const auto add = QRegion(rect.x() / sc,
-                                                     rect.y() / sc,
-                                                     rect.height() / sc,
-                                                     rect.width() / sc);
-                            bufferDamage = bufferDamage.united(add);
-                        }
-                    } else if (sc != 1) {
-                        // calculate scaled buffer damage
-                        for (const auto& rect : target->bufferDamage) {
-                            const auto add = QRegion(rect.x() / sc,
-                                                     rect.y() / sc,
-                                                     rect.width() / sc,
-                                                     rect.height() / sc);
-                            bufferDamage = bufferDamage.united(add);
-                        }
-                    } else {
-                        bufferDamage = target->bufferDamage;
-                    }
-                }
-                target->damage = windowRegion.intersected(target->damage.united(bufferDamage));
-                if (emitChanged) {
-                    subsurfaceIsMapped = true;
-                    trackedDamage = trackedDamage.united(target->damage);
-                    Q_EMIT handle()->damaged(target->damage);
-                    // workaround for https://bugreports.qt.io/browse/QTBUG-52092
-                    // if the surface is a sub-surface, but the main surface is not yet mapped, fake
-                    // frame rendered
-                    if (subsurface) {
-                        const auto mainSurface = subsurface->mainSurface();
-                        if (!mainSurface || !mainSurface->buffer()) {
-                            handle()->frameRendered(0);
-                        }
-                    }
-                }
-            }
-        } else if (!target->buffer && emitChanged) {
-            subsurfaceIsMapped = false;
-            Q_EMIT handle()->unmapped();
-        }
-    }
-    if (!emitChanged) {
-        return;
-    }
-    if (sizeChanged) {
+    if (resized) {
         Q_EMIT handle()->sizeChanged();
     }
-    if (shadowChanged) {
+
+    if (source.shadowIsSet) {
         Q_EMIT handle()->shadowChanged();
     }
-    if (blurChanged) {
+    if (source.blurIsSet) {
         Q_EMIT handle()->blurChanged();
     }
-    if (contrastChanged) {
+    if (source.contrastIsSet) {
         Q_EMIT handle()->contrastChanged();
     }
-    if (slideChanged) {
+    if (source.slideIsSet) {
         Q_EMIT handle()->slideOnShowHideChanged();
     }
-    if (sourceRectangleChanged) {
+    if (source.sourceRectangleIsSet) {
         Q_EMIT handle()->sourceRectangleChanged();
     }
-    if (childrenChanged) {
+    if (source.childrenChanged) {
         Q_EMIT handle()->subsurfaceTreeChanged();
+    }
+
+    if (damaged) {
+        Q_EMIT handle()->damaged(current.damage);
+    }
+
+    source = SurfaceState();
+    source.children = current.children;
+
+    for (auto subsurface : current.children) {
+        if (subsurface) {
+            subsurface->d_ptr->applyCached(forceChildren);
+        }
     }
 }
 
 void Surface::Private::commit()
 {
-    if (subsurface && subsurface->isSynchronized()) {
-        swapStates(&pending, &subsurfacePending, false);
-    } else {
-        swapStates(&pending, &current, true);
-        if (subsurface) {
-            subsurface->d_ptr->commit();
-        }
-
-        // Commit all subsurfaces to apply position changes.
-        // "The cached state is applied to the sub-surface immediately after the parent surface's
-        // state is applied"
-
-        for (auto subsurface : current.children) {
-            if (!subsurface) {
-                continue;
-            }
-            subsurface->d_ptr->commit();
-        }
+    if (subsurface) {
+        // Surface has associated subsurface. We delegate committing to there.
+        subsurface->d_ptr->commit();
+        Q_EMIT handle()->committed();
+        return;
     }
+
+    updateCurrentState(false);
 
     if (shellSurface) {
         shellSurface->commit();
     }
 
     Q_EMIT handle()->committed();
-}
-
-void Surface::Private::commitSubsurface()
-{
-    if (!subsurface || !subsurface->isSynchronized()) {
-        return;
-    }
-    swapStates(&subsurfacePending, &current, true);
-
-    // "The cached state is applied to the sub-surface immediately after the parent surface's state
-    // is applied"
-    for (auto subsurface : current.children) {
-        if (!subsurface || !subsurface->isSynchronized()) {
-            continue;
-        }
-        subsurface->d_ptr->commit();
-    }
 }
 
 void Surface::Private::damage(const QRect& rect)
@@ -752,48 +712,55 @@ void Surface::Private::addFrameCallback(uint32_t callback)
         return;
     }
     wl_resource_set_implementation(frameCallback, nullptr, this, destroyFrameCallback);
-    pending.callbacks << frameCallback;
+    pending.callbacks.push_back(frameCallback);
 }
 
-void Surface::Private::attachBuffer(wl_resource* buffer, const QPoint& offset)
+void Surface::Private::attachBuffer(wl_resource* wlBuffer, const QPoint& offset)
 {
     pending.bufferIsSet = true;
     pending.offset = offset;
 
-    delete pending.buffer;
-
-    if (!buffer) {
+    if (!wlBuffer) {
         // Got a null buffer, deletes content in next frame.
-        pending.buffer = nullptr;
+        pending.buffer.reset();
         pending.damage = QRegion();
         pending.bufferDamage = QRegion();
         return;
     }
 
-    pending.buffer = new Buffer(buffer, q_ptr);
+    pending.buffer = Buffer::make(wlBuffer, q_ptr);
 
-    QObject::connect(
-        pending.buffer, &Buffer::resourceDestroyed, handle(), [this, buffer = pending.buffer]() {
-            if (pending.buffer == buffer) {
-                pending.buffer = nullptr;
-            }
-            if (subsurfacePending.buffer == buffer) {
-                subsurfacePending.buffer = nullptr;
-            }
-            if (current.buffer == buffer) {
-                current.buffer->unref();
-                current.buffer = nullptr;
-            }
-        });
+    QObject::connect(pending.buffer.get(),
+                     &Buffer::resourceDestroyed,
+                     handle(),
+                     [this, buffer = pending.buffer.get()]() {
+                         if (pending.buffer.get() == buffer) {
+                             pending.buffer.reset();
+                         } else if (current.buffer.get() == buffer) {
+                             current.buffer.reset();
+                         } else if (subsurface
+                                    && subsurface->d_ptr->cached.buffer.get() == buffer) {
+                             subsurface->d_ptr->cached.buffer.reset();
+                         }
+                     });
 }
 
 void Surface::Private::destroyFrameCallback(wl_resource* wlResource)
 {
     auto priv = static_cast<Private*>(wl_resource_get_user_data(wlResource));
 
-    priv->current.callbacks.removeAll(wlResource);
-    priv->pending.callbacks.removeAll(wlResource);
-    priv->subsurfacePending.callbacks.removeAll(wlResource);
+    auto removeCallback = [wlResource](SurfaceState& state) {
+        auto it = std::find(state.callbacks.begin(), state.callbacks.end(), wlResource);
+        if (it != state.callbacks.end()) {
+            state.callbacks.erase(it);
+        }
+    };
+
+    removeCallback(priv->current);
+    removeCallback(priv->pending);
+    if (priv->subsurface) {
+        removeCallback(priv->subsurface->d_ptr->cached);
+    }
 }
 
 void Surface::Private::attachCallback([[maybe_unused]] wl_client* wlClient,
@@ -891,79 +858,61 @@ void Surface::Private::bufferScaleCallback([[maybe_unused]] wl_client* wlClient,
 
 QRegion Surface::damage() const
 {
-
     return d_ptr->current.damage;
 }
 
 QRegion Surface::opaque() const
 {
-
     return d_ptr->current.opaque;
 }
 
 QRegion Surface::input() const
 {
-
     return d_ptr->current.input;
 }
 
 bool Surface::inputIsInfinite() const
 {
-
     return d_ptr->current.inputIsInfinite;
 }
 
 qint32 Surface::scale() const
 {
-
     return d_ptr->current.scale;
 }
 
 Output::Transform Surface::transform() const
 {
-
     return d_ptr->current.transform;
 }
 
-Buffer* Surface::buffer()
+std::shared_ptr<Buffer> Surface::buffer() const
 {
-
-    return d_ptr->current.buffer;
-}
-
-Buffer* Surface::buffer() const
-{
-
     return d_ptr->current.buffer;
 }
 
 QPoint Surface::offset() const
 {
-
     return d_ptr->current.offset;
 }
 
 QRectF Surface::sourceRectangle() const
 {
-
     return d_ptr->current.sourceRectangle;
 }
 
 std::vector<Subsurface*> Surface::childSubsurfaces() const
 {
-
     return d_ptr->current.children;
 }
 
 Subsurface* Surface::subsurface() const
 {
-
     return d_ptr->subsurface;
 }
 
 QSize Surface::size() const
 {
-
     if (!d_ptr->current.buffer) {
         return QSize();
     }
@@ -979,35 +928,30 @@ QSize Surface::size() const
 
 QPointer<Shadow> Surface::shadow() const
 {
-
     return d_ptr->current.shadow;
 }
 
 QPointer<Blur> Surface::blur() const
 {
-
     return d_ptr->current.blur;
 }
 
 QPointer<Contrast> Surface::contrast() const
 {
-
     return d_ptr->current.contrast;
 }
 
 QPointer<Slide> Surface::slideOnShowHide() const
 {
-
     return d_ptr->current.slide;
 }
 
 bool Surface::isMapped() const
 {
-
     if (d_ptr->subsurface) {
         // From the spec: "A sub-surface becomes mapped, when a non-NULL wl_buffer is applied and
         // the parent surface is mapped."
-        return d_ptr->subsurfaceIsMapped && d_ptr->subsurface->parentSurface()
+        return d_ptr->current.buffer && d_ptr->subsurface->parentSurface()
             && d_ptr->subsurface->parentSurface()->isMapped();
     }
     return d_ptr->current.buffer != nullptr;
@@ -1015,19 +959,16 @@ bool Surface::isMapped() const
 
 QRegion Surface::trackedDamage() const
 {
-
     return d_ptr->trackedDamage;
 }
 
 void Surface::resetTrackedDamage()
 {
-
     d_ptr->trackedDamage = QRegion();
 }
 
 std::vector<Output*> Surface::outputs() const
 {
-
     return d_ptr->outputs;
 }
 
@@ -1129,6 +1070,7 @@ Surface* Surface::inputSurfaceAt(const QPointF& position)
             return s;
         }
     }
+
     // Check whether the geometry and input region contain the pos.
     if (!size().isEmpty() && QRectF(QPoint(0, 0), size()).contains(position)
         && (inputIsInfinite() || input().contains(position.toPoint()))) {
@@ -1154,7 +1096,6 @@ bool Surface::inhibitsIdle() const
 
 void Surface::setDataProxy(Surface* surface)
 {
-
     d_ptr->dataProxy = surface;
 }
 

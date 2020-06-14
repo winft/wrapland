@@ -132,12 +132,11 @@ void Shadow::Private::attachConnect(AttachSide side, Buffer* buffer)
     }
 
     QObject::connect(buffer, &Buffer::resourceDestroyed, handle(), [this, buffer, side]() {
-        if (auto& buf = pending.get(side); buf == buffer) {
-            buf = nullptr;
+        if (auto& buf = pending.get(side); buf.get() == buffer) {
+            buf.reset();
         }
-        if (auto& buf = current.get(side); buf == buffer) {
-            buf->unref();
-            buf = nullptr;
+        if (auto& buf = current.get(side); buf.get() == buffer) {
+            buf.reset();
         }
     });
 }
@@ -177,7 +176,7 @@ QMarginsF Shadow::offset() const
 
 // TODO(romangg): replace this with template function once we can use headers-only classes.
 #define BUFFER(__PART__, __UPPER_)                                                                 \
-    Buffer* Shadow::__PART__() const                                                               \
+    std::shared_ptr<Buffer> Shadow::__PART__() const                                               \
     {                                                                                              \
         return d_ptr->current.get<Private::AttachSide::__UPPER_>();                                \
     }

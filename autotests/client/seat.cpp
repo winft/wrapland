@@ -2060,10 +2060,18 @@ void TestSeat::testSelection()
     ds2->offer(QStringLiteral("text/plain"));
     dd2->setSelection(0, ds2.data());
     QVERIFY(selectionSpy.wait());
+    QCOMPARE(selectionSpy.count(), 3);
     QSignalSpy cancelledSpy(ds2.data(), &Clt::DataSource::cancelled);
     QVERIFY(cancelledSpy.isValid());
     m_serverSeat->setSelection(ddi);
     QVERIFY(cancelledSpy.wait());
+
+    // If we don't wait for the selection signal as well the test still works but we sporadically
+    // leak memory from the offer not being processed completely in the client and the lastOffer
+    // member variable not being cleaned up.
+    // TODO(romangg): Fix leak in client library when selection is not updated in time.
+    QVERIFY(selectionSpy.count() == 4 || selectionSpy.wait());
+    QCOMPARE(selectionSpy.count(), 4);
 
     // Copy already cleared selection, BUG 383054.
     ddi->sendSelection(ddi);

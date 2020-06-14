@@ -23,8 +23,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 struct wl_resource;
 struct wl_shm_buffer;
@@ -40,9 +41,9 @@ class Display;
 class BufferManager
 {
 public:
-    Buffer* fromResource(wl_resource* resource) const;
+    std::optional<std::shared_ptr<Buffer>> fromResource(wl_resource* resource) const;
 
-    void addBuffer(Buffer* buffer);
+    void addBuffer(std::weak_ptr<Wrapland::Server::Buffer> const& buffer);
     void removeBuffer(Buffer* buffer);
 
     bool beginShmAccess(wl_shm_buffer* buffer);
@@ -52,7 +53,7 @@ private:
     wl_shm_buffer* m_accessedShmBuffer{nullptr};
     int m_accessCounter{0};
 
-    std::vector<Buffer*> m_buffers;
+    std::unordered_map<Buffer*, std::weak_ptr<Buffer>> m_buffers;
 };
 
 }

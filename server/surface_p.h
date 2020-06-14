@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QHash>
 #include <QVector>
 
+#include <deque>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
@@ -34,49 +35,49 @@ namespace Wrapland::Server
 class IdleInhibitor;
 class XdgShellSurface;
 
+struct SurfaceState {
+    QRegion damage = QRegion();
+    QRegion bufferDamage = QRegion();
+    QRegion opaque = QRegion();
+    QRegion input = QRegion();
+
+    bool inputIsSet = false;
+    bool opaqueIsSet = false;
+    bool bufferIsSet = false;
+    bool shadowIsSet = false;
+    bool blurIsSet = false;
+    bool contrastIsSet = false;
+    bool slideIsSet = false;
+    bool inputIsInfinite = true;
+    bool childrenChanged = false;
+    bool scaleIsSet = false;
+    bool transformIsSet = false;
+    bool sourceRectangleIsSet = false;
+    bool destinationSizeIsSet = false;
+
+    qint32 scale = 1;
+    Output::Transform transform = Output::Transform::Normal;
+
+    std::deque<wl_resource*> callbacks;
+
+    QPoint offset = QPoint();
+    std::shared_ptr<Buffer> buffer;
+
+    QRectF sourceRectangle = QRectF();
+    QSize destinationSize = QSize();
+
+    // Stacking order: bottom (first) -> top (last).
+    std::vector<Subsurface*> children;
+
+    QPointer<Shadow> shadow;
+    QPointer<Blur> blur;
+    QPointer<Slide> slide;
+    QPointer<Contrast> contrast;
+};
+
 class Surface::Private : public Wayland::Resource<Surface>
 {
 public:
-    struct State {
-        QRegion damage = QRegion();
-        QRegion bufferDamage = QRegion();
-        QRegion opaque = QRegion();
-        QRegion input = QRegion();
-
-        bool inputIsSet = false;
-        bool opaqueIsSet = false;
-        bool bufferIsSet = false;
-        bool shadowIsSet = false;
-        bool blurIsSet = false;
-        bool contrastIsSet = false;
-        bool slideIsSet = false;
-        bool inputIsInfinite = true;
-        bool childrenChanged = false;
-        bool scaleIsSet = false;
-        bool transformIsSet = false;
-        bool sourceRectangleIsSet = false;
-        bool destinationSizeIsSet = false;
-
-        qint32 scale = 1;
-        Output::Transform transform = Output::Transform::Normal;
-
-        QList<wl_resource*> callbacks = QList<wl_resource*>();
-
-        QPoint offset = QPoint();
-        Buffer* buffer = nullptr;
-
-        QRectF sourceRectangle = QRectF();
-        QSize destinationSize = QSize();
-
-        // Stacking order: bottom (first) -> top (last).
-        std::vector<Subsurface*> children;
-
-        QPointer<Shadow> shadow;
-        QPointer<Blur> blur;
-        QPointer<Slide> slide;
-        QPointer<Contrast> contrast;
-    };
-
     Private(Client* client, uint32_t version, uint32_t id, Surface* q);
     ~Private() override;
 
@@ -99,14 +100,16 @@ public:
     void installIdleInhibitor(IdleInhibitor* inhibitor);
     void installViewport(Viewport* vp);
 
-    void commitSubsurface();
     void commit();
+
+    void updateCurrentState(bool forceChildren);
+    void updateCurrentState(SurfaceState& source, bool forceChildren);
 
     XdgShellSurface* shellSurface = nullptr;
 
-    State current;
-    State pending;
-    State subsurfacePending;
+    SurfaceState current;
+    SurfaceState pending;
+
     Subsurface* subsurface = nullptr;
     QRegion trackedDamage;
 
@@ -114,7 +117,7 @@ public:
     // A subsurface needs to be considered mapped even if it doesn't have a buffer attached.
     // Otherwise Qt's sub-surfaces will never be visible and the client will freeze due to
     // waiting on the frame callback of the never visible surface.
-    bool subsurfaceIsMapped = true;
+    //    bool subsurfaceIsMapped = true;
 
     std::vector<Output*> outputs;
 
@@ -127,10 +130,7 @@ public:
     Surface* dataProxy = nullptr;
 
 private:
-    QMetaObject::Connection constrainsOneShotConnection;
-    QMetaObject::Connection constrainsUnboundConnection;
-
-    void swapStates(State* source, State* target, bool emitChanged);
+    void updateCurrentBuffer(SurfaceState const& source, bool& damaged, bool& resized);
 
     void damage(const QRect& rect);
     void damageBuffer(const QRect& rect);
@@ -139,7 +139,7 @@ private:
     void setTransform(Output::Transform transform);
 
     void addFrameCallback(uint32_t callback);
-    void attachBuffer(wl_resource* buffer, const QPoint& offset);
+    void attachBuffer(wl_resource* wlBuffer, const QPoint& offset);
 
     void setOpaque(const QRegion& region);
     void setInput(const QRegion& region, bool isInfinite);
@@ -193,6 +193,9 @@ private:
                                      int32_t height);
 
     static const struct wl_surface_interface s_interface;
+
+    QMetaObject::Connection constrainsOneShotConnection;
+    QMetaObject::Connection constrainsUnboundConnection;
 
     Surface* q_ptr;
 };
