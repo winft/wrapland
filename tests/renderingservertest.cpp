@@ -177,7 +177,7 @@ void CompositorWindow::paintEvent(QPaintEvent *event)
     QWidget::paintEvent(event);
     QPainter p(this);
     for (auto s : m_stackingOrder) {
-        if (auto *b = s->surface()->surface()->buffer()) {
+        if (auto b = s->surface()->surface()->buffer()) {
             p.drawImage(QPoint(0, 0), b->data());
             s->surface()->surface()->frameRendered(QDateTime::currentMSecsSinceEpoch());
         }

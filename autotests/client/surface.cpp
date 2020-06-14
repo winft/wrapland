@@ -418,7 +418,7 @@ void TestSurface::testAttachBuffer()
     QVERIFY(!blueBuffer->isUsed());
     QCOMPARE(blueBuffer->stride(), blue.bytesPerLine());
 
-    s->attachBuffer(redBuffer.get());
+    s->attachBuffer(redBuffer);
     s->attachBuffer(blackBuffer);
     s->damage(QRect(0, 0, 24, 24));
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
@@ -430,21 +430,22 @@ void TestSurface::testAttachBuffer()
     QVERIFY(unmappedSpy.isEmpty());
 
     // now the ServerSurface should have the black image attached as a buffer
-    Wrapland::Server::Buffer* buffer = serverSurface->buffer();
-    buffer->ref();
-    QVERIFY(buffer->shmBuffer());
-    QCOMPARE(buffer->data(), black);
-    QCOMPARE(buffer->data().format(), QImage::Format_RGB32);
+    auto buffer1 = serverSurface->buffer();
+    QVERIFY(buffer1->shmBuffer());
+    QCOMPARE(buffer1->data(), black);
+    QCOMPARE(buffer1->data().format(), QImage::Format_RGB32);
+    buffer1.reset();
 
     // render another frame
     s->attachBuffer(redBuffer);
     s->damage(QRect(0, 0, 24, 24));
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     damageSpy.clear();
+    QVERIFY(!redBuffer->isReleased());
     QVERIFY(damageSpy.wait());
     QVERIFY(unmappedSpy.isEmpty());
-    Wrapland::Server::Buffer* buffer2 = serverSurface->buffer();
-    buffer2->ref();
+
+    auto buffer2 = serverSurface->buffer();
     QVERIFY(buffer2->shmBuffer());
     QCOMPARE(buffer2->data().format(), QImage::Format_ARGB32_Premultiplied);
     QCOMPARE(buffer2->data().width(), 24);
@@ -455,9 +456,9 @@ void TestSurface::testAttachBuffer()
             QCOMPARE(buffer2->data().pixel(i, j), qRgba(128, 0, 0, 128));
         }
     }
-    buffer2->unref();
-    QVERIFY(buffer2->isReferenced());
-    QVERIFY(!redBuffer.get()->isReleased());
+    QVERIFY(!redBuffer->isReleased());
+    buffer2.reset();
+    QVERIFY(!redBuffer->isReleased());
 
     // render another frame
     blueBuffer->setUsed(true);
@@ -470,17 +471,16 @@ void TestSurface::testAttachBuffer()
     damageSpy.clear();
     QVERIFY(damageSpy.wait());
     QVERIFY(unmappedSpy.isEmpty());
-    QVERIFY(!buffer2->isReferenced());
-    delete buffer2;
+    buffer2.reset();
+
     // TODO: we should have a signal on when the Buffer gets released
     QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents);
-    if (!redBuffer.get()->isReleased()) {
+    if (!redBuffer->isReleased()) {
         QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents);
     }
-    QVERIFY(redBuffer.get()->isReleased());
+    QVERIFY(redBuffer->isReleased());
 
-    Wrapland::Server::Buffer* buffer3 = serverSurface->buffer();
-    buffer3->ref();
+    auto buffer3 = serverSurface->buffer().get();
     QVERIFY(buffer3->shmBuffer());
     QCOMPARE(buffer3->data().format(), QImage::Format_ARGB32_Premultiplied);
     QCOMPARE(buffer3->data().width(), 24);
@@ -491,14 +491,12 @@ void TestSurface::testAttachBuffer()
             QCOMPARE(buffer3->data().pixel(i, j), qRgba(0, 0, 128, 128));
         }
     }
-    buffer3->unref();
-    QVERIFY(buffer3->isReferenced());
 
     serverSurface->frameRendered(1);
     QVERIFY(frameRenderedSpy.wait());
 
     // commit a different value shouldn't change our buffer
-    QCOMPARE(serverSurface->buffer(), buffer3);
+    QCOMPARE(serverSurface->buffer().get(), buffer3);
     QVERIFY(serverSurface->input().isNull());
     damageSpy.clear();
     s->setInputRegion(m_compositor->createRegion(QRegion(0, 0, 24, 24)).get());
@@ -507,7 +505,7 @@ void TestSurface::testAttachBuffer()
     QCoreApplication::processEvents();
     QCoreApplication::processEvents();
     QCOMPARE(serverSurface->input(), QRegion(0, 0, 24, 24));
-    QCOMPARE(serverSurface->buffer(), buffer3);
+    QCOMPARE(serverSurface->buffer().get(), buffer3);
     QVERIFY(damageSpy.isEmpty());
     QVERIFY(unmappedSpy.isEmpty());
     QVERIFY(serverSurface->isMapped());
@@ -524,9 +522,6 @@ void TestSurface::testAttachBuffer()
     QCOMPARE(unmappedSpy.count(), 1);
     QVERIFY(damageSpy.isEmpty());
     QVERIFY(!serverSurface->isMapped());
-
-    // TODO: add signal test on release
-    buffer->unref();
 }
 
 void TestSurface::testMultipleSurfaces()
@@ -1022,11 +1017,12 @@ void TestSurface::testDestroyAttachedBuffer()
     m_connection->flush();
 
     // Let's try to destroy it
-    QSignalSpy destroySpy(serverSurface->buffer(), &Wrapland::Server::Buffer::resourceDestroyed);
+    auto currentBuffer = serverSurface->buffer();
+    QSignalSpy destroySpy(currentBuffer.get(), &Wrapland::Server::Buffer::resourceDestroyed);
     QVERIFY(destroySpy.isValid());
     delete m_shm;
     m_shm = nullptr;
-    QVERIFY(destroySpy.wait());
+    QVERIFY(destroySpy.count() || destroySpy.wait());
 
     // TODO: should this emit unmapped?
     QVERIFY(!serverSurface->buffer());

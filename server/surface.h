@@ -62,8 +62,7 @@ public:
     qint32 scale() const;
     Output::Transform transform() const;
 
-    Buffer* buffer();
-    Buffer* buffer() const;
+    std::shared_ptr<Buffer> buffer() const;
 
     QPoint offset() const;
     QSize size() const;
@@ -122,31 +121,26 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    friend class Compositor;
-    friend class Subsurface;
-    friend class ShadowManager;
-    friend class BlurManager;
-    friend class SlideManager;
-    friend class ContrastManager;
-    friend class IdleInhibitManagerV1;
-    friend class IdleInhibitor;
-
     friend class AppMenuManager;
-    friend class PlasmaShell;
-    friend class XdgShell;
-    friend class XdgShellSurface;
-
-    friend class Seat;
-    friend class Keyboard;
-    friend class Pointer;
+    friend class BlurManager;
+    friend class ContrastManager;
+    friend class Compositor;
     friend class DataDevice;
+    friend class Keyboard;
+    friend class IdleInhibitManagerV1;
+    friend class PlasmaShell;
+    friend class Pointer;
     friend class PointerConstraintsV1;
     friend class PointerPinchGestureV1;
     friend class PointerSwipeGestureV1;
+    friend class Seat;
+    friend class ShadowManager;
+    friend class SlideManager;
+    friend class Subsurface;
     friend class TextInputV2;
-
-    friend class SurfaceRole;
     friend class Viewporter;
+    friend class XdgShell;
+    friend class XdgShellSurface;
 
     explicit Surface(Client* client, uint32_t version, uint32_t id);
 

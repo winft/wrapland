@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "subcompositor.h"
 
+#include "buffer.h"
 #include "display.h"
 #include "subsurface_p.h"
 #include "surface_p.h"
@@ -26,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/global.h"
 #include "wayland/resource.h"
 
+#include <cassert>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
@@ -122,36 +124,23 @@ Subsurface::Private::Private(Client* client,
     , surface{surface}
     , parent{parent}
 {
+    surface->d_ptr->subsurface = q;
+
+    QObject::connect(surface, &Surface::resourceDestroyed, q, [this] {
+        // From spec: "If the wl_surface associated with the wl_subsurface is destroyed,
+        // the wl_subsurface object becomes inert. Note, that destroying either object
+        // takes effect immediately."
+        if (this->parent) {
+            this->parent->d_ptr->removeChild(handle());
+            this->parent = nullptr;
+        }
+        this->surface = nullptr;
+    });
 }
 
 void Subsurface::Private::init()
 {
-    surface->d_ptr->subsurface = handle();
-
-    // Copy current state to subsurfacePending state.
-    // It's the reference for all new pending state which needs to be committed.
-    surface->d_ptr->subsurfacePending = surface->d_ptr->current;
-    surface->d_ptr->subsurfacePending.blurIsSet = false;
-    surface->d_ptr->subsurfacePending.bufferIsSet = false;
-    surface->d_ptr->subsurfacePending.childrenChanged = false;
-    surface->d_ptr->subsurfacePending.contrastIsSet = false;
-    surface->d_ptr->subsurfacePending.callbacks.clear();
-    surface->d_ptr->subsurfacePending.inputIsSet = false;
-    surface->d_ptr->subsurfacePending.inputIsInfinite = true;
-    surface->d_ptr->subsurfacePending.opaqueIsSet = false;
-    surface->d_ptr->subsurfacePending.shadowIsSet = false;
-    surface->d_ptr->subsurfacePending.slideIsSet = false;
     parent->d_ptr->addChild(handle());
-
-    QObject::connect(surface, &Surface::resourceDestroyed, handle(), [this] {
-        // From spec: "If the wl_surface associated with the wl_subsurface is destroyed,
-        // the wl_subsurface object becomes inert. Note, that destroying either object
-        // takes effect immediately."
-        if (parent) {
-            parent->d_ptr->removeChild(handle());
-            parent = nullptr;
-        }
-    });
 }
 
 const struct wl_subsurface_interface Subsurface::Private::s_interface = {
@@ -163,17 +152,39 @@ const struct wl_subsurface_interface Subsurface::Private::s_interface = {
     setDeSyncCallback,
 };
 
-void Subsurface::Private::commit()
+void Subsurface::Private::applyCached(bool force)
 {
+    assert(surface);
+
     if (scheduledPosChange) {
         scheduledPosChange = false;
         pos = scheduledPos;
         scheduledPos = QPoint();
         Q_EMIT handle()->positionChanged(pos);
     }
-    if (surface) {
-        surface->d_ptr->commitSubsurface();
+
+    if (force || handle()->isSynchronized()) {
+        surface->d_ptr->updateCurrentState(cached, true);
     }
+}
+
+void Subsurface::Private::commit()
+{
+    assert(surface);
+
+    if (handle()->isSynchronized()) {
+        // Sync mode. We cache the pending state and wait for the parent surface to commit.
+        cached = surface->d_ptr->pending;
+        if (cached.buffer) {
+            cached.buffer->setCommitted();
+        }
+        surface->d_ptr->pending = SurfaceState();
+        surface->d_ptr->pending.children = cached.children;
+        return;
+    }
+
+    // Desync mode. We commit the surface directly.
+    surface->d_ptr->updateCurrentState(false);
 }
 
 void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClient,
@@ -262,16 +273,21 @@ void Subsurface::Private::setMode(Mode m)
     if (mode == m) {
         return;
     }
-    if (m == Mode::Desynchronized
-        && (!parent->subsurface() || !parent->subsurface()->isSynchronized())) {
-        // no longer synchronized, this is like calling commit
-        if (surface) {
-            surface->d_ptr->commit();
-            surface->d_ptr->commitSubsurface();
-        }
-    }
     mode = m;
     Q_EMIT handle()->modeChanged(m);
+
+    if (m == Mode::Desynchronized
+        && (!parent->subsurface() || !parent->subsurface()->isSynchronized())) {
+        // Parent subsurface list must be updated immediately.
+        auto& cc = parent->d_ptr->current.children;
+        auto subsurface = handle();
+        if (std::find(cc.cbegin(), cc.cend(), subsurface) == cc.cend()) {
+            cc.push_back(subsurface);
+        }
+        // No longer synchronized, this is like calling commit.
+        assert(surface);
+        surface->d_ptr->updateCurrentState(cached, false);
+    }
 }
 
 Subsurface::Subsurface(Client* client,
@@ -287,7 +303,6 @@ Subsurface::Subsurface(Client* client,
 
 Subsurface::~Subsurface()
 {
-    // No need to notify the surface as it's tracking a QPointer which will be reset automatically.
     if (d_ptr->surface) {
         d_ptr->surface->d_ptr->subsurface = nullptr;
     }

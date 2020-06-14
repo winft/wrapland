@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "subcompositor.h"
+#include "surface_p.h"
 
 #include "wayland/resource.h"
 
@@ -46,6 +47,7 @@ public:
      */
     void init();
 
+    void applyCached(bool force);
     void commit();
 
     QPoint pos = QPoint(0, 0);
@@ -55,6 +57,7 @@ public:
 
     Surface* surface = nullptr;
     Surface* parent = nullptr;
+    SurfaceState cached;
 
 private:
     void setMode(Mode mode);
