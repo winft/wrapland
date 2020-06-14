@@ -215,6 +215,7 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 
 set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-blur-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-linux-dmabuf-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-blur-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-contrast-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-contrast-server-protocol.h

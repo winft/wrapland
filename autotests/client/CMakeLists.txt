@@ -196,9 +196,20 @@ set( testBlur_SRCS
         blur.cpp
     )
 add_executable(testBlur ${testBlur_SRCS})
-target_link_libraries( testBlur Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+target_link_libraries( testBlur Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
 add_test(NAME wrapland-testBlur COMMAND testBlur)
 ecm_mark_as_test(testBlur)
+
+########################################################
+# Test LinuxDmabuf
+########################################################
+set( testLinuxDmabuf_SRCS
+        linux_dmabuf.cpp
+    )
+add_executable(testLinuxDmabuf ${testLinuxDmabuf_SRCS})
+target_link_libraries( testLinuxDmabuf Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-testLinuxDmabuf COMMAND testLinuxDmabuf)
+ecm_mark_as_test(testLinuxDmabuf)
 
 ########################################################
 # Test Contrast

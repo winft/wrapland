@@ -64,6 +64,7 @@ set(CLIENT_LIB_SRCS
     xdgshell_v6.cpp
     xdgshell_stable.cpp
     xdgoutput.cpp
+    linux_dmabuf_v1.cpp
     ../compat/wayland-xdg-shell-v5-protocol.c
 )
 
@@ -208,6 +209,10 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     BASENAME keyboard-shortcuts-inhibit
 )
 
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/linux-dmabuf/linux-dmabuf-unstable-v1.xml
+    BASENAME linux-dmabuf-unstable-v1
+)
 
 set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-fullscreen-shell-client-protocol.h
@@ -236,6 +241,7 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-inhibit-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-output-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-unstable-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-linux-dmabuf-unstable-v1-client-protocol.h
 )
 
 set_source_files_properties(${CLIENT_GENERATED_FILES} PROPERTIES SKIP_AUTOMOC ON)
@@ -327,6 +333,7 @@ set(CLIENT_LIB_HEADERS
   xdgshell.h
   xdgforeign.h
   xdgoutput.h
+  linux_dmabuf_v1.h
 )
 
 install(FILES
