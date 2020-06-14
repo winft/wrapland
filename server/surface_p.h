@@ -35,7 +35,19 @@ namespace Wrapland::Server
 class IdleInhibitor;
 class XdgShellSurface;
 
-struct SurfaceState {
+class SurfaceState
+{
+public:
+    SurfaceState() = default;
+
+    SurfaceState(SurfaceState const&) = delete;
+    SurfaceState& operator=(SurfaceState const&) = delete;
+
+    SurfaceState(SurfaceState&&) noexcept = delete;
+    SurfaceState& operator=(SurfaceState&&) noexcept = default;
+
+    ~SurfaceState() = default;
+
     QRegion damage = QRegion();
     QRegion bufferDamage = QRegion();
     QRegion opaque = QRegion();
