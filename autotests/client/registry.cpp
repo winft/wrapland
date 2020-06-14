@@ -59,6 +59,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/output_device_v1.h"
 #include "../../server/text_input_v2.h"
 #include "../../server/xdg_decoration.h"
+#include "../../server/linux_dmabuf_v1.h"
 
 #include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
@@ -73,6 +74,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-pointer-constraints-unstable-v1-client-protocol.h>
 #include <wayland-xdg-shell-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
+#include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
 
 class TestWaylandRegistry : public QObject
 {
@@ -87,6 +89,7 @@ private Q_SLOTS:
     void testBindCompositor();
     void testBindOutput();
     void testBindShm();
+    void testBindDmaBuf();
     void testBindSeat();
     void testBindSubCompositor();
     void testBindDataDeviceManager();
@@ -135,6 +138,7 @@ private:
     std::unique_ptr<Wrapland::Server::ContrastManager> m_contrast;
     std::unique_ptr<Wrapland::Server::BlurManager> m_blur;
     std::unique_ptr<Wrapland::Server::IdleInhibitManagerV1> m_idleInhibit;
+    std::unique_ptr<Wrapland::Server::LinuxDmabufV1> m_dmabuf;
 
 };
 
@@ -170,6 +174,7 @@ void TestWaylandRegistry::init()
     m_pointerGesturesV1.reset(m_display->createPointerGestures());
     m_pointerConstraintsV1.reset(m_display->createPointerConstraints());
     m_idleInhibit.reset(m_display->createIdleInhibitManager());
+    m_dmabuf.reset(m_display->createLinuxDmabuf());
 }
 
 void TestWaylandRegistry::cleanup()
@@ -247,6 +252,11 @@ void TestWaylandRegistry::testBindCompositor()
 void TestWaylandRegistry::testBindOutput()
 {
     TEST_BIND(Wrapland::Client::Registry::Interface::Output, SIGNAL(outputAnnounced(quint32,quint32)), bindOutput, wl_output_destroy)
+}
+
+void TestWaylandRegistry::testBindDmaBuf()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::LinuxDmabufV1, SIGNAL(LinuxDmabufV1Announced(quint32,quint32)), bindLinuxDmabufV1, zwp_linux_dmabuf_v1_destroy)
 }
 
 void TestWaylandRegistry::testBindSeat()

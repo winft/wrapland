@@ -1,3 +1,4 @@
+
 /********************************************************************
 Copyright 2014  Martin Gräßlin <mgraesslin@kde.org>
 Copyright 2018  David Edmundson <davidedmundson@kde.org>
@@ -69,6 +70,7 @@ struct zwp_idle_inhibit_manager_v1;
 struct zxdg_output_manager_v1;
 struct zxdg_decoration_manager_v1;
 struct zwp_keyboard_shortcuts_inhibit_manager_v1;
+struct zwp_linux_dmabuf_v1;
 
 namespace Wrapland
 {
@@ -118,6 +120,7 @@ class XdgImporter;
 class XdgOutputManager;
 class XdgDecorationManager;
 class KeyboardShortcutsInhibitManagerV1;
+class LinuxDmabufV1;
 
 /**
  * @short Wrapper for the wl_registry interface.
@@ -195,6 +198,7 @@ public:
         Keystate,///<refers to org_kwin_keystate, @since 0.0.557
         Viewporter, ///< Refers to wp_viewporter, @since 0.518.0
         KeyboardShortcutsInhibitManagerV1,
+        LinuxDmabufV1,
     };
     explicit Registry(QObject *parent = nullptr);
     virtual ~Registry();
@@ -578,7 +582,7 @@ public:
      *
      * Prefer using createRelativePointerManager instead.
      * @see createRelativePointerManager
-     * @since 0.0.528
+     * @since 0.0.520
      **/
     zwp_relative_pointer_manager_v1 *bindRelativePointerManagerUnstableV1(uint32_t name, uint32_t version) const;
     /**
@@ -688,6 +692,16 @@ public:
      * @since 0.0.554
      **/
     zwp_keyboard_shortcuts_inhibit_manager_v1 *bindKeyboardShortcutsInhibitManagerV1(uint32_t name, uint32_t version) const;
+    
+    /** Binds the zwp_linux_dmabuf_v1 with @p name and @p version.
+     * If the @p name does not exist,
+     * @c null will be returned.
+     *
+     * Prefer using createLinuxDmabufV1 instead.
+     * @see createLinuxDmabufV1
+     * @since 0.520.0
+     **/
+    zwp_linux_dmabuf_v1 *bindLinuxDmabufV1(uint32_t name, uint32_t version) const;
 
     ///@}
 
@@ -1293,6 +1307,21 @@ public:
      **/
     KeyboardShortcutsInhibitManagerV1 *createKeyboardShortcutsInhibitManagerV1(quint32 name, quint32 version, QObject *parent = nullptr);
 
+    /** Creates an LinuxDmabufV1 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the zwp_linux_dmabuf_v1 interface,
+     * the returned LinuxDmabufV1 will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the zwp_linux_dmabuf_v1 interface to bind
+     * @param version The version or the zwp_linux_dmabuf_v1 interface to use
+     * @param parent The parent for LinuxDmabufV1
+     *
+     * @returns The created LinuxDmabufV1.
+     * @since 0.520.0
+     **/
+    LinuxDmabufV1 *createLinuxDmabufV1(quint32 name, quint32 version, QObject *parent = nullptr);
 
 
     ///@}
@@ -1591,6 +1620,12 @@ Q_SIGNALS:
      * @since 0.0.554
      **/
     void keyboardShortcutsInhibitManagerAnnounced(quint32 name, quint32 version);
+    
+    /** Emitted whenever a zwp_linux_dmabuf_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     **/
+    void LinuxDmabufV1Announced(quint32 name, quint32 version);
 
     ///@}
 
@@ -1831,6 +1866,11 @@ Q_SIGNALS:
      * @since 0.0.554
      **/
     void keyboardShortcutsInhibitManagerRemoved(quint32 name);
+    
+    /** Emitted whenever a zwp_linux_dmabuf_v1 gets removed.
+     * @param name The name of the removed interface
+     **/
+    void LinuxDmabufV1Removed(quint32 name);
 
     void keystateAnnounced(quint32 name, quint32 version);
     void keystateRemoved(quint32 name);

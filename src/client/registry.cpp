@@ -61,6 +61,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdgoutput.h"
 #include "xdgdecoration.h"
 #include "keyboard_shortcuts_inhibit.h"
+#include "linux_dmabuf_v1.h"
 // Qt
 #include <QDebug>
 // wayland
@@ -97,6 +98,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-keystate-client-protocol.h>
 #include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
+#include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
+
 /*****
  * How to add another interface:
  * * define a new enum value in Registry::Interface
@@ -403,6 +406,13 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &zwp_keyboard_shortcuts_inhibit_manager_v1_interface,
         &Registry::keyboardShortcutsInhibitManagerAnnounced,
         &Registry::keyboardShortcutsInhibitManagerRemoved
+    }},
+    {Registry::Interface::LinuxDmabufV1, {
+        3,
+        QByteArrayLiteral("zwp_linux_dmabuf_v1"),
+        &zwp_linux_dmabuf_v1_interface,
+        &Registry::LinuxDmabufV1Announced,
+        &Registry::LinuxDmabufV1Removed
     }}
 };
 
@@ -721,7 +731,7 @@ BIND2(ServerSideDecorationPaletteManager, ServerSideDecorationPalette, org_kde_k
 BIND(XdgOutputUnstableV1, zxdg_output_manager_v1)
 BIND(XdgDecorationUnstableV1, zxdg_decoration_manager_v1)
 BIND(KeyboardShortcutsInhibitManagerV1, zwp_keyboard_shortcuts_inhibit_manager_v1)
-
+BIND(LinuxDmabufV1, zwp_linux_dmabuf_v1)
 #undef BIND
 #undef BIND2
 
@@ -874,6 +884,16 @@ XdgDecorationManager *Registry::createXdgDecorationManager(quint32 name, quint32
     switch(d->interfaceForName(name)) {
     case Interface::XdgDecorationUnstableV1:
         return d->create<XdgDecorationManager>(name, version, parent, &Registry::bindXdgDecorationUnstableV1);
+    default:
+        return nullptr;
+    }
+}
+
+LinuxDmabufV1 *Registry::createLinuxDmabufV1(quint32 name, quint32 version, QObject *parent)
+{
+    switch(d->interfaceForName(name)) {
+    case Interface::LinuxDmabufV1:
+        return d->create<LinuxDmabufV1>(name, version, parent, &Registry::bindLinuxDmabufV1);
     default:
         return nullptr;
     }
