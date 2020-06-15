@@ -92,7 +92,7 @@ Buffer::Private::Private(Buffer* q,
     , surface(surface)
     , refCount(0)
     , alpha(false)
-    , committed{!surface}
+    , committed{false}
     , display(display)
     , q_ptr{q}
 {
