@@ -55,14 +55,16 @@ public:
 
     static std::shared_ptr<Buffer> get(Display* display, wl_resource* resource);
 
-    static std::shared_ptr<Buffer> make(wl_resource* wlResource, Surface* surface);
-    static std::shared_ptr<Buffer> make(wl_resource* wlResource, Display* display);
-
 Q_SIGNALS:
     void sizeChanged();
     void resourceDestroyed();
 
 private:
+    friend class Surface;
+
+    static std::shared_ptr<Buffer> make(wl_resource* wlResource, Surface* surface);
+    static std::shared_ptr<Buffer> make(wl_resource* wlResource, Display* display);
+
     Buffer(wl_resource* wlResource, Surface* surface);
     Buffer(wl_resource* wlResource, Display* display);
 
