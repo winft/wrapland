@@ -91,7 +91,6 @@ void Surface::Private::addChild(Subsurface* child)
     pending.children.push_back(child);
     pending.childrenChanged = true;
 
-    Q_EMIT handle()->subsurfaceTreeChanged();
     Q_EMIT handle()->childSubSurfaceAdded(child);
 
     // TODO(romangg): Should all below only be changed on commit?
@@ -546,6 +545,7 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
 {
     bool const scaleFactorChanged = source.scaleIsSet && (current.scale != source.scale);
     bool const transformChanged = source.transformIsSet && (current.transform != source.transform);
+    bool const visibilityChanged = bool(source.buffer) != bool(current.buffer);
 
     bool damaged = false;
     bool resized = false;
@@ -651,6 +651,9 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
     }
 
     if (damaged) {
+        if (visibilityChanged) {
+            Q_EMIT handle()->mapped();
+        }
         Q_EMIT handle()->damaged(current.damage);
     }
 

@@ -107,6 +107,7 @@ Q_SIGNALS:
     void inputChanged(const QRegion&);
     void scaleChanged(qint32);
     void transformChanged(Wrapland::Server::Output::Transform);
+    void mapped();
     void unmapped();
     void sizeChanged();
     void shadowChanged();
