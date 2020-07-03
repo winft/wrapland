@@ -141,6 +141,7 @@ private:
     friend class Display;
     friend class RemoteAccessManager;
     friend class Surface;
+    friend class PresentationFeedback;
 
     explicit Output(Wrapland::Server::Display* display, QObject* parent = nullptr);
 

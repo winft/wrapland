@@ -46,6 +46,7 @@ class OutputDeviceV1;
 class OutputManagementV1;
 class PlasmaVirtualDesktopManager;
 class PlasmaWindowManager;
+class PresentationManager;
 class Seat;
 class XdgShell;
 
@@ -135,6 +136,7 @@ public:
     DpmsManager* createDpmsManager(QObject* parent = nullptr);
 
     KeyState* createKeyState(QObject* parent = nullptr);
+    PresentationManager* createPresentationManager(QObject* parent = nullptr);
 
     TextInputManagerV2* createTextInputManager(QObject* parent = nullptr);
 

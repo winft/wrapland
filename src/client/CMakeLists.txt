@@ -38,6 +38,7 @@ set(CLIENT_LIB_SRCS
     plasmavirtualdesktop.cpp
     plasmawindowmanagement.cpp
     plasmawindowmodel.cpp
+    presentation_time.cpp
     region.cpp
     registry.cpp
     relativepointer.cpp
@@ -164,6 +165,10 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     BASENAME pointer-constraints-unstable-v1
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/stable/presentation-time/presentation-time.xml
+    BASENAME presentation-time
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-foreign/xdg-foreign-unstable-v2.xml
     BASENAME xdg-foreign-unstable-v2
 )
@@ -237,6 +242,7 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-gestures-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-constraints-unstable-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-presentation-time-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-foreign-unstable-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-inhibit-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-output-unstable-v1-client-protocol.h
@@ -313,6 +319,7 @@ set(CLIENT_LIB_HEADERS
   plasmavirtualdesktop.h
   plasmawindowmanagement.h
   plasmawindowmodel.h
+  presentation_time.h
   pointergestures.h
   region.h
   registry.h

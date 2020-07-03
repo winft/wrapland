@@ -27,15 +27,29 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 
 #include <deque>
+#include <unordered_map>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
 {
 
+class Feedbacks;
 class IdleInhibitor;
 class XdgShellSurface;
 
-struct SurfaceState {
+class SurfaceState
+{
+public:
+    SurfaceState() = default;
+
+    SurfaceState(SurfaceState const&) = delete;
+    SurfaceState& operator=(SurfaceState const&) = delete;
+
+    SurfaceState(SurfaceState&&) noexcept = delete;
+    SurfaceState& operator=(SurfaceState&&) noexcept = default;
+
+    ~SurfaceState() = default;
+
     QRegion damage = QRegion();
     QRegion bufferDamage = QRegion();
     QRegion opaque = QRegion();
@@ -73,6 +87,7 @@ struct SurfaceState {
     QPointer<Blur> blur;
     QPointer<Slide> slide;
     QPointer<Contrast> contrast;
+    std::unique_ptr<Feedbacks> feedbacks{std::make_unique<Feedbacks>()};
 };
 
 class Surface::Private : public Wayland::Resource<Surface>
@@ -94,6 +109,7 @@ public:
 
     void setSourceRectangle(const QRectF& source);
     void setDestinationSize(const QSize& dest);
+    void addPresentationFeedback(PresentationFeedback* feedback) const;
 
     void installPointerConstraint(LockedPointerV1* lock);
     void installPointerConstraint(ConfinedPointerV1* confinement);
@@ -120,6 +136,9 @@ public:
     //    bool subsurfaceIsMapped = true;
 
     std::vector<Output*> outputs;
+
+    uint32_t feedbackId = 0;
+    std::unordered_map<uint32_t, std::unique_ptr<Feedbacks>> waitingFeedbacks;
 
     QPointer<LockedPointerV1> lockedPointer;
     QPointer<ConfinedPointerV1> confinedPointer;
@@ -198,6 +217,32 @@ private:
     QMetaObject::Connection constrainsUnboundConnection;
 
     Surface* q_ptr;
+};
+
+class Feedbacks : public QObject
+{
+    Q_OBJECT
+public:
+    explicit Feedbacks(QObject* parent = nullptr);
+    ~Feedbacks() override;
+
+    bool active();
+    void add(PresentationFeedback* feedback);
+    void setOutput(Output* output);
+    void handleOutputRemoval();
+
+    void presented(uint32_t tvSecHi,
+                   uint32_t tvSecLo,
+                   uint32_t tvNsec,
+                   uint32_t refresh,
+                   uint32_t seqHi,
+                   uint32_t seqLo,
+                   Surface::PresentationKinds kinds);
+    void discard();
+
+private:
+    std::vector<PresentationFeedback*> m_feedbacks;
+    Output* m_output = nullptr;
 };
 
 }

@@ -180,6 +180,12 @@ public:
         return m_handle;
     }
 
+    void serverSideDestroy()
+    {
+        wl_resource_set_destructor(m_resource, nullptr);
+        wl_resource_destroy(m_resource);
+    }
+
 private:
     static ResourceType* self(wl_resource* resource)
     {

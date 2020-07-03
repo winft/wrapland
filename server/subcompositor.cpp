@@ -174,12 +174,12 @@ void Subsurface::Private::commit()
 
     if (handle()->isSynchronized()) {
         // Sync mode. We cache the pending state and wait for the parent surface to commit.
-        cached = surface->d_ptr->pending;
+        cached = std::move(surface->d_ptr->pending);
+        surface->d_ptr->pending = SurfaceState();
+        surface->d_ptr->pending.children = cached.children;
         if (cached.buffer) {
             cached.buffer->setCommitted();
         }
-        surface->d_ptr->pending = SurfaceState();
-        surface->d_ptr->pending.children = cached.children;
         return;
     }
 

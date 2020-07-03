@@ -41,6 +41,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "plasmawindowmanagement.h"
 #include "pointerconstraints.h"
 #include "pointergestures.h"
+#include "presentation_time.h"
 #include "seat.h"
 #include "shadow.h"
 #include "blur.h"
@@ -99,6 +100,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-keystate-client-protocol.h>
 #include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
+#include <wayland-presentation-time-client-protocol.h>
 
 /*****
  * How to add another interface:
@@ -329,6 +331,13 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &zwp_pointer_constraints_v1_interface,
         &Registry::pointerConstraintsUnstableV1Announced,
         &Registry::pointerConstraintsUnstableV1Removed
+    }},
+    {Registry::Interface::PresentationManager, {
+        1,
+        QByteArrayLiteral("wp_presentation"),
+        &wp_presentation_interface,
+        &Registry::presentationManagerAnnounced,
+        &Registry::presentationManagerRemoved
     }},
     {Registry::Interface::XdgExporterUnstableV2, {
         1,
@@ -717,6 +726,7 @@ BIND(XdgShellStable, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
 BIND(PointerGesturesUnstableV1, zwp_pointer_gestures_v1)
 BIND(PointerConstraintsUnstableV1, zwp_pointer_constraints_v1)
+BIND(PresentationManager, wp_presentation)
 BIND(XdgExporterUnstableV2, zxdg_exporter_v2)
 BIND(XdgImporterUnstableV2, zxdg_importer_v2)
 BIND(IdleInhibitManagerUnstableV1, zwp_idle_inhibit_manager_v1)
@@ -787,6 +797,7 @@ CREATE(Keystate)
 CREATE(ServerSideDecorationPaletteManager)
 CREATE(Viewporter)
 CREATE(KeyboardShortcutsInhibitManagerV1)
+CREATE(PresentationManager)
 
 #undef CREATE
 #undef CREATE2

@@ -40,6 +40,7 @@ class IdleInhibitManagerV1;
 class IdleInhibitor;
 class LockedPointerV1;
 class PointerConstraintsV1;
+class PresentationFeedback;
 class ShadowManager;
 class Shadow;
 class Slide;
@@ -51,6 +52,15 @@ class WRAPLANDSERVER_EXPORT Surface : public QObject
 {
     Q_OBJECT
 public:
+    enum class PresentationKind {
+        None = 0,
+        Vsync = 1 << 0,
+        HwClock = 1 << 1,
+        HwCompletion = 1 << 2,
+        ZeroCopy = 1 << 3
+    };
+    Q_DECLARE_FLAGS(PresentationKinds, PresentationKind)
+
     void frameRendered(quint32 msec);
 
     QRegion damage() const;
@@ -99,6 +109,17 @@ public:
 
     QRectF sourceRectangle() const;
 
+    uint32_t lockPresentation(Output* output);
+    void presentationFeedback(uint32_t presentationId,
+                              uint32_t tvSecHi,
+                              uint32_t tvSecLo,
+                              uint32_t tvNsec,
+                              uint32_t refresh,
+                              uint32_t seqHi,
+                              uint32_t seqLo,
+                              PresentationKinds kinds);
+    void presentationDiscarded(uint32_t presentationId);
+
     wl_resource* resource() const;
 
 Q_SIGNALS:
@@ -133,6 +154,7 @@ private:
     friend class PointerConstraintsV1;
     friend class PointerPinchGestureV1;
     friend class PointerSwipeGestureV1;
+    friend class PresentationManager;
     friend class Seat;
     friend class ShadowManager;
     friend class SlideManager;
@@ -151,3 +173,4 @@ private:
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Surface*)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::Surface::PresentationKinds)
