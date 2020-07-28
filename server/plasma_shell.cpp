@@ -209,7 +209,9 @@ void PlasmaShellSurface::Private::panelAutoHideHideCallback([[maybe_unused]] wl_
                                                             wl_resource* wlResource)
 {
     auto priv = handle(wlResource)->d_ptr;
-    if (priv->m_role != Role::Panel || priv->m_panelBehavior != PanelBehavior::AutoHide) {
+    if (priv->m_role != Role::Panel
+        || (priv->m_panelBehavior != PanelBehavior::AutoHide
+            && priv->m_panelBehavior != PanelBehavior::WindowsCanCover)) {
         priv->postError(ORG_KDE_PLASMA_SURFACE_ERROR_PANEL_NOT_AUTO_HIDE, "Not an auto hide panel");
         return;
     }
