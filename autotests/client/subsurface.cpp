@@ -708,8 +708,8 @@ void TestSubsurface::testSyncMode()
     QVERIFY(childDamagedSpy.wait());
     QCOMPARE(childDamagedSpy.count(), 1);
     QCOMPARE(subsurfaceTreeChangedSpy.count(), 3);
-    QCOMPARE(childSurface->buffer()->data(), image);
-    QCOMPARE(parentSurface->buffer()->data(), image2);
+    QCOMPARE(childSurface->buffer()->shmImage()->createQImage(), image);
+    QCOMPARE(parentSurface->buffer()->shmImage()->createQImage(), image2);
     QVERIFY(childSurface->isMapped());
     QVERIFY(parentSurface->isMapped());
 
@@ -767,7 +767,7 @@ void TestSubsurface::testDeSyncMode()
     subsurface->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
     QVERIFY(childDamagedSpy.count() || childDamagedSpy.wait());
     QCOMPARE(subsurfaceTreeChangedSpy.count(), 2);
-    QCOMPARE(childSurface->buffer()->data(), image);
+    QCOMPARE(childSurface->buffer()->shmImage()->createQImage(), image);
     QVERIFY(!childSurface->isMapped());
     QVERIFY(!parentSurface->isMapped());
 
@@ -778,7 +778,7 @@ void TestSubsurface::testDeSyncMode()
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(childDamagedSpy.wait());
     QCOMPARE(subsurfaceTreeChangedSpy.count(), 3);
-    QCOMPARE(childSurface->buffer()->data(), image);
+    QCOMPARE(childSurface->buffer()->shmImage()->createQImage(), image);
 }
 
 void TestSubsurface::testMainSurfaceFromTree()

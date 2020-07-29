@@ -34,14 +34,33 @@ struct DestroyWrapper {
     struct wl_listener listener;
 };
 
+class ShmImage::Private
+{
+public:
+    Private(Buffer* buffer, ShmImage::Format format);
+    ~Private();
+
+    QImage createQImage();
+
+    ShmImage::Format format{ShmImage::Format::invalid};
+    int32_t stride;
+    int32_t bpp;
+
+    uchar* data;
+
+    Buffer* buffer;
+    Wayland::Display* display;
+
+private:
+    static void imageBufferCleanupHandler(void* info);
+    QImage image;
+};
+
 class Buffer::Private
 {
 public:
     Private(Buffer* q, wl_resource* wlResource, Surface* surface, Wayland::Display* display);
     ~Private();
-
-    QImage::Format format() const;
-    QImage createImage();
 
     wl_resource* resource;
     wl_shm_buffer* shmBuffer;
@@ -53,11 +72,11 @@ public:
     bool alpha{false};
     bool committed{false};
 
+    Wayland::Display* display;
+
 private:
     static void destroyListenerCallback(wl_listener* listener, void* data);
-    static void imageBufferCleanupHandler(void* info);
 
-    Wayland::Display* display;
     Buffer* q_ptr;
     DestroyWrapper destroyWrapper;
 };

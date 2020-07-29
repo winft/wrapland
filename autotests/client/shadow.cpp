@@ -242,14 +242,14 @@ void ShadowTest::testShadowElements()
     auto serverShadow = serverSurface->shadow();
     QVERIFY(serverShadow);
     QCOMPARE(serverShadow->offset(), QMarginsF(1, 2, 3, 4));
-    QCOMPARE(serverShadow->topLeft()->data(), topLeftImage);
-    QCOMPARE(serverShadow->top()->data(), topImage);
-    QCOMPARE(serverShadow->topRight()->data(), topRightImage);
-    QCOMPARE(serverShadow->right()->data(), rightImage);
-    QCOMPARE(serverShadow->bottomRight()->data(), bottomRightImage);
-    QCOMPARE(serverShadow->bottom()->data(), bottomImage);
-    QCOMPARE(serverShadow->bottomLeft()->data(), bottomLeftImage);
-    QCOMPARE(serverShadow->left()->data(), leftImage);
+    QCOMPARE(serverShadow->topLeft()->shmImage()->createQImage(), topLeftImage);
+    QCOMPARE(serverShadow->top()->shmImage()->createQImage(), topImage);
+    QCOMPARE(serverShadow->topRight()->shmImage()->createQImage(), topRightImage);
+    QCOMPARE(serverShadow->right()->shmImage()->createQImage(), rightImage);
+    QCOMPARE(serverShadow->bottomRight()->shmImage()->createQImage(), bottomRightImage);
+    QCOMPARE(serverShadow->bottom()->shmImage()->createQImage(), bottomImage);
+    QCOMPARE(serverShadow->bottomLeft()->shmImage()->createQImage(), bottomLeftImage);
+    QCOMPARE(serverShadow->left()->shmImage()->createQImage(), leftImage);
 
     // try to destroy the buffer
     // first attach one buffer

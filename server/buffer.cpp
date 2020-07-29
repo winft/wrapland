@@ -48,6 +48,159 @@ eglQueryWaylandBufferWL_func eglQueryWaylandBufferWL = nullptr;
 namespace Wrapland::Server
 {
 
+int constexpr default_bpp{32};
+
+ShmImage::Private::Private(Buffer* buffer, ShmImage::Format format)
+    : format{format}
+    , stride{wl_shm_buffer_get_stride(buffer->d_ptr->shmBuffer)}
+    , bpp{default_bpp}
+    , data{static_cast<uchar*>(wl_shm_buffer_get_data(buffer->d_ptr->shmBuffer))}
+    , buffer{buffer}
+    , display{buffer->d_ptr->display}
+{
+}
+
+ShmImage::Private::~Private()
+{
+    display->bufferManager()->endShmAccess();
+}
+
+QImage ShmImage::Private::createQImage()
+{
+    if (!image.isNull()) {
+        return image;
+    }
+
+    [[maybe_unused]] auto const hasAccess
+        = display->bufferManager()->beginShmAccess(buffer->d_ptr->shmBuffer);
+    assert(hasAccess);
+
+    QImage::Format qtFormat{QImage::Format_Invalid};
+    switch (format) {
+    case ShmImage::Format::argb8888:
+        qtFormat = QImage::Format_ARGB32_Premultiplied;
+        break;
+    case ShmImage::Format::xrgb8888:
+        qtFormat = QImage::Format_RGB32;
+        break;
+    default:
+        assert(false);
+    }
+
+    auto const size = buffer->size();
+    return QImage(
+        data, size.width(), size.height(), stride, qtFormat, &imageBufferCleanupHandler, display);
+}
+
+void ShmImage::Private::imageBufferCleanupHandler(void* info)
+{
+    auto display = static_cast<Wayland::Display*>(info);
+    display->bufferManager()->endShmAccess();
+}
+
+ShmImage::ShmImage(Buffer* buffer, ShmImage::Format format)
+    : d_ptr{new Private(buffer, format)}
+{
+}
+
+ShmImage::ShmImage(ShmImage const& img)
+    : d_ptr{new Private(img.d_ptr->buffer, img.d_ptr->format)}
+{
+    d_ptr->display->bufferManager()->beginShmAccess(d_ptr->buffer->d_ptr->shmBuffer);
+}
+
+ShmImage& ShmImage::operator=(ShmImage const& img)
+{
+    if (this != &img) {
+        d_ptr->display->bufferManager()->endShmAccess();
+        img.d_ptr->display->bufferManager()->beginShmAccess(img.d_ptr->buffer->d_ptr->shmBuffer);
+
+        d_ptr->format = img.d_ptr->format;
+        d_ptr->stride = img.d_ptr->stride;
+        d_ptr->bpp = img.d_ptr->bpp;
+        d_ptr->data = img.d_ptr->data;
+        d_ptr->buffer = img.d_ptr->buffer;
+        d_ptr->display = img.d_ptr->display;
+    }
+
+    return *this;
+}
+
+ShmImage::ShmImage(ShmImage&& img) noexcept
+    : d_ptr{std::move(img.d_ptr)}
+{
+}
+
+ShmImage& ShmImage::operator=(ShmImage&& img) noexcept
+{
+    if (this != &img) {
+        d_ptr = std::move(img.d_ptr);
+    }
+
+    return *this;
+}
+
+ShmImage::~ShmImage() = default;
+
+ShmImage::Format ShmImage::format() const
+{
+    return d_ptr->format;
+}
+
+int32_t ShmImage::stride() const
+{
+    return d_ptr->stride;
+}
+
+int32_t ShmImage::bpp() const
+{
+    return d_ptr->bpp;
+}
+
+uchar* ShmImage::data() const
+{
+    return d_ptr->data;
+}
+
+QImage ShmImage::createQImage()
+{
+    return d_ptr->createQImage();
+}
+
+ShmImage::Format getFormat(wl_shm_buffer* shmBuffer)
+{
+    switch (wl_shm_buffer_get_format(shmBuffer)) {
+    case WL_SHM_FORMAT_ARGB8888:
+        return ShmImage::Format::argb8888;
+    case WL_SHM_FORMAT_XRGB8888:
+        return ShmImage::Format::xrgb8888;
+    default:
+        return ShmImage::Format::invalid;
+    }
+}
+
+std::optional<ShmImage> ShmImage::get(Buffer* buffer)
+{
+    auto display = buffer->d_ptr->display;
+    auto shmBuffer = buffer->d_ptr->shmBuffer;
+
+    if (!shmBuffer) {
+        return std::nullopt;
+    }
+
+    if (!display->bufferManager()->beginShmAccess(shmBuffer)) {
+        return std::nullopt;
+    }
+
+    auto const imageFormat = getFormat(shmBuffer);
+    if (imageFormat == ShmImage::Format::invalid) {
+        display->bufferManager()->endShmAccess();
+        return std::nullopt;
+    }
+
+    return ShmImage(buffer, imageFormat);
+}
+
 Buffer::Private::Private(Buffer* q,
                          wl_resource* wlResource,
                          Surface* surface,
@@ -159,12 +312,6 @@ Buffer::Private::~Private()
     display->bufferManager()->removeBuffer(q_ptr);
 }
 
-void Buffer::Private::imageBufferCleanupHandler(void* info)
-{
-    auto priv = static_cast<Private*>(info);
-    priv->display->bufferManager()->endShmAccess();
-}
-
 std::shared_ptr<Buffer> Buffer::make(wl_resource* wlResource, Surface* surface)
 {
     auto backendDisplay = Wayland::Display::backendCast(surface->client()->display());
@@ -195,46 +342,6 @@ void Buffer::Private::destroyListenerCallback(wl_listener* listener, [[maybe_unu
 
     wrapper->buffer->d_ptr->resource = nullptr;
     Q_EMIT wrapper->buffer->resourceDestroyed();
-}
-
-QImage::Format Buffer::Private::format() const
-{
-    if (!shmBuffer) {
-        return QImage::Format_Invalid;
-    }
-    switch (wl_shm_buffer_get_format(shmBuffer)) {
-    case WL_SHM_FORMAT_ARGB8888:
-        return QImage::Format_ARGB32_Premultiplied;
-    case WL_SHM_FORMAT_XRGB8888:
-        return QImage::Format_RGB32;
-    default:
-        return QImage::Format_Invalid;
-    }
-}
-
-QImage Buffer::Private::createImage()
-{
-    if (!shmBuffer) {
-        return QImage();
-    }
-
-    if (!display->bufferManager()->beginShmAccess(shmBuffer)) {
-        return QImage();
-    }
-
-    const QImage::Format imageFormat = format();
-    if (imageFormat == QImage::Format_Invalid) {
-        display->bufferManager()->endShmAccess();
-        return QImage();
-    }
-
-    return QImage(static_cast<const uchar*>(wl_shm_buffer_get_data(shmBuffer)),
-                  size.width(),
-                  size.height(),
-                  wl_shm_buffer_get_stride(shmBuffer),
-                  imageFormat,
-                  &imageBufferCleanupHandler,
-                  this);
 }
 
 Buffer::Buffer(wl_resource* wlResource, Surface* surface)
@@ -270,9 +377,9 @@ Buffer::~Buffer()
     }
 }
 
-QImage Buffer::data()
+std::optional<ShmImage> Buffer::shmImage()
 {
-    return d_ptr->createImage();
+    return ShmImage::get(this);
 }
 
 Surface* Buffer::surface() const

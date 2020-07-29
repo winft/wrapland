@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 
 #include <memory>
+#include <optional>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
@@ -31,9 +32,43 @@ struct wl_shm_buffer;
 
 namespace Wrapland::Server
 {
+class Buffer;
 class Display;
 class Surface;
 class LinuxDmabufBufferV1;
+
+class WRAPLANDSERVER_EXPORT ShmImage
+{
+public:
+    enum class Format {
+        invalid,
+        argb8888,
+        xrgb8888,
+    };
+    ShmImage(ShmImage const& img);
+    ShmImage& operator=(ShmImage const& img);
+
+    ShmImage(ShmImage&& img) noexcept;
+    ShmImage& operator=(ShmImage&& img) noexcept;
+
+    ~ShmImage();
+
+    Format format() const;
+    int32_t stride() const;
+    int32_t bpp() const;
+
+    uchar* data() const;
+
+    QImage createQImage();
+
+    static std::optional<ShmImage> get(Buffer* buffer);
+
+private:
+    ShmImage(Buffer* buffer, ShmImage::Format format);
+
+    class Private;
+    std::unique_ptr<Private> d_ptr;
+};
 
 class WRAPLANDSERVER_EXPORT Buffer : public QObject
 {
@@ -46,7 +81,8 @@ public:
     LinuxDmabufBufferV1* linuxDmabufBuffer();
     wl_resource* resource() const;
 
-    QImage data();
+    std::optional<ShmImage> shmImage();
+
     QSize size() const;
     void setSize(const QSize& size);
     void setCommitted();
@@ -60,6 +96,7 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
+    friend class ShmImage;
     friend class Surface;
 
     static std::shared_ptr<Buffer> make(wl_resource* wlResource, Surface* surface);
