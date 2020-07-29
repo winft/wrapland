@@ -45,13 +45,13 @@ public:
 
     wl_resource* resource;
     wl_shm_buffer* shmBuffer;
-    LinuxDmabufBufferV1* dmabufBuffer;
+    LinuxDmabufBufferV1* dmabufBuffer{nullptr};
 
     Surface* surface;
-    int refCount;
+    int refCount{0};
     QSize size;
-    bool alpha;
-    bool committed;
+    bool alpha{false};
+    bool committed{false};
 
 private:
     static void destroyListenerCallback(wl_listener* listener, void* data);

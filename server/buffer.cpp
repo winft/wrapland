@@ -54,11 +54,7 @@ Buffer::Private::Private(Buffer* q,
                          Wayland::Display* display)
     : resource(wlResource)
     , shmBuffer(wl_shm_buffer_get(wlResource))
-    , dmabufBuffer(nullptr)
     , surface(surface)
-    , refCount(0)
-    , alpha(false)
-    , committed{false}
     , display(display)
     , q_ptr{q}
 {
