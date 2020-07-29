@@ -271,7 +271,7 @@ void TestSurface::testDamage()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     s->setScale(2);
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
@@ -362,7 +362,7 @@ void TestSurface::testFrameCallback()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
@@ -370,7 +370,7 @@ void TestSurface::testFrameCallback()
     QSignalSpy damageSpy(serverSurface, SIGNAL(damaged(QRegion)));
     QVERIFY(damageSpy.isValid());
 
-    QSignalSpy frameRenderedSpy(s, SIGNAL(frameRendered()));
+    QSignalSpy frameRenderedSpy(s.get(), SIGNAL(frameRendered()));
     QVERIFY(frameRenderedSpy.isValid());
     QImage img(QSize(10, 10), QImage::Format_ARGB32_Premultiplied);
     img.fill(Qt::black);
@@ -391,7 +391,7 @@ void TestSurface::testAttachBuffer()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
@@ -466,7 +466,7 @@ void TestSurface::testAttachBuffer()
     QVERIFY(blueBuffer->isUsed());
     s->attachBuffer(blueBuffer.get());
     s->damage(QRect(0, 0, 24, 24));
-    QSignalSpy frameRenderedSpy(s, SIGNAL(frameRendered()));
+    QSignalSpy frameRenderedSpy(s.get(), SIGNAL(frameRendered()));
     QVERIFY(frameRenderedSpy.isValid());
     s->commit();
     damageSpy.clear();
@@ -629,7 +629,7 @@ void TestSurface::testOpaque()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
@@ -685,7 +685,7 @@ void TestSurface::testInput()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
@@ -836,9 +836,9 @@ void TestSurface::testScale()
 void TestSurface::testDestroy()
 {
     using namespace Wrapland::Client;
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
 
-    connect(m_connection, &ConnectionThread::establishedChanged, s, &Surface::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, s.get(), &Surface::release);
     connect(
         m_connection, &ConnectionThread::establishedChanged, m_compositor, &Compositor::release);
     connect(m_connection, &ConnectionThread::establishedChanged, m_shm, &ShmPool::release);
