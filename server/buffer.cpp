@@ -18,7 +18,7 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#include "buffer.h"
+#include "buffer_p.h"
 
 #include "client.h"
 #include "display.h"
@@ -32,13 +32,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "linux_dmabuf_v1_p.h"
 
 #include <drm_fourcc.h>
-#include <wayland-server.h>
 
 #include <EGL/egl.h>
 #include <QtGui/qopengl.h>
-
-namespace Wrapland::Server
-{
 
 namespace EGL
 {
@@ -49,38 +45,8 @@ typedef GLboolean (*eglQueryWaylandBufferWL_func)(EGLDisplay dpy,
 eglQueryWaylandBufferWL_func eglQueryWaylandBufferWL = nullptr;
 }
 
-struct DestroyWrapper {
-    Buffer* buffer;
-    struct wl_listener listener;
-};
-
-class Buffer::Private
+namespace Wrapland::Server
 {
-public:
-    Private(Buffer* q, wl_resource* wlResource, Surface* surface, Wayland::Display* display);
-    ~Private();
-
-    QImage::Format format() const;
-    QImage createImage();
-
-    wl_resource* resource;
-    wl_shm_buffer* shmBuffer;
-    LinuxDmabufBufferV1* dmabufBuffer;
-
-    Surface* surface;
-    int refCount;
-    QSize size;
-    bool alpha;
-    bool committed;
-
-private:
-    static void destroyListenerCallback(wl_listener* listener, void* data);
-    static void imageBufferCleanupHandler(void* info);
-
-    Wayland::Display* display;
-    Buffer* q_ptr;
-    DestroyWrapper destroyWrapper;
-};
 
 Buffer::Private::Private(Buffer* q,
                          wl_resource* wlResource,
