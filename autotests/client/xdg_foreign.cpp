@@ -244,6 +244,7 @@ void TestForeign::testExport()
     delete m_imported;
     delete m_exportedSurface;
     delete m_exported;
+    delete m_childSurface;
 }
 
 void TestForeign::testDeleteImported()
@@ -264,6 +265,7 @@ void TestForeign::testDeleteImported()
 
     delete m_exportedSurface;
     delete m_exported;
+    delete m_childSurface;
 }
 
 void TestForeign::testDeleteChildSurface()
@@ -316,6 +318,7 @@ void TestForeign::testDeleteParentSurface()
 
     delete m_imported;
     delete m_exported;
+    delete m_childSurface;
 }
 
 void TestForeign::testDeleteExported()
@@ -339,6 +342,7 @@ void TestForeign::testDeleteExported()
 
     delete m_imported;
     delete m_exportedSurface;
+    delete m_childSurface;
 }
 
 void TestForeign::testExportTwoTimes()
@@ -389,6 +393,7 @@ void TestForeign::testExportTwoTimes()
     delete m_imported;
     delete m_exportedSurface;
     delete m_exported;
+    delete m_childSurface;
 }
 
 void TestForeign::testImportTwoTimes()
@@ -407,7 +412,7 @@ void TestForeign::testImportTwoTimes()
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
-    Wrapland::Client::Surface* childSurface2 = m_compositor->createSurface();
+    auto childSurface2 = m_compositor->createSurface();
     QVERIFY(serverSurfaceCreated.wait());
 
     Wrapland::Server::Surface* childSurface2Interface
@@ -429,6 +434,8 @@ void TestForeign::testImportTwoTimes()
     delete m_imported;
     delete m_exportedSurface;
     delete m_exported;
+    delete m_childSurface;
+    delete childSurface2;
 }
 
 QTEST_GUILESS_MAIN(TestForeign)

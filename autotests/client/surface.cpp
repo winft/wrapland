@@ -271,7 +271,7 @@ void TestSurface::testDamage()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     s->setScale(2);
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
@@ -362,7 +362,7 @@ void TestSurface::testFrameCallback()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
@@ -370,7 +370,7 @@ void TestSurface::testFrameCallback()
     QSignalSpy damageSpy(serverSurface, SIGNAL(damaged(QRegion)));
     QVERIFY(damageSpy.isValid());
 
-    QSignalSpy frameRenderedSpy(s, SIGNAL(frameRendered()));
+    QSignalSpy frameRenderedSpy(s.get(), SIGNAL(frameRendered()));
     QVERIFY(frameRenderedSpy.isValid());
     QImage img(QSize(10, 10), QImage::Format_ARGB32_Premultiplied);
     img.fill(Qt::black);
@@ -391,7 +391,7 @@ void TestSurface::testAttachBuffer()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
@@ -432,8 +432,9 @@ void TestSurface::testAttachBuffer()
     // now the ServerSurface should have the black image attached as a buffer
     auto buffer1 = serverSurface->buffer();
     QVERIFY(buffer1->shmBuffer());
-    QCOMPARE(buffer1->data(), black);
-    QCOMPARE(buffer1->data().format(), QImage::Format_RGB32);
+    QCOMPARE(buffer1->shmImage()->createQImage(), black);
+    QCOMPARE(buffer1->shmImage()->format(), Wrapland::Server::ShmImage::Format::xrgb8888);
+    QCOMPARE(buffer1->shmImage()->createQImage().format(), QImage::Format_RGB32);
     buffer1.reset();
 
     // render another frame
@@ -447,13 +448,13 @@ void TestSurface::testAttachBuffer()
 
     auto buffer2 = serverSurface->buffer();
     QVERIFY(buffer2->shmBuffer());
-    QCOMPARE(buffer2->data().format(), QImage::Format_ARGB32_Premultiplied);
-    QCOMPARE(buffer2->data().width(), 24);
-    QCOMPARE(buffer2->data().height(), 24);
+    QCOMPARE(buffer2->shmImage()->createQImage().format(), QImage::Format_ARGB32_Premultiplied);
+    QCOMPARE(buffer2->shmImage()->createQImage().width(), 24);
+    QCOMPARE(buffer2->shmImage()->createQImage().height(), 24);
     for (int i = 0; i < 24; ++i) {
         for (int j = 0; j < 24; ++j) {
             // it's premultiplied in the format
-            QCOMPARE(buffer2->data().pixel(i, j), qRgba(128, 0, 0, 128));
+            QCOMPARE(buffer2->shmImage()->createQImage().pixel(i, j), qRgba(128, 0, 0, 128));
         }
     }
     QVERIFY(!redBuffer->isReleased());
@@ -465,7 +466,7 @@ void TestSurface::testAttachBuffer()
     QVERIFY(blueBuffer->isUsed());
     s->attachBuffer(blueBuffer.get());
     s->damage(QRect(0, 0, 24, 24));
-    QSignalSpy frameRenderedSpy(s, SIGNAL(frameRendered()));
+    QSignalSpy frameRenderedSpy(s.get(), SIGNAL(frameRendered()));
     QVERIFY(frameRenderedSpy.isValid());
     s->commit();
     damageSpy.clear();
@@ -482,13 +483,13 @@ void TestSurface::testAttachBuffer()
 
     auto buffer3 = serverSurface->buffer().get();
     QVERIFY(buffer3->shmBuffer());
-    QCOMPARE(buffer3->data().format(), QImage::Format_ARGB32_Premultiplied);
-    QCOMPARE(buffer3->data().width(), 24);
-    QCOMPARE(buffer3->data().height(), 24);
+    QCOMPARE(buffer3->shmImage()->createQImage().format(), QImage::Format_ARGB32_Premultiplied);
+    QCOMPARE(buffer3->shmImage()->createQImage().width(), 24);
+    QCOMPARE(buffer3->shmImage()->createQImage().height(), 24);
     for (int i = 0; i < 24; ++i) {
         for (int j = 0; j < 24; ++j) {
             // it's premultiplied in the format
-            QCOMPARE(buffer3->data().pixel(i, j), qRgba(0, 0, 128, 128));
+            QCOMPARE(buffer3->shmImage()->createQImage().pixel(i, j), qRgba(0, 0, 128, 128));
         }
     }
 
@@ -579,10 +580,10 @@ void TestSurface::testMultipleSurfaces()
     // now the ServerSurface should have the black image attached as a buffer
     auto buffer1 = serverSurface1->buffer();
     QVERIFY(buffer1);
-    QImage buffer1Data = buffer1->data();
+    QImage buffer1Data = buffer1->shmImage()->createQImage();
     QCOMPARE(buffer1Data, black);
     // accessing the same buffer is OK
-    QImage buffer1Data2 = buffer1->data();
+    QImage buffer1Data2 = buffer1->shmImage()->createQImage();
     QCOMPARE(buffer1Data2, buffer1Data);
     buffer1Data = QImage();
     QVERIFY(buffer1Data.isNull());
@@ -599,12 +600,12 @@ void TestSurface::testMultipleSurfaces()
 
     auto buffer2 = serverSurface2->buffer();
     QVERIFY(buffer2);
-    QImage buffer2Data = buffer2->data();
+    QImage buffer2Data = buffer2->shmImage()->createQImage();
     QCOMPARE(buffer2Data, red);
 
     // while buffer2 is accessed we cannot access buffer1
-    buffer1Data = buffer1->data();
-    QVERIFY(buffer1Data.isNull());
+    auto buffer1ShmImage = buffer1->shmImage();
+    QVERIFY(!buffer1ShmImage);
 
     // a deep copy can be kept around
     QImage deepCopy = buffer2Data.copy();
@@ -614,7 +615,9 @@ void TestSurface::testMultipleSurfaces()
     QCOMPARE(deepCopy, red);
 
     // now that buffer2Data is destroyed we can access buffer1 again
-    buffer1Data = buffer1->data();
+    buffer1ShmImage = buffer1->shmImage();
+    QVERIFY(buffer1ShmImage);
+    buffer1Data = buffer1ShmImage->createQImage();
     QVERIFY(!buffer1Data.isNull());
     QCOMPARE(buffer1Data, black);
 }
@@ -626,7 +629,7 @@ void TestSurface::testOpaque()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
@@ -682,7 +685,7 @@ void TestSurface::testInput()
     QSignalSpy serverSurfaceCreated(m_serverCompositor,
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
@@ -833,9 +836,9 @@ void TestSurface::testScale()
 void TestSurface::testDestroy()
 {
     using namespace Wrapland::Client;
-    auto s = m_compositor->createSurface();
+    std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
 
-    connect(m_connection, &ConnectionThread::establishedChanged, s, &Surface::release);
+    connect(m_connection, &ConnectionThread::establishedChanged, s.get(), &Surface::release);
     connect(
         m_connection, &ConnectionThread::establishedChanged, m_compositor, &Compositor::release);
     connect(m_connection, &ConnectionThread::establishedChanged, m_shm, &ShmPool::release);
