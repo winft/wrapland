@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "../server/display.h"
 #include "../server/data_device_manager.h"
-#include "../server/output.h"
+#include "../server/wl_output.h"
 #include "../server/seat.h"
 #include "../server/compositor.h"
 #include "../server/surface.h"

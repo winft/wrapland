@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/output.h"
 
 #include "../../server/display.h"
-#include "../../server/output.h"
+#include "../../server/wl_output.h"
 #include "../../server/remote_access.h"
 
 #include <linux/input.h>

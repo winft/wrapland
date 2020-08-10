@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include "output.h"
+#include "wl_output.h"
 
 #include "wayland/global.h"
 

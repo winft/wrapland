@@ -20,7 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtTest>
 
 #include "../../server/display.h"
-#include "../../server/output.h"
+#include "../../server/wl_output.h"
 
 
 #include "../../src/client/connection_thread.h"

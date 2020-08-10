@@ -20,8 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "dpms_p.h"
 
 #include "display.h"
-#include "output.h"
-#include "output_p.h"
+#include "wl_output.h"
+#include "wl_output_p.h"
 
 #include "wayland/client.h"
 #include "wayland/display.h"

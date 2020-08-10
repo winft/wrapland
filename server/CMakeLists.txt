@@ -20,7 +20,6 @@ set(SERVER_LIB_SRCS
     keystate.cpp
     keyboard_shortcuts_inhibit.cpp
     linux_dmabuf_v1.cpp
-    output.cpp
     output_changeset_v1.cpp
     output_configuration_v1.cpp
     output_device_v1.cpp
@@ -47,6 +46,7 @@ set(SERVER_LIB_SRCS
     wayland/buffer_manager.cpp
     wayland/client.cpp
     wayland/display.cpp
+    wl_output.cpp
     xdg_decoration.cpp
     xdg_foreign.cpp
     xdg_foreign_v2.cpp
@@ -331,7 +331,7 @@ set(SERVER_LIB_HEADERS
   keystate.h
   keyboard_shortcuts_inhibit.h
   linux_dmabuf_v1.h
-  output.h
+  wl_output.h
   output_changeset_v1.h
   output_configuration_v1.h
   output_device_v1.h

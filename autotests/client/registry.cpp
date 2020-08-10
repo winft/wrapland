@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/data_device_manager.h"
 #include "../../server/dpms.h"
-#include "../../server/output.h"
+#include "../../server/wl_output.h"
 #include "../../server/relative_pointer_v1.h"
 #include "../../server/pointer_gestures_v1.h"
 #include "../../server/seat.h"

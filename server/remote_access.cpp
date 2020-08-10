@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "remote_access_p.h"
 
 #include "display.h"
-#include "output_p.h"
+#include "wl_output_p.h"
 
 #include <wayland-remote-access-server-protocol.h>
 

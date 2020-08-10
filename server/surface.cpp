@@ -26,7 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "compositor.h"
 #include "idle_inhibit_v1.h"
 #include "idle_inhibit_v1_p.h"
-#include "output_p.h"
 #include "pointer_constraints_v1.h"
 #include "pointer_constraints_v1_p.h"
 #include "presentation_time.h"
@@ -34,6 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "subcompositor.h"
 #include "subsurface_p.h"
 #include "viewporter_p.h"
+#include "wl_output_p.h"
 #include "xdg_shell_surface.h"
 
 #include <QListIterator>

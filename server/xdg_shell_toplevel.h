@@ -22,8 +22,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdg_shell_surface.h"
 
 // For Qt metatype declaration.
-#include "output.h"
 #include "seat.h"
+#include "wl_output.h"
 #include "xdg_shell.h"
 
 #include <QObject>

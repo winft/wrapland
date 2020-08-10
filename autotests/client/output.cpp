@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/display.h"
 #include "../../server/dpms.h"
-#include "../../server/output.h"
+#include "../../server/wl_output.h"
 
 #include <wayland-client-protocol.h>
 

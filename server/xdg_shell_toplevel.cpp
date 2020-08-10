@@ -21,8 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdg_shell_toplevel_p.h"
 
 #include "display.h"
-#include "output_p.h"
 #include "seat_p.h"
+#include "wl_output_p.h"
 #include "xdg_shell_surface.h"
 #include "xdg_shell_surface_p.h"
 

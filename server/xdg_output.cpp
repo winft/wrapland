@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include "xdg_output_p.h"
 
-#include "output_p.h"
+#include "wl_output_p.h"
 
 namespace Wrapland::Server
 {

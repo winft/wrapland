@@ -20,7 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "display.h"
-#include "output.h"
+#include "wl_output.h"
 #include "xdg_output.h"
 
 #include "wayland/client.h"

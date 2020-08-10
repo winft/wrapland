@@ -33,9 +33,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/output.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
+#include "../../server/wl_output.h"
 #include "../../server/xdg_shell.h"
 #include "../../server/xdg_shell_popup.h"
 #include "../../server/xdg_shell_toplevel.h"

@@ -17,8 +17,7 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#include "output.h"
-#include "output_p.h"
+#include "wl_output_p.h"
 
 #include "display.h"
 

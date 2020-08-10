@@ -36,8 +36,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/idle_inhibit_v1.h"
-#include "../../server/output.h"
 #include "../../server/surface.h"
+#include "../../server/wl_output.h"
 
 #include <wayland-client-protocol.h>
 

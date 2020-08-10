@@ -20,10 +20,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "presentation_time.h"
 
 #include "display.h"
-#include "output_p.h"
 #include "region.h"
 #include "surface.h"
 #include "surface_p.h"
+#include "wl_output_p.h"
 
 #include "wayland/global.h"
 #include "wayland/resource.h"

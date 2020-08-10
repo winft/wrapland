@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../../server/display.h"
 #include "../../../server/compositor.h"
 #include "../../../server/subcompositor.h"
-#include "../../../server/output.h"
+#include "../../../server/wl_output.h"
 #include "../../../server/seat.h"
 #include "../../../server/surface.h"
 

@@ -21,8 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/client.h"
 #include "../../server/display.h"
-#include "../../server/output.h"
 #include "../../server/output_management_v1.h"
+#include "../../server/wl_output.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
