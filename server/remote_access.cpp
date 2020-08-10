@@ -44,7 +44,7 @@ RemoteAccessManager::Private::Private(Display* display, RemoteAccessManager* q)
     create();
 }
 
-void RemoteAccessManager::Private::sendBufferReady(Output* output, RemoteBufferHandle* buf)
+void RemoteAccessManager::Private::sendBufferReady(WlOutput* output, RemoteBufferHandle* buf)
 {
     BufferHolder holder{buf, 0};
 
@@ -161,7 +161,7 @@ RemoteAccessManager::RemoteAccessManager(Display* display, QObject* parent)
 
 RemoteAccessManager::~RemoteAccessManager() = default;
 
-void RemoteAccessManager::sendBufferReady(Output* output, RemoteBufferHandle* buf)
+void RemoteAccessManager::sendBufferReady(WlOutput* output, RemoteBufferHandle* buf)
 {
     d_ptr->sendBufferReady(output, buf);
 }

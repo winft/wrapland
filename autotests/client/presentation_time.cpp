@@ -53,7 +53,7 @@ private:
     Server::Display* m_display;
     Server::Compositor* m_serverCompositor;
     Server::PresentationManager* m_serverPresentation;
-    Server::Output* m_serverOutput;
+    Server::WlOutput* m_serverOutput;
 
     Client::ConnectionThread* m_connection;
     Client::EventQueue* m_queue;

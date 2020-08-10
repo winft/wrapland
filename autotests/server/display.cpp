@@ -88,12 +88,12 @@ void TestServerDisplay::testAddRemoveOutput()
     display.setSocketName(std::string("kwin-wayland-server-display-test-output-0"));
     display.start();
 
-    std::unique_ptr<Output> output1{display.createOutput()};
+    std::unique_ptr<WlOutput> output1{display.createOutput()};
     QCOMPARE(display.outputs().size(), 1);
     QCOMPARE(display.outputs()[0], output1.get());
 
     // create a second output
-    std::unique_ptr<Output> output2{display.createOutput()};
+    std::unique_ptr<WlOutput> output2{display.createOutput()};
     QCOMPARE(display.outputs().size(), 2);
     QCOMPARE(display.outputs()[0], output1.get());
     QCOMPARE(display.outputs()[1], output2.get());

@@ -40,7 +40,7 @@ class Private;
 
 class DataDeviceManager;
 class DpmsManager;
-class Output;
+class WlOutput;
 class OutputConfigurationV1;
 class OutputDeviceV1;
 class OutputManagementV1;
@@ -105,9 +105,9 @@ public:
     wl_display* native() const;
     bool running() const;
 
-    Output* createOutput(QObject* parent = nullptr);
-    void removeOutput(Output* output);
-    std::vector<Output*>& outputs() const;
+    WlOutput* createOutput(QObject* parent = nullptr);
+    void removeOutput(WlOutput* output);
+    std::vector<WlOutput*>& outputs() const;
 
     Seat* createSeat(QObject* parent = nullptr);
     std::vector<Seat*>& seats() const;

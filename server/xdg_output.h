@@ -27,7 +27,6 @@ namespace Wrapland::Server
 {
 class Client;
 class Display;
-class OutputInterface;
 class XdgOutput;
 
 class WRAPLANDSERVER_EXPORT XdgOutputManager : public QObject
@@ -35,7 +34,7 @@ class WRAPLANDSERVER_EXPORT XdgOutputManager : public QObject
     Q_OBJECT
 public:
     ~XdgOutputManager() override;
-    XdgOutput* createXdgOutput(Output* output, QObject* parent);
+    XdgOutput* createXdgOutput(WlOutput* output, QObject* parent);
 
 private:
     explicit XdgOutputManager(Display* display, QObject* parent = nullptr);

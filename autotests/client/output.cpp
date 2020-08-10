@@ -61,7 +61,7 @@ private Q_SLOTS:
 
 private:
     Srv::Display* m_display;
-    Srv::Output* m_serverOutput;
+    Srv::WlOutput* m_serverOutput;
     Clt::ConnectionThread* m_connection;
     Clt::EventQueue* m_queue;
     QThread* m_thread;
@@ -89,17 +89,17 @@ void TestOutput::init()
     QCOMPARE(m_serverOutput->pixelSize(), QSize());
     QCOMPARE(m_serverOutput->refreshRate(), 60000);
     m_serverOutput->addMode(QSize(800, 600),
-                            Srv::Output::ModeFlags(Srv::Output::ModeFlag::Preferred));
+                            Srv::WlOutput::ModeFlags(Srv::WlOutput::ModeFlag::Preferred));
     QCOMPARE(m_serverOutput->pixelSize(), QSize(800, 600));
     m_serverOutput->addMode(QSize(1024, 768));
-    m_serverOutput->addMode(QSize(1280, 1024), Srv::Output::ModeFlags(), 90000);
+    m_serverOutput->addMode(QSize(1280, 1024), Srv::WlOutput::ModeFlags(), 90000);
     QCOMPARE(m_serverOutput->pixelSize(), QSize(800, 600));
     m_serverOutput->setCurrentMode(QSize(1024, 768));
     QCOMPARE(m_serverOutput->pixelSize(), QSize(1024, 768));
     QCOMPARE(m_serverOutput->refreshRate(), 60000);
 
     QCOMPARE(m_serverOutput->isDpmsSupported(), false);
-    QCOMPARE(m_serverOutput->dpmsMode(), Srv::Output::DpmsMode::Off);
+    QCOMPARE(m_serverOutput->dpmsMode(), Srv::WlOutput::DpmsMode::Off);
 
     // setup connection
     m_connection = new Clt::ConnectionThread;
@@ -145,7 +145,7 @@ void TestOutput::cleanup()
 
 void TestOutput::testRegistry()
 {
-    QSignalSpy globalPositionChangedSpy(m_serverOutput, &Srv::Output::globalPositionChanged);
+    QSignalSpy globalPositionChangedSpy(m_serverOutput, &Srv::WlOutput::globalPositionChanged);
     QVERIFY(globalPositionChangedSpy.isValid());
     QCOMPARE(m_serverOutput->globalPosition(), QPoint(0, 0));
     m_serverOutput->setGlobalPosition(QPoint(100, 50));
@@ -155,7 +155,7 @@ void TestOutput::testRegistry()
     m_serverOutput->setGlobalPosition(QPoint(100, 50));
     QCOMPARE(globalPositionChangedSpy.count(), 1);
 
-    QSignalSpy physicalSizeChangedSpy(m_serverOutput, &Srv::Output::physicalSizeChanged);
+    QSignalSpy physicalSizeChangedSpy(m_serverOutput, &Srv::WlOutput::physicalSizeChanged);
     QVERIFY(physicalSizeChangedSpy.isValid());
     QCOMPARE(m_serverOutput->physicalSize(), QSize());
     m_serverOutput->setPhysicalSize(QSize(200, 100));
@@ -222,9 +222,9 @@ void TestOutput::testModeChanges()
     QCOMPARE(serverModes.at(0).refreshRate, 60000);
     QCOMPARE(serverModes.at(1).refreshRate, 60000);
     QCOMPARE(serverModes.at(2).refreshRate, 90000);
-    QCOMPARE(serverModes.at(0).flags, Srv::Output::ModeFlags(Srv::Output::ModeFlag::Preferred));
-    QCOMPARE(serverModes.at(1).flags, Srv::Output::ModeFlags(Srv::Output::ModeFlag::Current));
-    QCOMPARE(serverModes.at(2).flags, Srv::Output::ModeFlags());
+    QCOMPARE(serverModes.at(0).flags, Srv::WlOutput::ModeFlags(Srv::WlOutput::ModeFlag::Preferred));
+    QCOMPARE(serverModes.at(1).flags, Srv::WlOutput::ModeFlags(Srv::WlOutput::ModeFlag::Current));
+    QCOMPARE(serverModes.at(2).flags, Srv::WlOutput::ModeFlags());
 
     using namespace Clt;
     Clt::Registry registry;
@@ -349,7 +349,7 @@ void TestOutput::testScaleChange()
     // change the scale
     outputChanged.clear();
     QCOMPARE(m_serverOutput->scale(), 1);
-    QSignalSpy serverScaleChanged(m_serverOutput, &Srv::Output::scaleChanged);
+    QSignalSpy serverScaleChanged(m_serverOutput, &Srv::WlOutput::scaleChanged);
     QVERIFY(serverScaleChanged.isValid());
     m_serverOutput->setScale(2);
     QCOMPARE(m_serverOutput->scale(), 2);
@@ -373,25 +373,25 @@ void TestOutput::testScaleChange()
 void TestOutput::testSubPixel_data()
 {
     QTest::addColumn<Clt::Output::SubPixel>("expected");
-    QTest::addColumn<Srv::Output::SubPixel>("actual");
+    QTest::addColumn<Srv::WlOutput::SubPixel>("actual");
 
-    QTest::newRow("none") << Clt::Output::SubPixel::None << Srv::Output::SubPixel::None;
+    QTest::newRow("none") << Clt::Output::SubPixel::None << Srv::WlOutput::SubPixel::None;
     QTest::newRow("horizontal/rgb")
-        << Clt::Output::SubPixel::HorizontalRGB << Srv::Output::SubPixel::HorizontalRGB;
+        << Clt::Output::SubPixel::HorizontalRGB << Srv::WlOutput::SubPixel::HorizontalRGB;
     QTest::newRow("horizontal/bgr")
-        << Clt::Output::SubPixel::HorizontalBGR << Srv::Output::SubPixel::HorizontalBGR;
+        << Clt::Output::SubPixel::HorizontalBGR << Srv::WlOutput::SubPixel::HorizontalBGR;
     QTest::newRow("vertical/rgb") << Clt::Output::SubPixel::VerticalRGB
-                                  << Srv::Output::SubPixel::VerticalRGB;
+                                  << Srv::WlOutput::SubPixel::VerticalRGB;
     QTest::newRow("vertical/bgr") << Clt::Output::SubPixel::VerticalBGR
-                                  << Srv::Output::SubPixel::VerticalBGR;
+                                  << Srv::WlOutput::SubPixel::VerticalBGR;
 }
 
 void TestOutput::testSubPixel()
 {
-    QFETCH(Srv::Output::SubPixel, actual);
+    QFETCH(Srv::WlOutput::SubPixel, actual);
 
-    QCOMPARE(m_serverOutput->subPixel(), Srv::Output::SubPixel::Unknown);
-    QSignalSpy serverSubPixelChangedSpy(m_serverOutput, &Srv::Output::subPixelChanged);
+    QCOMPARE(m_serverOutput->subPixel(), Srv::WlOutput::SubPixel::Unknown);
+    QSignalSpy serverSubPixelChangedSpy(m_serverOutput, &Srv::WlOutput::subPixelChanged);
     QVERIFY(serverSubPixelChangedSpy.isValid());
     m_serverOutput->setSubPixel(actual);
     QCOMPARE(m_serverOutput->subPixel(), actual);
@@ -422,8 +422,8 @@ void TestOutput::testSubPixel()
 
     // change back to unknown
     outputChanged.clear();
-    m_serverOutput->setSubPixel(Srv::Output::SubPixel::Unknown);
-    QCOMPARE(m_serverOutput->subPixel(), Srv::Output::SubPixel::Unknown);
+    m_serverOutput->setSubPixel(Srv::WlOutput::SubPixel::Unknown);
+    QCOMPARE(m_serverOutput->subPixel(), Srv::WlOutput::SubPixel::Unknown);
     QCOMPARE(serverSubPixelChangedSpy.count(), 2);
     if (outputChanged.isEmpty()) {
         QVERIFY(outputChanged.wait());
@@ -434,27 +434,28 @@ void TestOutput::testSubPixel()
 void TestOutput::testTransform_data()
 {
     QTest::addColumn<Clt::Output::Transform>("expected");
-    QTest::addColumn<Srv::Output::Transform>("actual");
+    QTest::addColumn<Srv::WlOutput::Transform>("actual");
 
-    QTest::newRow("90") << Clt::Output::Transform::Rotated90 << Srv::Output::Transform::Rotated90;
+    QTest::newRow("90") << Clt::Output::Transform::Rotated90 << Srv::WlOutput::Transform::Rotated90;
     QTest::newRow("180") << Clt::Output::Transform::Rotated180
-                         << Srv::Output::Transform::Rotated180;
+                         << Srv::WlOutput::Transform::Rotated180;
     QTest::newRow("270") << Clt::Output::Transform::Rotated270
-                         << Srv::Output::Transform::Rotated270;
-    QTest::newRow("Flipped") << Clt::Output::Transform::Flipped << Srv::Output::Transform::Flipped;
+                         << Srv::WlOutput::Transform::Rotated270;
+    QTest::newRow("Flipped") << Clt::Output::Transform::Flipped
+                             << Srv::WlOutput::Transform::Flipped;
     QTest::newRow("Flipped 90") << Clt::Output::Transform::Flipped90
-                                << Srv::Output::Transform::Flipped90;
+                                << Srv::WlOutput::Transform::Flipped90;
     QTest::newRow("Flipped 180") << Clt::Output::Transform::Flipped180
-                                 << Srv::Output::Transform::Flipped180;
+                                 << Srv::WlOutput::Transform::Flipped180;
     QTest::newRow("Flipped 280") << Clt::Output::Transform::Flipped270
-                                 << Srv::Output::Transform::Flipped270;
+                                 << Srv::WlOutput::Transform::Flipped270;
 }
 
 void TestOutput::testTransform()
 {
-    QFETCH(Srv::Output::Transform, actual);
-    QCOMPARE(m_serverOutput->transform(), Srv::Output::Transform::Normal);
-    QSignalSpy serverTransformChangedSpy(m_serverOutput, &Srv::Output::transformChanged);
+    QFETCH(Srv::WlOutput::Transform, actual);
+    QCOMPARE(m_serverOutput->transform(), Srv::WlOutput::Transform::Normal);
+    QSignalSpy serverTransformChangedSpy(m_serverOutput, &Srv::WlOutput::transformChanged);
     QVERIFY(serverTransformChangedSpy.isValid());
     m_serverOutput->setTransform(actual);
     QCOMPARE(m_serverOutput->transform(), actual);
@@ -485,8 +486,8 @@ void TestOutput::testTransform()
 
     // change back to normal
     outputChanged.clear();
-    m_serverOutput->setTransform(Srv::Output::Transform::Normal);
-    QCOMPARE(m_serverOutput->transform(), Srv::Output::Transform::Normal);
+    m_serverOutput->setTransform(Srv::WlOutput::Transform::Normal);
+    QCOMPARE(m_serverOutput->transform(), Srv::WlOutput::Transform::Normal);
     QCOMPARE(serverTransformChangedSpy.count(), 2);
     if (outputChanged.isEmpty()) {
         QVERIFY(outputChanged.wait());
@@ -497,11 +498,11 @@ void TestOutput::testTransform()
 void TestOutput::testDpms_data()
 {
     QTest::addColumn<Clt::Dpms::Mode>("client");
-    QTest::addColumn<Srv::Output::DpmsMode>("server");
+    QTest::addColumn<Srv::WlOutput::DpmsMode>("server");
 
-    QTest::newRow("Standby") << Clt::Dpms::Mode::Standby << Srv::Output::DpmsMode::Standby;
-    QTest::newRow("Suspend") << Clt::Dpms::Mode::Suspend << Srv::Output::DpmsMode::Suspend;
-    QTest::newRow("On") << Clt::Dpms::Mode::On << Srv::Output::DpmsMode::On;
+    QTest::newRow("Standby") << Clt::Dpms::Mode::Standby << Srv::WlOutput::DpmsMode::Standby;
+    QTest::newRow("Suspend") << Clt::Dpms::Mode::Suspend << Srv::WlOutput::DpmsMode::Suspend;
+    QTest::newRow("On") << Clt::Dpms::Mode::On << Srv::WlOutput::DpmsMode::On;
 }
 
 void TestOutput::testDpms()
@@ -509,7 +510,7 @@ void TestOutput::testDpms()
     std::unique_ptr<Srv::DpmsManager> serverDpmsManager{m_display->createDpmsManager()};
 
     // set Dpms on the Output
-    QSignalSpy serverDpmsSupportedChangedSpy(m_serverOutput, &Srv::Output::dpmsSupportedChanged);
+    QSignalSpy serverDpmsSupportedChangedSpy(m_serverOutput, &Srv::WlOutput::dpmsSupportedChanged);
     QVERIFY(serverDpmsSupportedChangedSpy.isValid());
     QCOMPARE(m_serverOutput->isDpmsSupported(), false);
     m_serverOutput->setDpmsSupported(true);
@@ -557,13 +558,13 @@ void TestOutput::testDpms()
     QCOMPARE(dpms->isSupported(), true);
 
     // and let's change to suspend
-    QSignalSpy serverDpmsModeChangedSpy(m_serverOutput, &Srv::Output::dpmsModeChanged);
+    QSignalSpy serverDpmsModeChangedSpy(m_serverOutput, &Srv::WlOutput::dpmsModeChanged);
     QVERIFY(serverDpmsModeChangedSpy.isValid());
     QSignalSpy clientDpmsModeChangedSpy(dpms, &Clt::Dpms::modeChanged);
     QVERIFY(clientDpmsModeChangedSpy.isValid());
 
-    QCOMPARE(m_serverOutput->dpmsMode(), Srv::Output::DpmsMode::Off);
-    QFETCH(Srv::Output::DpmsMode, server);
+    QCOMPARE(m_serverOutput->dpmsMode(), Srv::WlOutput::DpmsMode::Off);
+    QFETCH(Srv::WlOutput::DpmsMode, server);
     m_serverOutput->setDpmsMode(server);
     QCOMPARE(m_serverOutput->dpmsMode(), server);
     QCOMPARE(serverDpmsModeChangedSpy.count(), 1);
@@ -585,7 +586,7 @@ void TestOutput::testDpms()
     QVERIFY(dpms->isSupported());
 
     // and switch back to off
-    m_serverOutput->setDpmsMode(Srv::Output::DpmsMode::Off);
+    m_serverOutput->setDpmsMode(Srv::WlOutput::DpmsMode::Off);
     QVERIFY(clientDpmsModeChangedSpy.wait());
     QCOMPARE(clientDpmsModeChangedSpy.count(), 2);
     QCOMPARE(dpms->mode(), Clt::Dpms::Mode::Off);
@@ -594,12 +595,12 @@ void TestOutput::testDpms()
 void TestOutput::testDpmsRequestMode_data()
 {
     QTest::addColumn<Clt::Dpms::Mode>("client");
-    QTest::addColumn<Srv::Output::DpmsMode>("server");
+    QTest::addColumn<Srv::WlOutput::DpmsMode>("server");
 
-    QTest::newRow("Standby") << Clt::Dpms::Mode::Standby << Srv::Output::DpmsMode::Standby;
-    QTest::newRow("Suspend") << Clt::Dpms::Mode::Suspend << Srv::Output::DpmsMode::Suspend;
-    QTest::newRow("Off") << Clt::Dpms::Mode::Off << Srv::Output::DpmsMode::Off;
-    QTest::newRow("On") << Clt::Dpms::Mode::On << Srv::Output::DpmsMode::On;
+    QTest::newRow("Standby") << Clt::Dpms::Mode::Standby << Srv::WlOutput::DpmsMode::Standby;
+    QTest::newRow("Suspend") << Clt::Dpms::Mode::Suspend << Srv::WlOutput::DpmsMode::Suspend;
+    QTest::newRow("Off") << Clt::Dpms::Mode::Off << Srv::WlOutput::DpmsMode::Off;
+    QTest::newRow("On") << Clt::Dpms::Mode::On << Srv::WlOutput::DpmsMode::On;
 }
 
 void TestOutput::testDpmsRequestMode()
@@ -611,7 +612,7 @@ void TestOutput::testDpmsRequestMode()
     std::unique_ptr<Srv::DpmsManager> serverDpmsManager{m_display->createDpmsManager()};
 
     // set Dpms on the Output
-    QSignalSpy serverDpmsSupportedChangedSpy(m_serverOutput, &Srv::Output::dpmsSupportedChanged);
+    QSignalSpy serverDpmsSupportedChangedSpy(m_serverOutput, &Srv::WlOutput::dpmsSupportedChanged);
     QVERIFY(serverDpmsSupportedChangedSpy.isValid());
     QCOMPARE(m_serverOutput->isDpmsSupported(), false);
     m_serverOutput->setDpmsSupported(true);
@@ -644,13 +645,13 @@ void TestOutput::testDpmsRequestMode()
 
     auto* dpms = dpmsManager->getDpms(output, &registry);
     // and test request mode
-    QSignalSpy modeRequestedSpy(m_serverOutput, &Srv::Output::dpmsModeRequested);
+    QSignalSpy modeRequestedSpy(m_serverOutput, &Srv::WlOutput::dpmsModeRequested);
     QVERIFY(modeRequestedSpy.isValid());
 
     QFETCH(Clt::Dpms::Mode, client);
     dpms->requestMode(client);
     QVERIFY(modeRequestedSpy.wait());
-    QTEST(modeRequestedSpy.last().first().value<Srv::Output::DpmsMode>(), "server");
+    QTEST(modeRequestedSpy.last().first().value<Srv::WlOutput::DpmsMode>(), "server");
 }
 
 QTEST_GUILESS_MAIN(TestOutput)

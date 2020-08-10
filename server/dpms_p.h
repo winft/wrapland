@@ -30,7 +30,7 @@ namespace Wrapland
 namespace Server
 {
 
-class Output;
+class WlOutput;
 
 class DpmsManager::Private : public Wayland::Global<DpmsManager>
 {
@@ -50,7 +50,7 @@ class Dpms : public QObject
 {
     Q_OBJECT
 public:
-    Dpms(Client* client, uint32_t version, uint32_t id, Output* output);
+    Dpms(Client* client, uint32_t version, uint32_t id, WlOutput* output);
 
     void sendSupported();
     void sendMode();
@@ -67,9 +67,9 @@ private:
 class Dpms::Private : public Wayland::Resource<Dpms>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Output* output, Dpms* q);
+    Private(Client* client, uint32_t version, uint32_t id, WlOutput* output, Dpms* q);
 
-    Output* output;
+    WlOutput* output;
 
 private:
     static void setCallback(wl_client* client, wl_resource* wlResource, uint32_t mode);

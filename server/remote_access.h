@@ -28,7 +28,7 @@ namespace Wrapland::Server
 {
 
 class Display;
-class Output;
+class WlOutput;
 class RemoteBufferHandle;
 
 class WRAPLANDSERVER_EXPORT RemoteAccessManager : public QObject
@@ -37,7 +37,7 @@ class WRAPLANDSERVER_EXPORT RemoteAccessManager : public QObject
 public:
     ~RemoteAccessManager() override;
 
-    void sendBufferReady(Output* output, RemoteBufferHandle* buf);
+    void sendBufferReady(WlOutput* output, RemoteBufferHandle* buf);
     bool bound() const;
 
 Q_SIGNALS:

@@ -127,7 +127,7 @@ private Q_SLOTS:
 private:
     std::unique_ptr<Wrapland::Server::Display> m_display;
     std::unique_ptr<Wrapland::Server::Compositor> m_compositor;
-    std::unique_ptr<Wrapland::Server::Output> m_output;
+    std::unique_ptr<Wrapland::Server::WlOutput> m_output;
     std::unique_ptr<Wrapland::Server::OutputDeviceV1> m_outputDevice;
     std::unique_ptr<Wrapland::Server::Seat> m_seat;
     std::unique_ptr<Wrapland::Server::Subcompositor> m_subcompositor;
@@ -823,7 +823,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QSignalSpy outputAnnouncedSpy(&registry, &Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    std::unique_ptr<Wrapland::Server::Output> output1{m_display->createOutput()};
+    std::unique_ptr<Wrapland::Server::WlOutput> output1{m_display->createOutput()};
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 2);
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().name, outputAnnouncedSpy.first().first().value<quint32>());
@@ -831,7 +831,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QCOMPARE(registry.interface(Registry::Interface::Output).name, outputAnnouncedSpy.first().first().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::Output).version, outputAnnouncedSpy.first().last().value<quint32>());
 
-    std::unique_ptr<Wrapland::Server::Output> output2{m_display->createOutput()};
+    std::unique_ptr<Wrapland::Server::WlOutput> output2{m_display->createOutput()};
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 3);
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().name, outputAnnouncedSpy.last().first().value<quint32>());

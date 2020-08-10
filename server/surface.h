@@ -70,7 +70,7 @@ public:
     bool inputIsInfinite() const;
 
     qint32 scale() const;
-    Output::Transform transform() const;
+    WlOutput::Transform transform() const;
 
     std::shared_ptr<Buffer> buffer() const;
 
@@ -93,8 +93,8 @@ public:
     Surface* surfaceAt(const QPointF& position);
     Surface* inputSurfaceAt(const QPointF& position);
 
-    void setOutputs(std::vector<Output*> const& outputs);
-    std::vector<Output*> outputs() const;
+    void setOutputs(std::vector<WlOutput*> const& outputs);
+    std::vector<WlOutput*> outputs() const;
 
     QPointer<ConfinedPointerV1> confinedPointer() const;
     QPointer<LockedPointerV1> lockedPointer() const;
@@ -109,7 +109,7 @@ public:
 
     QRectF sourceRectangle() const;
 
-    uint32_t lockPresentation(Output* output);
+    uint32_t lockPresentation(WlOutput* output);
     void presentationFeedback(uint32_t presentationId,
                               uint32_t tvSecHi,
                               uint32_t tvSecLo,
@@ -127,7 +127,7 @@ Q_SIGNALS:
     void opaqueChanged(const QRegion&);
     void inputChanged(const QRegion&);
     void scaleChanged(qint32);
-    void transformChanged(Wrapland::Server::Output::Transform);
+    void transformChanged(Wrapland::Server::WlOutput::Transform);
     void unmapped();
     void sizeChanged();
     void shadowChanged();

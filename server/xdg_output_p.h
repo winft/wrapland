@@ -37,7 +37,6 @@ namespace Wrapland::Server
 {
 
 class Display;
-class OutputInterface;
 class XdgOutput;
 
 class XdgOutputManager::Private : public Wayland::Global<XdgOutputManager>
@@ -45,7 +44,7 @@ class XdgOutputManager::Private : public Wayland::Global<XdgOutputManager>
 public:
     Private(Display* display, XdgOutputManager* qptr);
 
-    std::map<Output*, XdgOutput*> outputs;
+    std::map<WlOutput*, XdgOutput*> outputs;
 
 private:
     static void getXdgOutputCallback(wl_client* client,

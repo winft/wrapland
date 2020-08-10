@@ -51,7 +51,7 @@ void DpmsManager::Private::getDpmsCallback([[maybe_unused]] wl_client* wlClient,
     auto bind = priv->getBind(wlResource);
 
     auto dpms
-        = new Dpms(bind->client()->handle(), bind->version(), id, OutputGlobal::handle(output));
+        = new Dpms(bind->client()->handle(), bind->version(), id, WlOutputGlobal::handle(output));
     if (!dpms) {
         return;
     }
@@ -74,7 +74,7 @@ const struct org_kde_kwin_dpms_interface Dpms::Private::s_interface = {
     destroyCallback,
 };
 
-Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, Output* output, Dpms* q)
+Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, WlOutput* output, Dpms* q)
     : Wayland::Resource<Dpms>(client, version, id, &org_kde_kwin_dpms_interface, &s_interface, q)
     , output(output)
 {
@@ -83,19 +83,19 @@ Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, Output* ou
 void Dpms::Private::setCallback(wl_client* client, wl_resource* wlResource, uint32_t mode)
 {
     Q_UNUSED(client)
-    Output::DpmsMode dpmsMode;
+    WlOutput::DpmsMode dpmsMode;
     switch (mode) {
     case ORG_KDE_KWIN_DPMS_MODE_ON:
-        dpmsMode = Output::DpmsMode::On;
+        dpmsMode = WlOutput::DpmsMode::On;
         break;
     case ORG_KDE_KWIN_DPMS_MODE_STANDBY:
-        dpmsMode = Output::DpmsMode::Standby;
+        dpmsMode = WlOutput::DpmsMode::Standby;
         break;
     case ORG_KDE_KWIN_DPMS_MODE_SUSPEND:
-        dpmsMode = Output::DpmsMode::Suspend;
+        dpmsMode = WlOutput::DpmsMode::Suspend;
         break;
     case ORG_KDE_KWIN_DPMS_MODE_OFF:
-        dpmsMode = Output::DpmsMode::Off;
+        dpmsMode = WlOutput::DpmsMode::Off;
         break;
     default:
         return;
@@ -103,14 +103,14 @@ void Dpms::Private::setCallback(wl_client* client, wl_resource* wlResource, uint
     Q_EMIT handle(wlResource)->d_ptr->output->dpmsModeRequested(dpmsMode);
 }
 
-Dpms::Dpms(Client* client, uint32_t version, uint32_t id, Output* output)
+Dpms::Dpms(Client* client, uint32_t version, uint32_t id, WlOutput* output)
     : d_ptr(new Private(client, version, id, output, this))
 {
-    connect(output, &Output::dpmsSupportedChanged, this, [this] {
+    connect(output, &WlOutput::dpmsSupportedChanged, this, [this] {
         sendSupported();
         sendDone();
     });
-    connect(output, &Output::dpmsModeChanged, this, [this] {
+    connect(output, &WlOutput::dpmsModeChanged, this, [this] {
         sendMode();
         sendDone();
     });
@@ -126,16 +126,16 @@ void Dpms::sendMode()
     org_kde_kwin_dpms_mode mode = ORG_KDE_KWIN_DPMS_MODE_ON;
 
     switch (d_ptr->output->dpmsMode()) {
-    case Output::DpmsMode::On:
+    case WlOutput::DpmsMode::On:
         mode = ORG_KDE_KWIN_DPMS_MODE_ON;
         break;
-    case Output::DpmsMode::Standby:
+    case WlOutput::DpmsMode::Standby:
         mode = ORG_KDE_KWIN_DPMS_MODE_STANDBY;
         break;
-    case Output::DpmsMode::Suspend:
+    case WlOutput::DpmsMode::Suspend:
         mode = ORG_KDE_KWIN_DPMS_MODE_SUSPEND;
         break;
-    case Output::DpmsMode::Off:
+    case WlOutput::DpmsMode::Off:
         mode = ORG_KDE_KWIN_DPMS_MODE_OFF;
         break;
     default:

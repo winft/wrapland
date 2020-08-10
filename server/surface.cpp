@@ -419,7 +419,7 @@ void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
 }
 
 void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
-                                                  Output::Transform transform,
+                                                  WlOutput::Transform transform,
                                                   qint32 scale,
                                                   const QRectF& sourceRectangle) const
 {
@@ -428,9 +428,9 @@ void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
     }
     QSizeF bufferSize = buffer->size() / scale;
 
-    if (transform == Output::Transform::Rotated90 || transform == Output::Transform::Rotated270
-        || transform == Output::Transform::Flipped90
-        || transform == Output::Transform::Flipped270) {
+    if (transform == WlOutput::Transform::Rotated90 || transform == WlOutput::Transform::Rotated270
+        || transform == WlOutput::Transform::Flipped90
+        || transform == WlOutput::Transform::Flipped270) {
         bufferSize.transpose();
     }
 
@@ -495,7 +495,7 @@ void Surface::Private::updateCurrentBuffer(SurfaceState const& source, bool& dam
         auto const tr = current.transform;
         auto const sc = current.scale;
 
-        using Tr = Output::Transform;
+        using Tr = WlOutput::Transform;
         if (tr == Tr::Rotated90 || tr == Tr::Rotated270 || tr == Tr::Flipped90
             || tr == Tr::Flipped270) {
 
@@ -707,7 +707,7 @@ void Surface::Private::setScale(qint32 scale)
     pending.scaleIsSet = true;
 }
 
-void Surface::Private::setTransform(Output::Transform transform)
+void Surface::Private::setTransform(WlOutput::Transform transform)
 {
     pending.transform = transform;
 }
@@ -854,7 +854,7 @@ void Surface::Private::bufferTransformCallback([[maybe_unused]] wl_client* wlCli
                                                int32_t transform)
 {
     auto priv = handle(wlResource)->d_ptr;
-    priv->setTransform(Output::Transform(transform));
+    priv->setTransform(WlOutput::Transform(transform));
 }
 
 void Surface::Private::bufferScaleCallback([[maybe_unused]] wl_client* wlClient,
@@ -890,7 +890,7 @@ qint32 Surface::scale() const
     return d_ptr->current.scale;
 }
 
-Output::Transform Surface::transform() const
+WlOutput::Transform Surface::transform() const
 {
     return d_ptr->current.transform;
 }
@@ -976,14 +976,14 @@ void Surface::resetTrackedDamage()
     d_ptr->trackedDamage = QRegion();
 }
 
-std::vector<Output*> Surface::outputs() const
+std::vector<WlOutput*> Surface::outputs() const
 {
     return d_ptr->outputs;
 }
 
-void Surface::setOutputs(std::vector<Output*> const& outputs)
+void Surface::setOutputs(std::vector<WlOutput*> const& outputs)
 {
-    std::vector<Output*> removedOutputs = d_ptr->outputs;
+    std::vector<WlOutput*> removedOutputs = d_ptr->outputs;
 
     for (auto stays : outputs) {
         removedOutputs.erase(std::remove(removedOutputs.begin(), removedOutputs.end(), stays),
@@ -998,7 +998,7 @@ void Surface::setOutputs(std::vector<Output*> const& outputs)
         disconnect(d_ptr->outputDestroyedConnections.take(output));
     }
 
-    std::vector<Output*> addedOutputs = outputs;
+    std::vector<WlOutput*> addedOutputs = outputs;
     for (auto keeping : d_ptr->outputs) {
         addedOutputs.erase(std::remove(addedOutputs.begin(), addedOutputs.end(), keeping),
                            addedOutputs.end());
@@ -1010,24 +1010,25 @@ void Surface::setOutputs(std::vector<Output*> const& outputs)
             d_ptr->send<wl_surface_send_enter>(bind->resource());
         }
 
-        d_ptr->outputDestroyedConnections[add] = connect(add, &Output::removed, this, [this, add] {
-            auto outputs = d_ptr->outputs;
-            bool removed = false;
-            outputs.erase(std::remove_if(outputs.begin(),
-                                         outputs.end(),
-                                         [&removed, add](Output* out) {
-                                             if (add == out) {
-                                                 removed = true;
-                                                 return true;
-                                             }
-                                             return false;
-                                         }),
-                          outputs.end());
+        d_ptr->outputDestroyedConnections[add]
+            = connect(add, &WlOutput::removed, this, [this, add] {
+                  auto outputs = d_ptr->outputs;
+                  bool removed = false;
+                  outputs.erase(std::remove_if(outputs.begin(),
+                                               outputs.end(),
+                                               [&removed, add](WlOutput* out) {
+                                                   if (add == out) {
+                                                       removed = true;
+                                                       return true;
+                                                   }
+                                                   return false;
+                                               }),
+                                outputs.end());
 
-            if (removed) {
-                setOutputs(outputs);
-            }
-        });
+                  if (removed) {
+                      setOutputs(outputs);
+                  }
+              });
     }
     // TODO(unknown author): send enter when the client binds the Output another time
 
@@ -1128,7 +1129,7 @@ uint32_t Surface::id() const
     return d_ptr->id();
 }
 
-uint32_t Surface::lockPresentation(Output* output)
+uint32_t Surface::lockPresentation(WlOutput* output)
 {
     if (!d_ptr->current.feedbacks) {
         return 0;
@@ -1192,11 +1193,11 @@ void Feedbacks::add(PresentationFeedback* feedback)
     m_feedbacks.push_back(feedback);
 }
 
-void Feedbacks::setOutput(Output* output)
+void Feedbacks::setOutput(WlOutput* output)
 {
     assert(!m_output);
     m_output = output;
-    QObject::connect(output, &Output::removed, this, &Feedbacks::handleOutputRemoval);
+    QObject::connect(output, &WlOutput::removed, this, &Feedbacks::handleOutputRemoval);
 }
 
 void Feedbacks::handleOutputRemoval()

@@ -36,7 +36,7 @@ public:
     Client* createClientHandle(wl_client* wlClient);
     Wayland::Client* castClientImpl(Server::Client* client) override;
 
-    std::vector<Output*> outputs;
+    std::vector<WlOutput*> outputs;
     std::vector<OutputDeviceV1*> outputDevices;
     std::vector<Seat*> seats;
 

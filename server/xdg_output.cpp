@@ -46,7 +46,7 @@ XdgOutputManager::XdgOutputManager(Display* display, QObject* parent)
 
 XdgOutputManager::~XdgOutputManager() = default;
 
-XdgOutput* XdgOutputManager::createXdgOutput(Output* output, QObject* parent)
+XdgOutput* XdgOutputManager::createXdgOutput(WlOutput* output, QObject* parent)
 {
     if (d_ptr->outputs.find(output) == d_ptr->outputs.end()) {
         auto xdgOutput = new XdgOutput(parent);
@@ -76,7 +76,7 @@ void XdgOutputManager::Private::getXdgOutputCallback([[maybe_unused]] wl_client*
         return;
     }
 
-    auto output = OutputGlobal::handle(outputResource);
+    auto output = WlOutputGlobal::handle(outputResource);
 
     if (priv->outputs.find(output) == priv->outputs.end()) {
         // Server hasn't created an XdgOutput for this output yet, give the client nothing.

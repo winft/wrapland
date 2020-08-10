@@ -139,7 +139,7 @@ PresentationFeedback::~PresentationFeedback()
     }
 }
 
-void PresentationFeedback::sync(Output* output)
+void PresentationFeedback::sync(WlOutput* output)
 {
     auto outputBinds = output->d_ptr->getBinds(d_ptr->client()->handle());
 

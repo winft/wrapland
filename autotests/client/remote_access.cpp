@@ -56,7 +56,7 @@ private Q_SLOTS:
 
 private:
     Srv::Display *m_display = nullptr;
-    Srv::Output *m_serverOutput[2] = {nullptr};
+    Srv::WlOutput *m_serverOutput[2] = {nullptr};
     Srv::RemoteAccessManager *m_serverRemoteAccess = nullptr;
 };
 

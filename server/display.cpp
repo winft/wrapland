@@ -163,14 +163,14 @@ void Display::terminate()
     d_ptr->terminate();
 }
 
-Output* Display::createOutput(QObject* parent)
+WlOutput* Display::createOutput(QObject* parent)
 {
-    auto* output = new Output(this, parent);
+    auto* output = new WlOutput(this, parent);
     d_ptr->outputs.push_back(output);
     return output;
 }
 
-void Display::removeOutput(Output* output)
+void Display::removeOutput(WlOutput* output)
 {
     // TODO(romangg): This does not clean up. But it should be also possible to just delete the
     //                output.
@@ -392,7 +392,7 @@ wl_display* Display::native() const
     return d_ptr->native();
 }
 
-std::vector<Output*>& Display::outputs() const
+std::vector<WlOutput*>& Display::outputs() const
 {
     return d_ptr->outputs;
 }

@@ -33,7 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-class Output;
+class WlOutput;
 class Seat;
 class XdgShellSurface;
 
@@ -66,7 +66,7 @@ Q_SIGNALS:
     void maxSizeChanged(const QSize& size);
     void moveRequested(Seat* seat, uint32_t serial);
     void maximizedChanged(bool maximized);
-    void fullscreenChanged(bool fullscreen, Output* output);
+    void fullscreenChanged(bool fullscreen, WlOutput* output);
     void windowMenuRequested(Seat* seat, uint32_t serial, const QPoint& position);
     void resizeRequested(Seat* seat, uint32_t serial, Qt::Edges edges);
     void minimizeRequested();

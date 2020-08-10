@@ -47,7 +47,7 @@ class RemoteAccessManager::Private : public RemoteAccessManagerGlobal
 public:
     Private(Display* display, RemoteAccessManager* q);
 
-    void sendBufferReady(Output* output, RemoteBufferHandle* buf);
+    void sendBufferReady(WlOutput* output, RemoteBufferHandle* buf);
 
 protected:
     void prepareUnbind(RemoteAccessManagerBind* bind) override;

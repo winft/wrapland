@@ -32,20 +32,20 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Output::Private::Private(Output* q, Display* display)
-    : OutputGlobal(q, display, &wl_output_interface, &s_interface)
+WlOutput::Private::Private(WlOutput* q, Display* display)
+    : WlOutputGlobal(q, display, &wl_output_interface, &s_interface)
     , displayHandle(display)
     , q_ptr(q)
 {
 }
 
-const struct wl_output_interface Output::Private::s_interface = {resourceDestroyCallback};
+const struct wl_output_interface WlOutput::Private::s_interface = {resourceDestroyCallback};
 
-Output::Output(Display* display, QObject* parent)
+WlOutput::WlOutput(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {
-    connect(this, &Output::currentModeChanged, this, [this] {
+    connect(this, &WlOutput::currentModeChanged, this, [this] {
         auto currentModeIt
             = std::find_if(d_ptr->modes.cbegin(), d_ptr->modes.cend(), [](const Mode& mode) {
                   return mode.flags.testFlag(ModeFlag::Current);
@@ -61,12 +61,12 @@ Output::Output(Display* display, QObject* parent)
         wl_display_flush_clients(d_ptr->displayHandle->native());
     });
 
-    connect(this, &Output::subPixelChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &Output::transformChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &Output::globalPositionChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &Output::modelChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &Output::manufacturerChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &Output::scaleChanged, this, [this] {
+    connect(this, &WlOutput::subPixelChanged, this, [this] { d_ptr->updateGeometry(); });
+    connect(this, &WlOutput::transformChanged, this, [this] { d_ptr->updateGeometry(); });
+    connect(this, &WlOutput::globalPositionChanged, this, [this] { d_ptr->updateGeometry(); });
+    connect(this, &WlOutput::modelChanged, this, [this] { d_ptr->updateGeometry(); });
+    connect(this, &WlOutput::manufacturerChanged, this, [this] { d_ptr->updateGeometry(); });
+    connect(this, &WlOutput::scaleChanged, this, [this] {
         d_ptr->sendScale();
         d_ptr->sendDone();
     });
@@ -74,7 +74,7 @@ Output::Output(Display* display, QObject* parent)
     d_ptr->create();
 }
 
-Output::~Output()
+WlOutput::~WlOutput()
 {
     Q_EMIT removed();
 
@@ -83,7 +83,7 @@ Output::~Output()
     }
 }
 
-QSize Output::pixelSize() const
+QSize WlOutput::pixelSize() const
 {
     auto it = std::find_if(d_ptr->modes.cbegin(), d_ptr->modes.cend(), [](const Mode& mode) {
         return mode.flags.testFlag(ModeFlag::Current);
@@ -94,7 +94,7 @@ QSize Output::pixelSize() const
     return (*it).size;
 }
 
-int Output::refreshRate() const
+int WlOutput::refreshRate() const
 {
     auto it = std::find_if(d_ptr->modes.cbegin(), d_ptr->modes.cend(), [](const Mode& mode) {
         return mode.flags.testFlag(ModeFlag::Current);
@@ -105,7 +105,7 @@ int Output::refreshRate() const
     return (*it).refreshRate;
 }
 
-void Output::addMode(const QSize& size, Output::ModeFlags flags, int refreshRate)
+void WlOutput::addMode(const QSize& size, WlOutput::ModeFlags flags, int refreshRate)
 {
     auto currentModeIt
         = std::find_if(d_ptr->modes.begin(), d_ptr->modes.end(), [](const Mode& mode) {
@@ -160,7 +160,7 @@ void Output::addMode(const QSize& size, Output::ModeFlags flags, int refreshRate
     emitChanges();
 }
 
-void Output::setCurrentMode(const QSize& size, int refreshRate)
+void WlOutput::setCurrentMode(const QSize& size, int refreshRate)
 {
     auto currentModeIt
         = std::find_if(d_ptr->modes.begin(), d_ptr->modes.end(), [](const Mode& mode) {
@@ -184,7 +184,7 @@ void Output::setCurrentMode(const QSize& size, int refreshRate)
     emit currentModeChanged();
 }
 
-int32_t Output::Private::toTransform() const
+int32_t WlOutput::Private::toTransform() const
 {
     switch (transform) {
     case Transform::Normal:
@@ -207,7 +207,7 @@ int32_t Output::Private::toTransform() const
     abort();
 }
 
-int32_t Output::Private::toSubPixel() const
+int32_t WlOutput::Private::toSubPixel() const
 {
     switch (subPixel) {
     case SubPixel::Unknown:
@@ -226,7 +226,7 @@ int32_t Output::Private::toSubPixel() const
     abort();
 }
 
-void Output::Private::bindInit(Wayland::Resource<Output, OutputGlobal>* bind)
+void WlOutput::Private::bindInit(Wayland::Resource<WlOutput, WlOutputGlobal>* bind)
 {
     send<wl_output_send_geometry>(bind, geometryArgs());
     send<wl_output_send_scale, 2>(bind, scale);
@@ -250,53 +250,54 @@ void Output::Private::bindInit(Wayland::Resource<Output, OutputGlobal>* bind)
     bind->client()->flush();
 }
 
-int32_t getFlags(const Output::Mode& mode)
+int32_t getFlags(const WlOutput::Mode& mode)
 {
     int32_t flags = 0;
-    if (mode.flags.testFlag(Output::ModeFlag::Current)) {
+    if (mode.flags.testFlag(WlOutput::ModeFlag::Current)) {
         flags |= WL_OUTPUT_MODE_CURRENT;
     }
-    if (mode.flags.testFlag(Output::ModeFlag::Preferred)) {
+    if (mode.flags.testFlag(WlOutput::ModeFlag::Preferred)) {
         flags |= WL_OUTPUT_MODE_PREFERRED;
     }
     return flags;
 }
 
-void Output::Private::sendMode(Wayland::Resource<Output, OutputGlobal>* bind, const Mode& mode)
+void WlOutput::Private::sendMode(Wayland::Resource<WlOutput, WlOutputGlobal>* bind,
+                                 const Mode& mode)
 {
     send<wl_output_send_mode>(
         bind, getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
 }
 
-void Output::Private::sendMode(const Mode& mode)
+void WlOutput::Private::sendMode(const Mode& mode)
 {
     send<wl_output_send_mode>(
         getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
 }
 
-void Output::Private::sendGeometry()
+void WlOutput::Private::sendGeometry()
 {
     send<wl_output_send_geometry>(geometryArgs());
 }
 
-void Output::Private::sendScale()
+void WlOutput::Private::sendScale()
 {
     send<wl_output_send_scale, 2>(scale);
 }
 
-void Output::Private::sendDone()
+void WlOutput::Private::sendDone()
 {
     send<wl_output_send_done>();
 }
 
-void Output::Private::updateGeometry()
+void WlOutput::Private::updateGeometry()
 {
     sendGeometry();
     sendDone();
 }
 
 std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
-Output::Private::geometryArgs() const
+WlOutput::Private::geometryArgs() const
 {
     return std::make_tuple(globalPosition.x(),
                            globalPosition.y(),
@@ -309,7 +310,7 @@ Output::Private::geometryArgs() const
 }
 
 #define SETTER(setterName, type, argumentName)                                                     \
-    void Output::setterName(type arg)                                                              \
+    void WlOutput::setterName(type arg)                                                            \
     {                                                                                              \
         if (d_ptr->argumentName == arg) {                                                          \
             return;                                                                                \
@@ -328,48 +329,48 @@ SETTER(setTransform, Transform, transform)
 
 #undef SETTER
 
-QSize Output::physicalSize() const
+QSize WlOutput::physicalSize() const
 {
     return d_ptr->physicalSize;
 }
 
-QPoint Output::globalPosition() const
+QPoint WlOutput::globalPosition() const
 {
     return d_ptr->globalPosition;
 }
 
-std::string const& Output::manufacturer() const
+std::string const& WlOutput::manufacturer() const
 {
 
     return d_ptr->manufacturer;
 }
 
-std::string const& Output::model() const
+std::string const& WlOutput::model() const
 {
     return d_ptr->model;
 }
 
-int Output::scale() const
+int WlOutput::scale() const
 {
     return d_ptr->scale;
 }
 
-Output::SubPixel Output::subPixel() const
+WlOutput::SubPixel WlOutput::subPixel() const
 {
     return d_ptr->subPixel;
 }
 
-Output::Transform Output::transform() const
+WlOutput::Transform WlOutput::transform() const
 {
     return d_ptr->transform;
 }
 
-std::vector<Output::Mode> const& Output::modes() const
+std::vector<WlOutput::Mode> const& WlOutput::modes() const
 {
     return d_ptr->modes;
 }
 
-void Output::setDpmsMode(Output::DpmsMode mode)
+void WlOutput::setDpmsMode(WlOutput::DpmsMode mode)
 {
     if (d_ptr->dpms.mode == mode) {
         return;
@@ -378,7 +379,7 @@ void Output::setDpmsMode(Output::DpmsMode mode)
     Q_EMIT dpmsModeChanged();
 }
 
-void Output::setDpmsSupported(bool supported)
+void WlOutput::setDpmsSupported(bool supported)
 {
     if (d_ptr->dpms.supported == supported) {
         return;
@@ -387,12 +388,12 @@ void Output::setDpmsSupported(bool supported)
     Q_EMIT dpmsSupportedChanged();
 }
 
-Output::DpmsMode Output::dpmsMode() const
+WlOutput::DpmsMode WlOutput::dpmsMode() const
 {
     return d_ptr->dpms.mode;
 }
 
-bool Output::isDpmsSupported() const
+bool WlOutput::isDpmsSupported() const
 {
     return d_ptr->dpms.supported;
 }

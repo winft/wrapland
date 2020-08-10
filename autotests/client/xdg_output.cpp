@@ -41,7 +41,7 @@ private Q_SLOTS:
     void testChanges();
 private:
     Wrapland::Server::Display *m_display;
-    Wrapland::Server::Output* m_serverOutput;
+    Wrapland::Server::WlOutput* m_serverOutput;
     Wrapland::Server::XdgOutputManager *m_serverXdgOutputManager;
     Wrapland::Server::XdgOutput *m_serverXdgOutput;
     Wrapland::Client::ConnectionThread *m_connection;
@@ -69,7 +69,7 @@ void TestXdgOutput::init()
     m_display->start();
 
     m_serverOutput = m_display->createOutput(this);
-    m_serverOutput->addMode(QSize(1920, 1080), Output::ModeFlags(Output::ModeFlag::Preferred));
+    m_serverOutput->addMode(QSize(1920, 1080), WlOutput::ModeFlags(WlOutput::ModeFlag::Preferred));
     m_serverOutput->setCurrentMode(QSize(1920, 1080));
 
     m_serverXdgOutputManager = m_display->createXdgOutputManager(this);

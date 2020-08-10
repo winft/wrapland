@@ -27,17 +27,17 @@ namespace Wrapland::Server
 {
 class Display;
 
-constexpr uint32_t OutputVersion = 3;
-using OutputGlobal = Wayland::Global<Output, OutputVersion>;
+constexpr uint32_t WlOutputVersion = 3;
+using WlOutputGlobal = Wayland::Global<WlOutput, WlOutputVersion>;
 
-class Output::Private : public OutputGlobal
+class WlOutput::Private : public WlOutputGlobal
 {
 public:
-    Private(Output* q, Display* display);
+    Private(WlOutput* q, Display* display);
 
-    void bindInit(Wayland::Resource<Output, OutputGlobal>* bind) override;
+    void bindInit(Wayland::Resource<WlOutput, WlOutputGlobal>* bind) override;
 
-    void sendMode(Wayland::Resource<Output, OutputGlobal>* bind, const Mode& mode);
+    void sendMode(Wayland::Resource<WlOutput, WlOutputGlobal>* bind, const Mode& mode);
     void sendMode(const Mode& mode);
     void sendGeometry();
     void sendScale();
@@ -64,7 +64,7 @@ public:
         bool supported = false;
     } dpms;
 
-    Output* q_ptr;
+    WlOutput* q_ptr;
 
 private:
     int32_t toTransform() const;

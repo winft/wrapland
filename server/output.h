@@ -41,7 +41,7 @@ namespace Wrapland::Server
 class Client;
 class Display;
 
-class WRAPLANDSERVER_EXPORT Output : public QObject
+class WRAPLANDSERVER_EXPORT WlOutput : public QObject
 {
     Q_OBJECT
 public:
@@ -85,7 +85,7 @@ public:
         ModeFlags flags;
     };
 
-    ~Output() override;
+    ~WlOutput() override;
 
     QSize physicalSize() const;
     QPoint globalPosition() const;
@@ -134,7 +134,7 @@ Q_SIGNALS:
     void currentModeChanged();
     void dpmsModeChanged();
     void dpmsSupportedChanged();
-    void dpmsModeRequested(Wrapland::Server::Output::DpmsMode mode);
+    void dpmsModeRequested(Wrapland::Server::WlOutput::DpmsMode mode);
     void removed();
 
 private:
@@ -143,7 +143,7 @@ private:
     friend class Surface;
     friend class PresentationFeedback;
 
-    explicit Output(Wrapland::Server::Display* display, QObject* parent = nullptr);
+    explicit WlOutput(Wrapland::Server::Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;
@@ -151,7 +151,7 @@ private:
 
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::Output::ModeFlags)
-Q_DECLARE_METATYPE(Wrapland::Server::Output::SubPixel)
-Q_DECLARE_METATYPE(Wrapland::Server::Output::Transform)
-Q_DECLARE_METATYPE(Wrapland::Server::Output::DpmsMode)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::WlOutput::ModeFlags)
+Q_DECLARE_METATYPE(Wrapland::Server::WlOutput::SubPixel)
+Q_DECLARE_METATYPE(Wrapland::Server::WlOutput::Transform)
+Q_DECLARE_METATYPE(Wrapland::Server::WlOutput::DpmsMode)

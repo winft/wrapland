@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 
     [[maybe_unused]] Wrapland::Server::XdgShell *shell = display.createXdgShell();
 
-    Wrapland::Server::Output *output = display.createOutput(&display);
+    auto output = display.createOutput(&display);
     output->setPhysicalSize(QSize(10, 10));
     output->addMode(QSize(1024, 768));
 

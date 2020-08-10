@@ -86,8 +86,8 @@ private:
     Server::Display* m_display;
     Server::Compositor* m_serverCompositor;
     Server::XdgShell* m_serverXdgShell;
-    Server::Output* m_o1Interface;
-    Server::Output* m_o2Interface;
+    Server::WlOutput* m_o1Interface;
+    Server::WlOutput* m_o2Interface;
     Server::Seat* m_serverSeat;
 
     Client::ConnectionThread* m_connection;
@@ -122,7 +122,7 @@ XdgShellTest::XdgShellTest(QObject* parent)
     qRegisterMetaType<Server::Surface*>();
     qRegisterMetaType<Server::XdgShellToplevel*>();
     qRegisterMetaType<Server::XdgShellPopup*>();
-    qRegisterMetaType<Server::Output*>();
+    qRegisterMetaType<Server::WlOutput*>();
     qRegisterMetaType<Server::Seat*>();
     qRegisterMetaType<Client::XdgShellSurface::States>();
     qRegisterMetaType<std::string>();
@@ -397,28 +397,28 @@ void XdgShellTest::testFullscreen()
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 1);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QVERIFY(!fullscreenSpy.last().at(1).value<Server::Output*>());
+    QVERIFY(!fullscreenSpy.last().at(1).value<Server::WlOutput*>());
 
     // unset
     xdgSurface->setFullscreen(false);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 2);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), false);
-    QVERIFY(!fullscreenSpy.last().at(1).value<Server::Output*>());
+    QVERIFY(!fullscreenSpy.last().at(1).value<Server::WlOutput*>());
 
     // with outputs
     xdgSurface->setFullscreen(true, m_output1);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 3);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), m_o1Interface);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::WlOutput*>(), m_o1Interface);
 
     // now other output
     xdgSurface->setFullscreen(true, m_output2);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 4);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), m_o2Interface);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::WlOutput*>(), m_o2Interface);
 }
 
 void XdgShellTest::testShowWindowMenu()
