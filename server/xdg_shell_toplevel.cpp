@@ -344,7 +344,8 @@ void XdgShellToplevel::Private::setFullscreenCallback([[maybe_unused]] wl_client
                                                       wl_resource* wlOutput)
 {
     auto priv = handle(wlResource)->d_ptr;
-    auto output = wlOutput ? WlOutputGlobal::handle(wlOutput) : nullptr;
+    auto output = wlOutput ? WlOutputGlobal::handle(wlOutput)->output() : nullptr;
+
     Q_EMIT priv->handle()->fullscreenChanged(true, output);
 }
 

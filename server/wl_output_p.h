@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
+#include "output_p.h"
 #include "wl_output.h"
 
 #include "wayland/global.h"
@@ -29,49 +30,28 @@ class Display;
 
 constexpr uint32_t WlOutputVersion = 3;
 using WlOutputGlobal = Wayland::Global<WlOutput, WlOutputVersion>;
+using WlOutputBind = Wayland::Resource<WlOutput, WlOutputGlobal>;
 
 class WlOutput::Private : public WlOutputGlobal
 {
 public:
-    Private(WlOutput* q, Display* display);
+    Private(Output* output, Display* display, WlOutput* q);
 
-    void bindInit(Wayland::Resource<WlOutput, WlOutputGlobal>* bind) override;
-
-    void sendMode(Wayland::Resource<WlOutput, WlOutputGlobal>* bind, const Mode& mode);
-    void sendMode(const Mode& mode);
-    void sendGeometry();
-    void sendScale();
-    void sendDone();
-
-    void updateGeometry();
-    void updateScale();
+    bool broadcast();
+    void done();
 
     Display* displayHandle;
-
-    QSize physicalSize;
-    QPoint globalPosition;
-    std::string manufacturer = "org.kde.kwin";
-    std::string model = "none";
-
-    int scale = 1;
-    SubPixel subPixel = SubPixel::Unknown;
-    Transform transform = Transform::Normal;
-
-    std::vector<Mode> modes;
-
-    struct {
-        DpmsMode mode = DpmsMode::Off;
-        bool supported = false;
-    } dpms;
-
-    WlOutput* q_ptr;
+    Output* output;
 
 private:
-    int32_t toTransform() const;
-    int32_t toSubPixel() const;
+    void bindInit(WlOutputBind* bind) override;
 
-    std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
-    geometryArgs() const;
+    static std::
+        tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
+        geometry_args(OutputState const& state);
+
+    void sendMode(WlOutputBind* bind, Output::Mode const& mode);
+    void sendMode(Output::Mode const& mode);
 
     static const struct wl_output_interface s_interface;
 };

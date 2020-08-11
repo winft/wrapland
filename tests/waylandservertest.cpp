@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "../server/compositor.h"
 #include "../server/display.h"
-#include "../server/wl_output.h"
+#include "../server/output.h"
 #include "../server/seat.h"
 #include "../server/xdg_shell.h"
 
@@ -91,9 +91,9 @@ int main(int argc, char **argv)
 
     [[maybe_unused]] Wrapland::Server::XdgShell *shell = display.createXdgShell();
 
-    auto output = display.createOutput(&display);
-    output->setPhysicalSize(QSize(10, 10));
-    output->addMode(QSize(1024, 768));
+    auto output = new Wrapland::Server::Output(&display, &display);
+    output->set_physical_size(QSize(10, 10));
+    output->add_mode(Wrapland::Server::Output::Mode{QSize(1024, 768)});
 
     // starts XWayland by forking and opening a pipe
     const int pipe = startXServer();

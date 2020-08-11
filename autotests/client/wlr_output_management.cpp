@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/output_configuration_v1.h"
-#include "../../server/output_device_v1.h"
+#include "../../server/output.h"
 #include "../../server/output_management_v1.h"
 
 #include <QtTest>
@@ -49,14 +49,14 @@ private Q_SLOTS:
 private:
     Srv::Display *m_display;
     Srv::OutputManagementV1 *m_outputManagementInterface;
-    QList<Srv::OutputDeviceV1 *> m_serverOutputs;
+    QList<Srv::Output*> m_serverOutputs;
 
     Clt::Registry *m_registry = nullptr;
     Clt::WlrOutputHeadV1 *m_outputHead = nullptr;
     Clt::WlrOutputManagerV1 *m_outputManager = nullptr;
     Clt::WlrOutputConfigurationV1 *m_outputConfiguration = nullptr;
     QList<Clt::WlrOutputHeadV1*> m_clientOutputs;
-    QList<Srv::OutputDeviceV1::Mode> m_modes;
+    QList<Srv::Output::Mode> m_modes;
 
     Clt::ConnectionThread *m_connection = nullptr;
     Clt::EventQueue *m_queue = nullptr;
@@ -87,38 +87,36 @@ void TestWlrOutputManagement::init()
     m_display->setSocketName(s_socketName);
     m_display->createCompositor(this);
 
-    auto outputDeviceInterface = m_display->createOutputDeviceV1(this);
+    auto server_output = new Srv::Output(m_display, this);
 
-    Srv::OutputDeviceV1::Mode m0;
+    Srv::Output::Mode m0;
     m0.id = 0;
     m0.size = QSize(800, 600);
-    m0.flags = Srv::OutputDeviceV1::ModeFlags(
-                Srv::OutputDeviceV1::ModeFlag::Preferred);
-    outputDeviceInterface->addMode(m0);
+    m0.preferred = true;
+    server_output->add_mode(m0);
 
-    Srv::OutputDeviceV1::Mode m1;
+    Srv::Output::Mode m1;
     m1.id = 1;
     m1.size = QSize(1024, 768);
-    outputDeviceInterface->addMode(m1);
+    server_output->add_mode(m1);
 
-    Srv::OutputDeviceV1::Mode m2;
+    Srv::Output::Mode m2;
     m2.id = 2;
     m2.size = QSize(1280, 1024);
-    m2.refreshRate = 90000;
-    outputDeviceInterface->addMode(m2);
+    m2.refresh_rate = 90000;
+    server_output->add_mode(m2);
 
-    Srv::OutputDeviceV1::Mode m3;
+    Srv::Output::Mode m3;
     m3.id = 3;
     m3.size = QSize(1920, 1080);
-    m3.flags = Srv::OutputDeviceV1::ModeFlags();
-    m3.refreshRate = 100000;
-    outputDeviceInterface->addMode(m3);
+    m3.refresh_rate = 100000;
+    server_output->add_mode(m3);
 
     m_modes << m0 << m1 << m2 << m3;
 
-    outputDeviceInterface->setMode(1);
-    outputDeviceInterface->setGeometry(QRectF(QPointF(0, 1920), QSizeF(1024, 768)));
-    m_serverOutputs << outputDeviceInterface;
+    server_output->set_mode(1);
+    server_output->set_geometry(QRectF(QPointF(0, 1920), QSizeF(1024, 768)));
+    m_serverOutputs << server_output;
 
     m_outputManagementInterface = m_display->createOutputManagementV1(this);
 

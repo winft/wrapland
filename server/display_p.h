@@ -40,6 +40,7 @@ public:
     std::vector<OutputDeviceV1*> outputDevices;
     std::vector<Seat*> seats;
 
+    std::unique_ptr<XdgOutputManager> xdg_output_manager;
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 
     static Private* castDisplay(Server::Display* display);

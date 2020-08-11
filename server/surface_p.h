@@ -70,7 +70,7 @@ public:
     bool destinationSizeIsSet = false;
 
     qint32 scale = 1;
-    WlOutput::Transform transform = WlOutput::Transform::Normal;
+    Output::Transform transform = Output::Transform::Normal;
 
     std::deque<wl_resource*> callbacks;
 
@@ -135,7 +135,7 @@ public:
     // waiting on the frame callback of the never visible surface.
     //    bool subsurfaceIsMapped = true;
 
-    std::vector<WlOutput*> outputs;
+    std::vector<Output*> outputs;
 
     uint32_t feedbackId = 0;
     std::unordered_map<uint32_t, std::unique_ptr<Feedbacks>> waitingFeedbacks;
@@ -143,7 +143,7 @@ public:
     QPointer<LockedPointerV1> lockedPointer;
     QPointer<ConfinedPointerV1> confinedPointer;
     QPointer<Viewport> viewport;
-    QHash<WlOutput*, QMetaObject::Connection> outputDestroyedConnections;
+    QHash<Output*, QMetaObject::Connection> outputDestroyedConnections;
     QVector<IdleInhibitor*> idleInhibitors;
 
     Surface* dataProxy = nullptr;
@@ -155,7 +155,7 @@ private:
     void damageBuffer(const QRect& rect);
 
     void setScale(qint32 scale);
-    void setTransform(WlOutput::Transform transform);
+    void setTransform(Output::Transform transform);
 
     void addFrameCallback(uint32_t callback);
     void attachBuffer(wl_resource* wlBuffer, const QPoint& offset);
@@ -172,7 +172,7 @@ private:
      * Posts Wayland error in case the source rectangle is not contained in surface size.
      */
     void soureRectangleContainCheck(const Buffer* buffer,
-                                    WlOutput::Transform transform,
+                                    Output::Transform transform,
                                     qint32 scale,
                                     const QRectF& sourceRectangle) const;
 
@@ -228,7 +228,7 @@ public:
 
     bool active();
     void add(PresentationFeedback* feedback);
-    void setOutput(WlOutput* output);
+    void setOutput(Output* output);
     void handleOutputRemoval();
 
     void presented(uint32_t tvSecHi,
@@ -242,7 +242,7 @@ public:
 
 private:
     std::vector<PresentationFeedback*> m_feedbacks;
-    WlOutput* m_output = nullptr;
+    Output* m_output = nullptr;
 };
 
 }

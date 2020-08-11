@@ -104,7 +104,7 @@ public:
     wl_display* native() const;
     bool running() const;
 
-    WlOutput* createOutput(QObject* parent = nullptr);
+    void add_wl_output(WlOutput* output);
     void removeOutput(WlOutput* output);
     std::vector<WlOutput*>& outputs() const;
 
@@ -113,7 +113,7 @@ public:
 
     void setSocketName(const QString& name);
 
-    OutputDeviceV1* createOutputDeviceV1(QObject* parent = nullptr);
+    void add_output_device_v1(OutputDeviceV1* output);
     void removeOutputDevice(OutputDeviceV1* outputDevice);
     std::vector<OutputDeviceV1*> outputDevices() const;
 
@@ -155,7 +155,7 @@ public:
                                                                                  = nullptr);
     LinuxDmabufV1* createLinuxDmabuf(QObject* parent = nullptr);
     Viewporter* createViewporter(QObject* parent = nullptr);
-    XdgOutputManager* createXdgOutputManager(QObject* parent = nullptr);
+    XdgOutputManager* xdgOutputManager() const;
 
     PlasmaVirtualDesktopManager* createPlasmaVirtualDesktopManager(QObject* parent = nullptr);
     XdgDecorationManager* createXdgDecorationManager(XdgShell* shell, QObject* parent = nullptr);

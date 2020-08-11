@@ -53,7 +53,7 @@ private:
     Server::Display* m_display;
     Server::Compositor* m_serverCompositor;
     Server::PresentationManager* m_serverPresentation;
-    Server::WlOutput* m_serverOutput;
+    Server::Output* m_serverOutput;
 
     Client::ConnectionThread* m_connection;
     Client::EventQueue* m_queue;
@@ -96,8 +96,9 @@ void TestPresentationTime::init()
     m_serverPresentation = m_display->createPresentationManager(m_display);
     QVERIFY(m_serverPresentation);
 
-    m_serverOutput = m_display->createOutput(m_display);
-    QVERIFY(m_serverOutput);
+    m_serverOutput = new Server::Output(m_display, m_display);
+    m_serverOutput->set_enabled(true);
+    m_serverOutput->done();
 
     // Setup connection.
     m_connection = new Client::ConnectionThread;

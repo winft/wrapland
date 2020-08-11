@@ -419,7 +419,7 @@ void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
 }
 
 void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
-                                                  WlOutput::Transform transform,
+                                                  Output::Transform transform,
                                                   qint32 scale,
                                                   const QRectF& sourceRectangle) const
 {
@@ -428,9 +428,9 @@ void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
     }
     QSizeF bufferSize = buffer->size() / scale;
 
-    if (transform == WlOutput::Transform::Rotated90 || transform == WlOutput::Transform::Rotated270
-        || transform == WlOutput::Transform::Flipped90
-        || transform == WlOutput::Transform::Flipped270) {
+    if (transform == Output::Transform::Rotated90 || transform == Output::Transform::Rotated270
+        || transform == Output::Transform::Flipped90
+        || transform == Output::Transform::Flipped270) {
         bufferSize.transpose();
     }
 
@@ -495,7 +495,7 @@ void Surface::Private::updateCurrentBuffer(SurfaceState const& source, bool& dam
         auto const tr = current.transform;
         auto const sc = current.scale;
 
-        using Tr = WlOutput::Transform;
+        using Tr = Output::Transform;
         if (tr == Tr::Rotated90 || tr == Tr::Rotated270 || tr == Tr::Flipped90
             || tr == Tr::Flipped270) {
 
@@ -707,7 +707,7 @@ void Surface::Private::setScale(qint32 scale)
     pending.scaleIsSet = true;
 }
 
-void Surface::Private::setTransform(WlOutput::Transform transform)
+void Surface::Private::setTransform(Output::Transform transform)
 {
     pending.transform = transform;
 }
@@ -854,7 +854,7 @@ void Surface::Private::bufferTransformCallback([[maybe_unused]] wl_client* wlCli
                                                int32_t transform)
 {
     auto priv = handle(wlResource)->d_ptr;
-    priv->setTransform(WlOutput::Transform(transform));
+    priv->setTransform(Output::Transform(transform));
 }
 
 void Surface::Private::bufferScaleCallback([[maybe_unused]] wl_client* wlClient,
@@ -890,7 +890,7 @@ qint32 Surface::scale() const
     return d_ptr->current.scale;
 }
 
-WlOutput::Transform Surface::transform() const
+Output::Transform Surface::transform() const
 {
     return d_ptr->current.transform;
 }
@@ -976,14 +976,14 @@ void Surface::resetTrackedDamage()
     d_ptr->trackedDamage = QRegion();
 }
 
-std::vector<WlOutput*> Surface::outputs() const
+std::vector<Output*> Surface::outputs() const
 {
     return d_ptr->outputs;
 }
 
-void Surface::setOutputs(std::vector<WlOutput*> const& outputs)
+void Surface::setOutputs(std::vector<Output*> const& outputs)
 {
-    std::vector<WlOutput*> removedOutputs = d_ptr->outputs;
+    std::vector<Output*> removedOutputs = d_ptr->outputs;
 
     for (auto stays : outputs) {
         removedOutputs.erase(std::remove(removedOutputs.begin(), removedOutputs.end(), stays),
@@ -991,32 +991,32 @@ void Surface::setOutputs(std::vector<WlOutput*> const& outputs)
     }
 
     for (auto output : removedOutputs) {
-        auto const binds = output->d_ptr->getBinds(d_ptr->client()->handle());
+        auto const binds = output->wayland_output()->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_leave>(bind->resource());
         }
         disconnect(d_ptr->outputDestroyedConnections.take(output));
     }
 
-    std::vector<WlOutput*> addedOutputs = outputs;
+    std::vector<Output*> addedOutputs = outputs;
     for (auto keeping : d_ptr->outputs) {
         addedOutputs.erase(std::remove(addedOutputs.begin(), addedOutputs.end(), keeping),
                            addedOutputs.end());
     }
 
     for (auto add : addedOutputs) {
-        auto const binds = add->d_ptr->getBinds(d_ptr->client()->handle());
+        auto const binds = add->wayland_output()->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_enter>(bind->resource());
         }
 
         d_ptr->outputDestroyedConnections[add]
-            = connect(add, &WlOutput::removed, this, [this, add] {
+            = connect(add->wayland_output(), &WlOutput::removed, this, [this, add] {
                   auto outputs = d_ptr->outputs;
                   bool removed = false;
                   outputs.erase(std::remove_if(outputs.begin(),
                                                outputs.end(),
-                                               [&removed, add](WlOutput* out) {
+                                               [&removed, add](Output* out) {
                                                    if (add == out) {
                                                        removed = true;
                                                        return true;
@@ -1129,7 +1129,7 @@ uint32_t Surface::id() const
     return d_ptr->id();
 }
 
-uint32_t Surface::lockPresentation(WlOutput* output)
+uint32_t Surface::lockPresentation(Output* output)
 {
     if (!d_ptr->current.feedbacks) {
         return 0;
@@ -1193,11 +1193,12 @@ void Feedbacks::add(PresentationFeedback* feedback)
     m_feedbacks.push_back(feedback);
 }
 
-void Feedbacks::setOutput(WlOutput* output)
+void Feedbacks::setOutput(Output* output)
 {
     assert(!m_output);
     m_output = output;
-    QObject::connect(output, &WlOutput::removed, this, &Feedbacks::handleOutputRemoval);
+    QObject::connect(
+        output->wayland_output(), &WlOutput::removed, this, &Feedbacks::handleOutputRemoval);
 }
 
 void Feedbacks::handleOutputRemoval()

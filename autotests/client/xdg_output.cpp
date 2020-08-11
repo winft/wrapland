@@ -20,7 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtTest>
 
 #include "../../server/display.h"
-#include "../../server/wl_output.h"
+#include "../../server/output.h"
 
 
 #include "../../src/client/connection_thread.h"
@@ -41,9 +41,7 @@ private Q_SLOTS:
     void testChanges();
 private:
     Wrapland::Server::Display *m_display;
-    Wrapland::Server::WlOutput* m_serverOutput;
-    Wrapland::Server::XdgOutputManager *m_serverXdgOutputManager;
-    Wrapland::Server::XdgOutput *m_serverXdgOutput;
+    Wrapland::Server::Output* m_serverOutput;
     Wrapland::Client::ConnectionThread *m_connection;
     Wrapland::Client::EventQueue *m_queue;
     QThread *m_thread;
@@ -68,15 +66,14 @@ void TestXdgOutput::init()
     m_display->setSocketName(s_socketName);
     m_display->start();
 
-    m_serverOutput = m_display->createOutput(this);
-    m_serverOutput->addMode(QSize(1920, 1080), WlOutput::ModeFlags(WlOutput::ModeFlag::Preferred));
-    m_serverOutput->setCurrentMode(QSize(1920, 1080));
+    m_serverOutput = new Output(m_display);
+    m_serverOutput->add_mode(Output::Mode{QSize(1920, 1080), 60000, true, 1});
+    m_serverOutput->set_mode(1);
+    m_serverOutput->set_enabled(true);
 
-    m_serverXdgOutputManager = m_display->createXdgOutputManager(this);
-    m_serverXdgOutput =  m_serverXdgOutputManager->createXdgOutput(m_serverOutput, this);
-    m_serverXdgOutput->setLogicalSize(QSize(1280, 720)); //a 1.5 scale factor
-    m_serverXdgOutput->setLogicalPosition(QPoint(11,12)); //not a sensible value for one monitor, but works for this test
-    m_serverXdgOutput->done();
+    // Not a sensible position for one monitor but works for this test. And a 1.5 scale factor.
+    m_serverOutput->set_geometry(QRectF(QPoint(11,12), QSize(1280, 720)));
+    m_serverOutput->done();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -121,9 +118,8 @@ void TestXdgOutput::cleanup()
 
 void TestXdgOutput::testChanges()
 {
-    // verify the server modes
-    using namespace Wrapland::Server;
-    using namespace Wrapland::Client;
+    // Verify the server modes.
+
     Wrapland::Client::Registry registry;
     QSignalSpy announced(&registry, SIGNAL(outputAnnounced(quint32,quint32)));
     QSignalSpy xdgOutputAnnounced(&registry, SIGNAL(xdgOutputAnnounced(quint32,quint32)));
@@ -155,9 +151,8 @@ void TestXdgOutput::testChanges()
     QCOMPARE(xdgOutput->logicalSize(), QSize(1280,720));
 
     //dynamic updates
-    m_serverXdgOutput->setLogicalPosition(QPoint(1000, 2000));
-    m_serverXdgOutput->setLogicalSize(QSize(100,200));
-    m_serverXdgOutput->done();
+    m_serverOutput->set_geometry(QRectF(QPoint(1000, 2000), QSize(100,200)));
+    m_serverOutput->done();
 
     QVERIFY(xdgOutputChanged.wait());
     QCOMPARE(xdgOutputChanged.count(), 1);

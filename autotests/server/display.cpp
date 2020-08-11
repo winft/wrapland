@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/client.h"
 #include "../../server/display.h"
+#include "../../server/output.h"
 #include "../../server/output_management_v1.h"
 #include "../../server/wl_output.h"
 
@@ -88,20 +89,26 @@ void TestServerDisplay::testAddRemoveOutput()
     display.setSocketName(std::string("kwin-wayland-server-display-test-output-0"));
     display.start();
 
-    std::unique_ptr<WlOutput> output1{display.createOutput()};
+    std::unique_ptr<Output> output1{new Wrapland::Server::Output(&display)};
+    output1->set_enabled(true);
+    output1->done();
+
     QCOMPARE(display.outputs().size(), 1);
-    QCOMPARE(display.outputs()[0], output1.get());
+    QCOMPARE(display.outputs()[0], output1->wayland_output());
 
     // create a second output
-    std::unique_ptr<WlOutput> output2{display.createOutput()};
+    std::unique_ptr<Output> output2{new Wrapland::Server::Output(&display)};
+    output2->set_enabled(true);
+    output2->done();
+
     QCOMPARE(display.outputs().size(), 2);
-    QCOMPARE(display.outputs()[0], output1.get());
-    QCOMPARE(display.outputs()[1], output2.get());
+    QCOMPARE(display.outputs()[0], output1->wayland_output());
+    QCOMPARE(display.outputs()[1], output2->wayland_output());
 
     // remove the first output
-    display.removeOutput(output1.get());
+    output1.reset();
     QCOMPARE(display.outputs().size(), 1);
-    QCOMPARE(display.outputs()[0], output2.get());
+    QCOMPARE(display.outputs()[0], output2->wayland_output());
 
     // and delete the second
     output2.reset();

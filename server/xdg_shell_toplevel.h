@@ -23,7 +23,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 // For Qt metatype declaration.
 #include "seat.h"
-#include "wl_output.h"
 #include "xdg_shell.h"
 
 #include <QObject>
@@ -33,7 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-class WlOutput;
+class Output;
 class Seat;
 class XdgShellSurface;
 
@@ -66,7 +65,7 @@ Q_SIGNALS:
     void maxSizeChanged(const QSize& size);
     void moveRequested(Seat* seat, uint32_t serial);
     void maximizedChanged(bool maximized);
-    void fullscreenChanged(bool fullscreen, WlOutput* output);
+    void fullscreenChanged(bool fullscreen, Wrapland::Server::Output* output);
     void windowMenuRequested(Seat* seat, uint32_t serial, const QPoint& position);
     void resizeRequested(Seat* seat, uint32_t serial, Qt::Edges edges);
     void minimizeRequested();

@@ -36,8 +36,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/idle_inhibit_v1.h"
+#include "../../server/output.h"
 #include "../../server/surface.h"
-#include "../../server/wl_output.h"
 
 #include <wayland-client-protocol.h>
 
@@ -1131,7 +1131,7 @@ void TestSurface::testOutput()
     QVERIFY(surfaceCreatedSpy.wait());
     auto serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
-    QCOMPARE(serverSurface->outputs(), std::vector<Wrapland::Server::WlOutput*>());
+    QCOMPARE(serverSurface->outputs(), std::vector<Wrapland::Server::Output*>());
 
     // Create another registry to get notified about added outputs.
     Wrapland::Client::Registry registry;
@@ -1145,7 +1145,9 @@ void TestSurface::testOutput()
     QSignalSpy outputAnnouncedSpy(&registry, &Wrapland::Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto serverOutput = m_display->createOutput(m_display);
+    auto serverOutput = new Wrapland::Server::Output(m_display, m_display);
+    serverOutput->set_enabled(true);
+    serverOutput->done();
 
     QVERIFY(outputAnnouncedSpy.wait());
     std::unique_ptr<Wrapland::Client::Output> clientOutput(
@@ -1156,7 +1158,7 @@ void TestSurface::testOutput()
     m_display->dispatchEvents();
 
     // Now enter it.
-    std::vector<Wrapland::Server::WlOutput*> outputs;
+    std::vector<Wrapland::Server::Output*> outputs;
     outputs.push_back(serverOutput);
     serverSurface->setOutputs(outputs);
     QCOMPARE(serverSurface->outputs(), outputs);
@@ -1166,11 +1168,11 @@ void TestSurface::testOutput()
     QCOMPARE(s->outputs(), QVector<Wrapland::Client::Output*>{clientOutput.get()});
 
     // Adding to same should not trigger.
-    serverSurface->setOutputs(std::vector<Wrapland::Server::WlOutput*>{serverOutput});
+    serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>{serverOutput});
 
     // leave again
-    serverSurface->setOutputs(std::vector<Wrapland::Server::WlOutput*>());
-    QCOMPARE(serverSurface->outputs(), std::vector<Wrapland::Server::WlOutput*>());
+    serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>());
+    QCOMPARE(serverSurface->outputs(), std::vector<Wrapland::Server::Output*>());
     QVERIFY(leftSpy.wait());
     QCOMPARE(enteredSpy.count(), 1);
     QCOMPARE(leftSpy.count(), 1);
@@ -1178,11 +1180,11 @@ void TestSurface::testOutput()
     QCOMPARE(s->outputs(), QVector<Wrapland::Client::Output*>());
 
     // Leave again should not trigger.
-    serverSurface->setOutputs(std::vector<Wrapland::Server::WlOutput*>());
+    serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>());
 
     // and enter again, just to verify
-    serverSurface->setOutputs(std::vector<Wrapland::Server::WlOutput*>{serverOutput});
-    QCOMPARE(serverSurface->outputs(), std::vector<Wrapland::Server::WlOutput*>{serverOutput});
+    serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>{serverOutput});
+    QCOMPARE(serverSurface->outputs(), std::vector<Wrapland::Server::Output*>{serverOutput});
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.count(), 2);
     QCOMPARE(leftSpy.count(), 1);

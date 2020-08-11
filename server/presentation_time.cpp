@@ -139,9 +139,9 @@ PresentationFeedback::~PresentationFeedback()
     }
 }
 
-void PresentationFeedback::sync(WlOutput* output)
+void PresentationFeedback::sync(Output* output)
 {
-    auto outputBinds = output->d_ptr->getBinds(d_ptr->client()->handle());
+    auto outputBinds = output->wayland_output()->d_ptr->getBinds(d_ptr->client()->handle());
 
     for (auto bind : outputBinds) {
         d_ptr->send<wp_presentation_feedback_send_sync_output>(bind->resource());

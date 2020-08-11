@@ -19,7 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include "wl_output.h"
+#include "output.h"
 
 #include <QObject>
 #include <QPointer>
@@ -27,11 +27,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+struct wl_resource;
+
 namespace Wrapland::Server
 {
 class BlurManager;
 class Blur;
 class Buffer;
+class Client;
 class ConfinedPointerV1;
 class Contrast;
 class ContrastManager;
@@ -70,7 +73,7 @@ public:
     bool inputIsInfinite() const;
 
     qint32 scale() const;
-    WlOutput::Transform transform() const;
+    Output::Transform transform() const;
 
     std::shared_ptr<Buffer> buffer() const;
 
@@ -93,8 +96,8 @@ public:
     Surface* surfaceAt(const QPointF& position);
     Surface* inputSurfaceAt(const QPointF& position);
 
-    void setOutputs(std::vector<WlOutput*> const& outputs);
-    std::vector<WlOutput*> outputs() const;
+    void setOutputs(std::vector<Output*> const& outputs);
+    std::vector<Output*> outputs() const;
 
     QPointer<ConfinedPointerV1> confinedPointer() const;
     QPointer<LockedPointerV1> lockedPointer() const;
@@ -109,7 +112,7 @@ public:
 
     QRectF sourceRectangle() const;
 
-    uint32_t lockPresentation(WlOutput* output);
+    uint32_t lockPresentation(Output* output);
     void presentationFeedback(uint32_t presentationId,
                               uint32_t tvSecHi,
                               uint32_t tvSecLo,
@@ -127,7 +130,7 @@ Q_SIGNALS:
     void opaqueChanged(const QRegion&);
     void inputChanged(const QRegion&);
     void scaleChanged(qint32);
-    void transformChanged(Wrapland::Server::WlOutput::Transform);
+    void transformChanged(Output::Transform);
     void unmapped();
     void sizeChanged();
     void shadowChanged();

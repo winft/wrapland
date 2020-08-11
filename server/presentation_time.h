@@ -30,7 +30,7 @@ namespace Wrapland::Server
 {
 class Client;
 class Display;
-class WlOutput;
+class Output;
 class Surface;
 
 class WRAPLANDSERVER_EXPORT PresentationManager : public QObject
@@ -64,7 +64,7 @@ public:
 
     ~PresentationFeedback() override;
 
-    void sync(WlOutput* output);
+    void sync(Output* output);
     void presented(uint32_t tvSecHi,
                    uint32_t tvSecLo,
                    uint32_t tvNsec,

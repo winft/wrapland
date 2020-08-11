@@ -268,10 +268,10 @@ int main(int argc, char **argv)
     display.createCompositor(&display);
     auto shell = display.createXdgShell();
     display.createShm();
-    auto output = display.createOutput(&display);
-    output->setPhysicalSize(QSize(269, 202));
+    auto output = new Output(&display, &display);
+    output->set_physical_size(QSize(269, 202));
     const QSize windowSize(1024, 768);
-    output->addMode(windowSize);
+    output->add_mode(Output::Mode{windowSize});
 
     auto seat = display.createSeat();
     seat->setHasKeyboard(true);

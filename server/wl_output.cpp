@@ -24,53 +24,130 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/client.h"
 #include "wayland/display.h"
 
-#include <cassert>
 #include <functional>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
 {
 
-WlOutput::Private::Private(WlOutput* q, Display* display)
+WlOutput::Private::Private(Output* output, Display* display, WlOutput* q)
     : WlOutputGlobal(q, display, &wl_output_interface, &s_interface)
     , displayHandle(display)
-    , q_ptr(q)
+    , output(output)
 {
+    create();
 }
 
 const struct wl_output_interface WlOutput::Private::s_interface = {resourceDestroyCallback};
 
-WlOutput::WlOutput(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+int32_t to_subpixel(Output::Subpixel subpixel)
 {
-    connect(this, &WlOutput::currentModeChanged, this, [this] {
-        auto currentModeIt
-            = std::find_if(d_ptr->modes.cbegin(), d_ptr->modes.cend(), [](const Mode& mode) {
-                  return mode.flags.testFlag(ModeFlag::Current);
-              });
+    switch (subpixel) {
+    case Output::Subpixel::Unknown:
+        return WL_OUTPUT_SUBPIXEL_UNKNOWN;
+    case Output::Subpixel::None:
+        return WL_OUTPUT_SUBPIXEL_NONE;
+    case Output::Subpixel::HorizontalRGB:
+        return WL_OUTPUT_SUBPIXEL_HORIZONTAL_RGB;
+    case Output::Subpixel::HorizontalBGR:
+        return WL_OUTPUT_SUBPIXEL_HORIZONTAL_BGR;
+    case Output::Subpixel::VerticalRGB:
+        return WL_OUTPUT_SUBPIXEL_VERTICAL_RGB;
+    case Output::Subpixel::VerticalBGR:
+        return WL_OUTPUT_SUBPIXEL_VERTICAL_BGR;
+    }
+    abort();
+}
 
-        if (currentModeIt == d_ptr->modes.cend()) {
-            return;
+std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
+WlOutput::Private::geometry_args(OutputState const& state)
+{
+    auto const position = state.geometry.topLeft();
+
+    return std::make_tuple(position.x(),
+                           position.y(),
+                           state.info.physical_size.width(),
+                           state.info.physical_size.height(),
+                           to_subpixel(state.subpixel),
+                           state.info.manufacturer.c_str(),
+                           state.info.model.c_str(),
+                           Output::Private::to_transform(state.transform));
+}
+
+void WlOutput::Private::bindInit(WlOutputBind* bind)
+{
+    auto const state = output->d_ptr->published;
+
+    send<wl_output_send_geometry>(bind, geometry_args(state));
+
+    for (auto const& mode : output->d_ptr->modes) {
+        if (mode != output->d_ptr->published.mode) {
+            sendMode(bind, mode);
         }
+    }
+    sendMode(bind, output->d_ptr->published.mode);
 
-        d_ptr->sendMode(*currentModeIt);
-        d_ptr->sendDone();
+    send<wl_output_send_scale, 2>(bind, state.client_scale);
+    send<wl_output_send_done, 2>(bind);
+    bind->client()->flush();
+}
 
-        wl_display_flush_clients(d_ptr->displayHandle->native());
-    });
+void WlOutput::Private::sendMode(WlOutputBind* bind, Output::Mode const& mode)
+{
+    // Only called on bind. In this case we want to send the currently published mode.
+    auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->published);
 
-    connect(this, &WlOutput::subPixelChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &WlOutput::transformChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &WlOutput::globalPositionChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &WlOutput::modelChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &WlOutput::manufacturerChanged, this, [this] { d_ptr->updateGeometry(); });
-    connect(this, &WlOutput::scaleChanged, this, [this] {
-        d_ptr->sendScale();
-        d_ptr->sendDone();
-    });
+    send<wl_output_send_mode>(
+        bind, flags, mode.size.width(), mode.size.height(), mode.refresh_rate);
+}
 
-    d_ptr->create();
+void WlOutput::Private::sendMode(Output::Mode const& mode)
+{
+    // Only called on update. In this case we want to send the pending mode.
+    auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->pending);
+
+    send<wl_output_send_mode>(flags, mode.size.width(), mode.size.height(), mode.refresh_rate);
+}
+
+bool WlOutput::Private::broadcast()
+{
+    auto const published = output->d_ptr->published;
+    auto const pending = output->d_ptr->pending;
+
+    bool changed = false;
+
+    if (published.geometry.topLeft() != pending.geometry.topLeft()
+        || published.info.physical_size != pending.info.physical_size
+        || published.subpixel != pending.subpixel
+        || published.info.manufacturer != pending.info.manufacturer
+        || published.info.model != pending.info.model || published.transform != pending.transform) {
+        send<wl_output_send_geometry>(geometry_args(pending));
+        changed = true;
+    }
+
+    if (published.client_scale != pending.client_scale) {
+        send<wl_output_send_scale, 2>(pending.client_scale);
+        changed = true;
+    }
+
+    if (published.mode != pending.mode) {
+        sendMode(pending.mode);
+        changed = true;
+    }
+
+    return changed;
+}
+
+void WlOutput::Private::done()
+{
+    send<wl_output_send_done>();
+}
+
+WlOutput::WlOutput(Output* output, Display* display)
+    : QObject(nullptr)
+    , d_ptr(new Private(output, display, this))
+{
+    display->add_wl_output(this);
 }
 
 WlOutput::~WlOutput()
@@ -82,319 +159,9 @@ WlOutput::~WlOutput()
     }
 }
 
-QSize WlOutput::pixelSize() const
+Output* WlOutput::output() const
 {
-    auto it = std::find_if(d_ptr->modes.cbegin(), d_ptr->modes.cend(), [](const Mode& mode) {
-        return mode.flags.testFlag(ModeFlag::Current);
-    });
-    if (it == d_ptr->modes.cend()) {
-        return QSize();
-    }
-    return (*it).size;
-}
-
-int WlOutput::refreshRate() const
-{
-    auto it = std::find_if(d_ptr->modes.cbegin(), d_ptr->modes.cend(), [](const Mode& mode) {
-        return mode.flags.testFlag(ModeFlag::Current);
-    });
-    if (it == d_ptr->modes.cend()) {
-        return Mode::defaultRefreshRate;
-    }
-    return (*it).refreshRate;
-}
-
-void WlOutput::addMode(const QSize& size, WlOutput::ModeFlags flags, int refreshRate)
-{
-    auto currentModeIt
-        = std::find_if(d_ptr->modes.begin(), d_ptr->modes.end(), [](const Mode& mode) {
-              return mode.flags.testFlag(ModeFlag::Current);
-          });
-    if (currentModeIt == d_ptr->modes.end() && !flags.testFlag(ModeFlag::Current)) {
-        // no mode with current flag - enforce
-        flags |= ModeFlag::Current;
-    }
-    if (currentModeIt != d_ptr->modes.end() && flags.testFlag(ModeFlag::Current)) {
-        // another mode has the current flag - remove
-        (*currentModeIt).flags &= ~uint(ModeFlag::Current);
-    }
-
-    if (flags.testFlag(ModeFlag::Preferred)) {
-        // remove from existing Preferred mode
-        auto preferredIt
-            = std::find_if(d_ptr->modes.begin(), d_ptr->modes.end(), [](const Mode& mode) {
-                  return mode.flags.testFlag(ModeFlag::Preferred);
-              });
-        if (preferredIt != d_ptr->modes.end()) {
-            (*preferredIt).flags &= ~uint(ModeFlag::Preferred);
-        }
-    }
-
-    auto existingModeIt = std::find_if(
-        d_ptr->modes.begin(), d_ptr->modes.end(), [size, refreshRate](const Mode& mode) {
-            return mode.size == size && mode.refreshRate == refreshRate;
-        });
-    auto emitChanges = [this, flags, size, refreshRate] {
-        emit modesChanged();
-        if (flags.testFlag(ModeFlag::Current)) {
-            emit refreshRateChanged(refreshRate);
-            emit pixelSizeChanged(size);
-            emit currentModeChanged();
-        }
-    };
-    if (existingModeIt != d_ptr->modes.end()) {
-        if ((*existingModeIt).flags == flags) {
-            // nothing to do
-            return;
-        }
-        (*existingModeIt).flags = flags;
-        emitChanges();
-        return;
-    }
-    Mode mode;
-    mode.size = size;
-    mode.refreshRate = refreshRate;
-    mode.flags = flags;
-    d_ptr->modes.push_back(mode);
-    emitChanges();
-}
-
-void WlOutput::setCurrentMode(const QSize& size, int refreshRate)
-{
-    auto currentModeIt
-        = std::find_if(d_ptr->modes.begin(), d_ptr->modes.end(), [](const Mode& mode) {
-              return mode.flags.testFlag(ModeFlag::Current);
-          });
-    if (currentModeIt != d_ptr->modes.end()) {
-        // another mode has the current flag - remove
-        (*currentModeIt).flags &= ~uint(ModeFlag::Current);
-    }
-
-    auto existingModeIt = std::find_if(
-        d_ptr->modes.begin(), d_ptr->modes.end(), [size, refreshRate](const Mode& mode) {
-            return mode.size == size && mode.refreshRate == refreshRate;
-        });
-
-    Q_ASSERT(existingModeIt != d_ptr->modes.end());
-    (*existingModeIt).flags |= ModeFlag::Current;
-    emit modesChanged();
-    emit refreshRateChanged((*existingModeIt).refreshRate);
-    emit pixelSizeChanged((*existingModeIt).size);
-    emit currentModeChanged();
-}
-
-int32_t WlOutput::Private::toTransform() const
-{
-    switch (transform) {
-    case Transform::Normal:
-        return WL_OUTPUT_TRANSFORM_NORMAL;
-    case Transform::Rotated90:
-        return WL_OUTPUT_TRANSFORM_90;
-    case Transform::Rotated180:
-        return WL_OUTPUT_TRANSFORM_180;
-    case Transform::Rotated270:
-        return WL_OUTPUT_TRANSFORM_270;
-    case Transform::Flipped:
-        return WL_OUTPUT_TRANSFORM_FLIPPED;
-    case Transform::Flipped90:
-        return WL_OUTPUT_TRANSFORM_FLIPPED_90;
-    case Transform::Flipped180:
-        return WL_OUTPUT_TRANSFORM_FLIPPED_180;
-    case Transform::Flipped270:
-        return WL_OUTPUT_TRANSFORM_FLIPPED_270;
-    }
-    abort();
-}
-
-int32_t WlOutput::Private::toSubPixel() const
-{
-    switch (subPixel) {
-    case SubPixel::Unknown:
-        return WL_OUTPUT_SUBPIXEL_UNKNOWN;
-    case SubPixel::None:
-        return WL_OUTPUT_SUBPIXEL_NONE;
-    case SubPixel::HorizontalRGB:
-        return WL_OUTPUT_SUBPIXEL_HORIZONTAL_RGB;
-    case SubPixel::HorizontalBGR:
-        return WL_OUTPUT_SUBPIXEL_HORIZONTAL_BGR;
-    case SubPixel::VerticalRGB:
-        return WL_OUTPUT_SUBPIXEL_VERTICAL_RGB;
-    case SubPixel::VerticalBGR:
-        return WL_OUTPUT_SUBPIXEL_VERTICAL_BGR;
-    }
-    abort();
-}
-
-void WlOutput::Private::bindInit(Wayland::Resource<WlOutput, WlOutputGlobal>* bind)
-{
-    send<wl_output_send_geometry>(bind, geometryArgs());
-    send<wl_output_send_scale, 2>(bind, scale);
-
-    auto currentModeIt = modes.cend();
-    for (auto it = modes.cbegin(); it != modes.cend(); ++it) {
-        const Mode& mode = *it;
-        if (mode.flags.testFlag(ModeFlag::Current)) {
-            // needs to be sent as last mode
-            currentModeIt = it;
-            continue;
-        }
-        sendMode(bind, mode);
-    }
-
-    if (currentModeIt != modes.cend()) {
-        sendMode(bind, *currentModeIt);
-    }
-
-    send<wl_output_send_done, 2>(bind);
-    bind->client()->flush();
-}
-
-int32_t getFlags(const WlOutput::Mode& mode)
-{
-    int32_t flags = 0;
-    if (mode.flags.testFlag(WlOutput::ModeFlag::Current)) {
-        flags |= WL_OUTPUT_MODE_CURRENT;
-    }
-    if (mode.flags.testFlag(WlOutput::ModeFlag::Preferred)) {
-        flags |= WL_OUTPUT_MODE_PREFERRED;
-    }
-    return flags;
-}
-
-void WlOutput::Private::sendMode(Wayland::Resource<WlOutput, WlOutputGlobal>* bind,
-                                 const Mode& mode)
-{
-    send<wl_output_send_mode>(
-        bind, getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
-}
-
-void WlOutput::Private::sendMode(const Mode& mode)
-{
-    send<wl_output_send_mode>(
-        getFlags(mode), mode.size.width(), mode.size.height(), mode.refreshRate);
-}
-
-void WlOutput::Private::sendGeometry()
-{
-    send<wl_output_send_geometry>(geometryArgs());
-}
-
-void WlOutput::Private::sendScale()
-{
-    send<wl_output_send_scale, 2>(scale);
-}
-
-void WlOutput::Private::sendDone()
-{
-    send<wl_output_send_done>();
-}
-
-void WlOutput::Private::updateGeometry()
-{
-    sendGeometry();
-    sendDone();
-}
-
-std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
-WlOutput::Private::geometryArgs() const
-{
-    return std::make_tuple(globalPosition.x(),
-                           globalPosition.y(),
-                           physicalSize.width(),
-                           physicalSize.height(),
-                           toSubPixel(),
-                           manufacturer.c_str(),
-                           model.c_str(),
-                           toTransform());
-}
-
-#define SETTER(setterName, type, argumentName)                                                     \
-    void WlOutput::setterName(type arg)                                                            \
-    {                                                                                              \
-        if (d_ptr->argumentName == arg) {                                                          \
-            return;                                                                                \
-        }                                                                                          \
-        d_ptr->argumentName = arg;                                                                 \
-        emit argumentName##Changed(d_ptr->argumentName);                                           \
-    }
-
-SETTER(setPhysicalSize, const QSize&, physicalSize)
-SETTER(setGlobalPosition, const QPoint&, globalPosition)
-SETTER(setManufacturer, std::string const&, manufacturer)
-SETTER(setModel, std::string const&, model)
-SETTER(setScale, int, scale)
-SETTER(setSubPixel, SubPixel, subPixel)
-SETTER(setTransform, Transform, transform)
-
-#undef SETTER
-
-QSize WlOutput::physicalSize() const
-{
-    return d_ptr->physicalSize;
-}
-
-QPoint WlOutput::globalPosition() const
-{
-    return d_ptr->globalPosition;
-}
-
-std::string const& WlOutput::manufacturer() const
-{
-
-    return d_ptr->manufacturer;
-}
-
-std::string const& WlOutput::model() const
-{
-    return d_ptr->model;
-}
-
-int WlOutput::scale() const
-{
-    return d_ptr->scale;
-}
-
-WlOutput::SubPixel WlOutput::subPixel() const
-{
-    return d_ptr->subPixel;
-}
-
-WlOutput::Transform WlOutput::transform() const
-{
-    return d_ptr->transform;
-}
-
-std::vector<WlOutput::Mode> const& WlOutput::modes() const
-{
-    return d_ptr->modes;
-}
-
-void WlOutput::setDpmsMode(WlOutput::DpmsMode mode)
-{
-    if (d_ptr->dpms.mode == mode) {
-        return;
-    }
-    d_ptr->dpms.mode = mode;
-    Q_EMIT dpmsModeChanged();
-}
-
-void WlOutput::setDpmsSupported(bool supported)
-{
-    if (d_ptr->dpms.supported == supported) {
-        return;
-    }
-    d_ptr->dpms.supported = supported;
-    Q_EMIT dpmsSupportedChanged();
-}
-
-WlOutput::DpmsMode WlOutput::dpmsMode() const
-{
-    return d_ptr->dpms.mode;
-}
-
-bool WlOutput::isDpmsSupported() const
-{
-    return d_ptr->dpms.supported;
+    return d_ptr->output;
 }
 
 }

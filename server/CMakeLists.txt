@@ -20,6 +20,7 @@ set(SERVER_LIB_SRCS
     keystate.cpp
     keyboard_shortcuts_inhibit.cpp
     linux_dmabuf_v1.cpp
+    output.cpp
     output_changeset_v1.cpp
     output_configuration_v1.cpp
     output_device_v1.cpp
@@ -325,7 +326,7 @@ set(SERVER_LIB_HEADERS
   keystate.h
   keyboard_shortcuts_inhibit.h
   linux_dmabuf_v1.h
-  wl_output.h
+  output.h
   output_changeset_v1.h
   output_configuration_v1.h
   output_device_v1.h
@@ -348,6 +349,7 @@ set(SERVER_LIB_HEADERS
   text_input_v2.h
   touch.h
   viewporter.h
+  wl_output.h
   xdg_decoration.h
   xdg_output.h
   xdg_foreign.h

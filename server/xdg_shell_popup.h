@@ -35,7 +35,6 @@ namespace Wrapland
 namespace Server
 {
 class Client;
-class Output;
 class Seat;
 class Surface;
 class XdgShellPopup;

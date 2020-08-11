@@ -20,138 +20,37 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <QObject>
-#include <QPoint>
-#include <QSize>
-#include <QVector>
-
-#include <QDebug>
+#include <memory>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include <memory>
-#include <string>
-#include <vector>
-
-struct wl_global;
-struct wl_client;
-struct wl_resource;
-
 namespace Wrapland::Server
 {
-class Client;
 class Display;
+class Output;
 
 class WRAPLANDSERVER_EXPORT WlOutput : public QObject
 {
     Q_OBJECT
 public:
-    enum class DpmsMode {
-        On,
-        Standby,
-        Suspend,
-        Off,
-    };
-
-    enum class ModeFlag {
-        Current = 1,
-        Preferred = 2,
-    };
-    Q_DECLARE_FLAGS(ModeFlags, ModeFlag)
-
-    enum class SubPixel {
-        Unknown,
-        None,
-        HorizontalRGB,
-        HorizontalBGR,
-        VerticalRGB,
-        VerticalBGR,
-    };
-
-    enum class Transform {
-        Normal,
-        Rotated90,
-        Rotated180,
-        Rotated270,
-        Flipped,
-        Flipped90,
-        Flipped180,
-        Flipped270,
-    };
-
-    struct Mode {
-        QSize size = QSize();
-        static constexpr int defaultRefreshRate = 60000;
-        int refreshRate = defaultRefreshRate;
-        ModeFlags flags;
-    };
-
     ~WlOutput() override;
 
-    QSize physicalSize() const;
-    QPoint globalPosition() const;
-    const std::string& manufacturer() const;
-    const std::string& model() const;
-
-    QSize pixelSize() const;
-    int refreshRate() const;
-    int scale() const;
-    Transform transform() const;
-
-    SubPixel subPixel() const;
-    const std::vector<Mode>& modes() const;
-
-    bool isDpmsSupported() const;
-    DpmsMode dpmsMode() const;
-
-    void setPhysicalSize(const QSize& size);   // NOLINT
-    void setGlobalPosition(const QPoint& pos); // NOLINT
-
-    void setManufacturer(std::string const& manufacturer); // NOLINT
-    void setModel(std::string const& model);               // NOLINT
-
-    void setScale(int scale);               // NOLINT
-    void setSubPixel(SubPixel subPixel);    // NOLINT
-    void setTransform(Transform transform); // NOLINT
-    void addMode(const QSize& size,
-                 ModeFlags flags = ModeFlags(),
-                 int refreshRate = Mode::defaultRefreshRate);
-    void setCurrentMode(const QSize& size, int refreshRate = Mode::defaultRefreshRate);
-
-    void setDpmsSupported(bool supported);
-    void setDpmsMode(DpmsMode mode);
+    Output* output() const;
 
 Q_SIGNALS:
-    void physicalSizeChanged(const QSize&);
-    void globalPositionChanged(const QPoint&);
-    void manufacturerChanged(std::string const&);
-    void modelChanged(std::string const&);
-    void pixelSizeChanged(const QSize&);
-    void refreshRateChanged(int);
-    void scaleChanged(int);
-    void subPixelChanged(SubPixel);
-    void transformChanged(Transform);
-    void modesChanged();
-    void currentModeChanged();
-    void dpmsModeChanged();
-    void dpmsSupportedChanged();
-    void dpmsModeRequested(Wrapland::Server::WlOutput::DpmsMode mode);
     void removed();
 
 private:
+    explicit WlOutput(Output* output, Display* display);
+
     friend class Display;
+    friend class Output;
     friend class RemoteAccessManager;
     friend class Surface;
     friend class PresentationFeedback;
-
-    explicit WlOutput(Wrapland::Server::Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
 
 }
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::WlOutput::ModeFlags)
-Q_DECLARE_METATYPE(Wrapland::Server::WlOutput::SubPixel)
-Q_DECLARE_METATYPE(Wrapland::Server::WlOutput::Transform)
-Q_DECLARE_METATYPE(Wrapland::Server::WlOutput::DpmsMode)

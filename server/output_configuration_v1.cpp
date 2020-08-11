@@ -63,11 +63,8 @@ void OutputConfigurationV1::Private::enableCallback([[maybe_unused]] wl_client* 
     auto priv = handle(wlResource)->d_ptr;
     auto outputDevice = OutputDeviceV1Global::handle(wlOutputDevice);
 
-    auto enable = (wlEnable == ZKWINFT_OUTPUT_DEVICE_V1_ENABLEMENT_ENABLED)
-        ? OutputDeviceV1::Enablement::Enabled
-        : OutputDeviceV1::Enablement::Disabled;
-
-    priv->pendingChanges(outputDevice)->d_ptr->enabled = enable;
+    priv->pendingChanges(outputDevice)->d_ptr->enabled
+        = (wlEnable == ZKWINFT_OUTPUT_DEVICE_V1_ENABLEMENT_ENABLED);
 }
 
 void OutputConfigurationV1::Private::modeCallback([[maybe_unused]] wl_client* wlClient,
@@ -79,7 +76,7 @@ void OutputConfigurationV1::Private::modeCallback([[maybe_unused]] wl_client* wl
     auto outputDevice = OutputDeviceV1Global::handle(wlOutputDevice);
 
     bool modeValid = false;
-    for (const auto& m : outputDevice->modes()) {
+    for (const auto& m : outputDevice->output()->modes()) {
         if (m.id == mode_id) {
             modeValid = true;
             break;
@@ -105,22 +102,22 @@ void OutputConfigurationV1::Private::transformCallback([[maybe_unused]] wl_clien
     auto toTransform = [](int32_t wlTransform) {
         switch (wlTransform) {
         case WL_OUTPUT_TRANSFORM_90:
-            return OutputDeviceV1::Transform::Rotated90;
+            return Output::Transform::Rotated90;
         case WL_OUTPUT_TRANSFORM_180:
-            return OutputDeviceV1::Transform::Rotated180;
+            return Output::Transform::Rotated180;
         case WL_OUTPUT_TRANSFORM_270:
-            return OutputDeviceV1::Transform::Rotated270;
+            return Output::Transform::Rotated270;
         case WL_OUTPUT_TRANSFORM_FLIPPED:
-            return OutputDeviceV1::Transform::Flipped;
+            return Output::Transform::Flipped;
         case WL_OUTPUT_TRANSFORM_FLIPPED_90:
-            return OutputDeviceV1::Transform::Flipped90;
+            return Output::Transform::Flipped90;
         case WL_OUTPUT_TRANSFORM_FLIPPED_180:
-            return OutputDeviceV1::Transform::Flipped180;
+            return Output::Transform::Flipped180;
         case WL_OUTPUT_TRANSFORM_FLIPPED_270:
-            return OutputDeviceV1::Transform::Flipped270;
+            return Output::Transform::Flipped270;
         case WL_OUTPUT_TRANSFORM_NORMAL:
         default:
-            return OutputDeviceV1::Transform::Normal;
+            return Output::Transform::Normal;
         }
     };
 

@@ -162,21 +162,24 @@ void Display::terminate()
     d_ptr->terminate();
 }
 
-WlOutput* Display::createOutput(QObject* parent)
+void Display::add_output_device_v1(OutputDeviceV1* output)
 {
-    auto* output = new WlOutput(this, parent);
+    if (!d_ptr->xdg_output_manager) {
+        d_ptr->xdg_output_manager.reset(new XdgOutputManager(this));
+    }
+
+    d_ptr->outputDevices.push_back(output);
+}
+
+void Display::add_wl_output(WlOutput* output)
+{
     d_ptr->outputs.push_back(output);
-    return output;
 }
 
 void Display::removeOutput(WlOutput* output)
 {
-    // TODO(romangg): This does not clean up. But it should be also possible to just delete the
-    //                output.
     d_ptr->outputs.erase(std::remove(d_ptr->outputs.begin(), d_ptr->outputs.end(), output),
                          d_ptr->outputs.end());
-    // d_ptr->removeGlobal(output);
-    // delete output;
 }
 
 void Display::removeOutputDevice(OutputDeviceV1* outputDevice)
@@ -189,13 +192,6 @@ void Display::removeOutputDevice(OutputDeviceV1* outputDevice)
 Compositor* Display::createCompositor(QObject* parent)
 {
     return new Compositor(this, parent);
-}
-
-OutputDeviceV1* Display::createOutputDeviceV1(QObject* parent)
-{
-    auto device = new OutputDeviceV1(this, parent);
-    d_ptr->outputDevices.push_back(device);
-    return device;
 }
 
 OutputManagementV1* Display::createOutputManagementV1(QObject* parent)
@@ -335,9 +331,9 @@ Viewporter* Display::createViewporter(QObject* parent)
     return new Viewporter(this, parent);
 }
 
-XdgOutputManager* Display::createXdgOutputManager(QObject* parent)
+XdgOutputManager* Display::xdgOutputManager() const
 {
-    return new XdgOutputManager(this, parent);
+    return d_ptr->xdg_output_manager.get();
 }
 
 XdgDecorationManager* Display::createXdgDecorationManager(XdgShell* shell, QObject* parent)
