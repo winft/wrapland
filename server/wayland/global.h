@@ -94,16 +94,6 @@ public:
         return m_implementation;
     }
 
-    explicit operator wl_global*() const
-    {
-        return m_capsule->get();
-    }
-
-    explicit operator wl_global*()
-    {
-        return m_capsule->get();
-    }
-
     static Handle* handle(wl_resource* wlResource)
     {
         auto resource = static_cast<GlobalResource*>(wl_resource_get_user_data(wlResource));
