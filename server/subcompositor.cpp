@@ -39,8 +39,6 @@ public:
     Private(Subcompositor* q, Display* display);
 
 private:
-    void subsurface(Client* client, uint32_t id, Surface* surface, Surface* parentSurface);
-
     static void destroyCallback(wl_client* wlClient, wl_resource* wlResource);
     static void subsurfaceCallback(wl_client* wlClient,
                                    wl_resource* wlResource,
@@ -67,42 +65,29 @@ void Subcompositor::Private::subsurfaceCallback([[maybe_unused]] wl_client* wlCl
                                                 wl_resource* wlSurface,
                                                 wl_resource* wlParent)
 {
-    auto subcompositor = handle(wlResource);
-    auto client = subcompositor->d_ptr->display()->handle()->getClient(wlClient);
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     auto parentSurface = Wayland::Resource<Surface>::handle(wlParent);
 
-    subcompositor->d_ptr->subsurface(client, id, surface, parentSurface);
-}
-
-void Subcompositor::Private::subsurface(Client* client,
-                                        uint32_t id,
-                                        Surface* surface,
-                                        Surface* parentSurface)
-{
     if (!surface || !parentSurface) {
-        // TODO(romangg): post error in backend
-        wl_resource_post_error(getResources(client)[0],
-                               WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE,
-                               "Surface or parent surface not found");
+        bind->postError(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE, "Surface or parent surface not found.");
         return;
     }
     if (surface == parentSurface) {
-        // TODO(romangg): post error in backend
-        wl_resource_post_error(getResources(client)[0],
-                               WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE,
-                               "Cannot become sub composite to same surface");
+        bind->postError(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE, "Cannot subcomposite to same surface.");
         return;
     }
 
     // TODO(romangg): add check that surface is not already used in an interface (e.g. Shell)
     // TODO(romangg): add check that parentSurface is not a child of surface
     // TODO(romangg): handle error
-    auto subsurface
-        = new Subsurface(client, handle()->d_ptr->version(), id, surface, parentSurface);
 
-    Q_EMIT handle()->subsurfaceCreated(subsurface);
+    auto subsurface
+        = new Subsurface(bind->client()->handle(), priv->version(), id, surface, parentSurface);
+
+    Q_EMIT priv->handle()->subsurfaceCreated(subsurface);
 }
 
 Subcompositor::Subcompositor(Display* display, QObject* parent)

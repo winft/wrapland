@@ -173,19 +173,6 @@ public:
         return ret;
     }
 
-    // Legacy
-    QVector<wl_resource*> getResources(Server::Client* client)
-    {
-        QVector<wl_resource*> ret;
-        for (auto* bind : m_binds) {
-            if (bind->client()->handle() == client) {
-                ret << bind->resource();
-            }
-        }
-        return ret;
-    }
-    //
-
 protected:
     Global(Handle* handle,
            Server::Display* display,
