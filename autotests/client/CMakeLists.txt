@@ -471,17 +471,6 @@ add_test(NAME wrapland-testPresentationTime COMMAND testPresentationTime)
 ecm_mark_as_test(testPresentationTime)
 
 ########################################################
-# Test RemoteAccess
-########################################################
-set( testRemoteAccess_SRCS
-        remote_access.cpp
-    )
-add_executable(testRemoteAccess ${testRemoteAccess_SRCS})
-target_link_libraries( testRemoteAccess Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
-add_test(NAME wrapland-testRemoteAccess COMMAND testRemoteAccess)
-ecm_mark_as_test(testRemoteAccess)
-
-########################################################
 # Test VirtualDesktop
 ########################################################
 set( testPlasmaVirtualDesktop_SRCS

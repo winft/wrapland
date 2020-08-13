@@ -26,7 +26,6 @@ set(CLIENT_LIB_SRCS
     keyboard.cpp
     keystate.cpp
     keyboard_shortcuts_inhibit.cpp
-    remote_access.cpp
     output.cpp
     output_configuration_v1.cpp
     output_management_v1.cpp
@@ -252,11 +251,6 @@ set(CLIENT_GENERATED_FILES
 
 set_source_files_properties(${CLIENT_GENERATED_FILES} PROPERTIES SKIP_AUTOMOC ON)
 
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/remote-access.xml
-    BASENAME remote-access
-)
-
 add_library(WraplandClient ${CLIENT_LIB_SRCS})
 add_library(Wrapland::Client ALIAS WraplandClient)
 
@@ -306,7 +300,6 @@ set(CLIENT_LIB_HEADERS
   keyboard.h
   keystate.h
   keyboard_shortcuts_inhibit.h
-  remote_access.h
   output.h
   output_configuration_v1.h
   output_management_v1.h

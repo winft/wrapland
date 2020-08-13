@@ -33,7 +33,6 @@ set(SERVER_LIB_SRCS
     presentation_time.cpp
     region.cpp
     relative_pointer_v1.cpp
-    remote_access.cpp
     seat.cpp
     server_decoration_palette.cpp
     shadow.cpp
@@ -172,11 +171,6 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/server-decoration-palette.xml
     BASENAME server_decoration_palette
-)
-
-ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/remote-access.xml
-    BASENAME remote-access
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
@@ -345,7 +339,6 @@ set(SERVER_LIB_HEADERS
   presentation_time.h
   region.h
   relative_pointer_v1.h
-  remote_access.h
   seat.h
   server_decoration_palette.h
   shadow.h

@@ -49,7 +49,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_gestures_v1.h"
 #include "presentation_time.h"
 #include "relative_pointer_v1.h"
-#include "remote_access.h"
 #include "seat.h"
 #include "server_decoration_palette.h"
 #include "shadow.h"
@@ -233,11 +232,6 @@ PlasmaShell* Display::createPlasmaShell(QObject* parent)
 PlasmaWindowManager* Display::createPlasmaWindowManager(QObject* parent)
 {
     return new PlasmaWindowManager(this, parent);
-}
-
-RemoteAccessManager* Display::createRemoteAccessManager(QObject* parent)
-{
-    return new RemoteAccessManager(this, parent);
 }
 
 KdeIdle* Display::createIdle(QObject* parent)
