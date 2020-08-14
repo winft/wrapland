@@ -42,7 +42,7 @@ class PlasmaWindowRes;
 
 constexpr uint32_t PlasmaWindowManagerVersion = 9;
 using PlasmaWindowManagerGlobal = Wayland::Global<PlasmaWindowManager, PlasmaWindowManagerVersion>;
-using PlasmaWindowManagerBind = Wayland::Resource<PlasmaWindowManager, PlasmaWindowManagerGlobal>;
+using PlasmaWindowManagerBind = Wayland::Bind<PlasmaWindowManagerGlobal>;
 
 class PlasmaWindowManager::Private : public PlasmaWindowManagerGlobal
 {

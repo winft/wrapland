@@ -32,12 +32,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-
 class Display;
 class Surface;
 class Viewport;
 
-class Viewporter::Private : public Wayland::Global<Viewporter>
+constexpr uint32_t ViewporterVersion = 1;
+using ViewporterGlobal = Wayland::Global<Viewporter, ViewporterVersion>;
+using ViewporterBind = Wayland::Bind<ViewporterGlobal>;
+
+class Viewporter::Private : public ViewporterGlobal
 {
 public:
     Private(Display* display, Viewporter* qptr);

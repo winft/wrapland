@@ -54,7 +54,7 @@ const struct zwp_linux_dmabuf_v1_interface LinuxDmabufV1::Private::s_interface =
 
 constexpr size_t modifierShift = 32;
 
-void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind)
+void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
 {
     // Send formats & modifiers.
     QHash<uint32_t, QSet<uint64_t>>::const_iterator it = supportedFormatsWithModifiers.constBegin();

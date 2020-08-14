@@ -33,13 +33,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class PresentationManager::Private : public Wayland::Global<PresentationManager>
+constexpr uint32_t PresentationManagerVersion = 1;
+using PresentationManagerGlobal = Wayland::Global<PresentationManager, PresentationManagerVersion>;
+using PresentationManagerBind = Wayland::Bind<PresentationManagerGlobal>;
+
+class PresentationManager::Private : public PresentationManagerGlobal
 {
 public:
     Private(PresentationManager* q, Display* display);
 
-    void
-    bindInit(Wayland::Resource<PresentationManager, Global<PresentationManager>>* bind) override;
+    void bindInit(PresentationManagerBind* bind) override;
 
     clockid_t clockId = 0;
 
@@ -56,7 +59,7 @@ private:
 const uint32_t PresentationManager::Private::s_version = 1;
 
 PresentationManager::Private::Private(PresentationManager* q, Display* display)
-    : Wayland::Global<PresentationManager>(q, display, &wp_presentation_interface, &s_interface)
+    : PresentationManagerGlobal(q, display, &wp_presentation_interface, &s_interface)
 {
 }
 
@@ -65,8 +68,7 @@ const struct wp_presentation_interface PresentationManager::Private::s_interface
     feedbackCallback,
 };
 
-void PresentationManager::Private::bindInit(
-    Wayland::Resource<PresentationManager, Global<PresentationManager>>* bind)
+void PresentationManager::Private::bindInit(PresentationManagerBind* bind)
 {
     send<wp_presentation_send_clock_id>(bind, clockId);
 }

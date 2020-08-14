@@ -32,7 +32,7 @@ class Output;
 
 constexpr uint32_t OutputDeviceV1Version = 1;
 using OutputDeviceV1Global = Wayland::Global<OutputDeviceV1, OutputDeviceV1Version>;
-using OutputDeviceV1Bind = Wayland::Resource<OutputDeviceV1, OutputDeviceV1Global>;
+using OutputDeviceV1Bind = Wayland::Bind<OutputDeviceV1Global>;
 
 class OutputDeviceV1::Private : public OutputDeviceV1Global
 {

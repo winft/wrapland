@@ -60,8 +60,8 @@ void XdgShell::Private::prepareUnbind(XdgShellBind* bind)
                 positioner, &XdgShellPositioner::resourceDestroyed, handle(), nullptr);
         }
         if (!surfaces.empty()) {
-            bind->postError(XDG_WM_BASE_ERROR_DEFUNCT_SURFACES,
-                            "xdg_wm_base destroyed before surfaces");
+            bind->post_error(XDG_WM_BASE_ERROR_DEFUNCT_SURFACES,
+                             "xdg_wm_base destroyed before surfaces");
         }
         bindsObjects.erase(it);
     }
@@ -110,7 +110,7 @@ void XdgShell::Private::getXdgSurfaceCallback([[maybe_unused]] wl_client* wlClie
             return surface == s->surface();
         });
         if (surfaceIt != surfaces.cend()) {
-            bind->postError(XDG_WM_BASE_ERROR_ROLE, "XDG Surface already created");
+            bind->post_error(XDG_WM_BASE_ERROR_ROLE, "XDG Surface already created");
             return;
         }
     }

@@ -72,11 +72,13 @@ void Subcompositor::Private::subsurfaceCallback([[maybe_unused]] wl_client* wlCl
     auto parentSurface = Wayland::Resource<Surface>::handle(wlParent);
 
     if (!surface || !parentSurface) {
-        bind->postError(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE, "Surface or parent surface not found.");
+        bind->post_error(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE,
+                         "Surface or parent surface not found.");
         return;
     }
     if (surface == parentSurface) {
-        bind->postError(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE, "Cannot subcomposite to same surface.");
+        bind->post_error(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE,
+                         "Cannot subcomposite to same surface.");
         return;
     }
 

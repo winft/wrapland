@@ -30,7 +30,7 @@ class Display;
 
 constexpr uint32_t WlOutputVersion = 3;
 using WlOutputGlobal = Wayland::Global<WlOutput, WlOutputVersion>;
-using WlOutputBind = Wayland::Resource<WlOutput, WlOutputGlobal>;
+using WlOutputBind = Wayland::Bind<WlOutputGlobal>;
 
 class WlOutput::Private : public WlOutputGlobal
 {

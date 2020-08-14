@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QDebug>
 
-#include "display.h"
-
+#include "bind.h"
 #include "capsule.h"
+#include "display.h"
 #include "resource.h"
 
 #include <cstdint>
@@ -47,7 +47,7 @@ template<typename Handle, int Version = 1>
 class Global
 {
 public:
-    using GlobalResource = Resource<Handle, Global<Handle, Version>>;
+    using GlobalBind = Bind<Global<Handle, Version>>;
 
     Global(Global const&) = delete;
     Global& operator=(Global const&) = delete;
@@ -60,7 +60,7 @@ public:
             m_display->removeGlobal(m_capsule.get());
         }
         for (auto bind : m_binds) {
-            bind->setGlobal(nullptr);
+            bind->set_global(nullptr);
         }
         remove();
     }
@@ -90,12 +90,12 @@ public:
 
     static Handle* handle(wl_resource* wlResource)
     {
-        auto resource = static_cast<GlobalResource*>(wl_resource_get_user_data(wlResource));
+        auto resource = static_cast<GlobalBind*>(wl_resource_get_user_data(wlResource));
         return resource->global()->handle();
     }
 
     template<auto sender, uint32_t minVersion = 0, typename... Args>
-    void send(GlobalResource* bind, Args&&... args)
+    void send(GlobalBind* bind, Args&&... args)
     {
         // See Vandevoorde et al.: C++ Templates - The Complete Guide p.79
         // or https://stackoverflow.com/a/4942746.
@@ -125,13 +125,13 @@ public:
         return m_handle;
     }
 
-    void unbind(GlobalResource* bind)
+    void unbind(GlobalBind* bind)
     {
         prepareUnbind(bind);
         m_binds.erase(std::remove(m_binds.begin(), m_binds.end(), bind), m_binds.end());
     }
 
-    GlobalResource* getBind(wl_resource* wlResource)
+    GlobalBind* getBind(wl_resource* wlResource)
     {
         for (auto bind : m_binds) {
             if (bind->resource() == wlResource) {
@@ -141,14 +141,14 @@ public:
         return nullptr;
     }
 
-    std::vector<GlobalResource*> getBinds()
+    std::vector<GlobalBind*> getBinds()
     {
         return m_binds;
     }
 
-    std::vector<GlobalResource*> getBinds(Server::Client* client)
+    std::vector<GlobalBind*> getBinds(Server::Client* client)
     {
-        std::vector<GlobalResource*> ret;
+        std::vector<GlobalBind*> ret;
         for (auto bind : m_binds) {
             if (bind->client()->handle() == client) {
                 ret.push_back(bind);
@@ -187,14 +187,14 @@ protected:
 
     static void resourceDestroyCallback(wl_client* wlClient, wl_resource* wlResource)
     {
-        GlobalResource::destroyCallback(wlClient, wlResource);
+        GlobalBind::destroy_callback(wlClient, wlResource);
     }
 
-    virtual void bindInit([[maybe_unused]] GlobalResource* bind)
+    virtual void bindInit([[maybe_unused]] GlobalBind* bind)
     {
     }
 
-    virtual void prepareUnbind([[maybe_unused]] GlobalResource* bind)
+    virtual void prepareUnbind([[maybe_unused]] GlobalBind* bind)
     {
     }
 
@@ -228,8 +228,7 @@ private:
 
     void bind(Client* client, uint32_t version, uint32_t id)
     {
-        auto resource = new GlobalResource(client, version, id, m_interface, m_implementation);
-        resource->setGlobal(this);
+        auto resource = new Bind(client, version, id, this);
         m_binds.push_back(resource);
         bindInit(resource);
     }
@@ -240,7 +239,7 @@ private:
     void const* m_implementation;
 
     std::unique_ptr<GlobalCapsule> m_capsule;
-    std::vector<GlobalResource*> m_binds;
+    std::vector<GlobalBind*> m_binds;
 };
 
 }

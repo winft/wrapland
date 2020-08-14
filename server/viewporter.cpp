@@ -39,7 +39,7 @@ const struct wp_viewporter_interface Viewporter::Private::s_interface = {
 };
 
 Viewporter::Private::Private(Display* display, Viewporter* qptr)
-    : Wayland::Global<Viewporter>(qptr, display, &wp_viewporter_interface, &s_interface)
+    : ViewporterGlobal(qptr, display, &wp_viewporter_interface, &s_interface)
 {
     create();
 }
@@ -63,7 +63,7 @@ void Viewporter::Private::getViewport(wl_resource* wlResource, uint32_t id, wl_r
 
     if (!surface->d_ptr->viewport.isNull()) {
         // Surface already has a viewport. That's a protocol error.
-        bind->postError(WP_VIEWPORTER_ERROR_VIEWPORT_EXISTS, "Surface already has viewport");
+        bind->post_error(WP_VIEWPORTER_ERROR_VIEWPORT_EXISTS, "Surface already has viewport");
         return;
     }
 
