@@ -22,7 +22,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 
 #include "bind.h"
-#include "capsule.h"
 #include "display.h"
 #include "nucleus.h"
 #include "resource.h"
@@ -58,6 +57,7 @@ public:
 
     virtual ~Global()
     {
+        m_nucleus->remove();
     }
 
     void create()
@@ -159,13 +159,8 @@ protected:
     }
 
 private:
-    static void destroy(std::unique_ptr<GlobalCapsule> global)
-    {
-        global.reset();
-    }
-
     Handle* m_handle;
-    std::unique_ptr<Nucleus<type>> m_nucleus;
+    Nucleus<type>* m_nucleus;
 };
 
 }

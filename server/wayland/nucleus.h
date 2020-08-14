@@ -45,20 +45,20 @@ template<typename Global>
 class Bind;
 
 template<typename Global>
-class Nucleus
+class Nucleus : GlobalCapsule
 {
 public:
     Nucleus(Global* global,
             Server::Display* display,
             const wl_interface* interface,
             void const* implementation)
-        : m_global(global)
+        : GlobalCapsule(wl_global_destroy)
+        , m_global(global)
         , m_display(Display::backendCast(display))
         , m_interface(interface)
         , m_implementation(implementation)
-        , m_capsule{new GlobalCapsule(wl_global_destroy)}
     {
-        m_display->addGlobal(m_capsule.get());
+        m_display->addGlobal(this);
     }
 
     Nucleus(Nucleus const&) = delete;
@@ -66,22 +66,32 @@ public:
     Nucleus(Nucleus&&) noexcept = delete;
     Nucleus& operator=(Nucleus&&) noexcept = delete;
 
-    ~Nucleus()
+    ~Nucleus() override
     {
-        if (m_capsule->valid()) {
-            m_display->removeGlobal(m_capsule.get());
+        if (get()) {
+            wl_global_set_user_data(get(), nullptr);
         }
         for (auto bind : m_binds) {
             bind->unset_global();
         }
-        remove();
+    }
+
+    void remove()
+    {
+        m_global = nullptr;
+
+        if (get()) {
+            wl_global_remove(get());
+            display()->removeGlobal(this);
+        } else {
+            delete this;
+        }
     }
 
     void create()
     {
-        assert(!m_capsule->valid());
-
-        m_capsule->create(
+        assert(!get());
+        GlobalCapsule::set(
             wl_global_create(m_display->native(), m_interface, Global::version, this, bind));
     }
 
@@ -119,25 +129,13 @@ public:
     }
 
 private:
-    void remove()
-    {
-        if (!m_capsule->valid()) {
-            return;
-        }
-        wl_global_remove(m_capsule->get());
-
-        // TODO(romangg): call destroy with timer.
-        destroy(std::move(m_capsule));
-    }
-
-    static void destroy(std::unique_ptr<GlobalCapsule> global)
-    {
-        global.reset();
-    }
-
     static void bind(wl_client* wlClient, void* data, uint32_t version, uint32_t id)
     {
         auto nucleus = static_cast<Nucleus<Global>*>(data);
+        if (!nucleus) {
+            // Nucleus already destroyed. Bind came in after destroy timer expired.
+            return;
+        }
 
         auto get_client = [&nucleus, &wlClient] { return nucleus->m_display->getClient(wlClient); };
         auto bind_to_global
@@ -171,8 +169,6 @@ private:
     Display* m_display;
     wl_interface const* m_interface;
     void const* m_implementation;
-
-    std::unique_ptr<GlobalCapsule> m_capsule;
     std::vector<Bind<Global>*> m_binds;
 };
 

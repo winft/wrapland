@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QAbstractEventDispatcher>
 #include <QSocketNotifier>
 #include <QThread>
+#include <QTimer>
 
 #include "logging.h"
 
@@ -60,6 +61,10 @@ Display::Display(Server::Display* parent)
 
 Display::~Display()
 {
+    for (auto stale_global : m_stale_globals) {
+        delete stale_global;
+    }
+
     terminate();
     if (m_display) {
         wl_display_destroy(m_display);
@@ -100,6 +105,16 @@ void Display::addGlobal(GlobalCapsule* capsule)
 void Display::removeGlobal(GlobalCapsule* capsule)
 {
     m_globals.erase(std::remove(m_globals.begin(), m_globals.end(), capsule), m_globals.end());
+    m_stale_globals.push_back(capsule);
+
+    // A single-shot QTimer is cleaned up by Qt internally when the receiver (here m_handle) goes
+    // away what clang-tidy does not understand.
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
+    QTimer::singleShot(s_global_stale_time, m_handle, [this, capsule] {
+        delete capsule;
+        m_stale_globals.erase(std::remove(m_stale_globals.begin(), m_stale_globals.end(), capsule),
+                              m_stale_globals.end());
+    });
 }
 
 void Display::addSocket()
