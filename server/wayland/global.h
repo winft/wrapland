@@ -73,7 +73,13 @@ public:
     static Handle* handle(wl_resource* wlResource)
     {
         auto bind = static_cast<Bind<type>*>(wl_resource_get_user_data(wlResource));
-        return bind->global()->handle();
+
+        if (auto global = bind->global()) {
+            return global->handle();
+        }
+
+        // If we are here the global has been removed while not yet destroyed.
+        return nullptr;
     }
 
     template<auto sender, uint32_t minVersion = 0, typename... Args>
@@ -156,6 +162,16 @@ protected:
     static void resourceDestroyCallback(wl_client* wlClient, wl_resource* wlResource)
     {
         Bind<type>::destroy_callback(wlClient, wlResource);
+    }
+
+    template<auto callback, typename... Args>
+    static void cb([[maybe_unused]] wl_client* client, wl_resource* resource, Args... args)
+    {
+        // The global might be destroyed already on the compositor side.
+        if (handle(resource)) {
+            auto bind = static_cast<Bind<type>*>(wl_resource_get_user_data(resource));
+            callback(bind, std::forward<Args>(args)...);
+        }
     }
 
 private:
