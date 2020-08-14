@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 
 #include "client.h"
+#include "nucleus.h"
 #include "send.h"
 
 #include <tuple>
@@ -39,14 +40,14 @@ template<typename Global>
 class Bind
 {
 public:
-    Bind(Client* client, uint32_t version, uint32_t id, Global* global)
+    Bind(Client* client, uint32_t version, uint32_t id, Nucleus<Global>* global_nucleus)
         : m_client{client}
         , m_version{version}
-        , m_global{global}
-        , m_resource{client->createResource(global->interface(), version, id)}
+        , m_global_nucleus{global_nucleus}
+        , m_resource{client->createResource(global_nucleus->interface(), version, id)}
     {
         wl_resource_set_user_data(m_resource, this);
-        wl_resource_set_implementation(m_resource, global->implementation(), this, destroy);
+        wl_resource_set_implementation(m_resource, global_nucleus->implementation(), this, destroy);
     }
 
     Bind(Bind&) = delete;
@@ -62,12 +63,13 @@ public:
 
     Global* global() const
     {
-        return m_global;
+        assert(m_global_nucleus);
+        return m_global_nucleus->global();
     }
 
-    void set_global(Global* global)
+    void unset_global()
     {
-        m_global = global;
+        m_global_nucleus = nullptr;
     }
 
     Client* client() const
@@ -140,15 +142,15 @@ private:
 
     void onDestroy()
     {
-        if (m_global) {
-            m_global->unbind(this);
+        if (m_global_nucleus) {
+            m_global_nucleus->unbind(this);
         }
     }
 
     Client* m_client;
     uint32_t m_version;
 
-    Global* m_global;
+    Nucleus<Global>* m_global_nucleus;
 
     wl_resource* m_resource;
 };
