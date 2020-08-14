@@ -108,19 +108,11 @@ private Q_SLOTS:
     void testBindPointerConstraintsUnstableV1();
     void testBindPresentationTime();
     void testBindIdleIhibitManagerUnstableV1();
+    void testRemoval();
+    void testOutOfSyncRemoval();
+    void testDestroy();
     void testGlobalSync();
     void testGlobalSyncThreaded();
-    void testRemoval();
-
-    // TODO: This test currently fails because we do not check in singular Global binds if the
-    //       global handle exists. Instead we go with the wl_global_remove approach of
-    //       libwayland 1.17. For that a timer must be implemented in Global::remove to call
-    //       Global::destroy.
-#if 0
-    void testOutOfSyncRemoval();
-#endif
-
-    void testDestroy();
     void testAnnounceMultiple();
     void testAnnounceMultipleOutputDeviceV1s();
 
@@ -312,7 +304,7 @@ void TestWaylandRegistry::testBindDpmsManager()
     TEST_BIND(Wrapland::Client::Registry::Interface::Dpms, SIGNAL(dpmsAnnounced(quint32,quint32)), bindDpmsManager, org_kde_kwin_dpms_manager_destroy)
 }
 
-void TestWaylandRegistry::testBindXdgDecorationUnstableV1() 
+void TestWaylandRegistry::testBindXdgDecorationUnstableV1()
 {
     TEST_BIND(Wrapland::Client::Registry::Interface::XdgDecorationUnstableV1, SIGNAL(xdgDecorationAnnounced(quint32,quint32)), bindXdgDecorationUnstableV1, zxdg_decoration_manager_v1_destroy)
 }
@@ -607,13 +599,11 @@ void TestWaylandRegistry::testRemoval()
     registry.release();
 }
 
-#if 0
 void TestWaylandRegistry::testOutOfSyncRemoval()
 {
     //This tests the following sequence of events
     //server announces global
     //client binds to that global
-
     //server removes the global
     //(simultaneously) the client legimitely uses the bound resource to the global
     //client then gets the server events...it should no-op, not be a protocol error
@@ -644,7 +634,6 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QCOMPARE(contrastAnnouncedSpy.count(), 1);
 
     BlurManager *blurManager = registry.createBlurManager(registry.interface(Registry::Interface::Blur).name, registry.interface(Registry::Interface::Blur).version, &registry);
-    ContrastManager *contrastManager = registry.createContrastManager(registry.interface(Registry::Interface::Contrast).name, registry.interface(Registry::Interface::Contrast).version, &registry);
 
     connection.flush();
     m_display->dispatchEvents();
@@ -657,7 +646,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     //remove blur
     QSignalSpy blurRemovedSpy(&registry, &Registry::blurRemoved);
 
-    delete m_blur;
+    m_blur.reset();
 
     //client hasn't processed the event yet
     QVERIFY(blurRemovedSpy.count() == 0);
@@ -669,18 +658,19 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QVERIFY(blurRemovedSpy.wait());
     QVERIFY(blurRemovedSpy.count() == 1);
 
-    //remove background contrast
+    // Remove contrast global.
     QSignalSpy contrastRemovedSpy(&registry, &Registry::contrastRemoved);
 
-    delete m_contrast;
+    m_contrast.reset();
 
-    //client hasn't processed the event yet
+    // Client hasn't processed the event yet.
     QVERIFY(contrastRemovedSpy.count() == 0);
 
-    //use the in the client
+    // Create and use the in the client.
+    ContrastManager *contrastManager = registry.createContrastManager(registry.interface(Registry::Interface::Contrast).name, registry.interface(Registry::Interface::Contrast).version, &registry);
     auto *contrast = contrastManager->createContrast(surface.get(), nullptr);
 
-    //now process events,
+    // Now process events.
     QVERIFY(contrastRemovedSpy.wait());
     QVERIFY(contrastRemovedSpy.count() == 1);
 
@@ -692,7 +682,6 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     compositor.reset();
     registry.release();
 }
-#endif
 
 void TestWaylandRegistry::testDestroy()
 {
@@ -705,7 +694,7 @@ void TestWaylandRegistry::testDestroy()
     QCOMPARE(connectedSpy.count(), 1);
 
     Registry registry;
-    QSignalSpy shellAnnouncedSpy(&registry, SIGNAL(shellAnnounced(quint32,quint32)));
+    QSignalSpy shellAnnouncedSpy(&registry, &Registry::xdgShellStableAnnounced);
 
     QVERIFY(!registry.isValid());
     registry.create(&connection);
@@ -713,7 +702,7 @@ void TestWaylandRegistry::testDestroy()
     QVERIFY(registry.isValid());
 
     //create some arbitrary Interface
-    shellAnnouncedSpy.wait();
+    QVERIFY(shellAnnouncedSpy.wait());
     std::unique_ptr<XdgShell>
             shell(registry.createXdgShell(registry.interface(Registry::Interface::XdgShellStable).name,
                                        registry.interface(Registry::Interface::XdgShellStable).version,
