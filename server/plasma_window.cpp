@@ -199,14 +199,6 @@ PlasmaWindow::Private::~Private()
     }
 }
 
-PlasmaWindow::PlasmaWindow(PlasmaWindowManager* manager, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(manager, this))
-{
-}
-
-PlasmaWindow::~PlasmaWindow() = default;
-
 void PlasmaWindow::Private::createResource(uint32_t version,
                                            uint32_t id,
                                            Wayland::Client* client,
@@ -408,6 +400,14 @@ void PlasmaWindow::Private::setGeometry(const QRect& geo)
             geometry.x(), geometry.y(), geometry.width(), geometry.height());
     }
 }
+
+PlasmaWindow::PlasmaWindow(PlasmaWindowManager* manager, QObject* parent)
+    : QObject(parent)
+    , d_ptr(new Private(manager, this))
+{
+}
+
+PlasmaWindow::~PlasmaWindow() = default;
 
 void PlasmaWindow::setAppId(const QString& appId)
 {
@@ -642,13 +642,6 @@ PlasmaWindowRes::Private::Private(Wayland::Client* client,
                                          q)
     , window(window)
 {
-}
-
-void PlasmaWindowRes::Private::unmap()
-{
-    window = nullptr;
-    send<org_kde_plasma_window_send_unmapped>();
-    client()->flush();
 }
 
 const struct org_kde_plasma_window_interface PlasmaWindowRes::Private::s_interface = {
@@ -904,6 +897,13 @@ void PlasmaWindowRes::Private::unsetMinimizedGeometryCallback([[maybe_unused]] w
     }
     priv->window->d_ptr->minimizedGeometries.remove(panel);
     Q_EMIT priv->window->minimizedGeometriesChanged();
+}
+
+void PlasmaWindowRes::Private::unmap()
+{
+    window = nullptr;
+    send<org_kde_plasma_window_send_unmapped>();
+    client()->flush();
 }
 
 PlasmaWindowRes::PlasmaWindowRes(Wayland::Client* client,
