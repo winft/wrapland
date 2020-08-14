@@ -80,14 +80,15 @@ void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmab
     }
 }
 
-void LinuxDmabufV1::Private::createParamsCallback(wl_client* wlClient,
+void LinuxDmabufV1::Private::createParamsCallback([[maybe_unused]] wl_client* wlClient,
                                                   wl_resource* wlResource,
                                                   uint32_t id)
 {
     auto priv = handle(wlResource)->d_ptr.get();
-    auto client = priv->display()->getClient(wlClient);
+    auto bind = priv->getBind(wlResource);
 
-    [[maybe_unused]] auto params = new ParamsWrapperV1(client->handle(), priv->version(), id, priv);
+    [[maybe_unused]] auto params
+        = new ParamsWrapperV1(bind->client()->handle(), bind->version(), id, priv);
 }
 
 LinuxDmabufV1::LinuxDmabufV1(Display* display, QObject* parent)

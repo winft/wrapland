@@ -85,7 +85,7 @@ void Subcompositor::Private::subsurfaceCallback([[maybe_unused]] wl_client* wlCl
     // TODO(romangg): handle error
 
     auto subsurface
-        = new Subsurface(bind->client()->handle(), priv->version(), id, surface, parentSurface);
+        = new Subsurface(bind->client()->handle(), bind->version(), id, surface, parentSurface);
 
     Q_EMIT priv->handle()->subsurfaceCreated(subsurface);
 }

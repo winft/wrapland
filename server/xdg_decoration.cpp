@@ -84,7 +84,7 @@ void XdgDecorationManager::Private::getToplevelDecorationCallback(
         return;
     }
 
-    auto deco = new XdgDecoration(bind->client()->handle(), priv->version(), id, toplevel);
+    auto deco = new XdgDecoration(bind->client()->handle(), bind->version(), id, toplevel);
     // TODO(romangg): check resource
 
     priv->m_decorations[toplevel] = deco;
