@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "client.h"
 #include "display.h"
+#include "send.h"
 
 #include <cstdint>
 #include <functional>
@@ -142,22 +143,15 @@ public:
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(Args&&... args)
     {
-        if constexpr (minVersion <= 1) {
-            sender(m_resource, args...);
-        } else {
-            if (m_version >= minVersion) {
-                sender(m_resource, args...);
-            }
-        }
+        Wayland::send<sender, minVersion>(m_resource, m_version, args...);
     }
 
     // We only support std::tuple but since it's just internal API that should be well enough.
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(std::tuple<Args...>&& tuple)
     {
-        constexpr auto size = std::tuple_size_v<std::decay_t<decltype(tuple)>>;
-        constexpr auto indices = std::make_index_sequence<size>{};
-        sendTuple<sender, minVersion>(std::forward<decltype(tuple)>(tuple), indices);
+        Wayland::send_tuple<sender, minVersion>(
+            m_resource, m_version, std::forward<decltype(tuple)>(tuple));
     }
 
     void postError(uint32_t code, char const* msg, ...)
@@ -210,12 +204,6 @@ private:
                 m_global->unbind(this);
             }
         }
-    }
-
-    template<auto sender, uint32_t minVersion, typename Tuple, std::size_t... Indices>
-    void sendTuple(Tuple&& tuple, [[maybe_unused]] std::index_sequence<Indices...> indices)
-    {
-        send<sender, minVersion>(std::get<Indices>(tuple)...);
     }
 
     Client* m_client;
