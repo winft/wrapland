@@ -19,8 +19,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QDebug>
-
 #include "client.h"
 #include "display.h"
 #include "send.h"
@@ -39,12 +37,10 @@ namespace Wrapland::Server::Wayland
 
 class Client;
 
-template<typename Handle, typename GlobalHandle = void>
+template<typename Handle>
 class Resource
 {
 public:
-    using ResourceType = Resource<Handle, GlobalHandle>;
-
     Resource(Resource* parent,
              uint32_t id,
              const wl_interface* interface,
@@ -73,21 +69,10 @@ public:
         : m_client{client}
         , m_version{version}
         , m_handle{handle}
-        , m_global{nullptr}
         , m_resource{client->createResource(interface, version, id)}
     {
         wl_resource_set_user_data(m_resource, this);
         wl_resource_set_implementation(m_resource, impl, this, destroy);
-    }
-
-    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
-    Resource(Client* client,
-             uint32_t version,
-             uint32_t id,
-             const wl_interface* interface,
-             const void* impl)
-        : Resource(client, version, id, interface, impl, nullptr)
-    {
     }
 
     Resource(Resource&) = delete;
@@ -100,18 +85,6 @@ public:
     wl_resource* resource() const
     {
         return m_resource;
-    }
-
-    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
-    GlobalHandle* global() const
-    {
-        return m_global;
-    }
-
-    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
-    void setGlobal(GlobalHandle* global)
-    {
-        m_global = global;
     }
 
     Client* client() const
@@ -134,7 +107,6 @@ public:
         m_client->flush();
     }
 
-    template<typename = std::enable_if<!std::is_same_v<GlobalHandle, void>>>
     static Handle* handle(wl_resource* resource)
     {
         return self(resource)->m_handle;
@@ -168,7 +140,6 @@ public:
         wl_resource_destroy(resource->resource());
     }
 
-    template<typename = std::enable_if<std::is_same_v<GlobalHandle, void>>>
     Handle* handle()
     {
         return m_handle;
@@ -181,9 +152,9 @@ public:
     }
 
 private:
-    static ResourceType* self(wl_resource* resource)
+    static auto self(wl_resource* resource)
     {
-        return static_cast<ResourceType*>(wl_resource_get_user_data(resource));
+        return static_cast<Resource<Handle>*>(wl_resource_get_user_data(resource));
     }
 
     static void destroy(wl_resource* wlResource)
@@ -196,22 +167,13 @@ private:
 
     void onDestroy()
     {
-        if constexpr (std::is_same_v<GlobalHandle, void>) {
-            Q_EMIT m_handle->resourceDestroyed();
-            delete m_handle;
-        } else {
-            if (m_global) {
-                m_global->unbind(this);
-            }
-        }
+        Q_EMIT m_handle->resourceDestroyed();
+        delete m_handle;
     }
 
     Client* m_client;
     uint32_t m_version;
-
     Handle* m_handle;
-    GlobalHandle* m_global;
-
     wl_resource* m_resource;
 };
 
