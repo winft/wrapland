@@ -86,8 +86,8 @@ private:
     Server::Display* m_display;
     Server::Compositor* m_serverCompositor;
     Server::XdgShell* m_serverXdgShell;
-    Server::Output* m_o1Interface;
-    Server::Output* m_o2Interface;
+    Server::Output* m_server_output1;
+    Server::Output* m_server_output2;
     Server::Seat* m_serverSeat;
 
     Client::ConnectionThread* m_connection;
@@ -106,8 +106,8 @@ XdgShellTest::XdgShellTest(QObject* parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
     , m_serverXdgShell(nullptr)
-    , m_o1Interface(nullptr)
-    , m_o2Interface(nullptr)
+    , m_server_output1(nullptr)
+    , m_server_output2(nullptr)
     , m_serverSeat(nullptr)
     , m_connection(nullptr)
     , m_queue(nullptr)
@@ -139,11 +139,15 @@ void XdgShellTest::init()
     m_display->start();
     m_display->createShm();
 
-    m_o1Interface = m_display->createOutput(m_display);
-    m_o1Interface->addMode(QSize(1024, 768));
+    m_server_output1 = new Server::Output(m_display, m_display);
+    m_server_output1->add_mode(Server::Output::Mode{QSize(1024, 768)});
+    m_server_output1->set_enabled(true);
+    m_server_output1->done();
 
-    m_o2Interface = m_display->createOutput(m_display);
-    m_o2Interface->addMode(QSize(1024, 768));
+    m_server_output2 = new Server::Output(m_display, m_display);
+    m_server_output2->add_mode(Server::Output::Mode{QSize(1024, 768)});
+    m_server_output2->set_enabled(true);
+    m_server_output2->done();
 
     m_serverSeat = m_display->createSeat(m_display);
     m_serverSeat->setHasKeyboard(true);
@@ -252,8 +256,8 @@ void XdgShellTest::cleanup()
 
     CLEANUP(m_serverCompositor)
     CLEANUP(m_serverXdgShell)
-    CLEANUP(m_o1Interface);
-    CLEANUP(m_o2Interface);
+    CLEANUP(m_server_output1);
+    CLEANUP(m_server_output2);
     CLEANUP(m_serverSeat);
     CLEANUP(m_display)
 #undef CLEANUP
@@ -411,14 +415,14 @@ void XdgShellTest::testFullscreen()
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 3);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), m_o1Interface);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), m_server_output1);
 
     // now other output
     xdgSurface->setFullscreen(true, m_output2);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 4);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), m_o2Interface);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), m_server_output2);
 }
 
 void XdgShellTest::testShowWindowMenu()

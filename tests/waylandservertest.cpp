@@ -91,9 +91,9 @@ int main(int argc, char **argv)
 
     [[maybe_unused]] Wrapland::Server::XdgShell *shell = display.createXdgShell();
 
-    Wrapland::Server::Output *output = display.createOutput(&display);
-    output->setPhysicalSize(QSize(10, 10));
-    output->addMode(QSize(1024, 768));
+    auto output = new Wrapland::Server::Output(&display, &display);
+    output->set_physical_size(QSize(10, 10));
+    output->add_mode(Wrapland::Server::Output::Mode{QSize(1024, 768)});
 
     // starts XWayland by forking and opening a pipe
     const int pipe = startXServer();

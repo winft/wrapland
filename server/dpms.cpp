@@ -20,8 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "dpms_p.h"
 
 #include "display.h"
-#include "output.h"
-#include "output_p.h"
+#include "wl_output_p.h"
 
 #include "wayland/client.h"
 #include "wayland/display.h"
@@ -51,7 +50,7 @@ void DpmsManager::Private::getDpmsCallback([[maybe_unused]] wl_client* wlClient,
     auto bind = priv->getBind(wlResource);
 
     auto dpms
-        = new Dpms(bind->client()->handle(), bind->version(), id, OutputGlobal::handle(output));
+        = new Dpms(bind->client()->handle(), bind->version(), id, WlOutputGlobal::handle(output));
     if (!dpms) {
         return;
     }
@@ -74,7 +73,7 @@ const struct org_kde_kwin_dpms_interface Dpms::Private::s_interface = {
     destroyCallback,
 };
 
-Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, Output* output, Dpms* q)
+Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, WlOutput* output, Dpms* q)
     : Wayland::Resource<Dpms>(client, version, id, &org_kde_kwin_dpms_interface, &s_interface, q)
     , output(output)
 {
@@ -100,17 +99,18 @@ void Dpms::Private::setCallback(wl_client* client, wl_resource* wlResource, uint
     default:
         return;
     }
-    Q_EMIT handle(wlResource)->d_ptr->output->dpmsModeRequested(dpmsMode);
+    Q_EMIT handle(wlResource)->d_ptr->output->output()->dpms_mode_requested(dpmsMode);
 }
 
-Dpms::Dpms(Client* client, uint32_t version, uint32_t id, Output* output)
+Dpms::Dpms(Client* client, uint32_t version, uint32_t id, WlOutput* output)
     : d_ptr(new Private(client, version, id, output, this))
 {
-    connect(output, &Output::dpmsSupportedChanged, this, [this] {
+    auto master_output = output->output();
+    connect(master_output, &Output::dpms_supported_changed, this, [this] {
         sendSupported();
         sendDone();
     });
-    connect(output, &Output::dpmsModeChanged, this, [this] {
+    connect(master_output, &Output::dpms_mode_changed, this, [this] {
         sendMode();
         sendDone();
     });
@@ -118,14 +118,14 @@ Dpms::Dpms(Client* client, uint32_t version, uint32_t id, Output* output)
 
 void Dpms::sendSupported()
 {
-    d_ptr->send<org_kde_kwin_dpms_send_supported>(d_ptr->output->isDpmsSupported());
+    d_ptr->send<org_kde_kwin_dpms_send_supported>(d_ptr->output->output()->dpms_supported());
 }
 
 void Dpms::sendMode()
 {
     org_kde_kwin_dpms_mode mode = ORG_KDE_KWIN_DPMS_MODE_ON;
 
-    switch (d_ptr->output->dpmsMode()) {
+    switch (d_ptr->output->output()->dpms_mode()) {
     case Output::DpmsMode::On:
         mode = ORG_KDE_KWIN_DPMS_MODE_ON;
         break;

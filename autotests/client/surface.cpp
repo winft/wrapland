@@ -1145,7 +1145,9 @@ void TestSurface::testOutput()
     QSignalSpy outputAnnouncedSpy(&registry, &Wrapland::Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto serverOutput = m_display->createOutput(m_display);
+    auto serverOutput = new Wrapland::Server::Output(m_display, m_display);
+    serverOutput->set_enabled(true);
+    serverOutput->done();
 
     QVERIFY(outputAnnouncedSpy.wait());
     std::unique_ptr<Wrapland::Client::Output> clientOutput(

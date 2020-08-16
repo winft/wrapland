@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
+#include "output.h"
 #include "output_changeset_v1.h"
 
 #include <QRectF>
@@ -33,9 +34,9 @@ public:
 
     OutputDeviceV1* device;
 
-    OutputDeviceV1::Enablement enabled;
+    bool enabled;
     int modeId;
-    OutputDeviceV1::Transform transform;
+    Output::Transform transform;
     QRectF geometry;
 
     OutputChangesetV1* q;

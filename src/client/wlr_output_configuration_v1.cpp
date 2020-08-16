@@ -197,7 +197,7 @@ void WlrOutputConfigurationV1::Private::send()
         }
 
         if (head->scaleSet) {
-            zwlr_output_configuration_head_v1_set_scale(head->native, head->scale);
+            zwlr_output_configuration_head_v1_set_scale(head->native, wl_fixed_from_double(head->scale));
         }
     }
 }

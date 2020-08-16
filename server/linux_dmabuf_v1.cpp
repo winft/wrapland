@@ -54,7 +54,7 @@ const struct zwp_linux_dmabuf_v1_interface LinuxDmabufV1::Private::s_interface =
 
 constexpr size_t modifierShift = 32;
 
-void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind)
+void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
 {
     // Send formats & modifiers.
     QHash<uint32_t, QSet<uint64_t>>::const_iterator it = supportedFormatsWithModifiers.constBegin();
@@ -80,14 +80,15 @@ void LinuxDmabufV1::Private::bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmab
     }
 }
 
-void LinuxDmabufV1::Private::createParamsCallback(wl_client* wlClient,
+void LinuxDmabufV1::Private::createParamsCallback([[maybe_unused]] wl_client* wlClient,
                                                   wl_resource* wlResource,
                                                   uint32_t id)
 {
     auto priv = handle(wlResource)->d_ptr.get();
-    auto client = priv->display()->getClient(wlClient);
+    auto bind = priv->getBind(wlResource);
 
-    [[maybe_unused]] auto params = new ParamsWrapperV1(client->handle(), priv->version(), id, priv);
+    [[maybe_unused]] auto params
+        = new ParamsWrapperV1(bind->client()->handle(), bind->version(), id, priv);
 }
 
 LinuxDmabufV1::LinuxDmabufV1(Display* display, QObject* parent)

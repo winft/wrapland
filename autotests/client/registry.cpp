@@ -108,19 +108,11 @@ private Q_SLOTS:
     void testBindPointerConstraintsUnstableV1();
     void testBindPresentationTime();
     void testBindIdleIhibitManagerUnstableV1();
+    void testRemoval();
+    void testOutOfSyncRemoval();
+    void testDestroy();
     void testGlobalSync();
     void testGlobalSyncThreaded();
-    void testRemoval();
-
-    // TODO: This test currently fails because we do not check in singular Global binds if the
-    //       global handle exists. Instead we go with the wl_global_remove approach of
-    //       libwayland 1.17. For that a timer must be implemented in Global::remove to call
-    //       Global::destroy.
-#if 0
-    void testOutOfSyncRemoval();
-#endif
-
-    void testDestroy();
     void testAnnounceMultiple();
     void testAnnounceMultipleOutputDeviceV1s();
 
@@ -128,7 +120,6 @@ private:
     std::unique_ptr<Wrapland::Server::Display> m_display;
     std::unique_ptr<Wrapland::Server::Compositor> m_compositor;
     std::unique_ptr<Wrapland::Server::Output> m_output;
-    std::unique_ptr<Wrapland::Server::OutputDeviceV1> m_outputDevice;
     std::unique_ptr<Wrapland::Server::Seat> m_seat;
     std::unique_ptr<Wrapland::Server::Subcompositor> m_subcompositor;
     std::unique_ptr<Wrapland::Server::DataDeviceManager> m_dataDeviceManager;
@@ -162,12 +153,11 @@ void TestWaylandRegistry::init()
 
     m_display->createShm();
     m_compositor.reset(m_display->createCompositor());
-    m_output.reset(m_display->createOutput());
+    m_output.reset(new Wrapland::Server::Output(m_display.get()));
     m_seat.reset(m_display->createSeat());
     m_subcompositor.reset(m_display->createSubCompositor());
     m_dataDeviceManager.reset(m_display->createDataDeviceManager());
     m_outputManagement.reset(m_display->createOutputManagementV1());
-    m_outputDevice.reset(m_display->createOutputDeviceV1());
     m_blur.reset(m_display->createBlurManager());
     m_contrast.reset(m_display->createContrastManager());
     m_display->createSlideManager(this);
@@ -181,6 +171,9 @@ void TestWaylandRegistry::init()
     m_presentation.reset(m_display->createPresentationManager());
     m_idleInhibit.reset(m_display->createIdleInhibitManager());
     m_dmabuf.reset(m_display->createLinuxDmabuf());
+
+    m_output->set_enabled(true);
+    m_output->done();
 }
 
 void TestWaylandRegistry::cleanup()
@@ -311,7 +304,7 @@ void TestWaylandRegistry::testBindDpmsManager()
     TEST_BIND(Wrapland::Client::Registry::Interface::Dpms, SIGNAL(dpmsAnnounced(quint32,quint32)), bindDpmsManager, org_kde_kwin_dpms_manager_destroy)
 }
 
-void TestWaylandRegistry::testBindXdgDecorationUnstableV1() 
+void TestWaylandRegistry::testBindXdgDecorationUnstableV1()
 {
     TEST_BIND(Wrapland::Client::Registry::Interface::XdgDecorationUnstableV1, SIGNAL(xdgDecorationAnnounced(quint32,quint32)), bindXdgDecorationUnstableV1, zxdg_decoration_manager_v1_destroy)
 }
@@ -492,6 +485,9 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy outputRemovedSpy(&registry, SIGNAL(outputRemoved(quint32)));
     QVERIFY(outputRemovedSpy.isValid());
 
+    QSignalSpy outputDeviceRemovedSpy(&registry, SIGNAL(outputDeviceV1Removed(quint32)));
+    QVERIFY(outputDeviceRemovedSpy.isValid());
+
     m_output.reset();
     QVERIFY(outputRemovedSpy.wait());
     QCOMPARE(outputRemovedSpy.first().first(), outputAnnouncedSpy.first().first());
@@ -499,11 +495,10 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::Output).isEmpty());
     QCOMPARE(outputObjectRemovedSpy.count(), 1);
 
-    QSignalSpy outputDeviceRemovedSpy(&registry, SIGNAL(outputDeviceV1Removed(quint32)));
-    QVERIFY(outputDeviceRemovedSpy.isValid());
-
-    m_outputDevice.reset();
-    QVERIFY(outputDeviceRemovedSpy.wait());
+    m_output.reset();
+    if (!outputDeviceRemovedSpy.size()) {
+        QVERIFY(outputDeviceRemovedSpy.wait());
+    }
     QCOMPARE(outputDeviceRemovedSpy.first().first(), outputDeviceAnnouncedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::OutputDeviceV1));
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::OutputDeviceV1).isEmpty());
@@ -604,13 +599,11 @@ void TestWaylandRegistry::testRemoval()
     registry.release();
 }
 
-#if 0
 void TestWaylandRegistry::testOutOfSyncRemoval()
 {
     //This tests the following sequence of events
     //server announces global
     //client binds to that global
-
     //server removes the global
     //(simultaneously) the client legimitely uses the bound resource to the global
     //client then gets the server events...it should no-op, not be a protocol error
@@ -641,7 +634,6 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QCOMPARE(contrastAnnouncedSpy.count(), 1);
 
     BlurManager *blurManager = registry.createBlurManager(registry.interface(Registry::Interface::Blur).name, registry.interface(Registry::Interface::Blur).version, &registry);
-    ContrastManager *contrastManager = registry.createContrastManager(registry.interface(Registry::Interface::Contrast).name, registry.interface(Registry::Interface::Contrast).version, &registry);
 
     connection.flush();
     m_display->dispatchEvents();
@@ -654,7 +646,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     //remove blur
     QSignalSpy blurRemovedSpy(&registry, &Registry::blurRemoved);
 
-    delete m_blur;
+    m_blur.reset();
 
     //client hasn't processed the event yet
     QVERIFY(blurRemovedSpy.count() == 0);
@@ -666,18 +658,19 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     QVERIFY(blurRemovedSpy.wait());
     QVERIFY(blurRemovedSpy.count() == 1);
 
-    //remove background contrast
+    // Remove contrast global.
     QSignalSpy contrastRemovedSpy(&registry, &Registry::contrastRemoved);
 
-    delete m_contrast;
+    m_contrast.reset();
 
-    //client hasn't processed the event yet
+    // Client hasn't processed the event yet.
     QVERIFY(contrastRemovedSpy.count() == 0);
 
-    //use the in the client
+    // Create and use the in the client.
+    ContrastManager *contrastManager = registry.createContrastManager(registry.interface(Registry::Interface::Contrast).name, registry.interface(Registry::Interface::Contrast).version, &registry);
     auto *contrast = contrastManager->createContrast(surface.get(), nullptr);
 
-    //now process events,
+    // Now process events.
     QVERIFY(contrastRemovedSpy.wait());
     QVERIFY(contrastRemovedSpy.count() == 1);
 
@@ -689,7 +682,6 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     compositor.reset();
     registry.release();
 }
-#endif
 
 void TestWaylandRegistry::testDestroy()
 {
@@ -702,7 +694,7 @@ void TestWaylandRegistry::testDestroy()
     QCOMPARE(connectedSpy.count(), 1);
 
     Registry registry;
-    QSignalSpy shellAnnouncedSpy(&registry, SIGNAL(shellAnnounced(quint32,quint32)));
+    QSignalSpy shellAnnouncedSpy(&registry, &Registry::xdgShellStableAnnounced);
 
     QVERIFY(!registry.isValid());
     registry.create(&connection);
@@ -710,7 +702,7 @@ void TestWaylandRegistry::testDestroy()
     QVERIFY(registry.isValid());
 
     //create some arbitrary Interface
-    shellAnnouncedSpy.wait();
+    QVERIFY(shellAnnouncedSpy.wait());
     std::unique_ptr<XdgShell>
             shell(registry.createXdgShell(registry.interface(Registry::Interface::XdgShellStable).name,
                                        registry.interface(Registry::Interface::XdgShellStable).version,
@@ -823,7 +815,9 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QSignalSpy outputAnnouncedSpy(&registry, &Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    std::unique_ptr<Wrapland::Server::Output> output1{m_display->createOutput()};
+    std::unique_ptr<Wrapland::Server::Output> output1{new Wrapland::Server::Output(m_display.get())};
+    output1->set_enabled(true);
+    output1->done();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 2);
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().name, outputAnnouncedSpy.first().first().value<quint32>());
@@ -831,7 +825,9 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QCOMPARE(registry.interface(Registry::Interface::Output).name, outputAnnouncedSpy.first().first().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::Output).version, outputAnnouncedSpy.first().last().value<quint32>());
 
-    std::unique_ptr<Wrapland::Server::Output> output2{m_display->createOutput()};
+    std::unique_ptr<Wrapland::Server::Output> output2{new Wrapland::Server::Output(m_display.get())};
+    output2->set_enabled(true);
+    output2->done();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 3);
     QCOMPARE(registry.interfaces(Registry::Interface::Output).last().name, outputAnnouncedSpy.last().first().value<quint32>());
@@ -888,7 +884,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QSignalSpy outputDeviceAnnouncedSpy(&registry, &Registry::outputDeviceV1Announced);
     QVERIFY(outputDeviceAnnouncedSpy.isValid());
 
-    std::unique_ptr<Wrapland::Server::OutputDeviceV1> device1{m_display->createOutputDeviceV1()};
+    std::unique_ptr<Wrapland::Server::Output> device1{new Wrapland::Server::Output(m_display.get())};
     QVERIFY(outputDeviceAnnouncedSpy.wait());
 
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 2);
@@ -897,7 +893,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).name, outputDeviceAnnouncedSpy.first().first().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).version, outputDeviceAnnouncedSpy.first().last().value<quint32>());
 
-    std::unique_ptr<Wrapland::Server::OutputDeviceV1> device2{m_display->createOutputDeviceV1()};
+    std::unique_ptr<Wrapland::Server::Output> device2{new Wrapland::Server::Output(m_display.get())};
     QVERIFY(outputDeviceAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 3);
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().name, outputDeviceAnnouncedSpy.last().first().value<quint32>());

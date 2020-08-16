@@ -19,35 +19,41 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include "client.h"
-#include "display.h"
-#include "wayland/display.h"
+#include "output_p.h"
+#include "wl_output.h"
 
-#include <EGL/egl.h>
+#include "wayland/global.h"
 
 namespace Wrapland::Server
 {
+class Display;
 
-class Private : public Wayland::Display
+constexpr uint32_t WlOutputVersion = 3;
+using WlOutputGlobal = Wayland::Global<WlOutput, WlOutputVersion>;
+using WlOutputBind = Wayland::Bind<WlOutputGlobal>;
+
+class WlOutput::Private : public WlOutputGlobal
 {
 public:
-    explicit Private(Server::Display* display);
+    Private(Output* output, Display* display, WlOutput* q);
 
-    Client* createClientHandle(wl_client* wlClient);
-    Wayland::Client* castClientImpl(Server::Client* client) override;
+    bool broadcast();
+    void done();
 
-    std::vector<WlOutput*> outputs;
-    std::vector<OutputDeviceV1*> outputDevices;
-    std::vector<Seat*> seats;
-
-    std::unique_ptr<XdgOutputManager> xdg_output_manager;
-    EGLDisplay eglDisplay = EGL_NO_DISPLAY;
-
-    static Private* castDisplay(Server::Display* display);
+    Display* displayHandle;
+    Output* output;
 
 private:
-    friend class Wayland::Display;
-    Server::Display* q_ptr;
+    void bindInit(WlOutputBind* bind) override;
+
+    static std::
+        tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
+        geometry_args(OutputState const& state);
+
+    void sendMode(WlOutputBind* bind, Output::Mode const& mode);
+    void sendMode(Output::Mode const& mode);
+
+    static const struct wl_output_interface s_interface;
 };
 
 }

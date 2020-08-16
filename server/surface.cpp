@@ -26,7 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "compositor.h"
 #include "idle_inhibit_v1.h"
 #include "idle_inhibit_v1_p.h"
-#include "output_p.h"
 #include "pointer_constraints_v1.h"
 #include "pointer_constraints_v1_p.h"
 #include "presentation_time.h"
@@ -34,6 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "subcompositor.h"
 #include "subsurface_p.h"
 #include "viewporter_p.h"
+#include "wl_output_p.h"
 #include "xdg_shell_surface.h"
 
 #include <QListIterator>
@@ -991,7 +991,7 @@ void Surface::setOutputs(std::vector<Output*> const& outputs)
     }
 
     for (auto output : removedOutputs) {
-        auto const binds = output->d_ptr->getBinds(d_ptr->client()->handle());
+        auto const binds = output->wayland_output()->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_leave>(bind->resource());
         }
@@ -1005,29 +1005,30 @@ void Surface::setOutputs(std::vector<Output*> const& outputs)
     }
 
     for (auto add : addedOutputs) {
-        auto const binds = add->d_ptr->getBinds(d_ptr->client()->handle());
+        auto const binds = add->wayland_output()->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_enter>(bind->resource());
         }
 
-        d_ptr->outputDestroyedConnections[add] = connect(add, &Output::removed, this, [this, add] {
-            auto outputs = d_ptr->outputs;
-            bool removed = false;
-            outputs.erase(std::remove_if(outputs.begin(),
-                                         outputs.end(),
-                                         [&removed, add](Output* out) {
-                                             if (add == out) {
-                                                 removed = true;
-                                                 return true;
-                                             }
-                                             return false;
-                                         }),
-                          outputs.end());
+        d_ptr->outputDestroyedConnections[add]
+            = connect(add->wayland_output(), &WlOutput::removed, this, [this, add] {
+                  auto outputs = d_ptr->outputs;
+                  bool removed = false;
+                  outputs.erase(std::remove_if(outputs.begin(),
+                                               outputs.end(),
+                                               [&removed, add](Output* out) {
+                                                   if (add == out) {
+                                                       removed = true;
+                                                       return true;
+                                                   }
+                                                   return false;
+                                               }),
+                                outputs.end());
 
-            if (removed) {
-                setOutputs(outputs);
-            }
-        });
+                  if (removed) {
+                      setOutputs(outputs);
+                  }
+              });
     }
     // TODO(unknown author): send enter when the client binds the Output another time
 
@@ -1196,7 +1197,8 @@ void Feedbacks::setOutput(Output* output)
 {
     assert(!m_output);
     m_output = output;
-    QObject::connect(output, &Output::removed, this, &Feedbacks::handleOutputRemoval);
+    QObject::connect(
+        output->wayland_output(), &WlOutput::removed, this, &Feedbacks::handleOutputRemoval);
 }
 
 void Feedbacks::handleOutputRemoval()

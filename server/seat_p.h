@@ -41,14 +41,14 @@ class TextInputV2;
 
 constexpr uint32_t SeatVersion = 5;
 using SeatGlobal = Wayland::Global<Seat, SeatVersion>;
-using SeatBind = Wayland::Resource<Seat, SeatGlobal>;
+using SeatBind = Wayland::Bind<SeatGlobal>;
 
 class Seat::Private : public SeatGlobal
 {
 public:
     Private(Seat* q, Display* d);
 
-    void bindInit(Wayland::Resource<Seat, SeatGlobal>* bind) override;
+    void bindInit(SeatBind* bind) override;
 
     void sendCapabilities();
     void sendName();

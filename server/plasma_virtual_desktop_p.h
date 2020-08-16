@@ -37,8 +37,7 @@ class PlasmaVirtualDesktop;
 constexpr uint32_t PlasmaVirtualDesktopManagerVersion = 2;
 using PlasmaVirtualDesktopManagerGlobal
     = Wayland::Global<PlasmaVirtualDesktopManager, PlasmaVirtualDesktopManagerVersion>;
-using PlasmaVirtualDesktopManagerBind
-    = Wayland::Resource<PlasmaVirtualDesktopManager, PlasmaVirtualDesktopManagerGlobal>;
+using PlasmaVirtualDesktopManagerBind = Wayland::Bind<PlasmaVirtualDesktopManagerGlobal>;
 
 class PlasmaVirtualDesktopManager::Private : public PlasmaVirtualDesktopManagerGlobal
 {

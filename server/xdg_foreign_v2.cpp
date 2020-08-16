@@ -141,13 +141,14 @@ const struct zxdg_importer_v2_interface XdgImporterV2::Private::s_interface = {
     importToplevelCallback,
 };
 
-void XdgImporterV2::Private::importToplevelCallback(wl_client* wlClient,
+void XdgImporterV2::Private::importToplevelCallback([[maybe_unused]] wl_client* wlClient,
                                                     wl_resource* wlResource,
                                                     uint32_t id,
                                                     const char* handle)
 {
     auto importerHandle = XdgImporterV2::Private::handle(wlResource);
-    auto client = importerHandle->d_ptr->display()->handle()->getClient(wlClient);
+    auto bind = importerHandle->d_ptr->getBind(wlResource);
+    auto client = bind->client()->handle();
 
     if (!importerHandle->d_ptr->exporter) {
         importerHandle->d_ptr->send<zxdg_imported_v2_send_destroyed>();
@@ -165,7 +166,7 @@ void XdgImporterV2::Private::importToplevelCallback(wl_client* wlClient,
         return;
     }
 
-    auto imported = new XdgImportedV2(client, importerHandle->d_ptr->version(), id, exported);
+    auto imported = new XdgImportedV2(client, bind->version(), id, exported);
     // TODO(romangg): error handling
 
     connect(imported,

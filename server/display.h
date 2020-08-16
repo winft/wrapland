@@ -40,7 +40,7 @@ class Private;
 
 class DataDeviceManager;
 class DpmsManager;
-class Output;
+class WlOutput;
 class OutputConfigurationV1;
 class OutputDeviceV1;
 class OutputManagementV1;
@@ -52,7 +52,6 @@ class XdgShell;
 
 class Compositor;
 class KdeIdle;
-class RemoteAccessManager;
 class IdleInhibitManagerV1;
 class FakeInput;
 class PlasmaShell;
@@ -105,16 +104,16 @@ public:
     wl_display* native() const;
     bool running() const;
 
-    Output* createOutput(QObject* parent = nullptr);
-    void removeOutput(Output* output);
-    std::vector<Output*>& outputs() const;
+    void add_wl_output(WlOutput* output);
+    void removeOutput(WlOutput* output);
+    std::vector<WlOutput*>& outputs() const;
 
     Seat* createSeat(QObject* parent = nullptr);
     std::vector<Seat*>& seats() const;
 
     void setSocketName(const QString& name);
 
-    OutputDeviceV1* createOutputDeviceV1(QObject* parent = nullptr);
+    void add_output_device_v1(OutputDeviceV1* output);
     void removeOutputDevice(OutputDeviceV1* outputDevice);
     std::vector<OutputDeviceV1*> outputDevices() const;
 
@@ -127,7 +126,6 @@ public:
     PlasmaShell* createPlasmaShell(QObject* parent = nullptr);
     PlasmaWindowManager* createPlasmaWindowManager(QObject* parent = nullptr);
     KdeIdle* createIdle(QObject* parent = nullptr);
-    RemoteAccessManager* createRemoteAccessManager(QObject* parent = nullptr);
     FakeInput* createFakeInput(QObject* parent = nullptr);
     ShadowManager* createShadowManager(QObject* parent = nullptr);
     BlurManager* createBlurManager(QObject* parent = nullptr);
@@ -157,7 +155,7 @@ public:
                                                                                  = nullptr);
     LinuxDmabufV1* createLinuxDmabuf(QObject* parent = nullptr);
     Viewporter* createViewporter(QObject* parent = nullptr);
-    XdgOutputManager* createXdgOutputManager(QObject* parent = nullptr);
+    XdgOutputManager* xdgOutputManager() const;
 
     PlasmaVirtualDesktopManager* createPlasmaVirtualDesktopManager(QObject* parent = nullptr);
     XdgDecorationManager* createXdgDecorationManager(XdgShell* shell, QObject* parent = nullptr);

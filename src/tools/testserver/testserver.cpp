@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../../server/display.h"
 #include "../../../server/compositor.h"
 #include "../../../server/subcompositor.h"
-#include "../../../server/output.h"
+#include "../../../server/wl_output.h"
 #include "../../../server/seat.h"
 #include "../../../server/surface.h"
 
@@ -82,11 +82,11 @@ void TestServer::init()
     m_display->createIdle(m_display);
     m_display->createSubCompositor(m_display);
 
-    auto output = m_display->createOutput(m_display);
+    auto output = new Output(m_display, m_display);
     const QSize size(1280, 1024);
-    output->setGlobalPosition(QPoint(0, 0));
-    output->setPhysicalSize(size / 3.8);
-    output->addMode(size);
+    output->set_geometry(QRectF(QPoint(0, 0), size));
+    output->set_physical_size(size / 3.8);
+    output->add_mode(Output::Mode{size});
 
     auto fakeInput = m_display->createFakeInput(m_display);
     connect(fakeInput, &FakeInput::deviceCreated, this,

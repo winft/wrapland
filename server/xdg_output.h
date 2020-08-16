@@ -27,19 +27,19 @@ namespace Wrapland::Server
 {
 class Client;
 class Display;
-class OutputInterface;
-class XdgOutput;
+class Output;
 
 class WRAPLANDSERVER_EXPORT XdgOutputManager : public QObject
 {
     Q_OBJECT
 public:
     ~XdgOutputManager() override;
-    XdgOutput* createXdgOutput(Output* output, QObject* parent);
 
 private:
     explicit XdgOutputManager(Display* display, QObject* parent = nullptr);
+
     friend class Display;
+    friend class XdgOutput;
 
     class Private;
     std::unique_ptr<Private> d_ptr;
@@ -51,37 +51,14 @@ class WRAPLANDSERVER_EXPORT XdgOutput : public QObject
 public:
     ~XdgOutput() override;
 
-    QSize logicalSize() const;
-    void setLogicalSize(const QSize& size);
-
-    QPoint logicalPosition() const;
-    void setLogicalPosition(const QPoint& pos);
-
-    void done();
-
 private:
-    explicit XdgOutput(QObject* parent);
+    XdgOutput(Output* output, Display* display);
+
+    friend class Output;
     friend class XdgOutputManager;
 
     class Private;
     std::unique_ptr<Private> d_ptr;
-};
-
-class XdgOutputV1 : public QObject
-{
-    Q_OBJECT
-public:
-    XdgOutputV1(Client* client, uint32_t version, uint32_t id, XdgOutputManager* parent);
-
-    void setLogicalSize(const QSize& size) const;
-    void setLogicalPosition(const QPoint& pos) const;
-    void done() const;
-
-    class Private;
-    Private* d_ptr;
-
-Q_SIGNALS:
-    void resourceDestroyed();
 };
 
 }

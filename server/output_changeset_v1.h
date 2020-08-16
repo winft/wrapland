@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
+#include "output.h"
 #include "output_device_v1.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>
@@ -39,9 +40,9 @@ public:
     bool transformChanged() const;
     bool modeChanged() const;
     bool geometryChanged() const;
-    OutputDeviceV1::Enablement enabled() const;
+    bool enabled() const;
     int mode() const;
-    OutputDeviceV1::Transform transform() const;
+    Output::Transform transform() const;
     QRectF geometry() const;
 
 private:

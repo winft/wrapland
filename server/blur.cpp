@@ -36,8 +36,8 @@ namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_blur_manager_interface BlurManager::Private::s_interface = {
-    createCallback,
-    unsetCallback,
+    cb<createCallback>,
+    cb<unsetCallback>,
 };
 
 BlurManager::Private::Private(Display* display, BlurManager* qptr)
@@ -48,25 +48,22 @@ BlurManager::Private::Private(Display* display, BlurManager* qptr)
 
 BlurManager::Private::~Private() = default;
 
-void BlurManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
-                                          wl_resource* wlResource,
+void BlurManager::Private::createCallback(BlurManagerBind* bind,
                                           uint32_t id,
                                           wl_resource* wlSurface)
 {
-    auto bind = handle(wlResource)->d_ptr->getBind(wlResource);
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto blur = new Blur(bind->client()->handle(), bind->version(), id);
     if (!blur->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        wl_resource_post_no_memory(bind->resource());
         delete blur;
         return;
     }
     surface->d_ptr->setBlur(QPointer<Blur>(blur));
 }
 
-void BlurManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
-                                         [[maybe_unused]] wl_resource* wlResource,
+void BlurManager::Private::unsetCallback([[maybe_unused]] BlurManagerBind* bind,
                                          wl_resource* wlSurface)
 {
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);

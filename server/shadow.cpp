@@ -43,24 +43,17 @@ ShadowManager::Private::Private(Display* display, ShadowManager* qptr)
     create();
 }
 
-void ShadowManager::Private::createCallback(wl_client* wlClient,
+void ShadowManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
                                             wl_resource* wlResource,
                                             uint32_t id,
                                             wl_resource* wlSurface)
 {
+    auto priv = handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
 
-    handle(wlResource)->d_ptr->createShadow(wlClient, wlResource, id, wlSurface);
-}
-
-void ShadowManager::Private::createShadow(wl_client* wlClient,
-                                          wl_resource* wlResource,
-                                          uint32_t id,
-                                          wl_resource* wlSurface)
-{
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
-    auto client = display()->handle()->getClient(wlClient);
-    auto shadow = new Shadow(client, wl_resource_get_version(wlResource), id);
 
+    auto shadow = new Shadow(bind->client()->handle(), bind->version(), id);
     if (!shadow->d_ptr->resource()) {
         wl_resource_post_no_memory(wlResource);
         delete shadow;

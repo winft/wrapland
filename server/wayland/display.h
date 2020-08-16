@@ -100,6 +100,9 @@ private:
     bool m_running = false;
 
     std::vector<GlobalCapsule*> m_globals;
+    std::vector<GlobalCapsule*> m_stale_globals;
+    static int constexpr s_global_stale_time{5000};
+
     std::vector<Client*> m_clients;
     std::unique_ptr<BufferManager> m_bufferManager;
 

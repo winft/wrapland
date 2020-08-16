@@ -35,6 +35,7 @@ class BufferV1;
 
 constexpr uint32_t LinuxDmabufV1Version = 3;
 using LinuxDmabufV1Global = Wayland::Global<LinuxDmabufV1, LinuxDmabufV1Version>;
+using LinuxDmabufV1Bind = Wayland::Bind<LinuxDmabufV1Global>;
 
 class LinuxDmabufV1::Private : public LinuxDmabufV1Global
 {
@@ -42,7 +43,7 @@ public:
     Private(LinuxDmabufV1* q, Display* display);
     ~Private() override;
 
-    void bindInit(Wayland::Resource<LinuxDmabufV1, LinuxDmabufV1Global>* bind) final;
+    void bindInit(LinuxDmabufV1Bind* bind) final;
 
     static const struct wl_buffer_interface* bufferInterface();
     static void createParamsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);

@@ -58,8 +58,8 @@ void KeyboardShortcutsInhibitManagerV1::Private::inhibitShortcutsCallback(
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     if (priv->m_inhibitors.contains({surface, seat})) {
-        bind->postError(ZWP_KEYBOARD_SHORTCUTS_INHIBIT_MANAGER_V1_ERROR_ALREADY_INHIBITED,
-                        "the shortcuts are already inhibited for this surface and seat");
+        bind->post_error(ZWP_KEYBOARD_SHORTCUTS_INHIBIT_MANAGER_V1_ERROR_ALREADY_INHIBITED,
+                         "the shortcuts are already inhibited for this surface and seat");
         return;
     }
 

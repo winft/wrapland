@@ -1,4 +1,4 @@
-/****************************************************************************
+/********************************************************************
 Copyright © 2020 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
@@ -16,7 +16,7 @@ Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
-****************************************************************************/
+*********************************************************************/
 #pragma once
 
 #include <QObject>
@@ -26,52 +26,28 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-
 class Display;
 class Output;
-class RemoteBufferHandle;
 
-class WRAPLANDSERVER_EXPORT RemoteAccessManager : public QObject
+class WRAPLANDSERVER_EXPORT WlOutput : public QObject
 {
     Q_OBJECT
 public:
-    ~RemoteAccessManager() override;
+    ~WlOutput() override;
 
-    void sendBufferReady(Output* output, RemoteBufferHandle* buf);
-    bool bound() const;
+    Output* output() const;
 
 Q_SIGNALS:
-    void bufferReleased(RemoteBufferHandle* buf);
+    void removed();
 
 private:
-    explicit RemoteAccessManager(Display* display, QObject* parent = nullptr);
+    explicit WlOutput(Output* output, Display* display);
+
     friend class Display;
-
-    class Private;
-    std::unique_ptr<Private> d_ptr;
-};
-
-class WRAPLANDSERVER_EXPORT RemoteBufferHandle : public QObject
-{
-    Q_OBJECT
-public:
-    RemoteBufferHandle();
-    ~RemoteBufferHandle() override;
-
-    void setFd(uint32_t fd);
-    void setSize(uint32_t width, uint32_t height);
-    void setStride(uint32_t stride);
-    void setFormat(uint32_t format);
-
-    uint32_t fd() const;
-    uint32_t height() const;
-    uint32_t width() const;
-    uint32_t stride() const;
-    uint32_t format() const;
-
-private:
+    friend class Output;
     friend class RemoteAccessManager;
-    friend class RemoteBuffer;
+    friend class Surface;
+    friend class PresentationFeedback;
 
     class Private;
     std::unique_ptr<Private> d_ptr;

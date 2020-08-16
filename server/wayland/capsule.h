@@ -42,14 +42,14 @@ public:
     Capsule(Capsule&&) noexcept = default;
     Capsule& operator=(Capsule&&) noexcept = default;
 
-    ~Capsule()
+    virtual ~Capsule()
     {
         if (m_object) {
             m_dtor(m_object);
         }
     }
 
-    void create(WaylandObject* object)
+    void set(WaylandObject* object)
     {
         m_object = object;
     }

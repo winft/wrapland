@@ -27,11 +27,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+struct wl_resource;
+
 namespace Wrapland::Server
 {
 class BlurManager;
 class Blur;
 class Buffer;
+class Client;
 class ConfinedPointerV1;
 class Contrast;
 class ContrastManager;
@@ -127,7 +130,7 @@ Q_SIGNALS:
     void opaqueChanged(const QRegion&);
     void inputChanged(const QRegion&);
     void scaleChanged(qint32);
-    void transformChanged(Wrapland::Server::Output::Transform);
+    void transformChanged(Output::Transform);
     void unmapped();
     void sizeChanged();
     void shadowChanged();

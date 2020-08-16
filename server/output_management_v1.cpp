@@ -33,7 +33,7 @@ namespace Wrapland::Server
 
 constexpr uint32_t OutputManagementV1Version = 1;
 using OutputManagementV1Global = Wayland::Global<OutputManagementV1, OutputManagementV1Version>;
-using OutputManagementV1Bind = Wayland::Resource<OutputManagementV1, OutputManagementV1Global>;
+using OutputManagementV1Bind = Wayland::Bind<OutputManagementV1Global>;
 
 class OutputManagementV1::Private : public OutputManagementV1Global
 {

@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QDebug>
 
+#include "bind.h"
 #include "display.h"
-
-#include "capsule.h"
+#include "nucleus.h"
 #include "resource.h"
 
 #include <cstdint>
@@ -33,7 +33,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <wayland-server.h>
-#include <wayland-version.h>
 
 namespace Wrapland::Server
 {
@@ -48,7 +47,8 @@ template<typename Handle, int Version = 1>
 class Global
 {
 public:
-    using GlobalResource = Resource<Handle, Global<Handle, Version>>;
+    using type = Global<Handle, Version>;
+    static int constexpr version = Version;
 
     Global(Global const&) = delete;
     Global& operator=(Global const&) = delete;
@@ -57,61 +57,33 @@ public:
 
     virtual ~Global()
     {
-        if (m_capsule->valid()) {
-            m_display->removeGlobal(m_capsule.get());
-        }
-        for (auto bind : m_binds) {
-            bind->setGlobal(nullptr);
-        }
-        remove();
+        m_nucleus->remove();
     }
 
     void create()
     {
-        Q_ASSERT(!m_capsule->valid());
-
-        m_capsule->create(
-            wl_global_create(display()->handle()->native(), m_interface, version(), this, bind));
-    }
-
-    constexpr int version() const
-    {
-        return Version;
+        m_nucleus->create();
     }
 
     Display* display()
     {
-        return m_display;
-    }
-
-    wl_interface const* interface() const
-    {
-        return m_interface;
-    }
-
-    void const* implementation() const
-    {
-        return m_implementation;
-    }
-
-    explicit operator wl_global*() const
-    {
-        return m_capsule->get();
-    }
-
-    explicit operator wl_global*()
-    {
-        return m_capsule->get();
+        return m_nucleus->display();
     }
 
     static Handle* handle(wl_resource* wlResource)
     {
-        auto resource = static_cast<GlobalResource*>(wl_resource_get_user_data(wlResource));
-        return resource->global()->handle();
+        auto bind = static_cast<Bind<type>*>(wl_resource_get_user_data(wlResource));
+
+        if (auto global = bind->global()) {
+            return global->handle();
+        }
+
+        // If we are here the global has been removed while not yet destroyed.
+        return nullptr;
     }
 
     template<auto sender, uint32_t minVersion = 0, typename... Args>
-    void send(GlobalResource* bind, Args&&... args)
+    void send(Bind<type>* bind, Args&&... args)
     {
         // See Vandevoorde et al.: C++ Templates - The Complete Guide p.79
         // or https://stackoverflow.com/a/4942746.
@@ -121,7 +93,7 @@ public:
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(Client* client, Args&&... args)
     {
-        for (auto bind : m_binds) {
+        for (auto bind : m_nucleus->binds()) {
             if (bind->client() == client) {
                 bind->template send<sender, minVersion>(std::forward<Args>(args)...);
             }
@@ -131,7 +103,7 @@ public:
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(Args&&... args)
     {
-        for (auto bind : m_binds) {
+        for (auto bind : m_nucleus->binds()) {
             bind->template send<sender, minVersion>(std::forward<Args>(args)...);
         }
     }
@@ -141,15 +113,9 @@ public:
         return m_handle;
     }
 
-    void unbind(GlobalResource* bind)
+    Bind<type>* getBind(wl_resource* wlResource)
     {
-        prepareUnbind(bind);
-        m_binds.erase(std::remove(m_binds.begin(), m_binds.end(), bind), m_binds.end());
-    }
-
-    GlobalResource* getBind(wl_resource* wlResource)
-    {
-        for (auto bind : m_binds) {
+        for (auto bind : m_nucleus->binds()) {
             if (bind->resource() == wlResource) {
                 return bind;
             }
@@ -157,15 +123,15 @@ public:
         return nullptr;
     }
 
-    std::vector<GlobalResource*> getBinds()
+    std::vector<Bind<type>*> getBinds()
     {
-        return m_binds;
+        return m_nucleus->binds();
     }
 
-    std::vector<GlobalResource*> getBinds(Server::Client* client)
+    std::vector<Bind<type>*> getBinds(Server::Client* client)
     {
-        std::vector<GlobalResource*> ret;
-        for (auto bind : m_binds) {
+        std::vector<Bind<type>*> ret;
+        for (auto bind : m_nucleus->binds()) {
             if (bind->client()->handle() == client) {
                 ret.push_back(bind);
             }
@@ -173,18 +139,13 @@ public:
         return ret;
     }
 
-    // Legacy
-    QVector<wl_resource*> getResources(Server::Client* client)
+    virtual void bindInit([[maybe_unused]] Bind<type>* bind)
     {
-        QVector<wl_resource*> ret;
-        for (auto* bind : m_binds) {
-            if (bind->client()->handle() == client) {
-                ret << bind->resource();
-            }
-        }
-        return ret;
     }
-    //
+
+    virtual void prepareUnbind([[maybe_unused]] Bind<type>* bind)
+    {
+    }
 
 protected:
     Global(Handle* handle,
@@ -192,85 +153,30 @@ protected:
            const wl_interface* interface,
            void const* implementation)
         : m_handle(handle)
-        , m_display(Display::backendCast(display))
-        , m_interface(interface)
-        , m_implementation(implementation)
-        , m_capsule{new GlobalCapsule(wl_global_destroy)}
+        , m_nucleus{new Nucleus<type>(this, display, interface, implementation)}
     {
-        m_display->addGlobal(m_capsule.get());
-
         // TODO(romangg): allow to create and destroy Globals while keeping the object existing (but
         //                always create on ctor call?).
     }
 
-    void remove()
-    {
-        if (!m_capsule->valid()) {
-            return;
-        }
-#if (WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR > 17)
-        wl_global_remove(m_capsule->get());
-#endif
-        // TODO(romangg): call destroy with timer.
-        destroy(std::move(m_capsule));
-    }
-
     static void resourceDestroyCallback(wl_client* wlClient, wl_resource* wlResource)
     {
-        GlobalResource::destroyCallback(wlClient, wlResource);
+        Bind<type>::destroy_callback(wlClient, wlResource);
     }
 
-    virtual void bindInit([[maybe_unused]] GlobalResource* bind)
+    template<auto callback, typename... Args>
+    static void cb([[maybe_unused]] wl_client* client, wl_resource* resource, Args... args)
     {
-    }
-
-    virtual void prepareUnbind([[maybe_unused]] GlobalResource* bind)
-    {
+        // The global might be destroyed already on the compositor side.
+        if (handle(resource)) {
+            auto bind = static_cast<Bind<type>*>(wl_resource_get_user_data(resource));
+            callback(bind, std::forward<Args>(args)...);
+        }
     }
 
 private:
-    static void destroy(std::unique_ptr<GlobalCapsule> global)
-    {
-        global.reset();
-    }
-
-    static void bind(wl_client* wlClient, void* data, uint32_t version, uint32_t id)
-    {
-        auto global = static_cast<Global*>(data);
-        auto getClient = [&global, &wlClient] { return global->display()->getClient(wlClient); };
-
-        auto bindToGlobal
-            = [&global, version, id](auto* client) { global->bind(client, version, id); };
-
-        if (auto* client = getClient()) {
-            bindToGlobal(client);
-            return;
-        }
-        // Client not yet known to the server.
-        // TODO(romangg): Create backend representation only?
-        global->display()->handle()->getClient(wlClient);
-
-        // Now the client must be available.
-        // TODO(romangg): otherwise send protocol error (oom)
-        auto* client = getClient();
-        bindToGlobal(client);
-    }
-
-    void bind(Client* client, uint32_t version, uint32_t id)
-    {
-        auto resource = new GlobalResource(client, version, id, m_interface, m_implementation);
-        resource->setGlobal(this);
-        m_binds.push_back(resource);
-        bindInit(resource);
-    }
-
     Handle* m_handle;
-    Display* m_display;
-    wl_interface const* m_interface;
-    void const* m_implementation;
-
-    std::unique_ptr<GlobalCapsule> m_capsule;
-    std::vector<GlobalResource*> m_binds;
+    Nucleus<type>* m_nucleus;
 };
 
 }

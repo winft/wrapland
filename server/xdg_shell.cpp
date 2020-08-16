@@ -60,8 +60,8 @@ void XdgShell::Private::prepareUnbind(XdgShellBind* bind)
                 positioner, &XdgShellPositioner::resourceDestroyed, handle(), nullptr);
         }
         if (!surfaces.empty()) {
-            bind->postError(XDG_WM_BASE_ERROR_DEFUNCT_SURFACES,
-                            "xdg_wm_base destroyed before surfaces");
+            bind->post_error(XDG_WM_BASE_ERROR_DEFUNCT_SURFACES,
+                             "xdg_wm_base destroyed before surfaces");
         }
         bindsObjects.erase(it);
     }
@@ -74,7 +74,7 @@ void XdgShell::Private::createPositionerCallback([[maybe_unused]] wl_client* wlC
     auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
-    auto positioner = new XdgShellPositioner(bind->client()->handle(), priv->version(), id);
+    auto positioner = new XdgShellPositioner(bind->client()->handle(), bind->version(), id);
 
     auto bindsIt = priv->bindsObjects.find(bind);
     if (bindsIt == priv->bindsObjects.end()) {
@@ -110,13 +110,13 @@ void XdgShell::Private::getXdgSurfaceCallback([[maybe_unused]] wl_client* wlClie
             return surface == s->surface();
         });
         if (surfaceIt != surfaces.cend()) {
-            bind->postError(XDG_WM_BASE_ERROR_ROLE, "XDG Surface already created");
+            bind->post_error(XDG_WM_BASE_ERROR_ROLE, "XDG Surface already created");
             return;
         }
     }
 
     auto shellSurface = new XdgShellSurface(
-        bind->client()->handle(), priv->version(), id, priv->handle(), surface);
+        bind->client()->handle(), bind->version(), id, priv->handle(), surface);
 
     if (bindsIt == priv->bindsObjects.end()) {
         BindResources b;

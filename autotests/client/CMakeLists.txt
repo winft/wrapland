@@ -14,26 +14,26 @@ ecm_mark_as_test(testViewporter)
 ########################################################
 # Test WaylandConnectionThread
 ########################################################
-set( testWaylandConnectionThread_SRCS connection_thread.cpp )
-add_executable(testWaylandConnectionThread ${testWaylandConnectionThread_SRCS})
-target_link_libraries( testWaylandConnectionThread
+set( testConnectionThread_SRCS connection_thread.cpp )
+add_executable(testConnectionThread ${testConnectionThread_SRCS})
+target_link_libraries( testConnectionThread
     Qt5::Test Qt5::Gui
     Wrapland::Client Wrapland::Server
     Wayland::Client Wayland::Server)
-add_test(NAME wrapland-testWaylandConnectionThread COMMAND testWaylandConnectionThread)
-ecm_mark_as_test(testWaylandConnectionThread)
+add_test(NAME wrapland-testConnectionThread COMMAND testConnectionThread)
+ecm_mark_as_test(testConnectionThread)
 
 ########################################################
 # Test WaylandRegistry
 ########################################################
-set( testWaylandRegistry_SRCS registry.cpp )
-add_executable(testWaylandRegistry ${testWaylandRegistry_SRCS})
-target_link_libraries( testWaylandRegistry
+set( testRegistry_SRCS registry.cpp )
+add_executable(testRegistry ${testRegistry_SRCS})
+target_link_libraries( testRegistry
     Qt5::Test Qt5::Gui
     Wrapland::Client Wrapland::Server
     Wayland::Client Wayland::Server)
-add_test(NAME wrapland-testWaylandRegistry COMMAND testWaylandRegistry)
-ecm_mark_as_test(testWaylandRegistry)
+add_test(NAME wrapland-testRegistry COMMAND testRegistry)
+ecm_mark_as_test(testRegistry)
 
 ########################################################
 # Test WaylandFullscreenShell
@@ -41,11 +41,11 @@ ecm_mark_as_test(testWaylandRegistry)
 if(Wayland_VERSION VERSION_GREATER "1.4.0")
   find_program(WESTON_EXECUTABLE weston DOC "Path to the weston executable.")
   if(WESTON_EXECUTABLE)
-    set( testWaylandFullscreenShell_SRCS fullscreen_shell.cpp )
-    add_executable(testWaylandFullscreenShell ${testWaylandFullscreenShell_SRCS})
-    target_link_libraries( testWaylandFullscreenShell Qt5::Test Wrapland::Client Wayland::Client)
-    add_test(NAME wrapland-testWaylandFullscreenShell COMMAND testWaylandFullscreenShell)
-    ecm_mark_as_test(testWaylandFullscreenShell)
+    set( testFullscreenShell_SRCS fullscreen_shell.cpp )
+    add_executable(testFullscreenShell ${testFullscreenShell_SRCS})
+    target_link_libraries( testFullscreenShell Qt5::Test Wrapland::Client Wayland::Client)
+    add_test(NAME wrapland-testFullscreenShell COMMAND testFullscreenShell)
+    ecm_mark_as_test(testFullscreenShell)
   else()
     message(STATUS "The weston executable was not found. Some autotests will not be executed.")
   endif()
@@ -469,17 +469,6 @@ target_link_libraries( testPresentationTime
     Wrapland::Server)
 add_test(NAME wrapland-testPresentationTime COMMAND testPresentationTime)
 ecm_mark_as_test(testPresentationTime)
-
-########################################################
-# Test RemoteAccess
-########################################################
-set( testRemoteAccess_SRCS
-        remote_access.cpp
-    )
-add_executable(testRemoteAccess ${testRemoteAccess_SRCS})
-target_link_libraries( testRemoteAccess Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
-add_test(NAME wrapland-testRemoteAccess COMMAND testRemoteAccess)
-ecm_mark_as_test(testRemoteAccess)
 
 ########################################################
 # Test VirtualDesktop

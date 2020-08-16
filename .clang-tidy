@@ -20,6 +20,7 @@ WarningsAsErrors: "*"
 # fuchsia-default-arguments-calls: We allow default arguments.
 # fuchsia-default-arguments-declarations: We allow default arguments.
 # fuchsia-overloaded-operator: We overload | for enum classes through Q_DECLARE_OPERATORS_FOR_FLAGS.
+# fuchsia-trailing-return: False positive on some templated ctors (here Server::Wayland::Bind)
 # google-build-using-namespace: We do allow using namespaces for now. Might make sense to
 #   reevaluate this decision at some point in the future.
 # google-readability-namespace-comments: Often unnecessary verbose, with C++17 namespaces there are
@@ -68,6 +69,7 @@ Checks: "*,
 -fuchsia-default-arguments-calls,
 -fuchsia-default-arguments-declarations,
 -fuchsia-overloaded-operator,
+-fuchsia-trailing-return,
 -google-build-using-namespace,
 -google-readability-namespace-comments,
 -google-runtime-references,

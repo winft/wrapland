@@ -24,10 +24,10 @@ namespace Wrapland::Server
 
 OutputChangesetV1::Private::Private(OutputDeviceV1* outputDevice, OutputChangesetV1* parent)
     : device{outputDevice}
-    , enabled{device->enabled()}
-    , modeId{device->modeId()}
-    , transform{device->transform()}
-    , geometry{device->geometry()}
+    , enabled{device->output()->enabled()}
+    , modeId{device->output()->mode_id()}
+    , transform{device->output()->transform()}
+    , geometry{device->output()->geometry()}
     , q{parent}
 {
 }
@@ -42,17 +42,17 @@ OutputChangesetV1::~OutputChangesetV1() = default;
 
 bool OutputChangesetV1::enabledChanged() const
 {
-    return d_ptr->enabled != d_ptr->device->enabled();
+    return d_ptr->enabled != d_ptr->device->output()->enabled();
 }
 
-OutputDeviceV1::Enablement OutputChangesetV1::enabled() const
+bool OutputChangesetV1::enabled() const
 {
     return d_ptr->enabled;
 }
 
 bool OutputChangesetV1::modeChanged() const
 {
-    return d_ptr->modeId != d_ptr->device->modeId();
+    return d_ptr->modeId != d_ptr->device->output()->mode_id();
 }
 
 int OutputChangesetV1::mode() const
@@ -62,16 +62,16 @@ int OutputChangesetV1::mode() const
 
 bool OutputChangesetV1::transformChanged() const
 {
-    return d_ptr->transform != d_ptr->device->transform();
+    return d_ptr->transform != d_ptr->device->output()->transform();
 }
 
-OutputDeviceV1::Transform OutputChangesetV1::transform() const
+Output::Transform OutputChangesetV1::transform() const
 {
     return d_ptr->transform;
 }
 bool OutputChangesetV1::geometryChanged() const
 {
-    return d_ptr->geometry != d_ptr->device->geometry();
+    return d_ptr->geometry != d_ptr->device->output()->geometry();
 }
 
 QRectF OutputChangesetV1::geometry() const

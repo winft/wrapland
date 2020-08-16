@@ -20,7 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "display.h"
-#include "output.h"
+#include "wl_output.h"
 #include "xdg_output.h"
 
 #include "wayland/client.h"
@@ -30,6 +30,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-xdg-output-server-protocol.h>
 
+#include <QPoint>
+#include <QSize>
 #include <map>
 #include <memory>
 
@@ -37,8 +39,8 @@ namespace Wrapland::Server
 {
 
 class Display;
-class OutputInterface;
 class XdgOutput;
+class XdgOutputV1;
 
 class XdgOutputManager::Private : public Wayland::Global<XdgOutputManager>
 {
@@ -58,23 +60,41 @@ private:
 class XdgOutput::Private
 {
 public:
+    Private(Output* output, Display* display, XdgOutput* q);
+
+    bool broadcast();
+    void done();
+
     void resourceConnected(XdgOutputV1* resource);
     void resourceDisconnected(XdgOutputV1* resource);
-    QPoint pos;
-    QSize size;
-    bool dirty = false;
-    bool doneOnce = false;
+
+private:
+    Output* output;
+    XdgOutputManager* manager;
     std::vector<XdgOutputV1*> resources;
+};
+
+class XdgOutputV1 : public QObject
+{
+    Q_OBJECT
+public:
+    XdgOutputV1(Client* client, uint32_t version, uint32_t id);
+
+    void send_logical_position(QPointF const& pos) const;
+    void send_logical_size(QSizeF const& size) const;
+    void done() const;
+
+    class Private;
+    Private* d_ptr;
+
+Q_SIGNALS:
+    void resourceDestroyed();
 };
 
 class XdgOutputV1::Private : public Wayland::Resource<XdgOutputV1>
 {
 public:
     Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q);
-
-    void setLogicalSize(const QSize& size);
-    void setLogicalPosition(const QPoint& pos);
-    void done();
 
 private:
     static const struct zxdg_output_v1_interface s_interface;

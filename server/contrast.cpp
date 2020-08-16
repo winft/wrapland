@@ -36,7 +36,7 @@ namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_contrast_manager_interface ContrastManager::Private::s_interface = {
-    createCallback,
+    cb<createCallback>,
     unsetCallback,
 };
 
@@ -48,17 +48,15 @@ ContrastManager::Private::Private(Display* display, ContrastManager* q)
 
 ContrastManager::Private::~Private() = default;
 
-void ContrastManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
-                                              wl_resource* wlResource,
+void ContrastManager::Private::createCallback(ContrastManagerBind* bind,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
-    auto bind = handle(wlResource)->d_ptr->getBind(wlResource);
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto contrast = new Contrast(bind->client()->handle(), bind->version(), id);
     if (!contrast->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        wl_resource_post_no_memory(bind->resource());
         delete contrast;
         return;
     }

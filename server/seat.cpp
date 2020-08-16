@@ -76,7 +76,7 @@ Seat::Seat(Display* display, QObject* parent)
 
 Seat::~Seat() = default;
 
-void Seat::Private::bindInit(Wayland::Resource<Seat, SeatGlobal>* bind)
+void Seat::Private::bindInit(SeatBind* bind)
 {
     send<wl_seat_send_capabilities>(bind, getCapabilities());
     send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(bind, name.c_str());

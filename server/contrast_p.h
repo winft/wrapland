@@ -37,6 +37,7 @@ class Display;
 
 constexpr uint32_t ContrastManagerVersion = 1;
 using ContrastManagerGlobal = Wayland::Global<ContrastManager, ContrastManagerVersion>;
+using ContrastManagerBind = Wayland::Bind<ContrastManagerGlobal>;
 
 class ContrastManager::Private : public ContrastManagerGlobal
 {
@@ -45,10 +46,7 @@ public:
     ~Private() override;
 
 private:
-    static void createCallback(wl_client* wlClient,
-                               wl_resource* wlResource,
-                               uint32_t id,
-                               wl_resource* wlSurface);
+    static void createCallback(ContrastManagerBind* bind, uint32_t id, wl_resource* wlSurface);
     static void unsetCallback(wl_client* wlClient, wl_resource* wlResource, wl_resource* wlSurface);
 
     static const struct org_kde_kwin_contrast_manager_interface s_interface;

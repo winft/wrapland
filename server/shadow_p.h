@@ -45,8 +45,6 @@ public:
     Private(Display* display, ShadowManager* qptr);
 
 private:
-    void createShadow(wl_client* client, wl_resource* resource, uint32_t id, wl_resource* surface);
-
     static void
     createCallback(wl_client* client, wl_resource* resource, uint32_t id, wl_resource* surface);
     static void unsetCallback(wl_client* client, wl_resource* resource, wl_resource* surface);

@@ -35,7 +35,7 @@ namespace Wrapland::Server
 
 constexpr uint32_t FakeInputVersion = 4;
 using FakeInputGlobal = Wayland::Global<FakeInput, FakeInputVersion>;
-using FakeInputBind = Wayland::Resource<FakeInput, FakeInputGlobal>;
+using FakeInputBind = Wayland::Bind<FakeInputGlobal>;
 
 class FakeInput::Private : public FakeInputGlobal
 {

@@ -21,41 +21,51 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "output.h"
 
-#include "wayland/global.h"
+#include <QRectF>
 
 namespace Wrapland::Server
 {
+class OutputDeviceV1;
+class WlOutput;
+class XdgOutput;
+
 class Display;
 
-constexpr uint32_t OutputVersion = 3;
-using OutputGlobal = Wayland::Global<Output, OutputVersion>;
+struct OutputState {
+    struct Info {
+        // TODO(romangg): should uuid and edid be saved as std::vector<std::char> or maybe
+        // std::vector<std::byte>?
+        std::string uuid;
+        std::string eisa_id;
+        std::string serial_number;
+        std::string edid;
+        std::string manufacturer = "org.kwinft.wrapland";
+        std::string model = "none";
+        QSize physical_size;
+    } info;
 
-class Output::Private : public OutputGlobal
+    bool enabled{false};
+
+    Output::Mode mode;
+    Output::Subpixel subpixel = Output::Subpixel::Unknown;
+
+    Output::Transform transform = Output::Transform::Normal;
+    QRectF geometry;
+    int client_scale = 1;
+};
+
+class Output::Private
 {
 public:
-    Private(Output* q, Display* display);
+    Private(Display* display, Output* q);
 
-    void bindInit(Wayland::Resource<Output, OutputGlobal>* bind) override;
+    void update_client_scale();
+    void done();
 
-    void sendMode(Wayland::Resource<Output, OutputGlobal>* bind, const Mode& mode);
-    void sendMode(const Mode& mode);
-    void sendGeometry();
-    void sendScale();
-    void sendDone();
+    static int32_t get_mode_flags(Output::Mode const& mode, OutputState const& state);
+    static int32_t to_transform(Output::Transform transform);
 
-    void updateGeometry();
-    void updateScale();
-
-    Display* displayHandle;
-
-    QSize physicalSize;
-    QPoint globalPosition;
-    std::string manufacturer = "org.kde.kwin";
-    std::string model = "none";
-
-    int scale = 1;
-    SubPixel subPixel = SubPixel::Unknown;
-    Transform transform = Transform::Normal;
+    Display* display_handle;
 
     std::vector<Mode> modes;
 
@@ -64,16 +74,18 @@ public:
         bool supported = false;
     } dpms;
 
+    OutputState pending;
+    OutputState published;
+
+    std::unique_ptr<OutputDeviceV1> device;
+    std::unique_ptr<WlOutput> wayland_output;
+    std::unique_ptr<XdgOutput> xdg_output;
+
     Output* q_ptr;
 
 private:
     int32_t toTransform() const;
-    int32_t toSubPixel() const;
-
-    std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
-    geometryArgs() const;
-
-    static const struct wl_output_interface s_interface;
+    int32_t toSubpixel() const;
 };
 
 }

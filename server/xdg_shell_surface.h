@@ -27,7 +27,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class Output;
 class Seat;
 class Surface;
 class XdgShell;

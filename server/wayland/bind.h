@@ -19,17 +19,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
+#include <QDebug>
+
 #include "client.h"
-#include "display.h"
+#include "nucleus.h"
 #include "send.h"
 
-#include <cstdint>
-#include <functional>
 #include <tuple>
 #include <wayland-server.h>
 
 struct wl_client;
-struct wl_interface;
 struct wl_resource;
 
 namespace Wrapland::Server::Wayland
@@ -37,54 +36,40 @@ namespace Wrapland::Server::Wayland
 
 class Client;
 
-template<typename Handle>
-class Resource
+template<typename Global>
+class Bind
 {
 public:
-    Resource(Resource* parent,
-             uint32_t id,
-             const wl_interface* interface,
-             const void* impl,
-             Handle* handle)
-        : Resource(parent->client(), parent->version(), id, interface, impl, handle)
-    {
-    }
-
-    Resource(Server::Client* client,
-             uint32_t version,
-             uint32_t id,
-             const wl_interface* interface,
-             const void* impl,
-             Handle* handle)
-        : Resource(Display::castClient(client), version, id, interface, impl, handle)
-    {
-    }
-
-    Resource(Client* client,
-             uint32_t version,
-             uint32_t id,
-             const wl_interface* interface,
-             const void* impl,
-             Handle* handle)
+    Bind(Client* client, uint32_t version, uint32_t id, Nucleus<Global>* global_nucleus)
         : m_client{client}
         , m_version{version}
-        , m_handle{handle}
-        , m_resource{client->createResource(interface, version, id)}
+        , m_global_nucleus{global_nucleus}
+        , m_resource{client->createResource(global_nucleus->interface(), version, id)}
     {
         wl_resource_set_user_data(m_resource, this);
-        wl_resource_set_implementation(m_resource, impl, this, destroy);
+        wl_resource_set_implementation(m_resource, global_nucleus->implementation(), this, destroy);
     }
 
-    Resource(Resource&) = delete;
-    Resource& operator=(Resource) = delete;
-    Resource(Resource&&) noexcept = delete;
-    Resource& operator=(Resource&&) noexcept = delete;
-
-    virtual ~Resource() = default;
+    Bind(Bind&) = delete;
+    Bind& operator=(Bind) = delete;
+    Bind(Bind&&) noexcept = delete;
+    Bind& operator=(Bind&&) noexcept = delete;
+    virtual ~Bind() = default;
 
     wl_resource* resource() const
     {
         return m_resource;
+    }
+
+    Global* global() const
+    {
+        assert(m_global_nucleus);
+        return m_global_nucleus->global();
+    }
+
+    void unset_global()
+    {
+        m_global_nucleus = nullptr;
     }
 
     Client* client() const
@@ -107,11 +92,6 @@ public:
         m_client->flush();
     }
 
-    static Handle* handle(wl_resource* resource)
-    {
-        return self(resource)->m_handle;
-    }
-
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(Args&&... args)
     {
@@ -126,7 +106,7 @@ public:
             m_resource, m_version, std::forward<decltype(tuple)>(tuple));
     }
 
-    void postError(uint32_t code, char const* msg, ...)
+    void post_error(uint32_t code, char const* msg, ...)
     {
         va_list args;
         va_start(args, msg);
@@ -134,15 +114,10 @@ public:
         va_end(args);
     }
 
-    static void destroyCallback([[maybe_unused]] wl_client* client, wl_resource* wlResource)
+    static void destroy_callback([[maybe_unused]] wl_client* client, wl_resource* wl_res)
     {
-        auto resource = self(wlResource);
+        auto resource = self(wl_res);
         wl_resource_destroy(resource->resource());
-    }
-
-    Handle* handle()
-    {
-        return m_handle;
     }
 
     void serverSideDestroy()
@@ -152,9 +127,9 @@ public:
     }
 
 private:
-    static auto self(wl_resource* resource)
+    static Bind<Global>* self(wl_resource* resource)
     {
-        return static_cast<Resource<Handle>*>(wl_resource_get_user_data(resource));
+        return static_cast<Bind<Global>*>(wl_resource_get_user_data(resource));
     }
 
     static void destroy(wl_resource* wlResource)
@@ -167,13 +142,16 @@ private:
 
     void onDestroy()
     {
-        Q_EMIT m_handle->resourceDestroyed();
-        delete m_handle;
+        if (m_global_nucleus) {
+            m_global_nucleus->unbind(this);
+        }
     }
 
     Client* m_client;
     uint32_t m_version;
-    Handle* m_handle;
+
+    Nucleus<Global>* m_global_nucleus;
+
     wl_resource* m_resource;
 };
 

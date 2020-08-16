@@ -41,7 +41,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_configuration_v1.h"
 #include "output_device_v1_p.h"
 #include "output_management_v1.h"
-#include "output_p.h"
 #include "plasma_shell.h"
 #include "plasma_virtual_desktop.h"
 #include "plasma_window.h"
@@ -50,7 +49,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_gestures_v1.h"
 #include "presentation_time.h"
 #include "relative_pointer_v1.h"
-#include "remote_access.h"
 #include "seat.h"
 #include "server_decoration_palette.h"
 #include "shadow.h"
@@ -58,6 +56,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "subcompositor.h"
 #include "text_input_v2.h"
 #include "viewporter.h"
+#include "wl_output_p.h"
 #include "xdg_decoration.h"
 #include "xdg_foreign.h"
 #include "xdg_output.h"
@@ -163,21 +162,24 @@ void Display::terminate()
     d_ptr->terminate();
 }
 
-Output* Display::createOutput(QObject* parent)
+void Display::add_output_device_v1(OutputDeviceV1* output)
 {
-    auto* output = new Output(this, parent);
-    d_ptr->outputs.push_back(output);
-    return output;
+    if (!d_ptr->xdg_output_manager) {
+        d_ptr->xdg_output_manager.reset(new XdgOutputManager(this));
+    }
+
+    d_ptr->outputDevices.push_back(output);
 }
 
-void Display::removeOutput(Output* output)
+void Display::add_wl_output(WlOutput* output)
 {
-    // TODO(romangg): This does not clean up. But it should be also possible to just delete the
-    //                output.
+    d_ptr->outputs.push_back(output);
+}
+
+void Display::removeOutput(WlOutput* output)
+{
     d_ptr->outputs.erase(std::remove(d_ptr->outputs.begin(), d_ptr->outputs.end(), output),
                          d_ptr->outputs.end());
-    // d_ptr->removeGlobal(output);
-    // delete output;
 }
 
 void Display::removeOutputDevice(OutputDeviceV1* outputDevice)
@@ -190,13 +192,6 @@ void Display::removeOutputDevice(OutputDeviceV1* outputDevice)
 Compositor* Display::createCompositor(QObject* parent)
 {
     return new Compositor(this, parent);
-}
-
-OutputDeviceV1* Display::createOutputDeviceV1(QObject* parent)
-{
-    auto device = new OutputDeviceV1(this, parent);
-    d_ptr->outputDevices.push_back(device);
-    return device;
 }
 
 OutputManagementV1* Display::createOutputManagementV1(QObject* parent)
@@ -233,11 +228,6 @@ PlasmaShell* Display::createPlasmaShell(QObject* parent)
 PlasmaWindowManager* Display::createPlasmaWindowManager(QObject* parent)
 {
     return new PlasmaWindowManager(this, parent);
-}
-
-RemoteAccessManager* Display::createRemoteAccessManager(QObject* parent)
-{
-    return new RemoteAccessManager(this, parent);
 }
 
 KdeIdle* Display::createIdle(QObject* parent)
@@ -341,9 +331,9 @@ Viewporter* Display::createViewporter(QObject* parent)
     return new Viewporter(this, parent);
 }
 
-XdgOutputManager* Display::createXdgOutputManager(QObject* parent)
+XdgOutputManager* Display::xdgOutputManager() const
 {
-    return new XdgOutputManager(this, parent);
+    return d_ptr->xdg_output_manager.get();
 }
 
 XdgDecorationManager* Display::createXdgDecorationManager(XdgShell* shell, QObject* parent)
@@ -392,7 +382,7 @@ wl_display* Display::native() const
     return d_ptr->native();
 }
 
-std::vector<Output*>& Display::outputs() const
+std::vector<WlOutput*>& Display::outputs() const
 {
     return d_ptr->outputs;
 }
