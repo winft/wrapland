@@ -88,12 +88,6 @@ public:
     };
 
     struct Mode {
-        enum class Flag {
-            None = 0,
-            Current = 1 << 0,
-            Preferred = 1 << 1
-        };
-        Q_DECLARE_FLAGS(Flags, Flag)
         /**
          * The size of this Mode in pixel space.
          **/
@@ -102,11 +96,7 @@ public:
          * The refresh rate in mHz of this Mode.
          **/
         int refreshRate = 0;
-        /**
-         * The flags of this Mode, that is whether it's the
-         * Current and/or Preferred Mode of the OutputDeviceV1.
-         **/
-        Flags flags = Flag::None;
+        bool preferred{false};
         /**
          * The OutputDeviceV1 to which this Mode belongs.
          **/
@@ -285,4 +275,3 @@ private:
 Q_DECLARE_METATYPE(Wrapland::Client::OutputDeviceV1::Transform)
 Q_DECLARE_METATYPE(Wrapland::Client::OutputDeviceV1::Enablement)
 Q_DECLARE_METATYPE(Wrapland::Client::OutputDeviceV1::Mode)
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::OutputDeviceV1::Mode::Flags)
