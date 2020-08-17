@@ -105,7 +105,7 @@ bool OutputDeviceV1::Mode::operator==(const OutputDeviceV1::Mode &m) const
 {
     return size == m.size
            && refreshRate == m.refreshRate
-           && flags == m.flags
+           && preferred == m.preferred
            && output == m.output;
 }
 
@@ -170,47 +170,42 @@ void OutputDeviceV1::Private::addMode(uint32_t flags, int32_t width, int32_t hei
     mode.refreshRate = refresh;
     mode.size = QSize(width, height);
     mode.id = mode_id;
-    if (flags & WL_OUTPUT_MODE_CURRENT) {
-        mode.flags |= Mode::Flag::Current;
-    }
     if (flags & WL_OUTPUT_MODE_PREFERRED) {
-        mode.flags |= Mode::Flag::Preferred;
+        mode.preferred = true;
     }
-    auto currentIt = modes.insert(modes.end(), mode);
-    bool existing = false;
-    if (flags & WL_OUTPUT_MODE_CURRENT) {
-        auto it = modes.begin();
-        while (it != currentIt) {
-            auto &m = (*it);
-            if (m.flags.testFlag(Mode::Flag::Current)) {
-                m.flags &= ~Mode::Flags(Mode::Flag::Current);
-                emit q->modeChanged(m);
+
+    for (auto it = modes.begin(); it != modes.end(); it++) {
+        if ((*it).id == mode.id) {
+            if (flags & WL_OUTPUT_MODE_CURRENT) {
+                auto change = currentMode == modes.end() || (*currentMode).id != mode.id;
+                currentMode = it;
+                if (change) {
+                    Q_EMIT q->modeChanged(mode);
+                }
             }
-            if (m.refreshRate == mode.refreshRate && m.size == mode.size) {
-                it = modes.erase(it);
-                existing = true;
-            } else {
-                it++;
-            }
+            // That should normally not be necessary because modes stay the same besides the
+            // current flag. But just to be sure when some compositors do something stupid
+            // and change some mode properties later on.
+            *it = mode;
+            return;
         }
-        currentMode = currentIt;
     }
-    if (existing) {
-        emit q->modeChanged(mode);
-    } else {
-        emit q->modeAdded(mode);
+
+    // New mode added.
+    modes.append(mode);
+    if (flags & WL_OUTPUT_MODE_CURRENT) {
+        currentMode = modes.end() - 1;
     }
+    Q_EMIT q->modeAdded(mode);
 }
 
 Wrapland::Client::OutputDeviceV1::Mode OutputDeviceV1::currentMode() const
 {
-    for (const auto &mode: modes()) {
-        if (mode.flags.testFlag(Wrapland::Client::OutputDeviceV1::Mode::Flag::Current)) {
-            return mode;
-        }
+    if (d->currentMode == d->modes.end()) {
+        qCWarning(WRAPLAND_CLIENT) << "current mode not found";
+        return Mode();
     }
-    qCWarning(WRAPLAND_CLIENT) << "current mode not found";
-    return Mode();
+    return *(d->currentMode);
 }
 
 void OutputDeviceV1::Private::geometryCallback(void *data, zkwinft_output_device_v1 *output,

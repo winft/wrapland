@@ -243,19 +243,19 @@ void TestOutputDevice::testModeChanges()
 
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().size, QSize(800, 600));
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
-    QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().flags, OutputDeviceV1::Mode::Flags(OutputDeviceV1::Mode::Flag::Preferred));
+    QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().preferred, true);
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().output, QPointer<OutputDeviceV1>(&output));
     QVERIFY(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().id > -1);
 
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().size, QSize(1280, 1024));
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().refreshRate, 90000);
-    QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().flags, OutputDeviceV1::Mode::Flags(OutputDeviceV1::Mode::Flag::None));
+    QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().preferred, false);
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().output, QPointer<OutputDeviceV1>(&output));
     QVERIFY(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().id > -1);
 
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().size, QSize(1024, 768));
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
-    QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().flags, OutputDeviceV1::Mode::Flags(OutputDeviceV1::Mode::Flag::Current));
+    QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().id, output.currentMode().id);
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().output, QPointer<OutputDeviceV1>(&output));
 
     const QList<OutputDeviceV1::Mode> &modes = output.modes();
@@ -274,27 +274,29 @@ void TestOutputDevice::testModeChanges()
     m_server_output->set_mode(0);
     m_server_output->done();
     QVERIFY(doneSpy.wait());
-    QCOMPARE(modeChangedSpy.size(), 2);
-    // the one which lost the current flag
-    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().size, QSize(1024, 768));
-    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
-    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().flags, OutputDeviceV1::Mode::Flags());
+    QCOMPARE(modeChangedSpy.size(), 1);
+
     // the one which got the current flag
-    QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().size, QSize(800, 600));
-    QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
-    QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().flags, OutputDeviceV1::Mode::Flags(OutputDeviceV1::Mode::Flag::Current | OutputDeviceV1::Mode::Flag::Preferred));
+    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().size, QSize(800, 600));
+    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
+    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().preferred, true);
+    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().id, output.currentMode().id);
     QVERIFY(!outputChanged.isEmpty());
     QCOMPARE(output.pixelSize(), QSize(800, 600));
+
     const QList<OutputDeviceV1::Mode> &modes2 = output.modes();
-    QCOMPARE(modes2.at(0).size, QSize(1280, 1024));
-    QCOMPARE(modes2.at(0).refreshRate, 90000);
-    QCOMPARE(modes2.at(0).flags, OutputDeviceV1::Mode::Flag::None);
-    QCOMPARE(modes2.at(1).size, QSize(1024, 768));
-    QCOMPARE(modes2.at(1).refreshRate, 60000);
-    QCOMPARE(modes2.at(1).flags, OutputDeviceV1::Mode::Flag::None);
-    QCOMPARE(modes2.at(2).size, QSize(800, 600));
+    QCOMPARE(modes2.at(0).size, QSize(800, 600));
+    QCOMPARE(modes2.at(0).refreshRate, 60000);
+    QCOMPARE(modes2.at(0).preferred, true);
+    QCOMPARE(modes2.at(0).id, output.currentMode().id);
+    QCOMPARE(modes2.at(1).size, QSize(1280, 1024));
+    QCOMPARE(modes2.at(1).refreshRate, 90000);
+    QCOMPARE(modes2.at(1).preferred, false);
+    QVERIFY(modes2.at(1).id != output.currentMode().id);
+    QCOMPARE(modes2.at(2).size, QSize(1024, 768));
     QCOMPARE(modes2.at(2).refreshRate, 60000);
-    QCOMPARE(modes2.at(2).flags, OutputDeviceV1::Mode::Flag::Current | OutputDeviceV1::Mode::Flag::Preferred);
+    QCOMPARE(modes2.at(2).preferred, false);
+    QVERIFY(modes2.at(2).id != output.currentMode().id);
 
     // change once more
     outputChanged.clear();
@@ -302,15 +304,13 @@ void TestOutputDevice::testModeChanges()
     m_server_output->set_mode(2);
     m_server_output->done();
     QVERIFY(doneSpy.wait());
-    QCOMPARE(modeChangedSpy.size(), 2);
-    // the one which lost the current flag
-    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().size, QSize(800, 600));
-    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
-    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().flags, OutputDeviceV1::Mode::Flags(OutputDeviceV1::Mode::Flag::Preferred));
+    QCOMPARE(modeChangedSpy.size(), 1);
+
     // the one which got the current flag
     QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().size, QSize(1280, 1024));
     QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().refreshRate, 90000);
-    QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().flags, OutputDeviceV1::Mode::Flags(OutputDeviceV1::Mode::Flag::Current));
+    QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().preferred, false);
+    QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().id, output.currentMode().id);
     QVERIFY(!outputChanged.isEmpty());
     QCOMPARE(output.pixelSize(), QSize(1280, 1024));
 }
