@@ -67,16 +67,11 @@ void DataOffer::Private::receiveCallback([[maybe_unused]] wl_client* wlClient,
                                          int32_t fd)
 {
     auto priv = handle(wlResource)->d_ptr;
-    priv->receive(mimeType, fd);
-}
-
-void DataOffer::Private::receive(std::string const& mimeType, int32_t fd) const
-{
-    if (!source) {
+    if (!priv->source) {
         close(fd);
         return;
     }
-    source->requestData(mimeType, fd);
+    priv->source->requestData(mimeType, fd);
 }
 
 void DataOffer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
