@@ -1,8 +1,28 @@
 # Contributing to Wrapland
 
+ - [Logging and Debugging](#logging-and-debugging)
  - [Submission Guideline](#submission-guideline)
  - [Commit Message Guideline](#commit-message-guideline)
  - [Contact](#contact)
+
+## Logging and Debugging
+The first step in contributing to the project
+either by providing meaningful feedback
+or by sending in patches
+is always the analysis of the runtime behavior of a program
+that makes use of Wrapland.
+This means studying the debug log
+of the program.
+
+*KWinFT* is a program that makes use of Wrapland's server and client libraries.
+For further information on how to log and debug KWinFT and by that also Wrapland
+see the Logging and Debugging chapter
+in [KWinFT's Contributing document][kwinft-log-debug].
+
+Another library and system service with a backend plugin
+that makes use of Wrapland's client library is *Disman*.
+See the Logging and Debugging chapter
+in [Disman's Contributing document][disman-log-debug] for more information.
 
 ## Submission Guideline
 Contributions are very welcome but follow a strict process.
@@ -115,11 +135,13 @@ In case you are unsure if your question should go into a separate issue ticket d
 room first and if a separate issue ticket would make sense for your question you will then be
 referred to doing that.
 
-[merge-request]: https://gitlab.com/kwinft/wrapland/-/merge_requests
-[issue]: https://gitlab.com/kwinft/wrapland/-/issues
-[frameworks-style]: https://community.kde.org/Policies/Frameworks_Coding_Style
-[plasma-schedule]: https://community.kde.org/Schedules/Plasma_5
-[conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/#specification
 [angular-revert]: https://github.com/angular/angular/blob/3cf2005a936bec2058610b0786dd0671dae3d358/CONTRIBUTING.md#revert
 [angular-subject]: https://github.com/angular/angular/blob/3cf2005a936bec2058610b0786dd0671dae3d358/CONTRIBUTING.md#subject
+[conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/#specification
+[disman-log-debug]: https://gitlab.com/kwinft/disman/-/blob/master/CONTRIBUTING.md#logging-and-debugging
+[frameworks-style]: https://community.kde.org/Policies/Frameworks_Coding_Style
 [gitter-room]: https://gitter.im/kwinft/community
+[issue]: https://gitlab.com/kwinft/wrapland/-/issues
+[kwinft-log-debug]: https://gitlab.com/kwinft/kwinft/-/blob/master/CONTRIBUTING.md#logging-and-debugging
+[merge-request]: https://gitlab.com/kwinft/wrapland/-/merge_requests
+[plasma-schedule]: https://community.kde.org/Schedules/Plasma_5
