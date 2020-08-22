@@ -33,8 +33,10 @@ struct wl_resource;
 
 namespace Wrapland::Server::Wayland
 {
-
 class Client;
+
+template<typename Global>
+class Nucleus;
 
 template<typename Global>
 class Bind

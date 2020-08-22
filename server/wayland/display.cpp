@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "buffer_manager.h"
 #include "client.h"
-#include "global.h"
+#include "nucleus.h"
 
 #include "../client.h"
 #include "../display.h"
@@ -97,22 +97,22 @@ void Display::setRunning(bool running)
     m_running = running;
 }
 
-void Display::addGlobal(GlobalCapsule* capsule)
+void Display::addGlobal(BasicNucleus* nucleus)
 {
-    m_globals.push_back(capsule);
+    m_globals.push_back(nucleus);
 }
 
-void Display::removeGlobal(GlobalCapsule* capsule)
+void Display::removeGlobal(BasicNucleus* nucleus)
 {
-    m_globals.erase(std::remove(m_globals.begin(), m_globals.end(), capsule), m_globals.end());
-    m_stale_globals.push_back(capsule);
+    m_globals.erase(std::remove(m_globals.begin(), m_globals.end(), nucleus), m_globals.end());
+    m_stale_globals.push_back(nucleus);
 
     // A single-shot QTimer is cleaned up by Qt internally when the receiver (here m_handle) goes
     // away what clang-tidy does not understand.
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-    QTimer::singleShot(s_global_stale_time, m_handle, [this, capsule] {
-        delete capsule;
-        m_stale_globals.erase(std::remove(m_stale_globals.begin(), m_stale_globals.end(), capsule),
+    QTimer::singleShot(s_global_stale_time, m_handle, [this, nucleus] {
+        delete nucleus;
+        m_stale_globals.erase(std::remove(m_stale_globals.begin(), m_stale_globals.end(), nucleus),
                               m_stale_globals.end());
     });
 }
@@ -166,8 +166,8 @@ void Display::terminate()
         return;
     }
 
-    for (auto capsule : m_globals) {
-        capsule->release();
+    for (auto nucleus : m_globals) {
+        nucleus->release();
     }
 
     // That call is not really necessary because we run our own Qt-embedded event loop and do not

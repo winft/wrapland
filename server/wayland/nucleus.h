@@ -20,7 +20,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "bind.h"
-#include "capsule.h"
 #include "display.h"
 #include "resource.h"
 
@@ -44,21 +43,56 @@ class Client;
 template<typename Global>
 class Bind;
 
+class BasicNucleus
+{
+public:
+    explicit BasicNucleus(Server::Display* display)
+        : m_display{Display::backendCast(display)}
+    {
+    }
+    virtual ~BasicNucleus() = default;
+
+    Display* display()
+    {
+        return m_display;
+    }
+
+    wl_global* native()
+    {
+        return m_global;
+    }
+
+    void release()
+    {
+        m_display = nullptr;
+        m_global = nullptr;
+    }
+
+protected:
+    void set_native(wl_global* global)
+    {
+        m_global = global;
+    }
+
+private:
+    Display* m_display;
+    wl_global* m_global{nullptr};
+};
+
 template<typename Global>
-class Nucleus : GlobalCapsule
+class Nucleus : public BasicNucleus
 {
 public:
     Nucleus(Global* global,
             Server::Display* display,
             const wl_interface* interface,
             void const* implementation)
-        : GlobalCapsule(wl_global_destroy)
+        : BasicNucleus(display)
         , m_global(global)
-        , m_display(Display::backendCast(display))
         , m_interface(interface)
         , m_implementation(implementation)
     {
-        m_display->addGlobal(this);
+        this->display()->addGlobal(this);
     }
 
     Nucleus(Nucleus const&) = delete;
@@ -68,8 +102,8 @@ public:
 
     ~Nucleus() override
     {
-        if (get()) {
-            wl_global_set_user_data(get(), nullptr);
+        if (native()) {
+            wl_global_set_user_data(native(), nullptr);
         }
         for (auto bind : m_binds) {
             bind->unset_global();
@@ -80,8 +114,8 @@ public:
     {
         m_global = nullptr;
 
-        if (get()) {
-            wl_global_remove(get());
+        if (native()) {
+            wl_global_remove(native());
             display()->removeGlobal(this);
         } else {
             delete this;
@@ -90,14 +124,8 @@ public:
 
     void create()
     {
-        assert(!get());
-        GlobalCapsule::set(
-            wl_global_create(m_display->native(), m_interface, Global::version, this, bind));
-    }
-
-    Display* display()
-    {
-        return m_display;
+        assert(!native());
+        set_native(wl_global_create(display()->native(), m_interface, Global::version, this, bind));
     }
 
     wl_interface const* interface() const
@@ -137,7 +165,7 @@ private:
             return;
         }
 
-        auto get_client = [&nucleus, &wlClient] { return nucleus->m_display->getClient(wlClient); };
+        auto get_client = [&nucleus, &wlClient] { return nucleus->display()->getClient(wlClient); };
         auto bind_to_global
             = [&nucleus, version, id](auto client) { nucleus->bind(client, version, id); };
 
@@ -147,7 +175,7 @@ private:
         }
         // Client not yet known to the server.
         // TODO(romangg): Create backend representation only?
-        nucleus->m_display->handle()->getClient(wlClient);
+        nucleus->display()->handle()->getClient(wlClient);
 
         // Now the client must be available.
         // TODO(romangg): otherwise send protocol error (oom)
@@ -166,7 +194,6 @@ private:
     }
 
     Global* m_global;
-    Display* m_display;
     wl_interface const* m_interface;
     void const* m_implementation;
     std::vector<Bind<Global>*> m_binds;

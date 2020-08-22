@@ -19,10 +19,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include "capsule.h"
-
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -40,10 +39,9 @@ class Display;
 
 namespace Wayland
 {
+class BasicNucleus;
 class BufferManager;
 class Client;
-
-using GlobalCapsule = Capsule<wl_global>;
 
 class Display
 {
@@ -53,8 +51,8 @@ public:
 
     void setSocketName(const std::string& name);
 
-    void addGlobal(GlobalCapsule* capsule);
-    void removeGlobal(GlobalCapsule* capsule);
+    void addGlobal(BasicNucleus* nucleus);
+    void removeGlobal(BasicNucleus* nucleus);
 
     wl_display* native() const;
     std::string socketName() const;
@@ -99,8 +97,8 @@ private:
 
     bool m_running = false;
 
-    std::vector<GlobalCapsule*> m_globals;
-    std::vector<GlobalCapsule*> m_stale_globals;
+    std::vector<BasicNucleus*> m_globals;
+    std::vector<BasicNucleus*> m_stale_globals;
     static int constexpr s_global_stale_time{5000};
 
     std::vector<Client*> m_clients;
