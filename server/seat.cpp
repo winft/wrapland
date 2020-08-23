@@ -598,6 +598,8 @@ void Seat::setDragTarget(Surface* surface,
     const quint32 serial = d_ptr->display()->handle()->nextSerial();
     if (d_ptr->drag.target) {
         d_ptr->drag.target->updateDragTarget(nullptr, serial);
+        QObject::disconnect(d_ptr->drag.target_destroy_connection);
+        d_ptr->drag.target_destroy_connection = QMetaObject::Connection();
     }
 
     // In theory we can have multiple data devices and we should send the drag to all of them, but
@@ -618,6 +620,13 @@ void Seat::setDragTarget(Surface* surface,
         d_ptr->drag.surface = surface;
         d_ptr->drag.transformation = inputTransformation;
         d_ptr->drag.target->updateDragTarget(surface, serial);
+        d_ptr->drag.target_destroy_connection
+            = QObject::connect(d_ptr->drag.target, &DataDevice::resourceDestroyed, this, [this] {
+                  QObject::disconnect(d_ptr->drag.target_destroy_connection);
+                  d_ptr->drag.target_destroy_connection = QMetaObject::Connection();
+                  d_ptr->drag.target = nullptr;
+              });
+
     } else {
         d_ptr->drag.surface = nullptr;
     }

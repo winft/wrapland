@@ -17,14 +17,13 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// client
+
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/fakeinput.h"
 #include "../../src/client/registry.h"
-// server
+
 #include "../../server/display.h"
 #include "../../server/fake_input.h"
 
@@ -58,13 +57,13 @@ private Q_SLOTS:
     void testKeyboardKeyLinux();
 
 private:
-    Srv::Display *m_display = nullptr;
-    Srv::FakeInput *m_fakeInputInterface = nullptr;
-    Srv::FakeInputDevice *m_device = nullptr;
-    ConnectionThread *m_connection = nullptr;
-    QThread *m_thread = nullptr;
-    EventQueue *m_queue = nullptr;
-    Clt::FakeInput *m_fakeInput = nullptr;
+    Srv::Display* m_display = nullptr;
+    Srv::FakeInput* m_fakeInputInterface = nullptr;
+    Srv::FakeInputDevice* m_device = nullptr;
+    ConnectionThread* m_connection = nullptr;
+    QThread* m_thread = nullptr;
+    EventQueue* m_queue = nullptr;
+    Clt::FakeInput* m_fakeInput = nullptr;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-fake-input-0");
@@ -107,9 +106,10 @@ void FakeInputTest::init()
     registry.setup();
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    m_fakeInput = registry.createFakeInput(registry.interface(Registry::Interface::FakeInput).name,
-                                           registry.interface(Registry::Interface::FakeInput).version,
-                                           this);
+    m_fakeInput
+        = registry.createFakeInput(registry.interface(Registry::Interface::FakeInput).name,
+                                   registry.interface(Registry::Interface::FakeInput).version,
+                                   this);
     QVERIFY(m_fakeInput->isValid());
 
     QVERIFY(deviceCreatedSpy.wait());
@@ -119,10 +119,10 @@ void FakeInputTest::init()
 
 void FakeInputTest::cleanup()
 {
-#define CLEANUP(variable) \
-    if (variable) { \
-        delete variable; \
-        variable = nullptr; \
+#define CLEANUP(variable)                                                                          \
+    if (variable) {                                                                                \
+        delete variable;                                                                           \
+        variable = nullptr;                                                                        \
     }
     CLEANUP(m_fakeInput)
     CLEANUP(m_queue)
@@ -220,7 +220,8 @@ void FakeInputTest::testPointerButtonQt_data()
 
 void FakeInputTest::testPointerButtonQt()
 {
-    // this test verifies that pointer button events are properly passed to the server with Qt button codes
+    // this test verifies that pointer button events are properly passed to the server with Qt
+    // button codes
     QVERIFY(!m_device->isAuthenticated());
     QSignalSpy pressedSpy(m_device, &FakeInputDevice::pointerButtonPressRequested);
     QVERIFY(pressedSpy.isValid());
@@ -274,7 +275,8 @@ void FakeInputTest::testPointerButtonLinux_data()
 
 void FakeInputTest::testPointerButtonLinux()
 {
-    // this test verifies that pointer button events are properly passed to the server with Qt button codes
+    // this test verifies that pointer button events are properly passed to the server with Qt
+    // button codes
     QVERIFY(!m_device->isAuthenticated());
     QSignalSpy pressedSpy(m_device, &FakeInputDevice::pointerButtonPressRequested);
     QVERIFY(pressedSpy.isValid());
@@ -317,9 +319,9 @@ void FakeInputTest::testAxis_data()
     QTest::addColumn<Qt::Orientation>("orientation");
     QTest::addColumn<qreal>("delta");
 
-    QTest::newRow("horizontal/1")  << Qt::Horizontal << 1.0;
+    QTest::newRow("horizontal/1") << Qt::Horizontal << 1.0;
     QTest::newRow("horizontal/-2") << Qt::Horizontal << -2.0;
-    QTest::newRow("vertical/10")  << Qt::Vertical << 10.0;
+    QTest::newRow("vertical/10") << Qt::Vertical << 10.0;
     QTest::newRow("vertical/-20") << Qt::Vertical << -22.0;
 }
 
@@ -389,7 +391,7 @@ void FakeInputTest::testTouch()
     QCOMPARE(touchDownSpy.last().at(1).toPointF(), QPointF(1, 2));
 
     // Same id should not trigger another touchDown.
-    m_fakeInput->requestTouchDown(0, QPointF(5,6));
+    m_fakeInput->requestTouchDown(0, QPointF(5, 6));
     QVERIFY(!touchDownSpy.wait(100));
 
     m_fakeInput->requestTouchMotion(0, QPointF(3, 4));
@@ -438,7 +440,8 @@ void FakeInputTest::testKeyboardKeyLinux_data()
 
 void FakeInputTest::testKeyboardKeyLinux()
 {
-    // this test verifies that keyboard key events are properly passed to the server with Qt button codes
+    // this test verifies that keyboard key events are properly passed to the server with Qt button
+    // codes
     QVERIFY(!m_device->isAuthenticated());
     QSignalSpy pressedSpy(m_device, &FakeInputDevice::keyboardKeyPressRequested);
     QVERIFY(pressedSpy.isValid());

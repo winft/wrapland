@@ -70,9 +70,9 @@ void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
                 const uint32_t modifier_lo = modifier & 0xFFFFFFFF;
                 const uint32_t modifier_hi = modifier >> modifierShift;
                 send<zwp_linux_dmabuf_v1_send_modifier, ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION>(
-                    it.key(), modifier_hi, modifier_lo);
+                    bind, it.key(), modifier_hi, modifier_lo);
             } else if (modifier == DRM_FORMAT_MOD_LINEAR || modifier == DRM_FORMAT_MOD_INVALID) {
-                send<zwp_linux_dmabuf_v1_send_format>(it.key());
+                send<zwp_linux_dmabuf_v1_send_format>(bind, it.key());
             }
         }
 

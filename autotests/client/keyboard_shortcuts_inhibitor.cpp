@@ -17,9 +17,8 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-// Qt
 #include <QtTest>
-// client
+
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
@@ -27,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
-// server
+
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/keyboard_shortcuts_inhibit.h"
@@ -81,8 +80,6 @@ void TestKeyboardShortcutsInhibitor::init()
     m_serverSeat->setName("seat0");
     m_serverKeyboardShortcutsInhibitor = m_display->createKeyboardShortcutsInhibitManager();
 
-
-
     // setup connection
     m_connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
@@ -106,7 +103,6 @@ void TestKeyboardShortcutsInhibitor::init()
     QVERIFY(interfacesAnnouncedSpy.isValid());
     registry.setEventQueue(m_queue);
 
-    
     registry.create(m_connection);
     QVERIFY(registry.isValid());
     registry.setup();
@@ -157,12 +153,11 @@ void TestKeyboardShortcutsInhibitor::cleanup()
     CLEANUP(m_queue)
     CLEANUP(m_clientCompositor)
 
-    for (auto surface : m_clientSurfaces) 
-    {
+    for (auto surface : m_clientSurfaces) {
         delete surface;
     }
     m_clientSurfaces.clear();
-    
+
     if (m_connection) {
         m_connection->deleteLater();
         m_connection = nullptr;
@@ -194,7 +189,7 @@ void TestKeyboardShortcutsInhibitor::testKeyboardShortcuts()
                                   &Clt::KeyboardShortcutsInhibitorV1::inhibitorActive);
     QSignalSpy inhibitorInactiveSpy(inhibitorClient,
                                     &Clt::KeyboardShortcutsInhibitorV1::inhibitorInactive);
-    
+
     QVERIFY(inhibitorCreatedSpy.wait() || inhibitorCreatedSpy.count() == 1);
     auto inhibitorServer
         = m_serverKeyboardShortcutsInhibitor->findInhibitor(m_serverSurfaces[0], m_serverSeat);
@@ -208,7 +203,8 @@ void TestKeyboardShortcutsInhibitor::testKeyboardShortcuts()
     QVERIFY(inhibitorInactiveSpy.wait() || inhibitorInactiveSpy.count() == 1);
 
     // Test creating for another surface
-    auto inhibitorClient2 = m_keyboard_shortcuts_inhibitor->inhibitShortcuts(m_clientSurfaces[1], m_seat);
+    auto inhibitorClient2
+        = m_keyboard_shortcuts_inhibitor->inhibitShortcuts(m_clientSurfaces[1], m_seat);
     QVERIFY(inhibitorCreatedSpy.wait() || inhibitorCreatedSpy.count() == 2);
 
     // Test destroy is working
@@ -220,12 +216,14 @@ void TestKeyboardShortcutsInhibitor::testKeyboardShortcuts()
     QSignalSpy errorOccured(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QCOMPARE(m_connection->error(), 0);
 
-    auto inhibitorClient3 = m_keyboard_shortcuts_inhibitor->inhibitShortcuts(m_clientSurfaces[0], m_seat);
-    
+    auto inhibitorClient3
+        = m_keyboard_shortcuts_inhibitor->inhibitShortcuts(m_clientSurfaces[0], m_seat);
+
     QVERIFY(errorOccured.wait());
     QCOMPARE(m_connection->error(), EPROTO);
     QVERIFY(m_connection->hasProtocolError());
-    QCOMPARE(m_connection->protocolError(), ZWP_KEYBOARD_SHORTCUTS_INHIBIT_MANAGER_V1_ERROR_ALREADY_INHIBITED);
+    QCOMPARE(m_connection->protocolError(),
+             ZWP_KEYBOARD_SHORTCUTS_INHIBIT_MANAGER_V1_ERROR_ALREADY_INHIBITED);
 
     delete inhibitorClient;
     delete inhibitorClient2;

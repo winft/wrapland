@@ -17,15 +17,14 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// client
+
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/idle.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/seat.h"
-// server
+
 #include "../../server/display.h"
 #include "../../server/kde_idle.h"
 #include "../../server/seat.h"
@@ -50,14 +49,14 @@ private Q_SLOTS:
     void testIdleInhibitBlocksTimeout();
 
 private:
-    Display *m_display = nullptr;
-    Srv::Seat *m_seatInterface = nullptr;
-    KdeIdle *m_kdeIdle = nullptr;
-    ConnectionThread *m_connection = nullptr;
-    QThread *m_thread = nullptr;
-    EventQueue *m_queue = nullptr;
-    Clt::Seat *m_seat = nullptr;
-    Idle *m_idle = nullptr;
+    Display* m_display = nullptr;
+    Srv::Seat* m_seatInterface = nullptr;
+    KdeIdle* m_kdeIdle = nullptr;
+    ConnectionThread* m_connection = nullptr;
+    QThread* m_thread = nullptr;
+    EventQueue* m_queue = nullptr;
+    Clt::Seat* m_seat = nullptr;
+    Idle* m_idle = nullptr;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-idle-0");
@@ -112,10 +111,10 @@ void IdleTest::init()
 
 void IdleTest::cleanup()
 {
-#define CLEANUP(variable) \
-    if (variable) { \
-        delete variable; \
-        variable = nullptr; \
+#define CLEANUP(variable)                                                                          \
+    if (variable) {                                                                                \
+        delete variable;                                                                           \
+        variable = nullptr;                                                                        \
     }
     CLEANUP(m_idle)
     CLEANUP(m_seat)
@@ -141,7 +140,7 @@ void IdleTest::testTimeout()
 {
     // this test verifies the basic functionality of a timeout, that it gets fired
     // and that it resumes from idle, etc.
-    
+
     std::unique_ptr<Clt::IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
     QVERIFY(timeout->isValid());
     QSignalSpy idleSpy(timeout.get(), &Clt::IdleTimeout::idle);

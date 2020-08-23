@@ -24,8 +24,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/output_device_v1.h"
 #include "../../src/client/registry.h"
 
-#include "../../server/output.h"
 #include "../../server/display.h"
+#include "../../server/output.h"
 
 #include <wayland-client-protocol.h>
 
@@ -38,7 +38,7 @@ class TestOutputDevice : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestOutputDevice(QObject *parent = nullptr);
+    explicit TestOutputDevice(QObject* parent = nullptr);
 
 private Q_SLOTS:
     void init();
@@ -52,24 +52,23 @@ private Q_SLOTS:
     void testTransform_data();
     void testTransform();
 
-
     void testDone();
 
 private:
-    Srv::Display *m_display;
-    Srv::Output *m_server_output;
+    Srv::Display* m_display;
+    Srv::Output* m_server_output;
     QByteArray m_edid;
     QString m_serialNumber;
     QString m_eidaId;
 
-    Wrapland::Client::ConnectionThread *m_connection;
-    Wrapland::Client::EventQueue *m_queue;
-    QThread *m_thread;
+    Wrapland::Client::ConnectionThread* m_connection;
+    Wrapland::Client::EventQueue* m_queue;
+    QThread* m_thread;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-output-0");
 
-TestOutputDevice::TestOutputDevice(QObject *parent)
+TestOutputDevice::TestOutputDevice(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_server_output(nullptr)
@@ -108,7 +107,14 @@ void TestOutputDevice::init()
 
     m_server_output->set_mode(1);
 
-    m_edid = QByteArray::fromBase64("\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00\x10\xAC\x16\xF0LLKA\x0E\x16\x01\x03\x80""4 x\xEA\x1E\xC5\xAEO4\xB1&\x0EPT\xA5K\x00\x81\x80\xA9@\xD1\x00qO\x01\x01\x01\x01\x01\x01\x01\x01(<\x80\xA0p\xB0#@0 6\x00\x06""D!\x00\x00\x1A\x00\x00\x00\xFF\x00""F525M245AK");
+    m_edid = QByteArray::fromBase64(
+        "\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00\x10\xAC\x16\xF0LLKA\x0E\x16"
+        "\x01\x03\x80"
+        "4 x\xEA\x1E\xC5\xAEO4\xB1&\x0EPT\xA5K\x00\x81"
+        "\x80\xA9@\xD1\x00qO\x01\x01\x01\x01\x01\x01\x01\x01(<\x80"
+        "\xA0p\xB0#@0 6\x00\x06"
+        "D!\x00\x00\x1A\x00\x00\x00\xFF\x00"
+        "F525M245AK");
     m_server_output->set_edid(m_edid.constData());
 
     m_serialNumber = "23498723948723";
@@ -194,7 +200,8 @@ void TestOutputDevice::testRegistry()
     QSignalSpy outputChanged(&output, &Wrapland::Client::OutputDeviceV1::done);
     QVERIFY(outputChanged.isValid());
 
-    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(), announced.first().last().value<quint32>()));
+    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(),
+                                             announced.first().last().value<quint32>()));
     wl_display_flush(m_connection->display());
 
     QVERIFY(outputChanged.wait());
@@ -236,7 +243,8 @@ void TestOutputDevice::testModeChanges()
     QVERIFY(modeAddedSpy.isValid());
     QSignalSpy doneSpy(&output, &Wrapland::Client::OutputDeviceV1::done);
     QVERIFY(doneSpy.isValid());
-    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(), announced.first().last().value<quint32>()));
+    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(),
+                                             announced.first().last().value<quint32>()));
     wl_display_flush(m_connection->display());
     QVERIFY(doneSpy.wait());
     QCOMPARE(modeAddedSpy.count(), 3);
@@ -244,21 +252,24 @@ void TestOutputDevice::testModeChanges()
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().size, QSize(800, 600));
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().preferred, true);
-    QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().output, QPointer<OutputDeviceV1>(&output));
+    QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().output,
+             QPointer<OutputDeviceV1>(&output));
     QVERIFY(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().id > -1);
 
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().size, QSize(1280, 1024));
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().refreshRate, 90000);
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().preferred, false);
-    QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().output, QPointer<OutputDeviceV1>(&output));
+    QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().output,
+             QPointer<OutputDeviceV1>(&output));
     QVERIFY(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().id > -1);
 
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().size, QSize(1024, 768));
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().id, output.currentMode().id);
-    QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().output, QPointer<OutputDeviceV1>(&output));
+    QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().output,
+             QPointer<OutputDeviceV1>(&output));
 
-    const QList<OutputDeviceV1::Mode> &modes = output.modes();
+    const QList<OutputDeviceV1::Mode>& modes = output.modes();
     QVERIFY(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().id > -1);
     QCOMPARE(modes.size(), 3);
     QCOMPARE(modes.at(0), modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>());
@@ -280,11 +291,12 @@ void TestOutputDevice::testModeChanges()
     QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().size, QSize(800, 600));
     QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
     QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().preferred, true);
-    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().id, output.currentMode().id);
+    QCOMPARE(modeChangedSpy.first().first().value<OutputDeviceV1::Mode>().id,
+             output.currentMode().id);
     QVERIFY(!outputChanged.isEmpty());
     QCOMPARE(output.pixelSize(), QSize(800, 600));
 
-    const QList<OutputDeviceV1::Mode> &modes2 = output.modes();
+    const QList<OutputDeviceV1::Mode>& modes2 = output.modes();
     QCOMPARE(modes2.at(0).size, QSize(800, 600));
     QCOMPARE(modes2.at(0).refreshRate, 60000);
     QCOMPARE(modes2.at(0).preferred, true);
@@ -310,7 +322,8 @@ void TestOutputDevice::testModeChanges()
     QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().size, QSize(1280, 1024));
     QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().refreshRate, 90000);
     QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().preferred, false);
-    QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().id, output.currentMode().id);
+    QCOMPARE(modeChangedSpy.last().first().value<OutputDeviceV1::Mode>().id,
+             output.currentMode().id);
     QVERIFY(!outputChanged.isEmpty());
     QCOMPARE(output.pixelSize(), QSize(1280, 1024));
 }
@@ -320,13 +333,20 @@ void TestOutputDevice::testTransform_data()
     QTest::addColumn<Clt::OutputDeviceV1::Transform>("expected");
     QTest::addColumn<Srv::Output::Transform>("actual");
 
-    QTest::newRow("90")          << Clt::OutputDeviceV1::Transform::Rotated90  << Srv::Output::Transform::Rotated90;
-    QTest::newRow("180")         << Clt::OutputDeviceV1::Transform::Rotated180 << Srv::Output::Transform::Rotated180;
-    QTest::newRow("270")         << Clt::OutputDeviceV1::Transform::Rotated270 << Srv::Output::Transform::Rotated270;
-    QTest::newRow("Flipped")     << Clt::OutputDeviceV1::Transform::Flipped    << Srv::Output::Transform::Flipped;
-    QTest::newRow("Flipped 90")  << Clt::OutputDeviceV1::Transform::Flipped90  << Srv::Output::Transform::Flipped90;
-    QTest::newRow("Flipped 180") << Clt::OutputDeviceV1::Transform::Flipped180 << Srv::Output::Transform::Flipped180;
-    QTest::newRow("Flipped 280") << Clt::OutputDeviceV1::Transform::Flipped270 << Srv::Output::Transform::Flipped270;
+    QTest::newRow("90") << Clt::OutputDeviceV1::Transform::Rotated90
+                        << Srv::Output::Transform::Rotated90;
+    QTest::newRow("180") << Clt::OutputDeviceV1::Transform::Rotated180
+                         << Srv::Output::Transform::Rotated180;
+    QTest::newRow("270") << Clt::OutputDeviceV1::Transform::Rotated270
+                         << Srv::Output::Transform::Rotated270;
+    QTest::newRow("Flipped") << Clt::OutputDeviceV1::Transform::Flipped
+                             << Srv::Output::Transform::Flipped;
+    QTest::newRow("Flipped 90") << Clt::OutputDeviceV1::Transform::Flipped90
+                                << Srv::Output::Transform::Flipped90;
+    QTest::newRow("Flipped 180") << Clt::OutputDeviceV1::Transform::Flipped180
+                                 << Srv::Output::Transform::Flipped180;
+    QTest::newRow("Flipped 280") << Clt::OutputDeviceV1::Transform::Flipped270
+                                 << Srv::Output::Transform::Flipped270;
 }
 
 void TestOutputDevice::testTransform()
@@ -348,7 +368,10 @@ void TestOutputDevice::testTransform()
     wl_display_flush(m_connection->display());
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    Wrapland::Client::OutputDeviceV1 *output = registry.createOutputDeviceV1(announced.first().first().value<quint32>(), announced.first().last().value<quint32>(), &registry);
+    Wrapland::Client::OutputDeviceV1* output
+        = registry.createOutputDeviceV1(announced.first().first().value<quint32>(),
+                                        announced.first().last().value<quint32>(),
+                                        &registry);
     QSignalSpy outputChanged(output, &Wrapland::Client::OutputDeviceV1::done);
     QVERIFY(outputChanged.isValid());
     wl_display_flush(m_connection->display());
@@ -380,7 +403,8 @@ void TestOutputDevice::testEnabled()
     Wrapland::Client::OutputDeviceV1 output;
     QSignalSpy outputChanged(&output, &Wrapland::Client::OutputDeviceV1::done);
     QVERIFY(outputChanged.isValid());
-    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(), announced.first().last().value<quint32>()));
+    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(),
+                                             announced.first().last().value<quint32>()));
     wl_display_flush(m_connection->display());
     QVERIFY(outputChanged.wait());
 
@@ -409,70 +433,72 @@ void TestOutputDevice::testEnabled()
     }
     QCOMPARE(changed.count(), enabledChanged.count());
 }
+#if 0
+void TestOutputDevice::testEdid()
+{
+    Wrapland::Client::Registry registry;
+    QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
+    QVERIFY(interfacesAnnouncedSpy.isValid());
+    QSignalSpy announced(&registry, &Wrapland::Client::Registry::outputDeviceAnnounced);
+    registry.setEventQueue(m_queue);
+    registry.create(m_connection->display());
+    QVERIFY(registry.isValid());
+    registry.setup();
+    wl_display_flush(m_connection->display());
+    QVERIFY(interfacesAnnouncedSpy.wait());
 
-//void TestOutputDevice::testEdid()
-//{
-//    Wrapland::Client::Registry registry;
-//    QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
-//    QVERIFY(interfacesAnnouncedSpy.isValid());
-//    QSignalSpy announced(&registry, &Wrapland::Client::Registry::outputDeviceAnnounced);
-//    registry.setEventQueue(m_queue);
-//    registry.create(m_connection->display());
-//    QVERIFY(registry.isValid());
-//    registry.setup();
-//    wl_display_flush(m_connection->display());
-//    QVERIFY(interfacesAnnouncedSpy.wait());
+    Wrapland::Client::OutputDeviceV1 output;
 
-//    Wrapland::Client::OutputDeviceV1 output;
+    QCOMPARE(output.edid(), QByteArray());
 
-//    QCOMPARE(output.edid(), QByteArray());
+    QSignalSpy outputChanged(&output, &Wrapland::Client::OutputDeviceV1::done);
+    QVERIFY(outputChanged.isValid());
+    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(),
+                                             announced.first().last().value<quint32>()));
+    wl_display_flush(m_connection->display());
+    QVERIFY(outputChanged.wait());
+    QCOMPARE(output.edid(), m_edid);
+}
 
-//    QSignalSpy outputChanged(&output, &Wrapland::Client::OutputDeviceV1::done);
-//    QVERIFY(outputChanged.isValid());
-//    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(), announced.first().last().value<quint32>()));
-//    wl_display_flush(m_connection->display());
-//    QVERIFY(outputChanged.wait());
-//    QCOMPARE(output.edid(), m_edid);
-//}
+void TestOutputDevice::testId()
+{
+    Wrapland::Client::Registry registry;
+    QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
+    QVERIFY(interfacesAnnouncedSpy.isValid());
+    QSignalSpy announced(&registry, &Wrapland::Client::Registry::outputDeviceAnnounced);
+    registry.setEventQueue(m_queue);
+    registry.create(m_connection->display());
+    QVERIFY(registry.isValid());
+    registry.setup();
+    wl_display_flush(m_connection->display());
+    QVERIFY(interfacesAnnouncedSpy.wait());
 
-//void TestOutputDevice::testId()
-//{
-//    Wrapland::Client::Registry registry;
-//    QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfacesAnnounced);
-//    QVERIFY(interfacesAnnouncedSpy.isValid());
-//    QSignalSpy announced(&registry, &Wrapland::Client::Registry::outputDeviceAnnounced);
-//    registry.setEventQueue(m_queue);
-//    registry.create(m_connection->display());
-//    QVERIFY(registry.isValid());
-//    registry.setup();
-//    wl_display_flush(m_connection->display());
-//    QVERIFY(interfacesAnnouncedSpy.wait());
+    Wrapland::Client::OutputDeviceV1 output;
+    QSignalSpy outputChanged(&output, &Wrapland::Client::OutputDeviceV1::done);
+    QVERIFY(outputChanged.isValid());
+    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(),
+                                             announced.first().last().value<quint32>()));
+    wl_display_flush(m_connection->display());
+    QVERIFY(outputChanged.wait());
 
-//    Wrapland::Client::OutputDeviceV1 output;
-//    QSignalSpy outputChanged(&output, &Wrapland::Client::OutputDeviceV1::done);
-//    QVERIFY(outputChanged.isValid());
-//    output.setup(registry.bindOutputDeviceV1(announced.first().first().value<quint32>(), announced.first().last().value<quint32>()));
-//    wl_display_flush(m_connection->display());
-//    QVERIFY(outputChanged.wait());
+    QCOMPARE(output.uuid(), QByteArray("1337"));
 
-//    QCOMPARE(output.uuid(), QByteArray("1337"));
+    QSignalSpy idChanged(&output, &Wrapland::Client::OutputDeviceV1::uuidChanged);
+    QVERIFY(idChanged.isValid());
 
-//    QSignalSpy idChanged(&output, &Wrapland::Client::OutputDeviceV1::uuidChanged);
-//    QVERIFY(idChanged.isValid());
+    m_server_output->setUuid("42");
+    QVERIFY(idChanged.wait());
+    QCOMPARE(idChanged.first().first().toByteArray(), QByteArray("42"));
+    idChanged.clear();
+    QCOMPARE(output.uuid(), QByteArray("42"));
 
-//    m_server_output->setUuid("42");
-//    QVERIFY(idChanged.wait());
-//    QCOMPARE(idChanged.first().first().toByteArray(), QByteArray("42"));
-//    idChanged.clear();
-//    QCOMPARE(output.uuid(), QByteArray("42"));
-
-//    m_server_output->setUuid("4711");
-//    QVERIFY(idChanged.wait());
-//    QCOMPARE(idChanged.first().first().toByteArray(), QByteArray("4711"));
-//    idChanged.clear();
-//    QCOMPARE(output.uuid(), QByteArray("4711"));
-//}
-
+    m_server_output->setUuid("4711");
+    QVERIFY(idChanged.wait());
+    QCOMPARE(idChanged.first().first().toByteArray(), QByteArray("4711"));
+    idChanged.clear();
+    QCOMPARE(output.uuid(), QByteArray("4711"));
+}
+#endif
 void TestOutputDevice::testDone()
 {
     Wrapland::Client::Registry registry;
@@ -494,7 +520,6 @@ void TestOutputDevice::testDone()
     wl_display_flush(m_connection->display());
     QVERIFY(outputDone.wait());
 }
-
 
 QTEST_GUILESS_MAIN(TestOutputDevice)
 #include "output_device.moc"
