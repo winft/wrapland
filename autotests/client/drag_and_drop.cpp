@@ -52,6 +52,7 @@ private Q_SLOTS:
     void test_pointer();
     void test_touch();
     void test_cancel_by_destroyed_data_source();
+    void test_target_removed();
     void test_pointer_events_ignored();
 
 private:
@@ -555,6 +556,102 @@ void TestDragAndDrop::test_cancel_by_destroyed_data_source()
     // Verify that we did not get any further input events.
     QVERIFY(pointer_motion_spy.isEmpty());
     QCOMPARE(button_press_spy.count(), 2);
+}
+
+void TestDragAndDrop::test_target_removed()
+{
+    // Checks that if target goes away mid-drag server handles this correctly.
+
+    std::unique_ptr<Wrapland::Client::Surface> surface_1(create_surface(c_1));
+    auto server_surface_1 = get_server_surface();
+    QVERIFY(server_surface_1);
+    std::unique_ptr<Wrapland::Client::Surface> surface_2(create_surface(c_2));
+    auto server_surface_2 = get_server_surface();
+    QVERIFY(server_surface_2);
+
+    QSignalSpy source_selected_action_changed_spy(
+        c_1.source, &Wrapland::Client::DataSource::selectedDragAndDropActionChanged);
+    QVERIFY(source_selected_action_changed_spy.isValid());
+
+    // Now we need to pass pointer focus to the Surface and simulate a button press.
+    QSignalSpy button_press_spy(c_1.pointer, &Wrapland::Client::Pointer::buttonStateChanged);
+    QVERIFY(button_press_spy.isValid());
+    m_server_seat->setFocusedPointerSurface(server_surface_1);
+    m_server_seat->setTimestamp(2);
+    m_server_seat->pointerButtonPressed(1);
+    QVERIFY(button_press_spy.wait());
+    QCOMPARE(button_press_spy.first().at(1).value<quint32>(), quint32(2));
+
+    // Now we can start the drag and drop.
+    QSignalSpy drag_started_spy(m_server_seat, &Wrapland::Server::Seat::dragStarted);
+    QVERIFY(drag_started_spy.isValid());
+
+    c_1.source->setDragAndDropActions(Wrapland::Client::DataDeviceManager::DnDAction::Copy
+                                      | Wrapland::Client::DataDeviceManager::DnDAction::Move);
+    c_1.device->startDrag(
+        button_press_spy.first().first().value<quint32>(), c_1.source, surface_1.get());
+
+    QVERIFY(drag_started_spy.wait());
+    QCOMPARE(m_server_seat->dragSurface(), server_surface_1);
+    QCOMPARE(m_server_seat->dragSurfaceTransformation(), QMatrix4x4());
+    QVERIFY(!m_server_seat->dragSource()->icon());
+    QCOMPARE(m_server_seat->dragSource()->dragImplicitGrabSerial(),
+             button_press_spy.first().first().value<quint32>());
+
+    QSignalSpy drag_entered_spy(c_2.device, &Wrapland::Client::DataDevice::dragEntered);
+    QVERIFY(drag_entered_spy.isValid());
+
+    // Now move drag to the second client.
+    m_server_seat->setDragTarget(server_surface_2);
+    QCOMPARE(m_server_seat->dragSurface(), server_surface_2);
+
+    QVERIFY(drag_entered_spy.wait());
+    QCOMPARE(drag_entered_spy.count(), 1);
+    QCOMPARE(drag_entered_spy.first().first().value<quint32>(), m_display->serial());
+    QCOMPARE(drag_entered_spy.first().last().toPointF(), QPointF(0, 0));
+    QCOMPARE(c_2.device->dragSurface().data(), surface_2.get());
+
+    auto offer = c_2.device->dragOffer();
+    QVERIFY(offer);
+    QCOMPARE(offer->selectedDragAndDropAction(),
+             Wrapland::Client::DataDeviceManager::DnDAction::None);
+    QSignalSpy offer_action_changed_spy(
+        offer, &Wrapland::Client::DataOffer::selectedDragAndDropActionChanged);
+    QVERIFY(offer_action_changed_spy.isValid());
+    QCOMPARE(c_2.device->dragOffer()->offeredMimeTypes().count(), 1);
+    QCOMPARE(c_2.device->dragOffer()->offeredMimeTypes().first().name(),
+             QStringLiteral("text/plain"));
+    QTRY_COMPARE(offer->sourceDragAndDropActions(),
+                 Wrapland::Client::DataDeviceManager::DnDAction::Copy
+                     | Wrapland::Client::DataDeviceManager::DnDAction::Move);
+
+    offer->setDragAndDropActions(Wrapland::Client::DataDeviceManager::DnDAction::Copy
+                                     | Wrapland::Client::DataDeviceManager::DnDAction::Move,
+                                 Wrapland::Client::DataDeviceManager::DnDAction::Move);
+    QVERIFY(offer_action_changed_spy.wait());
+    QCOMPARE(offer_action_changed_spy.count(), 1);
+    QCOMPARE(offer->selectedDragAndDropAction(),
+             Wrapland::Client::DataDeviceManager::DnDAction::Move);
+    QVERIFY(source_selected_action_changed_spy.count() == 1
+            || source_selected_action_changed_spy.wait());
+    QCOMPARE(source_selected_action_changed_spy.count(), 1);
+    QCOMPARE(c_1.source->selectedDragAndDropAction(),
+             Wrapland::Client::DataDeviceManager::DnDAction::Move);
+
+    // Now delete the second client's data device.
+    QSignalSpy device_destroyed_spy(c_2.server_device,
+                                    &Wrapland::Server::DataDevice::resourceDestroyed);
+    QVERIFY(device_destroyed_spy.isValid());
+    delete c_2.device;
+    c_2.device = nullptr;
+    QVERIFY(device_destroyed_spy.wait());
+
+    // Simulate drop.
+    QSignalSpy dropped_spy(c_1.source, &Wrapland::Client::DataSource::dragAndDropPerformed);
+    QVERIFY(dropped_spy.isValid());
+    m_server_seat->setTimestamp(4);
+    m_server_seat->pointerButtonReleased(1);
+    QVERIFY(dropped_spy.wait(500));
 }
 
 void TestDragAndDrop::test_pointer_events_ignored()
