@@ -182,6 +182,7 @@ public:
         QMatrix4x4 transformation;
         QMetaObject::Connection destroyConnection;
         QMetaObject::Connection dragSourceDestroyConnection;
+        QMetaObject::Connection target_destroy_connection;
     };
     Drag drag;
 
