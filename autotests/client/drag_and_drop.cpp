@@ -76,7 +76,8 @@ private:
         Wrapland::Client::Touch* touch = nullptr;
         Wrapland::Client::DataDeviceManager* ddm = nullptr;
         Wrapland::Client::ShmPool* shm = nullptr;
-    } c_1;
+    } c_1, c_2;
+    decltype(c_1)* clients[2] = {&c_1, &c_2};
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-drag-n-drop-0");
@@ -89,13 +90,6 @@ void TestDragAndDrop::init()
     m_display->setSocketName(s_socketName);
     m_display->start();
 
-    // setup connection
-    c_1.connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connected_spy(c_1.connection,
-                             &Wrapland::Client::ConnectionThread::establishedChanged);
-    QVERIFY(connected_spy.isValid());
-    c_1.connection->setSocketName(s_socketName);
-
     m_server_compositor = m_display->createCompositor(m_display);
     m_server_seat = m_display->createSeat(m_display);
     m_server_seat->setHasPointer(true);
@@ -104,84 +98,95 @@ void TestDragAndDrop::init()
     m_server_device_manager = m_display->createDataDeviceManager(m_display);
     m_display->createShm();
 
-    c_1.thread = new QThread(this);
-    c_1.connection->moveToThread(c_1.thread);
-    c_1.thread->start();
+    for (auto client : clients) {
+        // setup connection
+        client->connection = new Wrapland::Client::ConnectionThread;
+        QSignalSpy connected_spy(client->connection,
+                                 &Wrapland::Client::ConnectionThread::establishedChanged);
+        QVERIFY(connected_spy.isValid());
+        client->connection->setSocketName(s_socketName);
 
-    c_1.connection->establishConnection();
-    QVERIFY(connected_spy.count() || connected_spy.wait());
-    QCOMPARE(connected_spy.count(), 1);
+        client->thread = new QThread(this);
+        client->connection->moveToThread(client->thread);
+        client->thread->start();
 
-    c_1.queue = new Wrapland::Client::EventQueue(this);
-    QVERIFY(!c_1.queue->isValid());
-    c_1.queue->setup(c_1.connection);
-    QVERIFY(c_1.queue->isValid());
+        client->connection->establishConnection();
+        QVERIFY(connected_spy.count() || connected_spy.wait());
+        QCOMPARE(connected_spy.count(), 1);
 
-    c_1.registry = new Wrapland::Client::Registry();
-    QSignalSpy interfaces_announced_spy(c_1.registry,
-                                        &Wrapland::Client::Registry::interfaceAnnounced);
-    QVERIFY(interfaces_announced_spy.isValid());
+        client->queue = new Wrapland::Client::EventQueue(this);
+        QVERIFY(!client->queue->isValid());
+        client->queue->setup(client->connection);
+        QVERIFY(client->queue->isValid());
 
-    QVERIFY(!c_1.registry->eventQueue());
-    c_1.registry->setEventQueue(c_1.queue);
-    QCOMPARE(c_1.registry->eventQueue(), c_1.queue);
-    c_1.registry->create(c_1.connection);
-    QVERIFY(c_1.registry->isValid());
-    c_1.registry->setup();
+        client->registry = new Wrapland::Client::Registry();
+        QSignalSpy interfaces_announced_spy(client->registry,
+                                            &Wrapland::Client::Registry::interfaceAnnounced);
+        QVERIFY(interfaces_announced_spy.isValid());
 
-    QVERIFY(interfaces_announced_spy.wait());
+        QVERIFY(!client->registry->eventQueue());
+        client->registry->setEventQueue(client->queue);
+        QCOMPARE(client->registry->eventQueue(), client->queue);
+        client->registry->create(client->connection);
+        QVERIFY(client->registry->isValid());
+        client->registry->setup();
+
+        QVERIFY(interfaces_announced_spy.wait());
 #define CREATE(variable, factory, iface)                                                           \
-    variable = c_1.registry->create##factory(                                                      \
-        c_1.registry->interface(Wrapland::Client::Registry::Interface::iface).name,                \
-        c_1.registry->interface(Wrapland::Client::Registry::Interface::iface).version,             \
+    variable = client->registry->create##factory(                                                  \
+        client->registry->interface(Wrapland::Client::Registry::Interface::iface).name,            \
+        client->registry->interface(Wrapland::Client::Registry::Interface::iface).version,         \
         this);                                                                                     \
     QVERIFY(variable);
 
-    CREATE(c_1.compositor, Compositor, Compositor)
-    CREATE(c_1.seat, Seat, Seat)
-    CREATE(c_1.ddm, DataDeviceManager, DataDeviceManager)
-    CREATE(c_1.shm, ShmPool, Shm)
+        CREATE(client->compositor, Compositor, Compositor)
+        CREATE(client->seat, Seat, Seat)
+        CREATE(client->ddm, DataDeviceManager, DataDeviceManager)
+        CREATE(client->shm, ShmPool, Shm)
 
 #undef CREATE
 
-    QSignalSpy pointerSpy(c_1.seat, &Wrapland::Client::Seat::hasPointerChanged);
-    QVERIFY(pointerSpy.isValid());
-    QVERIFY(pointerSpy.wait());
-    c_1.pointer = c_1.seat->createPointer(c_1.seat);
-    QVERIFY(c_1.pointer->isValid());
-    c_1.touch = c_1.seat->createTouch(c_1.seat);
-    QVERIFY(c_1.touch->isValid());
-    c_1.device = c_1.ddm->getDataDevice(c_1.seat, this);
-    QVERIFY(c_1.device->isValid());
-    c_1.source = c_1.ddm->createDataSource(this);
-    QVERIFY(c_1.source->isValid());
-    c_1.source->offer(QStringLiteral("text/plain"));
+        QSignalSpy pointerSpy(client->seat, &Wrapland::Client::Seat::hasPointerChanged);
+        QVERIFY(pointerSpy.isValid());
+        QVERIFY(pointerSpy.wait());
+        client->pointer = client->seat->createPointer(client->seat);
+        QVERIFY(client->pointer->isValid());
+        client->touch = client->seat->createTouch(client->seat);
+        QVERIFY(client->touch->isValid());
+        client->device = client->ddm->getDataDevice(client->seat, this);
+        QVERIFY(client->device->isValid());
+        client->source = client->ddm->createDataSource(this);
+        QVERIFY(client->source->isValid());
+        client->source->offer(QStringLiteral("text/plain"));
+    }
 }
 
 void TestDragAndDrop::cleanup()
 {
+    for (auto client : clients) {
 #define DELETE(name)                                                                               \
     if (name) {                                                                                    \
         delete name;                                                                               \
         name = nullptr;                                                                            \
     }
-    DELETE(c_1.source)
-    DELETE(c_1.device)
-    DELETE(c_1.shm)
-    DELETE(c_1.compositor)
-    DELETE(c_1.ddm)
-    DELETE(c_1.seat)
-    DELETE(c_1.queue)
-    DELETE(c_1.registry)
+        DELETE(client->source)
+        DELETE(client->device)
+        DELETE(client->shm)
+        DELETE(client->compositor)
+        DELETE(client->ddm)
+        DELETE(client->seat)
+        DELETE(client->queue)
+        DELETE(client->registry)
 #undef DELETE
-    if (c_1.thread) {
-        c_1.thread->quit();
-        c_1.thread->wait();
-        delete c_1.thread;
-        c_1.thread = nullptr;
+        if (client->thread) {
+            client->thread->quit();
+            client->thread->wait();
+            delete client->thread;
+            client->thread = nullptr;
+        }
+        delete client->connection;
+        client->connection = nullptr;
     }
-    delete c_1.connection;
-    c_1.connection = nullptr;
 
     delete m_display;
     m_display = nullptr;
