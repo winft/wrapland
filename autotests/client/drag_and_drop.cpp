@@ -55,7 +55,8 @@ private Q_SLOTS:
     void test_pointer_events_ignored();
 
 private:
-    Wrapland::Client::Surface* create_surface();
+    struct Client;
+    Wrapland::Client::Surface* create_surface(Client& client);
     Wrapland::Server::Surface* get_server_surface();
 
     Wrapland::Server::Display* m_display = nullptr;
@@ -63,7 +64,7 @@ private:
     Wrapland::Server::DataDeviceManager* m_server_device_manager = nullptr;
     Wrapland::Server::Seat* m_server_seat = nullptr;
 
-    struct {
+    struct Client {
         Wrapland::Client::ConnectionThread* connection = nullptr;
         QThread* thread = nullptr;
         Wrapland::Client::EventQueue* queue = nullptr;
@@ -77,7 +78,7 @@ private:
         Wrapland::Client::DataDeviceManager* ddm = nullptr;
         Wrapland::Client::ShmPool* shm = nullptr;
     } c_1, c_2;
-    decltype(c_1)* clients[2] = {&c_1, &c_2};
+    Client* clients[2] = {&c_1, &c_2};
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-drag-n-drop-0");
@@ -192,16 +193,16 @@ void TestDragAndDrop::cleanup()
     m_display = nullptr;
 }
 
-Wrapland::Client::Surface* TestDragAndDrop::create_surface()
+Wrapland::Client::Surface* TestDragAndDrop::create_surface(Client& client)
 {
-    auto s = c_1.compositor->createSurface();
+    auto surface = client.compositor->createSurface();
 
     QImage img(QSize(100, 200), QImage::Format_RGB32);
     img.fill(Qt::red);
-    s->attachBuffer(c_1.shm->createBuffer(img));
-    s->damage(QRect(0, 0, 100, 200));
-    s->commit(Wrapland::Client::Surface::CommitFlag::None);
-    return s;
+    surface->attachBuffer(client.shm->createBuffer(img));
+    surface->damage(QRect(0, 0, 100, 200));
+    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    return surface;
 }
 
 Wrapland::Server::Surface* TestDragAndDrop::get_server_surface()
@@ -223,7 +224,7 @@ void TestDragAndDrop::test_pointer()
     // drop.
 
     // First create a window.
-    std::unique_ptr<Wrapland::Client::Surface> surface(create_surface());
+    std::unique_ptr<Wrapland::Client::Surface> surface(create_surface(c_1));
     auto server_surface = get_server_surface();
     QVERIFY(server_surface);
 
@@ -331,7 +332,7 @@ void TestDragAndDrop::test_touch()
     // drop.
 
     // First create a window.
-    std::unique_ptr<Wrapland::Client::Surface> s(create_surface());
+    std::unique_ptr<Wrapland::Client::Surface> s(create_surface(c_1));
     s->setSize(QSize(100, 100));
     auto server_surface = get_server_surface();
     QVERIFY(server_surface);
@@ -440,7 +441,7 @@ void TestDragAndDrop::test_cancel_by_destroyed_data_source()
     // This test simulates the problem from BUG 389221.
 
     // First create a window.
-    std::unique_ptr<Wrapland::Client::Surface> s(create_surface());
+    std::unique_ptr<Wrapland::Client::Surface> s(create_surface(c_1));
     auto server_surface = get_server_surface();
     QVERIFY(server_surface);
 
@@ -549,7 +550,7 @@ void TestDragAndDrop::test_pointer_events_ignored()
     // drag.
 
     // First create a window.
-    std::unique_ptr<Wrapland::Client::Surface> s(create_surface());
+    std::unique_ptr<Wrapland::Client::Surface> s(create_surface(c_1));
     auto server_surface = get_server_surface();
     QVERIFY(server_surface);
 
