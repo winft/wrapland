@@ -71,6 +71,7 @@ private:
         Wrapland::Client::Compositor* compositor = nullptr;
         Wrapland::Client::Registry* registry = nullptr;
         Wrapland::Client::DataDevice* device = nullptr;
+        Wrapland::Server::DataDevice* server_device{nullptr};
         Wrapland::Client::DataSource* source = nullptr;
         Wrapland::Client::Seat* seat = nullptr;
         Wrapland::Client::Pointer* pointer = nullptr;
@@ -85,6 +86,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-wayland-drag-n
 
 void TestDragAndDrop::init()
 {
+    qRegisterMetaType<Wrapland::Server::DataDevice*>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::Display(this);
@@ -154,8 +156,19 @@ void TestDragAndDrop::init()
         QVERIFY(client->pointer->isValid());
         client->touch = client->seat->createTouch(client->seat);
         QVERIFY(client->touch->isValid());
+
+        QSignalSpy device_created_spy(m_server_device_manager,
+                                      &Wrapland::Server::DataDeviceManager::dataDeviceCreated);
+        QVERIFY(device_created_spy.isValid());
         client->device = client->ddm->getDataDevice(client->seat, this);
         QVERIFY(client->device->isValid());
+
+        QVERIFY(device_created_spy.wait());
+        QCOMPARE(device_created_spy.count(), 1);
+        client->server_device
+            = device_created_spy.first().first().value<Wrapland::Server::DataDevice*>();
+        QVERIFY(client->server_device);
+
         client->source = client->ddm->createDataSource(this);
         QVERIFY(client->source->isValid());
         client->source->offer(QStringLiteral("text/plain"));
