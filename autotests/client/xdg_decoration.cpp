@@ -28,11 +28,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/xdgdecoration.h"
 #include "../../src/client/xdgshell.h"
 
-#include "../../server/xdg_decoration.h"
-
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/surface.h"
+#include "../../server/xdg_decoration.h"
 #include "../../server/xdg_shell.h"
 #include "../../server/xdg_shell_toplevel.h"
 

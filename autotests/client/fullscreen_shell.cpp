@@ -17,20 +17,19 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// KWin
+
 #include "../../src/client/connection_thread.h"
-#include "../../src/client/registry.h"
 #include "../../src/client/fullscreen_shell.h"
-// Wayland
+#include "../../src/client/registry.h"
+
 #include <wayland-client-protocol.h>
 
 class TestWaylandFullscreenShell : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestWaylandFullscreenShell(QObject *parent = nullptr);
+    explicit TestWaylandFullscreenShell(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -41,12 +40,12 @@ private Q_SLOTS:
     // TODO: add tests for removal - requires more control over the compositor
 
 private:
-    QProcess *m_westonProcess;
+    QProcess* m_westonProcess;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-fullscreen-shell-0");
 
-TestWaylandFullscreenShell::TestWaylandFullscreenShell(QObject *parent)
+TestWaylandFullscreenShell::TestWaylandFullscreenShell(QObject* parent)
     : QObject(parent)
     , m_westonProcess(nullptr)
 {
@@ -71,7 +70,8 @@ void TestWaylandFullscreenShell::init()
     if (runtimeDir.exists(s_socketName)) {
         return;
     }
-    QFileSystemWatcher *socketWatcher = new QFileSystemWatcher(QStringList({runtimeDir.absolutePath()}), this);
+    QFileSystemWatcher* socketWatcher
+        = new QFileSystemWatcher(QStringList({runtimeDir.absolutePath()}), this);
     QSignalSpy socketSpy(socketWatcher, SIGNAL(directoryChanged(QString)));
 
     // limit to maximum of 10 waits
@@ -108,7 +108,7 @@ void TestWaylandFullscreenShell::testRegistry()
     Wrapland::Client::Registry registry;
     QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfaceAnnounced);
     QVERIFY(interfacesAnnouncedSpy.isValid());
-    QSignalSpy announced(&registry, SIGNAL(fullscreenShellAnnounced(quint32,quint32)));
+    QSignalSpy announced(&registry, SIGNAL(fullscreenShellAnnounced(quint32, quint32)));
     registry.create(connection.display());
     QVERIFY(registry.isValid());
     registry.setup();
@@ -125,25 +125,27 @@ void TestWaylandFullscreenShell::testRegistry()
     QVERIFY(!fullscreenShell.hasCapabilityArbitraryModes());
     QVERIFY(!fullscreenShell.hasCapabilityCursorPlane());
 
-    fullscreenShell.setup(registry.bindFullscreenShell(announced.first().first().value<quint32>(), 1));
+    fullscreenShell.setup(
+        registry.bindFullscreenShell(announced.first().first().value<quint32>(), 1));
     QVERIFY(fullscreenShell.isValid());
 }
 
 void TestWaylandFullscreenShell::testRegistryCreate()
-{    if (m_westonProcess->state() != QProcess::Running) {
+{
+    if (m_westonProcess->state() != QProcess::Running) {
         QSKIP("This test requires a running wayland server");
     }
     Wrapland::Client::ConnectionThread connection;
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.setSocketName(s_socketName);
     connection.establishConnection();
-     QVERIFY(connectedSpy.count() || connectedSpy.wait());
-     QCOMPARE(connectedSpy.count(), 1);
+    QVERIFY(connectedSpy.count() || connectedSpy.wait());
+    QCOMPARE(connectedSpy.count(), 1);
 
     Wrapland::Client::Registry registry;
     QSignalSpy interfacesAnnouncedSpy(&registry, &Wrapland::Client::Registry::interfaceAnnounced);
     QVERIFY(interfacesAnnouncedSpy.isValid());
-    QSignalSpy announced(&registry, SIGNAL(fullscreenShellAnnounced(quint32,quint32)));
+    QSignalSpy announced(&registry, SIGNAL(fullscreenShellAnnounced(quint32, quint32)));
     registry.create(connection.display());
     QVERIFY(registry.isValid());
     registry.setup();
@@ -155,7 +157,8 @@ void TestWaylandFullscreenShell::testRegistryCreate()
     }
     QCOMPARE(announced.count(), 1);
 
-    Wrapland::Client::FullscreenShell *fullscreenShell = registry.createFullscreenShell(announced.first().first().value<quint32>(), 1, &registry);
+    Wrapland::Client::FullscreenShell* fullscreenShell
+        = registry.createFullscreenShell(announced.first().first().value<quint32>(), 1, &registry);
     QVERIFY(fullscreenShell->isValid());
 }
 

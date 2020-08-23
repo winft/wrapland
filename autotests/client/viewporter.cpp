@@ -17,28 +17,28 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
+#include "../../src/client/viewporter.h"
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
-#include "../../src/client/surface.h"
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/shm_pool.h"
-#include "../../src/client/viewporter.h"
+#include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/surface.h"
-#include "../../server/wayland/client.h"
 #include "../../server/viewporter.h"
+#include "../../server/wayland/client.h"
 
 #include <wayland-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
 
-#include <QtTest>
 #include <QImage>
 #include <QPainter>
+#include <QtTest>
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -47,7 +47,7 @@ class TestViewporter : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestViewporter(QObject *parent = nullptr);
+    explicit TestViewporter(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -64,20 +64,20 @@ private Q_SLOTS:
     void testNoSurface();
 
 private:
-    Srv::Display *m_display;
-    Srv::Compositor *m_serverCompositor;
-    Srv::Viewporter *m_viewporterInterface;
-    Clt::ConnectionThread *m_connection;
-    Clt::Compositor *m_compositor;
-    Clt::ShmPool *m_shm;
-    Clt::EventQueue *m_queue;
-    Clt::Viewporter *m_viewporter;
-    QThread *m_thread;
+    Srv::Display* m_display;
+    Srv::Compositor* m_serverCompositor;
+    Srv::Viewporter* m_viewporterInterface;
+    Clt::ConnectionThread* m_connection;
+    Clt::Compositor* m_compositor;
+    Clt::ShmPool* m_shm;
+    Clt::EventQueue* m_queue;
+    Clt::Viewporter* m_viewporter;
+    QThread* m_thread;
 };
 
 static const QString s_socketName = QStringLiteral("kwin-test-viewporter-0");
 
-TestViewporter::TestViewporter(QObject *parent)
+TestViewporter::TestViewporter(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
@@ -122,9 +122,9 @@ void TestViewporter::init()
 
     Clt::Registry registry;
     registry.setEventQueue(m_queue);
-    QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32,quint32)));
-    QSignalSpy shmSpy(&registry, SIGNAL(shmAnnounced(quint32,quint32)));
-    QSignalSpy viewporterSpy(&registry, SIGNAL(viewporterAnnounced(quint32,quint32)));
+    QSignalSpy compositorSpy(&registry, SIGNAL(compositorAnnounced(quint32, quint32)));
+    QSignalSpy shmSpy(&registry, SIGNAL(shmAnnounced(quint32, quint32)));
+    QSignalSpy viewporterSpy(&registry, SIGNAL(viewporterAnnounced(quint32, quint32)));
     QSignalSpy allAnnounced(&registry, SIGNAL(interfacesAnnounced()));
     QVERIFY(allAnnounced.isValid());
     QVERIFY(shmSpy.isValid());
@@ -137,16 +137,17 @@ void TestViewporter::init()
     QVERIFY(!viewporterSpy.isEmpty());
 
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
-                                             compositorSpy.first().last().value<quint32>(), this);
+                                             compositorSpy.first().last().value<quint32>(),
+                                             this);
     QVERIFY(m_compositor->isValid());
-    m_shm = registry.createShmPool(shmSpy.first().first().value<quint32>(),
-                                   shmSpy.first().last().value<quint32>(), this);
+    m_shm = registry.createShmPool(
+        shmSpy.first().first().value<quint32>(), shmSpy.first().last().value<quint32>(), this);
     QVERIFY(m_shm->isValid());
 
     m_viewporter = registry.createViewporter(
-                registry.interface(Clt::Registry::Interface::Viewporter).name,
-                registry.interface(Clt::Registry::Interface::Viewporter).version,
-                this);
+        registry.interface(Clt::Registry::Interface::Viewporter).name,
+        registry.interface(Clt::Registry::Interface::Viewporter).version,
+        this);
     QVERIFY(m_viewporter->isValid());
 }
 
@@ -197,8 +198,7 @@ void TestViewporter::testViewportExists()
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Srv::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    Srv::Surface* serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
@@ -207,8 +207,7 @@ void TestViewporter::testViewportExists()
     std::unique_ptr<Clt::Viewport> vp1(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
-    auto serverViewport
-            = serverViewportCreated.first().first().value<Srv::Viewport*>();
+    auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Create second viewport with error.
@@ -228,8 +227,7 @@ void TestViewporter::testWithoutBuffer()
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    auto serverSurface
-            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    auto serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
@@ -238,8 +236,7 @@ void TestViewporter::testWithoutBuffer()
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
-    auto serverViewport
-            = serverViewportCreated.first().first().value<Srv::Viewport*>();
+    auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     QVERIFY(!serverSurface->buffer());
@@ -276,8 +273,7 @@ void TestViewporter::testDestinationSize()
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Srv::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    Srv::Surface* serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
@@ -286,8 +282,7 @@ void TestViewporter::testDestinationSize()
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
-    auto serverViewport
-            = serverViewportCreated.first().first().value<Srv::Viewport*>();
+    auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
@@ -327,8 +322,7 @@ void TestViewporter::testSourceRectangle()
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Srv::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    Srv::Surface* serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
@@ -337,8 +331,7 @@ void TestViewporter::testSourceRectangle()
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
-    auto serverViewport
-            = serverViewportCreated.first().first().value<Srv::Viewport*>();
+    auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
@@ -386,8 +379,7 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Srv::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    Srv::Surface* serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
@@ -396,8 +388,7 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
-    auto serverViewport
-            = serverViewportCreated.first().first().value<Srv::Viewport*>();
+    auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
@@ -428,10 +419,9 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 1);
     QCOMPARE(serverSurface->size(), destinationSize);
-    QVERIFY((serverSurface->sourceRectangle().topLeft()
-                - rect.topLeft()).manhattanLength() < 0.01);
-    QVERIFY((serverSurface->sourceRectangle().bottomRight()
-                - rect.bottomRight()).manhattanLength() < 0.01);
+    QVERIFY((serverSurface->sourceRectangle().topLeft() - rect.topLeft()).manhattanLength() < 0.01);
+    QVERIFY((serverSurface->sourceRectangle().bottomRight() - rect.bottomRight()).manhattanLength()
+            < 0.01);
 
     // Destroy the viewport and check that the size is reset.
     vp.reset();
@@ -463,8 +453,7 @@ void TestViewporter::testDataError()
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Srv::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    Srv::Surface* serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
@@ -473,8 +462,7 @@ void TestViewporter::testDataError()
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
-    auto serverViewport
-            = serverViewportCreated.first().first().value<Srv::Viewport*>();
+    auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
@@ -518,8 +506,7 @@ void TestViewporter::testBufferSizeChange()
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Srv::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    Srv::Surface* serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
@@ -528,8 +515,7 @@ void TestViewporter::testBufferSizeChange()
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
-    auto serverViewport
-            = serverViewportCreated.first().first().value<Srv::Viewport*>();
+    auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
@@ -606,8 +592,7 @@ void TestViewporter::testDestinationSizeChange()
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Srv::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    Srv::Surface* serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
@@ -616,8 +601,7 @@ void TestViewporter::testDestinationSizeChange()
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
-    auto serverViewport
-            = serverViewportCreated.first().first().value<Srv::Viewport*>();
+    auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.
@@ -648,10 +632,9 @@ void TestViewporter::testDestinationSizeChange()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 1);
     QCOMPARE(serverSurface->size(), destinationSize);
-    QVERIFY((serverSurface->sourceRectangle().topLeft()
-                - rect.topLeft()).manhattanLength() < 0.01);
-    QVERIFY((serverSurface->sourceRectangle().bottomRight()
-                - rect.bottomRight()).manhattanLength() < 0.01);
+    QVERIFY((serverSurface->sourceRectangle().topLeft() - rect.topLeft()).manhattanLength() < 0.01);
+    QVERIFY((serverSurface->sourceRectangle().bottomRight() - rect.bottomRight()).manhattanLength()
+            < 0.01);
 
     // Unset the destination size.
     vp->setDestinationSize(QSize(-1, -1));
@@ -665,10 +648,9 @@ void TestViewporter::testDestinationSizeChange()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 1);
     QCOMPARE(serverSurface->size(), rect.size());
-    QVERIFY((serverSurface->sourceRectangle().topLeft()
-                - rect.topLeft()).manhattanLength() < 0.01);
-    QVERIFY((serverSurface->sourceRectangle().bottomRight()
-                - rect.bottomRight()).manhattanLength() < 0.01);
+    QVERIFY((serverSurface->sourceRectangle().topLeft() - rect.topLeft()).manhattanLength() < 0.01);
+    QVERIFY((serverSurface->sourceRectangle().bottomRight() - rect.bottomRight()).manhattanLength()
+            < 0.01);
 
     // Set the destination size again.
     vp->setDestinationSize(destinationSize);
@@ -686,10 +668,10 @@ void TestViewporter::testDestinationSizeChange()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 2);
     QCOMPARE(serverSurface->size(), destinationSize);
-    QVERIFY((serverSurface->sourceRectangle().topLeft()
-                - rect2.topLeft()).manhattanLength() < 0.01);
-    QVERIFY((serverSurface->sourceRectangle().bottomRight()
-                - rect2.bottomRight()).manhattanLength() < 0.01);
+    QVERIFY((serverSurface->sourceRectangle().topLeft() - rect2.topLeft()).manhattanLength()
+            < 0.01);
+    QVERIFY((serverSurface->sourceRectangle().bottomRight() - rect2.bottomRight()).manhattanLength()
+            < 0.01);
 
     // And try to unset the destination size, what leads to an error.
     QSignalSpy errorSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
@@ -713,8 +695,7 @@ void TestViewporter::testNoSurface()
     std::unique_ptr<Clt::Surface> surface(m_compositor->createSurface());
 
     QVERIFY(serverSurfaceCreated.wait());
-    Srv::Surface *serverSurface
-            = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    Srv::Surface* serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
     // Create viewport.
@@ -723,8 +704,7 @@ void TestViewporter::testNoSurface()
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(surface.get(), this));
 
     QVERIFY(serverViewportCreated.wait());
-    auto serverViewport
-            = serverViewportCreated.first().first().value<Srv::Viewport*>();
+    auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
     // Add a buffer.

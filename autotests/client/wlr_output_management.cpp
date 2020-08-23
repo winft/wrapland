@@ -21,13 +21,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/event_queue.h"
 #include "../../src/client/output.h"
 #include "../../src/client/registry.h"
-#include "../../src/client/wlr_output_manager_v1.h"
 #include "../../src/client/wlr_output_configuration_v1.h"
+#include "../../src/client/wlr_output_manager_v1.h"
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/output_configuration_v1.h"
 #include "../../server/output.h"
+#include "../../server/output_configuration_v1.h"
 #include "../../server/output_management_v1.h"
 
 #include <QtTest>
@@ -41,35 +41,35 @@ class TestWlrOutputManagement : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestWlrOutputManagement(QObject *parent = nullptr);
+    explicit TestWlrOutputManagement(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
 
 private:
-    Srv::Display *m_display;
-    Srv::OutputManagementV1 *m_outputManagementInterface;
+    Srv::Display* m_display;
+    Srv::OutputManagementV1* m_outputManagementInterface;
     QList<Srv::Output*> m_serverOutputs;
 
-    Clt::Registry *m_registry = nullptr;
-    Clt::WlrOutputHeadV1 *m_outputHead = nullptr;
-    Clt::WlrOutputManagerV1 *m_outputManager = nullptr;
-    Clt::WlrOutputConfigurationV1 *m_outputConfiguration = nullptr;
+    Clt::Registry* m_registry = nullptr;
+    Clt::WlrOutputHeadV1* m_outputHead = nullptr;
+    Clt::WlrOutputManagerV1* m_outputManager = nullptr;
+    Clt::WlrOutputConfigurationV1* m_outputConfiguration = nullptr;
     QList<Clt::WlrOutputHeadV1*> m_clientOutputs;
     QList<Srv::Output::Mode> m_modes;
 
-    Clt::ConnectionThread *m_connection = nullptr;
-    Clt::EventQueue *m_queue = nullptr;
-    QThread *m_thread;
+    Clt::ConnectionThread* m_connection = nullptr;
+    Clt::EventQueue* m_queue = nullptr;
+    QThread* m_thread;
 
-    QSignalSpy *m_announcedSpy;
-    QSignalSpy *m_omSpy;
-    QSignalSpy *m_configSpy;
+    QSignalSpy* m_announcedSpy;
+    QSignalSpy* m_omSpy;
+    QSignalSpy* m_configSpy;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-output-0");
 
-TestWlrOutputManagement::TestWlrOutputManagement(QObject *parent)
+TestWlrOutputManagement::TestWlrOutputManagement(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_outputManagementInterface(nullptr)
@@ -140,8 +140,7 @@ void TestWlrOutputManagement::init()
 
     m_registry = new Clt::Registry();
 
-    m_announcedSpy = new QSignalSpy(m_registry,
-                                    &Clt::Registry::wlrOutputManagerV1Announced);
+    m_announcedSpy = new QSignalSpy(m_registry, &Clt::Registry::wlrOutputManagerV1Announced);
     m_omSpy = new QSignalSpy(m_registry, &Clt::Registry::outputDeviceV1Announced);
 
     QVERIFY(m_announcedSpy->isValid());

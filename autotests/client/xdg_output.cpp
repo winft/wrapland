@@ -22,34 +22,34 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/display.h"
 #include "../../server/output.h"
 
-
+#include "../../server/xdg_output.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/output.h"
-#include "../../src/client/xdgoutput.h"
 #include "../../src/client/registry.h"
-#include "../../server/xdg_output.h"
+#include "../../src/client/xdgoutput.h"
 
 class TestXdgOutput : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestXdgOutput(QObject *parent = nullptr);
+    explicit TestXdgOutput(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
     void testChanges();
+
 private:
-    Wrapland::Server::Display *m_display;
+    Wrapland::Server::Display* m_display;
     Wrapland::Server::Output* m_serverOutput;
-    Wrapland::Client::ConnectionThread *m_connection;
-    Wrapland::Client::EventQueue *m_queue;
-    QThread *m_thread;
+    Wrapland::Client::ConnectionThread* m_connection;
+    Wrapland::Client::EventQueue* m_queue;
+    QThread* m_thread;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-xdg-output-0");
 
-TestXdgOutput::TestXdgOutput(QObject *parent)
+TestXdgOutput::TestXdgOutput(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverOutput(nullptr)
@@ -72,7 +72,7 @@ void TestXdgOutput::init()
     m_serverOutput->set_enabled(true);
 
     // Not a sensible position for one monitor but works for this test. And a 1.5 scale factor.
-    m_serverOutput->set_geometry(QRectF(QPoint(11,12), QSize(1280, 720)));
+    m_serverOutput->set_geometry(QRectF(QPoint(11, 12), QSize(1280, 720)));
     m_serverOutput->done();
 
     // setup connection
@@ -121,8 +121,8 @@ void TestXdgOutput::testChanges()
     // Verify the server modes.
 
     Wrapland::Client::Registry registry;
-    QSignalSpy announced(&registry, SIGNAL(outputAnnounced(quint32,quint32)));
-    QSignalSpy xdgOutputAnnounced(&registry, SIGNAL(xdgOutputAnnounced(quint32,quint32)));
+    QSignalSpy announced(&registry, SIGNAL(outputAnnounced(quint32, quint32)));
+    QSignalSpy xdgOutputAnnounced(&registry, SIGNAL(xdgOutputAnnounced(quint32, quint32)));
 
     registry.setEventQueue(m_queue);
     registry.create(m_connection->display());
@@ -136,28 +136,33 @@ void TestXdgOutput::testChanges()
     Wrapland::Client::Output output;
     QSignalSpy outputChanged(&output, SIGNAL(changed()));
 
-    output.setup(registry.bindOutput(announced.first().first().value<quint32>(), announced.first().last().value<quint32>()));
+    output.setup(registry.bindOutput(announced.first().first().value<quint32>(),
+                                     announced.first().last().value<quint32>()));
     QVERIFY(outputChanged.wait());
 
-    std::unique_ptr<Wrapland::Client::XdgOutputManager> xdgOutputManager(registry.createXdgOutputManager(xdgOutputAnnounced.first().first().value<quint32>(), xdgOutputAnnounced.first().last().value<quint32>(), this));
+    std::unique_ptr<Wrapland::Client::XdgOutputManager> xdgOutputManager(
+        registry.createXdgOutputManager(xdgOutputAnnounced.first().first().value<quint32>(),
+                                        xdgOutputAnnounced.first().last().value<quint32>(),
+                                        this));
 
-    std::unique_ptr<Wrapland::Client::XdgOutput> xdgOutput(xdgOutputManager->getXdgOutput(&output, this));
+    std::unique_ptr<Wrapland::Client::XdgOutput> xdgOutput(
+        xdgOutputManager->getXdgOutput(&output, this));
     QSignalSpy xdgOutputChanged(xdgOutput.get(), SIGNAL(changed()));
 
-    //check details are sent on client bind
+    // check details are sent on client bind
     QVERIFY(xdgOutputChanged.wait());
     xdgOutputChanged.clear();
-    QCOMPARE(xdgOutput->logicalPosition(), QPoint(11,12));
-    QCOMPARE(xdgOutput->logicalSize(), QSize(1280,720));
+    QCOMPARE(xdgOutput->logicalPosition(), QPoint(11, 12));
+    QCOMPARE(xdgOutput->logicalSize(), QSize(1280, 720));
 
-    //dynamic updates
-    m_serverOutput->set_geometry(QRectF(QPoint(1000, 2000), QSize(100,200)));
+    // dynamic updates
+    m_serverOutput->set_geometry(QRectF(QPoint(1000, 2000), QSize(100, 200)));
     m_serverOutput->done();
 
     QVERIFY(xdgOutputChanged.wait());
     QCOMPARE(xdgOutputChanged.count(), 1);
     QCOMPARE(xdgOutput->logicalPosition(), QPoint(1000, 2000));
-    QCOMPARE(xdgOutput->logicalSize(), QSize(100,200));
+    QCOMPARE(xdgOutput->logicalSize(), QSize(100, 200));
 }
 
 QTEST_GUILESS_MAIN(TestXdgOutput)

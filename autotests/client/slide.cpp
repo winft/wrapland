@@ -24,15 +24,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/event_queue.h"
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
-#include "../../src/client/surface.h"
 #include "../../src/client/slide.h"
+#include "../../src/client/surface.h"
 
-#include "../../server/display.h"
 #include "../../server/compositor.h"
+#include "../../server/display.h"
 #include "../../server/region.h"
-#include "../../server/surface.h"
-
 #include "../../server/slide.h"
+#include "../../server/surface.h"
 
 using namespace Wrapland::Client;
 
@@ -40,7 +39,7 @@ class TestSlide : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestSlide(QObject *parent = nullptr);
+    explicit TestSlide(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -49,19 +48,19 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    Wrapland::Server::Display *m_display;
-    Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::SlideManager *m_slideManagerInterface;
-    Wrapland::Client::ConnectionThread *m_connection;
-    Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::SlideManager *m_slideManager;
-    Wrapland::Client::EventQueue *m_queue;
-    QThread *m_thread;
+    Wrapland::Server::Display* m_display;
+    Wrapland::Server::Compositor* m_serverCompositor;
+    Wrapland::Server::SlideManager* m_slideManagerInterface;
+    Wrapland::Client::ConnectionThread* m_connection;
+    Wrapland::Client::Compositor* m_compositor;
+    Wrapland::Client::SlideManager* m_slideManager;
+    Wrapland::Client::EventQueue* m_queue;
+    QThread* m_thread;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-slide-0");
 
-TestSlide::TestSlide(QObject *parent)
+TestSlide::TestSlide(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
@@ -114,20 +113,23 @@ void TestSlide::init()
     m_serverCompositor = m_display->createCompositor(m_display);
 
     QVERIFY(compositorSpy.wait());
-    m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(), compositorSpy.first().last().value<quint32>(), this);
+    m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
+                                             compositorSpy.first().last().value<quint32>(),
+                                             this);
 
     m_slideManagerInterface = m_display->createSlideManager(m_display);
 
     QVERIFY(slideSpy.wait());
-    m_slideManager = registry.createSlideManager(slideSpy.first().first().value<quint32>(), slideSpy.first().last().value<quint32>(), this);
+    m_slideManager = registry.createSlideManager(
+        slideSpy.first().first().value<quint32>(), slideSpy.first().last().value<quint32>(), this);
 }
 
 void TestSlide::cleanup()
 {
-#define CLEANUP(variable) \
-    if (variable) { \
-        delete variable; \
-        variable = nullptr; \
+#define CLEANUP(variable)                                                                          \
+    if (variable) {                                                                                \
+        delete variable;                                                                           \
+        variable = nullptr;                                                                        \
     }
     CLEANUP(m_compositor)
     CLEANUP(m_slideManager)
@@ -150,7 +152,8 @@ void TestSlide::cleanup()
 
 void TestSlide::testCreate()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
+    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+                                    SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -178,7 +181,8 @@ void TestSlide::testCreate()
 
 void TestSlide::testSurfaceDestroy()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+                                    &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());

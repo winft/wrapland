@@ -19,9 +19,9 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include <QtTest>
-// client
-#include "../../src/client/connection_thread.h"
+
 #include "../../src/client/compositor.h"
+#include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/pointer.h"
 #include "../../src/client/pointerconstraints.h"
@@ -29,10 +29,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/pointer_constraints_v1.h"
 #include "../../server/seat.h"
-#include "../../server/compositor.h"
 #include "../../server/surface.h"
 
 using namespace Wrapland::Client;
@@ -114,16 +114,23 @@ void TestPointerConstraints::init()
     registry.setup();
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    m_compositor = registry.createCompositor(registry.interface(Registry::Interface::Compositor).name, registry.interface(Registry::Interface::Compositor).version, this);
+    m_compositor
+        = registry.createCompositor(registry.interface(Registry::Interface::Compositor).name,
+                                    registry.interface(Registry::Interface::Compositor).version,
+                                    this);
     QVERIFY(m_compositor);
     QVERIFY(m_compositor->isValid());
 
-    m_pointerConstraints = registry.createPointerConstraints(registry.interface(Registry::Interface::PointerConstraintsUnstableV1).name,
-                                                             registry.interface(Registry::Interface::PointerConstraintsUnstableV1).version, this);
+    m_pointerConstraints = registry.createPointerConstraints(
+        registry.interface(Registry::Interface::PointerConstraintsUnstableV1).name,
+        registry.interface(Registry::Interface::PointerConstraintsUnstableV1).version,
+        this);
     QVERIFY(m_pointerConstraints);
     QVERIFY(m_pointerConstraints->isValid());
 
-    m_seat = registry.createSeat(registry.interface(Registry::Interface::Seat).name, registry.interface(Registry::Interface::Seat).version, this);
+    m_seat = registry.createSeat(registry.interface(Registry::Interface::Seat).name,
+                                 registry.interface(Registry::Interface::Seat).version,
+                                 this);
     QVERIFY(m_seat);
     QVERIFY(m_seat->isValid());
     QSignalSpy pointerChangedSpy(m_seat, &Wrapland::Client::Seat::hasPointerChanged);
@@ -135,10 +142,10 @@ void TestPointerConstraints::init()
 
 void TestPointerConstraints::cleanup()
 {
-#define CLEANUP(variable) \
-    if (variable) { \
-        delete variable; \
-        variable = nullptr; \
+#define CLEANUP(variable)                                                                          \
+    if (variable) {                                                                                \
+        delete variable;                                                                           \
+        variable = nullptr;                                                                        \
     }
     CLEANUP(m_compositor)
     CLEANUP(m_pointerConstraints)
@@ -170,8 +177,11 @@ void TestPointerConstraints::testLockPointer_data()
     QTest::addColumn<bool>("hasConstraintAfterUnlock");
     QTest::addColumn<int>("pointerChangedCount");
 
-    QTest::newRow("persistent") << PointerConstraints::LifeTime::Persistent << Wrapland::Server::LockedPointerV1::LifeTime::Persistent << true << 1;
-    QTest::newRow("oneshot") << PointerConstraints::LifeTime::OneShot << Wrapland::Server::LockedPointerV1::LifeTime::OneShot << false << 2;
+    QTest::newRow("persistent") << PointerConstraints::LifeTime::Persistent
+                                << Wrapland::Server::LockedPointerV1::LifeTime::Persistent << true
+                                << 1;
+    QTest::newRow("oneshot") << PointerConstraints::LifeTime::OneShot
+                             << Wrapland::Server::LockedPointerV1::LifeTime::OneShot << false << 2;
 }
 
 void TestPointerConstraints::testLockPointer()
@@ -191,11 +201,13 @@ void TestPointerConstraints::testLockPointer()
     QVERIFY(serverSurface->confinedPointer().isNull());
 
     // Now create the locked pointer.
-    QSignalSpy pointerConstraintsChangedSpy(serverSurface, &Wrapland::Server::Surface::pointerConstraintsChanged);
+    QSignalSpy pointerConstraintsChangedSpy(serverSurface,
+                                            &Wrapland::Server::Surface::pointerConstraintsChanged);
     QVERIFY(pointerConstraintsChangedSpy.isValid());
     QFETCH(PointerConstraints::LifeTime, clientLifeTime);
 
-    std::unique_ptr<LockedPointer> lockedPointer(m_pointerConstraints->lockPointer(surface.get(), m_pointer, nullptr, clientLifeTime));
+    std::unique_ptr<LockedPointer> lockedPointer(
+        m_pointerConstraints->lockPointer(surface.get(), m_pointer, nullptr, clientLifeTime));
     QSignalSpy lockedSpy(lockedPointer.get(), &LockedPointer::locked);
     QVERIFY(lockedSpy.isValid());
     QSignalSpy unlockedSpy(lockedPointer.get(), &LockedPointer::unlocked);
@@ -217,7 +229,8 @@ void TestPointerConstraints::testLockPointer()
     QVERIFY(!unlockedSpy.wait(500));
 
     // Try setting a region.
-    QSignalSpy regionChangedSpy(serverLockedPointer.data(), &Wrapland::Server::LockedPointerV1::regionChanged);
+    QSignalSpy regionChangedSpy(serverLockedPointer.data(),
+                                &Wrapland::Server::LockedPointerV1::regionChanged);
     QVERIFY(regionChangedSpy.isValid());
     lockedPointer->setRegion(m_compositor->createRegion(QRegion(0, 5, 10, 20), m_compositor));
 
@@ -234,7 +247,8 @@ void TestPointerConstraints::testLockPointer()
     QCOMPARE(serverLockedPointer->region(), QRegion());
 
     // Let's lock the surface.
-    QSignalSpy lockedChangedSpy(serverLockedPointer.data(), &Wrapland::Server::LockedPointerV1::lockedChanged);
+    QSignalSpy lockedChangedSpy(serverLockedPointer.data(),
+                                &Wrapland::Server::LockedPointerV1::lockedChanged);
     QVERIFY(lockedChangedSpy.isValid());
     m_serverSeat->setFocusedPointerSurface(serverSurface);
 
@@ -253,7 +267,8 @@ void TestPointerConstraints::testLockPointer()
     QVERIFY(unlockedSpy.isEmpty());
 
     const QPointF hint = QPointF(1.5, 0.5);
-    QSignalSpy hintChangedSpy(serverLockedPointer.data(), &Wrapland::Server::LockedPointerV1::cursorPositionHintChanged);
+    QSignalSpy hintChangedSpy(serverLockedPointer.data(),
+                              &Wrapland::Server::LockedPointerV1::cursorPositionHintChanged);
     lockedPointer->setCursorPositionHint(hint);
     QCOMPARE(serverLockedPointer->cursorPositionHint(), QPointF(-1., -1.));
     surface->commit(Surface::CommitFlag::None);
@@ -276,7 +291,8 @@ void TestPointerConstraints::testLockPointer()
     QVERIFY(pointerMotionSpy.wait());
     QCOMPARE(pointerMotionSpy.count(), 2);
 
-    QSignalSpy destroyedSpy(serverLockedPointer.data(), &Wrapland::Server::LockedPointerV1::resourceDestroyed);
+    QSignalSpy destroyedSpy(serverLockedPointer.data(),
+                            &Wrapland::Server::LockedPointerV1::resourceDestroyed);
     QVERIFY(destroyedSpy.isValid());
     lockedPointer.reset();
     QVERIFY(destroyedSpy.wait());
@@ -290,8 +306,12 @@ void TestPointerConstraints::testConfinePointer_data()
     QTest::addColumn<bool>("hasConstraintAfterUnlock");
     QTest::addColumn<int>("pointerChangedCount");
 
-    QTest::newRow("persistent") << PointerConstraints::LifeTime::Persistent << Wrapland::Server::ConfinedPointerV1::LifeTime::Persistent << true << 1;
-    QTest::newRow("oneshot") << PointerConstraints::LifeTime::OneShot << Wrapland::Server::ConfinedPointerV1::LifeTime::OneShot << false << 2;
+    QTest::newRow("persistent") << PointerConstraints::LifeTime::Persistent
+                                << Wrapland::Server::ConfinedPointerV1::LifeTime::Persistent << true
+                                << 1;
+    QTest::newRow("oneshot") << PointerConstraints::LifeTime::OneShot
+                             << Wrapland::Server::ConfinedPointerV1::LifeTime::OneShot << false
+                             << 2;
 }
 
 void TestPointerConstraints::testConfinePointer()
@@ -312,11 +332,13 @@ void TestPointerConstraints::testConfinePointer()
     QVERIFY(serverSurface->confinedPointer().isNull());
 
     // Now create the confined pointer.
-    QSignalSpy pointerConstraintsChangedSpy(serverSurface, &Wrapland::Server::Surface::pointerConstraintsChanged);
+    QSignalSpy pointerConstraintsChangedSpy(serverSurface,
+                                            &Wrapland::Server::Surface::pointerConstraintsChanged);
     QVERIFY(pointerConstraintsChangedSpy.isValid());
     QFETCH(PointerConstraints::LifeTime, clientLifeTime);
 
-    std::unique_ptr<ConfinedPointer> confinedPointer(m_pointerConstraints->confinePointer(surface.get(), m_pointer, nullptr, clientLifeTime));
+    std::unique_ptr<ConfinedPointer> confinedPointer(
+        m_pointerConstraints->confinePointer(surface.get(), m_pointer, nullptr, clientLifeTime));
     QSignalSpy confinedSpy(confinedPointer.get(), &ConfinedPointer::confined);
     QVERIFY(confinedSpy.isValid());
     QSignalSpy unconfinedSpy(confinedPointer.get(), &ConfinedPointer::unconfined);
@@ -338,9 +360,11 @@ void TestPointerConstraints::testConfinePointer()
     QVERIFY(!unconfinedSpy.wait(500));
 
     // Try setting a region.
-    QSignalSpy destroyedSpy(serverConfinedPointer.data(), &Wrapland::Server::ConfinedPointerV1::resourceDestroyed);
+    QSignalSpy destroyedSpy(serverConfinedPointer.data(),
+                            &Wrapland::Server::ConfinedPointerV1::resourceDestroyed);
     QVERIFY(destroyedSpy.isValid());
-    QSignalSpy regionChangedSpy(serverConfinedPointer.data(), &Wrapland::Server::ConfinedPointerV1::regionChanged);
+    QSignalSpy regionChangedSpy(serverConfinedPointer.data(),
+                                &Wrapland::Server::ConfinedPointerV1::regionChanged);
     QVERIFY(regionChangedSpy.isValid());
     confinedPointer->setRegion(m_compositor->createRegion(QRegion(0, 5, 10, 20), m_compositor));
 
@@ -357,7 +381,8 @@ void TestPointerConstraints::testConfinePointer()
     QCOMPARE(serverConfinedPointer->region(), QRegion());
 
     // Let's confine the surface.
-    QSignalSpy confinedChangedSpy(serverConfinedPointer.data(), &Wrapland::Server::ConfinedPointerV1::confinedChanged);
+    QSignalSpy confinedChangedSpy(serverConfinedPointer.data(),
+                                  &Wrapland::Server::ConfinedPointerV1::confinedChanged);
     QVERIFY(confinedChangedSpy.isValid());
     m_serverSeat->setFocusedPointerSurface(serverSurface);
     serverConfinedPointer->setConfined(true);
@@ -382,10 +407,7 @@ void TestPointerConstraints::testConfinePointer()
     QCOMPARE(pointerConstraintsChangedSpy.count(), 2);
 }
 
-enum class Constraint {
-    Lock,
-    Confine
-};
+enum class Constraint { Lock, Confine };
 
 Q_DECLARE_METATYPE(Constraint)
 
@@ -402,8 +424,8 @@ void TestPointerConstraints::testAlreadyConstrained_data()
 
 void TestPointerConstraints::testAlreadyConstrained()
 {
-    // this test verifies that creating a pointer constraint for an already constrained surface triggers an error
-    // first create a surface
+    // this test verifies that creating a pointer constraint for an already constrained surface
+    // triggers an error first create a surface
     std::unique_ptr<Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
     QFETCH(Constraint, firstConstraint);
@@ -411,10 +433,12 @@ void TestPointerConstraints::testAlreadyConstrained()
     std::unique_ptr<LockedPointer> lockedPointer;
     switch (firstConstraint) {
     case Constraint::Lock:
-        lockedPointer.reset(m_pointerConstraints->lockPointer(surface.get(), m_pointer, nullptr, PointerConstraints::LifeTime::OneShot));
+        lockedPointer.reset(m_pointerConstraints->lockPointer(
+            surface.get(), m_pointer, nullptr, PointerConstraints::LifeTime::OneShot));
         break;
     case Constraint::Confine:
-        confinedPointer.reset(m_pointerConstraints->confinePointer(surface.get(), m_pointer, nullptr, PointerConstraints::LifeTime::OneShot));
+        confinedPointer.reset(m_pointerConstraints->confinePointer(
+            surface.get(), m_pointer, nullptr, PointerConstraints::LifeTime::OneShot));
         break;
     default:
         Q_UNREACHABLE();
@@ -428,10 +452,12 @@ void TestPointerConstraints::testAlreadyConstrained()
     std::unique_ptr<LockedPointer> lockedPointer2;
     switch (secondConstraint) {
     case Constraint::Lock:
-        lockedPointer2.reset(m_pointerConstraints->lockPointer(surface.get(), m_pointer, nullptr, PointerConstraints::LifeTime::OneShot));
+        lockedPointer2.reset(m_pointerConstraints->lockPointer(
+            surface.get(), m_pointer, nullptr, PointerConstraints::LifeTime::OneShot));
         break;
     case Constraint::Confine:
-        confinedPointer2.reset(m_pointerConstraints->confinePointer(surface.get(), m_pointer, nullptr, PointerConstraints::LifeTime::OneShot));
+        confinedPointer2.reset(m_pointerConstraints->confinePointer(
+            surface.get(), m_pointer, nullptr, PointerConstraints::LifeTime::OneShot));
         break;
     default:
         Q_UNREACHABLE();

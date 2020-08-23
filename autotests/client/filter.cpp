@@ -17,23 +17,22 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
 #include <QtTest>
-// KWin
+
+#include "../../src/client/blur.h"
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/blur.h"
 
-#include "../../server/client.h"
-#include "../../server/display.h"
-#include "../../server/compositor.h"
-#include "../../server/region.h"
 #include "../../server/blur.h"
+#include "../../server/client.h"
+#include "../../server/compositor.h"
+#include "../../server/display.h"
 #include "../../server/filtered_display.h"
+#include "../../server/region.h"
 
 #include <wayland-server.h>
 
@@ -45,7 +44,7 @@ class TestFilter : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestFilter(QObject *parent = nullptr);
+    explicit TestFilter(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -53,26 +52,27 @@ private Q_SLOTS:
     void testFilter();
 
 private:
-    TestDisplay *m_display;
-    Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Server::BlurManager *m_blurManagerInterface;
+    TestDisplay* m_display;
+    Wrapland::Server::Compositor* m_serverCompositor;
+    Wrapland::Server::BlurManager* m_blurManagerInterface;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-blur-0");
 
-//The following non-realistic class allows only clients in the m_allowedClients list to access the blur interface
-//all other interfaces are allowed
+// The following non-realistic class allows only clients in the m_allowedClients list to access the
+// blur interface all other interfaces are allowed
 class TestDisplay : public Wrapland::Server::FilteredDisplay
 {
 public:
-    TestDisplay(QObject *parent);
-    bool allowInterface(Wrapland::Server::Client* client, const QByteArray & interfaceName) override;
+    TestDisplay(QObject* parent);
+    bool allowInterface(Wrapland::Server::Client* client, const QByteArray& interfaceName) override;
     QList<wl_client*> m_allowedClients;
 };
 
-TestDisplay::TestDisplay(QObject *parent):
-    Wrapland::Server::FilteredDisplay(parent)
-{}
+TestDisplay::TestDisplay(QObject* parent)
+    : Wrapland::Server::FilteredDisplay(parent)
+{
+}
 
 bool TestDisplay::allowInterface(Wrapland::Server::Client* client, const QByteArray& interfaceName)
 {
@@ -82,11 +82,12 @@ bool TestDisplay::allowInterface(Wrapland::Server::Client* client, const QByteAr
     return true;
 }
 
-TestFilter::TestFilter(QObject *parent)
+TestFilter::TestFilter(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
-{}
+{
+}
 
 void TestFilter::init()
 {
@@ -110,15 +111,15 @@ void TestFilter::testFilter_data()
     QTest::addColumn<bool>("accessAllowed");
     QTest::newRow("granted") << true;
     QTest::newRow("denied") << false;
-
 }
 
 void TestFilter::testFilter()
 {
     QFETCH(bool, accessAllowed);
 
-  // setup connection
-    std::unique_ptr<Wrapland::Client::ConnectionThread> connection(new Wrapland::Client::ConnectionThread());
+    // setup connection
+    std::unique_ptr<Wrapland::Client::ConnectionThread> connection(
+        new Wrapland::Client::ConnectionThread());
     QSignalSpy connectedSpy(connection.get(), &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketName(s_socketName);
@@ -131,11 +132,12 @@ void TestFilter::testFilter()
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
 
-    //use low level API as Server::Display::connections only lists connections which have
-    //been previous fetched via getConnection()
+    // use low level API as Server::Display::connections only lists connections which have
+    // been previous fetched via getConnection()
     if (accessAllowed) {
-        wl_client *clientConnection;
-        wl_client_for_each(clientConnection, wl_display_get_client_list(m_display->native())) {
+        wl_client* clientConnection;
+        wl_client_for_each(clientConnection, wl_display_get_client_list(m_display->native()))
+        {
             m_display->m_allowedClients << clientConnection;
         }
     }
@@ -160,7 +162,6 @@ void TestFilter::testFilter()
     thread->quit();
     thread->wait();
 }
-
 
 QTEST_GUILESS_MAIN(TestFilter)
 #include "filter.moc"

@@ -26,8 +26,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/client.h"
 #include "../../server/display.h"
 
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <wayland-client-protocol.h>
 
@@ -40,7 +40,7 @@ class TestWaylandConnectionThread : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestWaylandConnectionThread(QObject *parent = nullptr);
+    explicit TestWaylandConnectionThread(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -53,12 +53,12 @@ private Q_SLOTS:
     void testConnectFdNoSocketName();
 
 private:
-    Srv::Display *m_display;
+    Srv::Display* m_display;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-connection-0");
 
-TestWaylandConnectionThread::TestWaylandConnectionThread(QObject *parent)
+TestWaylandConnectionThread::TestWaylandConnectionThread(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
 {
@@ -115,8 +115,11 @@ void TestWaylandConnectionThread::testConnectionFailure()
     QVERIFY(!connection->display());
 }
 
-static void registryHandleGlobal(void *data, struct wl_registry *registry,
-                                 uint32_t name, const char *interface, uint32_t version)
+static void registryHandleGlobal(void* data,
+                                 struct wl_registry* registry,
+                                 uint32_t name,
+                                 const char* interface,
+                                 uint32_t version)
 {
     Q_UNUSED(data)
     Q_UNUSED(registry)
@@ -125,24 +128,22 @@ static void registryHandleGlobal(void *data, struct wl_registry *registry,
     Q_UNUSED(version)
 }
 
-static void registryHandleGlobalRemove(void *data, struct wl_registry *registry, uint32_t name)
+static void registryHandleGlobalRemove(void* data, struct wl_registry* registry, uint32_t name)
 {
     Q_UNUSED(data)
     Q_UNUSED(registry)
     Q_UNUSED(name)
 }
 
-static const struct wl_registry_listener s_registryListener = {
-    registryHandleGlobal,
-    registryHandleGlobalRemove
-};
+static const struct wl_registry_listener s_registryListener
+    = {registryHandleGlobal, registryHandleGlobalRemove};
 
 void TestWaylandConnectionThread::testConnectionThread()
 {
-    auto *connection = new Cnt::ConnectionThread;
+    auto* connection = new Cnt::ConnectionThread;
     connection->setSocketName(s_socketName);
 
-    QThread *connectionThread = new QThread(this);
+    QThread* connectionThread = new QThread(this);
     connection->moveToThread(connectionThread);
     connectionThread->start();
 
@@ -160,16 +161,18 @@ void TestWaylandConnectionThread::testConnectionThread()
     QSignalSpy eventsSpy(connection, &Cnt::ConnectionThread::eventsRead);
     QVERIFY(eventsSpy.isValid());
 
-    wl_display *display = connection->display();
+    wl_display* display = connection->display();
     std::unique_ptr<Cnt::EventQueue> queue(new Cnt::EventQueue);
     queue->setup(display);
     QVERIFY(queue->isValid());
 
-    connect(connection, &Cnt::ConnectionThread::eventsRead,
-            queue.get(), &Cnt::EventQueue::dispatch,
+    connect(connection,
+            &Cnt::ConnectionThread::eventsRead,
+            queue.get(),
+            &Cnt::EventQueue::dispatch,
             Qt::QueuedConnection);
 
-    wl_registry *registry = wl_display_get_registry(display);
+    wl_registry* registry = wl_display_get_registry(display);
     wl_proxy_set_queue((wl_proxy*)registry, *(queue.get()));
 
     wl_registry_add_listener(registry, &s_registryListener, this);
@@ -234,12 +237,12 @@ void TestWaylandConnectionThread::testConnectFd()
     QSignalSpy disconnectedSpy(c, &Srv::Client::disconnected);
     QVERIFY(disconnectedSpy.isValid());
 
-    auto *connection = new Cnt::ConnectionThread;
+    auto* connection = new Cnt::ConnectionThread;
     QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketFd(sv[1]);
 
-    QThread *connectionThread = new QThread(this);
+    QThread* connectionThread = new QThread(this);
     connection->moveToThread(connectionThread);
     connectionThread->start();
     connection->establishConnection();
@@ -281,12 +284,12 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
     QVERIFY(socketpair(AF_UNIX, SOCK_STREAM, 0, sv) >= 0);
     QVERIFY(display.createClient(sv[0]));
 
-    auto *connection = new Cnt::ConnectionThread;
+    auto* connection = new Cnt::ConnectionThread;
     QSignalSpy connectedSpy(connection, &Cnt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection->setSocketFd(sv[1]);
 
-    QThread *connectionThread = new QThread(this);
+    QThread* connectionThread = new QThread(this);
     connection->moveToThread(connectionThread);
     connectionThread->start();
     connection->establishConnection();

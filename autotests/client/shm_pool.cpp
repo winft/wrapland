@@ -17,16 +17,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-// Qt
-#include <QtTest>
 #include <QImage>
-// KWin
+#include <QtTest>
+
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
-#include "../../src/client/surface.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/shm_pool.h"
+#include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
 #include "../../server/compositor.h"
@@ -37,7 +36,7 @@ class TestShmPool : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestShmPool(QObject *parent = nullptr);
+    explicit TestShmPool(QObject* parent = nullptr);
 private Q_SLOTS:
     void init();
     void cleanup();
@@ -52,18 +51,18 @@ private Q_SLOTS:
     void testDestroy();
 
 private:
-    Wrapland::Server::Display *m_display;
-    Wrapland::Server::Compositor *m_serverCompositor;
-    Wrapland::Client::ConnectionThread *m_connection;
-    Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::ShmPool *m_shmPool;
-    Wrapland::Client::EventQueue *m_queue;
-    QThread *m_thread;
+    Wrapland::Server::Display* m_display;
+    Wrapland::Server::Compositor* m_serverCompositor;
+    Wrapland::Client::ConnectionThread* m_connection;
+    Wrapland::Client::Compositor* m_compositor;
+    Wrapland::Client::ShmPool* m_shmPool;
+    Wrapland::Client::EventQueue* m_queue;
+    QThread* m_thread;
 };
 
 static const QString s_socketName = QStringLiteral("wrapland-test-wayland-surface-0");
 
-TestShmPool::TestShmPool(QObject *parent)
+TestShmPool::TestShmPool(QObject* parent)
     : QObject(parent)
     , m_display(nullptr)
     , m_serverCompositor(nullptr)
@@ -99,7 +98,7 @@ void TestShmPool::init()
     Wrapland::Client::Registry registry;
     registry.setEventQueue(m_queue);
 
-    QSignalSpy shmSpy(&registry, SIGNAL(shmAnnounced(quint32,quint32)));
+    QSignalSpy shmSpy(&registry, SIGNAL(shmAnnounced(quint32, quint32)));
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
     registry.setup();
@@ -108,7 +107,8 @@ void TestShmPool::init()
     m_display->createShm();
 
     QVERIFY(shmSpy.wait());
-    m_shmPool = registry.createShmPool(shmSpy.first().first().value<quint32>(), shmSpy.first().last().value<quint32>(), this);
+    m_shmPool = registry.createShmPool(
+        shmSpy.first().first().value<quint32>(), shmSpy.first().last().value<quint32>(), this);
 }
 
 void TestShmPool::cleanup()
@@ -176,7 +176,7 @@ void TestShmPool::testCreateBufferFromImageWithAlpha()
 {
     QVERIFY(m_shmPool->isValid());
     QImage img(24, 24, QImage::Format_ARGB32_Premultiplied);
-    img.fill(QColor(255,0,0,100)); //red with alpha
+    img.fill(QColor(255, 0, 0, 100)); // red with alpha
     QVERIFY(!img.isNull());
     auto buffer = m_shmPool->createBuffer(img).lock();
     QVERIFY(buffer);
