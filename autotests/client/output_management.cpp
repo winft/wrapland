@@ -270,15 +270,13 @@ void TestOutputManagement::createOutputDevices()
     QVERIFY(!output->isValid());
     QCOMPARE(output->geometry(), QRect());
     QCOMPARE(output->geometry(), QRectF());
-    QCOMPARE(output->manufacturer(), QString());
+    QCOMPARE(output->make(), QString());
     QCOMPARE(output->model(), QString());
     QCOMPARE(output->physicalSize(), QSize());
     QCOMPARE(output->pixelSize(), QSize());
     QCOMPARE(output->refreshRate(), 0);
     QCOMPARE(output->transform(), Clt::OutputDeviceV1::Transform::Normal);
     QCOMPARE(output->enabled(), Clt::OutputDeviceV1::Enablement::Enabled);
-    QCOMPARE(output->edid(), QByteArray());
-    QCOMPARE(output->uuid(), QByteArray());
 
     QSignalSpy outputChanged(output, &Clt::OutputDeviceV1::changed);
     QVERIFY(outputChanged.isValid());

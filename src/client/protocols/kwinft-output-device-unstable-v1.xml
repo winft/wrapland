@@ -54,26 +54,24 @@
             <description summary="general information about this output">
                 The info event describes some base information about the output.
 
-
-                The uuid can be used to identify the output. It's controlled by
-                the server entirely. The server should make sure the uuid is
-                persistent across restarts. An empty uuid is considered invalid.
+                The arguments make and model should be the same as in the wl_output
+                interface. Together with the serial number they should be consistent
+                over compositor restarts such that clients are able to identify outputs
+                from previous sessions.
 
                 The event is sent when binding to the output object and whenever
                 any of the properties change.
             </description>
-            <arg name="uuid" type="string"
-                 summary="unique output device ID"/>
-            <arg name="eisa_id" type="string"
-                 summary="textual representation of EISA identifier"/>
-            <arg name="serial_number" type="string"
-                 summary="textual representation of serial number"/>
-            <arg name="edid" type="string"
-                 summary="base64-encoded EDID string"/>
+            <arg name="name" type="string"
+                 summary="unique output identifier"/>
+            <arg name="description" type="string"
+                 summary="human-readable pre-translated device description"/>
             <arg name="make" type="string"
                  summary="textual description of the manufacturer"/>
             <arg name="model" type="string"
                  summary="textual description of the model"/>
+            <arg name="serial_number" type="string"
+                 summary="serial number of the product"/>
             <arg name="physical_width" type="int"
                  summary="width in millimeters of the output"/>
             <arg name="physical_height" type="int"

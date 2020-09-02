@@ -33,14 +33,11 @@ class Display;
 
 struct OutputState {
     struct Info {
-        // TODO(romangg): should uuid and edid be saved as std::vector<std::char> or maybe
-        // std::vector<std::byte>?
-        std::string uuid;
-        std::string eisa_id;
+        std::string name = "Unknown";
+        std::string description;
+        std::string make;
+        std::string model;
         std::string serial_number;
-        std::string edid;
-        std::string manufacturer = "org.kwinft.wrapland";
-        std::string model = "none";
         QSize physical_size;
     } info;
 

@@ -69,7 +69,7 @@ WlOutput::Private::geometry_args(OutputState const& state)
                            state.info.physical_size.width(),
                            state.info.physical_size.height(),
                            to_subpixel(state.subpixel),
-                           state.info.manufacturer.c_str(),
+                           state.info.make.c_str(),
                            state.info.model.c_str(),
                            Output::Private::to_transform(state.transform));
 }
@@ -118,8 +118,7 @@ bool WlOutput::Private::broadcast()
 
     if (published.geometry.topLeft() != pending.geometry.topLeft()
         || published.info.physical_size != pending.info.physical_size
-        || published.subpixel != pending.subpixel
-        || published.info.manufacturer != pending.info.manufacturer
+        || published.subpixel != pending.subpixel || published.info.make != pending.info.make
         || published.info.model != pending.info.model || published.transform != pending.transform) {
         send<wl_output_send_geometry>(geometry_args(pending));
         changed = true;

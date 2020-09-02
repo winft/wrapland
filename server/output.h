@@ -87,21 +87,18 @@ public:
     explicit Output(Display* display, QObject* parent = nullptr);
     ~Output() override;
 
-    std::string uuid() const;
-    std::string eisa_id() const;
-    std::string serial_mumber() const;
-    std::string edid() const;
-    std::string manufacturer() const;
+    std::string name() const;
+    std::string description() const;
+    std::string make() const;
     std::string model() const;
+    std::string serial_mumber() const;
     QSize physical_size() const;
 
-    void set_uuid(std::string const& uuid);
-    void set_eisa_id(std::string const& eisa_id);
-    void set_serial_number(std::string const& serial_number);
-    void set_edid(std::string const& edid);
-
-    void set_manufacturer(std::string const& manufacturer);
+    void set_name(std::string const& name);
+    void set_description(std::string const& description);
+    void set_make(std::string const& make);
     void set_model(std::string const& model);
+    void set_serial_number(std::string const& serial_number);
     void set_physical_size(QSize const& size);
 
     bool enabled() const;

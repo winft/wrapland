@@ -158,14 +158,14 @@ Output::Transform Output::transform() const
     return d_ptr->pending.transform;
 }
 
-std::string Output::uuid() const
+std::string Output::name() const
 {
-    return d_ptr->pending.info.uuid;
+    return d_ptr->pending.info.name;
 }
 
-std::string Output::eisa_id() const
+std::string Output::description() const
 {
-    return d_ptr->pending.info.eisa_id;
+    return d_ptr->pending.info.description;
 }
 
 std::string Output::serial_mumber() const
@@ -173,14 +173,9 @@ std::string Output::serial_mumber() const
     return d_ptr->pending.info.serial_number;
 }
 
-std::string Output::edid() const
+std::string Output::make() const
 {
-    return d_ptr->pending.info.edid;
-}
-
-std::string Output::manufacturer() const
-{
-    return d_ptr->pending.info.manufacturer;
+    return d_ptr->pending.info.make;
 }
 
 std::string Output::model() const
@@ -188,34 +183,29 @@ std::string Output::model() const
     return d_ptr->pending.info.model;
 }
 
-void Output::set_uuid(std::string const& uuid)
+void Output::set_name(std::string const& name)
 {
-    d_ptr->pending.info.uuid = uuid;
+    d_ptr->pending.info.name = name;
 }
 
-void Output::set_eisa_id(std::string const& eisa_id)
+void Output::set_description(std::string const& description)
 {
-    d_ptr->pending.info.eisa_id = eisa_id;
+    d_ptr->pending.info.description = description;
 }
 
-void Output::set_serial_number(std::string const& serial_number)
+void Output::set_make(std::string const& make)
 {
-    d_ptr->pending.info.serial_number = serial_number;
-}
-
-void Output::set_edid(std::string const& edid)
-{
-    d_ptr->pending.info.edid = edid;
-}
-
-void Output::set_manufacturer(std::string const& manufacturer)
-{
-    d_ptr->pending.info.manufacturer = manufacturer;
+    d_ptr->pending.info.make = make;
 }
 
 void Output::set_model(std::string const& model)
 {
     d_ptr->pending.info.model = model;
+}
+
+void Output::set_serial_number(std::string const& serial_number)
+{
+    d_ptr->pending.info.serial_number = serial_number;
 }
 
 void Output::set_physical_size(QSize const& size)

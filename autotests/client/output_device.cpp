@@ -57,9 +57,11 @@ private Q_SLOTS:
 private:
     Srv::Display* m_display;
     Srv::Output* m_server_output;
-    QByteArray m_edid;
+    std::string m_name = "HDMI-A";
+    std::string m_make = "Foocorp";
+    std::string m_model = "Barmodel";
+    std::string m_description;
     QString m_serialNumber;
-    QString m_eidaId;
 
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::EventQueue* m_queue;
@@ -86,7 +88,6 @@ void TestOutputDevice::init()
     QVERIFY(m_display->running());
 
     m_server_output = new Srv::Output(m_display, this);
-    m_server_output->set_uuid("1337");
 
     Srv::Output::Mode m0;
     m0.id = 0;
@@ -107,20 +108,15 @@ void TestOutputDevice::init()
 
     m_server_output->set_mode(1);
 
-    m_edid = QByteArray::fromBase64(
-        "\x00\xFF\xFF\xFF\xFF\xFF\xFF\x00\x10\xAC\x16\xF0LLKA\x0E\x16"
-        "\x01\x03\x80"
-        "4 x\xEA\x1E\xC5\xAEO4\xB1&\x0EPT\xA5K\x00\x81"
-        "\x80\xA9@\xD1\x00qO\x01\x01\x01\x01\x01\x01\x01\x01(<\x80"
-        "\xA0p\xB0#@0 6\x00\x06"
-        "D!\x00\x00\x1A\x00\x00\x00\xFF\x00"
-        "F525M245AK");
-    m_server_output->set_edid(m_edid.constData());
+    m_server_output->set_name(m_name);
+    m_server_output->set_make(m_make);
+    m_server_output->set_model(m_model);
+
+    m_description = "Foocorp 11\" Display";
+    m_server_output->set_description(m_description);
 
     m_serialNumber = "23498723948723";
     m_server_output->set_serial_number(m_serialNumber.toStdString());
-    m_eidaId = "asdffoo";
-    m_server_output->set_eisa_id(m_eidaId.toStdString());
 
     m_server_output->set_enabled(true);
     m_server_output->done();
@@ -184,17 +180,14 @@ void TestOutputDevice::testRegistry()
 
     Wrapland::Client::OutputDeviceV1 output;
     QVERIFY(!output.isValid());
-    QCOMPARE(output.uuid(), QByteArray());
     QCOMPARE(output.geometry(), QRectF());
-    QCOMPARE(output.manufacturer(), QString());
+    QCOMPARE(output.make(), QString());
     QCOMPARE(output.model(), QString());
     QCOMPARE(output.physicalSize(), QSize());
     QCOMPARE(output.pixelSize(), QSize());
     QCOMPARE(output.refreshRate(), 0);
     QCOMPARE(output.transform(), Clt::OutputDeviceV1::Transform::Normal);
     QCOMPARE(output.enabled(), Clt::OutputDeviceV1::Enablement::Enabled);
-    QCOMPARE(output.edid(), QByteArray());
-    QCOMPARE(output.eisaId(), QString());
     QCOMPARE(output.serialNumber(), QString());
 
     QSignalSpy outputChanged(&output, &Wrapland::Client::OutputDeviceV1::done);
@@ -207,19 +200,18 @@ void TestOutputDevice::testRegistry()
     QVERIFY(outputChanged.wait());
 
     QCOMPARE(output.geometry(), QRectF(100, 50, 400, 200));
-    QCOMPARE(output.manufacturer(), QStringLiteral("org.kwinft.wrapland"));
-    QCOMPARE(output.model(), QStringLiteral("none"));
     QCOMPARE(output.physicalSize(), QSize(200, 100));
     QCOMPARE(output.pixelSize(), QSize(1024, 768));
     QCOMPARE(output.refreshRate(), 60000);
     // for xwayland transform is normal
     QCOMPARE(output.transform(), Wrapland::Client::OutputDeviceV1::Transform::Normal);
 
-    QCOMPARE(output.edid(), m_edid);
     QCOMPARE(output.enabled(), Clt::OutputDeviceV1::Enablement::Enabled);
-    QCOMPARE(output.uuid(), QByteArray("1337"));
+    QCOMPARE(output.name(), QString::fromStdString(m_name));
+    QCOMPARE(output.make(), QString::fromStdString(m_make));
+    QCOMPARE(output.model(), QString::fromStdString(m_model));
+    QCOMPARE(output.description(), QString::fromStdString(m_description));
     QCOMPARE(output.serialNumber(), m_serialNumber);
-    QCOMPARE(output.eisaId(), m_eidaId);
 }
 
 void TestOutputDevice::testModeChanges()
