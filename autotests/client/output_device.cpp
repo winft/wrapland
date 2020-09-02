@@ -112,8 +112,9 @@ void TestOutputDevice::init()
     m_server_output->set_make(m_make);
     m_server_output->set_model(m_model);
 
-    m_description = "Foocorp 11\" Display";
-    m_server_output->set_description(m_description);
+    m_server_output->generate_description();
+    m_description = m_server_output->description();
+    QCOMPARE(m_description, m_make + " " + m_model + " (" + m_name + ")");
 
     m_serialNumber = "23498723948723";
     m_server_output->set_serial_number(m_serialNumber.toStdString());

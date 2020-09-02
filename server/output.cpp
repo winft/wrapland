@@ -213,6 +213,26 @@ void Output::set_physical_size(QSize const& size)
     d_ptr->pending.info.physical_size = size;
 }
 
+void Output::generate_description()
+{
+    auto& info = d_ptr->pending.info;
+    std::string descr;
+    if (!info.make.empty()) {
+        descr = info.make;
+    }
+    if (!info.model.empty()) {
+        descr = (descr.empty() ? "" : descr + " ") + info.model;
+    }
+    if (!info.name.empty()) {
+        if (descr.empty()) {
+            descr = info.name;
+        } else {
+            descr += " (" + info.name + ")";
+        }
+    }
+    info.description = descr;
+}
+
 bool Output::enabled() const
 {
     return d_ptr->pending.enabled;

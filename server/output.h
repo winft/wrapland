@@ -101,6 +101,13 @@ public:
     void set_serial_number(std::string const& serial_number);
     void set_physical_size(QSize const& size);
 
+    /**
+     * Produces a description from available data. The pattern will be:
+     * - if make or model available: "<make> <model> (<name>)"
+     * - otherwise: "<name>"
+     */
+    void generate_description();
+
     bool enabled() const;
     void set_enabled(bool enabled);
 
