@@ -23,6 +23,12 @@
         DEALINGS IN THE SOFTWARE.
     ]]></copyright>
 
+    <description summary="protocol to obtain information about output devices">
+      This protocol exposes an interface for globally announced output devices.
+
+      Warning! The protocol described in this file is experimental and
+      backward incompatible changes may be made.
+    </description>
 
     <interface name="zkwinft_output_device_v1" version="1">
         <description summary="output configuration representation">
