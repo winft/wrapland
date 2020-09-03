@@ -271,6 +271,10 @@ public:
     static void scaleCallback(void *data, zwlr_output_head_v1 *head, wl_fixed_t scale);
     static void finishedCallback(void *data, zwlr_output_head_v1 *head);
 
+    static void makeCallback(void *data, zwlr_output_head_v1 *head, const char *make);
+    static void modelCallback(void *data, zwlr_output_head_v1 *head, const char *model);
+    static void serialNumberCallback(void *data, zwlr_output_head_v1 *head, const char *serialNumber);
+
     WlrOutputHeadV1 *q;
     static const struct zwlr_output_head_v1_listener s_listener;
 
@@ -281,6 +285,10 @@ public:
     Transform transform;
     bool enabled;
     double scale;
+
+    QString make;
+    QString model;
+    QString serialNumber;
 
     QVector<WlrOutputModeV1*> modes;
     WlrOutputModeV1 *currentMode;
@@ -299,7 +307,10 @@ const zwlr_output_head_v1_listener WlrOutputHeadV1::Private::s_listener = {
     positionCallback,
     transformCallback,
     scaleCallback,
-    finishedCallback
+    finishedCallback,
+    makeCallback,
+    modelCallback,
+    serialNumberCallback,
 };
 
 void WlrOutputHeadV1::Private::nameCallback(void *data, zwlr_output_head_v1 *head, const char *name)
@@ -438,6 +449,37 @@ void WlrOutputHeadV1::Private::finishedCallback(void *data, zwlr_output_head_v1 
     Q_EMIT d->q->removed();
 }
 
+void WlrOutputHeadV1::Private::makeCallback(void *data, zwlr_output_head_v1 *head, const char *make)
+{
+    auto d = reinterpret_cast<Private*>(data);
+    Q_ASSERT(d->outputHead == head);
+
+    d->make = make;
+    Q_EMIT d->q->changed();
+}
+
+void WlrOutputHeadV1::Private::modelCallback(void *data,
+                                             zwlr_output_head_v1 *head,
+                                             const char *model)
+{
+    auto d = reinterpret_cast<Private*>(data);
+    Q_ASSERT(d->outputHead == head);
+
+    d->model = model;
+    Q_EMIT d->q->changed();
+}
+
+void WlrOutputHeadV1::Private::serialNumberCallback(void *data,
+                                                    zwlr_output_head_v1 *head,
+                                                    const char *serialNumber)
+{
+    auto d = reinterpret_cast<Private*>(data);
+    Q_ASSERT(d->outputHead == head);
+
+    d->serialNumber = serialNumber;
+    Q_EMIT d->q->changed();
+}
+
 WlrOutputHeadV1::Private::Private(WlrOutputHeadV1 *q, zwlr_output_head_v1 *head)
     : q(q)
 {
@@ -461,6 +503,21 @@ QString WlrOutputHeadV1::name() const
 QString WlrOutputHeadV1::description() const
 {
     return d->description;
+}
+
+QString WlrOutputHeadV1::make() const
+{
+    return d->make;
+}
+
+QString WlrOutputHeadV1::model() const
+{
+    return d->model;
+}
+
+QString WlrOutputHeadV1::serialNumber() const
+{
+    return d->serialNumber;
 }
 
 QSize WlrOutputHeadV1::physicalSize() const
