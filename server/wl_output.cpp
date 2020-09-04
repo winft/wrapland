@@ -87,8 +87,8 @@ void WlOutput::Private::bindInit(WlOutputBind* bind)
     }
     sendMode(bind, output->d_ptr->published.mode);
 
-    send<wl_output_send_scale, 2>(bind, state.client_scale);
-    send<wl_output_send_done, 2>(bind);
+    send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(bind, state.client_scale);
+    done(bind);
     bind->client()->flush();
 }
 
@@ -125,7 +125,7 @@ bool WlOutput::Private::broadcast()
     }
 
     if (published.client_scale != pending.client_scale) {
-        send<wl_output_send_scale, 2>(pending.client_scale);
+        send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(pending.client_scale);
         changed = true;
     }
 
@@ -139,7 +139,12 @@ bool WlOutput::Private::broadcast()
 
 void WlOutput::Private::done()
 {
-    send<wl_output_send_done>();
+    send<wl_output_send_done, WL_OUTPUT_DONE_SINCE_VERSION>();
+}
+
+void WlOutput::Private::done(WlOutputBind* bind)
+{
+    send<wl_output_send_done, WL_OUTPUT_DONE_SINCE_VERSION>(bind);
 }
 
 WlOutput::WlOutput(Output* output, Display* display)

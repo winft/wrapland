@@ -39,6 +39,7 @@ public:
 
     bool broadcast();
     void done();
+    void done(WlOutputBind* bind);
 
     Display* displayHandle;
     Output* output;
