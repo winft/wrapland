@@ -30,10 +30,7 @@ const struct zxdg_output_manager_v1_interface XdgOutputManager::Private::s_inter
 };
 
 XdgOutputManager::Private::Private(Display* display, XdgOutputManager* qptr)
-    : Wayland::Global<XdgOutputManager>(qptr,
-                                        display,
-                                        &zxdg_output_manager_v1_interface,
-                                        &s_interface)
+    : XdgOutputManagerGlobal(qptr, display, &zxdg_output_manager_v1_interface, &s_interface)
 {
     create();
 }

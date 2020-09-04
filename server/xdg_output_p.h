@@ -42,7 +42,11 @@ class Display;
 class XdgOutput;
 class XdgOutputV1;
 
-class XdgOutputManager::Private : public Wayland::Global<XdgOutputManager>
+constexpr uint32_t XdgOutputManagerVersion = 1;
+using XdgOutputManagerGlobal = Wayland::Global<XdgOutputManager, XdgOutputManagerVersion>;
+using XdgOutputManagerBind = Wayland::Bind<XdgOutputManagerGlobal>;
+
+class XdgOutputManager::Private : public XdgOutputManagerGlobal
 {
 public:
     Private(Display* display, XdgOutputManager* qptr);
