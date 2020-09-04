@@ -98,6 +98,10 @@ void TestOutput::init()
 
     QCOMPARE(m_serverOutput->mode_size(), QSize(1280, 1024));
 
+    m_serverOutput->set_name("HDMI-A");
+    m_serverOutput->set_make("Foocorp");
+    m_serverOutput->set_model("Barmodel");
+
     m_serverOutput->set_mode(mode);
     QCOMPARE(m_serverOutput->mode_size(), QSize(1024, 768));
     QCOMPARE(m_serverOutput->refresh_rate(), 60000);
@@ -194,8 +198,8 @@ void TestOutput::testRegistry()
 
     QCOMPARE(output.geometry(), QRect(100, 50, 1024, 768));
     QCOMPARE(output.globalPosition(), QPoint(100, 50));
-    QCOMPARE(output.manufacturer(), QStringLiteral("org.kwinft.wrapland"));
-    QCOMPARE(output.model(), QStringLiteral("none"));
+    QCOMPARE(output.manufacturer(), QStringLiteral("Foocorp"));
+    QCOMPARE(output.model(), QStringLiteral("Barmodel"));
     QCOMPARE(output.physicalSize(), QSize(200, 100));
     QCOMPARE(output.pixelSize(), QSize(1024, 768));
     QCOMPARE(output.refreshRate(), 60000);

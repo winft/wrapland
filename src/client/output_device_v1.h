@@ -134,10 +134,13 @@ public:
      **/
     QSize physicalSize() const;
 
+    QString name() const;
+    QString description() const;
+
     /**
      * Textual description of the manufacturer.
      **/
-    QString manufacturer() const;
+    QString make() const;
     /**
      * Textual description of the model.
      **/
@@ -146,10 +149,6 @@ public:
      * Textual representation of serial number.
      */
     QString serialNumber() const;
-    /**
-     * Textual representation of EISA identifier.
-     */
-    QString eisaId() const;
     /**
      * Size in the current mode.
      **/
@@ -193,19 +192,9 @@ public:
     EventQueue *eventQueue() const;
 
     /**
-     * @returns The EDID information for this output.
-     **/
-    QByteArray edid() const;
-
-    /**
      * @returns Whether this output is enabled or not.
      **/
     OutputDeviceV1::Enablement enabled() const;
-
-    /**
-     * @returns A unique identifier for this outputdevice, determined by the server.
-     **/
-    QByteArray uuid() const;
 
     /**
      * Releases the zkwinft_output_device_v1 interface.
@@ -245,11 +234,6 @@ Q_SIGNALS:
      * @param mode The changed Mode
      **/
     void modeChanged(const Wrapland::Client::OutputDeviceV1::Mode &mode);
-
-    /**
-     * Emitted whenever the id property changes.
-     **/
-    void uuidChanged(const QByteArray &uuid);
 
     /**
      * Emitted whenever the geometry changes.

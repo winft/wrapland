@@ -178,6 +178,11 @@ public:
 
     QString name() const;
     QString description() const;
+
+    QString make() const;
+    QString model() const;
+    QString serialNumber() const;
+
     QSize physicalSize() const;
 
     bool enabled() const;

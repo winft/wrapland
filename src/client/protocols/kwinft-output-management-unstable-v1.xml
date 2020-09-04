@@ -23,6 +23,14 @@
         DEALINGS IN THE SOFTWARE.
     ]]></copyright>
 
+    <description summary="protocol to create and apply output configurations">
+      This protocol exposes interfaces to change the configuration of current
+      outputs.
+
+      Warning! The protocol described in this file is experimental and
+      backward incompatible changes may be made.
+    </description>
+
     <interface name="zkwinft_output_management_v1" version="1">
         <description summary="configuration of server outputs through clients">
             This interface enables clients to set properties of output devices for screen

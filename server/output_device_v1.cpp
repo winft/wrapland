@@ -37,22 +37,14 @@ OutputDeviceV1::Private::Private(Output* output, Display* display, OutputDeviceV
     displayHandle->add_output_device_v1(q);
 }
 
-std::tuple<const char*,
-           const char*,
-           const char*,
-           const char*,
-           const char*,
-           const char*,
-           int32_t,
-           int32_t>
+std::tuple<const char*, const char*, const char*, const char*, const char*, int32_t, int32_t>
 info_args(OutputState const& state)
 {
-    return std::make_tuple(state.info.uuid.c_str(),
-                           state.info.eisa_id.c_str(),
-                           state.info.serial_number.c_str(),
-                           state.info.edid.c_str(),
-                           state.info.manufacturer.c_str(),
+    return std::make_tuple(state.info.name.c_str(),
+                           state.info.description.c_str(),
+                           state.info.make.c_str(),
                            state.info.model.c_str(),
+                           state.info.serial_number.c_str(),
                            state.info.physical_size.width(),
                            state.info.physical_size.height());
 }
@@ -113,11 +105,10 @@ bool OutputDeviceV1::Private::broadcast()
 
     bool changed = false;
 
-    if (published.info.uuid != pending.info.uuid || published.info.eisa_id != pending.info.eisa_id
+    if (published.info.name != pending.info.name
+        || published.info.description != pending.info.description
+        || published.info.make != pending.info.make || published.info.model != pending.info.model
         || published.info.serial_number != pending.info.serial_number
-        || published.info.edid != pending.info.edid
-        || published.info.manufacturer != pending.info.manufacturer
-        || published.info.model != pending.info.model
         || published.info.physical_size != pending.info.physical_size) {
         send<zkwinft_output_device_v1_send_info>(info_args(pending));
         changed = true;

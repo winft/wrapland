@@ -69,7 +69,7 @@ WlOutput::Private::geometry_args(OutputState const& state)
                            state.info.physical_size.width(),
                            state.info.physical_size.height(),
                            to_subpixel(state.subpixel),
-                           state.info.manufacturer.c_str(),
+                           state.info.make.c_str(),
                            state.info.model.c_str(),
                            Output::Private::to_transform(state.transform));
 }
@@ -87,8 +87,8 @@ void WlOutput::Private::bindInit(WlOutputBind* bind)
     }
     sendMode(bind, output->d_ptr->published.mode);
 
-    send<wl_output_send_scale, 2>(bind, state.client_scale);
-    send<wl_output_send_done, 2>(bind);
+    send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(bind, state.client_scale);
+    done(bind);
     bind->client()->flush();
 }
 
@@ -118,15 +118,14 @@ bool WlOutput::Private::broadcast()
 
     if (published.geometry.topLeft() != pending.geometry.topLeft()
         || published.info.physical_size != pending.info.physical_size
-        || published.subpixel != pending.subpixel
-        || published.info.manufacturer != pending.info.manufacturer
+        || published.subpixel != pending.subpixel || published.info.make != pending.info.make
         || published.info.model != pending.info.model || published.transform != pending.transform) {
         send<wl_output_send_geometry>(geometry_args(pending));
         changed = true;
     }
 
     if (published.client_scale != pending.client_scale) {
-        send<wl_output_send_scale, 2>(pending.client_scale);
+        send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(pending.client_scale);
         changed = true;
     }
 
@@ -140,7 +139,12 @@ bool WlOutput::Private::broadcast()
 
 void WlOutput::Private::done()
 {
-    send<wl_output_send_done>();
+    send<wl_output_send_done, WL_OUTPUT_DONE_SINCE_VERSION>();
+}
+
+void WlOutput::Private::done(WlOutputBind* bind)
+{
+    send<wl_output_send_done, WL_OUTPUT_DONE_SINCE_VERSION>(bind);
 }
 
 WlOutput::WlOutput(Output* output, Display* display)

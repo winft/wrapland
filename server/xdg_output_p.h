@@ -42,7 +42,11 @@ class Display;
 class XdgOutput;
 class XdgOutputV1;
 
-class XdgOutputManager::Private : public Wayland::Global<XdgOutputManager>
+constexpr uint32_t XdgOutputManagerVersion = 3;
+using XdgOutputManagerGlobal = Wayland::Global<XdgOutputManager, XdgOutputManagerVersion>;
+using XdgOutputManagerBind = Wayland::Bind<XdgOutputManagerGlobal>;
+
+class XdgOutputManager::Private : public XdgOutputManagerGlobal
 {
 public:
     Private(Display* display, XdgOutputManager* qptr);
@@ -72,6 +76,7 @@ private:
     Output* output;
     XdgOutputManager* manager;
     std::vector<XdgOutputV1*> resources;
+    bool sent_once{false};
 };
 
 class XdgOutputV1 : public QObject
@@ -82,6 +87,8 @@ public:
 
     void send_logical_position(QPointF const& pos) const;
     void send_logical_size(QSizeF const& size) const;
+    void send_name(std::string const& name) const;
+    void send_description(std::string const& description) const;
     void done() const;
 
     class Private;

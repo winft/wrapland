@@ -94,22 +94,12 @@ EventQueue *XdgOutputManager::eventQueue()
     return d->queue;
 }
 
-XdgOutput *XdgOutputManager::getXdgOutput(Output *output, QObject *parent)
-{
-    Q_ASSERT(isValid());
-    auto p = new XdgOutput(parent);
-    auto w = zxdg_output_manager_v1_get_xdg_output(d->xdgoutputmanager, *output);
-    if (d->queue) {
-        d->queue->addProxy(w);
-    }
-    p->setup(w);
-    return p;
-}
-
 struct XdgOutputBuffer
 {
     QPoint logicalPosition;
     QSize logicalSize;
+    std::string name;
+    std::string description;
 };
 
 class XdgOutput::Private
@@ -118,6 +108,7 @@ public:
     Private(XdgOutput *q);
 
     void setup(zxdg_output_v1 *arg);
+    void done();
 
     WaylandPointer<zxdg_output_v1, zxdg_output_v1_destroy> xdgoutput;
 
@@ -131,14 +122,34 @@ private:
     static void logical_positionCallback(void *data, zxdg_output_v1 *zxdg_output_v1, int32_t x, int32_t y);
     static void logical_sizeCallback(void *data, zxdg_output_v1 *zxdg_output_v1, int32_t width, int32_t height);
     static void doneCallback(void *data, zxdg_output_v1 *zxdg_output_v1);
+    static void name_callback(void *data, zxdg_output_v1 *zxdg_output_v1, char const* name);
+    static void description_callback(void *data, zxdg_output_v1 *zxdg_output_v1, char const* description);
 
     static const zxdg_output_v1_listener s_listener;
 };
 
+XdgOutput *XdgOutputManager::getXdgOutput(Output *output, QObject *parent)
+{
+    Q_ASSERT(isValid());
+    auto p = new XdgOutput(parent);
+    auto w = zxdg_output_manager_v1_get_xdg_output(d->xdgoutputmanager, *output);
+    if (d->queue) {
+        d->queue->addProxy(w);
+    }
+    p->setup(w);
+
+    if (wl_proxy_get_version(reinterpret_cast<wl_proxy*>(w)) >= 3) {
+        connect(output, &Output::changed, p, [p] {p->d->done();});
+    }
+
+    return p;
+}
 const zxdg_output_v1_listener XdgOutput::Private::s_listener = {
     logical_positionCallback,
     logical_sizeCallback,
-    doneCallback
+    doneCallback,
+    name_callback,
+    description_callback,
 };
 
 void XdgOutput::Private::logical_positionCallback(void *data, zxdg_output_v1 *zxdg_output_v1, int32_t x, int32_t y)
@@ -159,11 +170,46 @@ void XdgOutput::Private::doneCallback(void *data, zxdg_output_v1 *zxdg_output_v1
 {
     auto p = reinterpret_cast<XdgOutput::Private*>(data);
     Q_ASSERT(p->xdgoutput == zxdg_output_v1);
-    std::swap(p->current, p->pending);
+    p->done();
+}
 
-    if (p->current.logicalSize != p->pending.logicalSize ||
-        p->current.logicalPosition != p->pending.logicalPosition) {
-        emit p->q->changed();
+void XdgOutput::Private::name_callback(void *data, zxdg_output_v1 *zxdg_output_v1, char const* name)
+{
+    auto p = reinterpret_cast<XdgOutput::Private*>(data);
+    Q_ASSERT(p->xdgoutput == zxdg_output_v1);
+    p->pending.name = name;
+}
+
+void XdgOutput::Private::description_callback(void *data, zxdg_output_v1 *zxdg_output_v1, char const* description)
+{
+    auto p = reinterpret_cast<XdgOutput::Private*>(data);
+    Q_ASSERT(p->xdgoutput == zxdg_output_v1);
+    p->pending.description = description;
+}
+
+void XdgOutput::Private::done()
+{
+    bool changed = false;
+
+    if (current.logicalSize != pending.logicalSize) {
+        current.logicalSize = pending.logicalSize;
+        changed = true;
+    }
+    if (current.logicalPosition != pending.logicalPosition) {
+        current.logicalPosition = pending.logicalPosition;
+        changed = true;
+    }
+    if (current.name != pending.name) {
+        current.name = pending.name;
+        changed = true;
+    }
+    if (current.description != pending.description) {
+        current.description = pending.description;
+        changed = true;
+    }
+
+    if (changed) {
+        emit q->changed();
     }
 }
 
@@ -209,6 +255,16 @@ QSize XdgOutput::logicalSize() const
 QPoint XdgOutput::logicalPosition() const
 {
     return d->current.logicalPosition;
+}
+
+std::string XdgOutput::name() const
+{
+    return d->current.name;
+}
+
+std::string XdgOutput::description() const
+{
+    return d->current.description;
 }
 
 XdgOutput::operator zxdg_output_v1*() {

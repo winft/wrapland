@@ -226,7 +226,7 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &Registry::outputDeviceV1Removed
     }},
     {Registry::Interface::WlrOutputManagerV1, {
-        1,
+        2,
         QByteArrayLiteral("zwlr_output_manager_v1"),
         &zwlr_output_manager_v1_interface,
         &Registry::wlrOutputManagerV1Announced,
@@ -373,7 +373,7 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         &Registry::serverSideDecorationPaletteManagerRemoved
     }},
     {Registry::Interface::XdgOutputUnstableV1, {
-        1,
+        3,
         QByteArrayLiteral("zxdg_output_manager_v1"),
         &zxdg_output_manager_v1_interface,
         &Registry::xdgOutputAnnounced,

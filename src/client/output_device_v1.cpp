@@ -48,24 +48,24 @@ public:
     EventQueue *queue = nullptr;
     QSize physicalSize;
     QRectF geometry;
-    QString manufacturer;
+    QString name;
+    QString description;
+    QString make;
     QString model;
     QString serialNumber;
-    QString eisaId;
     Transform transform = Transform::Normal;
     Modes modes;
     Modes::iterator currentMode = modes.end();
 
-    QByteArray edid;
     OutputDeviceV1::Enablement enabled = OutputDeviceV1::Enablement::Enabled;
-    QByteArray uuid;
 
     bool done = false;
 
 private:
     static void infoCallback(void *data, zkwinft_output_device_v1 *output,
-                             const char *uuid, const char *eisa_id, const char *serial_number,
-                             const char *edid, const char *make, const char *model,
+                             const char *name, const char *description,
+                             const char *make, const char *model,
+                             const char *serial_number,
                              int32_t physical_width, int32_t physical_height);
 
     static void enabledCallback(void *data, zkwinft_output_device_v1 *output,
@@ -119,20 +119,19 @@ zkwinft_output_device_v1_listener OutputDeviceV1::Private::s_outputListener = {
 };
 
 void OutputDeviceV1::Private::infoCallback(void *data, zkwinft_output_device_v1 *output,
-                                           const char *uuid, const char *eisa_id,
-                                           const char *serial_number, const char *edid,
+                                           const char *name, const char *description,
                                            const char *make, const char *model,
+                                           const char *serial_number,
                                            int32_t physical_width, int32_t physical_height)
 {
     auto out = reinterpret_cast<OutputDeviceV1::Private*>(data);
     Q_ASSERT(out->output == output);
 
-    out->uuid = uuid;
-    out->eisaId = eisa_id;
-    out->serialNumber = serial_number;
-    out->edid = edid;
-    out->manufacturer = make;
+    out->name = name;
+    out->description = description;
+    out->make = make;
     out->model = model;
+    out->serialNumber = serial_number;
     out->physicalSize = QSize(physical_width, physical_height);
 }
 
@@ -291,9 +290,19 @@ QRectF OutputDeviceV1::geometry() const
     return d->geometry;
 }
 
-QString OutputDeviceV1::manufacturer() const
+QString OutputDeviceV1::name() const
 {
-    return d->manufacturer;
+    return d->name;
+}
+
+QString OutputDeviceV1::description() const
+{
+    return d->description;
+}
+
+QString OutputDeviceV1::make() const
+{
+    return d->make;
 }
 
 QString OutputDeviceV1::model() const
@@ -304,11 +313,6 @@ QString OutputDeviceV1::model() const
 QString OutputDeviceV1::serialNumber() const
 {
     return d->serialNumber;
-}
-
-QString OutputDeviceV1::eisaId() const
-{
-    return d->eisaId;
 }
 
 zkwinft_output_device_v1* OutputDeviceV1::output()
@@ -360,19 +364,9 @@ OutputDeviceV1::operator zkwinft_output_device_v1* () const {
     return d->output;
 }
 
-QByteArray OutputDeviceV1::edid() const
-{
-    return d->edid;
-}
-
 OutputDeviceV1::Enablement OutputDeviceV1::enabled() const
 {
     return d->enabled;
-}
-
-QByteArray OutputDeviceV1::uuid() const
-{
-    return d->uuid;
 }
 
 void OutputDeviceV1::release()
