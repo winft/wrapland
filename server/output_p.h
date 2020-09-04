@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
+class Client;
 class OutputDeviceV1;
 class WlOutput;
 class XdgOutput;
@@ -58,6 +59,11 @@ public:
 
     void update_client_scale();
     void done();
+
+    /**
+     * Called internally when for updates of objects synced with wl_output.
+     */
+    void done_wl(Client* client) const;
 
     static int32_t get_mode_flags(Output::Mode const& mode, OutputState const& state);
     static int32_t to_transform(Output::Transform transform);

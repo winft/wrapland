@@ -112,8 +112,19 @@ bool XdgOutput::Private::broadcast()
         changed = true;
         for (auto resource : resources) {
             resource->send_name(pending.info.name);
-            resource->send_description(pending.info.description);
+            if (resource->d_ptr->version() < 3) {
+                resource->send_description(pending.info.description);
+            }
         }
+    }
+
+    if (published.info.description != pending.info.description) {
+        for (auto resource : resources) {
+            if (resource->d_ptr->version() >= 3) {
+                resource->send_description(pending.info.description);
+            }
+        }
+        changed = true;
     }
 
     return changed;
@@ -137,7 +148,11 @@ void XdgOutput::Private::resourceConnected(XdgOutputV1* resource)
     resource->send_name(state.info.name);
     resource->send_description(state.info.description);
 
-    resource->done();
+    if (resource->d_ptr->version() < 3) {
+        resource->done();
+    } else {
+        output->d_ptr->done_wl(resource->d_ptr->client()->handle());
+    }
     resources.push_back(resource);
 }
 
@@ -202,7 +217,9 @@ void XdgOutputV1::send_description(std::string const& description) const
 
 void XdgOutputV1::done() const
 {
-    d_ptr->send<zxdg_output_v1_send_done>();
+    if (d_ptr->version() < 3) {
+        d_ptr->send<zxdg_output_v1_send_done>();
+    }
 }
 
 }

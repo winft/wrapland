@@ -67,6 +67,18 @@ void Output::Private::done()
     published = pending;
 }
 
+void Output::Private::done_wl(Client* client) const
+{
+    if (!wayland_output) {
+        return;
+    }
+
+    auto binds = wayland_output->d_ptr->getBinds(client);
+    for (auto bind : binds) {
+        wayland_output->d_ptr->done(bind);
+    }
+}
+
 int32_t Output::Private::get_mode_flags(Output::Mode const& mode, OutputState const& state)
 {
     int32_t flags = 0;

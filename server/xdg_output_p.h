@@ -42,7 +42,7 @@ class Display;
 class XdgOutput;
 class XdgOutputV1;
 
-constexpr uint32_t XdgOutputManagerVersion = 2;
+constexpr uint32_t XdgOutputManagerVersion = 3;
 using XdgOutputManagerGlobal = Wayland::Global<XdgOutputManager, XdgOutputManagerVersion>;
 using XdgOutputManagerBind = Wayland::Bind<XdgOutputManagerGlobal>;
 

@@ -137,6 +137,7 @@ void TestXdgOutput::testChanges_data()
 
     QTest::newRow("v1") << 1;
     QTest::newRow("v2") << 2;
+    QTest::newRow("v3") << 3;
 }
 
 void TestXdgOutput::testChanges()
@@ -178,6 +179,7 @@ void TestXdgOutput::testChanges()
     // check details are sent on client bind
     QVERIFY(xdgOutputChanged.wait());
     xdgOutputChanged.clear();
+
     QCOMPARE(xdgOutput->logicalPosition(), QPoint(11, 12));
     QCOMPARE(xdgOutput->logicalSize(), QSize(1280, 720));
 
@@ -198,6 +200,7 @@ void TestXdgOutput::testChanges()
 
     QVERIFY(xdgOutputChanged.wait());
     QCOMPARE(xdgOutputChanged.count(), 1);
+
     QCOMPARE(xdgOutput->logicalPosition(), QPoint(1000, 2000));
     QCOMPARE(xdgOutput->logicalSize(), QSize(100, 200));
 
@@ -206,6 +209,8 @@ void TestXdgOutput::testChanges()
     } else if (client_version == 2) {
         // Description is immutable in version 2.
         QCOMPARE(xdgOutput->description(), m_description);
+    } else {
+        QCOMPARE(xdgOutput->description(), updated_description);
     }
 }
 

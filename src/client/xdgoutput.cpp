@@ -94,18 +94,6 @@ EventQueue *XdgOutputManager::eventQueue()
     return d->queue;
 }
 
-XdgOutput *XdgOutputManager::getXdgOutput(Output *output, QObject *parent)
-{
-    Q_ASSERT(isValid());
-    auto p = new XdgOutput(parent);
-    auto w = zxdg_output_manager_v1_get_xdg_output(d->xdgoutputmanager, *output);
-    if (d->queue) {
-        d->queue->addProxy(w);
-    }
-    p->setup(w);
-    return p;
-}
-
 struct XdgOutputBuffer
 {
     QPoint logicalPosition;
@@ -120,6 +108,7 @@ public:
     Private(XdgOutput *q);
 
     void setup(zxdg_output_v1 *arg);
+    void done();
 
     WaylandPointer<zxdg_output_v1, zxdg_output_v1_destroy> xdgoutput;
 
@@ -139,6 +128,22 @@ private:
     static const zxdg_output_v1_listener s_listener;
 };
 
+XdgOutput *XdgOutputManager::getXdgOutput(Output *output, QObject *parent)
+{
+    Q_ASSERT(isValid());
+    auto p = new XdgOutput(parent);
+    auto w = zxdg_output_manager_v1_get_xdg_output(d->xdgoutputmanager, *output);
+    if (d->queue) {
+        d->queue->addProxy(w);
+    }
+    p->setup(w);
+
+    if (wl_proxy_get_version(reinterpret_cast<wl_proxy*>(w)) >= 3) {
+        connect(output, &Output::changed, p, [p] {p->d->done();});
+    }
+
+    return p;
+}
 const zxdg_output_v1_listener XdgOutput::Private::s_listener = {
     logical_positionCallback,
     logical_sizeCallback,
@@ -165,30 +170,7 @@ void XdgOutput::Private::doneCallback(void *data, zxdg_output_v1 *zxdg_output_v1
 {
     auto p = reinterpret_cast<XdgOutput::Private*>(data);
     Q_ASSERT(p->xdgoutput == zxdg_output_v1);
-
-    bool changed = false;
-
-    if (p->current.logicalSize != p->pending.logicalSize) {
-        p->current.logicalSize = p->pending.logicalSize;
-        changed = true;
-    }
-    if (p->current.logicalPosition != p->pending.logicalPosition) {
-        p->current.logicalPosition = p->pending.logicalPosition;
-        changed = true;
-    }
-    if (p->current.name != p->pending.name) {
-        p->current.name = p->pending.name;
-        changed = true;
-    }
-    if (p->current.description != p->pending.description) {
-        p->current.description = p->pending.description;
-        changed = true;
-    }
-
-    if (changed) {
-        emit p->q->changed();
-    }
-
+    p->done();
 }
 
 void XdgOutput::Private::name_callback(void *data, zxdg_output_v1 *zxdg_output_v1, char const* name)
@@ -203,6 +185,32 @@ void XdgOutput::Private::description_callback(void *data, zxdg_output_v1 *zxdg_o
     auto p = reinterpret_cast<XdgOutput::Private*>(data);
     Q_ASSERT(p->xdgoutput == zxdg_output_v1);
     p->pending.description = description;
+}
+
+void XdgOutput::Private::done()
+{
+    bool changed = false;
+
+    if (current.logicalSize != pending.logicalSize) {
+        current.logicalSize = pending.logicalSize;
+        changed = true;
+    }
+    if (current.logicalPosition != pending.logicalPosition) {
+        current.logicalPosition = pending.logicalPosition;
+        changed = true;
+    }
+    if (current.name != pending.name) {
+        current.name = pending.name;
+        changed = true;
+    }
+    if (current.description != pending.description) {
+        current.description = pending.description;
+        changed = true;
+    }
+
+    if (changed) {
+        emit q->changed();
+    }
 }
 
 XdgOutput::Private::Private(XdgOutput *qptr)
