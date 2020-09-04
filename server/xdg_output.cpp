@@ -107,6 +107,15 @@ bool XdgOutput::Private::broadcast()
         changed = true;
     }
 
+    if (!sent_once) {
+        sent_once = true;
+        changed = true;
+        for (auto resource : resources) {
+            resource->send_name(pending.info.name);
+            resource->send_description(pending.info.description);
+        }
+    }
+
     return changed;
 }
 
@@ -119,9 +128,15 @@ void XdgOutput::Private::done()
 
 void XdgOutput::Private::resourceConnected(XdgOutputV1* resource)
 {
-    auto const geo = output->d_ptr->published.geometry;
+    auto const& state = output->d_ptr->published;
+
+    auto const geo = state.geometry;
     resource->send_logical_position(geo.topLeft());
     resource->send_logical_size(geo.size());
+
+    resource->send_name(state.info.name);
+    resource->send_description(state.info.description);
+
     resource->done();
     resources.push_back(resource);
 }
@@ -169,6 +184,20 @@ void XdgOutputV1::send_logical_position(QPointF const& pos) const
 void XdgOutputV1::send_logical_size(QSizeF const& size) const
 {
     d_ptr->send<zxdg_output_v1_send_logical_size>(size.width(), size.height());
+}
+
+void XdgOutputV1::send_name(std::string const& name) const
+{
+    if (d_ptr->version() >= ZXDG_OUTPUT_V1_NAME_SINCE_VERSION) {
+        d_ptr->send<zxdg_output_v1_send_name>(name.c_str());
+    }
+}
+
+void XdgOutputV1::send_description(std::string const& description) const
+{
+    if (d_ptr->version() >= ZXDG_OUTPUT_V1_DESCRIPTION_SINCE_VERSION) {
+        d_ptr->send<zxdg_output_v1_send_description>(description.c_str());
+    }
 }
 
 void XdgOutputV1::done() const

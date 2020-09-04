@@ -176,6 +176,9 @@ public:
      */
     QSize logicalSize() const;
 
+    std::string name() const;
+    std::string description() const;
+
 Q_SIGNALS:
     /**
      * Emitted when the logical position or size changes

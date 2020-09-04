@@ -37,11 +37,19 @@ public:
 private Q_SLOTS:
     void init();
     void cleanup();
+
+    void testChanges_data();
     void testChanges();
 
 private:
     Wrapland::Server::Display* m_display;
     Wrapland::Server::Output* m_serverOutput;
+
+    std::string m_name = "HDMI-A";
+    std::string m_make = "Foocorp";
+    std::string m_model = "Barmodel";
+    std::string m_description;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::EventQueue* m_queue;
     QThread* m_thread;
@@ -70,6 +78,13 @@ void TestXdgOutput::init()
     m_serverOutput->add_mode(Output::Mode{QSize(1920, 1080), 60000, true, 1});
     m_serverOutput->set_mode(1);
     m_serverOutput->set_enabled(true);
+
+    m_serverOutput->set_name(m_name);
+    m_serverOutput->set_make(m_make);
+    m_serverOutput->set_model(m_model);
+
+    m_serverOutput->generate_description();
+    m_description = m_serverOutput->description();
 
     // Not a sensible position for one monitor but works for this test. And a 1.5 scale factor.
     m_serverOutput->set_geometry(QRectF(QPoint(11, 12), QSize(1280, 720)));
@@ -116,9 +131,18 @@ void TestXdgOutput::cleanup()
     m_display = nullptr;
 }
 
+void TestXdgOutput::testChanges_data()
+{
+    QTest::addColumn<int>("client_version");
+
+    QTest::newRow("v1") << 1;
+    QTest::newRow("v2") << 2;
+}
+
 void TestXdgOutput::testChanges()
 {
     // Verify the server modes.
+    QFETCH(int, client_version);
 
     Wrapland::Client::Registry registry;
     QSignalSpy announced(&registry, SIGNAL(outputAnnounced(quint32, quint32)));
@@ -140,10 +164,12 @@ void TestXdgOutput::testChanges()
                                      announced.first().last().value<quint32>()));
     QVERIFY(outputChanged.wait());
 
+    QVERIFY(xdgOutputAnnounced.first().last().value<quint32>()
+            >= static_cast<quint32>(client_version));
+
     std::unique_ptr<Wrapland::Client::XdgOutputManager> xdgOutputManager(
-        registry.createXdgOutputManager(xdgOutputAnnounced.first().first().value<quint32>(),
-                                        xdgOutputAnnounced.first().last().value<quint32>(),
-                                        this));
+        registry.createXdgOutputManager(
+            xdgOutputAnnounced.first().first().value<quint32>(), client_version, this));
 
     std::unique_ptr<Wrapland::Client::XdgOutput> xdgOutput(
         xdgOutputManager->getXdgOutput(&output, this));
@@ -155,14 +181,32 @@ void TestXdgOutput::testChanges()
     QCOMPARE(xdgOutput->logicalPosition(), QPoint(11, 12));
     QCOMPARE(xdgOutput->logicalSize(), QSize(1280, 720));
 
+    if (client_version == 1) {
+        QCOMPARE(xdgOutput->name(), "");
+        QCOMPARE(xdgOutput->description(), "");
+    } else {
+        QCOMPARE(xdgOutput->name(), m_name);
+        QCOMPARE(xdgOutput->description(), m_description);
+    }
+
     // dynamic updates
     m_serverOutput->set_geometry(QRectF(QPoint(1000, 2000), QSize(100, 200)));
+
+    std::string updated_description = "Updated xdg-output description";
+    m_serverOutput->set_description(updated_description);
     m_serverOutput->done();
 
     QVERIFY(xdgOutputChanged.wait());
     QCOMPARE(xdgOutputChanged.count(), 1);
     QCOMPARE(xdgOutput->logicalPosition(), QPoint(1000, 2000));
     QCOMPARE(xdgOutput->logicalSize(), QSize(100, 200));
+
+    if (client_version == 1) {
+        QCOMPARE(xdgOutput->description(), "");
+    } else if (client_version == 2) {
+        // Description is immutable in version 2.
+        QCOMPARE(xdgOutput->description(), m_description);
+    }
 }
 
 QTEST_GUILESS_MAIN(TestXdgOutput)
