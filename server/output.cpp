@@ -283,7 +283,14 @@ int Output::refresh_rate() const
 void Output::add_mode(Mode const& mode)
 {
     d_ptr->pending.mode = mode;
-    d_ptr->modes.push_back(mode);
+
+    auto it = std::find(d_ptr->modes.begin(), d_ptr->modes.end(), mode);
+
+    if (it != d_ptr->modes.end()) {
+        d_ptr->modes.at(it - d_ptr->modes.begin()) = mode;
+    } else {
+        d_ptr->modes.push_back(mode);
+    }
 }
 
 bool Output::set_mode(int id)
