@@ -97,7 +97,8 @@ public:
     Surface* inputSurfaceAt(const QPointF& position);
 
     void setOutputs(std::vector<Output*> const& outputs);
-    std::vector<Output*> outputs() const;
+    void setOutputs(std::vector<WlOutput*> const& outputs);
+    std::vector<WlOutput*> outputs() const;
 
     QPointer<ConfinedPointerV1> confinedPointer() const;
     QPointer<LockedPointerV1> lockedPointer() const;
