@@ -976,48 +976,59 @@ void Surface::resetTrackedDamage()
     d_ptr->trackedDamage = QRegion();
 }
 
-std::vector<Output*> Surface::outputs() const
+std::vector<WlOutput*> Surface::outputs() const
 {
     return d_ptr->outputs;
 }
 
 void Surface::setOutputs(std::vector<Output*> const& outputs)
 {
-    std::vector<Output*> removedOutputs = d_ptr->outputs;
+    std::vector<WlOutput*> wayland_outputs;
+    wayland_outputs.reserve(outputs.size());
+
+    for (auto const& output : outputs) {
+        wayland_outputs.push_back(output->wayland_output());
+    }
+    setOutputs(wayland_outputs);
+}
+
+void Surface::setOutputs(std::vector<WlOutput*> const& outputs)
+{
+    auto removed_outputs = d_ptr->outputs;
 
     for (auto stays : outputs) {
-        removedOutputs.erase(std::remove(removedOutputs.begin(), removedOutputs.end(), stays),
-                             removedOutputs.end());
+        removed_outputs.erase(std::remove(removed_outputs.begin(), removed_outputs.end(), stays),
+                              removed_outputs.end());
     }
 
-    for (auto output : removedOutputs) {
-        auto const binds = output->wayland_output()->d_ptr->getBinds(d_ptr->client()->handle());
+    for (auto output : removed_outputs) {
+        auto const binds = output->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_leave>(bind->resource());
         }
         disconnect(d_ptr->outputDestroyedConnections.take(output));
     }
 
-    std::vector<Output*> addedOutputs = outputs;
+    auto added_outputs = outputs;
     for (auto keeping : d_ptr->outputs) {
-        addedOutputs.erase(std::remove(addedOutputs.begin(), addedOutputs.end(), keeping),
-                           addedOutputs.end());
+        added_outputs.erase(std::remove(added_outputs.begin(), added_outputs.end(), keeping),
+                            added_outputs.end());
     }
 
-    for (auto add : addedOutputs) {
-        auto const binds = add->wayland_output()->d_ptr->getBinds(d_ptr->client()->handle());
+    for (auto output : added_outputs) {
+        auto const binds = output->d_ptr->getBinds(d_ptr->client()->handle());
         for (auto bind : binds) {
             d_ptr->send<wl_surface_send_enter>(bind->resource());
         }
 
-        d_ptr->outputDestroyedConnections[add]
-            = connect(add->wayland_output(), &WlOutput::removed, this, [this, add] {
+        d_ptr->outputDestroyedConnections[output]
+            = connect(output, &WlOutput::removed, this, [this, output] {
                   auto outputs = d_ptr->outputs;
                   bool removed = false;
                   outputs.erase(std::remove_if(outputs.begin(),
                                                outputs.end(),
-                                               [&removed, add](Output* out) {
-                                                   if (add == out) {
+                                               [&removed, output](WlOutput* out) {
+                                                   if (output == out) {
                                                        removed = true;
                                                        return true;
                                                    }

@@ -135,7 +135,7 @@ public:
     // waiting on the frame callback of the never visible surface.
     //    bool subsurfaceIsMapped = true;
 
-    std::vector<Output*> outputs;
+    std::vector<WlOutput*> outputs;
 
     uint32_t feedbackId = 0;
     std::unordered_map<uint32_t, std::unique_ptr<Feedbacks>> waitingFeedbacks;
@@ -143,7 +143,7 @@ public:
     QPointer<LockedPointerV1> lockedPointer;
     QPointer<ConfinedPointerV1> confinedPointer;
     QPointer<Viewport> viewport;
-    QHash<Output*, QMetaObject::Connection> outputDestroyedConnections;
+    QHash<WlOutput*, QMetaObject::Connection> outputDestroyedConnections;
     QVector<IdleInhibitor*> idleInhibitors;
 
     Surface* dataProxy = nullptr;
