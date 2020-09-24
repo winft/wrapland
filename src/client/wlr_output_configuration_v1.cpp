@@ -240,9 +240,7 @@ void WlrOutputConfigurationV1::setEnabled(WlrOutputHeadV1 *head, bool enable)
                     = zwlr_output_configuration_v1_enable_head(d->outputConfiguration, *head);
         }
     } else {
-        if (configurationHead->native) {
-            zwlr_output_configuration_v1_disable_head(d->outputConfiguration, *head);
-        }
+        zwlr_output_configuration_v1_disable_head(d->outputConfiguration, *head);
     }
 }
 
