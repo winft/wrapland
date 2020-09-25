@@ -1,5 +1,78 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.520.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.519.0-beta.0...wrapland@0.520.0-beta.0) (2020-09-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **client:** The client output device mode API changes.
+* **server:** The Server Output class is refactored as a single access
+point for the compositor.
+* Legacy remote-access protocol and API are removed
+* **server:** Server Buffer API changes.
+* **server:** Server Buffers API changes.
+
+### Features
+
+* support xdg-output v2 ([d58574b](https://gitlab.com/kwinft/wrapland/commit/d58574b10041cbef3f60c7fc2f23070008f73db2))
+* support xdg-output v3 ([91d2291](https://gitlab.com/kwinft/wrapland/commit/91d2291e9a69633f17493d8a2f2b221893d5cd2c))
+* **client:** simplify current mode logic ([11d29a5](https://gitlab.com/kwinft/wrapland/commit/11d29a5f9958166386bcf2f35319bc7433720468))
+* **client:** support zwlr_output_manager_v1 version 2 ([10b49b5](https://gitlab.com/kwinft/wrapland/commit/10b49b59a3cda4c25d14ae9941fdc737b780f949))
+* **server:** generate output description ([28367e3](https://gitlab.com/kwinft/wrapland/commit/28367e3da4185e09bc0809f5e11e352dd7abcdca))
+* implement keyboard shortcuts inhibit ([132821b](https://gitlab.com/kwinft/wrapland/commit/132821bcabcb6aab766e597d3eb8498e8c0bb969))
+* remove remote-access ([054edc8](https://gitlab.com/kwinft/wrapland/commit/054edc8830f4d3289b6e9d140d77f9b36f73c9ee))
+* streamline output device information ([fd0194e](https://gitlab.com/kwinft/wrapland/commit/fd0194e994aaf2f6dc56e06c306037a151449f48))
+* **server:** add master output class ([bc91afe](https://gitlab.com/kwinft/wrapland/commit/bc91afe899811dff6b78016f74053d14ab926c9a))
+* provide method for server-side resource destruction ([ca62f48](https://gitlab.com/kwinft/wrapland/commit/ca62f487c28c37695c31ad0490b97769bbdbee7d))
+* support presentation time protocol ([6edb1b9](https://gitlab.com/kwinft/wrapland/commit/6edb1b9e19d64738c8ecef913ce0eb5293123216))
+* **client:** implement dmabuf client and autotest ([c4ac0a9](https://gitlab.com/kwinft/wrapland/commit/c4ac0a9020cad6f3c791c87450fb6e1a7dd469e7))
+
+
+### Bug Fixes
+
+* **client:** convert double to fixed output scale ([c6e9672](https://gitlab.com/kwinft/wrapland/commit/c6e96725c250f6574341a24c062daca47c7ab0a3))
+* **client:** disable wlr heads without native check ([26283ca](https://gitlab.com/kwinft/wrapland/commit/26283ca5910b02a5f3f2001b9f653b75197eacba))
+* **server:** check for global being removed and destroyed ([3eb7f44](https://gitlab.com/kwinft/wrapland/commit/3eb7f44e09bca11075ac322dcb888762397fb2f9))
+* **server:** check for source when accepting offer ([3be21a1](https://gitlab.com/kwinft/wrapland/commit/3be21a13a530f149d16869b4e1d5522f7bb7600b))
+* **server:** delay global destroy ([70161be](https://gitlab.com/kwinft/wrapland/commit/70161be4cdd2978dd2bd69aac39c6ac28688518d))
+* **server:** ensure modes are stored uniquely ([976a476](https://gitlab.com/kwinft/wrapland/commit/976a4762f0a3a2ee16a7829bcb4615578f092663))
+* **server:** free dmabuf private ([714484e](https://gitlab.com/kwinft/wrapland/commit/714484e86e92b59b3d7e1cef6b533995931a98e3))
+* **server:** guard wl_output events on since version ([2d574af](https://gitlab.com/kwinft/wrapland/commit/2d574afb2fd957803539d9e2f7700593378cc379))
+* **server:** initialize output in dpms off mode ([d7a398b](https://gitlab.com/kwinft/wrapland/commit/d7a398bf74707561ab6ffc2bef54361395a803d0))
+* **server:** release global nucleuses after client destroy ([38b8b4a](https://gitlab.com/kwinft/wrapland/commit/38b8b4a46017715a49dc1da3bd69566bd9b2b609))
+* **server:** release only surface buffers automatically ([e1fca59](https://gitlab.com/kwinft/wrapland/commit/e1fca5993b81a161036f5cd487e033186cb4ca40))
+* **server:** remove drag target on destroy ([3249e3e](https://gitlab.com/kwinft/wrapland/commit/3249e3ebef22b1f0b63f7f2086b2eae838ae14aa))
+* **server:** send events on binds only to the bind ([b2bab1a](https://gitlab.com/kwinft/wrapland/commit/b2bab1aa68d4c80c9955e3323e67552c521ac69e))
+* **server:** support multiple data devices on a single client ([6770cc5](https://gitlab.com/kwinft/wrapland/commit/6770cc5f848ece837833e2ec46460785fdafccaa))
+* **server:** use global bind versions on resource creation ([e498d8f](https://gitlab.com/kwinft/wrapland/commit/e498d8fee618b2ee38862c1f3080a48e7a72f33f))
+
+
+### Refactors
+
+* **server:** add Buffer private header ([a35d28a](https://gitlab.com/kwinft/wrapland/commit/a35d28a35b44a5cc1216d13989499d079e332329))
+* **server:** allow only private access to Buffer make ([ad1effb](https://gitlab.com/kwinft/wrapland/commit/ad1effbe7c9aabec74677a5365a4cf4cc5b93ba5))
+* **server:** create internal send function collection ([01d9be6](https://gitlab.com/kwinft/wrapland/commit/01d9be630e267645b58c7c6dcd2fb57eb59e9685))
+* **server:** create separate resource bind class ([07ef71a](https://gitlab.com/kwinft/wrapland/commit/07ef71ab4f60e15814e3ce77d4761aa89feaf38a))
+* **server:** define xdg-output manager aliases ([7482bcc](https://gitlab.com/kwinft/wrapland/commit/7482bcc6713457ee302b37c7f5c1ce1a31addcf7))
+* **server:** introduce nucleus class for globals ([2018f42](https://gitlab.com/kwinft/wrapland/commit/2018f42c50f8133fa272219b0827b87da730a219))
+* **server:** introduce ShmImage class ([c7c56e4](https://gitlab.com/kwinft/wrapland/commit/c7c56e404b373f6ede0375322f8142bb571d1d98))
+* **server:** introduce SurfaceState struct ([a766515](https://gitlab.com/kwinft/wrapland/commit/a7665154f1456c9f075b8a09d06374ff149ec71a))
+* **server:** make SurfaceState a move-only type ([11d0d97](https://gitlab.com/kwinft/wrapland/commit/11d0d97dff8648a3f42ac3e7443bdbe81a9a14b9))
+* **server:** modernize subsurface callback ([8e66003](https://gitlab.com/kwinft/wrapland/commit/8e660036c2cc10ac37413134cf5037d1a36877f5))
+* **server:** provide Buffers as shared_ptrs ([b62aca1](https://gitlab.com/kwinft/wrapland/commit/b62aca106bdb87e55b514047607ef4991be941a1))
+* **server:** remove data offer receive member function ([68a9c4d](https://gitlab.com/kwinft/wrapland/commit/68a9c4da4a0e702d14ce1f2f88e888ae06ce886c))
+* **server:** remove global support from Resource ([716340e](https://gitlab.com/kwinft/wrapland/commit/716340e54a395a8df00cf0816b044a412267e490))
+* **server:** remove separate shadow creation function ([cd318a7](https://gitlab.com/kwinft/wrapland/commit/cd318a778545ff4f8e5d78c183b7ee593579b3e1))
+* **server:** remove unused functions ([1aaee23](https://gitlab.com/kwinft/wrapland/commit/1aaee2366f029be306d8b9fcac3846be3ac8e4cd))
+* **server:** rename Output class files ([f84f3ef](https://gitlab.com/kwinft/wrapland/commit/f84f3efa74d18b9d0856a874c475523475804ae4))
+* **server:** rename Output class to WlOutput ([2fe2895](https://gitlab.com/kwinft/wrapland/commit/2fe289554b9285c3485cd385a99af990086ca27d))
+* **server:** replace capsule with basic nucleus ([f09dc77](https://gitlab.com/kwinft/wrapland/commit/f09dc778b1b14c9f559807b897d2c4b0dea7da32))
+* **server:** set entered outputs by wl_output ([3094db3](https://gitlab.com/kwinft/wrapland/commit/3094db39c9379d4d8d912a81d570fc6772a5cbdd))
+* **server:** store frame callbacks in deque ([131f70a](https://gitlab.com/kwinft/wrapland/commit/131f70a56795b74dbe32cb9db7b1cea873991535))
+* **server:** straighten out Surface and Subsurface state handling ([c38a4e2](https://gitlab.com/kwinft/wrapland/commit/c38a4e234963e1d80cc719e38f00f26dae50ab92))
+* **server:** use in-class member initializers ([baedfd3](https://gitlab.com/kwinft/wrapland/commit/baedfd3908128a3a90c1ed03000c99c110ea2daa))
+* **server:** use new server model in generator ([64bd019](https://gitlab.com/kwinft/wrapland/commit/64bd019d8b57e2db46196c333ac9b7f4a7e40b21))
+
 ## [0.519.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.519.0-beta.0...wrapland@0.519.0) (2020-06-09)
 
 
