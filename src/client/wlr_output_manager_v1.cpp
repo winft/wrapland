@@ -25,6 +25,8 @@
 
 #include "wayland-wlr-output-management-v1-client-protocol.h"
 
+#include <vector>
+
 namespace Wrapland
 {
 namespace Client
@@ -290,7 +292,7 @@ public:
     QString model;
     QString serialNumber;
 
-    QVector<WlrOutputModeV1*> modes;
+    std::vector<std::unique_ptr<WlrOutputModeV1>> modes;
     WlrOutputModeV1 *currentMode;
 
 private:
@@ -348,7 +350,7 @@ void WlrOutputHeadV1::Private::modeCallback(void *data, zwlr_output_head_v1 *hea
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
 
-    d->modes.append(new WlrOutputModeV1(mode, d->q));
+    d->modes.push_back(std::unique_ptr<WlrOutputModeV1>{new WlrOutputModeV1(mode, d->q)});
     Q_EMIT d->q->changed();
 }
 
@@ -373,9 +375,10 @@ void WlrOutputHeadV1::Private::currentModeCallback(void *data, zwlr_output_head_
 
 WlrOutputModeV1* WlrOutputHeadV1::Private::getMode(zwlr_output_mode_v1 *mode) const
 {
-    for (auto modeWrapper : modes) {
-        if (mode == *modeWrapper) {
-            return modeWrapper;
+    for (auto const& modeWrapper : modes) {
+        auto raw_ptr = modeWrapper.get();
+        if (mode == *raw_ptr) {
+            return raw_ptr;
         }
     }
     return nullptr;
@@ -547,7 +550,11 @@ double WlrOutputHeadV1::scale() const
 
 QVector<WlrOutputModeV1*> WlrOutputHeadV1::modes() const
 {
-    return d->modes;
+    QVector<WlrOutputModeV1*> ret;
+    for (auto const& mode : d->modes) {
+        ret.append(mode.get());
+    }
+    return ret;
 }
 
 WlrOutputModeV1* WlrOutputHeadV1::currentMode() const
