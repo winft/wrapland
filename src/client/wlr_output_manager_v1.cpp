@@ -284,16 +284,16 @@ public:
     QString description;
     QSize physicalSize;
     QPoint position;
-    Transform transform;
-    bool enabled;
-    double scale;
+    Transform transform{Transform::Normal};
+    bool enabled{false};
+    double scale{1.};
 
     QString make;
     QString model;
     QString serialNumber;
 
     std::vector<std::unique_ptr<WlrOutputModeV1>> modes;
-    WlrOutputModeV1 *currentMode;
+    WlrOutputModeV1 *currentMode{nullptr};
 
 private:
     WlrOutputModeV1* getMode(zwlr_output_mode_v1 *mode) const;
