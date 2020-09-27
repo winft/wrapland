@@ -25,6 +25,7 @@
 
 #include "wayland-wlr-output-management-v1-client-protocol.h"
 
+#include <algorithm>
 #include <vector>
 
 namespace Wrapland
@@ -350,7 +351,21 @@ void WlrOutputHeadV1::Private::modeCallback(void *data, zwlr_output_head_v1 *hea
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
 
-    d->modes.push_back(std::unique_ptr<WlrOutputModeV1>{new WlrOutputModeV1(mode, d->q)});
+    auto mode_wrapper = new WlrOutputModeV1(mode, d->q);
+    connect(mode_wrapper, &WlrOutputModeV1::removed, d->q, [d, mode_wrapper] {
+        auto it
+            = std::find_if(d->modes.begin(), d->modes.end(), [mode_wrapper](auto const& stored_mode) {
+            return mode_wrapper == stored_mode.get();
+        });
+        assert(it != d->modes.end());
+        d->modes.erase(it);
+        if (mode_wrapper == d->currentMode) {
+            d->currentMode = nullptr;
+            Q_EMIT d->q->changed();
+        }
+    });
+    d->modes.push_back(std::unique_ptr<WlrOutputModeV1>{mode_wrapper});
+
     Q_EMIT d->q->changed();
 }
 
