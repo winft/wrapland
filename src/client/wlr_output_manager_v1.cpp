@@ -465,6 +465,7 @@ void WlrOutputHeadV1::Private::finishedCallback(void *data, zwlr_output_head_v1 
     Q_ASSERT(d->outputHead == head);
 
     Q_EMIT d->q->removed();
+    delete d->q;
 }
 
 void WlrOutputHeadV1::Private::makeCallback(void *data, zwlr_output_head_v1 *head, const char *make)
