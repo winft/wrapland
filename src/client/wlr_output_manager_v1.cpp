@@ -224,7 +224,7 @@ void WlrOutputModeV1::Private::finishedCallback(void *data, zwlr_output_mode_v1 
 WlrOutputModeV1::Private::Private(WlrOutputModeV1 *q, zwlr_output_mode_v1 *mode)
     : q(q)
 {
-    outputMode.setup(mode, true);
+    outputMode.setup(mode);
     zwlr_output_mode_v1_add_listener(outputMode, &s_listener, this);
 }
 
@@ -501,7 +501,7 @@ void WlrOutputHeadV1::Private::serialNumberCallback(void *data,
 WlrOutputHeadV1::Private::Private(WlrOutputHeadV1 *q, zwlr_output_head_v1 *head)
     : q(q)
 {
-    outputHead.setup(head, true);
+    outputHead.setup(head);
     zwlr_output_head_v1_add_listener(outputHead, &s_listener, this);
 }
 
