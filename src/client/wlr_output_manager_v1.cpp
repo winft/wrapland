@@ -25,6 +25,9 @@
 
 #include "wayland-wlr-output-management-v1-client-protocol.h"
 
+#include <algorithm>
+#include <vector>
+
 namespace Wrapland
 {
 namespace Client
@@ -221,7 +224,7 @@ void WlrOutputModeV1::Private::finishedCallback(void *data, zwlr_output_mode_v1 
 WlrOutputModeV1::Private::Private(WlrOutputModeV1 *q, zwlr_output_mode_v1 *mode)
     : q(q)
 {
-    outputMode.setup(mode, true);
+    outputMode.setup(mode);
     zwlr_output_mode_v1_add_listener(outputMode, &s_listener, this);
 }
 
@@ -282,16 +285,16 @@ public:
     QString description;
     QSize physicalSize;
     QPoint position;
-    Transform transform;
-    bool enabled;
-    double scale;
+    Transform transform{Transform::Normal};
+    bool enabled{false};
+    double scale{1.};
 
     QString make;
     QString model;
     QString serialNumber;
 
-    QVector<WlrOutputModeV1*> modes;
-    WlrOutputModeV1 *currentMode;
+    std::vector<std::unique_ptr<WlrOutputModeV1>> modes;
+    WlrOutputModeV1 *currentMode{nullptr};
 
 private:
     WlrOutputModeV1* getMode(zwlr_output_mode_v1 *mode) const;
@@ -348,7 +351,21 @@ void WlrOutputHeadV1::Private::modeCallback(void *data, zwlr_output_head_v1 *hea
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
 
-    d->modes.append(new WlrOutputModeV1(mode, d->q));
+    auto mode_wrapper = new WlrOutputModeV1(mode, d->q);
+    connect(mode_wrapper, &WlrOutputModeV1::removed, d->q, [d, mode_wrapper] {
+        auto it
+            = std::find_if(d->modes.begin(), d->modes.end(), [mode_wrapper](auto const& stored_mode) {
+            return mode_wrapper == stored_mode.get();
+        });
+        assert(it != d->modes.end());
+        d->modes.erase(it);
+        if (mode_wrapper == d->currentMode) {
+            d->currentMode = nullptr;
+            Q_EMIT d->q->changed();
+        }
+    });
+    d->modes.push_back(std::unique_ptr<WlrOutputModeV1>{mode_wrapper});
+
     Q_EMIT d->q->changed();
 }
 
@@ -373,9 +390,10 @@ void WlrOutputHeadV1::Private::currentModeCallback(void *data, zwlr_output_head_
 
 WlrOutputModeV1* WlrOutputHeadV1::Private::getMode(zwlr_output_mode_v1 *mode) const
 {
-    for (auto modeWrapper : modes) {
-        if (mode == *modeWrapper) {
-            return modeWrapper;
+    for (auto const& modeWrapper : modes) {
+        auto raw_ptr = modeWrapper.get();
+        if (mode == *raw_ptr) {
+            return raw_ptr;
         }
     }
     return nullptr;
@@ -447,6 +465,7 @@ void WlrOutputHeadV1::Private::finishedCallback(void *data, zwlr_output_head_v1 
     Q_ASSERT(d->outputHead == head);
 
     Q_EMIT d->q->removed();
+    delete d->q;
 }
 
 void WlrOutputHeadV1::Private::makeCallback(void *data, zwlr_output_head_v1 *head, const char *make)
@@ -483,7 +502,7 @@ void WlrOutputHeadV1::Private::serialNumberCallback(void *data,
 WlrOutputHeadV1::Private::Private(WlrOutputHeadV1 *q, zwlr_output_head_v1 *head)
     : q(q)
 {
-    outputHead.setup(head, true);
+    outputHead.setup(head);
     zwlr_output_head_v1_add_listener(outputHead, &s_listener, this);
 }
 
@@ -547,7 +566,11 @@ double WlrOutputHeadV1::scale() const
 
 QVector<WlrOutputModeV1*> WlrOutputHeadV1::modes() const
 {
-    return d->modes;
+    QVector<WlrOutputModeV1*> ret;
+    for (auto const& mode : d->modes) {
+        ret.append(mode.get());
+    }
+    return ret;
 }
 
 WlrOutputModeV1* WlrOutputHeadV1::currentMode() const
