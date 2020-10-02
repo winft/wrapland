@@ -1,5 +1,16 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.520.0-beta.1](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.520.0-beta.0...wrapland@0.520.0-beta.1) (2020-10-02)
+
+
+### Bug Fixes
+
+* **client:** clean up wlr output modes with smart pointer ([ed71ffc](https://gitlab.com/kwinft/wrapland/commit/ed71ffcb0c0bef2a18d00ceb2e40455781c0bd96))
+* **client:** delete wlr output head on finished callback ([fa401d7](https://gitlab.com/kwinft/wrapland/commit/fa401d7f2b363650cc5726c386b27f3a2b5ea05a))
+* **client:** initialize private wlr mode data ([83ec883](https://gitlab.com/kwinft/wrapland/commit/83ec8831c6cadd382cbf83f599b7f2890c6c439b))
+* **client:** make objects non-foreign ([d5631a0](https://gitlab.com/kwinft/wrapland/commit/d5631a0d00b3c7795b00b10a46760cd7b04112c1))
+* **client:** remove wlr mode when finished ([784b987](https://gitlab.com/kwinft/wrapland/commit/784b987eb119a34545dccf17fbe7efdcda4baedc))
+
 ## [0.520.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.519.0-beta.0...wrapland@0.520.0-beta.0) (2020-09-25)
 
 
