@@ -90,6 +90,7 @@ public:
     void setShaded(bool set);
     void setMovable(bool set);
     void setResizable(bool set);
+    void setApplicationMenuPaths(const QString& serviceName, const QString& objectPath) const;
 
     /**
      * FIXME: still relevant with new desktops? Eike says yes in libtaskmanager code.

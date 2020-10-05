@@ -40,7 +40,7 @@ class Surface;
 class PlasmaVirtualDesktopManager;
 class PlasmaWindowRes;
 
-constexpr uint32_t PlasmaWindowManagerVersion = 9;
+constexpr uint32_t PlasmaWindowManagerVersion = 10;
 using PlasmaWindowManagerGlobal = Wayland::Global<PlasmaWindowManager, PlasmaWindowManagerVersion>;
 using PlasmaWindowManagerBind = Wayland::Bind<PlasmaWindowManagerGlobal>;
 
@@ -84,6 +84,7 @@ public:
     void setState(org_kde_plasma_window_management_state flag, bool set);
     void setParentWindow(PlasmaWindow* window);
     void setGeometry(const QRect& geometry);
+    void setApplicationMenuPaths(QString const& serviceName, QString const& objectPath) const;
 
     // TODO(romangg): Might make sense to have this as a non-static member function instead.
     static PlasmaWindowRes* getResourceOfParent(PlasmaWindow* parent, PlasmaWindowRes* childRes);
@@ -109,6 +110,10 @@ private:
     QIcon m_icon;
     uint32_t m_virtualDesktop = 0;
     uint32_t m_desktopState = 0;
+    struct {
+        QString serviceName;
+        QString objectPath;
+    } m_applicationMenu;
     wl_listener listener;
 };
 
