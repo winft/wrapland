@@ -47,6 +47,7 @@ set(SERVER_LIB_SRCS
     wayland/client.cpp
     wayland/display.cpp
     wl_output.cpp
+    grab.cpp
     xdg_decoration.cpp
     xdg_foreign.cpp
     xdg_foreign_v2.cpp

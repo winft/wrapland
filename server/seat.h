@@ -27,6 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include <optional>
 
+#include "grab.h"
+
 namespace Wrapland::Server
 {
 
@@ -151,6 +153,22 @@ public:
     void setPointerGrab(std::optional<Surface*>& surface,
                         const QPointF& surfacePosition = QPoint());
     void setPointerGrab(std::optional<Surface*>& surface, const QMatrix4x4& transformation);
+    std::optional<Surface*> currentGrab();
+
+    template<class GrabKind, int Priority>
+    GrabKind* grabHandler()
+    {
+        static_assert(std::is_convertible<GrabKind*, Grab*>::value,
+                      "T must inherit Wrapland::Server::Grab");
+
+        static GrabKind* s_grab = nullptr;
+        if (s_grab == nullptr) {
+            s_grab = new GrabKind(this);
+            grabManager->registerGrab(s_grab, Priority);
+        }
+
+        return s_grab;
+    }
 
     void setFocusedTextInputSurface(Surface* surface);
     Surface* focusedTextInputSurface() const;
@@ -189,6 +207,7 @@ private:
 
     class Private;
     std::unique_ptr<Private> d_ptr;
+    GrabManager* grabManager;
 };
 
 }

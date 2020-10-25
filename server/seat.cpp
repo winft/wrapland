@@ -65,6 +65,7 @@ Seat::Seat(Display* display, QObject* parent)
     , d_ptr(new Private(this, display))
 {
     connect(this, &Seat::nameChanged, this, [this] { d_ptr->sendName(); });
+    grabManager = new GrabManager(this);
 
     auto sendCapabilities = [this] { d_ptr->sendCapabilities(); };
     connect(this, &Seat::hasPointerChanged, this, sendCapabilities);
