@@ -54,6 +54,7 @@ set(SERVER_LIB_SRCS
     xdg_output.cpp
     xdg_shell.cpp
     xdg_shell_popup.cpp
+    xdg_shell_grab.cpp
     xdg_shell_positioner.cpp
     xdg_shell_surface.cpp
     xdg_shell_toplevel.cpp

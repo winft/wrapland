@@ -30,6 +30,7 @@ class Client;
 class Seat;
 class Surface;
 class XdgShell;
+class XdgPopupGrab;
 
 class WRAPLANDSERVER_EXPORT XdgShellSurface : public QObject
 {
@@ -65,6 +66,7 @@ private:
     friend class XdgShell;
     friend class XdgShellToplevel;
     friend class XdgShellPopup;
+    friend class XdgPopupGrab;
     XdgShellSurface(Client* client,
                     uint32_t version,
                     uint32_t id,
