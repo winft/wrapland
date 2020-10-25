@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPointer>
 #include <QVector>
 
+#include <optional>
 #include <string>
 #include <wayland-server.h>
 
@@ -71,9 +72,16 @@ public:
     bool touch = false;
     QList<wl_resource*> resources;
     quint32 timestamp = 0;
+
+    std::optional<Surface*> pointerGrab;
     QVector<Pointer*> pointers;
+
+    std::optional<Surface*> keyboardGrab;
     QVector<Keyboard*> keyboards;
+
+    std::optional<Surface*> touchGrab;
     QVector<Touch*> touchs;
+
     QVector<DataDevice*> dataDevices;
     QVector<TextInputV2*> textInputs;
     DataDevice* currentSelection = nullptr;

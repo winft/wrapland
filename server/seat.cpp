@@ -650,6 +650,10 @@ Surface* Seat::focusedPointerSurface() const
 
 void Seat::setFocusedPointerSurface(Surface* surface, const QPointF& surfacePosition)
 {
+    if (d_ptr->pointerGrab.has_value()) {
+        return;
+    }
+
     QMatrix4x4 m;
     m.translate(-surfacePosition.x(), -surfacePosition.y());
     setFocusedPointerSurface(surface, m);
@@ -663,6 +667,10 @@ void Seat::setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transfor
 {
     if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
         // ignore
+        return;
+    }
+
+    if (d_ptr->pointerGrab.has_value()) {
         return;
     }
 
@@ -1081,6 +1089,10 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
 {
     const quint32 serial = d_ptr->display()->handle()->nextSerial();
 
+    if (d_ptr->keyboardGrab.has_value()) {
+        return;
+    }
+
     for (auto it = d_ptr->keys.focus.keyboards.constBegin(),
               end = d_ptr->keys.focus.keyboards.constEnd();
          it != end;
@@ -1296,6 +1308,10 @@ void Seat::setFocusedTouchSurface(Surface* surface, const QPointF& surfacePositi
         return;
     }
     Q_ASSERT(!isDragTouch());
+
+    if (d_ptr->touchGrab.has_value()) {
+        return;
+    }
 
     if (d_ptr->globalTouch.focus.surface) {
         disconnect(d_ptr->globalTouch.focus.destroyConnection);
@@ -1548,6 +1564,50 @@ void Seat::setSelection(DataDevice* dataDevice)
         }
     }
     Q_EMIT selectionChanged(dataDevice);
+}
+
+void Seat::setKeyboardGrab(std::optional<Surface*>& surface)
+{
+    d_ptr->keyboardGrab.reset();
+    if (surface.has_value()) {
+        setFocusedKeyboardSurface(surface.value());
+        d_ptr->keyboardGrab = surface;
+    } else {
+        setFocusedKeyboardSurface(nullptr);
+    }
+}
+
+void Seat::setTouchGrab(std::optional<Surface*>& surface)
+{
+    d_ptr->touchGrab.reset();
+    if (surface.has_value()) {
+        setFocusedTouchSurface(surface.value());
+        d_ptr->touchGrab = surface;
+    } else {
+        setFocusedTouchSurface(nullptr);
+    }
+}
+
+void Seat::setPointerGrab(std::optional<Surface*>& surface, const QPointF& surfacePosition)
+{
+    d_ptr->pointerGrab.reset();
+    if (surface.has_value()) {
+        setFocusedPointerSurface(surface.value(), surfacePosition);
+        d_ptr->pointerGrab = surface;
+    } else {
+        setFocusedPointerSurface(nullptr, surfacePosition);
+    }
+}
+
+void Seat::setPointerGrab(std::optional<Surface*>& surface, const QMatrix4x4& transformation)
+{
+    d_ptr->pointerGrab.reset();
+    if (surface.has_value()) {
+        setFocusedPointerSurface(surface.value(), transformation);
+        d_ptr->pointerGrab = surface;
+    } else {
+        setFocusedPointerSurface(nullptr, transformation);
+    }
 }
 
 }

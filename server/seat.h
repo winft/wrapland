@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 #include <memory>
+#include <optional>
 
 namespace Wrapland::Server
 {
@@ -144,6 +145,12 @@ public:
     void cancelTouchSequence();
     bool isTouchSequence() const;
     bool hasImplicitTouchGrab(quint32 serial) const;
+
+    void setKeyboardGrab(std::optional<Surface*>& surface);
+    void setTouchGrab(std::optional<Surface*>& surface);
+    void setPointerGrab(std::optional<Surface*>& surface,
+                        const QPointF& surfacePosition = QPoint());
+    void setPointerGrab(std::optional<Surface*>& surface, const QMatrix4x4& transformation);
 
     void setFocusedTextInputSurface(Surface* surface);
     Surface* focusedTextInputSurface() const;
