@@ -57,6 +57,7 @@ public:
     Qt::Edges anchorEdge() const;
     QPoint anchorOffset() const;
     Qt::Edges gravity() const;
+    XdgShellSurface* parentSurface() const;
 
     XdgShellSurface::ConstraintAdjustments constraintAdjustments() const;
 

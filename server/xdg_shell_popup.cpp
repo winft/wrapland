@@ -213,6 +213,11 @@ XdgShellSurface::ConstraintAdjustments XdgShellPopup::constraintAdjustments() co
     return d_ptr->constraintAdjustments;
 }
 
+XdgShellSurface* XdgShellPopup::parentSurface() const
+{
+    return d_ptr->parent;
+}
+
 QRect XdgShellPopup::windowGeometry() const
 {
     return d_ptr->windowGeometry();
