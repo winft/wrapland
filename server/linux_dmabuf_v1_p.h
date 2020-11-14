@@ -46,7 +46,7 @@ public:
     void bindInit(LinuxDmabufV1Bind* bind) final;
 
     static const struct wl_buffer_interface* bufferInterface();
-    static void createParamsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
+    static void createParamsCallback(LinuxDmabufV1Bind* bind, uint32_t id);
 
     LinuxDmabufV1::Impl* impl;
     QHash<uint32_t, QSet<uint64_t>> supportedFormatsWithModifiers;

@@ -34,8 +34,8 @@ namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_slide_manager_interface SlideManager::Private::s_interface = {
-    createCallback,
-    unsetCallback,
+    cb<createCallback>,
+    cb<unsetCallback>,
 };
 
 SlideManager::Private::Private(Display* display, SlideManager* qptr)
@@ -44,12 +44,10 @@ SlideManager::Private::Private(Display* display, SlideManager* qptr)
     create();
 }
 
-void SlideManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
-                                           wl_resource* wlResource,
+void SlideManager::Private::createCallback(SlideManagerBind* bind,
                                            uint32_t id,
                                            wl_resource* wlSurface)
 {
-    auto bind = handle(wlResource)->d_ptr->getBind(wlResource);
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto slide = new Slide(bind->client()->handle(), bind->version(), id);
@@ -62,8 +60,7 @@ void SlideManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
     surface->d_ptr->setSlide(QPointer<Slide>(slide));
 }
 
-void SlideManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
-                                          [[maybe_unused]] wl_resource* wlResource,
+void SlideManager::Private::unsetCallback([[maybe_unused]] SlideManagerBind* bind,
                                           wl_resource* wlSurface)
 {
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);

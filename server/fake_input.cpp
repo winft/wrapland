@@ -30,17 +30,17 @@ namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_fake_input_interface FakeInput::Private::s_interface = {
-    authenticateCallback,
-    pointerMotionCallback,
-    buttonCallback,
-    axisCallback,
-    touchDownCallback,
-    touchMotionCallback,
-    touchUpCallback,
-    touchCancelCallback,
-    touchFrameCallback,
-    pointerMotionAbsoluteCallback,
-    keyboardKeyCallback,
+    cb<authenticateCallback>,
+    cb<pointerMotionCallback>,
+    cb<buttonCallback>,
+    cb<axisCallback>,
+    cb<touchDownCallback>,
+    cb<touchMotionCallback>,
+    cb<touchUpCallback>,
+    cb<touchCancelCallback>,
+    cb<touchFrameCallback>,
+    cb<pointerMotionAbsoluteCallback>,
+    cb<keyboardKeyCallback>,
 };
 
 FakeInput::Private::Private(Display* display, FakeInput* q)
@@ -94,12 +94,11 @@ FakeInputDevice* FakeInput::Private::device(FakeInputBind* bind) const
     return nullptr;
 }
 
-void FakeInput::Private::authenticateCallback([[maybe_unused]] wl_client* wlClient,
-                                              wl_resource* wlResource,
+void FakeInput::Private::authenticateCallback(FakeInputBind* bind,
                                               const char* application,
                                               const char* reason)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     Q_EMIT fakeDevice->authenticationRequested(QString::fromUtf8(application),
                                                QString::fromUtf8(reason));
 }
@@ -110,12 +109,11 @@ bool check(FakeInputDevice* device)
     return device->isAuthenticated();
 }
 
-void FakeInput::Private::pointerMotionCallback([[maybe_unused]] wl_client* wlClient,
-                                               wl_resource* wlResource,
+void FakeInput::Private::pointerMotionCallback(FakeInputBind* bind,
                                                wl_fixed_t delta_x,
                                                wl_fixed_t delta_y)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }
@@ -124,12 +122,11 @@ void FakeInput::Private::pointerMotionCallback([[maybe_unused]] wl_client* wlCli
         QSizeF(wl_fixed_to_double(delta_x), wl_fixed_to_double(delta_y)));
 }
 
-void FakeInput::Private::pointerMotionAbsoluteCallback([[maybe_unused]] wl_client* wlClient,
-                                                       wl_resource* wlResource,
+void FakeInput::Private::pointerMotionAbsoluteCallback(FakeInputBind* bind,
                                                        wl_fixed_t x,
                                                        wl_fixed_t y)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }
@@ -138,12 +135,9 @@ void FakeInput::Private::pointerMotionAbsoluteCallback([[maybe_unused]] wl_clien
         QPointF(wl_fixed_to_double(x), wl_fixed_to_double(y)));
 }
 
-void FakeInput::Private::axisCallback([[maybe_unused]] wl_client* wlClient,
-                                      wl_resource* wlResource,
-                                      uint32_t axis,
-                                      wl_fixed_t value)
+void FakeInput::Private::axisCallback(FakeInputBind* bind, uint32_t axis, wl_fixed_t value)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }
@@ -163,12 +157,9 @@ void FakeInput::Private::axisCallback([[maybe_unused]] wl_client* wlClient,
     Q_EMIT fakeDevice->pointerAxisRequested(orientation, wl_fixed_to_double(value));
 }
 
-void FakeInput::Private::buttonCallback([[maybe_unused]] wl_client* wlClient,
-                                        wl_resource* wlResource,
-                                        uint32_t button,
-                                        uint32_t state)
+void FakeInput::Private::buttonCallback(FakeInputBind* bind, uint32_t button, uint32_t state)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }
@@ -186,17 +177,16 @@ void FakeInput::Private::buttonCallback([[maybe_unused]] wl_client* wlClient,
     }
 }
 
-void FakeInput::Private::touchDownCallback([[maybe_unused]] wl_client* wlClient,
-                                           wl_resource* wlResource,
+void FakeInput::Private::touchDownCallback(FakeInputBind* bind,
                                            quint32 id,
                                            wl_fixed_t x,
                                            wl_fixed_t y)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }
-    auto priv = handle(wlResource)->d_ptr.get();
+    auto priv = bind->global()->handle()->d_ptr.get();
     if (priv->touchIds.contains(id)) {
         return;
     }
@@ -205,17 +195,16 @@ void FakeInput::Private::touchDownCallback([[maybe_unused]] wl_client* wlClient,
                                           QPointF(wl_fixed_to_double(x), wl_fixed_to_double(y)));
 }
 
-void FakeInput::Private::touchMotionCallback([[maybe_unused]] wl_client* wlClient,
-                                             wl_resource* wlResource,
+void FakeInput::Private::touchMotionCallback(FakeInputBind* bind,
                                              quint32 id,
                                              wl_fixed_t x,
                                              wl_fixed_t y)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }
-    auto priv = handle(wlResource)->d_ptr.get();
+    auto priv = bind->global()->handle()->d_ptr.get();
     if (!priv->touchIds.contains(id)) {
         return;
     }
@@ -223,15 +212,13 @@ void FakeInput::Private::touchMotionCallback([[maybe_unused]] wl_client* wlClien
                                             QPointF(wl_fixed_to_double(x), wl_fixed_to_double(y)));
 }
 
-void FakeInput::Private::touchUpCallback([[maybe_unused]] wl_client* wlClient,
-                                         wl_resource* wlResource,
-                                         quint32 id)
+void FakeInput::Private::touchUpCallback(FakeInputBind* bind, quint32 id)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }
-    auto priv = handle(wlResource)->d_ptr.get();
+    auto priv = bind->global()->handle()->d_ptr.get();
     if (!priv->touchIds.contains(id)) {
         return;
     }
@@ -239,34 +226,29 @@ void FakeInput::Private::touchUpCallback([[maybe_unused]] wl_client* wlClient,
     Q_EMIT fakeDevice->touchUpRequested(id);
 }
 
-void FakeInput::Private::touchCancelCallback([[maybe_unused]] wl_client* wlClient,
-                                             wl_resource* wlResource)
+void FakeInput::Private::touchCancelCallback(FakeInputBind* bind)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }
-    auto priv = handle(wlResource)->d_ptr.get();
+    auto priv = bind->global()->handle()->d_ptr.get();
     priv->touchIds.clear();
     Q_EMIT fakeDevice->touchCancelRequested();
 }
 
-void FakeInput::Private::touchFrameCallback([[maybe_unused]] wl_client* wlClient,
-                                            wl_resource* wlResource)
+void FakeInput::Private::touchFrameCallback(FakeInputBind* bind)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }
     Q_EMIT fakeDevice->touchFrameRequested();
 }
 
-void FakeInput::Private::keyboardKeyCallback([[maybe_unused]] wl_client* wlClient,
-                                             wl_resource* wlResource,
-                                             uint32_t button,
-                                             uint32_t state)
+void FakeInput::Private::keyboardKeyCallback(FakeInputBind* bind, uint32_t button, uint32_t state)
 {
-    auto fakeDevice = device(wlResource);
+    auto fakeDevice = device(bind->resource());
     if (!check(fakeDevice)) {
         return;
     }

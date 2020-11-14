@@ -23,7 +23,7 @@ namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_keystate_interface KeyState::Private::s_interface
-    = {KeyState::Private::fetchStatesCallback};
+    = {KeyState::Private::cb<fetchStatesCallback>};
 
 KeyState::Private::Private(Display* display, KeyState* q)
     : Wayland::Global<KeyState>(q, display, &org_kde_kwin_keystate_interface, &s_interface)
@@ -33,11 +33,9 @@ KeyState::Private::Private(Display* display, KeyState* q)
 
 KeyState::Private::~Private() = default;
 
-void KeyState::Private::fetchStatesCallback([[maybe_unused]] struct wl_client* wlClient,
-                                            struct wl_resource* wlResource)
+void KeyState::Private::fetchStatesCallback(KeyStateBind* bind)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
 
     for (int i = 0; i < priv->m_keyStates.count(); ++i) {
         priv->send<org_kde_kwin_keystate_send_stateChanged>(bind, i, priv->m_keyStates[i]);

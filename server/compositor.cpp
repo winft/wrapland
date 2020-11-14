@@ -34,6 +34,7 @@ namespace Wrapland::Server
 
 constexpr uint32_t CompositorVersion = 4;
 using CompositorGlobal = Wayland::Global<Compositor, CompositorVersion>;
+using CompositorBind = Wayland::Bind<CompositorGlobal>;
 
 class Compositor::Private : public CompositorGlobal
 {
@@ -44,8 +45,8 @@ public:
     std::vector<Surface*> surfaces;
 
 private:
-    static void createSurfaceCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
-    static void createRegionCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
+    static void createSurfaceCallback(CompositorBind* bind, uint32_t id);
+    static void createRegionCallback(CompositorBind* bind, uint32_t id);
 
     static const struct wl_compositor_interface s_interface;
 };
@@ -58,8 +59,8 @@ Compositor::Private::Private(Compositor* q, Display* display)
 Compositor::Private::~Private() = default;
 
 const struct wl_compositor_interface Compositor::Private::s_interface = {
-    createSurfaceCallback,
-    createRegionCallback,
+    cb<createSurfaceCallback>,
+    cb<createRegionCallback>,
 };
 
 Compositor::Compositor(Display* display, QObject* parent)
@@ -71,12 +72,9 @@ Compositor::Compositor(Display* display, QObject* parent)
 
 Compositor::~Compositor() = default;
 
-void Compositor::Private::createSurfaceCallback([[maybe_unused]] wl_client* wlClient,
-                                                wl_resource* wlResource,
-                                                uint32_t id)
+void Compositor::Private::createSurfaceCallback(CompositorBind* bind, uint32_t id)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
 
     auto surface = new Surface(bind->client()->handle(), bind->version(), id);
     // TODO(romangg): error handling (when resource not created)
@@ -90,12 +88,9 @@ void Compositor::Private::createSurfaceCallback([[maybe_unused]] wl_client* wlCl
     Q_EMIT priv->handle()->surfaceCreated(surface);
 }
 
-void Compositor::Private::createRegionCallback([[maybe_unused]] wl_client* wlClient,
-                                               wl_resource* wlResource,
-                                               uint32_t id)
+void Compositor::Private::createRegionCallback(CompositorBind* bind, uint32_t id)
 {
-    auto compositor = handle(wlResource);
-    auto bind = compositor->d_ptr->getBind(wlResource);
+    auto compositor = bind->global()->handle();
 
     auto region = new Region(bind->client()->handle(), bind->version(), id);
     // TODO(romangg): error handling (when resource not created)

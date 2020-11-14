@@ -35,7 +35,7 @@ namespace Wrapland::Server
 
 const struct wp_viewporter_interface Viewporter::Private::s_interface = {
     resourceDestroyCallback,
-    getViewportCallback,
+    cb<getViewportCallback>,
 };
 
 Viewporter::Private::Private(Display* display, Viewporter* qptr)
@@ -44,18 +44,18 @@ Viewporter::Private::Private(Display* display, Viewporter* qptr)
     create();
 }
 
-void Viewporter::Private::getViewportCallback([[maybe_unused]] wl_client* wlClient,
-                                              wl_resource* wlResource,
+void Viewporter::Private::getViewportCallback(ViewporterBind* bind,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
-    handle(wlResource)->d_ptr->getViewport(wlResource, id, wlSurface);
+    auto priv = handle(bind->resource())->d_ptr.get();
+    priv->getViewport(bind, id, wlSurface);
 }
 
-void Viewporter::Private::getViewport(wl_resource* wlResource, uint32_t id, wl_resource* wlSurface)
+void Viewporter::Private::getViewport(ViewporterBind* bind, uint32_t id, wl_resource* wlSurface)
 {
+
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
-    auto bind = getBind(wlResource);
     if (!surface) {
         // TODO(romangg): send error msg?
         return;

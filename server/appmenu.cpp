@@ -34,7 +34,7 @@ namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_appmenu_manager_interface AppmenuManager::Private::s_interface = {
-    createCallback,
+    cb<createCallback>,
 };
 
 AppmenuManager::Private::Private(Display* display, AppmenuManager* qptr)
@@ -53,13 +53,11 @@ AppmenuManager::AppmenuManager(Display* display, QObject* parent)
 
 AppmenuManager::~AppmenuManager() = default;
 
-void AppmenuManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
-                                             wl_resource* wlResource,
+void AppmenuManager::Private::createCallback(AppmenuManagerBind* bind,
                                              uint32_t id,
                                              wl_resource* wlSurface)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto appmenu = new Appmenu(bind->client()->handle(), bind->version(), id, surface);

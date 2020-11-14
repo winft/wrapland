@@ -31,7 +31,7 @@ const struct zwp_keyboard_shortcuts_inhibit_manager_v1_interface
     KeyboardShortcutsInhibitManagerV1::Private::s_interface
     = {
         resourceDestroyCallback,
-        inhibitShortcutsCallback,
+        cb<inhibitShortcutsCallback>,
 };
 
 KeyboardShortcutsInhibitManagerV1::Private::Private(Display* display,
@@ -46,14 +46,12 @@ KeyboardShortcutsInhibitManagerV1::Private::Private(Display* display,
 }
 
 void KeyboardShortcutsInhibitManagerV1::Private::inhibitShortcutsCallback(
-    [[maybe_unused]] wl_client* wlClient,
-    wl_resource* wlResource,
+    KeyboardShortcutsInhibitManagerV1Bind* bind,
     uint32_t id,
     wl_resource* wlSurface,
     wl_resource* wlSeat)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
     auto seat = SeatGlobal::handle(wlSeat);
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
@@ -74,7 +72,7 @@ void KeyboardShortcutsInhibitManagerV1::Private::inhibitShortcutsCallback(
                      });
 
     priv->m_inhibitors[{surface, seat}] = inhibitor;
-    Q_EMIT handle(wlResource)->inhibitorCreated(inhibitor);
+    Q_EMIT bind->global()->handle()->inhibitorCreated(inhibitor);
     inhibitor->setActive(true);
 }
 

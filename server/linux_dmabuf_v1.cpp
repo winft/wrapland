@@ -49,7 +49,7 @@ LinuxDmabufV1::Private::~Private() = default;
 
 const struct zwp_linux_dmabuf_v1_interface LinuxDmabufV1::Private::s_interface = {
     resourceDestroyCallback,
-    createParamsCallback,
+    cb<createParamsCallback>,
 };
 
 constexpr size_t modifierShift = 32;
@@ -80,12 +80,9 @@ void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
     }
 }
 
-void LinuxDmabufV1::Private::createParamsCallback([[maybe_unused]] wl_client* wlClient,
-                                                  wl_resource* wlResource,
-                                                  uint32_t id)
+void LinuxDmabufV1::Private::createParamsCallback(LinuxDmabufV1Bind* bind, uint32_t id)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
 
     [[maybe_unused]] auto params
         = new ParamsWrapperV1(bind->client()->handle(), bind->version(), id, priv);

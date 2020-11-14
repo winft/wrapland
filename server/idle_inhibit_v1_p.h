@@ -34,6 +34,7 @@ namespace Wrapland::Server
 constexpr uint32_t IdleInhibitManagerV1Version = 1;
 using IdleInhibitManagerV1Global
     = Wayland::Global<IdleInhibitManagerV1, IdleInhibitManagerV1Version>;
+using IdleInhibitManagerV1Bind = Wayland::Bind<IdleInhibitManagerV1Global>;
 
 class IdleInhibitManagerV1::Private : public IdleInhibitManagerV1Global
 {
@@ -42,10 +43,8 @@ public:
     ~Private() override;
 
 private:
-    static void createInhibitorCallback(wl_client* client,
-                                        wl_resource* resource,
-                                        uint32_t id,
-                                        wl_resource* surface);
+    static void
+    createInhibitorCallback(IdleInhibitManagerV1Bind* bind, uint32_t id, wl_resource* surface);
 
     static const struct zwp_idle_inhibit_manager_v1_interface s_interface;
 };

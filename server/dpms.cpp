@@ -28,11 +28,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-constexpr uint32_t DpmsManagerVersion = 1;
-using DpmsManagerGlobal = Wayland::Global<DpmsManager, DpmsManagerVersion>;
-
 const struct org_kde_kwin_dpms_manager_interface DpmsManager::Private::s_interface = {
-    getDpmsCallback,
+    cb<getDpmsCallback>,
 };
 
 DpmsManager::Private::Private(Display* display, DpmsManager* q)
@@ -41,14 +38,8 @@ DpmsManager::Private::Private(Display* display, DpmsManager* q)
     create();
 }
 
-void DpmsManager::Private::getDpmsCallback([[maybe_unused]] wl_client* wlClient,
-                                           wl_resource* wlResource,
-                                           uint32_t id,
-                                           wl_resource* output)
+void DpmsManager::Private::getDpmsCallback(DpmsManagerBind* bind, uint32_t id, wl_resource* output)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
-
     auto dpms
         = new Dpms(bind->client()->handle(), bind->version(), id, WlOutputGlobal::handle(output));
     if (!dpms) {

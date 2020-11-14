@@ -25,7 +25,7 @@ namespace Wrapland::Server
 {
 
 const struct org_kde_plasma_shell_interface PlasmaShell::Private::s_interface = {
-    createSurfaceCallback,
+    cb<createSurfaceCallback>,
 };
 
 PlasmaShell::Private::Private(Display* display, PlasmaShell* qptr)
@@ -36,27 +36,16 @@ PlasmaShell::Private::Private(Display* display, PlasmaShell* qptr)
 
 PlasmaShell::Private::~Private() = default;
 
-void PlasmaShell::Private::createSurfaceCallback(wl_client* wlClient,
-                                                 wl_resource* wlResource,
+void PlasmaShell::Private::createSurfaceCallback(PlasmaShellBind* bind,
                                                  uint32_t id,
                                                  wl_resource* surface)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    priv->createSurface(wlClient,
-                        wl_resource_get_version(wlResource),
-                        id,
-                        Wayland::Resource<Surface>::handle(surface),
-                        wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
+    priv->createSurface(bind, id, Wayland::Resource<Surface>::handle(surface));
 }
 
-void PlasmaShell::Private::createSurface([[maybe_unused]] wl_client* wlClient,
-                                         [[maybe_unused]] uint32_t version,
-                                         uint32_t id,
-                                         Surface* surface,
-                                         wl_resource* parentResource)
+void PlasmaShell::Private::createSurface(PlasmaShellBind* bind, uint32_t id, Surface* surface)
 {
-    auto bind = handle(parentResource)->d_ptr->getBind(parentResource);
-
     auto it = std::find_if(surfaces.constBegin(),
                            surfaces.constEnd(),
                            [surface](PlasmaShellSurface* s) { return surface == s->surface(); });

@@ -32,14 +32,17 @@ namespace Server
 
 class WlOutput;
 
+constexpr uint32_t DpmsManagerVersion = 1;
+using DpmsManagerGlobal = Wayland::Global<DpmsManager, DpmsManagerVersion>;
+using DpmsManagerBind = Wayland::Bind<DpmsManagerGlobal>;
+
 class DpmsManager::Private : public Wayland::Global<DpmsManager>
 {
 public:
     Private(Display* display, DpmsManager* q);
 
 private:
-    static void
-    getDpmsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id, wl_resource* output);
+    static void getDpmsCallback(DpmsManagerBind* bind, uint32_t id, wl_resource* output);
 
     static const struct org_kde_kwin_dpms_manager_interface s_interface;
 };

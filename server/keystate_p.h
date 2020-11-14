@@ -37,13 +37,14 @@ class KeyState;
 
 constexpr uint32_t KeyStateVersion = 1;
 using KeyStateGlobal = Wayland::Global<KeyState, KeyStateVersion>;
+using KeyStateBind = Wayland::Bind<KeyStateGlobal>;
 
 class KeyState::Private : public KeyStateGlobal
 {
 public:
     Private(Display* d, KeyState* q);
     ~Private() override;
-    static void fetchStatesCallback(struct wl_client* client, struct wl_resource* wlResource);
+    static void fetchStatesCallback(KeyStateBind* bind);
 
     QVector<State> m_keyStates = QVector<State>(3, Unlocked);
     static const struct org_kde_kwin_keystate_interface s_interface;

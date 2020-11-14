@@ -46,12 +46,9 @@ public:
     Private(Display* display, Viewporter* qptr);
 
 private:
-    void getViewport(wl_resource* wlResource, uint32_t id, wl_resource* wlSurface);
+    void getViewport(ViewporterBind* bind, uint32_t id, wl_resource* wlSurface);
 
-    static void getViewportCallback(wl_client* wlClient,
-                                    wl_resource* wlResource,
-                                    uint32_t id,
-                                    wl_resource* wlSurface);
+    static void getViewportCallback(ViewporterBind* bind, uint32_t id, wl_resource* wlSurface);
 
     static const struct wp_viewporter_interface s_interface;
 };

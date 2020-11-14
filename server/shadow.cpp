@@ -32,8 +32,8 @@ namespace Wrapland::Server
 {
 
 const struct org_kde_kwin_shadow_manager_interface ShadowManager::Private::s_interface = {
-    createCallback,
-    unsetCallback,
+    cb<createCallback>,
+    cb<unsetCallback>,
     resourceDestroyCallback,
 };
 
@@ -43,14 +43,10 @@ ShadowManager::Private::Private(Display* display, ShadowManager* qptr)
     create();
 }
 
-void ShadowManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
-                                            wl_resource* wlResource,
+void ShadowManager::Private::createCallback(ShadowManagerBind* bind,
                                             uint32_t id,
                                             wl_resource* wlSurface)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
-
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto shadow = new Shadow(bind->client()->handle(), bind->version(), id);
@@ -62,8 +58,7 @@ void ShadowManager::Private::createCallback([[maybe_unused]] wl_client* wlClient
     surface->d_ptr->setShadow(QPointer<Shadow>(shadow));
 }
 
-void ShadowManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
-                                           [[maybe_unused]] wl_resource* wlResource,
+void ShadowManager::Private::unsetCallback([[maybe_unused]] ShadowManagerBind* bind,
                                            wl_resource* wlSurface)
 {
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);

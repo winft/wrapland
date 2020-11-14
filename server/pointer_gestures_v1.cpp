@@ -45,18 +45,15 @@ PointerGesturesV1::Private::Private(PointerGesturesV1* q, Display* display)
 }
 
 const struct zwp_pointer_gestures_v1_interface PointerGesturesV1::Private::s_interface = {
-    swipeGestureCallback,
-    pinchGestureCallback,
+    cb<swipeGestureCallback>,
+    cb<pinchGestureCallback>,
     resourceDestroyCallback,
 };
 
-void PointerGesturesV1::Private::swipeGestureCallback([[maybe_unused]] wl_client* wlClient,
-                                                      wl_resource* wlResource,
+void PointerGesturesV1::Private::swipeGestureCallback(PointerGesturesV1Bind* bind,
                                                       uint32_t id,
                                                       wl_resource* wlPointer)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
     auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
 
     auto swiper = new PointerSwipeGestureV1(bind->client()->handle(), bind->version(), id, pointer);
@@ -67,13 +64,10 @@ void PointerGesturesV1::Private::swipeGestureCallback([[maybe_unused]] wl_client
     pointer->d_ptr->registerSwipeGesture(swiper);
 }
 
-void PointerGesturesV1::Private::pinchGestureCallback([[maybe_unused]] wl_client* wlClient,
-                                                      wl_resource* wlResource,
+void PointerGesturesV1::Private::pinchGestureCallback(PointerGesturesV1Bind* bind,
                                                       uint32_t id,
                                                       wl_resource* wlPointer)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
     auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
 
     auto pincher

@@ -35,6 +35,7 @@ namespace Wrapland::Server
 
 constexpr uint32_t SubcompositorVersion = 1;
 using SubcompositorGlobal = Wayland::Global<Subcompositor, SubcompositorVersion>;
+using SubcompositorBind = Wayland::Bind<SubcompositorGlobal>;
 
 class Subcompositor::Private : public SubcompositorGlobal
 {
@@ -42,9 +43,8 @@ public:
     Private(Subcompositor* q, Display* display);
 
 private:
-    static void destroyCallback(wl_client* wlClient, wl_resource* wlResource);
-    static void subsurfaceCallback(wl_client* wlClient,
-                                   wl_resource* wlResource,
+    static void destroyCallback(SubcompositorBind* bind);
+    static void subsurfaceCallback(SubcompositorBind* bind,
                                    uint32_t id,
                                    wl_resource* wlSurface,
                                    wl_resource* wlParent);
@@ -54,7 +54,7 @@ private:
 
 const struct wl_subcompositor_interface Subcompositor::Private::s_interface = {
     resourceDestroyCallback,
-    subsurfaceCallback,
+    cb<subsurfaceCallback>,
 };
 
 Subcompositor::Private::Private(Subcompositor* q, Display* display)
@@ -62,14 +62,12 @@ Subcompositor::Private::Private(Subcompositor* q, Display* display)
 {
 }
 
-void Subcompositor::Private::subsurfaceCallback([[maybe_unused]] wl_client* wlClient,
-                                                wl_resource* wlResource,
+void Subcompositor::Private::subsurfaceCallback(SubcompositorBind* bind,
                                                 uint32_t id,
                                                 wl_resource* wlSurface,
                                                 wl_resource* wlParent)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
 
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     auto parentSurface = Wayland::Resource<Surface>::handle(wlParent);

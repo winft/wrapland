@@ -33,7 +33,7 @@ namespace Wrapland::Server
 
 const struct zwp_text_input_manager_v2_interface TextInputManagerV2::Private::s_interface = {
     resourceDestroyCallback,
-    getTextInputCallback,
+    cb<getTextInputCallback>,
 };
 
 TextInputManagerV2::Private::Private(Display* display, TextInputManagerV2* q)
@@ -42,13 +42,10 @@ TextInputManagerV2::Private::Private(Display* display, TextInputManagerV2* q)
     create();
 }
 
-void TextInputManagerV2::Private::getTextInputCallback([[maybe_unused]] wl_client* wlClient,
-                                                       wl_resource* wlResource,
+void TextInputManagerV2::Private::getTextInputCallback(TextInputManagerV2Bind* bind,
                                                        uint32_t id,
                                                        wl_resource* wlSeat)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
     auto seat = SeatGlobal::handle(wlSeat);
 
     auto textInput = new TextInputV2(bind->client()->handle(), bind->version(), id);

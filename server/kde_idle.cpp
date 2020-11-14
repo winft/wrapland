@@ -30,7 +30,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-const struct org_kde_kwin_idle_interface KdeIdle::Private::s_interface = {getIdleTimeoutCallback};
+const struct org_kde_kwin_idle_interface KdeIdle::Private::s_interface
+    = {cb<getIdleTimeoutCallback>};
 
 KdeIdle::Private::Private(Display* display, KdeIdle* qptr)
     : Wayland::Global<KdeIdle>(qptr, display, &org_kde_kwin_idle_interface, &s_interface)
@@ -39,14 +40,12 @@ KdeIdle::Private::Private(Display* display, KdeIdle* qptr)
 }
 KdeIdle::Private::~Private() = default;
 
-void KdeIdle::Private::getIdleTimeoutCallback([[maybe_unused]] wl_client* wlClient,
-                                              wl_resource* wlResource,
+void KdeIdle::Private::getIdleTimeoutCallback(KdeIdleBind* bind,
                                               uint32_t id,
                                               wl_resource* wlSeat,
                                               uint32_t timeout)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
     auto seat = SeatGlobal::handle(wlSeat);
 
     auto idleTimeout

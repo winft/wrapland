@@ -38,6 +38,7 @@ class Display;
 
 constexpr uint32_t ShadowManagerVersion = 2;
 using ShadowManagerGlobal = Wayland::Global<ShadowManager, ShadowManagerVersion>;
+using ShadowManagerBind = Wayland::Bind<ShadowManagerGlobal>;
 
 class ShadowManager::Private : public ShadowManagerGlobal
 {
@@ -45,9 +46,8 @@ public:
     Private(Display* display, ShadowManager* qptr);
 
 private:
-    static void
-    createCallback(wl_client* client, wl_resource* resource, uint32_t id, wl_resource* surface);
-    static void unsetCallback(wl_client* client, wl_resource* resource, wl_resource* surface);
+    static void createCallback(ShadowManagerBind* bind, uint32_t id, wl_resource* surface);
+    static void unsetCallback(ShadowManagerBind* bind, wl_resource* surface);
 
     static const struct org_kde_kwin_shadow_manager_interface s_interface;
 };
