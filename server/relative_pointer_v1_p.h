@@ -29,7 +29,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class RelativePointerManagerV1::Private : public Wayland::Global<RelativePointerManagerV1>
+constexpr uint32_t RelativePointerManagerV1Version = 1;
+using RelativePointerManagerV1Global
+    = Wayland::Global<RelativePointerManagerV1, RelativePointerManagerV1Version>;
+
+class RelativePointerManagerV1::Private : public RelativePointerManagerV1Global
 {
 public:
     Private(RelativePointerManagerV1* q, Display* display);

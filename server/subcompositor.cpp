@@ -33,7 +33,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class Subcompositor::Private : public Wayland::Global<Subcompositor>
+constexpr uint32_t SubcompositorVersion = 1;
+using SubcompositorGlobal = Wayland::Global<Subcompositor, SubcompositorVersion>;
+
+class Subcompositor::Private : public SubcompositorGlobal
 {
 public:
     Private(Subcompositor* q, Display* display);

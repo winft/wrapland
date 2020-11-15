@@ -32,7 +32,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class XdgDecorationManager::Private : public Wayland::Global<XdgDecorationManager>
+constexpr uint32_t XdgDecorationManagerVersion = 1;
+using XdgDecorationManagerGlobal
+    = Wayland::Global<XdgDecorationManager, XdgDecorationManagerVersion>;
+
+class XdgDecorationManager::Private : public XdgDecorationManagerGlobal
 {
 public:
     Private(XdgDecorationManager* q, Display* display, XdgShell* shell);

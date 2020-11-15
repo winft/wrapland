@@ -30,7 +30,10 @@ namespace Wrapland::Server
 
 class Pointer;
 
-class PointerGesturesV1::Private : public Wayland::Global<PointerGesturesV1>
+constexpr uint32_t PointerGesturesV1Version = 1;
+using PointerGesturesV1Global = Wayland::Global<PointerGesturesV1, PointerGesturesV1Version>;
+
+class PointerGesturesV1::Private : public PointerGesturesV1Global
 {
 public:
     Private(PointerGesturesV1* q, Display* display);

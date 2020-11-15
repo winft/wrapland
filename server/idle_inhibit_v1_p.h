@@ -31,7 +31,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class IdleInhibitManagerV1::Private : public Wayland::Global<IdleInhibitManagerV1>
+constexpr uint32_t IdleInhibitManagerV1Version = 1;
+using IdleInhibitManagerV1Global
+    = Wayland::Global<IdleInhibitManagerV1, IdleInhibitManagerV1Version>;
+
+class IdleInhibitManagerV1::Private : public IdleInhibitManagerV1Global
 {
 public:
     Private(Display* display, IdleInhibitManagerV1* q);

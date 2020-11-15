@@ -36,7 +36,10 @@ class Display;
 class Seat;
 class IdleTimeout;
 
-class KdeIdle::Private : public Wayland::Global<KdeIdle>
+constexpr uint32_t KdeIdleVersion = 1;
+using KdeIdleGlobal = Wayland::Global<KdeIdle, KdeIdleVersion>;
+
+class KdeIdle::Private : public KdeIdleGlobal
 {
 public:
     Private(Display* display, KdeIdle* q);

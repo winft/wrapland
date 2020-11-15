@@ -30,7 +30,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class PointerConstraintsV1::Private : public Wayland::Global<PointerConstraintsV1>
+constexpr uint32_t PointerConstraintsV1Version = 1;
+using PointerConstraintsV1Global
+    = Wayland::Global<PointerConstraintsV1, PointerConstraintsV1Version>;
+
+class PointerConstraintsV1::Private : public PointerConstraintsV1Global
 {
 public:
     Private(PointerConstraintsV1* q, Display* display);

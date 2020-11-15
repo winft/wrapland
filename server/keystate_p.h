@@ -34,7 +34,11 @@ namespace Wrapland::Server
 {
 
 class KeyState;
-class KeyState::Private : public Wayland::Global<KeyState>
+
+constexpr uint32_t KeyStateVersion = 1;
+using KeyStateGlobal = Wayland::Global<KeyState, KeyStateVersion>;
+
+class KeyState::Private : public KeyStateGlobal
 {
 public:
     Private(Display* d, KeyState* q);
@@ -44,5 +48,4 @@ public:
     QVector<State> m_keyStates = QVector<State>(3, Unlocked);
     static const struct org_kde_kwin_keystate_interface s_interface;
 };
-
 }
