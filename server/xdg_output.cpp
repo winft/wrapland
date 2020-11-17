@@ -66,7 +66,7 @@ void XdgOutputManager::Private::getXdgOutputCallback([[maybe_unused]] wl_client*
 
     auto xdgOutputV1 = new XdgOutputV1(bind->client()->handle(), bind->version(), id);
     if (!xdgOutputV1->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        bind->post_no_memory();
         delete xdgOutputV1;
         return;
     }

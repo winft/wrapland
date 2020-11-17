@@ -54,7 +54,7 @@ void SlideManager::Private::createCallback([[maybe_unused]] wl_client* wlClient,
 
     auto slide = new Slide(bind->client()->handle(), bind->version(), id);
     if (!slide->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        bind->post_no_memory();
         delete slide;
         return;
     }

@@ -55,7 +55,7 @@ void ShadowManager::Private::createCallback([[maybe_unused]] wl_client* wlClient
 
     auto shadow = new Shadow(bind->client()->handle(), bind->version(), id);
     if (!shadow->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        bind->post_no_memory();
         delete shadow;
         return;
     }

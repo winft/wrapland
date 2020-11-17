@@ -52,7 +52,7 @@ void KdeIdle::Private::getIdleTimeoutCallback([[maybe_unused]] wl_client* wlClie
     auto idleTimeout
         = new IdleTimeout(bind->client()->handle(), bind->version(), id, seat, priv->handle());
     if (!idleTimeout->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        bind->post_no_memory();
         delete idleTimeout;
         return;
     }

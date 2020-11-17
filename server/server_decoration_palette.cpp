@@ -55,7 +55,7 @@ void ServerSideDecorationPaletteManager::Private::createCallback(
         = new ServerSideDecorationPalette(bind->client()->handle(), bind->version(), id, surface);
 
     if (!palette->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        bind->post_no_memory();
         delete palette;
         return;
     }

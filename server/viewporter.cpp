@@ -69,7 +69,7 @@ void Viewporter::Private::getViewport(wl_resource* wlResource, uint32_t id, wl_r
 
     auto viewport = new Viewport(bind->client()->handle(), bind->version(), id, surface);
     if (!viewport->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        bind->post_no_memory();
         delete viewport;
         return;
     }

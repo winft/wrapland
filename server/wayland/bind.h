@@ -116,6 +116,11 @@ public:
         va_end(args);
     }
 
+    void post_no_memory()
+    {
+        wl_resource_post_no_memory(m_resource);
+    }
+
     static void destroy_callback([[maybe_unused]] wl_client* client, wl_resource* wl_res)
     {
         auto resource = self(wl_res);

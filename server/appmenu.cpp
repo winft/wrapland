@@ -65,7 +65,7 @@ void AppmenuManager::Private::createCallback([[maybe_unused]] wl_client* wlClien
     auto appmenu = new Appmenu(bind->client()->handle(), bind->version(), id, surface);
 
     if (!appmenu->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        bind->post_no_memory();
         delete appmenu;
         return;
     }
