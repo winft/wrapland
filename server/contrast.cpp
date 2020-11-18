@@ -56,7 +56,7 @@ void ContrastManager::Private::createCallback(ContrastManagerBind* bind,
 
     auto contrast = new Contrast(bind->client()->handle(), bind->version(), id);
     if (!contrast->d_ptr->resource()) {
-        wl_resource_post_no_memory(bind->resource());
+        bind->post_no_memory();
         delete contrast;
         return;
     }

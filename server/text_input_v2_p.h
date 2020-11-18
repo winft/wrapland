@@ -33,6 +33,7 @@ namespace Wrapland::Server
 
 constexpr uint32_t TextInputManagerV2Version = 1;
 using TextInputManagerV2Global = Wayland::Global<TextInputManagerV2, TextInputManagerV2Version>;
+using TextInputManagerV2Bind = Wayland::Bind<TextInputManagerV2Global>;
 
 class TextInputManagerV2::Private : public TextInputManagerV2Global
 {
@@ -40,10 +41,8 @@ public:
     Private(Display* display, TextInputManagerV2* q);
 
 private:
-    static void getTextInputCallback(wl_client* wlClient,
-                                     wl_resource* wlResource,
-                                     uint32_t id,
-                                     wl_resource* wlSeat);
+    static void
+    getTextInputCallback(TextInputManagerV2Bind* bind, uint32_t id, wl_resource* wlSeat);
 
     static const struct zwp_text_input_manager_v2_interface s_interface;
 };

@@ -200,9 +200,9 @@ private:
     void updateSelection(DataDevice* dataDevice, bool set);
     void cleanupDataDevice(DataDevice* dataDevice);
 
-    static void getPointerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
-    static void getKeyboardCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
-    static void getTouchCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
+    static void getPointerCallback(SeatBind* bind, uint32_t id);
+    static void getKeyboardCallback(SeatBind* bind, uint32_t id);
+    static void getTouchCallback(SeatBind* bind, uint32_t id);
 
     static const struct wl_seat_interface s_interface;
 };

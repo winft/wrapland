@@ -31,14 +31,18 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class KeyboardShortcutsInhibitManagerV1::Private
-    : public Wayland::Global<KeyboardShortcutsInhibitManagerV1>
+constexpr uint32_t KeyboardShortcutsInhibitManagerV1Version = 1;
+using KeyboardShortcutsInhibitManagerV1Global
+    = Wayland::Global<KeyboardShortcutsInhibitManagerV1, KeyboardShortcutsInhibitManagerV1Version>;
+using KeyboardShortcutsInhibitManagerV1Bind
+    = Wayland::Bind<KeyboardShortcutsInhibitManagerV1Global>;
+
+class KeyboardShortcutsInhibitManagerV1::Private : public KeyboardShortcutsInhibitManagerV1Global
 {
 public:
     Private(Display* display, KeyboardShortcutsInhibitManagerV1* q);
 
-    static void inhibitShortcutsCallback(wl_client* client,
-                                         wl_resource* wlResource,
+    static void inhibitShortcutsCallback(KeyboardShortcutsInhibitManagerV1Bind* bind,
                                          uint32_t id,
                                          wl_resource* wlSurface,
                                          wl_resource* wlSeat);

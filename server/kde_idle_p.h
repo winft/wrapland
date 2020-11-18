@@ -36,7 +36,11 @@ class Display;
 class Seat;
 class IdleTimeout;
 
-class KdeIdle::Private : public Wayland::Global<KdeIdle>
+constexpr uint32_t KdeIdleVersion = 1;
+using KdeIdleGlobal = Wayland::Global<KdeIdle, KdeIdleVersion>;
+using KdeIdleBind = Wayland::Bind<KdeIdleGlobal>;
+
+class KdeIdle::Private : public KdeIdleGlobal
 {
 public:
     Private(Display* display, KdeIdle* q);
@@ -45,11 +49,8 @@ public:
     std::vector<IdleTimeout*> idleTimeouts;
 
 private:
-    static void getIdleTimeoutCallback(wl_client* wlClient,
-                                       wl_resource* wlResource,
-                                       uint32_t id,
-                                       wl_resource* wlSeat,
-                                       uint32_t timeout);
+    static void
+    getIdleTimeoutCallback(KdeIdleBind* bind, uint32_t id, wl_resource* wlSeat, uint32_t timeout);
 
     static const struct org_kde_kwin_idle_interface s_interface;
 };

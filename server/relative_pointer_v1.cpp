@@ -44,18 +44,13 @@ const struct zwp_relative_pointer_manager_v1_interface
     RelativePointerManagerV1::Private::s_interface
     = {
         resourceDestroyCallback,
-        relativePointerCallback,
+        cb<relativePointerCallback>,
 };
 
-void RelativePointerManagerV1::Private::relativePointerCallback(
-    [[maybe_unused]] wl_client* wlClient,
-    wl_resource* wlResource,
-    uint32_t id,
-    wl_resource* wlPointer)
+void RelativePointerManagerV1::Private::relativePointerCallback(RelativePointerManagerV1Bind* bind,
+                                                                uint32_t id,
+                                                                wl_resource* wlPointer)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
-
     auto relative = new RelativePointerV1(bind->client()->handle(), bind->version(), id);
     if (!relative) {
         return;

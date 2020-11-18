@@ -26,7 +26,7 @@ namespace Wrapland::Server
 
 const struct zxdg_output_manager_v1_interface XdgOutputManager::Private::s_interface = {
     resourceDestroyCallback,
-    getXdgOutputCallback,
+    cb<getXdgOutputCallback>,
 };
 
 XdgOutputManager::Private::Private(Display* display, XdgOutputManager* qptr)
@@ -43,13 +43,11 @@ XdgOutputManager::XdgOutputManager(Display* display, QObject* parent)
 
 XdgOutputManager::~XdgOutputManager() = default;
 
-void XdgOutputManager::Private::getXdgOutputCallback([[maybe_unused]] wl_client* wlClient,
-                                                     wl_resource* wlResource,
+void XdgOutputManager::Private::getXdgOutputCallback(XdgOutputManagerBind* bind,
                                                      uint32_t id,
                                                      wl_resource* outputResource)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
 
     auto output_handle = WlOutputGlobal::handle(outputResource);
     if (!output_handle) {
@@ -66,7 +64,7 @@ void XdgOutputManager::Private::getXdgOutputCallback([[maybe_unused]] wl_client*
 
     auto xdgOutputV1 = new XdgOutputV1(bind->client()->handle(), bind->version(), id);
     if (!xdgOutputV1->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        bind->post_no_memory();
         delete xdgOutputV1;
         return;
     }

@@ -62,12 +62,9 @@ protected:
     void prepareUnbind(XdgShellBind* bind) override;
 
 private:
-    static void createPositionerCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
-    static void getXdgSurfaceCallback(wl_client* wlClient,
-                                      wl_resource* wlResource,
-                                      uint32_t id,
-                                      wl_resource* wlSurface);
-    static void pongCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t serial);
+    static void createPositionerCallback(XdgShellBind* bind, uint32_t id);
+    static void getXdgSurfaceCallback(XdgShellBind* bind, uint32_t id, wl_resource* wlSurface);
+    static void pongCallback(XdgShellBind* bind, uint32_t serial);
 
     static const struct xdg_wm_base_interface s_interface;
 };

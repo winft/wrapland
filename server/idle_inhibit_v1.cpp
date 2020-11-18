@@ -24,7 +24,7 @@ namespace Wrapland::Server
 
 const struct zwp_idle_inhibit_manager_v1_interface IdleInhibitManagerV1::Private::s_interface = {
     resourceDestroyCallback,
-    createInhibitorCallback,
+    cb<createInhibitorCallback>,
 };
 
 IdleInhibitManagerV1::Private::Private(Display* display, IdleInhibitManagerV1* q)
@@ -37,13 +37,10 @@ IdleInhibitManagerV1::Private::Private(Display* display, IdleInhibitManagerV1* q
 }
 IdleInhibitManagerV1::Private::~Private() = default;
 
-void IdleInhibitManagerV1::Private::createInhibitorCallback([[maybe_unused]] wl_client* wlClient,
-                                                            wl_resource* wlResource,
+void IdleInhibitManagerV1::Private::createInhibitorCallback(IdleInhibitManagerV1Bind* bind,
                                                             uint32_t id,
                                                             wl_resource* wlSurface)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
     auto inhibitor = new IdleInhibitor(bind->client()->handle(), bind->version(), id);
 

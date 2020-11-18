@@ -32,7 +32,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class XdgDecorationManager::Private : public Wayland::Global<XdgDecorationManager>
+constexpr uint32_t XdgDecorationManagerVersion = 1;
+using XdgDecorationManagerGlobal
+    = Wayland::Global<XdgDecorationManager, XdgDecorationManagerVersion>;
+using XdgDecorationManagerBind = Wayland::Bind<XdgDecorationManagerGlobal>;
+
+class XdgDecorationManager::Private : public XdgDecorationManagerGlobal
 {
 public:
     Private(XdgDecorationManager* q, Display* display, XdgShell* shell);
@@ -40,8 +45,7 @@ public:
     std::map<XdgShellToplevel*, XdgDecoration*> m_decorations;
 
 private:
-    static void getToplevelDecorationCallback(wl_client* wlClient,
-                                              wl_resource* wlResource,
+    static void getToplevelDecorationCallback(XdgDecorationManagerBind* bind,
                                               uint32_t id,
                                               wl_resource* wlToplevel);
 
@@ -61,17 +65,14 @@ XdgDecorationManager::Private::Private(XdgDecorationManager* q, Display* display
 
 const struct zxdg_decoration_manager_v1_interface XdgDecorationManager::Private::s_interface = {
     resourceDestroyCallback,
-    getToplevelDecorationCallback,
+    cb<getToplevelDecorationCallback>,
 };
 
-void XdgDecorationManager::Private::getToplevelDecorationCallback(
-    [[maybe_unused]] wl_client* wlClient,
-    wl_resource* wlResource,
-    uint32_t id,
-    wl_resource* wlToplevel)
+void XdgDecorationManager::Private::getToplevelDecorationCallback(XdgDecorationManagerBind* bind,
+                                                                  uint32_t id,
+                                                                  wl_resource* wlToplevel)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
 
     auto toplevel = priv->m_shell->d_ptr->getToplevel(wlToplevel);
     if (!toplevel) {

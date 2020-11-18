@@ -35,6 +35,8 @@ namespace Wrapland::Server
 {
 
 constexpr uint32_t XdgExporterV2Version = 1;
+using XdgExporterV2Global = Wayland::Global<XdgExporterV2, XdgExporterV2Version>;
+using XdgExporterV2Bind = Wayland::Bind<XdgExporterV2Global>;
 
 class Q_DECL_HIDDEN XdgExporterV2::Private
     : public Wayland::Global<XdgExporterV2, XdgExporterV2Version>
@@ -45,10 +47,8 @@ public:
     QHash<QString, XdgExportedV2*> exportedSurfaces;
 
 private:
-    static void exportToplevelCallback(wl_client* wlClient,
-                                       wl_resource* wlResource,
-                                       uint32_t id,
-                                       wl_resource* wlSurface);
+    static void
+    exportToplevelCallback(XdgExporterV2Bind* bind, uint32_t id, wl_resource* wlSurface);
 
     static const struct zxdg_exporter_v2_interface s_interface;
 };
@@ -63,7 +63,7 @@ XdgExporterV2::Private::Private(XdgExporterV2* q, Display* display)
 
 const struct zxdg_exporter_v2_interface XdgExporterV2::Private::s_interface = {
     resourceDestroyCallback,
-    exportToplevelCallback,
+    cb<exportToplevelCallback>,
 };
 
 XdgExportedV2* XdgExporterV2::exportedSurface(const QString& handle)
@@ -74,20 +74,21 @@ XdgExportedV2* XdgExporterV2::exportedSurface(const QString& handle)
     }
     return nullptr;
 }
-void XdgExporterV2::Private::exportToplevelCallback([[maybe_unused]] wl_client* wlClient,
-                                                    wl_resource* wlResource,
+void XdgExporterV2::Private::exportToplevelCallback(XdgExporterV2Bind* bind,
                                                     uint32_t id,
                                                     wl_resource* wlSurface)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr;
 
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     const QString protocolHandle = QUuid::createUuid().toString();
 
-    auto exported = new XdgExportedV2(
-        bind->client()->handle(), wl_resource_get_version(wlResource), id, surface, protocolHandle);
+    auto exported = new XdgExportedV2(bind->client()->handle(),
+                                      wl_resource_get_version(bind->resource()),
+                                      id,
+                                      surface,
+                                      protocolHandle);
     // TODO(romangg): error handling
 
     // Surface not exported anymore.

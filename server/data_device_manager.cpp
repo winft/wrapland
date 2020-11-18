@@ -35,6 +35,7 @@ namespace Wrapland::Server
 
 constexpr uint32_t DataDeviceManagerVersion = 3;
 using DataDeviceManagerGlobal = Wayland::Global<DataDeviceManager, DataDeviceManagerVersion>;
+using DataDeviceManagerBind = Wayland::Bind<DataDeviceManagerGlobal>;
 
 class DataDeviceManager::Private : public DataDeviceManagerGlobal
 {
@@ -42,18 +43,16 @@ public:
     Private(DataDeviceManager* q, Display* display);
 
 private:
-    static void createDataSourceCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
-    static void getDataDeviceCallback(wl_client* wlClient,
-                                      wl_resource* wlResource,
-                                      uint32_t id,
-                                      wl_resource* wlSeat);
+    static void createDataSourceCallback(DataDeviceManagerBind* bind, uint32_t id);
+    static void
+    getDataDeviceCallback(DataDeviceManagerBind* bind, uint32_t id, wl_resource* wlSeat);
 
     static const struct wl_data_device_manager_interface s_interface;
 };
 
 const struct wl_data_device_manager_interface DataDeviceManager::Private::s_interface = {
-    createDataSourceCallback,
-    getDataDeviceCallback,
+    cb<createDataSourceCallback>,
+    cb<getDataDeviceCallback>,
 };
 
 DataDeviceManager::Private::Private(DataDeviceManager* q, Display* display)
@@ -61,12 +60,9 @@ DataDeviceManager::Private::Private(DataDeviceManager* q, Display* display)
 {
 }
 
-void DataDeviceManager::Private::createDataSourceCallback([[maybe_unused]] wl_client* wlClient,
-                                                          wl_resource* wlResource,
-                                                          uint32_t id)
+void DataDeviceManager::Private::createDataSourceCallback(DataDeviceManagerBind* bind, uint32_t id)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
 
     auto dataSource = new DataSource(bind->client()->handle(), bind->version(), id);
     if (!dataSource) {
@@ -76,13 +72,11 @@ void DataDeviceManager::Private::createDataSourceCallback([[maybe_unused]] wl_cl
     Q_EMIT priv->handle()->dataSourceCreated(dataSource);
 }
 
-void DataDeviceManager::Private::getDataDeviceCallback([[maybe_unused]] wl_client* wlClient,
-                                                       wl_resource* wlResource,
+void DataDeviceManager::Private::getDataDeviceCallback(DataDeviceManagerBind* bind,
                                                        uint32_t id,
                                                        wl_resource* wlSeat)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
     auto seat = SeatGlobal::handle(wlSeat);
 
     auto dataDevice = new DataDevice(bind->client()->handle(), bind->version(), id, seat);

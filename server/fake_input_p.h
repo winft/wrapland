@@ -49,39 +49,18 @@ private:
     void bindInit(FakeInputBind* bind) override;
     void prepareUnbind(FakeInputBind* bind) override;
 
-    static void authenticateCallback(wl_client* wlClient,
-                                     wl_resource* wlResource,
-                                     const char* application,
-                                     const char* reason);
-    static void pointerMotionCallback(wl_client* wlClient,
-                                      wl_resource* wlResource,
-                                      wl_fixed_t delta_x,
-                                      wl_fixed_t delta_y);
-    static void pointerMotionAbsoluteCallback(wl_client* wlClient,
-                                              wl_resource* wlResource,
-                                              wl_fixed_t x,
-                                              wl_fixed_t y);
     static void
-    buttonCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t button, uint32_t state);
-    static void
-    axisCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t axis, wl_fixed_t value);
-    static void touchDownCallback(wl_client* wlClient,
-                                  wl_resource* wlResource,
-                                  quint32 id,
-                                  wl_fixed_t x,
-                                  wl_fixed_t y);
-    static void touchMotionCallback(wl_client* wlClient,
-                                    wl_resource* wlResource,
-                                    quint32 id,
-                                    wl_fixed_t x,
-                                    wl_fixed_t y);
-    static void touchUpCallback(wl_client* wlClient, wl_resource* wlResource, quint32 id);
-    static void touchCancelCallback(wl_client* wlClient, wl_resource* wlResource);
-    static void touchFrameCallback(wl_client* wlClient, wl_resource* wlResource);
-    static void keyboardKeyCallback(wl_client* wlClient,
-                                    wl_resource* wlResource,
-                                    uint32_t button,
-                                    uint32_t state);
+    authenticateCallback(FakeInputBind* bind, const char* application, const char* reason);
+    static void pointerMotionCallback(FakeInputBind* bind, wl_fixed_t delta_x, wl_fixed_t delta_y);
+    static void pointerMotionAbsoluteCallback(FakeInputBind* bind, wl_fixed_t x, wl_fixed_t y);
+    static void buttonCallback(FakeInputBind* bind, uint32_t button, uint32_t state);
+    static void axisCallback(FakeInputBind* bind, uint32_t axis, wl_fixed_t value);
+    static void touchDownCallback(FakeInputBind* bind, quint32 id, wl_fixed_t x, wl_fixed_t y);
+    static void touchMotionCallback(FakeInputBind* bind, quint32 id, wl_fixed_t x, wl_fixed_t y);
+    static void touchUpCallback(FakeInputBind* bind, quint32 id);
+    static void touchCancelCallback(FakeInputBind* bind);
+    static void touchFrameCallback(FakeInputBind* bind);
+    static void keyboardKeyCallback(FakeInputBind* bind, uint32_t button, uint32_t state);
 
     static FakeInputDevice* device(wl_resource* wlResource);
     FakeInputDevice* device(FakeInputBind* bind) const;

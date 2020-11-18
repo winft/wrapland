@@ -49,34 +49,32 @@ PointerConstraintsV1::Private::Private(PointerConstraintsV1* q, Display* display
 
 const struct zwp_pointer_constraints_v1_interface PointerConstraintsV1::Private::s_interface = {
     resourceDestroyCallback,
-    lockPointerCallback,
-    confinePointerCallback,
+    cb<lockPointerCallback>,
+    cb<confinePointerCallback>,
 };
 
-void PointerConstraintsV1::Private::lockPointerCallback([[maybe_unused]] wl_client* wlClient,
-                                                        wl_resource* wlResource,
+void PointerConstraintsV1::Private::lockPointerCallback(PointerConstraintsV1Bind* bind,
                                                         uint32_t id,
                                                         wl_resource* wlSurface,
                                                         wl_resource* wlPointer,
                                                         wl_resource* wlRegion,
                                                         uint32_t lifetime)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
+    auto priv = bind->global()->handle()->d_ptr.get();
     priv->createConstraint<LockedPointerV1>(
-        wlResource, id, wlSurface, wlPointer, wlRegion, lifetime);
+        bind->resource(), id, wlSurface, wlPointer, wlRegion, lifetime);
 }
 
-void PointerConstraintsV1::Private::confinePointerCallback([[maybe_unused]] wl_client* wlClient,
-                                                           wl_resource* wlResource,
+void PointerConstraintsV1::Private::confinePointerCallback(PointerConstraintsV1Bind* bind,
                                                            uint32_t id,
                                                            wl_resource* wlSurface,
                                                            wl_resource* wlPointer,
                                                            wl_resource* wlRegion,
                                                            uint32_t lifetime)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
+    auto priv = bind->global()->handle()->d_ptr.get();
     priv->createConstraint<ConfinedPointerV1>(
-        wlResource, id, wlSurface, wlPointer, wlRegion, lifetime);
+        bind->resource(), id, wlSurface, wlPointer, wlRegion, lifetime);
 }
 
 template<class Constraint>

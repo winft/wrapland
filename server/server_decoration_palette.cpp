@@ -27,7 +27,7 @@ namespace Wrapland::Server
 const struct org_kde_kwin_server_decoration_palette_manager_interface
     ServerSideDecorationPaletteManager::Private::s_interface
     = {
-        createCallback,
+        cb<createCallback>,
 };
 
 ServerSideDecorationPaletteManager::Private::Private(Display* display,
@@ -42,20 +42,18 @@ ServerSideDecorationPaletteManager::Private::Private(Display* display,
 }
 
 void ServerSideDecorationPaletteManager::Private::createCallback(
-    [[maybe_unused]] wl_client* wlClient,
-    wl_resource* wlResource,
+    ServerSideDecorationPaletteManagerBind* bind,
     uint32_t id,
     wl_resource* wlSurface)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = handle(wlResource)->d_ptr->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto palette
         = new ServerSideDecorationPalette(bind->client()->handle(), bind->version(), id, surface);
 
     if (!palette->d_ptr->resource()) {
-        wl_resource_post_no_memory(wlResource);
+        bind->post_no_memory();
         delete palette;
         return;
     }

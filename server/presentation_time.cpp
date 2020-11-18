@@ -47,10 +47,8 @@ public:
     clockid_t clockId = 0;
 
 private:
-    static void feedbackCallback(wl_client* wlClient,
-                                 wl_resource* wlResource,
-                                 wl_resource* wlSurface,
-                                 uint32_t id);
+    static void
+    feedbackCallback(PresentationManagerBind* bind, wl_resource* wlSurface, uint32_t id);
 
     static const struct wp_presentation_interface s_interface;
     static const uint32_t s_version;
@@ -65,7 +63,7 @@ PresentationManager::Private::Private(PresentationManager* q, Display* display)
 
 const struct wp_presentation_interface PresentationManager::Private::s_interface = {
     resourceDestroyCallback,
-    feedbackCallback,
+    cb<feedbackCallback>,
 };
 
 void PresentationManager::Private::bindInit(PresentationManagerBind* bind)
@@ -73,12 +71,10 @@ void PresentationManager::Private::bindInit(PresentationManagerBind* bind)
     send<wp_presentation_send_clock_id>(bind, clockId);
 }
 
-void PresentationManager::Private::feedbackCallback([[maybe_unused]] wl_client* wlClient,
-                                                    wl_resource* wlResource,
+void PresentationManager::Private::feedbackCallback(PresentationManagerBind* bind,
                                                     wl_resource* wlSurface,
                                                     uint32_t id)
 {
-    auto bind = handle(wlResource)->d_ptr->getBind(wlResource);
     auto surface = Wayland::Resource<Surface>::handle(wlSurface);
 
     auto feedback = new PresentationFeedback(bind->client()->handle(), bind->version(), id);

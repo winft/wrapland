@@ -42,8 +42,7 @@ public:
     ~Private() override;
 
 private:
-    static void
-    createConfigurationCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
+    static void createConfigurationCallback(OutputManagementV1Bind* bind, uint32_t id);
 
     static const struct zkwinft_output_management_v1_interface s_interface;
 
@@ -51,7 +50,7 @@ private:
 };
 
 struct zkwinft_output_management_v1_interface const OutputManagementV1::Private::s_interface
-    = {createConfigurationCallback};
+    = {cb<createConfigurationCallback>};
 
 OutputManagementV1::Private::Private(OutputManagementV1* q, Display* display)
     : OutputManagementV1Global(q, display, &zkwinft_output_management_v1_interface, &s_interface)
@@ -66,12 +65,10 @@ OutputManagementV1::Private::~Private()
                   [](OutputConfigurationV1* config) { config->d_ptr->manager = nullptr; });
 }
 
-void OutputManagementV1::Private::createConfigurationCallback([[maybe_unused]] wl_client* wlClient,
-                                                              wl_resource* wlResource,
+void OutputManagementV1::Private::createConfigurationCallback(OutputManagementV1Bind* bind,
                                                               uint32_t id)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
-    auto bind = priv->getBind(wlResource);
+    auto priv = bind->global()->handle()->d_ptr.get();
 
     auto config
         = new OutputConfigurationV1(bind->client()->handle(), bind->version(), id, priv->handle());

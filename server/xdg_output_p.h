@@ -54,10 +54,7 @@ public:
     std::map<Output*, XdgOutput*> outputs;
 
 private:
-    static void getXdgOutputCallback(wl_client* client,
-                                     wl_resource* resource,
-                                     uint32_t id,
-                                     wl_resource* output);
+    static void getXdgOutputCallback(XdgOutputManagerBind* bind, uint32_t id, wl_resource* output);
 
     static const struct zxdg_output_manager_v1_interface s_interface;
 };

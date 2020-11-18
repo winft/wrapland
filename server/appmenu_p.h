@@ -38,6 +38,7 @@ class Appmenu;
 
 constexpr uint32_t AppmenuManagerVersion = 1;
 using AppmenuManagerGlobal = Wayland::Global<AppmenuManager, AppmenuManagerVersion>;
+using AppmenuManagerBind = Wayland::Bind<AppmenuManagerGlobal>;
 
 class AppmenuManager::Private : public AppmenuManagerGlobal
 {
@@ -48,8 +49,7 @@ public:
     std::vector<Appmenu*> appmenus;
 
 private:
-    static void
-    createCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id, wl_resource* surface);
+    static void createCallback(AppmenuManagerBind* bind, uint32_t id, wl_resource* surface);
 
     static const struct org_kde_kwin_appmenu_manager_interface s_interface;
 };
