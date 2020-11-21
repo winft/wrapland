@@ -35,7 +35,6 @@ namespace Wrapland
 namespace Client
 {
 
-
 /**
  * @short Wrapper for the wl_data_source interface.
  *
@@ -48,7 +47,7 @@ class WRAPLANDCLIENT_EXPORT DataSource : public QObject
 {
     Q_OBJECT
 public:
-    explicit DataSource(QObject *parent = nullptr);
+    explicit DataSource(QObject* parent = nullptr);
     virtual ~DataSource();
 
     /**
@@ -56,7 +55,7 @@ public:
      * When using DataDeviceManager::createDataSource there is no need to call this
      * method.
      **/
-    void setup(wl_data_source *dataSource);
+    void setup(wl_data_source* dataSource);
     /**
      * Releases the wl_data_source interface.
      * After the interface has been released the DataSource instance is no
@@ -69,8 +68,8 @@ public:
      **/
     bool isValid() const;
 
-    void offer(const QString &mimeType);
-    void offer(const QMimeType &mimeType);
+    void offer(const QString& mimeType);
+    void offer(const QMimeType& mimeType);
 
     /**
      * Sets the actions that the source side client supports for this
@@ -99,13 +98,13 @@ Q_SIGNALS:
      * Emitted when a target accepts pointer_focus or motion events. If
      * a target does not accept any of the offered types, @p mimeType is empty.
      **/
-    void targetAccepts(const QString &mimeType);
+    void targetAccepts(const QString& mimeType);
     /**
      * Request for data from the client. Send the data as the
      * specified @p mimeType over the passed file descriptor @p fd, then close
      * it.
      **/
-    void sendDataRequested(const QString &mimeType, qint32 fd);
+    void sendDataRequested(const QString& mimeType, qint32 fd);
     /**
      * This DataSource has been replaced by another DataSource.
      * The client should clean up and destroy this DataSource.

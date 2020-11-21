@@ -22,9 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QSize>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct wl_surface;
 struct org_kde_plasma_shell;
@@ -67,7 +67,7 @@ class WRAPLANDCLIENT_EXPORT PlasmaShell : public QObject
 {
     Q_OBJECT
 public:
-    explicit PlasmaShell(QObject *parent = nullptr);
+    explicit PlasmaShell(QObject* parent = nullptr);
     virtual ~PlasmaShell();
 
     /**
@@ -89,16 +89,16 @@ public:
      * When using Registry::createShell there is no need to call this
      * method.
      **/
-    void setup(org_kde_plasma_shell *shell);
+    void setup(org_kde_plasma_shell* shell);
 
     /**
      * Sets the @p queue to use for creating a Surface.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Surface.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates a PlasmaShellSurface for the given @p surface and sets it up.
@@ -110,7 +110,7 @@ public:
      * @param parent The parent to use for the PlasmaShellSurface
      * @returns created PlasmaShellSurface
      **/
-    PlasmaShellSurface *createSurface(wl_surface *surface, QObject *parent = nullptr);
+    PlasmaShellSurface* createSurface(wl_surface* surface, QObject* parent = nullptr);
     /**
      * Creates a PlasmaShellSurface for the given @p surface and sets it up.
      *
@@ -121,7 +121,7 @@ public:
      * @param parent The parent to use for the PlasmaShellSurface
      * @returns created PlasmaShellSurface
      **/
-    PlasmaShellSurface *createSurface(Surface *surface, QObject *parent = nullptr);
+    PlasmaShellSurface* createSurface(Surface* surface, QObject* parent = nullptr);
 
     operator org_kde_plasma_shell*();
     operator org_kde_plasma_shell*() const;
@@ -168,7 +168,7 @@ class WRAPLANDCLIENT_EXPORT PlasmaShellSurface : public QObject
 {
     Q_OBJECT
 public:
-    explicit PlasmaShellSurface(QObject *parent);
+    explicit PlasmaShellSurface(QObject* parent);
     virtual ~PlasmaShellSurface();
 
     /**
@@ -186,14 +186,14 @@ public:
      * There is normally no need to call this method as it's invoked by
      * PlasmaShell::createSurface.
      **/
-    void setup(org_kde_plasma_surface *surface);
+    void setup(org_kde_plasma_surface* surface);
 
     /**
      * @returns the PlasmaShellSurface * associated with surface,
      * if any, nullptr if not found.
      * @since 5.6
      */
-    static PlasmaShellSurface *get(Surface *surf);
+    static PlasmaShellSurface* get(Surface* surf);
 
     /**
      * @returns @c true if managing a org_kde_plasma_surface.
@@ -207,13 +207,15 @@ public:
      * The role can be used by the Wayland server to e.g. change the stacking order accordingly.
      **/
     enum class Role {
-        Normal, ///< A normal Surface
+        Normal,  ///< A normal Surface
         Desktop, ///< The Surface represents a desktop, normally stacked below all other surfaces
-        Panel, ///< The Surface represents a panel (dock), normally stacked above normal surfaces
-        OnScreenDisplay, ///< The Surface represents an on screen display, like a volume changed notification
-        Notification, ///< The Surface represents a notification @since 0.0.524
-        ToolTip, ///< The Surface represents a tooltip @since 0.0.524
-        CriticalNotification, ///< The Surface represents a critical notification, like battery is running out @since 0.0.558
+        Panel,   ///< The Surface represents a panel (dock), normally stacked above normal surfaces
+        OnScreenDisplay, ///< The Surface represents an on screen display, like a volume changed
+                         ///< notification
+        Notification,    ///< The Surface represents a notification @since 0.0.524
+        ToolTip,         ///< The Surface represents a tooltip @since 0.0.524
+        CriticalNotification, ///< The Surface represents a critical notification, like battery is
+                              ///< running out @since 0.0.558
     };
     /**
      * Changes the requested Role to @p role.
@@ -228,7 +230,7 @@ public:
     /**
      * Requests to position this PlasmaShellSurface at @p point in global coordinates.
      **/
-    void setPosition(const QPoint &point);
+    void setPosition(const QPoint& point);
 
     /**
      * Describes how a PlasmaShellSurface with role @c Role::Panel should behave.
@@ -238,7 +240,7 @@ public:
         AlwaysVisible,
         AutoHide,
         WindowsCanCover,
-        WindowsGoBelow
+        WindowsGoBelow,
     };
     /**
      * Sets the PanelBehavior for a PlasmaShellSurface with Role @c Role::Panel
@@ -298,7 +300,7 @@ public:
      * @param takesFocus Set to @c true if the surface should gain focus.
      * @since 0.0.528
      **/
-    //KF6 TODO rename to make it generic
+    // KF6 TODO rename to make it generic
     void setPanelTakesFocus(bool takesFocus);
 
 Q_SIGNALS:

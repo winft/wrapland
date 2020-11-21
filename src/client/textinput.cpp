@@ -24,7 +24,7 @@ namespace Wrapland
 namespace Client
 {
 
-TextInput::Private::Private(Seat *seat)
+TextInput::Private::Private(Seat* seat)
     : seat(seat)
 {
     currentCommit.deleteSurrounding.afterLength = 0;
@@ -33,7 +33,7 @@ TextInput::Private::Private(Seat *seat)
     pendingCommit.deleteSurrounding.beforeLength = 0;
 }
 
-TextInput::TextInput(Private *p, QObject *parent)
+TextInput::TextInput(Private* p, QObject* parent)
     : QObject(parent)
     , d(p)
 {
@@ -41,12 +41,12 @@ TextInput::TextInput(Private *p, QObject *parent)
 
 TextInput::~TextInput() = default;
 
-void TextInput::setEventQueue(EventQueue *queue)
+void TextInput::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *TextInput::eventQueue() const
+EventQueue* TextInput::eventQueue() const
 {
     return d->queue;
 }
@@ -56,7 +56,7 @@ bool TextInput::isValid() const
     return d->isValid();
 }
 
-Surface *TextInput::enteredSurface() const
+Surface* TextInput::enteredSurface() const
 {
     return d->enteredSurface;
 }
@@ -66,12 +66,12 @@ bool TextInput::isInputPanelVisible() const
     return d->inputPanelVisible;
 }
 
-void TextInput::enable(Surface *surface)
+void TextInput::enable(Surface* surface)
 {
     d->enable(surface);
 }
 
-void TextInput::disable(Surface *surface)
+void TextInput::disable(Surface* surface)
 {
     d->disable(surface);
 }
@@ -91,7 +91,7 @@ void TextInput::reset()
     d->reset();
 }
 
-void TextInput::setSurroundingText(const QString &text, quint32 cursor, quint32 anchor)
+void TextInput::setSurroundingText(const QString& text, quint32 cursor, quint32 anchor)
 {
     d->setSurroundingText(text, cursor, anchor);
 }
@@ -101,12 +101,12 @@ void TextInput::setContentType(ContentHints hint, ContentPurpose purpose)
     d->setContentType(hint, purpose);
 }
 
-void TextInput::setCursorRectangle(const QRect &rect)
+void TextInput::setCursorRectangle(const QRect& rect)
 {
     d->setCursorRectangle(rect);
 }
 
-void TextInput::setPreferredLanguage(const QString &language)
+void TextInput::setPreferredLanguage(const QString& language)
 {
     d->setPreferredLanguage(language);
 }
@@ -156,7 +156,7 @@ QByteArray TextInput::commitText() const
     return d->currentCommit.text;
 }
 
-TextInputManager::TextInputManager(Private *p, QObject *parent)
+TextInputManager::TextInputManager(Private* p, QObject* parent)
     : QObject(parent)
     , d(p)
 {
@@ -164,12 +164,12 @@ TextInputManager::TextInputManager(Private *p, QObject *parent)
 
 TextInputManager::~TextInputManager() = default;
 
-void TextInputManager::setup(wl_text_input_manager *textinputmanagerunstablev0)
+void TextInputManager::setup(wl_text_input_manager* textinputmanagerunstablev0)
 {
     d->setupV0(textinputmanagerunstablev0);
 }
 
-void TextInputManager::setup(zwp_text_input_manager_v2 *textinputmanagerunstablev2)
+void TextInputManager::setup(zwp_text_input_manager_v2* textinputmanagerunstablev2)
 {
     d->setupV2(textinputmanagerunstablev2);
 }
@@ -179,12 +179,12 @@ void TextInputManager::release()
     d->release();
 }
 
-void TextInputManager::setEventQueue(EventQueue *queue)
+void TextInputManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *TextInputManager::eventQueue()
+EventQueue* TextInputManager::eventQueue()
 {
     return d->queue;
 }
@@ -214,7 +214,7 @@ bool TextInputManager::isValid() const
     return d->isValid();
 }
 
-TextInput *TextInputManager::createTextInput(Seat *seat, QObject *parent)
+TextInput* TextInputManager::createTextInput(Seat* seat, QObject* parent)
 {
     return d->createTextInput(seat, parent);
 }

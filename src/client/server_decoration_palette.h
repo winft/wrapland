@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_SERVER_DECORATION_PALETTE_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct org_kde_kwin_server_decoration_palette_manager;
 struct org_kde_kwin_server_decoration_palette;
@@ -40,23 +40,25 @@ class ServerSideDecorationPalette;
 /**
  * @short Wrapper for the org_kde_kwin_server_decoration_palette_manager interface.
  *
- * This class provides a convenient wrapper for the org_kde_kwin_server_decoration_palette_manager interface.
+ * This class provides a convenient wrapper for the org_kde_kwin_server_decoration_palette_manager
+ * interface.
  *
  * To use this class one needs to interact with the Registry. There are two
  * possible ways to create the ServerSideDecorationPaletteManager interface:
  * @code
- * ServerSideDecorationPaletteManager *c = registry->createServerSideDecorationPaletteManager(name, version);
+ * ServerSideDecorationPaletteManager *c = registry->createServerSideDecorationPaletteManager(name,
+ * version);
  * @endcode
  *
- * This creates the ServerSideDecorationPaletteManager and sets it up directly. As an alternative this
- * can also be done in a more low level way:
+ * This creates the ServerSideDecorationPaletteManager and sets it up directly. As an alternative
+ * this can also be done in a more low level way:
  * @code
  * ServerSideDecorationPaletteManager *c = new ServerSideDecorationPaletteManager;
  * c->setup(registry->bindServerSideDecorationPaletteManager(name, version));
  * @endcode
  *
- * The ServerSideDecorationPaletteManager can be used as a drop-in replacement for any org_kde_kwin_server_decoration_palette_manager
- * pointer as it provides matching cast operators.
+ * The ServerSideDecorationPaletteManager can be used as a drop-in replacement for any
+ * org_kde_kwin_server_decoration_palette_manager pointer as it provides matching cast operators.
  *
  * @see Registry
  **/
@@ -66,19 +68,19 @@ class WRAPLANDCLIENT_EXPORT ServerSideDecorationPaletteManager : public QObject
 public:
     /**
      * Creates a new ServerSideDecorationPaletteManager.
-     * Note: after constructing the ServerSideDecorationPaletteManager it is not yet valid and one needs
-     * to call setup. In order to get a ready to use ServerSideDecorationPaletteManager prefer using
-     * Registry::createServerSideDecorationPaletteManager.
+     * Note: after constructing the ServerSideDecorationPaletteManager it is not yet valid and one
+     * needs to call setup. In order to get a ready to use ServerSideDecorationPaletteManager prefer
+     * using Registry::createServerSideDecorationPaletteManager.
      **/
-    explicit ServerSideDecorationPaletteManager(QObject *parent = nullptr);
+    explicit ServerSideDecorationPaletteManager(QObject* parent = nullptr);
     virtual ~ServerSideDecorationPaletteManager();
 
     /**
-     * Setup this ServerSideDecorationPaletteManager to manage the @p serverSideDecorationPaletteManager.
-     * When using Registry::createServerSideDecorationPaletteManager there is no need to call this
-     * method.
+     * Setup this ServerSideDecorationPaletteManager to manage the @p
+     * serverSideDecorationPaletteManager. When using
+     * Registry::createServerSideDecorationPaletteManager there is no need to call this method.
      **/
-    void setup(org_kde_kwin_server_decoration_palette_manager *serverSideDecorationPaletteManager);
+    void setup(org_kde_kwin_server_decoration_palette_manager* serverSideDecorationPaletteManager);
     /**
      * @returns @c true if managing a org_kde_kwin_server_decoration_palette_manager.
      **/
@@ -86,20 +88,22 @@ public:
     /**
      * Releases the org_kde_kwin_server_decoration_palette_manager interface.
      * After the interface has been released the ServerSideDecorationPaletteManager instance is no
-     * longer valid and can be setup with another org_kde_kwin_server_decoration_palette_manager interface.
+     * longer valid and can be setup with another org_kde_kwin_server_decoration_palette_manager
+     * interface.
      **/
     void release();
 
     /**
      * Sets the @p queue to use for creating objects with this ServerSideDecorationPaletteManager.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
-     * @returns The event queue to use for creating objects with this ServerSideDecorationPaletteManager.
+     * @returns The event queue to use for creating objects with this
+     * ServerSideDecorationPaletteManager.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
-    ServerSideDecorationPalette *create(Surface *surface, QObject *parent = nullptr);
+    ServerSideDecorationPalette* create(Surface* surface, QObject* parent = nullptr);
 
     operator org_kde_kwin_server_decoration_palette_manager*();
     operator org_kde_kwin_server_decoration_palette_manager*() const;
@@ -129,7 +133,7 @@ public:
      * When using ServerSideDecorationPaletteManager::create there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_server_decoration_palette *serversidedecorationpalette);
+    void setup(org_kde_kwin_server_decoration_palette* serversidedecorationpalette);
     /**
      * @returns @c true if managing a org_kde_kwin_server_decoration_palette.
      **/
@@ -146,18 +150,17 @@ public:
      * Absolute file path, or name of palette in the user's config directory.
      * If set to empty the default palette will be used.
      */
-    void setPalette(const QString &palette);
+    void setPalette(const QString& palette);
 
     operator org_kde_kwin_server_decoration_palette*();
     operator org_kde_kwin_server_decoration_palette*() const;
 
 private:
     friend class ServerSideDecorationPaletteManager;
-    explicit ServerSideDecorationPalette(QObject *parent = nullptr);
+    explicit ServerSideDecorationPalette(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

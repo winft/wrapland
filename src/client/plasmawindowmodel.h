@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_PLASMAWINDOWMODEL_H
 
 #include <QAbstractListModel>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 namespace Wrapland
 {
@@ -75,32 +75,32 @@ public:
         IsDemandingAttention,
         SkipTaskbar,
         /**
-        * @since 0.0.522
-        */
+         * @since 0.0.522
+         */
         IsShadeable,
         /**
-        * @since 0.0.522
-        */
+         * @since 0.0.522
+         */
         IsShaded,
         /**
-        * @since 0.0.522
-        */
+         * @since 0.0.522
+         */
         IsMovable,
         /**
-        * @since 0.0.522
-        */
+         * @since 0.0.522
+         */
         IsResizable,
         /**
-        * @since 0.0.522
-        */
+         * @since 0.0.522
+         */
         IsVirtualDesktopChangeable,
         /**
-        * @since 0.0.522
-        */
+         * @since 0.0.522
+         */
         IsCloseable,
         /**
-        * @since 0.0.525
-        */
+         * @since 0.0.525
+         */
         Geometry,
         /**
          * @since 0.0.535
@@ -117,19 +117,19 @@ public:
     };
     Q_ENUM(AdditionalRoles)
 
-    explicit PlasmaWindowModel(PlasmaWindowManagement *parent);
+    explicit PlasmaWindowModel(PlasmaWindowManagement* parent);
     virtual ~PlasmaWindowModel();
 
     QHash<int, QByteArray> roleNames() const override;
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * Returns an index with internalPointer() pointing to a PlasmaWindow instance.
      **/
-    QModelIndex	index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
-
+    QModelIndex
+    index(int row, int column = 0, const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * Request the window at this model row index be activated.
@@ -180,7 +180,7 @@ public:
      * relative to a panel in particular. QRectF, intended for use from QML
      * @since 5.5
      */
-    Q_INVOKABLE void setMinimizedGeometry(int row, Surface *panel, const QRect &geom);
+    Q_INVOKABLE void setMinimizedGeometry(int row, Surface* panel, const QRect& geom);
 
     /**
      * Requests the window at this model row index have its shaded state toggled.

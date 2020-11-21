@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 #include <QSize>
 #include <QWindow>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -72,7 +72,7 @@ class WRAPLANDCLIENT_EXPORT Shell : public QObject
 {
     Q_OBJECT
 public:
-    explicit Shell(QObject *parent = nullptr);
+    explicit Shell(QObject* parent = nullptr);
     virtual ~Shell();
 
     /**
@@ -94,16 +94,16 @@ public:
      * When using Registry::createShell there is no need to call this
      * method.
      **/
-    void setup(wl_shell *shell);
+    void setup(wl_shell* shell);
 
     /**
      * Sets the @p queue to use for creating a Surface.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Surface.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates a ShellSurface for the given @p surface and sets it up.
@@ -112,7 +112,7 @@ public:
      * @param parent The parent to use for the ShellSurface
      * @returns created ShellSurface
      **/
-    ShellSurface *createSurface(wl_surface *surface, QObject *parent = nullptr);
+    ShellSurface* createSurface(wl_surface* surface, QObject* parent = nullptr);
     /**
      * Creates a ShellSurface for the given @p surface and sets it up.
      *
@@ -120,7 +120,7 @@ public:
      * @param parent The parent to use for the ShellSurface
      * @returns created ShellSurface
      **/
-    ShellSurface *createSurface(Surface *surface, QObject *parent = nullptr);
+    ShellSurface* createSurface(Surface* surface, QObject* parent = nullptr);
 
     operator wl_shell*();
     operator wl_shell*() const;
@@ -161,7 +161,7 @@ class WRAPLANDCLIENT_EXPORT ShellSurface : public QObject
     Q_OBJECT
 
 public:
-    explicit ShellSurface(QObject *parent);
+    explicit ShellSurface(QObject* parent);
     virtual ~ShellSurface();
 
     /**
@@ -179,15 +179,15 @@ public:
      * There is normally no need to call this method as it's invoked by
      * Shell::createSurface.
      **/
-    void setup(wl_shell_surface *surface);
+    void setup(wl_shell_surface* surface);
     QSize size() const;
-    void setSize(const QSize &size);
+    void setSize(const QSize& size);
 
     /**
      * Sets the ShellSurface fullscreen on @p output.
      **/
-    void setFullscreen(Output *output = nullptr);
-    void setMaximized(Output *output = nullptr);
+    void setFullscreen(Output* output = nullptr);
+    void setMaximized(Output* output = nullptr);
     void setToplevel();
     /**
      * Flags which can be passed to a transient surface.
@@ -196,7 +196,7 @@ public:
      **/
     enum class TransientFlag {
         Default = 0x0, ///< Default: transient surface accepts keyboard focus
-        NoFocus = 0x1 ///< Transient surface does not accept keyboard focus
+        NoFocus = 0x1, ///< Transient surface does not accept keyboard focus
     };
     Q_DECLARE_FLAGS(TransientFlags, TransientFlag)
     /**
@@ -207,7 +207,9 @@ public:
      * @param flags The flags for the transient
      * @since 5.5
      **/
-    void setTransient(Surface *parent, const QPoint &offset = QPoint(), TransientFlags flags = TransientFlag::Default);
+    void setTransient(Surface* parent,
+                      const QPoint& offset = QPoint(),
+                      TransientFlags flags = TransientFlag::Default);
 
     /**
      * Sets this Surface as a popup transient for @p parent.
@@ -227,7 +229,11 @@ public:
      * @param flags The flags for the transient
      * @since 0.0.533
      **/
-    void setTransientPopup(Surface *parent, Seat *grabbedSeat, quint32 grabSerial, const QPoint &offset = QPoint(), TransientFlags flags = TransientFlag::Default);
+    void setTransientPopup(Surface* parent,
+                           Seat* grabbedSeat,
+                           quint32 grabSerial,
+                           const QPoint& offset = QPoint(),
+                           TransientFlags flags = TransientFlag::Default);
 
     bool isValid() const;
 
@@ -238,17 +244,18 @@ public:
      * @param serial The serial of the pointer button press which should trigger the move
      * @since 5.5
      **/
-    void requestMove(Seat *seat, quint32 serial);
+    void requestMove(Seat* seat, quint32 serial);
 
     /**
-     * Requests a resize on the given @p seat after the pointer button press with the given @p serial.
+     * Requests a resize on the given @p seat after the pointer button press with the given @p
+     * serial.
      *
      * @param seat The seat on which to resize the window
      * @param serial The serial of the pointer button press which should trigger the resize
      * @param edges A hint for the compositor to set e.g. an appropriate cursor image
      * @since 5.5
      **/
-    void requestResize(Seat *seat, quint32 serial, Qt::Edges edges);
+    void requestResize(Seat* seat, quint32 serial, Qt::Edges edges);
 
     /**
      * Sets a short title for the surface.
@@ -258,18 +265,18 @@ public:
      *
      * @since 0.0.555
      **/
-    void setTitle(const QString &title);
+    void setTitle(const QString& title);
 
     /**
      * Sets a window class for the surface.
      *
      * The surface class identifies the general class of applications to which the surface belongs.
-     * A common convention is to use the file name (or the full path if it is a non-standard location)
-     * of the application's .desktop file as the class.
+     * A common convention is to use the file name (or the full path if it is a non-standard
+     * location) of the application's .desktop file as the class.
      *
      * @since 0.0.555
      **/
-    void setWindowClass(const QByteArray &windowClass);
+    void setWindowClass(const QByteArray& windowClass);
 
     /**
      * Creates a ShellSurface for the given @p window.
@@ -280,7 +287,7 @@ public:
      * destroyed together with the @p window.
      * @since 0.0.528
      **/
-    static ShellSurface *fromWindow(QWindow *window);
+    static ShellSurface* fromWindow(QWindow* window);
 
     /**
      * Creates a ShellSurface for the given @p winId.
@@ -292,13 +299,14 @@ public:
      * the @p wid.
      * @since 0.0.528
      **/
-    static ShellSurface *fromQtWinId(WId wid);
+    static ShellSurface* fromQtWinId(WId wid);
 
     /**
-     * @returns The Surface referencing the @p native wl_surface or @c null if there is no such Surface.
+     * @returns The Surface referencing the @p native wl_surface or @c null if there is no such
+     * Surface.
      * @since 0.0.528
      **/
-    static ShellSurface *get(wl_shell_surface *native);
+    static ShellSurface* get(wl_shell_surface* native);
 
     operator wl_shell_surface*();
     operator wl_shell_surface*() const;
@@ -309,7 +317,7 @@ Q_SIGNALS:
      * The ShellSurface automatically responds to the ping.
      **/
     void pinged();
-    void sizeChanged(const QSize &);
+    void sizeChanged(const QSize&);
 
     /**
      * The popupDone signal is sent out when a popup grab is broken, that is,

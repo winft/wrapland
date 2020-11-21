@@ -19,9 +19,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QObject>
 #include <QMap>
 #include <QMutex>
+#include <QObject>
 #include <QThreadStorage>
 #include <QWaitCondition>
 #include <QXmlStreamReader>
@@ -35,7 +35,7 @@ class Argument
 {
 public:
     explicit Argument();
-    explicit Argument(const QXmlStreamAttributes &attributes);
+    explicit Argument(const QXmlStreamAttributes& attributes);
     ~Argument();
 
     enum class Type {
@@ -50,23 +50,27 @@ public:
         String
     };
 
-    QString name() const {
+    QString name() const
+    {
         return m_name;
     }
-    Type type() const {
+    Type type() const
+    {
         return m_type;
     }
-    bool isNullAllowed() const {
+    bool isNullAllowed() const
+    {
         return m_allowNull;
     }
-    QString interface() const {
+    QString interface() const
+    {
         return m_inteface;
     }
     QString typeAsQt() const;
     QString typeAsServerWl() const;
 
 private:
-    Type parseType(const QStringRef &type);
+    Type parseType(const QStringRef& type);
     QString m_name;
     Type m_type = Type::Unknown;
     bool m_allowNull = false;
@@ -77,27 +81,32 @@ class Request
 {
 public:
     explicit Request();
-    explicit Request(const QString &name);
+    explicit Request(const QString& name);
     ~Request();
 
-    void addArgument(const Argument &arg) {
+    void addArgument(const Argument& arg)
+    {
         m_arguments << arg;
     }
 
-    QString name() const {
+    QString name() const
+    {
         return m_name;
     }
 
-    QVector<Argument> arguments() const {
+    QVector<Argument> arguments() const
+    {
         return m_arguments;
     }
 
-    bool isDestructor() const {
+    bool isDestructor() const
+    {
         return m_destructor;
     }
     bool isFactory() const;
 
-    void markAsDestructor() {
+    void markAsDestructor()
+    {
         m_destructor = true;
     }
 
@@ -111,18 +120,21 @@ class Event
 {
 public:
     explicit Event();
-    explicit Event(const QString &name);
+    explicit Event(const QString& name);
     ~Event();
 
-    void addArgument(const Argument &arg) {
+    void addArgument(const Argument& arg)
+    {
         m_arguments << arg;
     }
 
-    QString name() const {
+    QString name() const
+    {
         return m_name;
     }
 
-    QVector<Argument> arguments() const {
+    QVector<Argument> arguments() const
+    {
         return m_arguments;
     }
 
@@ -135,51 +147,64 @@ class Interface
 {
 public:
     explicit Interface();
-    explicit Interface(const QXmlStreamAttributes &attributes);
+    explicit Interface(const QXmlStreamAttributes& attributes);
     virtual ~Interface();
 
-    void addRequest(const Request &request) {
+    void addRequest(const Request& request)
+    {
         m_requests << request;
     }
-    void addEvent(const Event &event) {
+    void addEvent(const Event& event)
+    {
         m_events << event;
     }
 
-    QString name() const {
+    QString name() const
+    {
         return m_name;
     }
-    quint32 version() const {
+    quint32 version() const
+    {
         return m_version;
     }
-    QString wraplandClientName() const {
+    QString wraplandClientName() const
+    {
         return m_clientName;
     }
-    QString wraplandServerName() const {
+    QString wraplandServerName() const
+    {
         return m_clientName;
     }
 
-    QVector<Request> requests() const {
+    QVector<Request> requests() const
+    {
         return m_requests;
     }
 
-    QVector<Event> events() const {
+    QVector<Event> events() const
+    {
         return m_events;
     }
 
-    void markAsGlobal() {
+    void markAsGlobal()
+    {
         m_global = true;
     }
-    bool isGlobal() const {
+    bool isGlobal() const
+    {
         return m_global;
     }
-    void setFactory(Interface *factory) {
+    void setFactory(Interface* factory)
+    {
         m_factory = factory;
     }
-    Interface *factory() const {
+    Interface* factory() const
+    {
         return m_factory;
     }
 
-    bool isUnstableInterface() const {
+    bool isUnstableInterface() const
+    {
         return m_name.startsWith(QLatin1String("zwp"));
     }
 
@@ -190,21 +215,22 @@ private:
     QVector<Request> m_requests;
     QVector<Event> m_events;
     bool m_global = false;
-    Interface *m_factory;
+    Interface* m_factory;
 };
-
 
 class Generator : public QObject
 {
     Q_OBJECT
 public:
-    explicit Generator(QObject *parent = nullptr);
+    explicit Generator(QObject* parent = nullptr);
     virtual ~Generator();
 
-    void setXmlFileName(const QString &name) {
+    void setXmlFileName(const QString& name)
+    {
         m_xmlFileName = name;
     }
-    void setBaseFileName(const QString &name) {
+    void setBaseFileName(const QString& name)
+    {
         m_baseFileName = name;
     }
     void start();
@@ -217,42 +243,42 @@ private:
     void generateEndNamespace();
     void generateHeaderIncludes();
     void generateCppIncludes();
-    void generatePrivateClass(const Interface &interface);
-    void generateClientPrivateClass(const Interface &interface);
-    void generateClientPrivateResourceClass(const Interface &interface);
-    void generateClientPrivateGlobalClass(const Interface &interface);
-    void generateServerPrivateGlobalFunction(const Interface &interface);
-    void generateServerPrivateHeaderGlobalClass(const Interface &interface);
-    void generateServerPrivateResourceFunction(const Interface &interface);
-    void generateServerPrivateHeaderResourceClass(const Interface &interface);
-    void generateServerPrivateInterfaceClass(const Interface &interface);
-    void generateServerPrivateGlobalConstructor(const Interface &interface);
-    void generateServerPrivateResourceCtorDtorClass(const Interface &interface);
-    void generateServerPrivateCallbackDefinitions(const Interface &interface);
-    void generateServerPrivateCallbackImpl(const Interface &interface);
-    void generateClientCpp(const Interface &interface);
-    void generateClass(const Interface &interface);
-    void generateClientGlobalClass(const Interface &interface);
-    void generateClientResourceClass(const Interface &interface);
-    void generateServerGlobalClass(const Interface &interface);
-    void generateServerGlobalClassUnstable(const Interface &interface);
-    void generateServerResourceClass(const Interface &interface);
-    void generateServerResourceClassUnstable(const Interface &interface);
-    void generateClientClassQObjectDerived(const Interface &interface);
-    void generateClientGlobalClassDoxy(const Interface &interface);
-    void generateClientGlobalClassCtor(const Interface &interface);
-    void generateClientGlobalClassSetup(const Interface &interface);
-    void generateClientResourceClassSetup(const Interface &interface);
-    void generateClientClassDtor(const Interface &interface);
-    void generateClientClassReleaseDestroy(const Interface &interface);
-    void generateClientClassStart(const Interface &interface);
-    void generateClientClassCasts(const Interface &interface);
-    void generateClientClassSignals(const Interface &interface);
-    void generateClientClassDptr(const Interface &interface);
-    void generateClientGlobalClassEnd(const Interface &interface);
-    void generateClientResourceClassEnd(const Interface &interface);
-    void generateClientClassRequests(const Interface &interface);
-    void generateClientCppRequests(const Interface &interface);
+    void generatePrivateClass(const Interface& interface);
+    void generateClientPrivateClass(const Interface& interface);
+    void generateClientPrivateResourceClass(const Interface& interface);
+    void generateClientPrivateGlobalClass(const Interface& interface);
+    void generateServerPrivateGlobalFunction(const Interface& interface);
+    void generateServerPrivateHeaderGlobalClass(const Interface& interface);
+    void generateServerPrivateResourceFunction(const Interface& interface);
+    void generateServerPrivateHeaderResourceClass(const Interface& interface);
+    void generateServerPrivateInterfaceClass(const Interface& interface);
+    void generateServerPrivateGlobalConstructor(const Interface& interface);
+    void generateServerPrivateResourceCtorDtorClass(const Interface& interface);
+    void generateServerPrivateCallbackDefinitions(const Interface& interface);
+    void generateServerPrivateCallbackImpl(const Interface& interface);
+    void generateClientCpp(const Interface& interface);
+    void generateClass(const Interface& interface);
+    void generateClientGlobalClass(const Interface& interface);
+    void generateClientResourceClass(const Interface& interface);
+    void generateServerGlobalClass(const Interface& interface);
+    void generateServerGlobalClassUnstable(const Interface& interface);
+    void generateServerResourceClass(const Interface& interface);
+    void generateServerResourceClassUnstable(const Interface& interface);
+    void generateClientClassQObjectDerived(const Interface& interface);
+    void generateClientGlobalClassDoxy(const Interface& interface);
+    void generateClientGlobalClassCtor(const Interface& interface);
+    void generateClientGlobalClassSetup(const Interface& interface);
+    void generateClientResourceClassSetup(const Interface& interface);
+    void generateClientClassDtor(const Interface& interface);
+    void generateClientClassReleaseDestroy(const Interface& interface);
+    void generateClientClassStart(const Interface& interface);
+    void generateClientClassCasts(const Interface& interface);
+    void generateClientClassSignals(const Interface& interface);
+    void generateClientClassDptr(const Interface& interface);
+    void generateClientGlobalClassEnd(const Interface& interface);
+    void generateClientResourceClassEnd(const Interface& interface);
+    void generateClientClassRequests(const Interface& interface);
+    void generateClientCppRequests(const Interface& interface);
     void generateWaylandForwardDeclarations();
     void generateNamespaceForwardDeclarations();
     void startParseXml();
@@ -275,11 +301,7 @@ private:
 
     QThreadStorage<QTextStream*> m_stream;
     QString m_xmlFileName;
-    enum class Project {
-        Client,
-        Server,
-        ServerPrivate
-    };
+    enum class Project { Client, Server, ServerPrivate };
     QThreadStorage<Project> m_project;
     QString m_authorName;
     QString m_authorEmail;

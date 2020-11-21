@@ -20,7 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef WAYLAND_SHM_POOL_H
 #define WAYLAND_SHM_POOL_H
 
-//QT
+// QT
 #include <QObject>
 
 // C++ STD
@@ -103,8 +103,8 @@ class EventQueue;
  *     qDebug() << "Didn't get a valid Buffer";
  *     return;
  * }
- * QImage image(buffer.lock()->address(), size.width(), size.height(), stride, QImage::Format_RGB32);
- * image.fill(Qt::black);
+ * QImage image(buffer.lock()->address(), size.width(), size.height(), stride,
+ * QImage::Format_RGB32); image.fill(Qt::black);
  * @endcode
  *
  * A Buffer can be attached to a Surface:
@@ -135,7 +135,7 @@ class WRAPLANDCLIENT_EXPORT ShmPool : public QObject
 {
     Q_OBJECT
 public:
-    explicit ShmPool(QObject *parent = nullptr);
+    explicit ShmPool(QObject* parent = nullptr);
     virtual ~ShmPool();
     /**
      * @returns @c true if the ShmPool references a wl_shm interface and the shared memory pool
@@ -148,7 +148,7 @@ public:
      * When using Registry::createShmPool there is no need to call this
      * method.
      **/
-    void setup(wl_shm *shm);
+    void setup(wl_shm* shm);
     /**
      * Releases the wl_shm interface.
      * After the interface has been released the ShmPool instance is no
@@ -161,11 +161,11 @@ public:
     /**
      * Sets the @p queue to use for creating a Buffer.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Buffer.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Provides a Buffer with:
@@ -178,10 +178,11 @@ public:
      * returned Buffer do <b>not</b> share memory.
      *
      * @param image The image which should be copied into the Buffer
-     * @return Buffer with copied content of @p image in success case, a @c null Buffer::Ptr otherwise
+     * @return Buffer with copied content of @p image in success case, a @c null Buffer::Ptr
+     * otherwise
      * @see getBuffer
      **/
-    Buffer::Ptr createBuffer(const QImage &image);
+    Buffer::Ptr createBuffer(const QImage& image);
     /**
      * Provides a Buffer with @p size, @p stride and @p format.
      *
@@ -196,8 +197,11 @@ public:
      * @return Buffer with copied content of @p src in success case, a @c null Buffer::Ptr otherwise
      * @see getBuffer
      **/
-    Buffer::Ptr createBuffer(const QSize &size, int32_t stride, const void *src, Buffer::Format format = Buffer::Format::ARGB32);
-    void *poolAddress() const;
+    Buffer::Ptr createBuffer(const QSize& size,
+                             int32_t stride,
+                             const void* src,
+                             Buffer::Format format = Buffer::Format::ARGB32);
+    void* poolAddress() const;
     /**
      * Provides a Buffer with @p size, @p stride and @p format.
      *
@@ -211,8 +215,9 @@ public:
      * @return Buffer as requested in success case, a @c null Buffer::Ptr otherwise.
      * @see createBuffer
      **/
-    Buffer::Ptr getBuffer(const QSize &size, int32_t stride, Buffer::Format format = Buffer::Format::ARGB32);
-    wl_shm *shm();
+    Buffer::Ptr
+    getBuffer(const QSize& size, int32_t stride, Buffer::Format format = Buffer::Format::ARGB32);
+    wl_shm* shm();
 Q_SIGNALS:
     /**
      * This signal is emitted whenever the shared memory pool gets resized.

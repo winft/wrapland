@@ -21,8 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "datadevice.h"
 #include "wayland_pointer_p.h"
 // Qt
-#include <QMimeType>
 #include <QMimeDatabase>
+#include <QMimeType>
 // Wayland
 #include <wayland-client-protocol.h>
 
@@ -35,56 +35,56 @@ namespace Client
 class Q_DECL_HIDDEN DataOffer::Private
 {
 public:
-    Private(wl_data_offer *offer, DataOffer *q);
+    Private(wl_data_offer* offer, DataOffer* q);
     WaylandPointer<wl_data_offer, wl_data_offer_destroy> dataOffer;
     QList<QMimeType> mimeTypes;
     DataDeviceManager::DnDActions sourceActions = DataDeviceManager::DnDAction::None;
     DataDeviceManager::DnDAction selectedAction = DataDeviceManager::DnDAction::None;
 
 private:
-    void offer(const QString &mimeType);
+    void offer(const QString& mimeType);
     void setAction(DataDeviceManager::DnDAction action);
-    static void offerCallback(void *data, wl_data_offer *dataOffer, const char *mimeType);
-    static void sourceActionsCallback(void *data, wl_data_offer *wl_data_offer, uint32_t source_actions);
-    static void actionCallback(void *data, wl_data_offer *wl_data_offer, uint32_t dnd_action);
-    DataOffer *q;
+    static void offerCallback(void* data, wl_data_offer* dataOffer, const char* mimeType);
+    static void
+    sourceActionsCallback(void* data, wl_data_offer* wl_data_offer, uint32_t source_actions);
+    static void actionCallback(void* data, wl_data_offer* wl_data_offer, uint32_t dnd_action);
+    DataOffer* q;
 
     static const struct wl_data_offer_listener s_listener;
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-const struct wl_data_offer_listener DataOffer::Private::s_listener = {
-    offerCallback,
-    sourceActionsCallback,
-    actionCallback
-};
+const struct wl_data_offer_listener DataOffer::Private::s_listener
+    = {offerCallback, sourceActionsCallback, actionCallback};
 #endif
 
-DataOffer::Private::Private(wl_data_offer *offer, DataOffer *q)
+DataOffer::Private::Private(wl_data_offer* offer, DataOffer* q)
     : q(q)
 {
     dataOffer.setup(offer);
     wl_data_offer_add_listener(offer, &s_listener, this);
 }
 
-void DataOffer::Private::offerCallback(void *data, wl_data_offer *dataOffer, const char *mimeType)
+void DataOffer::Private::offerCallback(void* data, wl_data_offer* dataOffer, const char* mimeType)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->dataOffer == dataOffer);
     d->offer(QString::fromUtf8(mimeType));
 }
 
-void DataOffer::Private::offer(const QString &mimeType)
+void DataOffer::Private::offer(const QString& mimeType)
 {
     QMimeDatabase db;
-    const auto &m = db.mimeTypeForName(mimeType);
+    const auto& m = db.mimeTypeForName(mimeType);
     if (m.isValid()) {
         mimeTypes << m;
         emit q->mimeTypeOffered(m.name());
     }
 }
 
-void DataOffer::Private::sourceActionsCallback(void *data, wl_data_offer *wl_data_offer, uint32_t source_actions)
+void DataOffer::Private::sourceActionsCallback(void* data,
+                                               wl_data_offer* wl_data_offer,
+                                               uint32_t source_actions)
 {
     Q_UNUSED(wl_data_offer)
     DataDeviceManager::DnDActions actions;
@@ -104,11 +104,13 @@ void DataOffer::Private::sourceActionsCallback(void *data, wl_data_offer *wl_dat
     }
 }
 
-void DataOffer::Private::actionCallback(void *data, wl_data_offer *wl_data_offer, uint32_t dnd_action)
+void DataOffer::Private::actionCallback(void* data,
+                                        wl_data_offer* wl_data_offer,
+                                        uint32_t dnd_action)
 {
     Q_UNUSED(wl_data_offer)
     auto d = reinterpret_cast<Private*>(data);
-    switch(dnd_action) {
+    switch (dnd_action) {
     case WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY:
         d->setAction(DataDeviceManager::DnDAction::Copy);
         break;
@@ -135,7 +137,7 @@ void DataOffer::Private::setAction(DataDeviceManager::DnDAction action)
     emit q->selectedDragAndDropActionChanged();
 }
 
-DataOffer::DataOffer(DataDevice *parent, wl_data_offer *dataOffer)
+DataOffer::DataOffer(DataDevice* parent, wl_data_offer* dataOffer)
     : QObject(parent)
     , d(new Private(dataOffer, this))
 {
@@ -156,17 +158,17 @@ bool DataOffer::isValid() const
     return d->dataOffer.isValid();
 }
 
-QList< QMimeType > DataOffer::offeredMimeTypes() const
+QList<QMimeType> DataOffer::offeredMimeTypes() const
 {
     return d->mimeTypes;
 }
 
-void DataOffer::receive(const QMimeType &mimeType, qint32 fd)
+void DataOffer::receive(const QMimeType& mimeType, qint32 fd)
 {
     receive(mimeType.name(), fd);
 }
 
-void DataOffer::receive(const QString &mimeType, qint32 fd)
+void DataOffer::receive(const QString& mimeType, qint32 fd)
 {
     Q_ASSERT(isValid());
     wl_data_offer_receive(d->dataOffer, mimeType.toUtf8().constData(), fd);
@@ -196,12 +198,13 @@ DataDeviceManager::DnDActions DataOffer::sourceDragAndDropActions() const
     return d->sourceActions;
 }
 
-void DataOffer::setDragAndDropActions(DataDeviceManager::DnDActions supported, DataDeviceManager::DnDAction preferred)
+void DataOffer::setDragAndDropActions(DataDeviceManager::DnDActions supported,
+                                      DataDeviceManager::DnDAction preferred)
 {
     if (wl_proxy_get_version(d->dataOffer) < WL_DATA_OFFER_SET_ACTIONS_SINCE_VERSION) {
         return;
     }
-    auto toWayland = [] (DataDeviceManager::DnDAction action) {
+    auto toWayland = [](DataDeviceManager::DnDAction action) {
         switch (action) {
         case DataDeviceManager::DnDAction::Copy:
             return WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY;

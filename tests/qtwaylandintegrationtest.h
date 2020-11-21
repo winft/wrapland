@@ -42,22 +42,22 @@ class WaylandClientTest : public QObject
 {
     Q_OBJECT
 public:
-    explicit WaylandClientTest(QObject *parent = nullptr);
+    explicit WaylandClientTest(QObject* parent = nullptr);
     virtual ~WaylandClientTest();
 
 private:
     void init();
-    void render(const QSize &size);
+    void render(const QSize& size);
     void render();
-    void setupRegistry(Wrapland::Client::Registry *registry);
+    void setupRegistry(Wrapland::Client::Registry* registry);
     void toggleTimer();
-    Wrapland::Client::ConnectionThread *m_connectionThreadObject;
-    Wrapland::Client::Compositor *m_compositor;
-    Wrapland::Client::Surface *m_surface;
-    Wrapland::Client::ShmPool *m_shm;
-    Wrapland::Client::ShellSurface *m_shellSurface;
+    Wrapland::Client::ConnectionThread* m_connectionThreadObject;
+    Wrapland::Client::Compositor* m_compositor;
+    Wrapland::Client::Surface* m_surface;
+    Wrapland::Client::ShmPool* m_shm;
+    Wrapland::Client::ShellSurface* m_shellSurface;
     QSize m_currentSize;
-    QTimer *m_timer;
+    QTimer* m_timer;
 };
 
 #endif

@@ -22,9 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QPointer>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct wl_subcompositor;
 
@@ -51,7 +51,7 @@ class WRAPLANDCLIENT_EXPORT SubCompositor : public QObject
 {
     Q_OBJECT
 public:
-    explicit SubCompositor(QObject *parent = nullptr);
+    explicit SubCompositor(QObject* parent = nullptr);
     virtual ~SubCompositor();
 
     /**
@@ -63,7 +63,7 @@ public:
      * When using Registry::createSubCompositor there is no need to call this
      * method.
      **/
-    void setup(wl_subcompositor *subcompositor);
+    void setup(wl_subcompositor* subcompositor);
     /**
      * Releases the wl_subcompositor interface.
      * After the interface has been released the SubCompositor instance is no
@@ -74,18 +74,20 @@ public:
     /**
      * Sets the @p queue to use for creating a SubSurface.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a SubSurface.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates and setup a new SubSurface with @p parent.
      * @param parent The parent to pass to the Surface.
      * @returns The new created Surface
      **/
-    SubSurface *createSubSurface(QPointer<Surface> surface, QPointer<Surface> parentSurface, QObject *parent = nullptr);
+    SubSurface* createSubSurface(QPointer<Surface> surface,
+                                 QPointer<Surface> parentSurface,
+                                 QObject* parent = nullptr);
 
     operator wl_subcompositor*();
     operator wl_subcompositor*() const;

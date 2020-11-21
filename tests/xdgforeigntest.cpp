@@ -18,55 +18,55 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
+#include "../src/client/xdgforeign.h"
 #include "../src/client/compositor.h"
 #include "../src/client/connection_thread.h"
 #include "../src/client/event_queue.h"
 #include "../src/client/registry.h"
 #include "../src/client/shell.h"
 #include "../src/client/shm_pool.h"
-#include "../src/client/xdgshell.h"
-#include "../src/client/xdgforeign.h"
 #include "../src/client/xdgdecoration.h"
+#include "../src/client/xdgshell.h"
 // Qt
 #include <QCommandLineParser>
+#include <QDebug>
 #include <QGuiApplication>
 #include <QImage>
 #include <QThread>
-#include <QDebug>
 using namespace Wrapland::Client;
 
 class XdgForeignTest : public QObject
 {
     Q_OBJECT
 public:
-    explicit XdgForeignTest(QObject *parent = nullptr);
+    explicit XdgForeignTest(QObject* parent = nullptr);
     virtual ~XdgForeignTest();
 
     void init();
 
 private:
-    void setupRegistry(Registry *registry);
+    void setupRegistry(Registry* registry);
     void render();
-    QThread *m_connectionThread;
-    ConnectionThread *m_connectionThreadObject;
-    EventQueue *m_eventQueue = nullptr;
-    Compositor *m_compositor = nullptr;
-    XdgShell *m_shell = nullptr;
-    XdgShellSurface *m_shellSurface = nullptr;
-    ShmPool *m_shm = nullptr;
-    Surface *m_surface = nullptr;
+    QThread* m_connectionThread;
+    ConnectionThread* m_connectionThreadObject;
+    EventQueue* m_eventQueue = nullptr;
+    Compositor* m_compositor = nullptr;
+    XdgShell* m_shell = nullptr;
+    XdgShellSurface* m_shellSurface = nullptr;
+    ShmPool* m_shm = nullptr;
+    Surface* m_surface = nullptr;
 
-    XdgShellSurface *m_childShellSurface = nullptr;
-    Surface *m_childSurface = nullptr;
+    XdgShellSurface* m_childShellSurface = nullptr;
+    Surface* m_childSurface = nullptr;
 
-    Wrapland::Client::XdgExporter *m_exporter = nullptr;
-    Wrapland::Client::XdgImporter *m_importer = nullptr;
-    Wrapland::Client::XdgExported *m_exported = nullptr;
-    Wrapland::Client::XdgImported *m_imported = nullptr;
-    Wrapland::Client::XdgDecorationManager *m_decoration = nullptr;
+    Wrapland::Client::XdgExporter* m_exporter = nullptr;
+    Wrapland::Client::XdgImporter* m_importer = nullptr;
+    Wrapland::Client::XdgExported* m_exported = nullptr;
+    Wrapland::Client::XdgImported* m_imported = nullptr;
+    Wrapland::Client::XdgDecorationManager* m_decoration = nullptr;
 };
 
-XdgForeignTest::XdgForeignTest(QObject *parent)
+XdgForeignTest::XdgForeignTest(QObject* parent)
     : QObject(parent)
     , m_connectionThread(new QThread(this))
     , m_connectionThreadObject(new ConnectionThread())
@@ -82,90 +82,94 @@ XdgForeignTest::~XdgForeignTest()
 
 void XdgForeignTest::init()
 {
-    connect(m_connectionThreadObject, &ConnectionThread::establishedChanged, this,
-        [this] (bool established) {
+    connect(
+        m_connectionThreadObject,
+        &ConnectionThread::establishedChanged,
+        this,
+        [this](bool established) {
             if (!established) {
                 return;
             }
             m_eventQueue = new EventQueue(this);
             m_eventQueue->setup(m_connectionThreadObject);
 
-            Registry *registry = new Registry(this);
+            Registry* registry = new Registry(this);
             setupRegistry(registry);
         },
-        Qt::QueuedConnection
-    );
+        Qt::QueuedConnection);
     m_connectionThreadObject->moveToThread(m_connectionThread);
     m_connectionThread->start();
 
     m_connectionThreadObject->establishConnection();
 }
 
-void XdgForeignTest::setupRegistry(Registry *registry)
+void XdgForeignTest::setupRegistry(Registry* registry)
 {
-    connect(registry, &Registry::compositorAnnounced, this,
-        [this, registry](quint32 name, quint32 version) {
-            m_compositor = registry->createCompositor(name, version, this);
-        }
-    );
-    connect(registry, &Registry::xdgShellUnstableV5Announced, this,
-        [this, registry](quint32 name, quint32 version) {
-            m_shell = registry->createXdgShell(name, version, this);
-        }
-    );
-    connect(registry, &Registry::shmAnnounced, this,
-        [this, registry](quint32 name, quint32 version) {
-            m_shm = registry->createShmPool(name, version, this);
-        }
-    );
-    connect(registry, &Registry::exporterUnstableV2Announced, this,
-        [this, registry](quint32 name, quint32 version) {
-            m_exporter = registry->createXdgExporter(name, version, this);
-            m_exporter->setEventQueue(m_eventQueue);
-        }
-    );
-    connect(registry, &Registry::importerUnstableV2Announced, this,
-        [this, registry](quint32 name, quint32 version) {
-            m_importer = registry->createXdgImporter(name, version, this);
-            m_importer->setEventQueue(m_eventQueue);
-        }
-    );
-    connect(registry, &Registry::xdgDecorationAnnounced, this,
-        [this, registry](quint32 name, quint32 version) {
-            m_decoration = registry->createXdgDecorationManager(name, version, this);
-            m_decoration->setEventQueue(m_eventQueue);
-        }
-    );
-    connect(registry, &Registry::interfacesAnnounced, this,
-        [this] {
-            Q_ASSERT(m_compositor);
-            Q_ASSERT(m_shell);
-            Q_ASSERT(m_shm);
-            Q_ASSERT(m_exporter);
-            Q_ASSERT(m_importer);
-            m_surface = m_compositor->createSurface(this);
-            Q_ASSERT(m_surface);
-            auto parentDeco = m_decoration->getToplevelDecoration(m_shellSurface, this);
-            m_shellSurface = m_shell->createSurface(m_surface, this);
-            Q_ASSERT(m_shellSurface);
-            connect(m_shellSurface, &XdgShellSurface::sizeChanged, this, &XdgForeignTest::render);
-
-            m_childSurface = m_compositor->createSurface(this);
-            Q_ASSERT(m_childSurface);
-            auto childDeco = m_decoration->getToplevelDecoration(m_childShellSurface, this);
-            m_childShellSurface = m_shell->createSurface(m_childSurface, this);
-            Q_ASSERT(m_childShellSurface);
-            connect(m_childShellSurface, &XdgShellSurface::sizeChanged, this, &XdgForeignTest::render);
-
-            m_exported = m_exporter->exportTopLevel(m_surface, this);
-            Q_ASSERT(m_decoration);
-            connect(m_exported, &XdgExported::done, this, [this]() {
-                m_imported = m_importer->importTopLevel(m_exported->handle(), this);
-                m_imported->setParentOf(m_childSurface);
+    connect(registry,
+            &Registry::compositorAnnounced,
+            this,
+            [this, registry](quint32 name, quint32 version) {
+                m_compositor = registry->createCompositor(name, version, this);
             });
-            render();
-        }
-    );
+    connect(registry,
+            &Registry::xdgShellUnstableV5Announced,
+            this,
+            [this, registry](quint32 name, quint32 version) {
+                m_shell = registry->createXdgShell(name, version, this);
+            });
+    connect(
+        registry, &Registry::shmAnnounced, this, [this, registry](quint32 name, quint32 version) {
+            m_shm = registry->createShmPool(name, version, this);
+        });
+    connect(registry,
+            &Registry::exporterUnstableV2Announced,
+            this,
+            [this, registry](quint32 name, quint32 version) {
+                m_exporter = registry->createXdgExporter(name, version, this);
+                m_exporter->setEventQueue(m_eventQueue);
+            });
+    connect(registry,
+            &Registry::importerUnstableV2Announced,
+            this,
+            [this, registry](quint32 name, quint32 version) {
+                m_importer = registry->createXdgImporter(name, version, this);
+                m_importer->setEventQueue(m_eventQueue);
+            });
+    connect(registry,
+            &Registry::xdgDecorationAnnounced,
+            this,
+            [this, registry](quint32 name, quint32 version) {
+                m_decoration = registry->createXdgDecorationManager(name, version, this);
+                m_decoration->setEventQueue(m_eventQueue);
+            });
+    connect(registry, &Registry::interfacesAnnounced, this, [this] {
+        Q_ASSERT(m_compositor);
+        Q_ASSERT(m_shell);
+        Q_ASSERT(m_shm);
+        Q_ASSERT(m_exporter);
+        Q_ASSERT(m_importer);
+        m_surface = m_compositor->createSurface(this);
+        Q_ASSERT(m_surface);
+        auto parentDeco = m_decoration->getToplevelDecoration(m_shellSurface, this);
+        m_shellSurface = m_shell->createSurface(m_surface, this);
+        Q_ASSERT(m_shellSurface);
+        connect(m_shellSurface, &XdgShellSurface::sizeChanged, this, &XdgForeignTest::render);
+
+        m_childSurface = m_compositor->createSurface(this);
+        Q_ASSERT(m_childSurface);
+        auto childDeco = m_decoration->getToplevelDecoration(m_childShellSurface, this);
+        m_childShellSurface = m_shell->createSurface(m_childSurface, this);
+        Q_ASSERT(m_childShellSurface);
+        connect(m_childShellSurface, &XdgShellSurface::sizeChanged, this, &XdgForeignTest::render);
+
+        m_exported = m_exporter->exportTopLevel(m_surface, this);
+        Q_ASSERT(m_decoration);
+        connect(m_exported, &XdgExported::done, this, [this]() {
+            m_imported = m_importer->importTopLevel(m_exported->handle(), this);
+            m_imported->setParentOf(m_childSurface);
+        });
+        render();
+    });
     registry->setEventQueue(m_eventQueue);
     registry->create(m_connectionThreadObject);
     registry->setup();
@@ -176,18 +180,20 @@ void XdgForeignTest::render()
     QSize size = m_shellSurface->size().isValid() ? m_shellSurface->size() : QSize(500, 500);
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
-    QImage image(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
+    QImage image(
+        buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
     image.fill(QColor(255, 255, 255, 255));
 
     m_surface->attachBuffer(*buffer);
     m_surface->damage(QRect(QPoint(0, 0), size));
     m_surface->commit(Surface::CommitFlag::None);
     buffer->setUsed(false);
-    
+
     size = m_childShellSurface->size().isValid() ? m_childShellSurface->size() : QSize(200, 200);
     buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
-    image = QImage(buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
+    image = QImage(
+        buffer->address(), size.width(), size.height(), QImage::Format_ARGB32_Premultiplied);
     image.fill(QColor(255, 0, 0, 255));
 
     m_childSurface->attachBuffer(*buffer);
@@ -196,7 +202,7 @@ void XdgForeignTest::render()
     buffer->setUsed(false);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
 

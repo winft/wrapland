@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_PLASMAVIRTUALDESKTOP_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct org_kde_plasma_virtual_desktop_management;
 struct org_kde_plasma_virtual_desktop;
@@ -39,12 +39,14 @@ class PlasmaVirtualDesktop;
 /**
  * @short Wrapper for the org_kde_plasma_virtual_desktop_management interface.
  *
- * This class provides a convenient wrapper for the org_kde_plasma_virtual_desktop_management interface.
+ * This class provides a convenient wrapper for the org_kde_plasma_virtual_desktop_management
+ * interface.
  *
  * To use this class one needs to interact with the Registry. There are two
  * possible ways to create the PlasmaVirtualDesktopManagement interface:
  * @code
- * PlasmaVirtualDesktopManagement *c = registry->createPlasmaVirtualDesktopManagement(name, version);
+ * PlasmaVirtualDesktopManagement *c = registry->createPlasmaVirtualDesktopManagement(name,
+ * version);
  * @endcode
  *
  * This creates the PlasmaVirtualDesktopManagement and sets it up directly. As an alternative this
@@ -54,8 +56,8 @@ class PlasmaVirtualDesktop;
  * c->setup(registry->bindPlasmaVirtualDesktopManagement(name, version));
  * @endcode
  *
- * The PlasmaVirtualDesktopManagement can be used as a drop-in replacement for any org_kde_plasma_virtual_desktop_management
- * pointer as it provides matching cast operators.
+ * The PlasmaVirtualDesktopManagement can be used as a drop-in replacement for any
+ * org_kde_plasma_virtual_desktop_management pointer as it provides matching cast operators.
  * @since 0.0.552
  *
  * @see Registry
@@ -70,7 +72,7 @@ public:
      * to call setup. In order to get a ready to use PlasmaVirtualDesktopManagement prefer using
      * Registry::createPlasmaVirtualDesktopManagement.
      **/
-    explicit PlasmaVirtualDesktopManagement(QObject *parent = nullptr);
+    explicit PlasmaVirtualDesktopManagement(QObject* parent = nullptr);
     virtual ~PlasmaVirtualDesktopManagement();
 
     /**
@@ -78,7 +80,7 @@ public:
      * When using Registry::createPlasmaVirtualDesktopManagement there is no need to call this
      * method.
      **/
-    void setup(org_kde_plasma_virtual_desktop_management *plasmavirtualdesktopmanagement);
+    void setup(org_kde_plasma_virtual_desktop_management* plasmavirtualdesktopmanagement);
     /**
      * @returns @c true if managing a org_kde_plasma_virtual_desktop_management.
      **/
@@ -86,46 +88,49 @@ public:
     /**
      * Releases the org_kde_plasma_virtual_desktop_management interface.
      * After the interface has been released the PlasmaVirtualDesktopManagement instance is no
-     * longer valid and can be setup with another org_kde_plasma_virtual_desktop_management interface.
+     * longer valid and can be setup with another org_kde_plasma_virtual_desktop_management
+     * interface.
      **/
     void release();
 
     /**
      * Sets the @p queue to use for creating objects with this PlasmaVirtualDesktopManagement.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
 
     /**
-     * @returns The event queue to use for creating objects with this PlasmaVirtualDesktopManagement.
-     * The object is owned by the manager and the caller should not delete it.
+     * @returns The event queue to use for creating objects with this
+     * PlasmaVirtualDesktopManagement. The object is owned by the manager and the caller should not
+     * delete it.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * @returns the PlasmaVirtualDesktop representing the desktop id.
      * The PlasmaVirtualDesktop instance is guaranteed to be unique for each id.
      */
-    PlasmaVirtualDesktop *getVirtualDesktop(const QString &id);
+    PlasmaVirtualDesktop* getVirtualDesktop(const QString& id);
 
     /**
      * Requests for the desktop identified by id to be removed.
      * The server may or may not acconsent to the request.
      */
-    void requestRemoveVirtualDesktop(const QString &id);
+    void requestRemoveVirtualDesktop(const QString& id);
 
     /**
-     * Ask the server to create a new virtual desktop, and position it at a specified position. 
+     * Ask the server to create a new virtual desktop, and position it at a specified position.
      * If the position is zero or less, it will be positioned at the beginning,
      * if the cosition is the count or more, it will be positioned at the end.
      * @param name The name we want for the desktop
      * @param position The position for the desktop to be created
      */
-    void requestCreateVirtualDesktop(const QString &name, quint32 position = std::numeric_limits<uint32_t>::max());
+    void requestCreateVirtualDesktop(const QString& name,
+                                     quint32 position = std::numeric_limits<uint32_t>::max());
 
     /**
      * @returns All the existent virtual desktops
      */
-    QList <PlasmaVirtualDesktop *> desktops() const;
+    QList<PlasmaVirtualDesktop*> desktops() const;
 
     /**
      * @returns How many rows the virtual desktops should be laid out into
@@ -142,12 +147,12 @@ Q_SIGNALS:
     /**
      * Emitted when a new desktop has been added
      */
-    void desktopCreated(const QString &id, quint32 position);
+    void desktopCreated(const QString& id, quint32 position);
 
     /**
      * Emitted when a desktop has been removed
      */
-    void desktopRemoved(const QString &id);
+    void desktopRemoved(const QString& id);
 
     /**
      * Emitted when the number of rows of virtual desktops has been changed by the server
@@ -177,10 +182,10 @@ public:
 
     /**
      * Setup this PlasmaVirtualDesktop to manage the @p plasmavirtualdesktop.
-     * When using PlasmaVirtualDesktopManagement::createPlasmaVirtualDesktop there is no need to call this
-     * method.
+     * When using PlasmaVirtualDesktopManagement::createPlasmaVirtualDesktop there is no need to
+     * call this method.
      **/
-    void setup(org_kde_plasma_virtual_desktop *plasmavirtualdesktop);
+    void setup(org_kde_plasma_virtual_desktop* plasmavirtualdesktop);
 
     /**
      * @returns @c true if managing a org_kde_plasma_virtual_desktop.
@@ -204,7 +209,6 @@ public:
      * @returns The unique id of this desktop. The format of the id is decided by the compositor
      */
     QString id() const;
-
 
     /**
      * @returns User readable name for the desktop.
@@ -252,11 +256,10 @@ Q_SIGNALS:
 
 private:
     friend class PlasmaVirtualDesktopManagement;
-    explicit PlasmaVirtualDesktop(QObject *parent = nullptr);
+    explicit PlasmaVirtualDesktop(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

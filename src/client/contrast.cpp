@@ -38,10 +38,10 @@ public:
     Private() = default;
 
     WaylandPointer<org_kde_kwin_contrast_manager, org_kde_kwin_contrast_manager_destroy> manager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-ContrastManager::ContrastManager(QObject *parent)
+ContrastManager::ContrastManager(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -62,27 +62,27 @@ bool ContrastManager::isValid() const
     return d->manager.isValid();
 }
 
-void ContrastManager::setup(org_kde_kwin_contrast_manager *manager)
+void ContrastManager::setup(org_kde_kwin_contrast_manager* manager)
 {
     Q_ASSERT(manager);
     Q_ASSERT(!d->manager);
     d->manager.setup(manager);
 }
 
-void ContrastManager::setEventQueue(EventQueue *queue)
+void ContrastManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *ContrastManager::eventQueue()
+EventQueue* ContrastManager::eventQueue()
 {
     return d->queue;
 }
 
-Contrast *ContrastManager::createContrast(Surface *surface, QObject *parent)
+Contrast* ContrastManager::createContrast(Surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
-    Contrast *s = new Contrast(parent);
+    Contrast* s = new Contrast(parent);
     auto w = org_kde_kwin_contrast_manager_create(d->manager, *surface);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -91,7 +91,7 @@ Contrast *ContrastManager::createContrast(Surface *surface, QObject *parent)
     return s;
 }
 
-void ContrastManager::removeContrast(Surface *surface)
+void ContrastManager::removeContrast(Surface* surface)
 {
     Q_ASSERT(isValid());
     org_kde_kwin_contrast_manager_unset(d->manager, *surface);
@@ -113,7 +113,7 @@ public:
     WaylandPointer<org_kde_kwin_contrast, org_kde_kwin_contrast_release> contrast;
 };
 
-Contrast::Contrast(QObject *parent)
+Contrast::Contrast(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -129,7 +129,7 @@ void Contrast::release()
     d->contrast.release();
 }
 
-void Contrast::setup(org_kde_kwin_contrast *contrast)
+void Contrast::setup(org_kde_kwin_contrast* contrast)
 {
     Q_ASSERT(contrast);
     Q_ASSERT(!d->contrast);
@@ -147,7 +147,7 @@ void Contrast::commit()
     org_kde_kwin_contrast_commit(d->contrast);
 }
 
-void Contrast::setRegion(Region *region)
+void Contrast::setRegion(Region* region)
 {
     org_kde_kwin_contrast_set_region(d->contrast, *region);
 }

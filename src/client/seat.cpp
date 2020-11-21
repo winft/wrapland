@@ -34,12 +34,12 @@ namespace Client
 class Q_DECL_HIDDEN Seat::Private
 {
 public:
-    Private(Seat *q);
+    Private(Seat* q);
     void resetSeat();
-    void setup(wl_seat *seat);
+    void setup(wl_seat* seat);
 
     WaylandPointer<wl_seat, wl_seat_destroy> seat;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
     bool capabilityKeyboard = false;
     bool capabilityPointer = false;
     bool capabilityTouch = false;
@@ -50,20 +50,20 @@ private:
     void setHasPointer(bool has);
     void setHasTouch(bool has);
     void capabilitiesChanged(uint32_t capabilities);
-    void setName(const QString &name);
-    static void capabilitiesCallback(void *data, wl_seat *seat, uint32_t capabilities);
-    static void nameCallback(void *data, wl_seat *wl_seat, const char *name);
+    void setName(const QString& name);
+    static void capabilitiesCallback(void* data, wl_seat* seat, uint32_t capabilities);
+    static void nameCallback(void* data, wl_seat* wl_seat, const char* name);
 
-    Seat *q;
+    Seat* q;
     static const wl_seat_listener s_listener;
 };
 
-Seat::Private::Private(Seat *q)
+Seat::Private::Private(Seat* q)
     : q(q)
 {
 }
 
-void Seat::Private::setup(wl_seat *s)
+void Seat::Private::setup(wl_seat* s)
 {
     Q_ASSERT(s);
     Q_ASSERT(!seat);
@@ -73,10 +73,10 @@ void Seat::Private::setup(wl_seat *s)
 
 const wl_seat_listener Seat::Private::s_listener = {
     capabilitiesCallback,
-    nameCallback
+    nameCallback,
 };
 
-Seat::Seat(QObject *parent)
+Seat::Seat(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -97,12 +97,12 @@ void Seat::release()
     d->resetSeat();
 }
 
-void Seat::setEventQueue(EventQueue *queue)
+void Seat::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *Seat::eventQueue()
+EventQueue* Seat::eventQueue()
 {
     return d->queue;
 }
@@ -142,19 +142,19 @@ void Seat::Private::setHasTouch(bool has)
     emit q->hasTouchChanged(capabilityTouch);
 }
 
-void Seat::setup(wl_seat *seat)
+void Seat::setup(wl_seat* seat)
 {
     d->setup(seat);
 }
 
-void Seat::Private::capabilitiesCallback(void *data, wl_seat *seat, uint32_t capabilities)
+void Seat::Private::capabilitiesCallback(void* data, wl_seat* seat, uint32_t capabilities)
 {
     auto s = reinterpret_cast<Seat::Private*>(data);
     Q_ASSERT(s->seat == seat);
     s->capabilitiesChanged(capabilities);
 }
 
-void Seat::Private::nameCallback(void *data, wl_seat *seat, const char *name)
+void Seat::Private::nameCallback(void* data, wl_seat* seat, const char* name)
 {
     auto s = reinterpret_cast<Seat::Private*>(data);
     Q_ASSERT(s->seat == seat);
@@ -168,11 +168,11 @@ void Seat::Private::capabilitiesChanged(uint32_t capabilities)
     setHasTouch(capabilities & WL_SEAT_CAPABILITY_TOUCH);
 }
 
-Keyboard *Seat::createKeyboard(QObject *parent)
+Keyboard* Seat::createKeyboard(QObject* parent)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(d->capabilityKeyboard);
-    Keyboard *k = new Keyboard(parent);
+    Keyboard* k = new Keyboard(parent);
     connect(this, &Seat::interfaceAboutToBeReleased, k, &Keyboard::release);
     auto w = wl_seat_get_keyboard(d->seat);
     if (d->queue) {
@@ -182,11 +182,11 @@ Keyboard *Seat::createKeyboard(QObject *parent)
     return k;
 }
 
-Pointer *Seat::createPointer(QObject *parent)
+Pointer* Seat::createPointer(QObject* parent)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(d->capabilityPointer);
-    Pointer *p = new Pointer(parent);
+    Pointer* p = new Pointer(parent);
     connect(this, &Seat::interfaceAboutToBeReleased, p, &Pointer::release);
     auto w = wl_seat_get_pointer(d->seat);
     if (d->queue) {
@@ -196,11 +196,11 @@ Pointer *Seat::createPointer(QObject *parent)
     return p;
 }
 
-Touch *Seat::createTouch(QObject *parent)
+Touch* Seat::createTouch(QObject* parent)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(d->capabilityTouch);
-    Touch *t = new Touch(parent);
+    Touch* t = new Touch(parent);
     connect(this, &Seat::interfaceAboutToBeReleased, t, &Touch::release);
     auto w = wl_seat_get_touch(d->seat);
     if (d->queue) {
@@ -210,7 +210,7 @@ Touch *Seat::createTouch(QObject *parent)
     return t;
 }
 
-void Seat::Private::setName(const QString &n)
+void Seat::Private::setName(const QString& n)
 {
     if (name == n) {
         return;

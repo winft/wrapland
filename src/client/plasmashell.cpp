@@ -34,35 +34,37 @@ class Q_DECL_HIDDEN PlasmaShell::Private
 {
 public:
     WaylandPointer<org_kde_plasma_shell, org_kde_plasma_shell_destroy> shell;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
 class Q_DECL_HIDDEN PlasmaShellSurface::Private
 {
 public:
-    Private(PlasmaShellSurface *q);
+    Private(PlasmaShellSurface* q);
     ~Private();
-    void setup(org_kde_plasma_surface *surface);
+    void setup(org_kde_plasma_surface* surface);
 
     WaylandPointer<org_kde_plasma_surface, org_kde_plasma_surface_destroy> surface;
     QSize size;
     QPointer<Surface> parentSurface;
     PlasmaShellSurface::Role role;
 
-    static PlasmaShellSurface *get(Surface *surface);
+    static PlasmaShellSurface* get(Surface* surface);
 
 private:
-    static void autoHidingPanelHiddenCallback(void *data, org_kde_plasma_surface *org_kde_plasma_surface);
-    static void autoHidingPanelShownCallback(void *data, org_kde_plasma_surface *org_kde_plasma_surface);
+    static void autoHidingPanelHiddenCallback(void* data,
+                                              org_kde_plasma_surface* org_kde_plasma_surface);
+    static void autoHidingPanelShownCallback(void* data,
+                                             org_kde_plasma_surface* org_kde_plasma_surface);
 
-    PlasmaShellSurface *q;
+    PlasmaShellSurface* q;
     static QVector<Private*> s_surfaces;
     static const org_kde_plasma_surface_listener s_listener;
 };
 
 QVector<PlasmaShellSurface::Private*> PlasmaShellSurface::Private::s_surfaces;
 
-PlasmaShell::PlasmaShell(QObject *parent)
+PlasmaShell::PlasmaShell(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -82,24 +84,24 @@ void PlasmaShell::release()
     d->shell.release();
 }
 
-void PlasmaShell::setup(org_kde_plasma_shell *shell)
+void PlasmaShell::setup(org_kde_plasma_shell* shell)
 {
     Q_ASSERT(!d->shell);
     Q_ASSERT(shell);
     d->shell.setup(shell);
 }
 
-void PlasmaShell::setEventQueue(EventQueue *queue)
+void PlasmaShell::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *PlasmaShell::eventQueue()
+EventQueue* PlasmaShell::eventQueue()
 {
     return d->queue;
 }
 
-PlasmaShellSurface *PlasmaShell::createSurface(wl_surface *surface, QObject *parent)
+PlasmaShellSurface* PlasmaShell::createSurface(wl_surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
     auto kwS = Surface::get(surface);
@@ -108,7 +110,7 @@ PlasmaShellSurface *PlasmaShell::createSurface(wl_surface *surface, QObject *par
             return s;
         }
     }
-    PlasmaShellSurface *s = new PlasmaShellSurface(parent);
+    PlasmaShellSurface* s = new PlasmaShellSurface(parent);
     connect(this, &PlasmaShell::interfaceAboutToBeReleased, s, &PlasmaShellSurface::release);
     auto w = org_kde_plasma_shell_get_surface(d->shell, surface);
     if (d->queue) {
@@ -119,7 +121,7 @@ PlasmaShellSurface *PlasmaShell::createSurface(wl_surface *surface, QObject *par
     return s;
 }
 
-PlasmaShellSurface *PlasmaShell::createSurface(Surface *surface, QObject *parent)
+PlasmaShellSurface* PlasmaShell::createSurface(Surface* surface, QObject* parent)
 {
     return createSurface(*surface, parent);
 }
@@ -139,9 +141,9 @@ PlasmaShell::operator org_kde_plasma_shell*() const
     return d->shell;
 }
 
-PlasmaShellSurface::Private::Private(PlasmaShellSurface *q)
-    : role(PlasmaShellSurface::Role::Normal),
-      q(q)
+PlasmaShellSurface::Private::Private(PlasmaShellSurface* q)
+    : role(PlasmaShellSurface::Role::Normal)
+    , q(q)
 {
     s_surfaces << this;
 }
@@ -151,7 +153,7 @@ PlasmaShellSurface::Private::~Private()
     s_surfaces.removeAll(this);
 }
 
-PlasmaShellSurface *PlasmaShellSurface::Private::get(Surface *surface)
+PlasmaShellSurface* PlasmaShellSurface::Private::get(Surface* surface)
 {
     if (!surface) {
         return nullptr;
@@ -164,7 +166,7 @@ PlasmaShellSurface *PlasmaShellSurface::Private::get(Surface *surface)
     return nullptr;
 }
 
-void PlasmaShellSurface::Private::setup(org_kde_plasma_surface *s)
+void PlasmaShellSurface::Private::setup(org_kde_plasma_surface* s)
 {
     Q_ASSERT(s);
     Q_ASSERT(!surface);
@@ -174,24 +176,28 @@ void PlasmaShellSurface::Private::setup(org_kde_plasma_surface *s)
 
 const org_kde_plasma_surface_listener PlasmaShellSurface::Private::s_listener = {
     autoHidingPanelHiddenCallback,
-    autoHidingPanelShownCallback
+    autoHidingPanelShownCallback,
 };
 
-void PlasmaShellSurface::Private::autoHidingPanelHiddenCallback(void *data, org_kde_plasma_surface *org_kde_plasma_surface)
+void PlasmaShellSurface::Private::autoHidingPanelHiddenCallback(
+    void* data,
+    org_kde_plasma_surface* org_kde_plasma_surface)
 {
     auto p = reinterpret_cast<PlasmaShellSurface::Private*>(data);
     Q_ASSERT(p->surface == org_kde_plasma_surface);
     emit p->q->autoHidePanelHidden();
 }
 
-void PlasmaShellSurface::Private::autoHidingPanelShownCallback(void *data, org_kde_plasma_surface *org_kde_plasma_surface)
+void PlasmaShellSurface::Private::autoHidingPanelShownCallback(
+    void* data,
+    org_kde_plasma_surface* org_kde_plasma_surface)
 {
     auto p = reinterpret_cast<PlasmaShellSurface::Private*>(data);
     Q_ASSERT(p->surface == org_kde_plasma_surface);
     emit p->q->autoHidePanelShown();
 }
 
-PlasmaShellSurface::PlasmaShellSurface(QObject *parent)
+PlasmaShellSurface::PlasmaShellSurface(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -207,12 +213,12 @@ void PlasmaShellSurface::release()
     d->surface.release();
 }
 
-void PlasmaShellSurface::setup(org_kde_plasma_surface *surface)
+void PlasmaShellSurface::setup(org_kde_plasma_surface* surface)
 {
     d->setup(surface);
 }
 
-PlasmaShellSurface *PlasmaShellSurface::get(Surface *surface)
+PlasmaShellSurface* PlasmaShellSurface::get(Surface* surface)
 {
     if (auto s = PlasmaShellSurface::Private::get(surface)) {
         return s;
@@ -266,7 +272,8 @@ void PlasmaShellSurface::setRole(PlasmaShellSurface::Role role)
         wlRole = ORG_KDE_PLASMA_SURFACE_ROLE_TOOLTIP;
         break;
     case Role::CriticalNotification:
-        if (wl_proxy_get_version(d->surface) < ORG_KDE_PLASMA_SURFACE_ROLE_CRITICALNOTIFICATION_SINCE_VERSION) {
+        if (wl_proxy_get_version(d->surface)
+            < ORG_KDE_PLASMA_SURFACE_ROLE_CRITICALNOTIFICATION_SINCE_VERSION) {
             // Fall back to generic notification type if not supported
             wlRole = ORG_KDE_PLASMA_SURFACE_ROLE_NOTIFICATION;
         } else {

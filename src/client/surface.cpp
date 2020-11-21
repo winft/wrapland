@@ -19,8 +19,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "surface.h"
 #include "buffer.h"
-#include "region.h"
 #include "output.h"
+#include "region.h"
 #include "wayland_pointer_p.h"
 
 #include <QGuiApplication>
@@ -39,9 +39,9 @@ namespace Client
 class Q_DECL_HIDDEN Surface::Private
 {
 public:
-    Private(Surface *q);
+    Private(Surface* q);
 
-    void setup(wl_surface *s);
+    void setup(wl_surface* s);
     void setupFrameCallback();
 
     WaylandPointer<wl_surface, wl_surface_destroy> surface;
@@ -50,29 +50,30 @@ public:
     bool foreign = false;
     qint32 scale = 1;
 
-    wl_callback *pendingFrameCallback = nullptr;
-    QVector<Output *> outputs;
+    wl_callback* pendingFrameCallback = nullptr;
+    QVector<Output*> outputs;
 
     static QList<Surface*> s_surfaces;
+
 private:
     void handleFrameCallback();
-    static void frameCallback(void *data, wl_callback *callback, uint32_t time);
-    static void enterCallback(void *data, wl_surface *wl_surface, wl_output *output);
-    static void leaveCallback(void *data, wl_surface *wl_surface, wl_output *output);
+    static void frameCallback(void* data, wl_callback* callback, uint32_t time);
+    static void enterCallback(void* data, wl_surface* wl_surface, wl_output* output);
+    static void leaveCallback(void* data, wl_surface* wl_surface, wl_output* output);
 
-    Surface *q;
+    Surface* q;
     static const wl_callback_listener s_listener;
     static const wl_surface_listener s_surfaceListener;
 };
 
 QList<Surface*> Surface::Private::s_surfaces = QList<Surface*>();
 
-Surface::Private::Private(Surface *q)
+Surface::Private::Private(Surface* q)
     : q(q)
 {
 }
 
-Surface::Surface(QObject *parent)
+Surface::Surface(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -85,31 +86,32 @@ Surface::~Surface()
     release();
 }
 
-Surface *Surface::fromWindow(QWindow *window)
+Surface* Surface::fromWindow(QWindow* window)
 {
     if (!window) {
         return nullptr;
     }
-    QPlatformNativeInterface *native = qApp->platformNativeInterface();
+    QPlatformNativeInterface* native = qApp->platformNativeInterface();
     if (!native) {
         return nullptr;
     }
     window->create();
-    wl_surface *s = reinterpret_cast<wl_surface*>(native->nativeResourceForWindow(QByteArrayLiteral("surface"), window));
+    wl_surface* s = reinterpret_cast<wl_surface*>(
+        native->nativeResourceForWindow(QByteArrayLiteral("surface"), window));
     if (!s) {
         return nullptr;
     }
     if (auto surface = get(s)) {
         return surface;
     }
-    Surface *surface = new Surface(window);
+    Surface* surface = new Surface(window);
     surface->d->surface.setup(s, true);
     return surface;
 }
 
-Surface *Surface::fromQtWinId(WId wid)
+Surface* Surface::fromQtWinId(WId wid)
 {
-    QWindow *window = nullptr;
+    QWindow* window = nullptr;
 
     for (auto win : qApp->allWindows()) {
         if (win->winId() == wid) {
@@ -133,12 +135,12 @@ void Surface::release()
     d->surface.release();
 }
 
-void Surface::setup(wl_surface *surface)
+void Surface::setup(wl_surface* surface)
 {
     d->setup(surface);
 }
 
-void Surface::Private::setup(wl_surface *s)
+void Surface::Private::setup(wl_surface* s)
 {
     Q_ASSERT(s);
     Q_ASSERT(!surface);
@@ -146,7 +148,7 @@ void Surface::Private::setup(wl_surface *s)
     wl_surface_add_listener(s, &s_surfaceListener, this);
 }
 
-void Surface::Private::frameCallback(void *data, wl_callback *callback, uint32_t time)
+void Surface::Private::frameCallback(void* data, wl_callback* callback, uint32_t time)
 {
     Q_UNUSED(time)
     auto s = reinterpret_cast<Surface::Private*>(data);
@@ -164,20 +166,20 @@ void Surface::Private::handleFrameCallback()
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 const struct wl_callback_listener Surface::Private::s_listener = {
-        frameCallback
+    frameCallback,
 };
 
 const struct wl_surface_listener Surface::Private::s_surfaceListener = {
-        enterCallback,
-        leaveCallback
+    enterCallback,
+    leaveCallback,
 };
 #endif
 
-void Surface::Private::enterCallback(void *data, wl_surface *surface, wl_output *output)
+void Surface::Private::enterCallback(void* data, wl_surface* surface, wl_output* output)
 {
     Q_UNUSED(surface);
     auto s = reinterpret_cast<Surface::Private*>(data);
-    Output *o = Output::get(output);
+    Output* o = Output::get(output);
     if (!o) {
         return;
     }
@@ -192,11 +194,11 @@ void Surface::Private::enterCallback(void *data, wl_surface *surface, wl_output 
     emit s->q->outputEntered(o);
 }
 
-void Surface::Private::leaveCallback(void *data, wl_surface *surface, wl_output *output)
+void Surface::Private::leaveCallback(void* data, wl_surface* surface, wl_output* output)
 {
     Q_UNUSED(surface);
     auto s = reinterpret_cast<Surface::Private*>(data);
-    Output *o = Output::get(output);
+    Output* o = Output::get(output);
     if (!o) {
         return;
     }
@@ -226,49 +228,49 @@ void Surface::commit(Surface::CommitFlag flag)
     wl_surface_commit(d->surface);
 }
 
-void Surface::damage(const QRegion &region)
+void Surface::damage(const QRegion& region)
 {
-    for (const QRect &rect : region) {
+    for (const QRect& rect : region) {
         damage(rect);
     }
 }
 
-void Surface::damage(const QRect &rect)
+void Surface::damage(const QRect& rect)
 {
     Q_ASSERT(isValid());
     wl_surface_damage(d->surface, rect.x(), rect.y(), rect.width(), rect.height());
 }
 
-void Surface::damageBuffer(const QRegion &region)
+void Surface::damageBuffer(const QRegion& region)
 {
-    for (const QRect &r : region) {
+    for (const QRect& r : region) {
         damageBuffer(r);
     }
 }
 
-void Surface::damageBuffer(const QRect &rect)
+void Surface::damageBuffer(const QRect& rect)
 {
     Q_ASSERT(isValid());
     wl_surface_damage_buffer(d->surface, rect.x(), rect.y(), rect.width(), rect.height());
 }
 
-void Surface::attachBuffer(wl_buffer *buffer, const QPoint &offset)
+void Surface::attachBuffer(wl_buffer* buffer, const QPoint& offset)
 {
     Q_ASSERT(isValid());
     wl_surface_attach(d->surface, buffer, offset.x(), offset.y());
 }
 
-void Surface::attachBuffer(Buffer *buffer, const QPoint &offset)
+void Surface::attachBuffer(Buffer* buffer, const QPoint& offset)
 {
     attachBuffer(buffer ? buffer->buffer() : nullptr, offset);
 }
 
-void Surface::attachBuffer(Buffer::Ptr buffer, const QPoint &offset)
+void Surface::attachBuffer(Buffer::Ptr buffer, const QPoint& offset)
 {
     attachBuffer(buffer.lock().get(), offset);
 }
 
-void Surface::setInputRegion(const Region *region)
+void Surface::setInputRegion(const Region* region)
 {
     Q_ASSERT(isValid());
     if (region) {
@@ -278,7 +280,7 @@ void Surface::setInputRegion(const Region *region)
     }
 }
 
-void Surface::setOpaqueRegion(const Region *region)
+void Surface::setOpaqueRegion(const Region* region)
 {
     Q_ASSERT(isValid());
     if (region) {
@@ -288,7 +290,7 @@ void Surface::setOpaqueRegion(const Region *region)
     }
 }
 
-void Surface::setSize(const QSize &size)
+void Surface::setSize(const QSize& size)
 {
     if (d->size == size) {
         return;
@@ -297,20 +299,18 @@ void Surface::setSize(const QSize &size)
     emit sizeChanged(d->size);
 }
 
-Surface *Surface::get(wl_surface *native)
+Surface* Surface::get(wl_surface* native)
 {
-    auto it = std::find_if(Private::s_surfaces.constBegin(), Private::s_surfaces.constEnd(),
-        [native](Surface *s) {
-            return s->d->surface == native;
-        }
-    );
+    auto it = std::find_if(Private::s_surfaces.constBegin(),
+                           Private::s_surfaces.constEnd(),
+                           [native](Surface* s) { return s->d->surface == native; });
     if (it != Private::s_surfaces.constEnd()) {
         return *(it);
     }
     return nullptr;
 }
 
-const QList< Surface* > &Surface::all()
+const QList<Surface*>& Surface::all()
 {
     return Private::s_surfaces;
 }
@@ -337,7 +337,7 @@ Surface::operator wl_surface*() const
 
 quint32 Surface::id() const
 {
-    wl_surface *s = *this;
+    wl_surface* s = *this;
     return wl_proxy_get_id(reinterpret_cast<wl_proxy*>(s));
 }
 
@@ -352,7 +352,7 @@ void Surface::setScale(qint32 scale)
     wl_surface_set_buffer_scale(d->surface, scale);
 }
 
-QVector<Output *> Surface::outputs() const
+QVector<Output*> Surface::outputs() const
 {
     return d->outputs;
 }

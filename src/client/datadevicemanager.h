@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_DATA_DEVICE_MANAGER_H
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -73,7 +73,7 @@ public:
         None = 0,
         Copy = 1 << 0,
         Move = 1 << 1,
-        Ask = 1 << 2
+        Ask = 1 << 2,
     };
     Q_DECLARE_FLAGS(DnDActions, DnDAction)
 
@@ -83,7 +83,7 @@ public:
      * to call setup. In order to get a ready to use Compositor prefer using
      * Registry::createCompositor.
      **/
-    explicit DataDeviceManager(QObject *parent = nullptr);
+    explicit DataDeviceManager(QObject* parent = nullptr);
     virtual ~DataDeviceManager();
 
     /**
@@ -95,7 +95,7 @@ public:
      * When using Registry::createDataDeviceManager there is no need to call this
      * method.
      **/
-    void setup(wl_data_device_manager *manager);
+    void setup(wl_data_device_manager* manager);
     /**
      * Releases the wl_data_device_manager interface.
      * After the interface has been released the DataDeviceManager instance is no
@@ -106,15 +106,15 @@ public:
     /**
      * Sets the @p queue to use for creating a DataSource.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a DataSource.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
-    DataSource *createDataSource(QObject *parent = nullptr);
+    DataSource* createDataSource(QObject* parent = nullptr);
 
-    DataDevice *getDataDevice(Seat *seat, QObject *parent = nullptr);
+    DataDevice* getDataDevice(Seat* seat, QObject* parent = nullptr);
 
     operator wl_data_device_manager*();
     operator wl_data_device_manager*() const;

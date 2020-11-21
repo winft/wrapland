@@ -33,10 +33,10 @@ class Q_DECL_HIDDEN Idle::Private
 {
 public:
     WaylandPointer<org_kde_kwin_idle, org_kde_kwin_idle_destroy> manager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-Idle::Idle(QObject *parent)
+Idle::Idle(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -57,28 +57,28 @@ bool Idle::isValid() const
     return d->manager.isValid();
 }
 
-void Idle::setup(org_kde_kwin_idle *manager)
+void Idle::setup(org_kde_kwin_idle* manager)
 {
     Q_ASSERT(manager);
     Q_ASSERT(!d->manager.isValid());
     d->manager.setup(manager);
 }
 
-EventQueue *Idle::eventQueue()
+EventQueue* Idle::eventQueue()
 {
     return d->queue;
 }
 
-void Idle::setEventQueue(EventQueue *queue)
+void Idle::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-IdleTimeout *Idle::getTimeout(quint32 msecs, Seat *seat, QObject *parent)
+IdleTimeout* Idle::getTimeout(quint32 msecs, Seat* seat, QObject* parent)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(seat);
-    IdleTimeout *idle = new IdleTimeout(parent);
+    IdleTimeout* idle = new IdleTimeout(parent);
     auto i = org_kde_kwin_idle_get_idle_timeout(d->manager, *seat, msecs);
     if (d->queue) {
         d->queue->addProxy(i);
@@ -100,42 +100,42 @@ Idle::operator org_kde_kwin_idle*()
 class Q_DECL_HIDDEN IdleTimeout::Private
 {
 public:
-    explicit Private(IdleTimeout *q);
-    void setup(org_kde_kwin_idle_timeout *d);
+    explicit Private(IdleTimeout* q);
+    void setup(org_kde_kwin_idle_timeout* d);
 
     WaylandPointer<org_kde_kwin_idle_timeout, org_kde_kwin_idle_timeout_release> timeout;
 
 private:
-    static void idleCallback(void *data, org_kde_kwin_idle_timeout *org_kde_kwin_idle_timeout);
-    static void resumedCallback(void *data, org_kde_kwin_idle_timeout *org_kde_kwin_idle_timeout);
+    static void idleCallback(void* data, org_kde_kwin_idle_timeout* org_kde_kwin_idle_timeout);
+    static void resumedCallback(void* data, org_kde_kwin_idle_timeout* org_kde_kwin_idle_timeout);
     static const struct org_kde_kwin_idle_timeout_listener s_listener;
 
-    IdleTimeout *q;
+    IdleTimeout* q;
 };
 
-const org_kde_kwin_idle_timeout_listener IdleTimeout::Private::s_listener = {
-    idleCallback,
-    resumedCallback
-};
+const org_kde_kwin_idle_timeout_listener IdleTimeout::Private::s_listener
+    = {idleCallback, resumedCallback};
 
-void IdleTimeout::Private::idleCallback(void *data, org_kde_kwin_idle_timeout *org_kde_kwin_idle_timeout)
+void IdleTimeout::Private::idleCallback(void* data,
+                                        org_kde_kwin_idle_timeout* org_kde_kwin_idle_timeout)
 {
     Q_UNUSED(org_kde_kwin_idle_timeout)
     emit reinterpret_cast<Private*>(data)->q->idle();
 }
 
-void IdleTimeout::Private::resumedCallback(void *data, org_kde_kwin_idle_timeout *org_kde_kwin_idle_timeout)
+void IdleTimeout::Private::resumedCallback(void* data,
+                                           org_kde_kwin_idle_timeout* org_kde_kwin_idle_timeout)
 {
     Q_UNUSED(org_kde_kwin_idle_timeout)
     emit reinterpret_cast<Private*>(data)->q->resumeFromIdle();
 }
 
-IdleTimeout::Private::Private(IdleTimeout *q)
+IdleTimeout::Private::Private(IdleTimeout* q)
     : q(q)
 {
 }
 
-void IdleTimeout::Private::setup(org_kde_kwin_idle_timeout *d)
+void IdleTimeout::Private::setup(org_kde_kwin_idle_timeout* d)
 {
     Q_ASSERT(d);
     Q_ASSERT(!timeout.isValid());
@@ -143,7 +143,7 @@ void IdleTimeout::Private::setup(org_kde_kwin_idle_timeout *d)
     org_kde_kwin_idle_timeout_add_listener(timeout, &s_listener, this);
 }
 
-IdleTimeout::IdleTimeout(QObject *parent)
+IdleTimeout::IdleTimeout(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -164,7 +164,7 @@ bool IdleTimeout::isValid() const
     return d->timeout.isValid();
 }
 
-void IdleTimeout::setup(org_kde_kwin_idle_timeout *dataDevice)
+void IdleTimeout::setup(org_kde_kwin_idle_timeout* dataDevice)
 {
     d->setup(dataDevice);
 }

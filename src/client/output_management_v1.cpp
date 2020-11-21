@@ -35,14 +35,14 @@ class Q_DECL_HIDDEN OutputManagementV1::Private
 public:
     Private() = default;
 
-    WaylandPointer<zkwinft_output_management_v1,
-                    zkwinft_output_management_v1_destroy> outputManagement;
-    EventQueue *queue = nullptr;
+    WaylandPointer<zkwinft_output_management_v1, zkwinft_output_management_v1_destroy>
+        outputManagement;
+    EventQueue* queue = nullptr;
 };
 
-OutputManagementV1::OutputManagementV1(QObject *parent)
-: QObject(parent)
-, d(new Private)
+OutputManagementV1::OutputManagementV1(QObject* parent)
+    : QObject(parent)
+    , d(new Private)
 {
 }
 
@@ -51,7 +51,7 @@ OutputManagementV1::~OutputManagementV1()
     d->outputManagement.release();
 }
 
-void OutputManagementV1::setup(zkwinft_output_management_v1 *outputManagement)
+void OutputManagementV1::setup(zkwinft_output_management_v1* outputManagement)
 {
     Q_ASSERT(outputManagement);
     Q_ASSERT(!d->outputManagement);
@@ -63,7 +63,7 @@ void OutputManagementV1::release()
     d->outputManagement.release();
 }
 
-void OutputManagementV1::setEventQueue(EventQueue *queue)
+void OutputManagementV1::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
@@ -73,11 +73,13 @@ EventQueue* OutputManagementV1::eventQueue()
     return d->queue;
 }
 
-OutputManagementV1::operator zkwinft_output_management_v1*() {
+OutputManagementV1::operator zkwinft_output_management_v1*()
+{
     return d->outputManagement;
 }
 
-OutputManagementV1::operator zkwinft_output_management_v1*() const {
+OutputManagementV1::operator zkwinft_output_management_v1*() const
+{
     return d->outputManagement;
 }
 
@@ -86,10 +88,10 @@ bool OutputManagementV1::isValid() const
     return d->outputManagement.isValid();
 }
 
-OutputConfigurationV1* OutputManagementV1::createConfiguration(QObject *parent)
+OutputConfigurationV1* OutputManagementV1::createConfiguration(QObject* parent)
 {
     Q_UNUSED(parent);
-    auto *config = new OutputConfigurationV1(this);
+    auto* config = new OutputConfigurationV1(this);
     auto w = zkwinft_output_management_v1_create_configuration(d->outputManagement);
 
     if (d->queue) {
@@ -99,7 +101,6 @@ OutputConfigurationV1* OutputManagementV1::createConfiguration(QObject *parent)
     config->setup(w);
     return config;
 }
-
 
 }
 }

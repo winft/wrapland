@@ -40,12 +40,12 @@ class Q_DECL_HIDDEN FakeInput::Private
 {
 public:
     WaylandPointer<org_kde_kwin_fake_input, org_kde_kwin_fake_input_destroy> manager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 
     void sendPointerButtonState(Qt::MouseButton button, quint32 state);
 };
 
-FakeInput::FakeInput(QObject *parent)
+FakeInput::FakeInput(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -66,43 +66,47 @@ bool FakeInput::isValid() const
     return d->manager.isValid();
 }
 
-void FakeInput::setup(org_kde_kwin_fake_input *manager)
+void FakeInput::setup(org_kde_kwin_fake_input* manager)
 {
     Q_ASSERT(manager);
     Q_ASSERT(!d->manager.isValid());
     d->manager.setup(manager);
 }
 
-EventQueue *FakeInput::eventQueue()
+EventQueue* FakeInput::eventQueue()
 {
     return d->queue;
 }
 
-void FakeInput::setEventQueue(EventQueue *queue)
+void FakeInput::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-void FakeInput::authenticate(const QString &applicationName, const QString &reason)
+void FakeInput::authenticate(const QString& applicationName, const QString& reason)
 {
     Q_ASSERT(d->manager.isValid());
-    org_kde_kwin_fake_input_authenticate(d->manager, applicationName.toUtf8().constData(), reason.toUtf8().constData());
+    org_kde_kwin_fake_input_authenticate(
+        d->manager, applicationName.toUtf8().constData(), reason.toUtf8().constData());
 }
 
-void FakeInput::requestPointerMove(const QSizeF &delta)
+void FakeInput::requestPointerMove(const QSizeF& delta)
 {
     Q_ASSERT(d->manager.isValid());
-    org_kde_kwin_fake_input_pointer_motion(d->manager, wl_fixed_from_double(delta.width()), wl_fixed_from_double(delta.height()));
+    org_kde_kwin_fake_input_pointer_motion(
+        d->manager, wl_fixed_from_double(delta.width()), wl_fixed_from_double(delta.height()));
 }
 
-void FakeInput::requestPointerMoveAbsolute(const QPointF &pos)
+void FakeInput::requestPointerMoveAbsolute(const QPointF& pos)
 {
     Q_ASSERT(d->manager.isValid());
-    if (wl_proxy_get_version(d->manager) < ORG_KDE_KWIN_FAKE_INPUT_POINTER_MOTION_ABSOLUTE_SINCE_VERSION) {
+    if (wl_proxy_get_version(d->manager)
+        < ORG_KDE_KWIN_FAKE_INPUT_POINTER_MOTION_ABSOLUTE_SINCE_VERSION) {
         return;
     }
 
-    org_kde_kwin_fake_input_pointer_motion_absolute(d->manager, wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
+    org_kde_kwin_fake_input_pointer_motion_absolute(
+        d->manager, wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
 }
 
 void FakeInput::Private::sendPointerButtonState(Qt::MouseButton button, quint32 state)
@@ -181,16 +185,18 @@ void FakeInput::requestPointerAxis(Qt::Orientation axis, qreal delta)
     org_kde_kwin_fake_input_axis(d->manager, a, wl_fixed_from_double(delta));
 }
 
-void FakeInput::requestTouchDown(quint32 id, const QPointF &pos)
+void FakeInput::requestTouchDown(quint32 id, const QPointF& pos)
 {
     Q_ASSERT(d->manager.isValid());
-    org_kde_kwin_fake_input_touch_down(d->manager, id, wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
+    org_kde_kwin_fake_input_touch_down(
+        d->manager, id, wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
 }
 
-void FakeInput::requestTouchMotion(quint32 id, const QPointF &pos)
+void FakeInput::requestTouchMotion(quint32 id, const QPointF& pos)
 {
     Q_ASSERT(d->manager.isValid());
-    org_kde_kwin_fake_input_touch_motion(d->manager, id, wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
+    org_kde_kwin_fake_input_touch_motion(
+        d->manager, id, wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
 }
 
 void FakeInput::requestTouchUp(quint32 id)
@@ -230,7 +236,6 @@ void FakeInput::requestKeyboardKeyRelease(quint32 linuxKey)
 
     org_kde_kwin_fake_input_keyboard_key(d->manager, linuxKey, WL_KEYBOARD_KEY_STATE_RELEASED);
 }
-
 
 FakeInput::operator org_kde_kwin_fake_input*() const
 {

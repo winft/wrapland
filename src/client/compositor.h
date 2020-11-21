@@ -71,7 +71,7 @@ public:
      * to call setup. In order to get a ready to use Compositor prefer using
      * Registry::createCompositor.
      **/
-    explicit Compositor(QObject *parent = nullptr);
+    explicit Compositor(QObject* parent = nullptr);
     virtual ~Compositor();
 
     /**
@@ -84,7 +84,7 @@ public:
      * as that's managed by Qt.
      * @since 5.4
      **/
-    static Compositor *fromApplication(QObject *parent = nullptr);
+    static Compositor* fromApplication(QObject* parent = nullptr);
 
     /**
      * @returns @c true if managing a wl_compositor.
@@ -95,7 +95,7 @@ public:
      * When using Registry::createCompositor there is no need to call this
      * method.
      **/
-    void setup(wl_compositor *compositor);
+    void setup(wl_compositor* compositor);
     /**
      * Releases the wl_compositor interface.
      * After the interface has been released the Compositor instance is no
@@ -106,25 +106,25 @@ public:
     /**
      * Sets the @p queue to use for creating a Surface.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Surface.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates and setup a new Surface with @p parent.
      * @param parent The parent to pass to the Surface.
      * @returns The new created Surface
      **/
-    Surface *createSurface(QObject *parent = nullptr);
+    Surface* createSurface(QObject* parent = nullptr);
 
     /**
      * Creates and setup a new Region with @p parent.
      * @param parent The parent to pass to the Region.
      * @returns The new created Region
      **/
-    Region *createRegion(QObject *parent = nullptr);
+    Region* createRegion(QObject* parent = nullptr);
     /**
      * Creates and setup a new Region with @p parent.
      *
@@ -133,7 +133,7 @@ public:
      * @param region The region to install on the newly created Region
      * @returns The new created Region
      **/
-    Region *createRegion(const QRegion &region, QObject *parent);
+    Region* createRegion(const QRegion& region, QObject* parent);
     /**
      * Creates and setup a new Region with @p region installed.
      *
@@ -151,7 +151,7 @@ public:
      * @param region The region to install on the newly created Region
      * @returns The new created Region
      **/
-    std::unique_ptr<Region> createRegion(const QRegion &region);
+    std::unique_ptr<Region> createRegion(const QRegion& region);
 
     operator wl_compositor*();
     operator wl_compositor*() const;

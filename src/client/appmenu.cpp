@@ -34,19 +34,20 @@ class AppMenuManager::Private
 public:
     Private() = default;
 
-    void setup(org_kde_kwin_appmenu_manager *arg);
+    void setup(org_kde_kwin_appmenu_manager* arg);
 
-    WaylandPointer<org_kde_kwin_appmenu_manager, org_kde_kwin_appmenu_manager_destroy> appmenumanager;
-    EventQueue *queue = nullptr;
+    WaylandPointer<org_kde_kwin_appmenu_manager, org_kde_kwin_appmenu_manager_destroy>
+        appmenumanager;
+    EventQueue* queue = nullptr;
 };
 
-AppMenuManager::AppMenuManager(QObject *parent)
+AppMenuManager::AppMenuManager(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
 }
 
-void AppMenuManager::Private::setup(org_kde_kwin_appmenu_manager *arg)
+void AppMenuManager::Private::setup(org_kde_kwin_appmenu_manager* arg)
 {
     Q_ASSERT(arg);
     Q_ASSERT(!appmenumanager);
@@ -58,7 +59,7 @@ AppMenuManager::~AppMenuManager()
     release();
 }
 
-void AppMenuManager::setup(org_kde_kwin_appmenu_manager *appmenumanager)
+void AppMenuManager::setup(org_kde_kwin_appmenu_manager* appmenumanager)
 {
     d->setup(appmenumanager);
 }
@@ -68,11 +69,13 @@ void AppMenuManager::release()
     d->appmenumanager.release();
 }
 
-AppMenuManager::operator org_kde_kwin_appmenu_manager*() {
+AppMenuManager::operator org_kde_kwin_appmenu_manager*()
+{
     return d->appmenumanager;
 }
 
-AppMenuManager::operator org_kde_kwin_appmenu_manager*() const {
+AppMenuManager::operator org_kde_kwin_appmenu_manager*() const
+{
     return d->appmenumanager;
 }
 
@@ -81,17 +84,17 @@ bool AppMenuManager::isValid() const
     return d->appmenumanager.isValid();
 }
 
-void AppMenuManager::setEventQueue(EventQueue *queue)
+void AppMenuManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *AppMenuManager::eventQueue()
+EventQueue* AppMenuManager::eventQueue()
 {
     return d->queue;
 }
 
-AppMenu *AppMenuManager::create(Surface *surface, QObject *parent)
+AppMenu* AppMenuManager::create(Surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
     auto p = new AppMenu(parent);
@@ -106,28 +109,28 @@ AppMenu *AppMenuManager::create(Surface *surface, QObject *parent)
 class AppMenu::Private
 {
 public:
-    Private(AppMenu *q);
+    Private(AppMenu* q);
 
-    void setup(org_kde_kwin_appmenu *arg);
+    void setup(org_kde_kwin_appmenu* arg);
 
     WaylandPointer<org_kde_kwin_appmenu, org_kde_kwin_appmenu_release> appmenu;
 
 private:
-    AppMenu *q;
+    AppMenu* q;
 };
 
-AppMenu::Private::Private(AppMenu *q)
+AppMenu::Private::Private(AppMenu* q)
     : q(q)
 {
 }
 
-AppMenu::AppMenu(QObject *parent)
+AppMenu::AppMenu(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
 }
 
-void AppMenu::Private::setup(org_kde_kwin_appmenu *arg)
+void AppMenu::Private::setup(org_kde_kwin_appmenu* arg)
 {
     Q_ASSERT(arg);
     Q_ASSERT(!appmenu);
@@ -139,7 +142,7 @@ AppMenu::~AppMenu()
     release();
 }
 
-void AppMenu::setup(org_kde_kwin_appmenu *appmenu)
+void AppMenu::setup(org_kde_kwin_appmenu* appmenu)
 {
     d->setup(appmenu);
 }
@@ -149,11 +152,13 @@ void AppMenu::release()
     d->appmenu.release();
 }
 
-AppMenu::operator org_kde_kwin_appmenu*() {
+AppMenu::operator org_kde_kwin_appmenu*()
+{
     return d->appmenu;
 }
 
-AppMenu::operator org_kde_kwin_appmenu*() const {
+AppMenu::operator org_kde_kwin_appmenu*() const
+{
     return d->appmenu;
 }
 
@@ -162,13 +167,11 @@ bool AppMenu::isValid() const
     return d->appmenu.isValid();
 }
 
-void AppMenu::setAddress(const QString &serviceName, const QString &objectPath)
+void AppMenu::setAddress(const QString& serviceName, const QString& objectPath)
 {
     Q_ASSERT(isValid());
     org_kde_kwin_appmenu_set_address(d->appmenu, serviceName.toLatin1(), objectPath.toLatin1());
 }
 
-
 }
 }
-

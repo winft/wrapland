@@ -22,9 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QSize>
 #include <QVector>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct zwlr_output_head_v1;
 struct zwlr_output_manager_v1;
@@ -73,7 +73,7 @@ public:
      * to call setup. In order to get a ready to use WlrOutputManagerV1 prefer using
      * Registry::createWlrOutputManagerV1.
      */
-    explicit WlrOutputManagerV1(QObject *parent = nullptr);
+    explicit WlrOutputManagerV1(QObject* parent = nullptr);
     ~WlrOutputManagerV1() override;
 
     /**
@@ -81,7 +81,7 @@ public:
      * When using Registry::createWlrOutputManagerV1 there is no need to call this
      * method.
      */
-    void setup(zwlr_output_manager_v1 *outputManager);
+    void setup(zwlr_output_manager_v1* outputManager);
     /**
      * @returns @c true if managing a zwlr_output_manager_v1.
      */
@@ -96,31 +96,31 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this WlrOutputManager.
      */
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this WlrOutputManager.
      */
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
-      * Create a configuration object ready for being used in a configure operation.
-      * @param parent
-      * @return configuration object.
-      */
-    WlrOutputConfigurationV1 *createConfiguration(QObject *parent = nullptr);
+     * Create a configuration object ready for being used in a configure operation.
+     * @param parent
+     * @return configuration object.
+     */
+    WlrOutputConfigurationV1* createConfiguration(QObject* parent = nullptr);
 
     operator zwlr_output_manager_v1*();
     operator zwlr_output_manager_v1*() const;
 
 Q_SIGNALS:
     /**
-      * A new output head appeared.
-      * @param head
-      */
-    void head(WlrOutputHeadV1 *head);
+     * A new output head appeared.
+     * @param head
+     */
+    void head(WlrOutputHeadV1* head);
     /**
-      * All information has been sent.
-      */
+     * All information has been sent.
+     */
     void done();
 
     /**
@@ -153,7 +153,7 @@ Q_SIGNALS:
     void removed();
 
 private:
-    explicit WlrOutputModeV1(zwlr_output_mode_v1 *mode, QObject *parent = nullptr);
+    explicit WlrOutputModeV1(zwlr_output_mode_v1* mode, QObject* parent = nullptr);
     friend class WlrOutputHeadV1;
 
     class Private;
@@ -172,7 +172,7 @@ public:
         Flipped,
         Flipped90,
         Flipped180,
-        Flipped270
+        Flipped270,
     };
     ~WlrOutputHeadV1() override;
 
@@ -202,7 +202,7 @@ Q_SIGNALS:
     void removed();
 
 private:
-    explicit WlrOutputHeadV1(zwlr_output_head_v1 *head, QObject *parent = nullptr);
+    explicit WlrOutputHeadV1(zwlr_output_head_v1* head, QObject* parent = nullptr);
     friend class WlrOutputManagerV1;
 
     class Private;

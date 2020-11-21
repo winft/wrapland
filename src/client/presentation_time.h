@@ -72,7 +72,7 @@ public:
      * to call setup. In order to get a ready to use PresentationManager prefer using
      * Registry::createPresentationManager.
      **/
-    explicit PresentationManager(QObject *parent = nullptr);
+    explicit PresentationManager(QObject* parent = nullptr);
     ~PresentationManager() override;
 
     /**
@@ -80,7 +80,7 @@ public:
      * When using Registry::createPresentationManager there is no need to call this
      * method.
      **/
-    void setup(wp_presentation *presentation);
+    void setup(wp_presentation* presentation);
     /**
      * @returns @c true if managing a wp_presentation.
      **/
@@ -95,14 +95,14 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this PresentationManager.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this PresentationManager.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     clockid_t clockId() const;
-    PresentationFeedback *createFeedback(Surface *surface, QObject *parent = nullptr);
+    PresentationFeedback* createFeedback(Surface* surface, QObject* parent = nullptr);
 
     operator wp_presentation*();
     operator wp_presentation*() const;
@@ -141,7 +141,7 @@ public:
      * When using PresentationManager::createPresentationFeedback there is no need to call this
      * method.
      **/
-    void setup(struct wp_presentation_feedback *feedback);
+    void setup(struct wp_presentation_feedback* feedback);
     /**
      * @returns @c true if managing a wp_presentation_feedback.
      **/
@@ -163,7 +163,7 @@ Q_SIGNALS:
 
 private:
     friend class PresentationManager;
-    explicit PresentationFeedback(QObject *parent = nullptr);
+    explicit PresentationFeedback(QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d;

@@ -34,19 +34,20 @@ class Q_DECL_HIDDEN IdleInhibitManager::Private
 public:
     Private() = default;
 
-    void setup(zwp_idle_inhibit_manager_v1 *arg);
+    void setup(zwp_idle_inhibit_manager_v1* arg);
 
-    WaylandPointer<zwp_idle_inhibit_manager_v1, zwp_idle_inhibit_manager_v1_destroy> idleinhibitmanager;
-    EventQueue *queue = nullptr;
+    WaylandPointer<zwp_idle_inhibit_manager_v1, zwp_idle_inhibit_manager_v1_destroy>
+        idleinhibitmanager;
+    EventQueue* queue = nullptr;
 };
 
-IdleInhibitManager::IdleInhibitManager(QObject *parent)
+IdleInhibitManager::IdleInhibitManager(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
 }
 
-void IdleInhibitManager::Private::setup(zwp_idle_inhibit_manager_v1 *arg)
+void IdleInhibitManager::Private::setup(zwp_idle_inhibit_manager_v1* arg)
 {
     Q_ASSERT(arg);
     Q_ASSERT(!idleinhibitmanager);
@@ -58,7 +59,7 @@ IdleInhibitManager::~IdleInhibitManager()
     release();
 }
 
-void IdleInhibitManager::setup(zwp_idle_inhibit_manager_v1 *idleinhibitmanager)
+void IdleInhibitManager::setup(zwp_idle_inhibit_manager_v1* idleinhibitmanager)
 {
     d->setup(idleinhibitmanager);
 }
@@ -68,11 +69,13 @@ void IdleInhibitManager::release()
     d->idleinhibitmanager.release();
 }
 
-IdleInhibitManager::operator zwp_idle_inhibit_manager_v1*() {
+IdleInhibitManager::operator zwp_idle_inhibit_manager_v1*()
+{
     return d->idleinhibitmanager;
 }
 
-IdleInhibitManager::operator zwp_idle_inhibit_manager_v1*() const {
+IdleInhibitManager::operator zwp_idle_inhibit_manager_v1*() const
+{
     return d->idleinhibitmanager;
 }
 
@@ -81,17 +84,17 @@ bool IdleInhibitManager::isValid() const
     return d->idleinhibitmanager.isValid();
 }
 
-void IdleInhibitManager::setEventQueue(EventQueue *queue)
+void IdleInhibitManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *IdleInhibitManager::eventQueue()
+EventQueue* IdleInhibitManager::eventQueue()
 {
     return d->queue;
 }
 
-IdleInhibitor *IdleInhibitManager::createInhibitor(Surface *surface, QObject *parent)
+IdleInhibitor* IdleInhibitManager::createInhibitor(Surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
     auto p = new IdleInhibitor(parent);
@@ -106,28 +109,28 @@ IdleInhibitor *IdleInhibitManager::createInhibitor(Surface *surface, QObject *pa
 class Q_DECL_HIDDEN IdleInhibitor::Private
 {
 public:
-    Private(IdleInhibitor *q);
+    Private(IdleInhibitor* q);
 
-    void setup(zwp_idle_inhibitor_v1 *arg);
+    void setup(zwp_idle_inhibitor_v1* arg);
 
     WaylandPointer<zwp_idle_inhibitor_v1, zwp_idle_inhibitor_v1_destroy> idleinhibitor;
 
 private:
-    IdleInhibitor *q;
+    IdleInhibitor* q;
 };
 
-IdleInhibitor::Private::Private(IdleInhibitor *q)
+IdleInhibitor::Private::Private(IdleInhibitor* q)
     : q(q)
 {
 }
 
-IdleInhibitor::IdleInhibitor(QObject *parent)
+IdleInhibitor::IdleInhibitor(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
 }
 
-void IdleInhibitor::Private::setup(zwp_idle_inhibitor_v1 *arg)
+void IdleInhibitor::Private::setup(zwp_idle_inhibitor_v1* arg)
 {
     Q_ASSERT(arg);
     Q_ASSERT(!idleinhibitor);
@@ -139,7 +142,7 @@ IdleInhibitor::~IdleInhibitor()
     release();
 }
 
-void IdleInhibitor::setup(zwp_idle_inhibitor_v1 *idleinhibitor)
+void IdleInhibitor::setup(zwp_idle_inhibitor_v1* idleinhibitor)
 {
     d->setup(idleinhibitor);
 }
@@ -149,11 +152,13 @@ void IdleInhibitor::release()
     d->idleinhibitor.release();
 }
 
-IdleInhibitor::operator zwp_idle_inhibitor_v1*() {
+IdleInhibitor::operator zwp_idle_inhibitor_v1*()
+{
     return d->idleinhibitor;
 }
 
-IdleInhibitor::operator zwp_idle_inhibitor_v1*() const {
+IdleInhibitor::operator zwp_idle_inhibitor_v1*() const
+{
     return d->idleinhibitor;
 }
 

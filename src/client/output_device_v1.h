@@ -24,9 +24,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPointer>
 #include <QSize>
 #include <QVector>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 class QRectF;
 struct zkwinft_output_device_v1;
@@ -79,12 +79,12 @@ public:
         Flipped,
         Flipped90,
         Flipped180,
-        Flipped270
+        Flipped270,
     };
 
     enum class Enablement {
         Disabled = 0,
-        Enabled = 1
+        Enabled = 1,
     };
 
     struct Mode {
@@ -108,10 +108,10 @@ public:
          **/
         int id;
 
-        bool operator==(const Mode &m) const;
+        bool operator==(const Mode& m) const;
     };
 
-    explicit OutputDeviceV1(QObject *parent = nullptr);
+    explicit OutputDeviceV1(QObject* parent = nullptr);
     virtual ~OutputDeviceV1();
 
     /**
@@ -119,14 +119,14 @@ public:
      * When using Registry::createOutputDeviceV1 there is no need to call this
      * method.
      **/
-    void setup(zkwinft_output_device_v1 *output);
+    void setup(zkwinft_output_device_v1* output);
 
     /**
      * @returns @c true if managing a zkwinft_output_device_v1.
      **/
     bool isValid() const;
-    operator zkwinft_output_device_v1* ();
-    operator zkwinft_output_device_v1* () const;
+    operator zkwinft_output_device_v1*();
+    operator zkwinft_output_device_v1*() const;
     zkwinft_output_device_v1* output();
 
     /**
@@ -181,15 +181,14 @@ public:
 
     Wrapland::Client::OutputDeviceV1::Mode currentMode() const;
 
-
     /**
      * Sets the @p queue to use for bound proxies.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for bound proxies.
      **/
-    EventQueue *eventQueue() const;
+    EventQueue* eventQueue() const;
 
     /**
      * @returns Whether this output is enabled or not.
@@ -226,19 +225,19 @@ Q_SIGNALS:
      * @param mode The newly added Mode.
      * @see modeChanged
      **/
-    void modeAdded(const Wrapland::Client::OutputDeviceV1::Mode &mode);
+    void modeAdded(const Wrapland::Client::OutputDeviceV1::Mode& mode);
 
     /**
      * Emitted whenever a Mode changes.
      * This normally means that the @c Mode::Flag::Current is added or removed.
      * @param mode The changed Mode
      **/
-    void modeChanged(const Wrapland::Client::OutputDeviceV1::Mode &mode);
+    void modeChanged(const Wrapland::Client::OutputDeviceV1::Mode& mode);
 
     /**
      * Emitted whenever the geometry changes.
      **/
-    void geometryChanged(const QRectF &geometry);
+    void geometryChanged(const QRectF& geometry);
 
     /**
      * The corresponding global for this interface on the Registry got removed.

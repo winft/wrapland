@@ -32,10 +32,16 @@ namespace Client
 class Q_DECL_HIDDEN Buffer::Private
 {
 public:
-    Private(Buffer *q, ShmPool *parent, wl_buffer *nativeBuffer, const QSize &size, int32_t stride, size_t offset, Format format);
+    Private(Buffer* q,
+            ShmPool* parent,
+            wl_buffer* nativeBuffer,
+            const QSize& size,
+            int32_t stride,
+            size_t offset,
+            Format format);
     ~Private();
 
-    ShmPool *shm;
+    ShmPool* shm;
     WaylandPointer<wl_buffer, wl_buffer_destroy> nativeBuffer;
     bool released;
     QSize size;
@@ -43,10 +49,11 @@ public:
     size_t offset;
     bool used;
     Format format;
+
 private:
-    Buffer *q;
+    Buffer* q;
     static const struct wl_buffer_listener s_listener;
-    static void releasedCallback(void *data, wl_buffer *wl_buffer);
+    static void releasedCallback(void* data, wl_buffer* wl_buffer);
 };
 
 }

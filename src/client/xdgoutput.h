@@ -21,11 +21,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_XDGOUTPUT_H
 
 #include <QObject>
-#include <QSize>
 #include <QPoint>
-//STD
-#include <memory>
+#include <QSize>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct zxdg_output_manager_v1;
 struct zxdg_output_v1;
@@ -77,7 +77,7 @@ public:
      * to call setup. In order to get a ready to use XdgOutputManager prefer using
      * Registry::createXdgOutputManager.
      **/
-    explicit XdgOutputManager(QObject *parent = nullptr);
+    explicit XdgOutputManager(QObject* parent = nullptr);
     virtual ~XdgOutputManager();
 
     /**
@@ -85,7 +85,7 @@ public:
      * When using Registry::createXdgOutputManager there is no need to call this
      * method.
      **/
-    void setup(zxdg_output_manager_v1 *xdgoutputmanager);
+    void setup(zxdg_output_manager_v1* xdgoutputmanager);
     /**
      * @returns @c true if managing a zxdg_output_manager_v1.
      **/
@@ -100,13 +100,13 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this XdgOutputManager.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this XdgOutputManager.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
-    XdgOutput *getXdgOutput(Output *output, QObject *parent = nullptr);
+    XdgOutput* getXdgOutput(Output* output, QObject* parent = nullptr);
 
     operator zxdg_output_manager_v1*();
     operator zxdg_output_manager_v1*() const;
@@ -150,7 +150,7 @@ public:
      * When using XdgOutputManager::createXdgOutput there is no need to call this
      * method.
      **/
-    void setup(zxdg_output_v1 *xdgoutput);
+    void setup(zxdg_output_v1* xdgoutput);
     /**
      * @returns @c true if managing a zxdg_output_v1.
      **/
@@ -187,11 +187,10 @@ Q_SIGNALS:
 
 private:
     friend class XdgOutputManager;
-    explicit XdgOutput(QObject *parent = nullptr);
+    explicit XdgOutput(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

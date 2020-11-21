@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_DPMS_H
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -72,7 +72,7 @@ public:
      * to call setup. In order to get a ready to use DpmsManager prefer using
      * Registry::createDpmsManager.
      **/
-    explicit DpmsManager(QObject *parent = nullptr);
+    explicit DpmsManager(QObject* parent = nullptr);
     virtual ~DpmsManager();
 
     /**
@@ -84,7 +84,7 @@ public:
      * When using Registry::createDpmsManager there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_dpms_manager *manager);
+    void setup(org_kde_kwin_dpms_manager* manager);
     /**
      * Releases the org_kde_kwin_dpms_manager interface.
      * After the interface has been released the DpmsManager instance is no
@@ -95,13 +95,13 @@ public:
     /**
      * Sets the @p queue to use for creating a Dpms.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Dpms.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
-    Dpms *getDpms(Output *output, QObject *parent = nullptr);
+    Dpms* getDpms(Output* output, QObject* parent = nullptr);
 
     operator org_kde_kwin_dpms_manager*();
     operator org_kde_kwin_dpms_manager*() const;
@@ -139,7 +139,7 @@ public:
         On,
         Standby,
         Suspend,
-        Off
+        Off,
     };
 
     /**
@@ -147,7 +147,7 @@ public:
      * When using DpmsManager::createDpms there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_dpms *dpms);
+    void setup(org_kde_kwin_dpms* dpms);
     /**
      * Releases the org_kde_kwin_dpms interface.
      * After the interface has been released the Dpms instance is no
@@ -221,7 +221,7 @@ Q_SIGNALS:
 
 private:
     friend class DpmsManager;
-    explicit Dpms(const QPointer<Output> &o, QObject *parent = nullptr);
+    explicit Dpms(const QPointer<Output>& o, QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };

@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QPoint>
 #include <QVector>
-//STD
+// STD
 #include <memory>
 
 class QRectF;
@@ -44,9 +44,11 @@ class EventQueue;
 /** @class OutputConfigurationV1
  *
  * OutputConfigurationV1 provides access to changing OutputDevices. The interface is async
- * and atomic. An OutputConfigurationV1 is created through OutputManagementV1::createConfiguration().
+ * and atomic. An OutputConfigurationV1 is created through
+ OutputManagementV1::createConfiguration().
  *
- * The overall mechanism is to get a new OutputConfigurationV1 from the OutputManagementV1 global and
+ * The overall mechanism is to get a new OutputConfigurationV1 from the OutputManagementV1 global
+ and
  * apply changes through the OutputConfigurationV1::set* calls. When all changes are set, the client
  * calls apply, which asks the server to look at the changes and apply them. The server will then
  * signal back whether the changes have been applied successfully (@c applied()) or were rejected
@@ -104,31 +106,31 @@ public:
     ~OutputConfigurationV1() override;
 
     /**
-    * Setup this OutputConfigurationV1 to manage the @p outputconfiguration.
-    * When using OutputManagementV1::createOutputConfiguration there is no need to call this
-    * method.
-    * @param outputconfiguration the outputconfiguration object to set up.
-    **/
-    void setup(zkwinft_output_configuration_v1 *outputconfiguration);
+     * Setup this OutputConfigurationV1 to manage the @p outputconfiguration.
+     * When using OutputManagementV1::createOutputConfiguration there is no need to call this
+     * method.
+     * @param outputconfiguration the outputconfiguration object to set up.
+     **/
+    void setup(zkwinft_output_configuration_v1* outputconfiguration);
     /**
-    * @returns @c true if managing a zkwinft_output_configuration_v1.
-    **/
+     * @returns @c true if managing a zkwinft_output_configuration_v1.
+     **/
     bool isValid() const;
     /**
-    * Releases the zkwinft_output_configuration_v1 interface.
-    * After the interface has been released the OutputConfigurationV1 instance is no
-    * longer valid and can be setup with another zkwinft_output_configuration_v1 interface.
-    **/
+     * Releases the zkwinft_output_configuration_v1 interface.
+     * After the interface has been released the OutputConfigurationV1 instance is no
+     * longer valid and can be setup with another zkwinft_output_configuration_v1 interface.
+     **/
     void release();
 
     /**
      * Sets the @p queue to use for creating a OutputConfigurationV1.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a OutputConfigurationV1
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Enable or disable an output. Enabled means it's used by the
@@ -141,7 +143,7 @@ public:
      * @param outputdevice the OutputDevice this change applies to.
      * @param enable new Enablement state of this output device.
      */
-    void setEnabled(OutputDeviceV1 *outputDevice, OutputDeviceV1::Enablement enable);
+    void setEnabled(OutputDeviceV1* outputDevice, OutputDeviceV1::Enablement enable);
 
     /**
      * Set the mode of this output, identified by its mode id.
@@ -151,7 +153,7 @@ public:
      * @param outputdevice the OutputDevice this change applies to.
      * @param modeId the id of the mode.
      */
-    void setMode(OutputDeviceV1 *outputDevice, const int modeId);
+    void setMode(OutputDeviceV1* outputDevice, const int modeId);
     /**
      * Set transformation for this output, for example rotated or flipped.
      * The changes done in this call will be recorded in the
@@ -160,7 +162,7 @@ public:
      * @param outputdevice the OutputDevice this change applies to.
      * @param scale the scaling factor for this output device.
      */
-    void setTransform(OutputDeviceV1 *outputDevice, OutputDeviceV1::Transform transform);
+    void setTransform(OutputDeviceV1* outputDevice, OutputDeviceV1::Transform transform);
 
     /**
      * Sets the geometry of this output in the global space, relative to other outputs.
@@ -179,7 +181,7 @@ public:
      * @param geo the OutputDevice geometry relative to other outputs,
      *
      */
-    void setGeometry(OutputDeviceV1 *outputDevice, const QRectF &geo);
+    void setGeometry(OutputDeviceV1* outputDevice, const QRectF& geo);
 
     /**
      * Ask the compositor to apply the changes.
@@ -214,11 +216,10 @@ Q_SIGNALS:
 
 private:
     friend class OutputManagementV1;
-    explicit OutputConfigurationV1(QObject *parent = nullptr);
+    explicit OutputConfigurationV1(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

@@ -23,20 +23,19 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/seat.h"
 #include "../server/xdg_shell.h"
 
-#include <QGuiApplication>
 #include <QFile>
+#include <QGuiApplication>
 #include <private/qeventdispatcher_glib_p.h>
 
-#include <unistd.h>
 #include <iostream>
+#include <unistd.h>
 
 static int startXServer()
 {
     const QByteArray process = QByteArrayLiteral("Xwayland");
     int pipeFds[2];
     if (pipe(pipeFds) != 0) {
-        std::cerr << "FATAL ERROR failed to create pipe to start X Server "
-                  << process.constData()
+        std::cerr << "FATAL ERROR failed to create pipe to start X Server " << process.constData()
                   << std::endl;
         exit(1);
     }
@@ -48,7 +47,7 @@ static int startXServer()
         close(pipeFds[0]);
         char fdbuf[16];
         sprintf(fdbuf, "%d", pipeFds[1]);
-        execlp(process.constData(), process.constData(), "-displayfd", fdbuf, (char *)nullptr);
+        execlp(process.constData(), process.constData(), "-displayfd", fdbuf, (char*)nullptr);
         close(pipeFds[1]);
         exit(20);
     }
@@ -68,7 +67,7 @@ static void readDisplayFromPipe(int pipe)
     QByteArray displayNumber = readPipe.readLine();
 
     displayNumber.prepend(QByteArray(":"));
-    displayNumber.remove(displayNumber.size() -1, 1);
+    displayNumber.remove(displayNumber.size() - 1, 1);
     std::cout << "X-Server started on display " << displayNumber.constData() << std::endl;
 
     setenv("DISPLAY", displayNumber.constData(), true);
@@ -77,10 +76,10 @@ static void readDisplayFromPipe(int pipe)
     close(pipe);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     // set our own event dispatcher to be able to dispatch events before the event loop is started
-    QAbstractEventDispatcher *eventDispatcher = new QEventDispatcherGlib();
+    QAbstractEventDispatcher* eventDispatcher = new QEventDispatcherGlib();
     QCoreApplication::setEventDispatcher(eventDispatcher);
 
     // first create the Server and setup with minimum to get an XWayland connected
@@ -89,7 +88,7 @@ int main(int argc, char **argv)
     display.createShm();
     display.createCompositor(&display);
 
-    [[maybe_unused]] Wrapland::Server::XdgShell *shell = display.createXdgShell();
+    [[maybe_unused]] Wrapland::Server::XdgShell* shell = display.createXdgShell();
 
     auto output = new Wrapland::Server::Output(&display, &display);
     output->set_physical_size(QSize(10, 10));

@@ -36,19 +36,20 @@ class Q_DECL_HIDDEN PointerConstraints::Private
 public:
     Private() = default;
 
-    void setup(zwp_pointer_constraints_v1 *arg);
+    void setup(zwp_pointer_constraints_v1* arg);
 
-    WaylandPointer<zwp_pointer_constraints_v1, zwp_pointer_constraints_v1_destroy> pointerconstraints;
-    EventQueue *queue = nullptr;
+    WaylandPointer<zwp_pointer_constraints_v1, zwp_pointer_constraints_v1_destroy>
+        pointerconstraints;
+    EventQueue* queue = nullptr;
 };
 
-PointerConstraints::PointerConstraints(QObject *parent)
+PointerConstraints::PointerConstraints(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
 }
 
-void PointerConstraints::Private::setup(zwp_pointer_constraints_v1 *arg)
+void PointerConstraints::Private::setup(zwp_pointer_constraints_v1* arg)
 {
     Q_ASSERT(arg);
     Q_ASSERT(!pointerconstraints);
@@ -60,7 +61,7 @@ PointerConstraints::~PointerConstraints()
     release();
 }
 
-void PointerConstraints::setup(zwp_pointer_constraints_v1 *pointerconstraints)
+void PointerConstraints::setup(zwp_pointer_constraints_v1* pointerconstraints)
 {
     d->setup(pointerconstraints);
 }
@@ -70,11 +71,13 @@ void PointerConstraints::release()
     d->pointerconstraints.release();
 }
 
-PointerConstraints::operator zwp_pointer_constraints_v1*() {
+PointerConstraints::operator zwp_pointer_constraints_v1*()
+{
     return d->pointerconstraints;
 }
 
-PointerConstraints::operator zwp_pointer_constraints_v1*() const {
+PointerConstraints::operator zwp_pointer_constraints_v1*() const
+{
     return d->pointerconstraints;
 }
 
@@ -83,17 +86,21 @@ bool PointerConstraints::isValid() const
     return d->pointerconstraints.isValid();
 }
 
-void PointerConstraints::setEventQueue(EventQueue *queue)
+void PointerConstraints::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *PointerConstraints::eventQueue()
+EventQueue* PointerConstraints::eventQueue()
 {
     return d->queue;
 }
 
-LockedPointer *PointerConstraints::lockPointer(Surface *surface, Pointer *pointer, Region *region, LifeTime lifetime, QObject *parent)
+LockedPointer* PointerConstraints::lockPointer(Surface* surface,
+                                               Pointer* pointer,
+                                               Region* region,
+                                               LifeTime lifetime,
+                                               QObject* parent)
 {
     Q_ASSERT(isValid());
     auto p = new LockedPointer(parent);
@@ -109,11 +116,12 @@ LockedPointer *PointerConstraints::lockPointer(Surface *surface, Pointer *pointe
         Q_UNREACHABLE();
         break;
     }
-    wl_region *wr = nullptr;
+    wl_region* wr = nullptr;
     if (region) {
         wr = *region;
     }
-    auto w = zwp_pointer_constraints_v1_lock_pointer(d->pointerconstraints, *surface, *pointer, wr, lf);
+    auto w = zwp_pointer_constraints_v1_lock_pointer(
+        d->pointerconstraints, *surface, *pointer, wr, lf);
     if (d->queue) {
         d->queue->addProxy(w);
     }
@@ -121,7 +129,11 @@ LockedPointer *PointerConstraints::lockPointer(Surface *surface, Pointer *pointe
     return p;
 }
 
-ConfinedPointer *PointerConstraints::confinePointer(Surface *surface, Pointer *pointer, Region *region, LifeTime lifetime, QObject *parent)
+ConfinedPointer* PointerConstraints::confinePointer(Surface* surface,
+                                                    Pointer* pointer,
+                                                    Region* region,
+                                                    LifeTime lifetime,
+                                                    QObject* parent)
 {
     Q_ASSERT(isValid());
     auto p = new ConfinedPointer(parent);
@@ -137,11 +149,12 @@ ConfinedPointer *PointerConstraints::confinePointer(Surface *surface, Pointer *p
         Q_UNREACHABLE();
         break;
     }
-    wl_region *wr = nullptr;
+    wl_region* wr = nullptr;
     if (region) {
         wr = *region;
     }
-    auto w = zwp_pointer_constraints_v1_confine_pointer(d->pointerconstraints, *surface, *pointer, wr, lf);
+    auto w = zwp_pointer_constraints_v1_confine_pointer(
+        d->pointerconstraints, *surface, *pointer, wr, lf);
     if (d->queue) {
         d->queue->addProxy(w);
     }
@@ -152,53 +165,55 @@ ConfinedPointer *PointerConstraints::confinePointer(Surface *surface, Pointer *p
 class Q_DECL_HIDDEN LockedPointer::Private
 {
 public:
-    Private(LockedPointer *q);
+    Private(LockedPointer* q);
 
-    void setup(zwp_locked_pointer_v1 *arg);
+    void setup(zwp_locked_pointer_v1* arg);
 
     WaylandPointer<zwp_locked_pointer_v1, zwp_locked_pointer_v1_destroy> lockedpointer;
 
 private:
-    LockedPointer *q;
+    LockedPointer* q;
 
 private:
-    static void lockedCallback(void *data, zwp_locked_pointer_v1 *zwp_locked_pointer_v1);
-    static void unlockedCallback(void *data, zwp_locked_pointer_v1 *zwp_locked_pointer_v1);
+    static void lockedCallback(void* data, zwp_locked_pointer_v1* zwp_locked_pointer_v1);
+    static void unlockedCallback(void* data, zwp_locked_pointer_v1* zwp_locked_pointer_v1);
 
     static const zwp_locked_pointer_v1_listener s_listener;
 };
 
 const zwp_locked_pointer_v1_listener LockedPointer::Private::s_listener = {
     lockedCallback,
-    unlockedCallback
+    unlockedCallback,
 };
 
-void LockedPointer::Private::lockedCallback(void *data, zwp_locked_pointer_v1 *zwp_locked_pointer_v1)
+void LockedPointer::Private::lockedCallback(void* data,
+                                            zwp_locked_pointer_v1* zwp_locked_pointer_v1)
 {
     auto p = reinterpret_cast<LockedPointer::Private*>(data);
     Q_ASSERT(p->lockedpointer == zwp_locked_pointer_v1);
     emit p->q->locked();
 }
 
-void LockedPointer::Private::unlockedCallback(void *data, zwp_locked_pointer_v1 *zwp_locked_pointer_v1)
+void LockedPointer::Private::unlockedCallback(void* data,
+                                              zwp_locked_pointer_v1* zwp_locked_pointer_v1)
 {
     auto p = reinterpret_cast<LockedPointer::Private*>(data);
     Q_ASSERT(p->lockedpointer == zwp_locked_pointer_v1);
     emit p->q->unlocked();
 }
 
-LockedPointer::Private::Private(LockedPointer *q)
+LockedPointer::Private::Private(LockedPointer* q)
     : q(q)
 {
 }
 
-LockedPointer::LockedPointer(QObject *parent)
+LockedPointer::LockedPointer(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
 }
 
-void LockedPointer::Private::setup(zwp_locked_pointer_v1 *arg)
+void LockedPointer::Private::setup(zwp_locked_pointer_v1* arg)
 {
     Q_ASSERT(arg);
     Q_ASSERT(!lockedpointer);
@@ -211,7 +226,7 @@ LockedPointer::~LockedPointer()
     release();
 }
 
-void LockedPointer::setup(zwp_locked_pointer_v1 *lockedpointer)
+void LockedPointer::setup(zwp_locked_pointer_v1* lockedpointer)
 {
     d->setup(lockedpointer);
 }
@@ -221,11 +236,13 @@ void LockedPointer::release()
     d->lockedpointer.release();
 }
 
-LockedPointer::operator zwp_locked_pointer_v1*() {
+LockedPointer::operator zwp_locked_pointer_v1*()
+{
     return d->lockedpointer;
 }
 
-LockedPointer::operator zwp_locked_pointer_v1*() const {
+LockedPointer::operator zwp_locked_pointer_v1*() const
+{
     return d->lockedpointer;
 }
 
@@ -234,16 +251,18 @@ bool LockedPointer::isValid() const
     return d->lockedpointer.isValid();
 }
 
-void LockedPointer::setCursorPositionHint(const QPointF &surfaceLocal)
+void LockedPointer::setCursorPositionHint(const QPointF& surfaceLocal)
 {
     Q_ASSERT(isValid());
-    zwp_locked_pointer_v1_set_cursor_position_hint(d->lockedpointer, wl_fixed_from_double(surfaceLocal.x()), wl_fixed_from_double(surfaceLocal.y()));
+    zwp_locked_pointer_v1_set_cursor_position_hint(d->lockedpointer,
+                                                   wl_fixed_from_double(surfaceLocal.x()),
+                                                   wl_fixed_from_double(surfaceLocal.y()));
 }
 
-void LockedPointer::setRegion(Region *region)
+void LockedPointer::setRegion(Region* region)
 {
     Q_ASSERT(isValid());
-    wl_region *wr = nullptr;
+    wl_region* wr = nullptr;
     if (region) {
         wr = *region;
     }
@@ -253,53 +272,55 @@ void LockedPointer::setRegion(Region *region)
 class Q_DECL_HIDDEN ConfinedPointer::Private
 {
 public:
-    Private(ConfinedPointer *q);
+    Private(ConfinedPointer* q);
 
-    void setup(zwp_confined_pointer_v1 *arg);
+    void setup(zwp_confined_pointer_v1* arg);
 
     WaylandPointer<zwp_confined_pointer_v1, zwp_confined_pointer_v1_destroy> confinedpointer;
 
 private:
-    ConfinedPointer *q;
+    ConfinedPointer* q;
 
 private:
-    static void confinedCallback(void *data, zwp_confined_pointer_v1 *zwp_confined_pointer_v1);
-    static void unconfinedCallback(void *data, zwp_confined_pointer_v1 *zwp_confined_pointer_v1);
+    static void confinedCallback(void* data, zwp_confined_pointer_v1* zwp_confined_pointer_v1);
+    static void unconfinedCallback(void* data, zwp_confined_pointer_v1* zwp_confined_pointer_v1);
 
     static const zwp_confined_pointer_v1_listener s_listener;
 };
 
 const zwp_confined_pointer_v1_listener ConfinedPointer::Private::s_listener = {
     confinedCallback,
-    unconfinedCallback
+    unconfinedCallback,
 };
 
-void ConfinedPointer::Private::confinedCallback(void *data, zwp_confined_pointer_v1 *zwp_confined_pointer_v1)
+void ConfinedPointer::Private::confinedCallback(void* data,
+                                                zwp_confined_pointer_v1* zwp_confined_pointer_v1)
 {
     auto p = reinterpret_cast<ConfinedPointer::Private*>(data);
     Q_ASSERT(p->confinedpointer == zwp_confined_pointer_v1);
     emit p->q->confined();
 }
 
-void ConfinedPointer::Private::unconfinedCallback(void *data, zwp_confined_pointer_v1 *zwp_confined_pointer_v1)
+void ConfinedPointer::Private::unconfinedCallback(void* data,
+                                                  zwp_confined_pointer_v1* zwp_confined_pointer_v1)
 {
     auto p = reinterpret_cast<ConfinedPointer::Private*>(data);
     Q_ASSERT(p->confinedpointer == zwp_confined_pointer_v1);
     emit p->q->unconfined();
 }
 
-ConfinedPointer::Private::Private(ConfinedPointer *q)
+ConfinedPointer::Private::Private(ConfinedPointer* q)
     : q(q)
 {
 }
 
-ConfinedPointer::ConfinedPointer(QObject *parent)
+ConfinedPointer::ConfinedPointer(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
 }
 
-void ConfinedPointer::Private::setup(zwp_confined_pointer_v1 *arg)
+void ConfinedPointer::Private::setup(zwp_confined_pointer_v1* arg)
 {
     Q_ASSERT(arg);
     Q_ASSERT(!confinedpointer);
@@ -312,7 +333,7 @@ ConfinedPointer::~ConfinedPointer()
     release();
 }
 
-void ConfinedPointer::setup(zwp_confined_pointer_v1 *confinedpointer)
+void ConfinedPointer::setup(zwp_confined_pointer_v1* confinedpointer)
 {
     d->setup(confinedpointer);
 }
@@ -322,11 +343,13 @@ void ConfinedPointer::release()
     d->confinedpointer.release();
 }
 
-ConfinedPointer::operator zwp_confined_pointer_v1*() {
+ConfinedPointer::operator zwp_confined_pointer_v1*()
+{
     return d->confinedpointer;
 }
 
-ConfinedPointer::operator zwp_confined_pointer_v1*() const {
+ConfinedPointer::operator zwp_confined_pointer_v1*() const
+{
     return d->confinedpointer;
 }
 
@@ -335,10 +358,10 @@ bool ConfinedPointer::isValid() const
     return d->confinedpointer.isValid();
 }
 
-void ConfinedPointer::setRegion(Region *region)
+void ConfinedPointer::setRegion(Region* region)
 {
     Q_ASSERT(isValid());
-    wl_region *wr = nullptr;
+    wl_region* wr = nullptr;
     if (region) {
         wr = *region;
     }

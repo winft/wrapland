@@ -78,7 +78,7 @@ public:
      * to call setup. In order to get a ready to use ShadowManager prefer using
      * Registry::createShadowManager.
      **/
-    explicit ShadowManager(QObject *parent = nullptr);
+    explicit ShadowManager(QObject* parent = nullptr);
     virtual ~ShadowManager();
 
     /**
@@ -90,7 +90,7 @@ public:
      * When using Registry::createShadowManager there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_shadow_manager *compositor);
+    void setup(org_kde_kwin_shadow_manager* compositor);
     /**
      * Releases the org_kde_kwin_shadow_manager interface.
      * After the interface has been released the ShadowManager instance is no
@@ -101,19 +101,19 @@ public:
     /**
      * Sets the @p queue to use for creating a Shadow.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Shadow.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates and setup a new Shadow with @p parent.
      * @param parent The parent to pass to the Shadow.
      * @returns The new created Shadow
      **/
-    Shadow *createShadow(Surface *surface, QObject *parent = nullptr);
-    void removeShadow(Surface *surface);
+    Shadow* createShadow(Surface* surface, QObject* parent = nullptr);
+    void removeShadow(Surface* surface);
 
     operator org_kde_kwin_shadow_manager*();
     operator org_kde_kwin_shadow_manager*() const;
@@ -158,7 +158,7 @@ public:
      * When using Compositor::createSurface there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_shadow *shadow);
+    void setup(org_kde_kwin_shadow* shadow);
     /**
      * Releases the org_kde_kwin_shadow interface.
      * After the interface has been released the Shadow instance is no
@@ -172,38 +172,38 @@ public:
     bool isValid() const;
 
     void commit();
-    void attachLeft(wl_buffer *buffer);
-    void attachLeft(Buffer *buffer);
+    void attachLeft(wl_buffer* buffer);
+    void attachLeft(Buffer* buffer);
     void attachLeft(Buffer::Ptr buffer);
-    void attachTopLeft(wl_buffer *buffer);
-    void attachTopLeft(Buffer *buffer);
+    void attachTopLeft(wl_buffer* buffer);
+    void attachTopLeft(Buffer* buffer);
     void attachTopLeft(Buffer::Ptr buffer);
-    void attachTop(wl_buffer *buffer);
-    void attachTop(Buffer *buffer);
+    void attachTop(wl_buffer* buffer);
+    void attachTop(Buffer* buffer);
     void attachTop(Buffer::Ptr buffer);
-    void attachTopRight(wl_buffer *buffer);
-    void attachTopRight(Buffer *buffer);
+    void attachTopRight(wl_buffer* buffer);
+    void attachTopRight(Buffer* buffer);
     void attachTopRight(Buffer::Ptr buffer);
-    void attachRight(wl_buffer *buffer);
-    void attachRight(Buffer *buffer);
+    void attachRight(wl_buffer* buffer);
+    void attachRight(Buffer* buffer);
     void attachRight(Buffer::Ptr buffer);
-    void attachBottomRight(wl_buffer *buffer);
-    void attachBottomRight(Buffer *buffer);
+    void attachBottomRight(wl_buffer* buffer);
+    void attachBottomRight(Buffer* buffer);
     void attachBottomRight(Buffer::Ptr buffer);
-    void attachBottom(wl_buffer *buffer);
-    void attachBottom(Buffer *buffer);
+    void attachBottom(wl_buffer* buffer);
+    void attachBottom(Buffer* buffer);
     void attachBottom(Buffer::Ptr buffer);
-    void attachBottomLeft(wl_buffer *buffer);
-    void attachBottomLeft(Buffer *buffer);
+    void attachBottomLeft(wl_buffer* buffer);
+    void attachBottomLeft(Buffer* buffer);
     void attachBottomLeft(Buffer::Ptr buffer);
-    void setOffsets(const QMarginsF &margins);
+    void setOffsets(const QMarginsF& margins);
 
     operator org_kde_kwin_shadow*();
     operator org_kde_kwin_shadow*() const;
 
 private:
     friend class ShadowManager;
-    explicit Shadow(QObject *parent = nullptr);
+    explicit Shadow(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
@@ -212,4 +212,3 @@ private:
 }
 
 #endif
-

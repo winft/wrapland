@@ -34,10 +34,10 @@ class Q_DECL_HIDDEN SubCompositor::Private
 {
 public:
     WaylandPointer<wl_subcompositor, wl_subcompositor_destroy> subCompositor;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-SubCompositor::SubCompositor(QObject *parent)
+SubCompositor::SubCompositor(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -53,17 +53,19 @@ void SubCompositor::release()
     d->subCompositor.release();
 }
 
-void SubCompositor::setup(wl_subcompositor *subcompositor)
+void SubCompositor::setup(wl_subcompositor* subcompositor)
 {
     Q_ASSERT(subcompositor);
     Q_ASSERT(!d->subCompositor.isValid());
     d->subCompositor.setup(subcompositor);
 }
 
-SubSurface *SubCompositor::createSubSurface(QPointer<Surface> surface, QPointer<Surface> parentSurface, QObject *parent)
+SubSurface* SubCompositor::createSubSurface(QPointer<Surface> surface,
+                                            QPointer<Surface> parentSurface,
+                                            QObject* parent)
 {
     Q_ASSERT(isValid());
-    SubSurface *s = new SubSurface(surface, parentSurface, parent);
+    SubSurface* s = new SubSurface(surface, parentSurface, parent);
     auto w = wl_subcompositor_get_subsurface(d->subCompositor, *surface, *parentSurface);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -87,12 +89,12 @@ SubCompositor::operator wl_subcompositor*() const
     return d->subCompositor;
 }
 
-EventQueue *SubCompositor::eventQueue()
+EventQueue* SubCompositor::eventQueue()
 {
     return d->queue;
 }
 
-void SubCompositor::setEventQueue(EventQueue *queue)
+void SubCompositor::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }

@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_KEYSTATE_H
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -54,7 +54,7 @@ public:
     Keystate(QObject* parent);
     ~Keystate() override;
 
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
 
     /**
      * Releases the org_kde_kwin_keystate interface.

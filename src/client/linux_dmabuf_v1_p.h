@@ -68,11 +68,9 @@ public:
 
     WaylandPointer<zwp_linux_buffer_params_v1, zwp_linux_buffer_params_v1_destroy> params;
 
-    static void callbackCreateSucceeded(void* data,
-                                        zwp_linux_buffer_params_v1* wlParams,
-                                        wl_buffer* wlBuffer);
-    static void callbackBufferCreationFail(void* data,
-                                           zwp_linux_buffer_params_v1* wlParams);
+    static void
+    callbackCreateSucceeded(void* data, zwp_linux_buffer_params_v1* wlParams, wl_buffer* wlBuffer);
+    static void callbackBufferCreationFail(void* data, zwp_linux_buffer_params_v1* wlParams);
 
     static const zwp_linux_buffer_params_v1_listener s_listener;
     wl_buffer* createdBuffer = nullptr;

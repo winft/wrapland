@@ -40,12 +40,11 @@ typedef QList<OutputDeviceV1::Mode> Modes;
 class Q_DECL_HIDDEN OutputDeviceV1::Private
 {
 public:
-    Private(OutputDeviceV1 *q);
-    void setup(zkwinft_output_device_v1 *o);
+    Private(OutputDeviceV1* q);
+    void setup(zkwinft_output_device_v1* o);
 
-    WaylandPointer<zkwinft_output_device_v1,
-                        zkwinft_output_device_v1_destroy> output;
-    EventQueue *queue = nullptr;
+    WaylandPointer<zkwinft_output_device_v1, zkwinft_output_device_v1_destroy> output;
+    EventQueue* queue = nullptr;
     QSize physicalSize;
     QRectF geometry;
     QString name;
@@ -62,38 +61,49 @@ public:
     bool done = false;
 
 private:
-    static void infoCallback(void *data, zkwinft_output_device_v1 *output,
-                             const char *name, const char *description,
-                             const char *make, const char *model,
-                             const char *serial_number,
-                             int32_t physical_width, int32_t physical_height);
+    static void infoCallback(void* data,
+                             zkwinft_output_device_v1* output,
+                             const char* name,
+                             const char* description,
+                             const char* make,
+                             const char* model,
+                             const char* serial_number,
+                             int32_t physical_width,
+                             int32_t physical_height);
 
-    static void enabledCallback(void *data, zkwinft_output_device_v1 *output,
-                                int32_t enabled);
+    static void enabledCallback(void* data, zkwinft_output_device_v1* output, int32_t enabled);
 
-    static void modeCallback(void *data, zkwinft_output_device_v1 *output, uint32_t flags,
-                             int32_t width, int32_t height, int32_t refresh, int32_t mode_id);
+    static void modeCallback(void* data,
+                             zkwinft_output_device_v1* output,
+                             uint32_t flags,
+                             int32_t width,
+                             int32_t height,
+                             int32_t refresh,
+                             int32_t mode_id);
 
-    static void transformCallback(void *data, zkwinft_output_device_v1 *output,
-                                  int32_t transform);
+    static void transformCallback(void* data, zkwinft_output_device_v1* output, int32_t transform);
 
-    static void geometryCallback(void *data, zkwinft_output_device_v1 *output,
-                                 wl_fixed_t x, wl_fixed_t y, wl_fixed_t width, wl_fixed_t height);
+    static void geometryCallback(void* data,
+                                 zkwinft_output_device_v1* output,
+                                 wl_fixed_t x,
+                                 wl_fixed_t y,
+                                 wl_fixed_t width,
+                                 wl_fixed_t height);
 
-    static void doneCallback(void *data, zkwinft_output_device_v1 *output);
+    static void doneCallback(void* data, zkwinft_output_device_v1* output);
 
     void addMode(uint32_t flags, int32_t width, int32_t height, int32_t refresh, int32_t mode_id);
 
-    OutputDeviceV1 *q;
+    OutputDeviceV1* q;
     static struct zkwinft_output_device_v1_listener s_outputListener;
 };
 
-OutputDeviceV1::Private::Private(OutputDeviceV1 *q)
+OutputDeviceV1::Private::Private(OutputDeviceV1* q)
     : q(q)
 {
 }
 
-void OutputDeviceV1::Private::setup(zkwinft_output_device_v1 *o)
+void OutputDeviceV1::Private::setup(zkwinft_output_device_v1* o)
 {
     Q_ASSERT(o);
     Q_ASSERT(!output);
@@ -101,12 +111,10 @@ void OutputDeviceV1::Private::setup(zkwinft_output_device_v1 *o)
     zkwinft_output_device_v1_add_listener(output, &s_outputListener, this);
 }
 
-bool OutputDeviceV1::Mode::operator==(const OutputDeviceV1::Mode &m) const
+bool OutputDeviceV1::Mode::operator==(const OutputDeviceV1::Mode& m) const
 {
-    return size == m.size
-           && refreshRate == m.refreshRate
-           && preferred == m.preferred
-           && output == m.output;
+    return size == m.size && refreshRate == m.refreshRate && preferred == m.preferred
+        && output == m.output;
 }
 
 zkwinft_output_device_v1_listener OutputDeviceV1::Private::s_outputListener = {
@@ -118,11 +126,15 @@ zkwinft_output_device_v1_listener OutputDeviceV1::Private::s_outputListener = {
     doneCallback,
 };
 
-void OutputDeviceV1::Private::infoCallback(void *data, zkwinft_output_device_v1 *output,
-                                           const char *name, const char *description,
-                                           const char *make, const char *model,
-                                           const char *serial_number,
-                                           int32_t physical_width, int32_t physical_height)
+void OutputDeviceV1::Private::infoCallback(void* data,
+                                           zkwinft_output_device_v1* output,
+                                           const char* name,
+                                           const char* description,
+                                           const char* make,
+                                           const char* model,
+                                           const char* serial_number,
+                                           int32_t physical_width,
+                                           int32_t physical_height)
 {
     auto out = reinterpret_cast<OutputDeviceV1::Private*>(data);
     Q_ASSERT(out->output == output);
@@ -135,7 +147,8 @@ void OutputDeviceV1::Private::infoCallback(void *data, zkwinft_output_device_v1 
     out->physicalSize = QSize(physical_width, physical_height);
 }
 
-void OutputDeviceV1::Private::enabledCallback(void* data, zkwinft_output_device_v1* output,
+void OutputDeviceV1::Private::enabledCallback(void* data,
+                                              zkwinft_output_device_v1* output,
                                               int32_t enabled)
 {
     auto out = reinterpret_cast<OutputDeviceV1::Private*>(data);
@@ -152,17 +165,24 @@ void OutputDeviceV1::Private::enabledCallback(void* data, zkwinft_output_device_
     }
 }
 
-void OutputDeviceV1::Private::modeCallback(void *data, zkwinft_output_device_v1 *output,
-                                           uint32_t flags, int32_t width, int32_t height,
-                                           int32_t refresh, int32_t mode_id)
+void OutputDeviceV1::Private::modeCallback(void* data,
+                                           zkwinft_output_device_v1* output,
+                                           uint32_t flags,
+                                           int32_t width,
+                                           int32_t height,
+                                           int32_t refresh,
+                                           int32_t mode_id)
 {
     auto out = reinterpret_cast<OutputDeviceV1::Private*>(data);
     Q_ASSERT(out->output == output);
     out->addMode(flags, width, height, refresh, mode_id);
 }
 
-void OutputDeviceV1::Private::addMode(uint32_t flags, int32_t width, int32_t height,
-                                      int32_t refresh, int32_t mode_id)
+void OutputDeviceV1::Private::addMode(uint32_t flags,
+                                      int32_t width,
+                                      int32_t height,
+                                      int32_t refresh,
+                                      int32_t mode_id)
 {
     Mode mode;
     mode.output = QPointer<OutputDeviceV1>(q);
@@ -207,19 +227,24 @@ Wrapland::Client::OutputDeviceV1::Mode OutputDeviceV1::currentMode() const
     return *(d->currentMode);
 }
 
-void OutputDeviceV1::Private::geometryCallback(void *data, zkwinft_output_device_v1 *output,
-                                               wl_fixed_t x, wl_fixed_t y,
-                                               wl_fixed_t width, wl_fixed_t height)
+void OutputDeviceV1::Private::geometryCallback(void* data,
+                                               zkwinft_output_device_v1* output,
+                                               wl_fixed_t x,
+                                               wl_fixed_t y,
+                                               wl_fixed_t width,
+                                               wl_fixed_t height)
 {
     auto out = reinterpret_cast<OutputDeviceV1::Private*>(data);
     Q_ASSERT(out->output == output);
 
-    out->geometry = QRectF(wl_fixed_to_double(x), wl_fixed_to_double(y),
-                           wl_fixed_to_double(width), wl_fixed_to_double(height));
+    out->geometry = QRectF(wl_fixed_to_double(x),
+                           wl_fixed_to_double(y),
+                           wl_fixed_to_double(width),
+                           wl_fixed_to_double(height));
 }
 
-void OutputDeviceV1::Private::transformCallback(void *data,
-                                                zkwinft_output_device_v1 *output,
+void OutputDeviceV1::Private::transformCallback(void* data,
+                                                zkwinft_output_device_v1* output,
                                                 int32_t transform)
 {
     auto out = reinterpret_cast<OutputDeviceV1::Private*>(data);
@@ -249,7 +274,7 @@ void OutputDeviceV1::Private::transformCallback(void *data,
     out->transform = toTransform();
 }
 
-void OutputDeviceV1::Private::doneCallback(void *data, zkwinft_output_device_v1 *output)
+void OutputDeviceV1::Private::doneCallback(void* data, zkwinft_output_device_v1* output)
 {
     auto out = reinterpret_cast<OutputDeviceV1::Private*>(data);
     Q_ASSERT(out->output == output);
@@ -259,22 +284,22 @@ void OutputDeviceV1::Private::doneCallback(void *data, zkwinft_output_device_v1 
     emit out->q->done();
 }
 
-void OutputDeviceV1::setup(zkwinft_output_device_v1 *output)
+void OutputDeviceV1::setup(zkwinft_output_device_v1* output)
 {
     d->setup(output);
 }
 
-EventQueue *OutputDeviceV1::eventQueue() const
+EventQueue* OutputDeviceV1::eventQueue() const
 {
     return d->queue;
 }
 
-void OutputDeviceV1::setEventQueue(EventQueue *queue)
+void OutputDeviceV1::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-OutputDeviceV1::OutputDeviceV1(QObject *parent)
+OutputDeviceV1::OutputDeviceV1(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -351,16 +376,18 @@ OutputDeviceV1::Transform OutputDeviceV1::transform() const
     return d->transform;
 }
 
-QList< OutputDeviceV1::Mode > OutputDeviceV1::modes() const
+QList<OutputDeviceV1::Mode> OutputDeviceV1::modes() const
 {
     return d->modes;
 }
 
-OutputDeviceV1::operator zkwinft_output_device_v1* () {
+OutputDeviceV1::operator zkwinft_output_device_v1*()
+{
     return d->output;
 }
 
-OutputDeviceV1::operator zkwinft_output_device_v1* () const {
+OutputDeviceV1::operator zkwinft_output_device_v1*() const
+{
     return d->output;
 }
 

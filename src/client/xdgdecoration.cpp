@@ -37,19 +37,20 @@ class Q_DECL_HIDDEN XdgDecorationManager::Private
 public:
     Private() = default;
 
-    void setup(zxdg_decoration_manager_v1 *arg);
+    void setup(zxdg_decoration_manager_v1* arg);
 
-    WaylandPointer<zxdg_decoration_manager_v1, zxdg_decoration_manager_v1_destroy> xdgdecorationmanager;
-    EventQueue *queue = nullptr;
+    WaylandPointer<zxdg_decoration_manager_v1, zxdg_decoration_manager_v1_destroy>
+        xdgdecorationmanager;
+    EventQueue* queue = nullptr;
 };
 
-XdgDecorationManager::XdgDecorationManager(QObject *parent)
+XdgDecorationManager::XdgDecorationManager(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
 }
 
-void XdgDecorationManager::Private::setup(zxdg_decoration_manager_v1 *arg)
+void XdgDecorationManager::Private::setup(zxdg_decoration_manager_v1* arg)
 {
     Q_ASSERT(arg);
     Q_ASSERT(!xdgdecorationmanager);
@@ -61,7 +62,7 @@ XdgDecorationManager::~XdgDecorationManager()
     release();
 }
 
-void XdgDecorationManager::setup(zxdg_decoration_manager_v1 *xdgdecorationmanager)
+void XdgDecorationManager::setup(zxdg_decoration_manager_v1* xdgdecorationmanager)
 {
     d->setup(xdgdecorationmanager);
 }
@@ -71,11 +72,13 @@ void XdgDecorationManager::release()
     d->xdgdecorationmanager.release();
 }
 
-XdgDecorationManager::operator zxdg_decoration_manager_v1*() {
+XdgDecorationManager::operator zxdg_decoration_manager_v1*()
+{
     return d->xdgdecorationmanager;
 }
 
-XdgDecorationManager::operator zxdg_decoration_manager_v1*() const {
+XdgDecorationManager::operator zxdg_decoration_manager_v1*() const
+{
     return d->xdgdecorationmanager;
 }
 
@@ -84,26 +87,29 @@ bool XdgDecorationManager::isValid() const
     return d->xdgdecorationmanager.isValid();
 }
 
-void XdgDecorationManager::setEventQueue(EventQueue *queue)
+void XdgDecorationManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *XdgDecorationManager::eventQueue()
+EventQueue* XdgDecorationManager::eventQueue()
 {
     return d->queue;
 }
 
-XdgDecoration *XdgDecorationManager::getToplevelDecoration(XdgShellSurface *toplevel, QObject *parent)
+XdgDecoration* XdgDecorationManager::getToplevelDecoration(XdgShellSurface* toplevel,
+                                                           QObject* parent)
 {
     Q_ASSERT(isValid());
-    xdg_toplevel *toplevel_resource = *toplevel;
-    if (!toplevel_resource) { //i.e using XDGShellV5
-        qWarning() << "Trying to create an XdgDecoration without an XDGShell stable toplevel object";
+    xdg_toplevel* toplevel_resource = *toplevel;
+    if (!toplevel_resource) { // i.e using XDGShellV5
+        qWarning()
+            << "Trying to create an XdgDecoration without an XDGShell stable toplevel object";
         return nullptr;
     }
     auto p = new XdgDecoration(parent);
-    auto w = zxdg_decoration_manager_v1_get_toplevel_decoration(d->xdgdecorationmanager, toplevel_resource);
+    auto w = zxdg_decoration_manager_v1_get_toplevel_decoration(d->xdgdecorationmanager,
+                                                                toplevel_resource);
     if (d->queue) {
         d->queue->addProxy(w);
     }
@@ -114,27 +120,33 @@ XdgDecoration *XdgDecorationManager::getToplevelDecoration(XdgShellSurface *topl
 class Q_DECL_HIDDEN XdgDecoration::Private
 {
 public:
-    Private(XdgDecoration *q);
+    Private(XdgDecoration* q);
 
-    void setup(zxdg_toplevel_decoration_v1 *arg);
+    void setup(zxdg_toplevel_decoration_v1* arg);
 
     WaylandPointer<zxdg_toplevel_decoration_v1, zxdg_toplevel_decoration_v1_destroy> xdgdecoration;
 
     XdgDecoration::Mode m_mode = XdgDecoration::Mode::ClientSide;
-private:
-    XdgDecoration *q;
 
 private:
-    static void configureCallback(void *data, zxdg_toplevel_decoration_v1 *zxdg_toplevel_decoration_v1, uint32_t mode);
+    XdgDecoration* q;
+
+private:
+    static void configureCallback(void* data,
+                                  zxdg_toplevel_decoration_v1* zxdg_toplevel_decoration_v1,
+                                  uint32_t mode);
 
     static const zxdg_toplevel_decoration_v1_listener s_listener;
 };
 
 const zxdg_toplevel_decoration_v1_listener XdgDecoration::Private::s_listener = {
-    configureCallback
+    configureCallback,
 };
 
-void XdgDecoration::Private::configureCallback(void *data, zxdg_toplevel_decoration_v1 *zxdg_toplevel_decoration_v1, uint32_t m)
+void XdgDecoration::Private::configureCallback(
+    void* data,
+    zxdg_toplevel_decoration_v1* zxdg_toplevel_decoration_v1,
+    uint32_t m)
 {
     auto p = reinterpret_cast<XdgDecoration::Private*>(data);
     Q_ASSERT(p->xdgdecoration == zxdg_toplevel_decoration_v1);
@@ -149,18 +161,18 @@ void XdgDecoration::Private::configureCallback(void *data, zxdg_toplevel_decorat
     emit p->q->modeChanged(p->m_mode);
 }
 
-XdgDecoration::Private::Private(XdgDecoration *q)
+XdgDecoration::Private::Private(XdgDecoration* q)
     : q(q)
 {
 }
 
-XdgDecoration::XdgDecoration(QObject *parent)
+XdgDecoration::XdgDecoration(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
 }
 
-void XdgDecoration::Private::setup(zxdg_toplevel_decoration_v1 *arg)
+void XdgDecoration::Private::setup(zxdg_toplevel_decoration_v1* arg)
 {
     Q_ASSERT(arg);
     Q_ASSERT(!xdgdecoration);
@@ -173,7 +185,7 @@ XdgDecoration::~XdgDecoration()
     release();
 }
 
-void XdgDecoration::setup(zxdg_toplevel_decoration_v1 *xdgdecoration)
+void XdgDecoration::setup(zxdg_toplevel_decoration_v1* xdgdecoration)
 {
     d->setup(xdgdecoration);
 }
@@ -183,11 +195,13 @@ void XdgDecoration::release()
     d->xdgdecoration.release();
 }
 
-XdgDecoration::operator zxdg_toplevel_decoration_v1*() {
+XdgDecoration::operator zxdg_toplevel_decoration_v1*()
+{
     return d->xdgdecoration;
 }
 
-XdgDecoration::operator zxdg_toplevel_decoration_v1*() const {
+XdgDecoration::operator zxdg_toplevel_decoration_v1*() const
+{
     return d->xdgdecoration;
 }
 
@@ -222,7 +236,5 @@ XdgDecoration::Mode XdgDecoration::mode() const
     return d->m_mode;
 }
 
-
 }
 }
-

@@ -32,24 +32,25 @@ namespace Client
 class Q_DECL_HIDDEN DataSource::Private
 {
 public:
-    explicit Private(DataSource *q);
-    void setup(wl_data_source *s);
+    explicit Private(DataSource* q);
+    void setup(wl_data_source* s);
 
     WaylandPointer<wl_data_source, wl_data_source_destroy> source;
     DataDeviceManager::DnDAction selectedAction = DataDeviceManager::DnDAction::None;
 
 private:
     void setAction(DataDeviceManager::DnDAction action);
-    static void targetCallback(void *data, wl_data_source *dataSource, const char *mimeType);
-    static void sendCallback(void *data, wl_data_source *dataSource, const char *mimeType, int32_t fd);
-    static void cancelledCallback(void *data, wl_data_source *dataSource);
-    static void dndDropPerformedCallback(void *data, wl_data_source *wl_data_source);
-    static void dndFinishedCallback(void *data, wl_data_source *wl_data_source);
-    static void actionCallback(void *data, wl_data_source *wl_data_source, uint32_t dnd_action);
+    static void targetCallback(void* data, wl_data_source* dataSource, const char* mimeType);
+    static void
+    sendCallback(void* data, wl_data_source* dataSource, const char* mimeType, int32_t fd);
+    static void cancelledCallback(void* data, wl_data_source* dataSource);
+    static void dndDropPerformedCallback(void* data, wl_data_source* wl_data_source);
+    static void dndFinishedCallback(void* data, wl_data_source* wl_data_source);
+    static void actionCallback(void* data, wl_data_source* wl_data_source, uint32_t dnd_action);
 
     static const struct wl_data_source_listener s_listener;
 
-    DataSource *q;
+    DataSource* q;
 };
 
 const wl_data_source_listener DataSource::Private::s_listener = {
@@ -58,54 +59,61 @@ const wl_data_source_listener DataSource::Private::s_listener = {
     cancelledCallback,
     dndDropPerformedCallback,
     dndFinishedCallback,
-    actionCallback
+    actionCallback,
 };
 
-DataSource::Private::Private(DataSource *q)
+DataSource::Private::Private(DataSource* q)
     : q(q)
 {
 }
 
-void DataSource::Private::targetCallback(void *data, wl_data_source *dataSource, const char *mimeType)
+void DataSource::Private::targetCallback(void* data,
+                                         wl_data_source* dataSource,
+                                         const char* mimeType)
 {
     auto d = reinterpret_cast<DataSource::Private*>(data);
     Q_ASSERT(d->source == dataSource);
     emit d->q->targetAccepts(QString::fromUtf8(mimeType));
 }
 
-void DataSource::Private::sendCallback(void *data, wl_data_source *dataSource, const char *mimeType, int32_t fd)
+void DataSource::Private::sendCallback(void* data,
+                                       wl_data_source* dataSource,
+                                       const char* mimeType,
+                                       int32_t fd)
 {
     auto d = reinterpret_cast<DataSource::Private*>(data);
     Q_ASSERT(d->source == dataSource);
     emit d->q->sendDataRequested(QString::fromUtf8(mimeType), fd);
 }
 
-void DataSource::Private::cancelledCallback(void *data, wl_data_source *dataSource)
+void DataSource::Private::cancelledCallback(void* data, wl_data_source* dataSource)
 {
     auto d = reinterpret_cast<DataSource::Private*>(data);
     Q_ASSERT(d->source == dataSource);
     emit d->q->cancelled();
 }
 
-void DataSource::Private::dndDropPerformedCallback(void *data, wl_data_source *wl_data_source)
+void DataSource::Private::dndDropPerformedCallback(void* data, wl_data_source* wl_data_source)
 {
     Q_UNUSED(wl_data_source)
     auto d = reinterpret_cast<DataSource::Private*>(data);
     emit d->q->dragAndDropPerformed();
 }
 
-void DataSource::Private::dndFinishedCallback(void *data, wl_data_source *wl_data_source)
+void DataSource::Private::dndFinishedCallback(void* data, wl_data_source* wl_data_source)
 {
     Q_UNUSED(wl_data_source)
     auto d = reinterpret_cast<DataSource::Private*>(data);
     emit d->q->dragAndDropFinished();
 }
 
-void DataSource::Private::actionCallback(void *data, wl_data_source *wl_data_source, uint32_t dnd_action)
+void DataSource::Private::actionCallback(void* data,
+                                         wl_data_source* wl_data_source,
+                                         uint32_t dnd_action)
 {
     Q_UNUSED(wl_data_source)
     auto d = reinterpret_cast<Private*>(data);
-    switch(dnd_action) {
+    switch (dnd_action) {
     case WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY:
         d->setAction(DataDeviceManager::DnDAction::Copy);
         break;
@@ -132,7 +140,7 @@ void DataSource::Private::setAction(DataDeviceManager::DnDAction action)
     emit q->selectedDragAndDropActionChanged();
 }
 
-void DataSource::Private::setup(wl_data_source *s)
+void DataSource::Private::setup(wl_data_source* s)
 {
     Q_ASSERT(!source.isValid());
     Q_ASSERT(s);
@@ -140,7 +148,7 @@ void DataSource::Private::setup(wl_data_source *s)
     wl_data_source_add_listener(s, &s_listener, this);
 }
 
-DataSource::DataSource(QObject *parent)
+DataSource::DataSource(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -161,17 +169,17 @@ bool DataSource::isValid() const
     return d->source.isValid();
 }
 
-void DataSource::setup(wl_data_source *dataSource)
+void DataSource::setup(wl_data_source* dataSource)
 {
     d->setup(dataSource);
 }
 
-void DataSource::offer(const QString &mimeType)
+void DataSource::offer(const QString& mimeType)
 {
     wl_data_source_offer(d->source, mimeType.toUtf8().constData());
 }
 
-void DataSource::offer(const QMimeType &mimeType)
+void DataSource::offer(const QMimeType& mimeType)
 {
     if (!mimeType.isValid()) {
         return;

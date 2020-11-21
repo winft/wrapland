@@ -38,10 +38,10 @@ public:
     Private() = default;
 
     WaylandPointer<org_kde_kwin_blur_manager, org_kde_kwin_blur_manager_destroy> manager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-BlurManager::BlurManager(QObject *parent)
+BlurManager::BlurManager(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -62,27 +62,27 @@ bool BlurManager::isValid() const
     return d->manager.isValid();
 }
 
-void BlurManager::setup(org_kde_kwin_blur_manager *manager)
+void BlurManager::setup(org_kde_kwin_blur_manager* manager)
 {
     Q_ASSERT(manager);
     Q_ASSERT(!d->manager);
     d->manager.setup(manager);
 }
 
-void BlurManager::setEventQueue(EventQueue *queue)
+void BlurManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *BlurManager::eventQueue()
+EventQueue* BlurManager::eventQueue()
 {
     return d->queue;
 }
 
-Blur *BlurManager::createBlur(Surface *surface, QObject *parent)
+Blur* BlurManager::createBlur(Surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
-    Blur *s = new Blur(parent);
+    Blur* s = new Blur(parent);
     auto w = org_kde_kwin_blur_manager_create(d->manager, *surface);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -91,7 +91,7 @@ Blur *BlurManager::createBlur(Surface *surface, QObject *parent)
     return s;
 }
 
-void BlurManager::removeBlur(Surface *surface)
+void BlurManager::removeBlur(Surface* surface)
 {
     Q_ASSERT(isValid());
     org_kde_kwin_blur_manager_unset(d->manager, *surface);
@@ -113,7 +113,7 @@ public:
     WaylandPointer<org_kde_kwin_blur, org_kde_kwin_blur_release> blur;
 };
 
-Blur::Blur(QObject *parent)
+Blur::Blur(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -129,7 +129,7 @@ void Blur::release()
     d->blur.release();
 }
 
-void Blur::setup(org_kde_kwin_blur *blur)
+void Blur::setup(org_kde_kwin_blur* blur)
 {
     Q_ASSERT(blur);
     Q_ASSERT(!d->blur);
@@ -147,7 +147,7 @@ void Blur::commit()
     org_kde_kwin_blur_commit(d->blur);
 }
 
-void Blur::setRegion(Region *region)
+void Blur::setRegion(Region* region)
 {
     org_kde_kwin_blur_set_region(d->blur, *region);
 }

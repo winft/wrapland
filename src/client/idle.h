@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_IDLE_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct org_kde_kwin_idle;
 struct org_kde_kwin_idle_timeout;
@@ -75,7 +75,7 @@ public:
      * to call setup. In order to get a ready to use Idle prefer using
      * Registry::createIdle.
      **/
-    explicit Idle(QObject *parent = nullptr);
+    explicit Idle(QObject* parent = nullptr);
     virtual ~Idle();
 
     /**
@@ -87,7 +87,7 @@ public:
      * When using Registry::createIdle there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_idle *manager);
+    void setup(org_kde_kwin_idle* manager);
     /**
      * Releases the org_kde_kwin_idle interface.
      * After the interface has been released the Idle instance is no
@@ -98,11 +98,11 @@ public:
     /**
      * Sets the @p queue to use for creating a IdleTimeout.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a IdleTimeout.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates a new IdleTimeout for the @p seat. If the @p seat has been idle,
@@ -116,7 +116,7 @@ public:
      * @param msec The duration in milliseconds after which an idle timeout should fire
      * @param seat The Seat on which the user activity should be monitored.
      **/
-    IdleTimeout *getTimeout(quint32 msecs, Seat *seat, QObject *parent = nullptr);
+    IdleTimeout* getTimeout(quint32 msecs, Seat* seat, QObject* parent = nullptr);
 
     operator org_kde_kwin_idle*();
     operator org_kde_kwin_idle*() const;
@@ -153,7 +153,7 @@ public:
      * To create an IdleTimeout prefer using {@link Idle::getTimeout} which sets up the
      * IdleTimeout to be fully functional.
      **/
-    explicit IdleTimeout(QObject *parent = nullptr);
+    explicit IdleTimeout(QObject* parent = nullptr);
     virtual ~IdleTimeout();
 
     /**
@@ -161,7 +161,7 @@ public:
      * When using IdleTimeoutManager::createIdleTimeout there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_idle_timeout *timeout);
+    void setup(org_kde_kwin_idle_timeout* timeout);
     /**
      * Releases the org_kde_kwin_idle_timeout interface.
      * After the interface has been released the IdleTimeout instance is no

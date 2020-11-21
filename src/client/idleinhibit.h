@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_IDLEINHIBIT_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct zwp_idle_inhibit_manager_v1;
 struct zwp_idle_inhibitor_v1;
@@ -71,7 +71,7 @@ public:
      * to call setup. In order to get a ready to use IdleInhibitManager prefer using
      * Registry::createIdleInhibitManager.
      **/
-    explicit IdleInhibitManager(QObject *parent = nullptr);
+    explicit IdleInhibitManager(QObject* parent = nullptr);
     virtual ~IdleInhibitManager();
 
     /**
@@ -79,7 +79,7 @@ public:
      * When using Registry::createIdleInhibitManager there is no need to call this
      * method.
      **/
-    void setup(zwp_idle_inhibit_manager_v1 *idleinhibitmanager);
+    void setup(zwp_idle_inhibit_manager_v1* idleinhibitmanager);
     /**
      * @returns @c true if managing a zwp_idle_inhibit_manager_v1.
      **/
@@ -94,11 +94,11 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this IdleInhibitManager.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this IdleInhibitManager.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates an IdleInhibitor for the given @p surface.
@@ -107,7 +107,7 @@ public:
      * @param parent The parent object for the IdleInhibitor
      * @returns The created IdleInhibitor
      **/
-    IdleInhibitor *createInhibitor(Surface *surface, QObject *parent = nullptr);
+    IdleInhibitor* createInhibitor(Surface* surface, QObject* parent = nullptr);
 
     operator zwp_idle_inhibit_manager_v1*();
     operator zwp_idle_inhibit_manager_v1*() const;
@@ -155,7 +155,7 @@ public:
      * When using IdleInhibitManager::createIdleInhibitor there is no need to call this
      * method.
      **/
-    void setup(zwp_idle_inhibitor_v1 *idleinhibitor);
+    void setup(zwp_idle_inhibitor_v1* idleinhibitor);
     /**
      * @returns @c true if managing a zwp_idle_inhibitor_v1.
      **/
@@ -177,7 +177,8 @@ public:
      *
      * It is suggested to connect this method to ConnectionThread::connectionDied:
      * @code
-     * connect(connection, &ConnectionThread::connectionDied, idleinhibitor, &IdleInhibitor::destroy);
+     * connect(connection, &ConnectionThread::connectionDied, idleinhibitor,
+     * &IdleInhibitor::destroy);
      * @endcode
      *
      * @see release
@@ -189,11 +190,10 @@ public:
 
 private:
     friend class IdleInhibitManager;
-    explicit IdleInhibitor(QObject *parent = nullptr);
+    explicit IdleInhibitor(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

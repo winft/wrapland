@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QPointer>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -58,7 +58,9 @@ class WRAPLANDCLIENT_EXPORT SubSurface : public QObject
 {
     Q_OBJECT
 public:
-    explicit SubSurface(QPointer<Surface> surface, QPointer<Surface> parentSurface, QObject *parent = nullptr);
+    explicit SubSurface(QPointer<Surface> surface,
+                        QPointer<Surface> parentSurface,
+                        QObject* parent = nullptr);
     virtual ~SubSurface();
 
     /**
@@ -70,7 +72,7 @@ public:
      * When using SubCompositor::createSubSurface there is no need to call this
      * method.
      **/
-    void setup(wl_subsurface *subsurface);
+    void setup(wl_subsurface* subsurface);
     /**
      * Releases the wl_subsurface interface.
      * After the interface has been released the SubSurface instance is no
@@ -83,7 +85,7 @@ public:
      **/
     enum class Mode {
         Synchronized,
-        Desynchronized
+        Desynchronized,
     };
 
     /**
@@ -98,7 +100,7 @@ public:
      *
      * The change is only applied after the parent Surface got committed.
      **/
-    void setPosition(const QPoint &pos);
+    void setPosition(const QPoint& pos);
     QPoint position() const;
 
     /**
@@ -166,7 +168,7 @@ public:
      **/
     QPointer<Surface> parentSurface() const;
 
-    static QPointer<SubSurface> get(wl_subsurface *native);
+    static QPointer<SubSurface> get(wl_subsurface* native);
 
     operator wl_subsurface*();
     operator wl_subsurface*() const;

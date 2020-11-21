@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_SLIDE_H
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -78,7 +78,7 @@ public:
      * to call setup. In order to get a ready to use SlideManager prefer using
      * Registry::createSlideManager.
      **/
-    explicit SlideManager(QObject *parent = nullptr);
+    explicit SlideManager(QObject* parent = nullptr);
     virtual ~SlideManager();
 
     /**
@@ -86,7 +86,7 @@ public:
      * When using Registry::createSlideManager there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_slide_manager *slidemanager);
+    void setup(org_kde_kwin_slide_manager* slidemanager);
     /**
      * @returns @c true if managing a org_kde_kwin_slide_manager.
      **/
@@ -101,15 +101,15 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this SlideManager.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this SlideManager.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
-    Slide *createSlide(Surface *surface, QObject *parent = nullptr);
+    Slide* createSlide(Surface* surface, QObject* parent = nullptr);
 
-    void removeSlide(Surface *surface);
+    void removeSlide(Surface* surface);
 
     operator org_kde_kwin_slide_manager*();
     operator org_kde_kwin_slide_manager*() const;
@@ -137,9 +137,9 @@ class WRAPLANDCLIENT_EXPORT Slide : public QObject
 public:
     enum Location {
         Left = 0, /**< Slide from the left edge of the screen */
-        Top, /**< Slide from the top edge of the screen */
-        Right, /**< Slide from the bottom edge of the screen */
-        Bottom /**< Slide from the bottom edge of the screen */
+        Top,      /**< Slide from the top edge of the screen */
+        Right,    /**< Slide from the bottom edge of the screen */
+        Bottom,   /**< Slide from the bottom edge of the screen */
     };
 
     virtual ~Slide();
@@ -149,7 +149,7 @@ public:
      * When using SlideManager::createSlide there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_slide *slide);
+    void setup(org_kde_kwin_slide* slide);
 
     /**
      * @returns @c true if managing a org_kde_kwin_slide.
@@ -181,11 +181,10 @@ public:
 
 private:
     friend class SlideManager;
-    explicit Slide(QObject *parent = nullptr);
+    explicit Slide(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

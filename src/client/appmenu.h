@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_APPMENU_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct org_kde_kwin_appmenu_manager;
 struct org_kde_kwin_appmenu;
@@ -71,7 +71,7 @@ public:
      * to call setup. In order to get a ready to use AppMenuManager prefer using
      * Registry::createAppMenuManager.
      **/
-    explicit AppMenuManager(QObject *parent = nullptr);
+    explicit AppMenuManager(QObject* parent = nullptr);
     virtual ~AppMenuManager();
 
     /**
@@ -79,7 +79,7 @@ public:
      * When using Registry::createAppMenuManager there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_appmenu_manager *appmenumanager);
+    void setup(org_kde_kwin_appmenu_manager* appmenumanager);
     /**
      * @returns @c true if managing a org_kde_kwin_appmenu_manager.
      **/
@@ -94,13 +94,13 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this AppMenuManager.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this AppMenuManager.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
-    AppMenu *create(Surface *surface, QObject *parent = nullptr);
+    AppMenu* create(Surface* surface, QObject* parent = nullptr);
 
     operator org_kde_kwin_appmenu_manager*();
     operator org_kde_kwin_appmenu_manager*() const;
@@ -134,7 +134,7 @@ public:
      * When using AppMenuManager::createAppmenu there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_appmenu *appmenu);
+    void setup(org_kde_kwin_appmenu* appmenu);
     /**
      * @returns @c true if managing a org_kde_kwin_appmenu.
      **/
@@ -150,18 +150,17 @@ public:
      * Sets the appmenu address. The DBus object should be registered before making this call
      * Strings should be valid DBus formatted names, in latin1.
      */
-    void setAddress(const QString & serviceName, const QString & objectPath);
+    void setAddress(const QString& serviceName, const QString& objectPath);
 
     operator org_kde_kwin_appmenu*();
     operator org_kde_kwin_appmenu*() const;
 
 private:
     friend class AppMenuManager;
-    explicit AppMenu(QObject *parent = nullptr);
+    explicit AppMenu(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

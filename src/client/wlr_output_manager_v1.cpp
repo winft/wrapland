@@ -36,19 +36,22 @@ namespace Client
 class Q_DECL_HIDDEN WlrOutputManagerV1::Private
 {
 public:
-    explicit Private(WlrOutputManagerV1 *q) : q(q) {}
+    explicit Private(WlrOutputManagerV1* q)
+        : q(q)
+    {
+    }
     ~Private() = default;
 
-    void setup(zwlr_output_manager_v1 *manager);
+    void setup(zwlr_output_manager_v1* manager);
 
     WaylandPointer<zwlr_output_manager_v1, zwlr_output_manager_v1_destroy> outputManager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 
-    static void headCallback(void *data, zwlr_output_manager_v1 *manager, zwlr_output_head_v1 *id);
-    static void doneCallback(void *data, zwlr_output_manager_v1 *manager, quint32 serial);
-    static void finishedCallback(void *data, zwlr_output_manager_v1 *manager);
+    static void headCallback(void* data, zwlr_output_manager_v1* manager, zwlr_output_head_v1* id);
+    static void doneCallback(void* data, zwlr_output_manager_v1* manager, quint32 serial);
+    static void finishedCallback(void* data, zwlr_output_manager_v1* manager);
 
-    WlrOutputManagerV1 *q;
+    WlrOutputManagerV1* q;
     static const struct zwlr_output_manager_v1_listener s_listener;
 
     quint32 serial;
@@ -57,11 +60,12 @@ public:
 const zwlr_output_manager_v1_listener WlrOutputManagerV1::Private::s_listener = {
     headCallback,
     doneCallback,
-    finishedCallback
+    finishedCallback,
 };
 
-void WlrOutputManagerV1::Private::headCallback(void *data, zwlr_output_manager_v1 *manager,
-                                               zwlr_output_head_v1 *id)
+void WlrOutputManagerV1::Private::headCallback(void* data,
+                                               zwlr_output_manager_v1* manager,
+                                               zwlr_output_head_v1* id)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputManager == manager);
@@ -70,7 +74,8 @@ void WlrOutputManagerV1::Private::headCallback(void *data, zwlr_output_manager_v
     Q_EMIT d->q->head(head);
 }
 
-void WlrOutputManagerV1::Private::doneCallback(void *data, zwlr_output_manager_v1 *manager,
+void WlrOutputManagerV1::Private::doneCallback(void* data,
+                                               zwlr_output_manager_v1* manager,
                                                quint32 serial)
 {
     auto d = reinterpret_cast<Private*>(data);
@@ -80,7 +85,7 @@ void WlrOutputManagerV1::Private::doneCallback(void *data, zwlr_output_manager_v
     Q_EMIT d->q->done();
 }
 
-void WlrOutputManagerV1::Private::finishedCallback(void *data, zwlr_output_manager_v1 *manager)
+void WlrOutputManagerV1::Private::finishedCallback(void* data, zwlr_output_manager_v1* manager)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputManager == manager);
@@ -88,7 +93,7 @@ void WlrOutputManagerV1::Private::finishedCallback(void *data, zwlr_output_manag
     Q_EMIT d->q->removed();
 }
 
-void WlrOutputManagerV1::Private::setup(zwlr_output_manager_v1 *manager)
+void WlrOutputManagerV1::Private::setup(zwlr_output_manager_v1* manager)
 {
     Q_ASSERT(manager);
     Q_ASSERT(!outputManager);
@@ -97,9 +102,9 @@ void WlrOutputManagerV1::Private::setup(zwlr_output_manager_v1 *manager)
     zwlr_output_manager_v1_add_listener(manager, &s_listener, this);
 }
 
-WlrOutputManagerV1::WlrOutputManagerV1(QObject *parent)
-: QObject(parent)
-, d(new Private(this))
+WlrOutputManagerV1::WlrOutputManagerV1(QObject* parent)
+    : QObject(parent)
+    , d(new Private(this))
 {
 }
 
@@ -108,7 +113,7 @@ WlrOutputManagerV1::~WlrOutputManagerV1()
     d->outputManager.release();
 }
 
-void WlrOutputManagerV1::setup(zwlr_output_manager_v1 *outputManager)
+void WlrOutputManagerV1::setup(zwlr_output_manager_v1* outputManager)
 {
     d->setup(outputManager);
 }
@@ -118,7 +123,7 @@ void WlrOutputManagerV1::release()
     d->outputManager.release();
 }
 
-void WlrOutputManagerV1::setEventQueue(EventQueue *queue)
+void WlrOutputManagerV1::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
@@ -143,10 +148,10 @@ bool WlrOutputManagerV1::isValid() const
     return d->outputManager.isValid();
 }
 
-WlrOutputConfigurationV1* WlrOutputManagerV1::createConfiguration(QObject *parent)
+WlrOutputConfigurationV1* WlrOutputManagerV1::createConfiguration(QObject* parent)
 {
     Q_UNUSED(parent);
-    auto *config = new WlrOutputConfigurationV1(this);
+    auto* config = new WlrOutputConfigurationV1(this);
     auto w = zwlr_output_manager_v1_create_configuration(d->outputManager, d->serial);
 
     if (d->queue) {
@@ -157,24 +162,23 @@ WlrOutputConfigurationV1* WlrOutputManagerV1::createConfiguration(QObject *paren
     return config;
 }
 
-
 class Q_DECL_HIDDEN WlrOutputModeV1::Private
 {
 public:
-    Private(WlrOutputModeV1 *q, zwlr_output_mode_v1 *mode);
+    Private(WlrOutputModeV1* q, zwlr_output_mode_v1* mode);
     ~Private() = default;
 
     WaylandPointer<zwlr_output_mode_v1, zwlr_output_mode_v1_destroy> outputMode;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 
-    void name(const QString &name);
+    void name(const QString& name);
 
-    static void sizeCallback(void *data, zwlr_output_mode_v1 *mode, int width, int height);
-    static void refreshCallback(void *data, zwlr_output_mode_v1 *mode, int refresh);
-    static void preferredCallback(void *data, zwlr_output_mode_v1 *mode);
-    static void finishedCallback(void *data, zwlr_output_mode_v1 *mode);
+    static void sizeCallback(void* data, zwlr_output_mode_v1* mode, int width, int height);
+    static void refreshCallback(void* data, zwlr_output_mode_v1* mode, int refresh);
+    static void preferredCallback(void* data, zwlr_output_mode_v1* mode);
+    static void finishedCallback(void* data, zwlr_output_mode_v1* mode);
 
-    WlrOutputModeV1 *q;
+    WlrOutputModeV1* q;
     static const struct zwlr_output_mode_v1_listener s_listener;
 
     QSize size;
@@ -186,10 +190,13 @@ const zwlr_output_mode_v1_listener WlrOutputModeV1::Private::s_listener = {
     sizeCallback,
     refreshCallback,
     preferredCallback,
-    finishedCallback
+    finishedCallback,
 };
 
-void WlrOutputModeV1::Private::sizeCallback(void *data, zwlr_output_mode_v1 *mode, int width, int height)
+void WlrOutputModeV1::Private::sizeCallback(void* data,
+                                            zwlr_output_mode_v1* mode,
+                                            int width,
+                                            int height)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputMode == mode);
@@ -197,7 +204,7 @@ void WlrOutputModeV1::Private::sizeCallback(void *data, zwlr_output_mode_v1 *mod
     d->size = QSize(width, height);
 }
 
-void WlrOutputModeV1::Private::refreshCallback(void *data, zwlr_output_mode_v1 *mode, int refresh)
+void WlrOutputModeV1::Private::refreshCallback(void* data, zwlr_output_mode_v1* mode, int refresh)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputMode == mode);
@@ -205,7 +212,7 @@ void WlrOutputModeV1::Private::refreshCallback(void *data, zwlr_output_mode_v1 *
     d->refresh = refresh;
 }
 
-void WlrOutputModeV1::Private::preferredCallback(void *data, zwlr_output_mode_v1 *mode)
+void WlrOutputModeV1::Private::preferredCallback(void* data, zwlr_output_mode_v1* mode)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputMode == mode);
@@ -213,7 +220,7 @@ void WlrOutputModeV1::Private::preferredCallback(void *data, zwlr_output_mode_v1
     d->preferred = true;
 }
 
-void WlrOutputModeV1::Private::finishedCallback(void *data, zwlr_output_mode_v1 *mode)
+void WlrOutputModeV1::Private::finishedCallback(void* data, zwlr_output_mode_v1* mode)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputMode == mode);
@@ -221,14 +228,14 @@ void WlrOutputModeV1::Private::finishedCallback(void *data, zwlr_output_mode_v1 
     Q_EMIT d->q->removed();
 }
 
-WlrOutputModeV1::Private::Private(WlrOutputModeV1 *q, zwlr_output_mode_v1 *mode)
+WlrOutputModeV1::Private::Private(WlrOutputModeV1* q, zwlr_output_mode_v1* mode)
     : q(q)
 {
     outputMode.setup(mode);
     zwlr_output_mode_v1_add_listener(outputMode, &s_listener, this);
 }
 
-WlrOutputModeV1::WlrOutputModeV1(zwlr_output_mode_v1 *mode, QObject *parent)
+WlrOutputModeV1::WlrOutputModeV1(zwlr_output_mode_v1* mode, QObject* parent)
     : QObject(parent)
     , d(new Private(this, mode))
 {
@@ -251,34 +258,33 @@ bool WlrOutputModeV1::preferred() const
     return d->preferred;
 }
 
-
 class Q_DECL_HIDDEN WlrOutputHeadV1::Private
 {
 public:
-    Private(WlrOutputHeadV1 *q, zwlr_output_head_v1 *head);
+    Private(WlrOutputHeadV1* q, zwlr_output_head_v1* head);
     ~Private() = default;
 
     WaylandPointer<zwlr_output_head_v1, zwlr_output_head_v1_destroy> outputHead;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 
-    static void nameCallback(void *data, zwlr_output_head_v1 *head, const char *name);
-    static void descriptionCallback(void *data, zwlr_output_head_v1 *head, const char *description);
-    static void physicalSizeCallback(void *data, zwlr_output_head_v1 *head,
-                                     int width, int height);
-    static void modeCallback(void *data, zwlr_output_head_v1 *head, zwlr_output_mode_v1 *mode);
-    static void enabledCallback(void *data, zwlr_output_head_v1 *head, int enabled);
-    static void currentModeCallback(void *data, zwlr_output_head_v1 *head,
-                                    zwlr_output_mode_v1 *mode);
-    static void positionCallback(void *data, zwlr_output_head_v1 *head, int x, int y);
-    static void transformCallback(void *data, zwlr_output_head_v1 *head, int transform);
-    static void scaleCallback(void *data, zwlr_output_head_v1 *head, wl_fixed_t scale);
-    static void finishedCallback(void *data, zwlr_output_head_v1 *head);
+    static void nameCallback(void* data, zwlr_output_head_v1* head, const char* name);
+    static void descriptionCallback(void* data, zwlr_output_head_v1* head, const char* description);
+    static void physicalSizeCallback(void* data, zwlr_output_head_v1* head, int width, int height);
+    static void modeCallback(void* data, zwlr_output_head_v1* head, zwlr_output_mode_v1* mode);
+    static void enabledCallback(void* data, zwlr_output_head_v1* head, int enabled);
+    static void
+    currentModeCallback(void* data, zwlr_output_head_v1* head, zwlr_output_mode_v1* mode);
+    static void positionCallback(void* data, zwlr_output_head_v1* head, int x, int y);
+    static void transformCallback(void* data, zwlr_output_head_v1* head, int transform);
+    static void scaleCallback(void* data, zwlr_output_head_v1* head, wl_fixed_t scale);
+    static void finishedCallback(void* data, zwlr_output_head_v1* head);
 
-    static void makeCallback(void *data, zwlr_output_head_v1 *head, const char *make);
-    static void modelCallback(void *data, zwlr_output_head_v1 *head, const char *model);
-    static void serialNumberCallback(void *data, zwlr_output_head_v1 *head, const char *serialNumber);
+    static void makeCallback(void* data, zwlr_output_head_v1* head, const char* make);
+    static void modelCallback(void* data, zwlr_output_head_v1* head, const char* model);
+    static void
+    serialNumberCallback(void* data, zwlr_output_head_v1* head, const char* serialNumber);
 
-    WlrOutputHeadV1 *q;
+    WlrOutputHeadV1* q;
     static const struct zwlr_output_head_v1_listener s_listener;
 
     QString name;
@@ -294,10 +300,10 @@ public:
     QString serialNumber;
 
     std::vector<std::unique_ptr<WlrOutputModeV1>> modes;
-    WlrOutputModeV1 *currentMode{nullptr};
+    WlrOutputModeV1* currentMode{nullptr};
 
 private:
-    WlrOutputModeV1* getMode(zwlr_output_mode_v1 *mode) const;
+    WlrOutputModeV1* getMode(zwlr_output_mode_v1* mode) const;
 };
 
 const zwlr_output_head_v1_listener WlrOutputHeadV1::Private::s_listener = {
@@ -316,7 +322,7 @@ const zwlr_output_head_v1_listener WlrOutputHeadV1::Private::s_listener = {
     serialNumberCallback,
 };
 
-void WlrOutputHeadV1::Private::nameCallback(void *data, zwlr_output_head_v1 *head, const char *name)
+void WlrOutputHeadV1::Private::nameCallback(void* data, zwlr_output_head_v1* head, const char* name)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -325,8 +331,9 @@ void WlrOutputHeadV1::Private::nameCallback(void *data, zwlr_output_head_v1 *hea
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::descriptionCallback(void *data, zwlr_output_head_v1 *head,
-                                                   const char *description)
+void WlrOutputHeadV1::Private::descriptionCallback(void* data,
+                                                   zwlr_output_head_v1* head,
+                                                   const char* description)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -335,8 +342,10 @@ void WlrOutputHeadV1::Private::descriptionCallback(void *data, zwlr_output_head_
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::physicalSizeCallback(void *data, zwlr_output_head_v1 *head,
-                                                    int width, int height)
+void WlrOutputHeadV1::Private::physicalSizeCallback(void* data,
+                                                    zwlr_output_head_v1* head,
+                                                    int width,
+                                                    int height)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -345,18 +354,19 @@ void WlrOutputHeadV1::Private::physicalSizeCallback(void *data, zwlr_output_head
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::modeCallback(void *data, zwlr_output_head_v1 *head,
-                                            zwlr_output_mode_v1 *mode)
+void WlrOutputHeadV1::Private::modeCallback(void* data,
+                                            zwlr_output_head_v1* head,
+                                            zwlr_output_mode_v1* mode)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
 
     auto mode_wrapper = new WlrOutputModeV1(mode, d->q);
     connect(mode_wrapper, &WlrOutputModeV1::removed, d->q, [d, mode_wrapper] {
-        auto it
-            = std::find_if(d->modes.begin(), d->modes.end(), [mode_wrapper](auto const& stored_mode) {
-            return mode_wrapper == stored_mode.get();
-        });
+        auto it = std::find_if(
+            d->modes.begin(), d->modes.end(), [mode_wrapper](auto const& stored_mode) {
+                return mode_wrapper == stored_mode.get();
+            });
         assert(it != d->modes.end());
         d->modes.erase(it);
         if (mode_wrapper == d->currentMode) {
@@ -369,7 +379,7 @@ void WlrOutputHeadV1::Private::modeCallback(void *data, zwlr_output_head_v1 *hea
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::enabledCallback(void *data, zwlr_output_head_v1 *head, int enabled)
+void WlrOutputHeadV1::Private::enabledCallback(void* data, zwlr_output_head_v1* head, int enabled)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -378,8 +388,9 @@ void WlrOutputHeadV1::Private::enabledCallback(void *data, zwlr_output_head_v1 *
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::currentModeCallback(void *data, zwlr_output_head_v1 *head,
-                                                   zwlr_output_mode_v1 *mode)
+void WlrOutputHeadV1::Private::currentModeCallback(void* data,
+                                                   zwlr_output_head_v1* head,
+                                                   zwlr_output_mode_v1* mode)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -388,7 +399,7 @@ void WlrOutputHeadV1::Private::currentModeCallback(void *data, zwlr_output_head_
     Q_EMIT d->q->changed();
 }
 
-WlrOutputModeV1* WlrOutputHeadV1::Private::getMode(zwlr_output_mode_v1 *mode) const
+WlrOutputModeV1* WlrOutputHeadV1::Private::getMode(zwlr_output_mode_v1* mode) const
 {
     for (auto const& modeWrapper : modes) {
         auto raw_ptr = modeWrapper.get();
@@ -409,7 +420,7 @@ WlrOutputModeV1::operator zwlr_output_mode_v1*() const
     return d->outputMode;
 }
 
-void WlrOutputHeadV1::Private::positionCallback(void *data, zwlr_output_head_v1 *head, int x, int y)
+void WlrOutputHeadV1::Private::positionCallback(void* data, zwlr_output_head_v1* head, int x, int y)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -418,7 +429,8 @@ void WlrOutputHeadV1::Private::positionCallback(void *data, zwlr_output_head_v1 
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::transformCallback(void *data, zwlr_output_head_v1 *head,
+void WlrOutputHeadV1::Private::transformCallback(void* data,
+                                                 zwlr_output_head_v1* head,
                                                  int transform)
 {
     auto d = reinterpret_cast<Private*>(data);
@@ -449,7 +461,8 @@ void WlrOutputHeadV1::Private::transformCallback(void *data, zwlr_output_head_v1
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::scaleCallback(void *data, zwlr_output_head_v1 *head,
+void WlrOutputHeadV1::Private::scaleCallback(void* data,
+                                             zwlr_output_head_v1* head,
                                              wl_fixed_t scale)
 {
     auto d = reinterpret_cast<Private*>(data);
@@ -459,7 +472,7 @@ void WlrOutputHeadV1::Private::scaleCallback(void *data, zwlr_output_head_v1 *he
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::finishedCallback(void *data, zwlr_output_head_v1 *head)
+void WlrOutputHeadV1::Private::finishedCallback(void* data, zwlr_output_head_v1* head)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -468,7 +481,7 @@ void WlrOutputHeadV1::Private::finishedCallback(void *data, zwlr_output_head_v1 
     delete d->q;
 }
 
-void WlrOutputHeadV1::Private::makeCallback(void *data, zwlr_output_head_v1 *head, const char *make)
+void WlrOutputHeadV1::Private::makeCallback(void* data, zwlr_output_head_v1* head, const char* make)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -477,9 +490,9 @@ void WlrOutputHeadV1::Private::makeCallback(void *data, zwlr_output_head_v1 *hea
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::modelCallback(void *data,
-                                             zwlr_output_head_v1 *head,
-                                             const char *model)
+void WlrOutputHeadV1::Private::modelCallback(void* data,
+                                             zwlr_output_head_v1* head,
+                                             const char* model)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -488,9 +501,9 @@ void WlrOutputHeadV1::Private::modelCallback(void *data,
     Q_EMIT d->q->changed();
 }
 
-void WlrOutputHeadV1::Private::serialNumberCallback(void *data,
-                                                    zwlr_output_head_v1 *head,
-                                                    const char *serialNumber)
+void WlrOutputHeadV1::Private::serialNumberCallback(void* data,
+                                                    zwlr_output_head_v1* head,
+                                                    const char* serialNumber)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -499,14 +512,14 @@ void WlrOutputHeadV1::Private::serialNumberCallback(void *data,
     Q_EMIT d->q->changed();
 }
 
-WlrOutputHeadV1::Private::Private(WlrOutputHeadV1 *q, zwlr_output_head_v1 *head)
+WlrOutputHeadV1::Private::Private(WlrOutputHeadV1* q, zwlr_output_head_v1* head)
     : q(q)
 {
     outputHead.setup(head);
     zwlr_output_head_v1_add_listener(outputHead, &s_listener, this);
 }
 
-WlrOutputHeadV1::WlrOutputHeadV1(zwlr_output_head_v1 *head, QObject *parent)
+WlrOutputHeadV1::WlrOutputHeadV1(zwlr_output_head_v1* head, QObject* parent)
     : QObject(parent)
     , d(new Private(this, head))
 {

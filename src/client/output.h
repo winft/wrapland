@@ -23,7 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QPointer>
 #include <QSize>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -80,7 +80,7 @@ public:
         HorizontalRGB,
         HorizontalBGR,
         VerticalRGB,
-        VerticalBGR
+        VerticalBGR,
     };
     enum class Transform {
         Normal,
@@ -90,13 +90,13 @@ public:
         Flipped,
         Flipped90,
         Flipped180,
-        Flipped270
+        Flipped270,
     };
     struct Mode {
         enum class Flag {
             None = 0,
             Current = 1 << 0,
-            Preferred = 1 << 1
+            Preferred = 1 << 1,
         };
         Q_DECLARE_FLAGS(Flags, Flag)
         /**
@@ -117,9 +117,9 @@ public:
          **/
         QPointer<Output> output;
 
-        bool operator==(const Mode &m) const;
+        bool operator==(const Mode& m) const;
     };
-    explicit Output(QObject *parent = nullptr);
+    explicit Output(QObject* parent = nullptr);
     virtual ~Output();
 
     /**
@@ -127,7 +127,7 @@ public:
      * When using Registry::createOutput there is no need to call this
      * method.
      **/
-    void setup(wl_output *output);
+    void setup(wl_output* output);
 
     /**
      * @returns @c true if managing a wl_output.
@@ -135,7 +135,7 @@ public:
     bool isValid() const;
     operator wl_output*();
     operator wl_output*() const;
-    wl_output *output();
+    wl_output* output();
     /**
      * Size in millimeters.
      **/
@@ -196,17 +196,17 @@ public:
     /**
      * Sets the @p queue to use for bound proxies.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for bound proxies.
      **/
-    EventQueue *eventQueue() const;
+    EventQueue* eventQueue() const;
 
     /**
      * @returns The Output for the @p native wl_output. @c null if there is no Output for it.
      * @since 0.0.527
      **/
-    static Output *get(wl_output *native);
+    static Output* get(wl_output* native);
 
     /**
      * Releases the wl_output interface.
@@ -227,13 +227,13 @@ Q_SIGNALS:
      * @param mode The newly added Mode.
      * @see modeChanged
      **/
-    void modeAdded(const Wrapland::Client::Output::Mode &mode);
+    void modeAdded(const Wrapland::Client::Output::Mode& mode);
     /**
      * Emitted whenever a Mode changes.
      * This normally means that the @c Mode::Flag::Current is added or removed.
      * @param mode The changed Mode
      **/
-    void modeChanged(const Wrapland::Client::Output::Mode &mode);
+    void modeChanged(const Wrapland::Client::Output::Mode& mode);
 
     /**
      * The corresponding global for this interface on the Registry got removed.
