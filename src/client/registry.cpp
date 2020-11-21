@@ -65,7 +65,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // Qt
 #include <QDebug>
 // wayland
-#include "../compat/wayland-xdg-shell-v5-client-protocol.h"
 #include <wayland-appmenu-client-protocol.h>
 #include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
@@ -367,16 +366,6 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &wp_viewporter_interface,
             &Registry::viewporterAnnounced,
             &Registry::viewporterRemoved,
-        },
-    },
-    {
-        Registry::Interface::XdgShellUnstableV5,
-        {
-            1,
-            QByteArrayLiteral("xdg_shell"),
-            &zxdg_shell_v5_interface,
-            &Registry::xdgShellUnstableV5Announced,
-            &Registry::xdgShellUnstableV5Removed,
         },
     },
     {
@@ -842,7 +831,6 @@ BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
 BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
 BIND(Viewporter, wp_viewporter)
-BIND(XdgShellUnstableV5, xdg_shell)
 BIND(XdgShellUnstableV6, zxdg_shell_v6)
 BIND(XdgShellStable, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
@@ -957,9 +945,6 @@ TextInputManager* Registry::createTextInputManager(quint32 name, quint32 version
 XdgShell* Registry::createXdgShell(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
-    case Interface::XdgShellUnstableV5:
-        return d->create<XdgShellUnstableV5>(
-            name, version, parent, &Registry::bindXdgShellUnstableV5);
     case Interface::XdgShellUnstableV6:
         return d->create<XdgShellUnstableV6>(
             name, version, parent, &Registry::bindXdgShellUnstableV6);

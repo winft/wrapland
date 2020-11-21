@@ -102,11 +102,6 @@ XdgDecoration* XdgDecorationManager::getToplevelDecoration(XdgShellSurface* topl
 {
     Q_ASSERT(isValid());
     xdg_toplevel* toplevel_resource = *toplevel;
-    if (!toplevel_resource) { // i.e using XDGShellV5
-        qWarning()
-            << "Trying to create an XdgDecoration without an XDGShell stable toplevel object";
-        return nullptr;
-    }
     auto p = new XdgDecoration(parent);
     auto w = zxdg_decoration_manager_v1_get_toplevel_decoration(d->xdgdecorationmanager,
                                                                 toplevel_resource);

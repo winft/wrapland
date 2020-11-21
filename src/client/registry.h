@@ -159,30 +159,29 @@ public:
      * object.
      **/
     enum class Interface {
-        Unknown,                    ///< Refers to an Unknown interface
-        Compositor,                 ///< Refers to the wl_compositor interface
-        Shell,                      ///< Refers to the wl_shell interface
-        Seat,                       ///< Refers to the wl_seat interface
-        Shm,                        ///< Refers to the wl_shm interface
-        Output,                     ///< Refers to the wl_output interface
-        FullscreenShell,            ///< Refers to the _wl_fullscreen_shell interface
-        SubCompositor,              ///< Refers to the wl_subcompositor interface;
-        DataDeviceManager,          ///< Refers to the wl_data_device_manager interface
-        PlasmaShell,                ///< Refers to org_kde_plasma_shell interface
-        PlasmaWindowManagement,     ///< Refers to org_kde_plasma_window_management interface
-        Idle,                       ///< Refers to org_kde_kwin_idle_interface interface
-        FakeInput,                  ///< Refers to org_kde_kwin_fake_input interface
-        Shadow,                     ///< Refers to org_kde_kwin_shadow_manager interface
-        Blur,                       ///< refers to org_kde_kwin_blur_manager interface
-        Contrast,                   ///< refers to org_kde_kwin_contrast_manager interface
-        Slide,                      ///< refers to org_kde_kwin_slide_manager
-        Dpms,                       ///< Refers to org_kde_kwin_dpms_manager interface
-        OutputManagementV1,         ///< Refers to the zkwinft_output_management_v1 interface
-        OutputDeviceV1,             ///< Refers to the zkwinft_output_device_v1 interface
-        WlrOutputManagerV1,         ///< Refers to the zwlr_output_manager_v1 interface
-        TextInputManagerUnstableV0, ///< Refers to wl_text_input_manager, @since 0.0.523
-        TextInputManagerUnstableV2, ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
-        XdgShellUnstableV5,         ///< Refers to xdg_shell (unstable version 5), @since 0.0.525
+        Unknown,                          ///< Refers to an Unknown interface
+        Compositor,                       ///< Refers to the wl_compositor interface
+        Shell,                            ///< Refers to the wl_shell interface
+        Seat,                             ///< Refers to the wl_seat interface
+        Shm,                              ///< Refers to the wl_shm interface
+        Output,                           ///< Refers to the wl_output interface
+        FullscreenShell,                  ///< Refers to the _wl_fullscreen_shell interface
+        SubCompositor,                    ///< Refers to the wl_subcompositor interface;
+        DataDeviceManager,                ///< Refers to the wl_data_device_manager interface
+        PlasmaShell,                      ///< Refers to org_kde_plasma_shell interface
+        PlasmaWindowManagement,           ///< Refers to org_kde_plasma_window_management interface
+        Idle,                             ///< Refers to org_kde_kwin_idle_interface interface
+        FakeInput,                        ///< Refers to org_kde_kwin_fake_input interface
+        Shadow,                           ///< Refers to org_kde_kwin_shadow_manager interface
+        Blur,                             ///< refers to org_kde_kwin_blur_manager interface
+        Contrast,                         ///< refers to org_kde_kwin_contrast_manager interface
+        Slide,                            ///< refers to org_kde_kwin_slide_manager
+        Dpms,                             ///< Refers to org_kde_kwin_dpms_manager interface
+        OutputManagementV1,               ///< Refers to the zkwinft_output_management_v1 interface
+        OutputDeviceV1,                   ///< Refers to the zkwinft_output_device_v1 interface
+        WlrOutputManagerV1,               ///< Refers to the zwlr_output_manager_v1 interface
+        TextInputManagerUnstableV0,       ///< Refers to wl_text_input_manager, @since 0.0.523
+        TextInputManagerUnstableV2,       ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
         RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since
                                           ///< 0.0.528
         PointerGesturesUnstableV1,        ///< Refers to zwp_pointer_gestures_v1, @since 0.0.529
@@ -558,16 +557,6 @@ public:
      * @since 0.518.0
      **/
     wp_viewporter* bindViewporter(uint32_t name, uint32_t version) const;
-    /**
-     * Binds the xdg_shell (unstable version 5) with @p name and @p version.
-     * If the @p name does not exist or is not for the xdg shell interface in unstable version 5,
-     * @c null will be returned.
-     *
-     * Prefer using createXdgShell instead.
-     * @see createXdgShell
-     * @since 0.0.525
-     **/
-    xdg_shell* bindXdgShellUnstableV5(uint32_t name, uint32_t version) const;
     /**
      * Binds the zxdg_shell_v6 (unstable version 6) with @p name and @p version.
      * If the @p name does not exist or is not for the xdg shell interface in unstable version 5,
@@ -1584,13 +1573,6 @@ Q_SIGNALS:
      **/
     void viewporterAnnounced(quint32 name, quint32 version);
     /**
-     * Emitted whenever a xdg_shell (unstable version 5) interface gets announced.
-     * @param name The name for the announced interface
-     * @param version The maximum supported version of the announced interface
-     * @since 0.0.525
-     **/
-    void xdgShellUnstableV5Announced(quint32 name, quint32 version);
-    /**
      * Emitted whenever a zxdg_shell_v6 (unstable version 6) interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1853,12 +1835,6 @@ Q_SIGNALS:
      * @since 0.518.0
      **/
     void viewporterRemoved(quint32 name);
-    /**
-     * Emitted whenever an xdg_shell (unstable version 5) interface gets removed.
-     * @param name The name for the removed interface
-     * @since 0.0.525
-     **/
-    void xdgShellUnstableV5Removed(quint32 name);
     /**
      * Emitted whenever an xdg_shell (unstable version 5) interface gets removed.
      * @param name The name for the removed interface

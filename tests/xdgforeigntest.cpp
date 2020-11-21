@@ -111,12 +111,6 @@ void XdgForeignTest::setupRegistry(Registry* registry)
             [this, registry](quint32 name, quint32 version) {
                 m_compositor = registry->createCompositor(name, version, this);
             });
-    connect(registry,
-            &Registry::xdgShellUnstableV5Announced,
-            this,
-            [this, registry](quint32 name, quint32 version) {
-                m_shell = registry->createXdgShell(name, version, this);
-            });
     connect(
         registry, &Registry::shmAnnounced, this, [this, registry](quint32 name, quint32 version) {
             m_shm = registry->createShmPool(name, version, this);

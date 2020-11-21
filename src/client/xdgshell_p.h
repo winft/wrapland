@@ -34,10 +34,6 @@ class Q_DECL_HIDDEN XdgShell::Private
 {
 public:
     virtual ~Private();
-    virtual void setupV5(xdg_shell* xdgshellv5)
-    {
-        Q_UNUSED(xdgshellv5)
-    }
     virtual void setupV6(zxdg_shell_v6* xdgshellv6)
     {
         Q_UNUSED(xdgshellv6)
@@ -125,17 +121,6 @@ protected:
     Private() = default;
 };
 
-class XdgShellUnstableV5 : public XdgShell
-{
-    Q_OBJECT
-public:
-    explicit XdgShellUnstableV5(QObject* parent = nullptr);
-    virtual ~XdgShellUnstableV5();
-
-private:
-    class Private;
-};
-
 class XdgShellUnstableV6 : public XdgShell
 {
     Q_OBJECT
@@ -155,18 +140,6 @@ public:
     virtual ~XdgShellStable();
 
 private:
-    class Private;
-};
-
-class XdgShellSurfaceUnstableV5 : public XdgShellSurface
-{
-    Q_OBJECT
-public:
-    virtual ~XdgShellSurfaceUnstableV5();
-
-private:
-    explicit XdgShellSurfaceUnstableV5(QObject* parent = nullptr);
-    friend class XdgShellUnstableV5;
     class Private;
 };
 
@@ -201,10 +174,6 @@ public:
     EventQueue* queue = nullptr;
     QSize size;
 
-    virtual void setupV5(xdg_surface* surface)
-    {
-        Q_UNUSED(surface)
-    }
     virtual void setupV6(zxdg_surface_v6* surface, zxdg_toplevel_v6* toplevel)
     {
         Q_UNUSED(toplevel)
@@ -283,10 +252,6 @@ public:
 
     EventQueue* queue = nullptr;
 
-    virtual void setupV5(xdg_popup* p)
-    {
-        Q_UNUSED(p)
-    }
     virtual void setupV6(zxdg_surface_v6* s, zxdg_popup_v6* p)
     {
         Q_UNUSED(s)
@@ -362,17 +327,6 @@ public:
     Qt::Edges anchorEdge;
     XdgPositioner::Constraints constraints;
     QPoint anchorOffset;
-};
-
-class XdgShellPopupUnstableV5 : public XdgShellPopup
-{
-public:
-    virtual ~XdgShellPopupUnstableV5();
-
-private:
-    explicit XdgShellPopupUnstableV5(QObject* parent = nullptr);
-    friend class XdgShellUnstableV5;
-    class Private;
 };
 
 class XdgShellPopupUnstableV6 : public XdgShellPopup

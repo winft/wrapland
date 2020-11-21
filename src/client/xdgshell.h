@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
 
-// This is a mix of structs for both xdgshell unstable v5 AND xdg wm base stable
+// These are structs for xdg wm base stable
 struct xdg_wm_base;
 struct xdg_shell;
 struct xdg_surface;
@@ -177,13 +177,6 @@ public:
     virtual ~XdgShell();
 
     /**
-     * Setup this XdgShell to manage the @p xdgshellv5.
-     * When using Registry::createXdgShell there is no need to call this
-     * method.
-     **/
-    void setup(xdg_shell* xdgshellv5);
-
-    /**
      * Setup this XdgShell to manage the @p xdgshellv6.
      * When using Registry::createXdgShell there is no need to call this
      * method.
@@ -220,17 +213,6 @@ public:
      * Creates a new XdgShellSurface for the given @p surface.
      **/
     XdgShellSurface* createSurface(Surface* surface, QObject* parent = nullptr);
-
-    /**
-     * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface.
-     * This method is only valid for Xdgv5
-     **/
-    XdgShellPopup* createPopup(Surface* surface,
-                               Surface* parentSurface,
-                               Seat* seat,
-                               quint32 serial,
-                               const QPoint& parentPos,
-                               QObject* parent = nullptr);
 
     /**
      * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the
@@ -313,13 +295,6 @@ public:
         Activated = 1 << 3,
     };
     Q_DECLARE_FLAGS(States, State)
-
-    /**
-     * Setup this XdgShellSurface to manage the @p xdgsurfacev5.
-     * When using XdgShell::createXdgShellSurface there is no need to call this
-     * method.
-     **/
-    void setup(xdg_surface* xdgsurfacev5);
 
     /**
      * Setup this XdgShellSurface to manage the @p toplevel on the relevant @p xdgsurfacev6
@@ -514,15 +489,6 @@ class WRAPLANDCLIENT_EXPORT XdgShellPopup : public QObject
     Q_OBJECT
 public:
     virtual ~XdgShellPopup();
-
-    /**
-     * Setup this XdgShellPopup to manage the @p xdgpopupv5.
-     * When using XdgShell::createXdgShellPopup there is no need to call this
-     * method.
-     *
-     * @deprecated Since 0.0.549. This was for XDGShellV5, this is now deprecated
-     **/
-    void setup(xdg_popup* xdgpopupv5);
 
     /**
      * Setup this XdgShellPopup to manage the @p xdgpopupv6 on associated @p xdgsurfacev6

@@ -17,7 +17,6 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#include "../compat/wayland-xdg-shell-v5-client-protocol.h"
 #include "event_queue.h"
 #include "output.h"
 #include "seat.h"
@@ -41,11 +40,6 @@ XdgShell::XdgShell(Private* p, QObject* parent)
 XdgShell::~XdgShell()
 {
     release();
-}
-
-void XdgShell::setup(xdg_shell* xdgshellv5)
-{
-    d->setupV5(xdgshellv5);
 }
 
 void XdgShell::setup(zxdg_shell_v6* xdgshellv6)
@@ -114,16 +108,6 @@ XdgShellSurface* XdgShell::createSurface(Surface* surface, QObject* parent)
 }
 
 XdgShellPopup* XdgShell::createPopup(Surface* surface,
-                                     Surface* parentSurface,
-                                     Seat* seat,
-                                     quint32 serial,
-                                     const QPoint& parentPos,
-                                     QObject* parent)
-{
-    return d->getXdgPopup(surface, parentSurface, seat, serial, parentPos, parent);
-}
-
-XdgShellPopup* XdgShell::createPopup(Surface* surface,
                                      XdgShellSurface* parentSurface,
                                      const XdgPositioner& positioner,
                                      QObject* parent)
@@ -155,11 +139,6 @@ XdgShellSurface::XdgShellSurface(Private* p, QObject* parent)
 XdgShellSurface::~XdgShellSurface()
 {
     release();
-}
-
-void XdgShellSurface::setup(xdg_surface* xdgsurfacev5)
-{
-    d->setupV5(xdgsurfacev5);
 }
 
 void XdgShellSurface::setup(zxdg_surface_v6* xdgsurfacev6, zxdg_toplevel_v6* xdgtoplevelv6)
@@ -335,11 +314,6 @@ XdgShellPopup::XdgShellPopup(Private* p, QObject* parent)
 XdgShellPopup::~XdgShellPopup()
 {
     release();
-}
-
-void XdgShellPopup::setup(xdg_popup* xdgpopupv5)
-{
-    d->setupV5(xdgpopupv5);
 }
 
 void XdgShellPopup::setup(zxdg_surface_v6* xdgsurfacev6, zxdg_popup_v6* xdgpopupv6)
