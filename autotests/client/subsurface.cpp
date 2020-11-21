@@ -35,6 +35,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/subcompositor.h"
 #include "../../server/surface.h"
 
+#include "../../tests/helpers.h"
+
 #include <wayland-client.h>
 
 class TestSubsurface : public QObject
@@ -705,9 +707,10 @@ void TestSubsurface::testSyncMode()
     parent->attachBuffer(m_shm->createBuffer(image2));
     parent->damage(QRect(0, 0, 400, 400));
     parent->commit();
+
     QVERIFY(childDamagedSpy.wait());
     QCOMPARE(childDamagedSpy.count(), 1);
-    QCOMPARE(subsurfaceTreeChangedSpy.count(), 3);
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 2);
     QCOMPARE(childSurface->buffer()->shmImage()->createQImage(), image);
     QCOMPARE(parentSurface->buffer()->shmImage()->createQImage(), image2);
     QVERIFY(childSurface->isMapped());
@@ -765,8 +768,10 @@ void TestSubsurface::testDeSyncMode()
     // setting to desync should apply the state directly
     QVERIFY(childDamagedSpy.isEmpty());
     subsurface->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
+
     QVERIFY(childDamagedSpy.count() || childDamagedSpy.wait());
-    QCOMPARE(subsurfaceTreeChangedSpy.count(), 2);
+    QCOMPARE(childDamagedSpy.count(), 1);
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
     QCOMPARE(childSurface->buffer()->shmImage()->createQImage(), image);
     QVERIFY(!childSurface->isMapped());
     QVERIFY(!parentSurface->isMapped());
@@ -776,8 +781,10 @@ void TestSubsurface::testDeSyncMode()
     surface->attachBuffer(m_shm->createBuffer(image));
     surface->damage(QRect(0, 0, 200, 200));
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+
     QVERIFY(childDamagedSpy.wait());
-    QCOMPARE(subsurfaceTreeChangedSpy.count(), 3);
+    QCOMPARE(childDamagedSpy.count(), 2);
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
     QCOMPARE(childSurface->buffer()->shmImage()->createQImage(), image);
 }
 
@@ -1158,75 +1165,77 @@ void TestSubsurface::testSurfaceAt()
     QVERIFY(serverGrandchild1->isMapped());
     QVERIFY(serverGrandchild2->isMapped());
 
+    namespace WST = Wrapland::Server::Test;
+
     // Now test some positions.
     // Around top-left.
-    QVERIFY(!serverParent->surfaceAt(QPointF(-26, -25)));
-    QVERIFY(!serverParent->surfaceAt(QPointF(-25, -26)));
-    QCOMPARE(serverParent->surfaceAt(QPointF(-25, -25)), serverGrandchild1);
-    QCOMPARE(serverParent->surfaceAt(QPointF(0, 0)), serverGrandchild1);
+    QVERIFY(!WST::surface_at(serverParent, QPointF(-26, -25)));
+    QVERIFY(!WST::surface_at(serverParent, QPointF(-25, -26)));
+    QCOMPARE(WST::surface_at(serverParent, QPointF(-25, -25)), serverGrandchild1);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(0, 0)), serverGrandchild1);
 
     // Around middle.
-    QCOMPARE(serverParent->surfaceAt(QPointF(49, 49)), serverChild1);
-    QCOMPARE(serverParent->surfaceAt(QPointF(49, 75)), serverChild1);
-    QCOMPARE(serverParent->surfaceAt(QPointF(75, 49)), serverChild1);
-    QCOMPARE(serverParent->surfaceAt(QPointF(76, 49)), serverParent);
-    QCOMPARE(serverParent->surfaceAt(QPointF(49, 76)), serverParent);
-    QCOMPARE(serverParent->surfaceAt(QPointF(49, 100)), serverParent);
-    QCOMPARE(serverParent->surfaceAt(QPointF(100, 49)), serverParent);
-    QCOMPARE(serverParent->surfaceAt(QPointF(50, 50)), serverChild2);
-    QCOMPARE(serverParent->surfaceAt(QPointF(100, 50)), serverChild2);
-    QCOMPARE(serverParent->surfaceAt(QPointF(50, 100)), serverChild2);
-    QCOMPARE(serverParent->surfaceAt(QPointF(75, 75)), serverGrandchild2);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(49, 49)), serverChild1);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(49, 75)), serverChild1);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(75, 49)), serverChild1);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(76, 49)), serverParent);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(49, 76)), serverParent);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(49, 100)), serverParent);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(100, 49)), serverParent);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(50, 50)), serverChild2);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(100, 50)), serverChild2);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(50, 100)), serverChild2);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(75, 75)), serverGrandchild2);
 
     // Around bottom-right.
-    QCOMPARE(serverParent->surfaceAt(QPointF(100, 100)), serverGrandchild2);
-    QCOMPARE(serverParent->surfaceAt(QPointF(125, 100)), serverGrandchild2);
-    QCOMPARE(serverParent->surfaceAt(QPointF(100, 125)), serverGrandchild2);
-    QVERIFY(!serverParent->surfaceAt(QPointF(126, 125)));
-    QVERIFY(!serverParent->surfaceAt(QPointF(125, 126)));
+    QCOMPARE(WST::surface_at(serverParent, QPointF(100, 100)), serverGrandchild2);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(125, 100)), serverGrandchild2);
+    QCOMPARE(WST::surface_at(serverParent, QPointF(100, 125)), serverGrandchild2);
+    QVERIFY(!WST::surface_at(serverParent, QPointF(126, 125)));
+    QVERIFY(!WST::surface_at(serverParent, QPointF(125, 126)));
 
     // Now test some input positions.
     // Around top-left.
-    QVERIFY(!serverParent->inputSurfaceAt(QPointF(-26, -25)));
-    QVERIFY(!serverParent->inputSurfaceAt(QPointF(-25, -26)));
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(-25, -25)), serverGrandchild1);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(0, 0)), serverGrandchild1);
+    QVERIFY(!WST::input_surface_at(serverParent, QPointF(-26, -25)));
+    QVERIFY(!WST::input_surface_at(serverParent, QPointF(-25, -26)));
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(-25, -25)), serverGrandchild1);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(0, 0)), serverGrandchild1);
 
     // Around middle.
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(49, 49)), serverChild1);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(49, 75)), serverChild1);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(75, 49)), serverChild1);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(76, 49)), serverParent);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(49, 76)), serverParent);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(49, 100)), serverParent);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 49)), serverParent);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(50, 50)), serverChild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 50)), serverChild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(50, 100)), serverChild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(75, 75)), serverGrandchild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(49, 49)), serverChild1);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(49, 75)), serverChild1);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(75, 49)), serverChild1);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(76, 49)), serverParent);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(49, 76)), serverParent);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(49, 100)), serverParent);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(100, 49)), serverParent);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(50, 50)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(100, 50)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(50, 100)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(75, 75)), serverGrandchild2);
 
     // Around bottom-right.
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(99, 99)), serverGrandchild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(99, 99)), serverGrandchild2);
 
     // In Qt QRegions do not contain the right and bottom edge.
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(99, 100)), serverChild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 99)), serverChild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(125, 100)), serverChild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 125)), serverChild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(125, 125)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(99, 100)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(100, 99)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(125, 100)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(100, 125)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(125, 125)), serverChild2);
 
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(99, 101)), serverChild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(101, 99)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(99, 101)), serverChild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(101, 99)), serverChild2);
 
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(75, 75)), serverGrandchild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 100)), serverGrandchild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(101, 100)), serverGrandchild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(100, 101)), serverGrandchild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(101, 101)), serverGrandchild2);
-    QCOMPARE(serverParent->inputSurfaceAt(QPointF(124, 124)), serverGrandchild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(75, 75)), serverGrandchild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(100, 100)), serverGrandchild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(101, 100)), serverGrandchild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(100, 101)), serverGrandchild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(101, 101)), serverGrandchild2);
+    QCOMPARE(WST::input_surface_at(serverParent, QPointF(124, 124)), serverGrandchild2);
 
-    QVERIFY(!serverParent->inputSurfaceAt(QPointF(126, 125)));
-    QVERIFY(!serverParent->inputSurfaceAt(QPointF(125, 126)));
+    QVERIFY(!WST::input_surface_at(serverParent, QPointF(126, 125)));
+    QVERIFY(!WST::input_surface_at(serverParent, QPointF(125, 126)));
 }
 
 void TestSubsurface::testDestroyAttachedBuffer()

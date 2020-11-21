@@ -93,9 +93,6 @@ public:
     QRegion trackedDamage() const;
     void resetTrackedDamage();
 
-    Surface* surfaceAt(const QPointF& position);
-    Surface* inputSurfaceAt(const QPointF& position);
-
     void setOutputs(std::vector<Output*> const& outputs);
     void setOutputs(std::vector<WlOutput*> const& outputs);
     std::vector<WlOutput*> outputs() const;

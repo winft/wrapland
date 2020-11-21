@@ -846,24 +846,9 @@ void Seat::pointerButtonPressed(quint32 button)
         // ignore
         return;
     }
-    if (auto* focusSurface = d_ptr->globalPointer.focus.surface) {
-        for (auto it = d_ptr->globalPointer.focus.pointers.constBegin(),
-                  end = d_ptr->globalPointer.focus.pointers.constEnd();
-             it != end;
-             ++it) {
-            (*it)->buttonPressed(serial, button);
-        }
-        if (focusSurface == d_ptr->keys.focus.surface) {
-            // update the focused child surface
-            auto p = focusedPointer();
-            if (p) {
-                for (auto it = d_ptr->keys.focus.keyboards.constBegin(),
-                          end = d_ptr->keys.focus.keyboards.constEnd();
-                     it != end;
-                     ++it) {
-                    (*it)->d_ptr->focusChildSurface(serial, p->d_ptr->focusedChildSurface);
-                }
-            }
+    if (d_ptr->globalPointer.focus.surface) {
+        for (auto pointer : d_ptr->globalPointer.focus.pointers) {
+            pointer->buttonPressed(serial, button);
         }
     }
 }
