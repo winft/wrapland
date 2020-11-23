@@ -63,7 +63,7 @@ public:
      * to call setup. In order to get a ready to use BlurManager prefer using
      * Registry::createBlurManager.
      **/
-    explicit BlurManager(QObject *parent = nullptr);
+    explicit BlurManager(QObject* parent = nullptr);
     virtual ~BlurManager();
 
     /**
@@ -75,7 +75,7 @@ public:
      * When using Registry::createBlurManager there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_blur_manager *compositor);
+    void setup(org_kde_kwin_blur_manager* compositor);
     /**
      * Releases the org_kde_kwin_blur_manager interface.
      * After the interface has been released the BlurManager instance is no
@@ -86,19 +86,19 @@ public:
     /**
      * Sets the @p queue to use for creating a Blur.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Blur.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates and setup a new Blur with @p parent.
      * @param parent The parent to pass to the Blur.
      * @returns The new created Blur
      **/
-    Blur *createBlur(Surface *surface, QObject *parent = nullptr);
-    void removeBlur(Surface *surface);
+    Blur* createBlur(Surface* surface, QObject* parent = nullptr);
+    void removeBlur(Surface* surface);
 
     operator org_kde_kwin_blur_manager*();
     operator org_kde_kwin_blur_manager*() const;
@@ -143,7 +143,7 @@ public:
      * When using BlurManager::createBlur there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_blur *blur);
+    void setup(org_kde_kwin_blur* blur);
     /**
      * Releases the org_kde_kwin_blur interface.
      * After the interface has been released the Blur instance is no
@@ -161,17 +161,17 @@ public:
     /**
      * Sets the area of the window that will have a blurred
      * background.
-     * The region will have to be created with 
+     * The region will have to be created with
      * Compositor::createRegion(QRegion)
      */
-    void setRegion(Region *region);
+    void setRegion(Region* region);
 
     operator org_kde_kwin_blur*();
     operator org_kde_kwin_blur*() const;
 
 private:
     friend class BlurManager;
-    explicit Blur(QObject *parent = nullptr);
+    explicit Blur(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
@@ -180,4 +180,3 @@ private:
 }
 
 #endif
-

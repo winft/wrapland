@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_FAKEINPUT_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct org_kde_kwin_fake_input;
 
@@ -72,7 +72,7 @@ public:
      * to call setup. In order to get a ready to use FakeInput prefer using
      * Registry::createFakeInput.
      **/
-    explicit FakeInput(QObject *parent = nullptr);
+    explicit FakeInput(QObject* parent = nullptr);
     virtual ~FakeInput();
 
     /**
@@ -84,7 +84,7 @@ public:
      * When using Registry::createFakeInput there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_fake_input *manager);
+    void setup(org_kde_kwin_fake_input* manager);
     /**
      * Releases the org_kde_kwin_fake_input interface.
      * After the interface has been released the FakeInput instance is no
@@ -95,11 +95,11 @@ public:
     /**
      * Sets the @p queue to use for bound proxies.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for bound proxies.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Authenticate with the Wayland server in order to request sending fake input events.
@@ -114,17 +114,17 @@ public:
      * @param applicationName A human readable description of the application
      * @param reason A human readable explanation why this application wants to send fake requests
      **/
-    void authenticate(const QString &applicationName, const QString &reason);
+    void authenticate(const QString& applicationName, const QString& reason);
     /**
      * Request a relative pointer motion of @p delta pixels.
      **/
-    void requestPointerMove(const QSizeF &delta);
+    void requestPointerMove(const QSizeF& delta);
     /**
      * Request an absolute pointer motion to @p pos position.
      *
      * @since 0.0.554
      **/
-    void requestPointerMoveAbsolute(const QPointF &pos);
+    void requestPointerMoveAbsolute(const QPointF& pos);
     /**
      * Convenience overload.
      * @see requestPointerButtonPress(quint32)
@@ -169,7 +169,7 @@ public:
      * @see requestTouchUp
      * @since 0.0.523
      **/
-    void requestTouchDown(quint32 id, const QPointF &pos);
+    void requestTouchDown(quint32 id, const QPointF& pos);
     /**
      * Request a move of the touch point identified by @p id to new global @p pos.
      * @param id The id to identify the touch point
@@ -177,7 +177,7 @@ public:
      * @see requestTouchDown
      * @since 0.0.523
      **/
-    void requestTouchMotion(quint32 id, const QPointF &pos);
+    void requestTouchMotion(quint32 id, const QPointF& pos);
     /**
      * Requests a touch up of the touch point identified by @p id.
      * @param id The id to identify the touch point

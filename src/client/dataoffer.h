@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_DATAOFFER_H
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -66,8 +66,8 @@ public:
 
     QList<QMimeType> offeredMimeTypes() const;
 
-    void receive(const QMimeType &mimeType, qint32 fd);
-    void receive(const QString &mimeType, qint32 fd);
+    void receive(const QMimeType& mimeType, qint32 fd);
+    void receive(const QString& mimeType, qint32 fd);
 
     /**
      * Notifies the compositor that the drag destination successfully
@@ -90,7 +90,8 @@ public:
      * Sets the @p supported and @p preferred Drag and Drop actions.
      * @since 0.0.542
      **/
-    void setDragAndDropActions(DataDeviceManager::DnDActions supported, DataDeviceManager::DnDAction preferred);
+    void setDragAndDropActions(DataDeviceManager::DnDActions supported,
+                               DataDeviceManager::DnDAction preferred);
 
     /**
      * The currently selected drag and drop action by the compositor.
@@ -120,7 +121,7 @@ Q_SIGNALS:
 
 private:
     friend class DataDevice;
-    explicit DataOffer(DataDevice *parent, wl_data_offer *dataOffer);
+    explicit DataOffer(DataDevice* parent, wl_data_offer* dataOffer);
     class Private;
     std::unique_ptr<Private> d;
 };

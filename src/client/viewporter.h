@@ -77,7 +77,7 @@ public:
      * to call setup. In order to get a ready to use Viewporter prefer using
      * Registry::createViewporter.
      **/
-    explicit Viewporter(QObject *parent = nullptr);
+    explicit Viewporter(QObject* parent = nullptr);
     virtual ~Viewporter();
 
     /**
@@ -89,7 +89,7 @@ public:
      * When using Registry::createViewporter there is no need to call this
      * method.
      **/
-    void setup(wp_viewporter *viewporter);
+    void setup(wp_viewporter* viewporter);
     /**
      * Releases the wp_viewporter interface.
      * After the interface has been released the Viewporter instance is no
@@ -100,11 +100,11 @@ public:
     /**
      * Sets the @p queue to use for creating a Viewport.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Viewport.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates and setup a new Viewport with @p parent.
@@ -112,7 +112,7 @@ public:
      * @param parent The parent to pass to the Viewport.
      * @returns The new created Viewport
      **/
-    Viewport *createViewport(Surface *surface, QObject *parent = nullptr);
+    Viewport* createViewport(Surface* surface, QObject* parent = nullptr);
 
     operator wp_viewporter*();
     operator wp_viewporter*() const;
@@ -151,7 +151,7 @@ public:
      * When using Viewporter::createViewport there is no need to call this
      * method.
      **/
-    void setup(wp_viewport *viewport);
+    void setup(wp_viewport* viewport);
     /**
      * Releases the wp_viewport interface.
      * After the interface has been released the Viewport instance is no
@@ -164,19 +164,18 @@ public:
      **/
     bool isValid() const;
 
-    void setSourceRectangle(const QRectF &source);
-    void setDestinationSize(const QSize &dest);
+    void setSourceRectangle(const QRectF& source);
+    void setDestinationSize(const QSize& dest);
 
     operator wp_viewport*();
     operator wp_viewport*() const;
 
 private:
     friend class Viewporter;
-    explicit Viewport(QObject *parent = nullptr);
+    explicit Viewport(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
 
 }
 }
-

@@ -31,8 +31,8 @@ namespace Client
 class Q_DECL_HIDDEN SubSurface::Private
 {
 public:
-    Private(QPointer<Surface> surface, QPointer<Surface> parentSurface, SubSurface *q);
-    void setup(wl_subsurface *subsurface);
+    Private(QPointer<Surface> surface, QPointer<Surface> parentSurface, SubSurface* q);
+    void setup(wl_subsurface* subsurface);
 
     WaylandPointer<wl_subsurface, wl_subsurface_destroy> subSurface;
     QPointer<Surface> surface;
@@ -40,20 +40,22 @@ public:
     Mode mode = Mode::Synchronized;
     QPoint pos = QPoint(0, 0);
 
-    static SubSurface *cast(wl_subsurface *native);
+    static SubSurface* cast(wl_subsurface* native);
 
 private:
-    SubSurface *q;
+    SubSurface* q;
 };
 
-SubSurface::Private::Private(QPointer< Surface > surface, QPointer< Surface > parentSurface, SubSurface *q)
+SubSurface::Private::Private(QPointer<Surface> surface,
+                             QPointer<Surface> parentSurface,
+                             SubSurface* q)
     : surface(surface)
     , parentSurface(parentSurface)
     , q(q)
 {
 }
 
-void SubSurface::Private::setup(wl_subsurface *subsurface)
+void SubSurface::Private::setup(wl_subsurface* subsurface)
 {
     Q_ASSERT(subsurface);
     Q_ASSERT(!subSurface.isValid());
@@ -61,12 +63,12 @@ void SubSurface::Private::setup(wl_subsurface *subsurface)
     wl_subsurface_set_user_data(subsurface, this);
 }
 
-SubSurface *SubSurface::Private::cast(wl_subsurface *native)
+SubSurface* SubSurface::Private::cast(wl_subsurface* native)
 {
     return reinterpret_cast<Private*>(wl_subsurface_get_user_data(native))->q;
 }
 
-SubSurface::SubSurface(QPointer< Surface > surface, QPointer< Surface > parentSurface, QObject *parent)
+SubSurface::SubSurface(QPointer<Surface> surface, QPointer<Surface> parentSurface, QObject* parent)
     : QObject(parent)
     , d(new Private(surface, parentSurface, this))
 {
@@ -77,7 +79,7 @@ SubSurface::~SubSurface()
     release();
 }
 
-void SubSurface::setup(wl_subsurface *subsurface)
+void SubSurface::setup(wl_subsurface* subsurface)
 {
     d->setup(subsurface);
 }
@@ -92,12 +94,12 @@ bool SubSurface::isValid() const
     return d->subSurface.isValid();
 }
 
-QPointer< Surface > SubSurface::surface() const
+QPointer<Surface> SubSurface::surface() const
 {
     return d->surface;
 }
 
-QPointer< Surface > SubSurface::parentSurface() const
+QPointer<Surface> SubSurface::parentSurface() const
 {
     return d->parentSurface;
 }
@@ -123,7 +125,7 @@ SubSurface::Mode SubSurface::mode() const
     return d->mode;
 }
 
-void SubSurface::setPosition(const QPoint &pos)
+void SubSurface::setPosition(const QPoint& pos)
 {
     if (pos == d->pos) {
         return;
@@ -142,7 +144,7 @@ void SubSurface::raise()
     placeAbove(d->parentSurface);
 }
 
-void SubSurface::placeAbove(QPointer< SubSurface > sibling)
+void SubSurface::placeAbove(QPointer<SubSurface> sibling)
 {
     if (sibling.isNull()) {
         return;
@@ -150,7 +152,7 @@ void SubSurface::placeAbove(QPointer< SubSurface > sibling)
     placeAbove(sibling->surface());
 }
 
-void SubSurface::placeAbove(QPointer< Surface > sibling)
+void SubSurface::placeAbove(QPointer<Surface> sibling)
 {
     if (sibling.isNull()) {
         return;
@@ -163,7 +165,7 @@ void SubSurface::lower()
     placeBelow(d->parentSurface);
 }
 
-void SubSurface::placeBelow(QPointer< Surface > sibling)
+void SubSurface::placeBelow(QPointer<Surface> sibling)
 {
     if (sibling.isNull()) {
         return;
@@ -171,7 +173,7 @@ void SubSurface::placeBelow(QPointer< Surface > sibling)
     wl_subsurface_place_below(d->subSurface, *sibling);
 }
 
-void SubSurface::placeBelow(QPointer< SubSurface > sibling)
+void SubSurface::placeBelow(QPointer<SubSurface> sibling)
 {
     if (sibling.isNull()) {
         return;
@@ -179,7 +181,7 @@ void SubSurface::placeBelow(QPointer< SubSurface > sibling)
     placeBelow(sibling->surface());
 }
 
-QPointer< SubSurface > SubSurface::get(wl_subsurface *native)
+QPointer<SubSurface> SubSurface::get(wl_subsurface* native)
 {
     return QPointer<SubSurface>(Private::cast(native));
 }

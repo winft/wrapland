@@ -23,7 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "dataoffer.h"
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -49,7 +49,7 @@ class WRAPLANDCLIENT_EXPORT DataDevice : public QObject
 {
     Q_OBJECT
 public:
-    explicit DataDevice(QObject *parent = nullptr);
+    explicit DataDevice(QObject* parent = nullptr);
     virtual ~DataDevice();
 
     /**
@@ -57,7 +57,7 @@ public:
      * When using DataDeviceManager::createDataDevice there is no need to call this
      * method.
      **/
-    void setup(wl_data_device *dataDevice);
+    void setup(wl_data_device* dataDevice);
     /**
      * Releases the wl_data_device interface.
      * After the interface has been released the DataDevice instance is no
@@ -70,13 +70,13 @@ public:
      **/
     bool isValid() const;
 
-    void startDrag(quint32 serial, DataSource *source, Surface *origin, Surface *icon = nullptr);
-    void startDragInternally(quint32 serial, Surface *origin, Surface *icon = nullptr);
+    void startDrag(quint32 serial, DataSource* source, Surface* origin, Surface* icon = nullptr);
+    void startDragInternally(quint32 serial, Surface* origin, Surface* icon = nullptr);
 
-    void setSelection(quint32 serial, DataSource *source = nullptr);
+    void setSelection(quint32 serial, DataSource* source = nullptr);
     void clearSelection(quint32 serial);
 
-    DataOffer *offeredSelection() const;
+    DataOffer* offeredSelection() const;
 
     /**
      * @returns the currently focused surface during drag'n'drop on this DataDevice.
@@ -87,7 +87,7 @@ public:
      * @returns the DataOffer during a drag'n'drop operation.
      * @since 0.0.522
      **/
-    DataOffer *dragOffer() const;
+    DataOffer* dragOffer() const;
 
     operator wl_data_device*();
     operator wl_data_device*() const;
@@ -106,7 +106,7 @@ Q_SIGNALS:
      * @see dragMotion
      * @since 0.0.522
      **/
-    void dragEntered(quint32 serial, const QPointF &relativeToSurface);
+    void dragEntered(quint32 serial, const QPointF& relativeToSurface);
     /**
      * Notification that the drag'n'drop operation left the Surface on this DataDevice.
      *
@@ -118,12 +118,13 @@ Q_SIGNALS:
     /**
      * Notification of drag motion events on the current drag surface.
      *
-     * @param relativeToSurface  Coordinates relative to the upper-left corner of the entered Surface.
+     * @param relativeToSurface  Coordinates relative to the upper-left corner of the entered
+     * Surface.
      * @param time timestamp with millisecond granularity
      * @see dragEntered
      * @since 0.0.522
      **/
-    void dragMotion(const QPointF &relativeToSurface, quint32 time);
+    void dragMotion(const QPointF& relativeToSurface, quint32 time);
     /**
      * Emitted when the implicit grab is removed and the drag'n'drop operation ended on this
      * DataDevice.

@@ -106,7 +106,7 @@ public:
      * method.
      * @param outputconfiguration the outputconfiguration object to set up.
      */
-    void setup(zwlr_output_configuration_v1 *outputconfiguration);
+    void setup(zwlr_output_configuration_v1* outputconfiguration);
     /**
      * @returns @c true if managing a zwlr_output_configuration_v1.
      */
@@ -121,11 +121,11 @@ public:
     /**
      * Sets the @p queue to use for creating a WlrOutputConfigurationV1.
      */
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a WlrOutputConfigurationV1
      */
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Enable or disable an output. Enabled means it's used by the
@@ -138,7 +138,7 @@ public:
      * @param head the head this change applies to.
      * @param enable new Enablement state of this head.
      */
-    void setEnabled(WlrOutputHeadV1 *head, bool enable);
+    void setEnabled(WlrOutputHeadV1* head, bool enable);
 
     /**
      * Set the mode of this output.
@@ -146,7 +146,7 @@ public:
      * @param head the head this change applies to.
      * @param mode the mode to set as current.
      */
-    void setMode(WlrOutputHeadV1 *head, WlrOutputModeV1 *mode);
+    void setMode(WlrOutputHeadV1* head, WlrOutputModeV1* mode);
 
     /**
      * Set a custom mode for this output.
@@ -155,7 +155,7 @@ public:
      * @param size the custom mode size of the head.
      * @param refresh the custom refresh rate of the head.
      */
-    void setCustomMode(WlrOutputHeadV1 *head, const QSize &size, int refresh);
+    void setCustomMode(WlrOutputHeadV1* head, const QSize& size, int refresh);
 
     /**
      * Set transformation for this output, for example rotated or flipped.
@@ -165,7 +165,7 @@ public:
      * @param head the head this change applies to.
      * @param scale the scaling factor for this head.
      */
-    void setTransform(WlrOutputHeadV1 *head, WlrOutputHeadV1::Transform transform);
+    void setTransform(WlrOutputHeadV1* head, WlrOutputHeadV1::Transform transform);
 
     /**
      * Sets the position of this output in the global space.
@@ -174,7 +174,7 @@ public:
      * @param geo the head geometry relative to other outputs,
      *
      */
-    void setPosition(WlrOutputHeadV1 *head, const QPoint &pos);
+    void setPosition(WlrOutputHeadV1* head, const QPoint& pos);
 
     /**
      * Sets the position of this output in the global space.
@@ -183,7 +183,7 @@ public:
      * @param geo the head geometry relative to other outputs,
      *
      */
-    void setScale(WlrOutputHeadV1 *head, double scale);
+    void setScale(WlrOutputHeadV1* head, double scale);
 
     /**
      * Check if current configuration is valid. Either succeeded() or failed() will be emitted
@@ -229,7 +229,7 @@ Q_SIGNALS:
     void cancelled();
 
 private:
-    explicit WlrOutputConfigurationV1(QObject *parent = nullptr);
+    explicit WlrOutputConfigurationV1(QObject* parent = nullptr);
     friend class WlrOutputManagerV1;
 
     class Private;

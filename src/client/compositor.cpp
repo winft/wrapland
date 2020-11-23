@@ -40,10 +40,10 @@ public:
     Private() = default;
 
     WaylandPointer<wl_compositor, wl_compositor_destroy> compositor;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-Compositor::Compositor(QObject *parent)
+Compositor::Compositor(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -54,22 +54,23 @@ Compositor::~Compositor()
     release();
 }
 
-Compositor *Compositor::fromApplication(QObject *parent)
+Compositor* Compositor::fromApplication(QObject* parent)
 {
-    QPlatformNativeInterface *native = qApp->platformNativeInterface();
+    QPlatformNativeInterface* native = qApp->platformNativeInterface();
     if (!native) {
         return nullptr;
     }
-    wl_compositor *compositor = reinterpret_cast<wl_compositor*>(native->nativeResourceForIntegration(QByteArrayLiteral("compositor")));
+    wl_compositor* compositor = reinterpret_cast<wl_compositor*>(
+        native->nativeResourceForIntegration(QByteArrayLiteral("compositor")));
     if (!compositor) {
         return nullptr;
     }
-    Compositor *c = new Compositor(parent);
+    Compositor* c = new Compositor(parent);
     c->d->compositor.setup(compositor, true);
     return c;
 }
 
-void Compositor::setup(wl_compositor *compositor)
+void Compositor::setup(wl_compositor* compositor)
 {
     Q_ASSERT(compositor);
     Q_ASSERT(!d->compositor);
@@ -81,20 +82,20 @@ void Compositor::release()
     d->compositor.release();
 }
 
-void Compositor::setEventQueue(EventQueue *queue)
+void Compositor::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *Compositor::eventQueue()
+EventQueue* Compositor::eventQueue()
 {
     return d->queue;
 }
 
-Surface *Compositor::createSurface(QObject *parent)
+Surface* Compositor::createSurface(QObject* parent)
 {
     Q_ASSERT(isValid());
-    Surface *s = new Surface(parent);
+    Surface* s = new Surface(parent);
     auto w = wl_compositor_create_surface(d->compositor);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -103,15 +104,15 @@ Surface *Compositor::createSurface(QObject *parent)
     return s;
 }
 
-Region *Compositor::createRegion(QObject *parent)
+Region* Compositor::createRegion(QObject* parent)
 {
     return createRegion(QRegion(), parent);
 }
 
-Region *Compositor::createRegion(const QRegion &region, QObject *parent)
+Region* Compositor::createRegion(const QRegion& region, QObject* parent)
 {
     Q_ASSERT(isValid());
-    Region *r = new Region(region, parent);
+    Region* r = new Region(region, parent);
     auto w = wl_compositor_create_region(d->compositor);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -120,16 +121,18 @@ Region *Compositor::createRegion(const QRegion &region, QObject *parent)
     return r;
 }
 
-std::unique_ptr< Region > Compositor::createRegion(const QRegion &region)
+std::unique_ptr<Region> Compositor::createRegion(const QRegion& region)
 {
     return std::unique_ptr<Region>(createRegion(region, nullptr));
 }
 
-Compositor::operator wl_compositor*() {
+Compositor::operator wl_compositor*()
+{
     return d->compositor;
 }
 
-Compositor::operator wl_compositor*() const {
+Compositor::operator wl_compositor*() const
+{
     return d->compositor;
 }
 

@@ -8,4 +8,6 @@ SOURCE_DIR=$(dirname $(dirname ${SCRIPT_DIR}))
 
 python $SCRIPT_DIR/run-clang-format.py \
     -r ${SOURCE_DIR}/server \
-    ${SOURCE_DIR}/autotests
+    ${SOURCE_DIR}/src \
+    ${SOURCE_DIR}/autotests \
+    ${SOURCE_DIR}/tests

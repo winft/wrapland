@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_POINTERCONSTRAINTS_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct zwp_pointer_constraints_v1;
 struct zwp_locked_pointer_v1;
@@ -77,7 +77,7 @@ public:
      * to call setup. In order to get a ready to use PointerConstraints prefer using
      * Registry::createPointerConstraints.
      **/
-    explicit PointerConstraints(QObject *parent = nullptr);
+    explicit PointerConstraints(QObject* parent = nullptr);
     virtual ~PointerConstraints();
 
     /**
@@ -85,7 +85,7 @@ public:
      * When using Registry::createPointerConstraints there is no need to call this
      * method.
      **/
-    void setup(zwp_pointer_constraints_v1 *pointerconstraints);
+    void setup(zwp_pointer_constraints_v1* pointerconstraints);
     /**
      * @returns @c true if managing a zwp_pointer_constraints_v1.
      **/
@@ -100,11 +100,11 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this PointerConstraints.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this PointerConstraints.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * These values represent different lifetime semantics. They are passed
@@ -163,12 +163,17 @@ public:
      *
      * @param surface The Surface which should be constrained in pointer motion
      * @param pointer The Pointer object for which this LockedPointer should be created
-     * @param region Region where to lock the pointer, if @c null the input region of the Surface is used
+     * @param region Region where to lock the pointer, if @c null the input region of the Surface is
+     * used
      * @param lifetime Whether the LockedPointer becomes invalid on unlocked
      * @param parent The parent object for the LockedPointer
      * @returns The factored LockedPointer
      **/
-    LockedPointer *lockPointer(Surface *surface, Pointer *pointer, Region *region, LifeTime lifetime, QObject *parent = nullptr);
+    LockedPointer* lockPointer(Surface* surface,
+                               Pointer* pointer,
+                               Region* region,
+                               LifeTime lifetime,
+                               QObject* parent = nullptr);
 
     /**
      * This factory method creates a ConfinedPointer.
@@ -189,12 +194,17 @@ public:
      *
      * @param surface The Surface which should be constrained in pointer motion
      * @param pointer The Pointer object for which this LockedPointer should be created
-     * @param region Region where to confine the pointer, if @c null the input region of the Surface is used
+     * @param region Region where to confine the pointer, if @c null the input region of the Surface
+     * is used
      * @param lifetime Whether the ConfinedPointer becomes invalid on unconfined
      * @param parent The parent object for the ConfinedPointer
      * @returns The factored ConfinedPointer
      **/
-    ConfinedPointer *confinePointer(Surface *surface, Pointer *pointer, Region *region, LifeTime lifetime, QObject *parent = nullptr);
+    ConfinedPointer* confinePointer(Surface* surface,
+                                    Pointer* pointer,
+                                    Region* region,
+                                    LifeTime lifetime,
+                                    QObject* parent = nullptr);
 
     operator zwp_pointer_constraints_v1*();
     operator zwp_pointer_constraints_v1*() const;
@@ -253,7 +263,7 @@ public:
      * When using PointerConstraints::createLockedPointer there is no need to call this
      * method.
      **/
-    void setup(zwp_locked_pointer_v1 *lockedpointer);
+    void setup(zwp_locked_pointer_v1* lockedpointer);
     /**
      * @returns @c true if managing a zwp_locked_pointer_v1.
      **/
@@ -280,7 +290,7 @@ public:
      * @param surfaceLocal The new position hint in surface local coordinates
      * @see Surface::commit
      **/
-    void setCursorPositionHint(const QPointF &surfaceLocal);
+    void setCursorPositionHint(const QPointF& surfaceLocal);
 
     /**
      * Set a new region used to lock the pointer.
@@ -293,7 +303,7 @@ public:
      * @see Surface::commit
      * @see PointerConstraints::lockPointer
      **/
-    void setRegion(Region *region);
+    void setRegion(Region* region);
 
     operator zwp_locked_pointer_v1*();
     operator zwp_locked_pointer_v1*() const;
@@ -318,7 +328,7 @@ Q_SIGNALS:
 
 private:
     friend class PointerConstraints;
-    explicit LockedPointer(QObject *parent = nullptr);
+    explicit LockedPointer(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
@@ -354,7 +364,7 @@ public:
      * When using PointerConstraints::createConfinedPointer there is no need to call this
      * method.
      **/
-    void setup(zwp_confined_pointer_v1 *confinedpointer);
+    void setup(zwp_confined_pointer_v1* confinedpointer);
     /**
      * @returns @c true if managing a zwp_confined_pointer_v1.
      **/
@@ -386,7 +396,7 @@ public:
      * @see Surface::commit
      * @see PointerConstraints::confinePointer
      **/
-    void setRegion(Region *region);
+    void setRegion(Region* region);
 
     operator zwp_confined_pointer_v1*();
     operator zwp_confined_pointer_v1*() const;
@@ -411,11 +421,10 @@ Q_SIGNALS:
 
 private:
     friend class PointerConstraints;
-    explicit ConfinedPointer(QObject *parent = nullptr);
+    explicit ConfinedPointer(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

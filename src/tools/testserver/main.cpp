@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QCoreApplication>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     QCoreApplication a(argc, argv);
     auto arguments = QCoreApplication::arguments();
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    TestServer *server = new TestServer(&a);
+    TestServer* server = new TestServer(&a);
     server->init();
     server->startTestApp(arguments.takeFirst(), arguments);
 

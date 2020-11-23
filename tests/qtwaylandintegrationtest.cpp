@@ -38,16 +38,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace Wrapland::Client;
 
-static Qt::GlobalColor s_colors[] = {
-    Qt::white,
-    Qt::red,
-    Qt::green,
-    Qt::blue,
-    Qt::black
-};
+static Qt::GlobalColor s_colors[] = {Qt::white, Qt::red, Qt::green, Qt::blue, Qt::black};
 static int s_colorIndex = 0;
 
-WaylandClientTest::WaylandClientTest(QObject *parent)
+WaylandClientTest::WaylandClientTest(QObject* parent)
     : QObject(parent)
     , m_connectionThreadObject(ConnectionThread::fromApplication(this))
     , m_compositor(Compositor::fromApplication(this))
@@ -63,40 +57,37 @@ WaylandClientTest::~WaylandClientTest() = default;
 
 void WaylandClientTest::init()
 {
-    connect(m_timer, &QTimer::timeout, this,
-        [this]() {
-            s_colorIndex = (s_colorIndex + 1) % 5;
-            render();
-        }
-    );
+    connect(m_timer, &QTimer::timeout, this, [this]() {
+        s_colorIndex = (s_colorIndex + 1) % 5;
+        render();
+    });
     m_timer->setInterval(1000);
     m_timer->start();
 
     m_surface = m_compositor->createSurface(this);
-    Registry *registry = new Registry(this);
+    Registry* registry = new Registry(this);
     setupRegistry(registry);
 }
 
-void WaylandClientTest::setupRegistry(Registry *registry)
+void WaylandClientTest::setupRegistry(Registry* registry)
 {
-    connect(registry, &Registry::shellAnnounced, this,
-        [this, registry](quint32 name) {
-            Shell *shell = registry->createShell(name, 1, this);
-            m_shellSurface = shell->createSurface(m_surface, m_surface);
-            connect(m_shellSurface, &ShellSurface::sizeChanged, this, static_cast<void(WaylandClientTest::*)(const QSize&)>(&WaylandClientTest::render));
-            render(QSize(200, 200));
-        }
-    );
-    connect(registry, &Registry::shmAnnounced, this,
-        [this, registry](quint32 name) {
-            m_shm = registry->createShmPool(name, 1, this);
-        }
-    );
+    connect(registry, &Registry::shellAnnounced, this, [this, registry](quint32 name) {
+        Shell* shell = registry->createShell(name, 1, this);
+        m_shellSurface = shell->createSurface(m_surface, m_surface);
+        connect(m_shellSurface,
+                &ShellSurface::sizeChanged,
+                this,
+                static_cast<void (WaylandClientTest::*)(const QSize&)>(&WaylandClientTest::render));
+        render(QSize(200, 200));
+    });
+    connect(registry, &Registry::shmAnnounced, this, [this, registry](quint32 name) {
+        m_shm = registry->createShmPool(name, 1, this);
+    });
     registry->create(m_connectionThreadObject->display());
     registry->setup();
 }
 
-void WaylandClientTest::render(const QSize &size)
+void WaylandClientTest::render(const QSize& size)
 {
     m_currentSize = size;
     render();
@@ -109,7 +100,10 @@ void WaylandClientTest::render()
     }
     auto buffer = m_shm->getBuffer(m_currentSize, m_currentSize.width() * 4).lock();
     buffer->setUsed(true);
-    QImage image(buffer->address(), m_currentSize.width(), m_currentSize.height(), QImage::Format_ARGB32_Premultiplied);
+    QImage image(buffer->address(),
+                 m_currentSize.width(),
+                 m_currentSize.height(),
+                 QImage::Format_ARGB32_Premultiplied);
     image.fill(s_colors[s_colorIndex]);
 
     m_surface->attachBuffer(*buffer);
@@ -118,7 +112,7 @@ void WaylandClientTest::render()
     buffer->setUsed(false);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     qputenv("QT_QPA_PLATFORM", "wayland");
     QGuiApplication app(argc, argv);

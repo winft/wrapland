@@ -35,10 +35,10 @@ class Q_DECL_HIDDEN DataDeviceManager::Private
 {
 public:
     WaylandPointer<wl_data_device_manager, wl_data_device_manager_destroy> manager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-DataDeviceManager::DataDeviceManager(QObject *parent)
+DataDeviceManager::DataDeviceManager(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -59,27 +59,27 @@ bool DataDeviceManager::isValid() const
     return d->manager.isValid();
 }
 
-void DataDeviceManager::setup(wl_data_device_manager *manager)
+void DataDeviceManager::setup(wl_data_device_manager* manager)
 {
     Q_ASSERT(manager);
     Q_ASSERT(!d->manager.isValid());
     d->manager.setup(manager);
 }
 
-EventQueue *DataDeviceManager::eventQueue()
+EventQueue* DataDeviceManager::eventQueue()
 {
     return d->queue;
 }
 
-void DataDeviceManager::setEventQueue(EventQueue *queue)
+void DataDeviceManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-DataSource *DataDeviceManager::createDataSource(QObject *parent)
+DataSource* DataDeviceManager::createDataSource(QObject* parent)
 {
     Q_ASSERT(isValid());
-    DataSource *s = new DataSource(parent);
+    DataSource* s = new DataSource(parent);
     auto w = wl_data_device_manager_create_data_source(d->manager);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -88,11 +88,11 @@ DataSource *DataDeviceManager::createDataSource(QObject *parent)
     return s;
 }
 
-DataDevice *DataDeviceManager::getDataDevice(Seat *seat, QObject *parent)
+DataDevice* DataDeviceManager::getDataDevice(Seat* seat, QObject* parent)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(seat);
-    DataDevice *device = new DataDevice(parent);
+    DataDevice* device = new DataDevice(parent);
     auto w = wl_data_device_manager_get_data_device(d->manager, *seat);
     if (d->queue) {
         d->queue->addProxy(w);

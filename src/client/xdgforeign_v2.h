@@ -20,8 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef WRAPLAND_CLIENT_XDGFOREIGN_V2_H
 #define WRAPLAND_CLIENT_XDGFOREIGN_V2_H
 
-#include "xdgforeign.h"
 #include "surface.h"
+#include "xdgforeign.h"
 
 #include <QObject>
 
@@ -75,7 +75,7 @@ public:
      * to call setup. In order to get a ready to use  prefer using
      * Registry::create.
      **/
-    explicit XdgExporterUnstableV2(QObject *parent = nullptr);
+    explicit XdgExporterUnstableV2(QObject* parent = nullptr);
     virtual ~XdgExporterUnstableV2();
 
 private:
@@ -115,7 +115,7 @@ public:
      * to call setup. In order to get a ready to use  prefer using
      * Registry::create.
      **/
-    explicit XdgImporterUnstableV2(QObject *parent = nullptr);
+    explicit XdgImporterUnstableV2(QObject* parent = nullptr);
     virtual ~XdgImporterUnstableV2();
 
 private:
@@ -130,7 +130,7 @@ public:
 
 private:
     friend class XdgExporterUnstableV2;
-    explicit XdgExportedUnstableV2(QObject *parent = nullptr);
+    explicit XdgExportedUnstableV2(QObject* parent = nullptr);
     class Private;
 };
 
@@ -142,10 +142,9 @@ public:
 
 private:
     friend class XdgImporterUnstableV2;
-    explicit XdgImportedUnstableV2(QObject *parent = nullptr);
+    explicit XdgImportedUnstableV2(QObject* parent = nullptr);
     class Private;
 };
-
 
 }
 }

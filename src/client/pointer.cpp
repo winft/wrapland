@@ -46,37 +46,50 @@ static Pointer::Axis wlAxisToPointerAxis(uint32_t axis)
 class Q_DECL_HIDDEN Pointer::Private
 {
 public:
-    Private(Pointer *q);
-    void setup(wl_pointer *p);
+    Private(Pointer* q);
+    void setup(wl_pointer* p);
 
     WaylandPointer<wl_pointer, wl_pointer_release> pointer;
     QPointer<Surface> enteredSurface;
     quint32 enteredSerial = 0;
-private:
-    void enter(uint32_t serial, wl_surface *surface, const QPointF &relativeToSurface);
-    void leave(uint32_t serial);
-    static void enterCallback(void *data, wl_pointer *pointer, uint32_t serial, wl_surface *surface,
-                              wl_fixed_t sx, wl_fixed_t sy);
-    static void leaveCallback(void *data, wl_pointer *pointer, uint32_t serial, wl_surface *surface);
-    static void motionCallback(void *data, wl_pointer *pointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy);
-    static void buttonCallback(void *data, wl_pointer *pointer, uint32_t serial, uint32_t time,
-                               uint32_t button, uint32_t state);
-    static void axisCallback(void *data, wl_pointer *pointer, uint32_t time, uint32_t axis, wl_fixed_t value);
-    static void frameCallback(void *data, wl_pointer *pointer);
-    static void axisSourceCallback(void *data, wl_pointer *pointer, uint32_t axis_source);
-    static void axisStopCallback(void *data, wl_pointer *pointer, uint32_t time, uint32_t axis);
-    static void axisDiscreteCallback(void *data, wl_pointer *pointer, uint32_t axis, int32_t discrete);
 
-    Pointer *q;
+private:
+    void enter(uint32_t serial, wl_surface* surface, const QPointF& relativeToSurface);
+    void leave(uint32_t serial);
+    static void enterCallback(void* data,
+                              wl_pointer* pointer,
+                              uint32_t serial,
+                              wl_surface* surface,
+                              wl_fixed_t sx,
+                              wl_fixed_t sy);
+    static void
+    leaveCallback(void* data, wl_pointer* pointer, uint32_t serial, wl_surface* surface);
+    static void
+    motionCallback(void* data, wl_pointer* pointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy);
+    static void buttonCallback(void* data,
+                               wl_pointer* pointer,
+                               uint32_t serial,
+                               uint32_t time,
+                               uint32_t button,
+                               uint32_t state);
+    static void
+    axisCallback(void* data, wl_pointer* pointer, uint32_t time, uint32_t axis, wl_fixed_t value);
+    static void frameCallback(void* data, wl_pointer* pointer);
+    static void axisSourceCallback(void* data, wl_pointer* pointer, uint32_t axis_source);
+    static void axisStopCallback(void* data, wl_pointer* pointer, uint32_t time, uint32_t axis);
+    static void
+    axisDiscreteCallback(void* data, wl_pointer* pointer, uint32_t axis, int32_t discrete);
+
+    Pointer* q;
     static const wl_pointer_listener s_listener;
 };
 
-Pointer::Private::Private(Pointer *q)
+Pointer::Private::Private(Pointer* q)
     : q(q)
 {
 }
 
-void Pointer::Private::setup(wl_pointer *p)
+void Pointer::Private::setup(wl_pointer* p)
 {
     Q_ASSERT(p);
     Q_ASSERT(!pointer);
@@ -93,10 +106,10 @@ const wl_pointer_listener Pointer::Private::s_listener = {
     frameCallback,
     axisSourceCallback,
     axisStopCallback,
-    axisDiscreteCallback
+    axisDiscreteCallback,
 };
 
-Pointer::Pointer(QObject *parent)
+Pointer::Pointer(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -112,27 +125,34 @@ void Pointer::release()
     d->pointer.release();
 }
 
-void Pointer::setup(wl_pointer *pointer)
+void Pointer::setup(wl_pointer* pointer)
 {
     d->setup(pointer);
 }
 
-void Pointer::Private::enterCallback(void *data, wl_pointer *pointer, uint32_t serial, wl_surface *surface,
-                            wl_fixed_t sx, wl_fixed_t sy)
+void Pointer::Private::enterCallback(void* data,
+                                     wl_pointer* pointer,
+                                     uint32_t serial,
+                                     wl_surface* surface,
+                                     wl_fixed_t sx,
+                                     wl_fixed_t sy)
 {
     auto p = reinterpret_cast<Pointer::Private*>(data);
     Q_ASSERT(p->pointer == pointer);
     p->enter(serial, surface, QPointF(wl_fixed_to_double(sx), wl_fixed_to_double(sy)));
 }
 
-void Pointer::Private::enter(uint32_t serial, wl_surface *surface, const QPointF &relativeToSurface)
+void Pointer::Private::enter(uint32_t serial, wl_surface* surface, const QPointF& relativeToSurface)
 {
     enteredSurface = QPointer<Surface>(Surface::get(surface));
     enteredSerial = serial;
     emit q->entered(serial, relativeToSurface);
 }
 
-void Pointer::Private::leaveCallback(void *data, wl_pointer *pointer, uint32_t serial, wl_surface *surface)
+void Pointer::Private::leaveCallback(void* data,
+                                     wl_pointer* pointer,
+                                     uint32_t serial,
+                                     wl_surface* surface)
 {
     auto p = reinterpret_cast<Pointer::Private*>(data);
     Q_ASSERT(p->pointer == pointer);
@@ -146,14 +166,23 @@ void Pointer::Private::leave(uint32_t serial)
     emit q->left(serial);
 }
 
-void Pointer::Private::motionCallback(void *data, wl_pointer *pointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
+void Pointer::Private::motionCallback(void* data,
+                                      wl_pointer* pointer,
+                                      uint32_t time,
+                                      wl_fixed_t sx,
+                                      wl_fixed_t sy)
 {
     auto p = reinterpret_cast<Pointer::Private*>(data);
     Q_ASSERT(p->pointer == pointer);
     emit p->q->motion(QPointF(wl_fixed_to_double(sx), wl_fixed_to_double(sy)), time);
 }
 
-void Pointer::Private::buttonCallback(void *data, wl_pointer *pointer, uint32_t serial, uint32_t time, uint32_t button, uint32_t state)
+void Pointer::Private::buttonCallback(void* data,
+                                      wl_pointer* pointer,
+                                      uint32_t serial,
+                                      uint32_t time,
+                                      uint32_t button,
+                                      uint32_t state)
 {
     auto p = reinterpret_cast<Pointer::Private*>(data);
     Q_ASSERT(p->pointer == pointer);
@@ -167,21 +196,25 @@ void Pointer::Private::buttonCallback(void *data, wl_pointer *pointer, uint32_t 
     emit p->q->buttonStateChanged(serial, time, button, toState());
 }
 
-void Pointer::Private::axisCallback(void *data, wl_pointer *pointer, uint32_t time, uint32_t axis, wl_fixed_t value)
+void Pointer::Private::axisCallback(void* data,
+                                    wl_pointer* pointer,
+                                    uint32_t time,
+                                    uint32_t axis,
+                                    wl_fixed_t value)
 {
     auto p = reinterpret_cast<Pointer::Private*>(data);
     Q_ASSERT(p->pointer == pointer);
     emit p->q->axisChanged(time, wlAxisToPointerAxis(axis), wl_fixed_to_double(value));
 }
 
-void Pointer::Private::frameCallback(void *data, wl_pointer *pointer)
+void Pointer::Private::frameCallback(void* data, wl_pointer* pointer)
 {
     auto p = reinterpret_cast<Pointer::Private*>(data);
     Q_ASSERT(p->pointer == pointer);
     emit p->q->frame();
 }
 
-void Pointer::Private::axisSourceCallback(void *data, wl_pointer *pointer, uint32_t axis_source)
+void Pointer::Private::axisSourceCallback(void* data, wl_pointer* pointer, uint32_t axis_source)
 {
     auto p = reinterpret_cast<Pointer::Private*>(data);
     Q_ASSERT(p->pointer == pointer);
@@ -206,24 +239,30 @@ void Pointer::Private::axisSourceCallback(void *data, wl_pointer *pointer, uint3
     emit p->q->axisSourceChanged(source);
 }
 
-void Pointer::Private::axisStopCallback(void *data, wl_pointer *pointer, uint32_t time, uint32_t axis)
+void Pointer::Private::axisStopCallback(void* data,
+                                        wl_pointer* pointer,
+                                        uint32_t time,
+                                        uint32_t axis)
 {
     auto p = reinterpret_cast<Pointer::Private*>(data);
     Q_ASSERT(p->pointer == pointer);
     emit p->q->axisStopped(time, wlAxisToPointerAxis(axis));
 }
 
-void Pointer::Private::axisDiscreteCallback(void *data, wl_pointer *pointer, uint32_t axis, int32_t discrete)
+void Pointer::Private::axisDiscreteCallback(void* data,
+                                            wl_pointer* pointer,
+                                            uint32_t axis,
+                                            int32_t discrete)
 {
     auto p = reinterpret_cast<Pointer::Private*>(data);
     Q_ASSERT(p->pointer == pointer);
     emit p->q->axisDiscreteChanged(wlAxisToPointerAxis(axis), discrete);
 }
 
-void Pointer::setCursor(Surface *surface, const QPoint &hotspot)
+void Pointer::setCursor(Surface* surface, const QPoint& hotspot)
 {
     Q_ASSERT(isValid());
-    wl_surface *s = nullptr;
+    wl_surface* s = nullptr;
     if (surface) {
         s = *surface;
     }
@@ -235,12 +274,12 @@ void Pointer::hideCursor()
     setCursor(nullptr);
 }
 
-Surface *Pointer::enteredSurface()
+Surface* Pointer::enteredSurface()
 {
     return d->enteredSurface.data();
 }
 
-Surface *Pointer::enteredSurface() const
+Surface* Pointer::enteredSurface() const
 {
     return d->enteredSurface.data();
 }

@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QVector>
 
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -122,15 +122,15 @@ namespace Client
  * (one can safely assume that the connection is valid when integrating with the Qt application),
  * does not dispatch events. Given that the use case of the ConnectionThread is rather limited to
  * a convenient API around wl_display to allow easily setup an own Registry in a QtWayland powered
- * application. Also moving the ConnectionThread to a different thread is not necessarily recommended
- * in that case as QtWayland holds it's connection in an own thread anyway.
+ * application. Also moving the ConnectionThread to a different thread is not necessarily
+ * recommended in that case as QtWayland holds it's connection in an own thread anyway.
  *
  **/
 class WRAPLANDCLIENT_EXPORT ConnectionThread : public QObject
 {
     Q_OBJECT
 public:
-    explicit ConnectionThread(QObject *parent = nullptr);
+    explicit ConnectionThread(QObject* parent = nullptr);
     virtual ~ConnectionThread();
 
     /**
@@ -150,14 +150,14 @@ public:
      *
      * @since 5.4
      **/
-    static ConnectionThread *fromApplication(QObject *parent = nullptr);
+    static ConnectionThread* fromApplication(QObject* parent = nullptr);
 
     /**
      * The display this ConnectionThread is connected to.
      * As long as there is no connection this method returns @c null.
      * @see establishConnection
      **/
-    wl_display *display();
+    wl_display* display();
     /**
      * @returns the name of the socket it connects to.
      **/
@@ -168,11 +168,12 @@ public:
      * The default socket name is derived from environment variable WAYLAND_DISPLAY
      * and if not set is hard coded to "wayland-0".
      *
-     * The socket name will be ignored if a file descriptor has been set through @link setSocketFd @endlink.
+     * The socket name will be ignored if a file descriptor has been set through @link setSocketFd
+     * @endlink.
      *
      * @see setSocketFd
      **/
-    void setSocketName(const QString &socketName);
+    void setSocketName(const QString& socketName);
     /**
      * Sets the socket @p fd to connect to.
      * Only applies if called before calling establishConnection.
@@ -293,7 +294,7 @@ protected:
      * Creates a connection thread from an existing wl_display object
      * @see ConnectionThread::fromApplication
      */
-    explicit ConnectionThread(wl_display *display, QObject *parent);
+    explicit ConnectionThread(wl_display* display, QObject* parent);
 
 private:
     /**
@@ -308,6 +309,5 @@ private:
 
 }
 }
-
 
 #endif

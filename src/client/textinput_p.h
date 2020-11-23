@@ -47,12 +47,12 @@ public:
      * to call setup. In order to get a ready to use TextInputManagerUnstableV0 prefer using
      * Registry::createTextInputManagerUnstableV0.
      **/
-    explicit TextInputManagerUnstableV0(QObject *parent = nullptr);
+    explicit TextInputManagerUnstableV0(QObject* parent = nullptr);
     virtual ~TextInputManagerUnstableV0();
 
 private:
     class Private;
-    Private *d_func() const;
+    Private* d_func() const;
 };
 
 class TextInputManagerUnstableV2 : public TextInputManager
@@ -65,7 +65,7 @@ public:
      * to call setup. In order to get a ready to use TextInputManagerUnstableV0 prefer using
      * Registry::createTextInputManagerUnstableV0.
      **/
-    explicit TextInputManagerUnstableV2(QObject *parent = nullptr);
+    explicit TextInputManagerUnstableV2(QObject* parent = nullptr);
     virtual ~TextInputManagerUnstableV2();
 
 private:
@@ -81,49 +81,55 @@ public:
 
     virtual void release() = 0;
     virtual bool isValid() = 0;
-    virtual void setupV0(wl_text_input_manager *textinputmanagerunstablev0) {
+    virtual void setupV0(wl_text_input_manager* textinputmanagerunstablev0)
+    {
         Q_UNUSED(textinputmanagerunstablev0)
     }
-    virtual void setupV2(zwp_text_input_manager_v2 *textinputmanagerunstablev2) {
+    virtual void setupV2(zwp_text_input_manager_v2* textinputmanagerunstablev2)
+    {
         Q_UNUSED(textinputmanagerunstablev2)
     }
-    virtual TextInput *createTextInput(Seat *seat, QObject *parent = nullptr) = 0;
-    virtual operator wl_text_input_manager*() {
+    virtual TextInput* createTextInput(Seat* seat, QObject* parent = nullptr) = 0;
+    virtual operator wl_text_input_manager*()
+    {
         return nullptr;
     }
-    virtual operator wl_text_input_manager*() const {
+    virtual operator wl_text_input_manager*() const
+    {
         return nullptr;
     }
-    virtual operator zwp_text_input_manager_v2*() {
+    virtual operator zwp_text_input_manager_v2*()
+    {
         return nullptr;
     }
-    virtual operator zwp_text_input_manager_v2*() const {
+    virtual operator zwp_text_input_manager_v2*() const
+    {
         return nullptr;
     }
 
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
 class Q_DECL_HIDDEN TextInput::Private
 {
 public:
-    Private(Seat *seat);
+    Private(Seat* seat);
     virtual ~Private() = default;
 
     virtual bool isValid() const = 0;
-    virtual void enable(Surface *surface) = 0;
-    virtual void disable(Surface *surface) = 0;
+    virtual void enable(Surface* surface) = 0;
+    virtual void disable(Surface* surface) = 0;
     virtual void showInputPanel() = 0;
     virtual void hideInputPanel() = 0;
-    virtual void setCursorRectangle(const QRect &rect) = 0;
-    virtual void setPreferredLanguage(const QString &lang) = 0;
-    virtual void setSurroundingText(const QString &text, quint32 cursor, quint32 anchor) = 0;
+    virtual void setCursorRectangle(const QRect& rect) = 0;
+    virtual void setPreferredLanguage(const QString& lang) = 0;
+    virtual void setSurroundingText(const QString& text, quint32 cursor, quint32 anchor) = 0;
     virtual void reset() = 0;
     virtual void setContentType(ContentHints hint, ContentPurpose purpose) = 0;
 
-    EventQueue *queue = nullptr;
-    Seat *seat;
-    Surface *enteredSurface = nullptr;
+    EventQueue* queue = nullptr;
+    Seat* seat;
+    Surface* enteredSurface = nullptr;
     quint32 latestSerial = 0;
     bool inputPanelVisible = false;
     Qt::LayoutDirection textDirection = Qt::LayoutDirectionAuto;
@@ -152,15 +158,15 @@ class TextInputUnstableV0 : public TextInput
 {
     Q_OBJECT
 public:
-    explicit TextInputUnstableV0(Seat *seat, QObject *parent = nullptr);
+    explicit TextInputUnstableV0(Seat* seat, QObject* parent = nullptr);
     virtual ~TextInputUnstableV0();
 
     /**
      * Setup this TextInputUnstableV0 to manage the @p textinputunstablev0.
-     * When using TextInputManagerUnstableV0::createTextInputUnstableV0 there is no need to call this
-     * method.
+     * When using TextInputManagerUnstableV0::createTextInputUnstableV0 there is no need to call
+     * this method.
      **/
-    void setup(wl_text_input *textinputunstablev0);
+    void setup(wl_text_input* textinputunstablev0);
     /**
      * Releases the wl_text_input interface.
      * After the interface has been released the TextInputUnstableV0 instance is no
@@ -173,22 +179,22 @@ public:
 
 private:
     class Private;
-    Private *d_func() const;
+    Private* d_func() const;
 };
 
 class TextInputUnstableV2 : public TextInput
 {
     Q_OBJECT
 public:
-    explicit TextInputUnstableV2(Seat *seat, QObject *parent = nullptr);
+    explicit TextInputUnstableV2(Seat* seat, QObject* parent = nullptr);
     virtual ~TextInputUnstableV2();
 
     /**
      * Setup this TextInputUnstableV2 to manage the @p textinputunstablev2.
-     * When using TextInputManagerUnstableV2::createTextInputUnstableV2 there is no need to call this
-     * method.
+     * When using TextInputManagerUnstableV2::createTextInputUnstableV2 there is no need to call
+     * this method.
      **/
-    void setup(zwp_text_input_v2 *textinputunstablev2);
+    void setup(zwp_text_input_v2* textinputunstablev2);
     /**
      * Releases the zwp_text_input_v2 interface.
      * After the interface has been released the TextInputUnstableV2 instance is no
@@ -201,7 +207,7 @@ public:
 
 private:
     class Private;
-    Private *d_func() const;
+    Private* d_func() const;
 };
 
 }

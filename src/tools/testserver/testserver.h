@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPointF>
 #include <QVector>
 
-//STD
+// STD
 #include <memory>
 
 class QElapsedTimer;
@@ -46,20 +46,20 @@ class TestServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit TestServer(QObject *parent);
+    explicit TestServer(QObject* parent);
     virtual ~TestServer();
 
     void init();
-    void startTestApp(const QString &app, const QStringList &arguments);
+    void startTestApp(const QString& app, const QStringList& arguments);
 
 private:
     void repaint();
 
-    Wrapland::Server::Display *m_display = nullptr;
-    Wrapland::Server::XdgShell *m_shell = nullptr;
-    Wrapland::Server::Seat *m_seat = nullptr;
+    Wrapland::Server::Display* m_display = nullptr;
+    Wrapland::Server::XdgShell* m_shell = nullptr;
+    Wrapland::Server::Seat* m_seat = nullptr;
     QVector<Wrapland::Server::XdgShellToplevel*> m_shellSurfaces;
-    QTimer *m_repaintTimer;
+    QTimer* m_repaintTimer;
     std::unique_ptr<QElapsedTimer> m_timeSinceStart;
     QPointF m_cursorPos;
     QHash<qint32, qint32> m_touchIdMapper;

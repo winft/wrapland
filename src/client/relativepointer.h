@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_RELATIVEPOINTER_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct zwp_relative_pointer_manager_v1;
 struct zwp_relative_pointer_v1;
@@ -55,8 +55,8 @@ class RelativePointer;
  * c->setup(registry->RelativePointerManager(name, version));
  * @endcode
  *
- * The RelativePointerManager can be used as a drop-in replacement for any zwp_relative_pointer_manager_v1
- * pointer as it provides matching cast operators.
+ * The RelativePointerManager can be used as a drop-in replacement for any
+ * zwp_relative_pointer_manager_v1 pointer as it provides matching cast operators.
  *
  * @see Registry
  * @since 0.0.528
@@ -71,15 +71,15 @@ public:
      * to call setup. In order to get a ready to use RelativePointerManager prefer using
      * Registry::createRelativePointerManagerUnstableV1.
      **/
-    explicit RelativePointerManager(QObject *parent = nullptr);
+    explicit RelativePointerManager(QObject* parent = nullptr);
     virtual ~RelativePointerManager();
 
     /**
-     * Setup this RelativePointerManagerUnstableV1 to manage the @p relativepointermanagerunstablev1.
-     * When using Registry::createRelativePointerManagerUnstableV1 there is no need to call this
-     * method.
+     * Setup this RelativePointerManagerUnstableV1 to manage the @p
+     * relativepointermanagerunstablev1. When using Registry::createRelativePointerManagerUnstableV1
+     * there is no need to call this method.
      **/
-    void setup(zwp_relative_pointer_manager_v1 *relativepointermanagerunstablev1);
+    void setup(zwp_relative_pointer_manager_v1* relativepointermanagerunstablev1);
     /**
      * @returns @c true if managing a zwp_relative_pointer_manager_v1.
      **/
@@ -94,16 +94,17 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this RelativePointerManagerUnstableV1.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
-     * @returns The event queue to use for creating objects with this RelativePointerManagerUnstableV1.
+     * @returns The event queue to use for creating objects with this
+     * RelativePointerManagerUnstableV1.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates a RelativePointer for the given @p pointer.
      **/
-    RelativePointer *createRelativePointer(Pointer *pointer, QObject *parent = nullptr);
+    RelativePointer* createRelativePointer(Pointer* pointer, QObject* parent = nullptr);
 
     operator zwp_relative_pointer_manager_v1*();
     operator zwp_relative_pointer_manager_v1*() const;
@@ -139,10 +140,10 @@ public:
 
     /**
      * Setup this RelativePointerUnstableV1 to manage the @p relativepointerunstablev1.
-     * When using RelativePointerManagerUnstableV1::createRelativePointerUnstableV1 there is no need to call this
-     * method.
+     * When using RelativePointerManagerUnstableV1::createRelativePointerUnstableV1 there is no need
+     * to call this method.
      **/
-    void setup(zwp_relative_pointer_v1 *relativepointerunstablev1);
+    void setup(zwp_relative_pointer_v1* relativepointerunstablev1);
     /**
      * @returns @c true if managing a zwp_relative_pointer_v1.
      **/
@@ -189,15 +190,14 @@ Q_SIGNALS:
      * @param deltaNonAccelerated non-accelerated motion vector
      * @param microseconds timestamp with microseconds granularity
      **/
-    void relativeMotion(const QSizeF &delta, const QSizeF &deltaNonAccelerated, quint64 timestamp);
+    void relativeMotion(const QSizeF& delta, const QSizeF& deltaNonAccelerated, quint64 timestamp);
 
 private:
     friend class RelativePointerManager;
-    explicit RelativePointer(QObject *parent = nullptr);
+    explicit RelativePointer(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

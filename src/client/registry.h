@@ -24,9 +24,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QHash>
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct wl_compositor;
 struct wl_data_device_manager;
@@ -159,51 +159,55 @@ public:
      * object.
      **/
     enum class Interface {
-        Unknown,    ///< Refers to an Unknown interface
-        Compositor, ///< Refers to the wl_compositor interface
-        Shell,      ///< Refers to the wl_shell interface
-        Seat,       ///< Refers to the wl_seat interface
-        Shm,        ///< Refers to the wl_shm interface
-        Output,     ///< Refers to the wl_output interface
-        FullscreenShell, ///< Refers to the _wl_fullscreen_shell interface
-        SubCompositor, ///< Refers to the wl_subcompositor interface;
-        DataDeviceManager, ///< Refers to the wl_data_device_manager interface
-        PlasmaShell, ///< Refers to org_kde_plasma_shell interface
-        PlasmaWindowManagement, ///< Refers to org_kde_plasma_window_management interface
-        Idle, ///< Refers to org_kde_kwin_idle_interface interface
-        FakeInput, ///< Refers to org_kde_kwin_fake_input interface
-        Shadow, ///< Refers to org_kde_kwin_shadow_manager interface
-        Blur, ///< refers to org_kde_kwin_blur_manager interface
-        Contrast, ///< refers to org_kde_kwin_contrast_manager interface
-        Slide, ///< refers to org_kde_kwin_slide_manager
-        Dpms, ///< Refers to org_kde_kwin_dpms_manager interface
-        OutputManagementV1, ///< Refers to the zkwinft_output_management_v1 interface
-        OutputDeviceV1,     ///< Refers to the zkwinft_output_device_v1 interface
-        WlrOutputManagerV1,     ///< Refers to the zwlr_output_manager_v1 interface
-        TextInputManagerUnstableV0, ///< Refers to wl_text_input_manager, @since 0.0.523
-        TextInputManagerUnstableV2, ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
-        XdgShellUnstableV5, ///< Refers to xdg_shell (unstable version 5), @since 0.0.525
-        RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since 0.0.528
-        PointerGesturesUnstableV1, ///< Refers to zwp_pointer_gestures_v1, @since 0.0.529
-        PointerConstraintsUnstableV1, ///< Refers to zwp_pointer_constraints_v1, @since 0.0.529
-        PresentationManager, ///< Refers to wp_presentation, @since 0.519.0
-        XdgExporterUnstableV2, ///< refers to zxdg_exporter_v2, @since 0.0.540
-        XdgImporterUnstableV2, ///< refers to zxdg_importer_v2, @since 0.0.540
+        Unknown,                          ///< Refers to an Unknown interface
+        Compositor,                       ///< Refers to the wl_compositor interface
+        Shell,                            ///< Refers to the wl_shell interface
+        Seat,                             ///< Refers to the wl_seat interface
+        Shm,                              ///< Refers to the wl_shm interface
+        Output,                           ///< Refers to the wl_output interface
+        FullscreenShell,                  ///< Refers to the _wl_fullscreen_shell interface
+        SubCompositor,                    ///< Refers to the wl_subcompositor interface;
+        DataDeviceManager,                ///< Refers to the wl_data_device_manager interface
+        PlasmaShell,                      ///< Refers to org_kde_plasma_shell interface
+        PlasmaWindowManagement,           ///< Refers to org_kde_plasma_window_management interface
+        Idle,                             ///< Refers to org_kde_kwin_idle_interface interface
+        FakeInput,                        ///< Refers to org_kde_kwin_fake_input interface
+        Shadow,                           ///< Refers to org_kde_kwin_shadow_manager interface
+        Blur,                             ///< refers to org_kde_kwin_blur_manager interface
+        Contrast,                         ///< refers to org_kde_kwin_contrast_manager interface
+        Slide,                            ///< refers to org_kde_kwin_slide_manager
+        Dpms,                             ///< Refers to org_kde_kwin_dpms_manager interface
+        OutputManagementV1,               ///< Refers to the zkwinft_output_management_v1 interface
+        OutputDeviceV1,                   ///< Refers to the zkwinft_output_device_v1 interface
+        WlrOutputManagerV1,               ///< Refers to the zwlr_output_manager_v1 interface
+        TextInputManagerUnstableV0,       ///< Refers to wl_text_input_manager, @since 0.0.523
+        TextInputManagerUnstableV2,       ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
+        RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since
+                                          ///< 0.0.528
+        PointerGesturesUnstableV1,        ///< Refers to zwp_pointer_gestures_v1, @since 0.0.529
+        PointerConstraintsUnstableV1,     ///< Refers to zwp_pointer_constraints_v1, @since 0.0.529
+        PresentationManager,              ///< Refers to wp_presentation, @since 0.519.0
+        XdgExporterUnstableV2,            ///< refers to zxdg_exporter_v2, @since 0.0.540
+        XdgImporterUnstableV2,            ///< refers to zxdg_importer_v2, @since 0.0.540
         XdgShellUnstableV6, ///< Refers to zxdg_shell_v6 (unstable version 6), @since 0.0.539
-        IdleInhibitManagerUnstableV1, ///< Refers to zwp_idle_inhibit_manager_v1 (unstable version 1), @since 0.0.541
-        AppMenu, ///Refers to org_kde_kwin_appmenu @since 0.0.542
-        ServerSideDecorationPalette, ///Refers to org_kde_kwin_server_decoration_palette_manager @since 0.0.542
-        RemoteAccessManager, ///< Refers to org_kde_kwin_remote_access_manager interface, @since 0.0.545
-        PlasmaVirtualDesktopManagement, ///< Refers to org_kde_plasma_virtual_desktop_management interface @since 0.0.552
-        XdgOutputUnstableV1, ///refers to zxdg_output_v1, @since 0.0.547
-        XdgShellStable, ///refers to xdg_wm_base @since 0.0.548
-        XdgDecorationUnstableV1, ///refers to zxdg_decoration_manager_v1, @since 0.0.554
-        Keystate,///<refers to org_kwin_keystate, @since 0.0.557
-        Viewporter, ///< Refers to wp_viewporter, @since 0.518.0
+        IdleInhibitManagerUnstableV1, ///< Refers to zwp_idle_inhibit_manager_v1 (unstable version
+                                      ///< 1), @since 0.0.541
+        AppMenu,                      /// Refers to org_kde_kwin_appmenu @since 0.0.542
+        ServerSideDecorationPalette,  /// Refers to org_kde_kwin_server_decoration_palette_manager
+                                      /// @since 0.0.542
+        RemoteAccessManager, ///< Refers to org_kde_kwin_remote_access_manager interface, @since
+                             ///< 0.0.545
+        PlasmaVirtualDesktopManagement, ///< Refers to org_kde_plasma_virtual_desktop_management
+                                        ///< interface @since 0.0.552
+        XdgOutputUnstableV1,            /// refers to zxdg_output_v1, @since 0.0.547
+        XdgShellStable,                 /// refers to xdg_wm_base @since 0.0.548
+        XdgDecorationUnstableV1,        /// refers to zxdg_decoration_manager_v1, @since 0.0.554
+        Keystate,                       ///< refers to org_kwin_keystate, @since 0.0.557
+        Viewporter,                     ///< Refers to wp_viewporter, @since 0.518.0
         KeyboardShortcutsInhibitManagerV1,
         LinuxDmabufV1,
     };
-    explicit Registry(QObject *parent = nullptr);
+    explicit Registry(QObject* parent = nullptr);
     virtual ~Registry();
 
     /**
@@ -216,11 +220,11 @@ public:
     /**
      * Gets the registry from the @p display.
      **/
-    void create(wl_display *display);
+    void create(wl_display* display);
     /**
      * Gets the registry from the @p connection.
      **/
-    void create(ConnectionThread *connection);
+    void create(ConnectionThread* connection);
     /**
      * Finalizes the setup of the Registry.
      * After calling this method the interfaces will be announced in an asynchronous way.
@@ -238,11 +242,11 @@ public:
      *
      * @param queue The event queue to use for this Registry.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The EventQueue used by this Registry
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * @returns @c true if managing a wl_registry.
@@ -272,7 +276,8 @@ public:
      * The first value of the returned pair is the "name", the second value is the "version".
      * If the @p interface has not been announced, both values are set to 0.
      * If there @p interface has been announced multiple times, the last announced is returned.
-     * In case one is interested in all announced interfaces, one should prefer @link interfaces(Interface) @endlink.
+     * In case one is interested in all announced interfaces, one should prefer @link
+     * interfaces(Interface) @endlink.
      *
      * The returned information can be passed into the bind or create methods.
      *
@@ -306,7 +311,7 @@ public:
      * Prefer using createCompositor instead.
      * @see createCompositor
      **/
-    wl_compositor *bindCompositor(uint32_t name, uint32_t version) const;
+    wl_compositor* bindCompositor(uint32_t name, uint32_t version) const;
     /**
      * Binds the wl_shell with @p name and @p version.
      * If the @p name does not exist or is not for the shell interface,
@@ -315,7 +320,7 @@ public:
      * Prefer using createShell instead.
      * @see createShell
      **/
-    wl_shell *bindShell(uint32_t name, uint32_t version) const;
+    wl_shell* bindShell(uint32_t name, uint32_t version) const;
     /**
      * Binds the wl_seat with @p name and @p version.
      * If the @p name does not exist or is not for the seat interface,
@@ -324,7 +329,7 @@ public:
      * Prefer using createSeat instead.
      * @see createSeat
      **/
-    wl_seat *bindSeat(uint32_t name, uint32_t version) const;
+    wl_seat* bindSeat(uint32_t name, uint32_t version) const;
     /**
      * Binds the wl_shm with @p name and @p version.
      * If the @p name does not exist or is not for the shm interface,
@@ -333,7 +338,7 @@ public:
      * Prefer using createShmPool instead.
      * @see createShmPool
      **/
-    wl_shm *bindShm(uint32_t name, uint32_t version) const;
+    wl_shm* bindShm(uint32_t name, uint32_t version) const;
     /**
      * Binds the zkwinft_output_management_v1 with @p name and @p version.
      * If the @p name does not exist or is not for the output management interface,
@@ -360,7 +365,7 @@ public:
      * Prefer using createOutput instead.
      * @see createOutput
      **/
-    wl_output *bindOutput(uint32_t name, uint32_t version) const;
+    wl_output* bindOutput(uint32_t name, uint32_t version) const;
     /**
      * Binds the wl_subcompositor with @p name and @p version.
      * If the @p name does not exist or is not for the subcompositor interface,
@@ -369,7 +374,7 @@ public:
      * Prefer using createSubCompositor instead.
      * @see createSubCompositor
      **/
-    wl_subcompositor *bindSubCompositor(uint32_t name, uint32_t version) const;
+    wl_subcompositor* bindSubCompositor(uint32_t name, uint32_t version) const;
     /**
      * Binds the zkwinft_output_device_v1 with @p name and @p version.
      * If the @p name does not exist or is not for the output interface,
@@ -388,7 +393,7 @@ public:
      * Prefer using createFullscreenShell instead.
      * @see createFullscreenShell
      **/
-    _wl_fullscreen_shell *bindFullscreenShell(uint32_t name, uint32_t version) const;
+    _wl_fullscreen_shell* bindFullscreenShell(uint32_t name, uint32_t version) const;
     /**
      * Binds the wl_data_device_manager with @p name and @p version.
      * If the @p name does not exist or is not for the data device manager interface,
@@ -397,7 +402,7 @@ public:
      * Prefer using createDataDeviceManager instead.
      * @see createDataDeviceManager
      **/
-    wl_data_device_manager *bindDataDeviceManager(uint32_t name, uint32_t version) const;
+    wl_data_device_manager* bindDataDeviceManager(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_plasma_shell with @p name and @p version.
      * If the @p name does not exist or is not for the Plasma shell interface,
@@ -407,7 +412,7 @@ public:
      * @see createPlasmaShell
      * @since 5.4
      **/
-    org_kde_plasma_shell *bindPlasmaShell(uint32_t name, uint32_t version) const;
+    org_kde_plasma_shell* bindPlasmaShell(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_plasma_virtual_desktop_management with @p name and @p version.
      * If the @p name does not exist or is not for the Plasma Virtual desktop interface,
@@ -417,7 +422,8 @@ public:
      * @see createPlasmaShell
      * @since 0.0.552
      **/
-    org_kde_plasma_virtual_desktop_management *bindPlasmaVirtualDesktopManagement(uint32_t name, uint32_t version) const;
+    org_kde_plasma_virtual_desktop_management*
+    bindPlasmaVirtualDesktopManagement(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_plasma_window_management with @p name and @p version.
      * If the @p name does not exist or is not for the Plasma window management interface,
@@ -427,7 +433,8 @@ public:
      * @see createPlasmaWindowManagement
      * @since 0.0.546
      **/
-    org_kde_plasma_window_management *bindPlasmaWindowManagement(uint32_t name, uint32_t version) const;
+    org_kde_plasma_window_management* bindPlasmaWindowManagement(uint32_t name,
+                                                                 uint32_t version) const;
     /**
      * Binds the org_kde_kwin_idle with @p name and @p version.
      * If the @p name does not exist or is not for the idle interface,
@@ -437,7 +444,7 @@ public:
      * @see createIdle
      * @since 5.4
      **/
-    org_kde_kwin_idle *bindIdle(uint32_t name, uint32_t version) const;
+    org_kde_kwin_idle* bindIdle(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_kwin_keystate with @p name and @p version.
      * If the @p name does not exist or is not for the keystate interface,
@@ -447,7 +454,7 @@ public:
      * @see createIdle
      * @since 5.4
      **/
-    org_kde_kwin_keystate *bindKeystate(uint32_t name, uint32_t version) const;
+    org_kde_kwin_keystate* bindKeystate(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_kwin_remote_access_manager with @p name and @p version.
      * If the @p name does not exist or is not for the idle interface,
@@ -457,7 +464,8 @@ public:
      * @see createRemoteAccessManager
      * @since 0.0.545
      **/
-    org_kde_kwin_remote_access_manager *bindRemoteAccessManager(uint32_t name, uint32_t version) const;
+    org_kde_kwin_remote_access_manager* bindRemoteAccessManager(uint32_t name,
+                                                                uint32_t version) const;
     /**
      * Binds the org_kde_kwin_fake_input with @p name and @p version.
      * If the @p name does not exist or is not for the fake input interface,
@@ -467,7 +475,7 @@ public:
      * @see createFakeInput
      * @since 5.4
      **/
-    org_kde_kwin_fake_input *bindFakeInput(uint32_t name, uint32_t version) const;
+    org_kde_kwin_fake_input* bindFakeInput(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_kwin_shadow_manager with @p name and @p version.
      * If the @p name does not exist or is not for the shadow manager interface,
@@ -477,7 +485,7 @@ public:
      * @see createShadowManager
      * @since 5.4
      **/
-    org_kde_kwin_shadow_manager *bindShadowManager(uint32_t name, uint32_t version) const;
+    org_kde_kwin_shadow_manager* bindShadowManager(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_kwin_blur_manager with @p name and @p version.
      * If the @p name does not exist or is not for the blur manager interface,
@@ -487,7 +495,7 @@ public:
      * @see createBlurManager
      * @since 5.5
      **/
-    org_kde_kwin_blur_manager *bindBlurManager(uint32_t name, uint32_t version) const;
+    org_kde_kwin_blur_manager* bindBlurManager(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_kwin_contrast_manager with @p name and @p version.
      * If the @p name does not exist or is not for the contrast manager interface,
@@ -497,7 +505,7 @@ public:
      * @see createContrastManager
      * @since 5.5
      **/
-    org_kde_kwin_contrast_manager *bindContrastManager(uint32_t name, uint32_t version) const;
+    org_kde_kwin_contrast_manager* bindContrastManager(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_kwin_slide_manager with @p name and @p version.
      * If the @p name does not exist or is not for the slide manager interface,
@@ -507,7 +515,7 @@ public:
      * @see createSlideManager
      * @since 5.5
      **/
-    org_kde_kwin_slide_manager * bindSlideManager(uint32_t name, uint32_t version) const;
+    org_kde_kwin_slide_manager* bindSlideManager(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_kwin_dpms_manager with @p name and @p version.
      * If the @p name does not exist or is not for the dpms manager interface,
@@ -517,7 +525,7 @@ public:
      * @see createDpmsManager
      * @since 5.5
      **/
-    org_kde_kwin_dpms_manager *bindDpmsManager(uint32_t name, uint32_t version) const;
+    org_kde_kwin_dpms_manager* bindDpmsManager(uint32_t name, uint32_t version) const;
     /**
      * Binds the wl_text_input_manager with @p name and @p version.
      * If the @p name does not exist or is not for the text input interface in unstable version 0,
@@ -527,7 +535,7 @@ public:
      * @see createTextInputManager
      * @since 0.0.523
      **/
-    wl_text_input_manager *bindTextInputManagerUnstableV0(uint32_t name, uint32_t version) const;
+    wl_text_input_manager* bindTextInputManagerUnstableV0(uint32_t name, uint32_t version) const;
     /**
      * Binds the zwp_text_input_manager_v2 with @p name and @p version.
      * If the @p name does not exist or is not for the text input interface in unstable version 2,
@@ -537,7 +545,8 @@ public:
      * @see createTextInputManager
      * @since 0.0.523
      **/
-    zwp_text_input_manager_v2 *bindTextInputManagerUnstableV2(uint32_t name, uint32_t version) const;
+    zwp_text_input_manager_v2* bindTextInputManagerUnstableV2(uint32_t name,
+                                                              uint32_t version) const;
     /**
      * Binds the wp_viewporter with @p name and @p version.
      * If the @p name does not exist or is not for the viewporter interface,
@@ -547,17 +556,7 @@ public:
      * @see createViewporter
      * @since 0.518.0
      **/
-    wp_viewporter *bindViewporter(uint32_t name, uint32_t version) const;
-    /**
-     * Binds the xdg_shell (unstable version 5) with @p name and @p version.
-     * If the @p name does not exist or is not for the xdg shell interface in unstable version 5,
-     * @c null will be returned.
-     *
-     * Prefer using createXdgShell instead.
-     * @see createXdgShell
-     * @since 0.0.525
-     **/
-    xdg_shell *bindXdgShellUnstableV5(uint32_t name, uint32_t version) const;
+    wp_viewporter* bindViewporter(uint32_t name, uint32_t version) const;
     /**
      * Binds the zxdg_shell_v6 (unstable version 6) with @p name and @p version.
      * If the @p name does not exist or is not for the xdg shell interface in unstable version 5,
@@ -567,7 +566,7 @@ public:
      * @see createXdgShell
      * @since 0.0.539
      **/
-    zxdg_shell_v6 *bindXdgShellUnstableV6(uint32_t name, uint32_t version) const;
+    zxdg_shell_v6* bindXdgShellUnstableV6(uint32_t name, uint32_t version) const;
     /**
      * Binds the zxdg_shell_v6 (unstable version 6) with @p name and @p version.
      * If the @p name does not exist or is not for the xdg shell interface in unstable version 5,
@@ -577,37 +576,42 @@ public:
      * @see createXdgShell
      * @since 0.0.539
      **/
-    xdg_wm_base *bindXdgShellStable(uint32_t name, uint32_t version) const;
+    xdg_wm_base* bindXdgShellStable(uint32_t name, uint32_t version) const;
     /**
      * Binds the zwp_relative_pointer_manager_v1 with @p name and @p version.
-     * If the @p name does not exist or is not for the relative pointer interface in unstable version 1,
+     * If the @p name does not exist or is not for the relative pointer interface in unstable
+     * version 1,
      * @c null will be returned.
      *
      * Prefer using createRelativePointerManager instead.
      * @see createRelativePointerManager
      * @since 0.0.520
      **/
-    zwp_relative_pointer_manager_v1 *bindRelativePointerManagerUnstableV1(uint32_t name, uint32_t version) const;
+    zwp_relative_pointer_manager_v1* bindRelativePointerManagerUnstableV1(uint32_t name,
+                                                                          uint32_t version) const;
     /**
      * Binds the zwp_pointer_gestures_v1 with @p name and @p version.
-     * If the @p name does not exist or is not for the pointer gestures interface in unstable version 1,
+     * If the @p name does not exist or is not for the pointer gestures interface in unstable
+     * version 1,
      * @c null will be returned.
      *
      * Prefer using createPointerGestures instead.
      * @see createPointerGestures
      * @since 0.0.529
      **/
-    zwp_pointer_gestures_v1 *bindPointerGesturesUnstableV1(uint32_t name, uint32_t version) const;
+    zwp_pointer_gestures_v1* bindPointerGesturesUnstableV1(uint32_t name, uint32_t version) const;
     /**
      * Binds the zwp_pointer_constraints_v1 with @p name and @p version.
-     * If the @p name does not exist or is not for the pointer constraints interface in unstable version 1,
+     * If the @p name does not exist or is not for the pointer constraints interface in unstable
+     * version 1,
      * @c null will be returned.
      *
      * Prefer using createPointerConstraints instead.
      * @see createPointerConstraints
      * @since 0.0.529
      **/
-    zwp_pointer_constraints_v1 *bindPointerConstraintsUnstableV1(uint32_t name, uint32_t version) const;
+    zwp_pointer_constraints_v1* bindPointerConstraintsUnstableV1(uint32_t name,
+                                                                 uint32_t version) const;
 
     /**
      * Binds the wp_presentation with @p name and @p version.
@@ -618,7 +622,7 @@ public:
      * @see createPresentationManager
      * @since 0.520.0
      **/
-    wp_presentation *bindPresentationManager(uint32_t name, uint32_t version) const;
+    wp_presentation* bindPresentationManager(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the zxdg_exporter_v2 with @p name and @p version.
@@ -629,7 +633,7 @@ public:
      * Prefer using createXdgExporter
      * @since 0.0.540
      */
-    zxdg_exporter_v2 *bindXdgExporterUnstableV2(uint32_t name, uint32_t version) const;
+    zxdg_exporter_v2* bindXdgExporterUnstableV2(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the zxdg_importer_v2 with @p name and @p version.
@@ -640,7 +644,7 @@ public:
      * Prefer using createXdgImporter
      * @since 0.0.540
      */
-    zxdg_importer_v2 *bindXdgImporterUnstableV2(uint32_t name, uint32_t version) const;
+    zxdg_importer_v2* bindXdgImporterUnstableV2(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the zwp_idle_inhibit_manager_v1 with @p name and @p version.
@@ -650,7 +654,8 @@ public:
      * Prefer using createIdleInhibitManager
      * @since 0.0.541
      */
-    zwp_idle_inhibit_manager_v1 *bindIdleInhibitManagerUnstableV1(uint32_t name, uint32_t version) const;
+    zwp_idle_inhibit_manager_v1* bindIdleInhibitManagerUnstableV1(uint32_t name,
+                                                                  uint32_t version) const;
 
     /**
      * Binds the org_kde_kwin_appmenu_manager with @p name and @p version.
@@ -661,18 +666,20 @@ public:
      * @see createAppMenuManager
      * @since 0.0.542
      **/
-    org_kde_kwin_appmenu_manager *bindAppMenuManager(uint32_t name, uint32_t version) const;
+    org_kde_kwin_appmenu_manager* bindAppMenuManager(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the org_kde_kwin_server_decoration_palette_manager with @p name and @p version.
-     * If the @p name does not exist or is not for the server side decoration palette manager interface,
+     * If the @p name does not exist or is not for the server side decoration palette manager
+     * interface,
      * @c null will be returned.
      *
      * Prefer using createServerSideDecorationPaletteManager instead.
      * @see createServerSideDecorationPaletteManager
      * @since 0.0.542
      **/
-    org_kde_kwin_server_decoration_palette_manager *bindServerSideDecorationPaletteManager(uint32_t name, uint32_t version) const;
+    org_kde_kwin_server_decoration_palette_manager*
+    bindServerSideDecorationPaletteManager(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the zxdg_output_v1 with @p name and @p version.
@@ -683,7 +690,7 @@ public:
      * @see createXdgOutputManager
      * @since 0.0.547
      **/
-    zxdg_output_manager_v1 *bindXdgOutputUnstableV1(uint32_t name, uint32_t version) const;
+    zxdg_output_manager_v1* bindXdgOutputUnstableV1(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the zxdg_decoration_manager_v1 with @p name and @p version.
@@ -694,7 +701,7 @@ public:
      * @see createXdgDecorationManager
      * @since 0.0.554
      **/
-    zxdg_decoration_manager_v1 *bindXdgDecorationUnstableV1(uint32_t name, uint32_t version) const;
+    zxdg_decoration_manager_v1* bindXdgDecorationUnstableV1(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the zwp_keyboard_shortcuts_inhibit_manager_v1 with @p name and @p version.
@@ -705,8 +712,9 @@ public:
      * @see createXdgDecorationManager
      * @since 0.0.554
      **/
-    zwp_keyboard_shortcuts_inhibit_manager_v1 *bindKeyboardShortcutsInhibitManagerV1(uint32_t name, uint32_t version) const;
-    
+    zwp_keyboard_shortcuts_inhibit_manager_v1*
+    bindKeyboardShortcutsInhibitManagerV1(uint32_t name, uint32_t version) const;
+
     /** Binds the zwp_linux_dmabuf_v1 with @p name and @p version.
      * If the @p name does not exist,
      * @c null will be returned.
@@ -715,7 +723,7 @@ public:
      * @see createLinuxDmabufV1
      * @since 0.520.0
      **/
-    zwp_linux_dmabuf_v1 *bindLinuxDmabufV1(uint32_t name, uint32_t version) const;
+    zwp_linux_dmabuf_v1* bindLinuxDmabufV1(uint32_t name, uint32_t version) const;
 
     ///@}
 
@@ -737,7 +745,7 @@ public:
      *
      * @returns The created Compositor.
      **/
-    Compositor *createCompositor(quint32 name, quint32 version, QObject *parent = nullptr);
+    Compositor* createCompositor(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a Seat and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -752,7 +760,7 @@ public:
      *
      * @returns The created Seat.
      **/
-    Shell *createShell(quint32 name, quint32 version, QObject *parent = nullptr);
+    Shell* createShell(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a Compositor and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -767,7 +775,7 @@ public:
      *
      * @returns The created Compositor.
      **/
-    Seat *createSeat(quint32 name, quint32 version, QObject *parent = nullptr);
+    Seat* createSeat(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a ShmPool and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -782,7 +790,7 @@ public:
      *
      * @returns The created ShmPool.
      **/
-    ShmPool *createShmPool(quint32 name, quint32 version, QObject *parent = nullptr);
+    ShmPool* createShmPool(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a SubCompositor and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -797,7 +805,7 @@ public:
      *
      * @returns The created SubCompositor.
      **/
-    SubCompositor *createSubCompositor(quint32 name, quint32 version, QObject *parent = nullptr);
+    SubCompositor* createSubCompositor(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates an Output and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -812,7 +820,7 @@ public:
      *
      * @returns The created Output.
      **/
-    Output *createOutput(quint32 name, quint32 version, QObject *parent = nullptr);
+    Output* createOutput(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates an OutputManagementV1 and sets it up to manage the interface identified
      * by @p name and @p version.
@@ -827,8 +835,8 @@ public:
      *
      * @returns The created OutputManagementV1.
      **/
-    OutputManagementV1* createOutputManagementV1(quint32 name, quint32 version,
-                                                 QObject *parent = nullptr);
+    OutputManagementV1*
+    createOutputManagementV1(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates an OutputDeviceV1 and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -843,7 +851,7 @@ public:
      *
      * @returns The created OutputDeviceV1.
      **/
-    OutputDeviceV1* createOutputDeviceV1(quint32 name, quint32 version, QObject *parent = nullptr);
+    OutputDeviceV1* createOutputDeviceV1(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates an OutputManagementV1 and sets it up to manage the interface identified
      * by @p name and @p version.
@@ -858,8 +866,8 @@ public:
      *
      * @returns The created OutputManagementV1.
      */
-    WlrOutputManagerV1* createWlrOutputManagerV1(quint32 name, quint32 version,
-                                                 QObject *parent = nullptr);
+    WlrOutputManagerV1*
+    createWlrOutputManagerV1(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a FullscreenShell and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -875,7 +883,8 @@ public:
      * @returns The created FullscreenShell.
      * @since 5.5
      **/
-    FullscreenShell *createFullscreenShell(quint32 name, quint32 version, QObject *parent = nullptr);
+    FullscreenShell*
+    createFullscreenShell(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a DataDeviceManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -890,7 +899,8 @@ public:
      *
      * @returns The created DataDeviceManager.
      **/
-    DataDeviceManager *createDataDeviceManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    DataDeviceManager*
+    createDataDeviceManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a PlasmaShell and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -906,13 +916,13 @@ public:
      * @returns The created PlasmaShell.
      * @since 5.4
      **/
-    PlasmaShell *createPlasmaShell(quint32 name, quint32 version, QObject *parent = nullptr);
+    PlasmaShell* createPlasmaShell(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a PlasmaVirtualDesktopManagement and sets it up to manage the interface identified by
      * @p name and @p version.
      *
-     * Note: in case @p name is invalid or isn't for the org_kde_plasma_virtual_desktop_management interface,
-     * the returned VirtualDesktop will not be valid. Therefore it's recommended to call
+     * Note: in case @p name is invalid or isn't for the org_kde_plasma_virtual_desktop_management
+     * interface, the returned VirtualDesktop will not be valid. Therefore it's recommended to call
      * isValid on the created instance.
      *
      * @param name The name of the org_kde_plasma_virtual_desktop_management interface to bind
@@ -922,7 +932,8 @@ public:
      * @returns The created PlasmaShell.
      * @since 0.0.552
      **/
-    PlasmaVirtualDesktopManagement *createPlasmaVirtualDesktopManagement(quint32 name, quint32 version, QObject *parent = nullptr);
+    PlasmaVirtualDesktopManagement*
+    createPlasmaVirtualDesktopManagement(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a PlasmaWindowManagement and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -938,7 +949,8 @@ public:
      * @returns The created PlasmaWindowManagement.
      * @since 5.4
      **/
-    PlasmaWindowManagement *createPlasmaWindowManagement(quint32 name, quint32 version, QObject *parent = nullptr);
+    PlasmaWindowManagement*
+    createPlasmaWindowManagement(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates an Idle and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -954,7 +966,7 @@ public:
      * @returns The created Idle.
      * @since 5.4
      **/
-    Idle *createIdle(quint32 name, quint32 version, QObject *parent = nullptr);
+    Idle* createIdle(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a KEystate and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -970,14 +982,14 @@ public:
      * @returns The created Idle.
      * @since 5.4
      **/
-    Keystate *createKeystate(quint32 name, quint32 version, QObject *parent = nullptr);
+    Keystate* createKeystate(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a RemoteAccessManager and sets it up to manage the interface identified by
      * @p name and @p version.
      *
-     * Note: in case @p name is invalid or isn't for the org_kde_kwin_remote_access_manager interface,
-     * the returned RemoteAccessManager will not be valid. Therefore it's recommended to call
-     * isValid on the created instance.
+     * Note: in case @p name is invalid or isn't for the org_kde_kwin_remote_access_manager
+     * interface, the returned RemoteAccessManager will not be valid. Therefore it's recommended to
+     * call isValid on the created instance.
      *
      * @param name The name of the org_kde_kwin_remote_access_manager interface to bind
      * @param version The version or the org_kde_kwin_remote_access_manager interface to use
@@ -986,7 +998,8 @@ public:
      * @returns The created RemoteAccessManager.
      * @since 0.0.545
      **/
-    RemoteAccessManager *createRemoteAccessManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    RemoteAccessManager*
+    createRemoteAccessManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a FakeInput and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1002,7 +1015,7 @@ public:
      * @returns The created FakeInput.
      * @since 5.4
      **/
-    FakeInput *createFakeInput(quint32 name, quint32 version, QObject *parent = nullptr);
+    FakeInput* createFakeInput(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a ShadowManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1018,7 +1031,7 @@ public:
      * @returns The created ShadowManager.
      * @since 5.4
      **/
-    ShadowManager *createShadowManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    ShadowManager* createShadowManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a BlurManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1034,7 +1047,7 @@ public:
      * @returns The created BlurManager.
      * @since 5.5
      **/
-    BlurManager *createBlurManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    BlurManager* createBlurManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a ContrastManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1050,7 +1063,8 @@ public:
      * @returns The created ContrastManager.
      * @since 5.5
      **/
-    ContrastManager *createContrastManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    ContrastManager*
+    createContrastManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a SlideManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1066,7 +1080,7 @@ public:
      * @returns The created SlideManager.
      * @since 5.5
      **/
-    SlideManager *createSlideManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    SlideManager* createSlideManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a DpmsManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1082,7 +1096,7 @@ public:
      * @returns The created DpmsManager.
      * @since 5.5
      **/
-    DpmsManager *createDpmsManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    DpmsManager* createDpmsManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a TextInputManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1101,7 +1115,8 @@ public:
      * @returns The created TextInputManager
      * @since 0.0.523
      **/
-    TextInputManager *createTextInputManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    TextInputManager*
+    createTextInputManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a Viewporter and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1117,7 +1132,7 @@ public:
      * @returns The created Viewporter
      * @since 0.518.0
      **/
-    Viewporter *createViewporter(quint32 name, quint32 version, QObject *parent = nullptr);
+    Viewporter* createViewporter(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates an XdgShell and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1135,7 +1150,7 @@ public:
      * @returns The created XdgShell
      * @since 0.0.525
      **/
-    XdgShell *createXdgShell(quint32 name, quint32 version, QObject *parent = nullptr);
+    XdgShell* createXdgShell(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a RelativePointerManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1153,7 +1168,8 @@ public:
      * @returns The created RelativePointerManager
      * @since 0.0.528
      **/
-    RelativePointerManager *createRelativePointerManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    RelativePointerManager*
+    createRelativePointerManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a PointerGestures and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1171,7 +1187,8 @@ public:
      * @returns The created PointerGestures
      * @since 0.0.529
      **/
-    PointerGestures *createPointerGestures(quint32 name, quint32 version, QObject *parent = nullptr);
+    PointerGestures*
+    createPointerGestures(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a PointerConstraints and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1189,7 +1206,8 @@ public:
      * @returns The created PointerConstraints
      * @since 0.0.529
      **/
-    PointerConstraints *createPointerConstraints(quint32 name, quint32 version, QObject *parent = nullptr);
+    PointerConstraints*
+    createPointerConstraints(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
      * Creates a PresentationManager and sets it up to manage the interface identified by
@@ -1206,8 +1224,8 @@ public:
      * @returns The created PresentationManager.
      * @since 0.520.0
      **/
-    PresentationManager *createPresentationManager(quint32 name, quint32 version,
-                                                   QObject *parent = nullptr);
+    PresentationManager*
+    createPresentationManager(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
      * Creates an XdgExporter and sets it up to manage the interface identified by
@@ -1222,7 +1240,7 @@ public:
      * @returns The created XdgExporter
      * @since 0.0.540
      */
-    XdgExporter *createXdgExporter(quint32 name, quint32 version, QObject *parent = nullptr);
+    XdgExporter* createXdgExporter(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
      * Creates an XdgImporter and sets it up to manage the interface identified by
@@ -1237,7 +1255,7 @@ public:
      * @returns The created XdgImporter
      * @since 0.0.540
      */
-    XdgImporter *createXdgImporter(quint32 name, quint32 version, QObject *parent = nullptr);
+    XdgImporter* createXdgImporter(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
      * Creates an IdleInhibitManager and sets it up to manage the interface identified by
@@ -1252,7 +1270,8 @@ public:
      * @returns The created IdleInhibitManager
      * @since 0.0.541
      */
-    IdleInhibitManager *createIdleInhibitManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    IdleInhibitManager*
+    createIdleInhibitManager(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
      * Creates a AppMenuManager and sets it up to manage the interface identified by
@@ -1269,24 +1288,29 @@ public:
      * @returns The created AppMenuManager.
      * @since 0.0.542
      **/
-    AppMenuManager *createAppMenuManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    AppMenuManager* createAppMenuManager(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
-     * Creates a ServerSideDecorationPaletteManager and sets it up to manage the interface identified by
+     * Creates a ServerSideDecorationPaletteManager and sets it up to manage the interface
+     * identified by
      * @p name and @p version.
      *
      * Note: in case @p name is invalid or isn't for the org_kde_kwin_appmenu_manager interface,
-     * the returned ServerSideDecorationPaletteManager will not be valid. Therefore it's recommended to call
-     * isValid on the created instance.
+     * the returned ServerSideDecorationPaletteManager will not be valid. Therefore it's recommended
+     * to call isValid on the created instance.
      *
      * @param name The name of the org_kde_kwin_server_decoration_palette_manager interface to bind
-     * @param version The version or the org_kde_kwin_server_decoration_palette_manager interface to use
+     * @param version The version or the org_kde_kwin_server_decoration_palette_manager interface to
+     * use
      * @param parent The parent for ServerSideDecorationPaletteManager
      *
      * @returns The created ServerSideDecorationPaletteManager.
      * @since 0.0.542
      **/
-    ServerSideDecorationPaletteManager *createServerSideDecorationPaletteManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    ServerSideDecorationPaletteManager* createServerSideDecorationPaletteManager(quint32 name,
+                                                                                 quint32 version,
+                                                                                 QObject* parent
+                                                                                 = nullptr);
 
     /**
      * Creates an XdgOutputManager and sets it up to manage the interface identified by
@@ -1303,7 +1327,8 @@ public:
      * @returns The created XdgOuptutManager.
      * @since 0.0.547
      **/
-    XdgOutputManager *createXdgOutputManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    XdgOutputManager*
+    createXdgOutputManager(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
      * Creates an XdgDecorationManager and sets it up to manage the interface identified by
@@ -1320,15 +1345,17 @@ public:
      * @returns The created XdgDecorationManager.
      * @since 0.0.554
      **/
-    XdgDecorationManager *createXdgDecorationManager(quint32 name, quint32 version, QObject *parent = nullptr);
+    XdgDecorationManager*
+    createXdgDecorationManager(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
-     * Creates an KeyboardShortcutsInhibitManagerV1 and sets it up to manage the interface identified by
+     * Creates an KeyboardShortcutsInhibitManagerV1 and sets it up to manage the interface
+     * identified by
      * @p name and @p version.
      *
      * Note: in case @p name is invalid or isn't for the zxdg_decoration_manager_v1 interface,
-     * the returned KeyboardShortcutsInhibitManagerV1 will not be valid. Therefore it's recommended to call
-     * isValid on the created instance.
+     * the returned KeyboardShortcutsInhibitManagerV1 will not be valid. Therefore it's recommended
+     * to call isValid on the created instance.
      *
      * @param name The name of the zxdg_decoration_manager_v1 interface to bind
      * @param version The version or the zxdg_decoration_manager_v1 interface to use
@@ -1337,7 +1364,10 @@ public:
      * @returns The created KeyboardShortcutsInhibitManagerV1.
      * @since 0.0.554
      **/
-    KeyboardShortcutsInhibitManagerV1 *createKeyboardShortcutsInhibitManagerV1(quint32 name, quint32 version, QObject *parent = nullptr);
+    KeyboardShortcutsInhibitManagerV1* createKeyboardShortcutsInhibitManagerV1(quint32 name,
+                                                                               quint32 version,
+                                                                               QObject* parent
+                                                                               = nullptr);
 
     /** Creates an LinuxDmabufV1 and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1353,11 +1383,9 @@ public:
      * @returns The created LinuxDmabufV1.
      * @since 0.520.0
      **/
-    LinuxDmabufV1 *createLinuxDmabufV1(quint32 name, quint32 version, QObject *parent = nullptr);
-
+    LinuxDmabufV1* createLinuxDmabufV1(quint32 name, quint32 version, QObject* parent = nullptr);
 
     ///@}
-
 
     /**
      * cast operator to the low-level Wayland @c wl_registry
@@ -1370,7 +1398,7 @@ public:
     /**
      * @returns access to the low-level Wayland @c wl_registry
      **/
-    wl_registry *registry();
+    wl_registry* registry();
 
 Q_SIGNALS:
     /**
@@ -1545,13 +1573,6 @@ Q_SIGNALS:
      **/
     void viewporterAnnounced(quint32 name, quint32 version);
     /**
-     * Emitted whenever a xdg_shell (unstable version 5) interface gets announced.
-     * @param name The name for the announced interface
-     * @param version The maximum supported version of the announced interface
-     * @since 0.0.525
-     **/
-    void xdgShellUnstableV5Announced(quint32 name, quint32 version);
-    /**
      * Emitted whenever a zxdg_shell_v6 (unstable version 6) interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1660,7 +1681,7 @@ Q_SIGNALS:
      * @since 0.0.554
      **/
     void keyboardShortcutsInhibitManagerAnnounced(quint32 name, quint32 version);
-    
+
     /** Emitted whenever a zwp_linux_dmabuf_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1819,12 +1840,6 @@ Q_SIGNALS:
      * @param name The name for the removed interface
      * @since 0.0.525
      **/
-    void xdgShellUnstableV5Removed(quint32 name);
-    /**
-     * Emitted whenever an xdg_shell (unstable version 5) interface gets removed.
-     * @param name The name for the removed interface
-     * @since 0.0.525
-     **/
     void xdgShellUnstableV6Removed(quint32 name);
     /**
      * Emitted whenever a zwp_relative_pointer_manager_v1 interface gets removed.
@@ -1913,7 +1928,7 @@ Q_SIGNALS:
      * @since 0.0.554
      **/
     void keyboardShortcutsInhibitManagerRemoved(quint32 name);
-    
+
     /** Emitted whenever a zwp_linux_dmabuf_v1 gets removed.
      * @param name The name of the removed interface
      **/

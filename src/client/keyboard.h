@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_KEYBOARD_H
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -50,9 +50,9 @@ class WRAPLANDCLIENT_EXPORT Keyboard : public QObject
 public:
     enum class KeyState {
         Released,
-        Pressed
+        Pressed,
     };
-    explicit Keyboard(QObject *parent = nullptr);
+    explicit Keyboard(QObject* parent = nullptr);
     virtual ~Keyboard();
 
     /**
@@ -64,7 +64,7 @@ public:
      * When using Seat::createKeyboard there is no need to call this
      * method.
      **/
-    void setup(wl_keyboard *keyboard);
+    void setup(wl_keyboard* keyboard);
     /**
      * Releases the wl_keyboard interface.
      * After the interface has been released the Keyboard instance is no
@@ -78,11 +78,11 @@ public:
     /**
      * @returns The Surface the Keyboard is on, may be @c null.
      **/
-    Surface *enteredSurface() const;
+    Surface* enteredSurface() const;
     /**
      * @overload
      **/
-    Surface *enteredSurface();
+    Surface* enteredSurface();
 
     /**
      * @returns Whether key repeat is enabled on this keyboard

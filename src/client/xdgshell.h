@@ -21,13 +21,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_XDG_SHELL_H
 
 #include <QObject>
-#include <QSize>
 #include <QRect>
-//STD
-#include <memory>
+#include <QSize>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
-//This is a mix of structs for both xdgshell unstable v5 AND xdg wm base stable
+// These are structs for xdg wm base stable
 struct xdg_wm_base;
 struct xdg_shell;
 struct xdg_surface;
@@ -62,55 +62,57 @@ class WRAPLANDCLIENT_EXPORT XdgPositioner
 {
 public:
     /*
-    * Flags describing how a popup should be reposition if constrained
-    */
+     * Flags describing how a popup should be reposition if constrained
+     */
     enum class Constraint {
         /*
-        * Slide the popup on the X axis until there is room
-        */
+         * Slide the popup on the X axis until there is room
+         */
         SlideX = 1 << 0,
         /*
-        * Slide the popup on the Y axis until there is room
-        */
+         * Slide the popup on the Y axis until there is room
+         */
         SlideY = 1 << 1,
         /*
-        * Invert the anchor and gravity on the X axis
-        */
+         * Invert the anchor and gravity on the X axis
+         */
         FlipX = 1 << 2,
         /*
-        * Invert the anchor and gravity on the Y axis
-        */
+         * Invert the anchor and gravity on the Y axis
+         */
         FlipY = 1 << 3,
         /*
-        * Resize the popup in the X axis
-        */
+         * Resize the popup in the X axis
+         */
         ResizeX = 1 << 4,
         /*
-        * Resize the popup in the Y axis
-        */
-        ResizeY = 1 << 5
+         * Resize the popup in the Y axis
+         */
+        ResizeY = 1 << 5,
     };
 
     Q_DECLARE_FLAGS(Constraints, Constraint)
 
-    XdgPositioner(const QSize &initialSize = QSize(), const QRect &anchor = QRect());
-    XdgPositioner(const XdgPositioner &other);
+    XdgPositioner(const QSize& initialSize = QSize(), const QRect& anchor = QRect());
+    XdgPositioner(const XdgPositioner& other);
     ~XdgPositioner();
 
     /**
      * Which edge of the anchor should the popup be positioned around
      */
-    //KF6 TODO use a better data type (enum of 8 options) rather than flags which allow invalid values
+    // KF6 TODO use a better data type (enum of 8 options) rather than flags which allow invalid
+    // values
     Qt::Edges anchorEdge() const;
     void setAnchorEdge(Qt::Edges edge);
 
     /**
      * Specifies in what direction the popup should be positioned around the anchor
-     * i.e if the gravity is "bottom", then then the top of top of the popup will be at the anchor edge
-     * if the gravity is top, then the bottom of the popup will be at the anchor edge
+     * i.e if the gravity is "bottom", then then the top of top of the popup will be at the anchor
+     * edge if the gravity is top, then the bottom of the popup will be at the anchor edge
      *
      */
-    //KF6 TODO use a better data type (enum of 8 options) rather than flags which allow invalid values
+    // KF6 TODO use a better data type (enum of 8 options) rather than flags which allow invalid
+    // values
     Qt::Edges gravity() const;
     void setGravity(Qt::Edges edge);
 
@@ -118,16 +120,17 @@ public:
      * The area this popup should be positioned around
      */
     QRect anchorRect() const;
-    void setAnchorRect(const QRect &anchor);
+    void setAnchorRect(const QRect& anchor);
 
     /**
      * The size of the surface that is to be positioned.
      */
     QSize initialSize() const;
-    void setInitialSize(const QSize &size);
+    void setInitialSize(const QSize& size);
 
     /**
-     * Specifies how the compositor should position the popup if it does not fit in the requested position
+     * Specifies how the compositor should position the popup if it does not fit in the requested
+     * position
      */
     Constraints constraints() const;
     void setConstraints(Constraints constraints);
@@ -136,7 +139,7 @@ public:
      * An additional offset that should be applied from the anchor.
      */
     QPoint anchorOffset() const;
-    void setAnchorOffset(const QPoint &offset);
+    void setAnchorOffset(const QPoint& offset);
 
 private:
     class Private;
@@ -174,25 +177,18 @@ public:
     virtual ~XdgShell();
 
     /**
-     * Setup this XdgShell to manage the @p xdgshellv5.
-     * When using Registry::createXdgShell there is no need to call this
-     * method.
-     **/
-    void setup(xdg_shell *xdgshellv5);
-
-    /**
      * Setup this XdgShell to manage the @p xdgshellv6.
      * When using Registry::createXdgShell there is no need to call this
      * method.
      **/
-    void setup(zxdg_shell_v6 *xdgshellv6);
+    void setup(zxdg_shell_v6* xdgshellv6);
 
     /**
      * Setup this XdgShell to manage the @p xdg_wm_base.
      * When using Registry::createXdgShell there is no need to call this
      * method.
      **/
-    void setup(xdg_wm_base *xdg_wm_base);
+    void setup(xdg_wm_base* xdg_wm_base);
     /**
      * @returns @c true if managing a xdg_shell.
      **/
@@ -207,35 +203,36 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this XdgShell.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this XdgShell.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates a new XdgShellSurface for the given @p surface.
      **/
-    XdgShellSurface *createSurface(Surface *surface, QObject *parent = nullptr);
+    XdgShellSurface* createSurface(Surface* surface, QObject* parent = nullptr);
 
     /**
-     * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface.
-     * This method is only valid for Xdgv5
-     **/
-    XdgShellPopup *createPopup(Surface *surface, Surface *parentSurface, Seat *seat, quint32 serial, const QPoint &parentPos, QObject *parent = nullptr);
-
-    /**
-     * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the given @p positioner.
-     * This method is only valid for Xdgv6 onwards.
+     * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the
+     * given @p positioner. This method is only valid for Xdgv6 onwards.
      * @since 0.0.539
      **/
-    XdgShellPopup *createPopup(Surface *surface, XdgShellSurface *parentSurface, const XdgPositioner &positioner, QObject *parent = nullptr);
+    XdgShellPopup* createPopup(Surface* surface,
+                               XdgShellSurface* parentSurface,
+                               const XdgPositioner& positioner,
+                               QObject* parent = nullptr);
 
     /**
-     * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the given @p positioner.
+     * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the
+     * given @p positioner.
      * @since 0.0.539
      **/
-    XdgShellPopup *createPopup(Surface *surface, XdgShellPopup *parentSurface, const XdgPositioner &positioner, QObject *parent = nullptr);
+    XdgShellPopup* createPopup(Surface* surface,
+                               XdgShellPopup* parentSurface,
+                               const XdgPositioner& positioner,
+                               QObject* parent = nullptr);
 
     operator xdg_wm_base*();
     operator xdg_wm_base*() const;
@@ -261,7 +258,7 @@ protected:
      * Registry::createXdgShell.
      **/
     class Private;
-    explicit XdgShell(Private *p, QObject *parent = nullptr);
+    explicit XdgShell(Private* p, QObject* parent = nullptr);
 
 private:
     std::unique_ptr<Private> d;
@@ -283,7 +280,7 @@ public:
         /**
          * The Surface is maximized.
          **/
-        Maximized  = 1 << 0,
+        Maximized = 1 << 0,
         /**
          * The Surface is fullscreen.
          **/
@@ -291,34 +288,27 @@ public:
         /**
          * The Surface is currently being resized by the Compositor.
          **/
-        Resizing   = 1 << 2,
+        Resizing = 1 << 2,
         /**
          * The Surface is considered active. Does not imply keyboard focus.
          **/
-        Activated  = 1 << 3
+        Activated = 1 << 3,
     };
     Q_DECLARE_FLAGS(States, State)
-
-    /**
-     * Setup this XdgShellSurface to manage the @p xdgsurfacev5.
-     * When using XdgShell::createXdgShellSurface there is no need to call this
-     * method.
-     **/
-    void setup(xdg_surface *xdgsurfacev5);
 
     /**
      * Setup this XdgShellSurface to manage the @p toplevel on the relevant @p xdgsurfacev6
      * When using XdgShell::createXdgShellSurface there is no need to call this
      * method.
      **/
-    void setup(zxdg_surface_v6 *xdgsurfacev6, zxdg_toplevel_v6 *toplevel);
+    void setup(zxdg_surface_v6* xdgsurfacev6, zxdg_toplevel_v6* toplevel);
 
     /**
      * Setup this XdgShellSurface to manage the @p toplevel on the relevant @p xdgsurface
      * When using XdgShell::createXdgShellSurface there is no need to call this
      * method.
      **/
-    void setup(xdg_surface *xdgsurface, xdg_toplevel *toplevel);
+    void setup(xdg_surface* xdgsurface, xdg_toplevel* toplevel);
 
     /**
      * @returns @c true if managing a xdg_surface.
@@ -334,11 +324,11 @@ public:
     /**
      * Sets the @p queue to use for bound proxies.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for bound proxies.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * The currently configured size.
@@ -356,27 +346,27 @@ public:
      * @see size
      * @see sizeChanged
      **/
-    void setSize(const QSize &size);
+    void setSize(const QSize& size);
 
     /**
      * Set this XdgShellSurface as transient for @p parent.
      **/
-    void setTransientFor(XdgShellSurface *parent);
+    void setTransientFor(XdgShellSurface* parent);
 
     /**
      * Sets the window title of this XdgShellSurface to @p title.
      **/
-    void setTitle(const QString &title);
+    void setTitle(const QString& title);
 
     /**
      * Set an application identifier for the surface.
      **/
-    void setAppId(const QByteArray &appId);
+    void setAppId(const QByteArray& appId);
 
     /**
      * Requests to show the window menu at @p pos in surface coordinates.
      **/
-    void requestShowWindowMenu(Seat *seat, quint32 serial, const QPoint &pos);
+    void requestShowWindowMenu(Seat* seat, quint32 serial, const QPoint& pos);
 
     /**
      * Requests a move on the given @p seat after the pointer button press with the given @p serial.
@@ -384,16 +374,17 @@ public:
      * @param seat The seat on which to move the window
      * @param serial The serial of the pointer button press which should trigger the move
      **/
-    void requestMove(Seat *seat, quint32 serial);
+    void requestMove(Seat* seat, quint32 serial);
 
     /**
-     * Requests a resize on the given @p seat after the pointer button press with the given @p serial.
+     * Requests a resize on the given @p seat after the pointer button press with the given @p
+     * serial.
      *
      * @param seat The seat on which to resize the window
      * @param serial The serial of the pointer button press which should trigger the resize
      * @param edges A hint for the compositor to set e.g. an appropriate cursor image
      **/
-    void requestResize(Seat *seat, quint32 serial, Qt::Edges edges);
+    void requestResize(Seat* seat, quint32 serial, Qt::Edges edges);
 
     /**
      * When a configure event is received, if a client commits the
@@ -420,7 +411,7 @@ public:
      * @param set Whether the Surface should be fullscreen or not
      * @param output Optional output as hint to the compositor where the Surface should be put
      **/
-    void setFullscreen(bool set, Output *output = nullptr);
+    void setFullscreen(bool set, Output* output = nullptr);
 
     /**
      * Request to the compositor to minimize this XdgShellSurface.
@@ -431,19 +422,19 @@ public:
      * Set this surface to have a given maximum size
      * @since 0.0.539
      */
-    void setMaxSize(const QSize &size);
+    void setMaxSize(const QSize& size);
 
     /**
      * Set this surface to have a given minimum size
      * @since 0.0.539
      */
-    void setMinSize(const QSize &size);
+    void setMinSize(const QSize& size);
 
     /**
      * Sets the position of the window contents within the buffer
      * @since 0.0.559
      */
-    void setWindowGeometry(const QRect &windowGeometry);
+    void setWindowGeometry(const QRect& windowGeometry);
 
     operator xdg_surface*();
     operator xdg_surface*() const;
@@ -463,20 +454,23 @@ Q_SIGNALS:
      * The compositor sent a configure with the new @p size and the @p states.
      * Before the next commit of the surface the @p serial needs to be passed to ackConfigure.
      **/
-    void configureRequested(const QSize &size, Wrapland::Client::XdgShellSurface::States states, quint32 serial);
+    void configureRequested(const QSize& size,
+                            Wrapland::Client::XdgShellSurface::States states,
+                            quint32 serial);
 
     /**
-     * Emitted whenever the size of the XdgShellSurface changes by e.g. receiving a configure request.
+     * Emitted whenever the size of the XdgShellSurface changes by e.g. receiving a configure
+     * request.
      *
      * @see configureRequested
      * @see size
      * @see setSize
      **/
-    void sizeChanged(const QSize &);
+    void sizeChanged(const QSize&);
 
 protected:
     class Private;
-    explicit XdgShellSurface(Private *p, QObject *parent = nullptr);
+    explicit XdgShellSurface(Private* p, QObject* parent = nullptr);
 
 private:
     std::unique_ptr<Private> d;
@@ -497,21 +491,12 @@ public:
     virtual ~XdgShellPopup();
 
     /**
-     * Setup this XdgShellPopup to manage the @p xdgpopupv5.
-     * When using XdgShell::createXdgShellPopup there is no need to call this
-     * method.
-     *
-     * @deprecated Since 0.0.549. This was for XDGShellV5, this is now deprecated
-     **/
-    void setup(xdg_popup *xdgpopupv5);
-
-    /**
      * Setup this XdgShellPopup to manage the @p xdgpopupv6 on associated @p xdgsurfacev6
      * When using XdgShell::createXdgShellPopup there is no need to call this
      * method.
      * @since 0.0.539
      **/
-    void setup(zxdg_surface_v6 *xdgsurfacev6, zxdg_popup_v6 *xdgpopup6);
+    void setup(zxdg_surface_v6* xdgsurfacev6, zxdg_popup_v6* xdgpopup6);
 
     /**
      * Setup this XdgShellPopup to manage the @p xdgpopupv on associated @p xdgsurface
@@ -519,7 +504,7 @@ public:
      * method.
      * @since 0.0.5XDGSTABLE
      **/
-    void setup(xdg_surface *xdgsurface, xdg_popup *xdgpopup);
+    void setup(xdg_surface* xdgsurface, xdg_popup* xdgpopup);
 
     /**
      * @returns @c true if managing an xdg_popup.
@@ -535,17 +520,17 @@ public:
     /**
      * Sets the @p queue to use for bound proxies.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for bound proxies.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Requests a grab on this popup
      * @since 0.0.539
      */
-    void requestGrab(Seat *seat, quint32 serial);
+    void requestGrab(Seat* seat, quint32 serial);
 
     /**
      * When a configure event is received, if a client commits the
@@ -561,7 +546,7 @@ public:
      * Sets the position of the window contents within the buffer
      * @since 0.0.559
      */
-    void setWindowGeometry(const QRect &windowGeometry);
+    void setWindowGeometry(const QRect& windowGeometry);
 
     operator xdg_surface*();
     operator xdg_surface*() const;
@@ -572,7 +557,6 @@ public:
     operator zxdg_popup_v6*();
     operator zxdg_popup_v6*() const;
 
-
 Q_SIGNALS:
     /**
      * This signal is emitted when a XdgShellPopup is dismissed by the
@@ -581,16 +565,15 @@ Q_SIGNALS:
     void popupDone();
 
     /**
-     * Emitted when the server has configured the popup with the final location of @p relativePosition
-     * This is emitted for V6 surfaces only
+     * Emitted when the server has configured the popup with the final location of @p
+     * relativePosition This is emitted for V6 surfaces only
      * @since 0.0.539
      **/
-    void configureRequested(const QRect &relativePosition, quint32 serial);
-
+    void configureRequested(const QRect& relativePosition, quint32 serial);
 
 protected:
     class Private;
-    explicit XdgShellPopup(Private *p, QObject *parent = nullptr);
+    explicit XdgShellPopup(Private* p, QObject* parent = nullptr);
 
 private:
     std::unique_ptr<Private> d;
@@ -607,6 +590,5 @@ Q_DECLARE_METATYPE(Wrapland::Client::XdgShellSurface::State)
 Q_DECLARE_METATYPE(Wrapland::Client::XdgShellSurface::States)
 Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner::Constraint)
 Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner::Constraints)
-
 
 #endif

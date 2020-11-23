@@ -32,8 +32,8 @@ namespace Client
 class Q_DECL_HIDDEN Keyboard::Private
 {
 public:
-    Private(Keyboard *q);
-    void setup(wl_keyboard *k);
+    Private(Keyboard* q);
+    void setup(wl_keyboard* k);
 
     WaylandPointer<wl_keyboard, wl_keyboard_release> keyboard;
     QPointer<Surface> enteredSurface;
@@ -42,26 +42,46 @@ public:
         qint32 charactersPerSecond = 0;
         qint32 delay = 0;
     } repeatInfo;
+
 private:
-    void enter(uint32_t serial, wl_surface *surface, wl_array *keys);
+    void enter(uint32_t serial, wl_surface* surface, wl_array* keys);
     void leave(uint32_t serial);
-    static void keymapCallback(void *data, wl_keyboard *keyboard, uint32_t format, int fd, uint32_t size);
-    static void enterCallback(void *data, wl_keyboard *keyboard, uint32_t serial, wl_surface *surface, wl_array *keys);
-    static void leaveCallback(void *data, wl_keyboard *keyboard, uint32_t serial, wl_surface *surface);
-    static void keyCallback(void *data, wl_keyboard *keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state);
-    static void modifiersCallback(void *data, wl_keyboard *keyboard, uint32_t serial, uint32_t modsDepressed,
-                                  uint32_t modsLatched, uint32_t modsLocked, uint32_t group);
-    static void repeatInfoCallback(void *data, wl_keyboard *keyboard, int32_t charactersPerSecond, int32_t delay);
-    Keyboard *q;
+    static void
+    keymapCallback(void* data, wl_keyboard* keyboard, uint32_t format, int fd, uint32_t size);
+    static void enterCallback(void* data,
+                              wl_keyboard* keyboard,
+                              uint32_t serial,
+                              wl_surface* surface,
+                              wl_array* keys);
+    static void
+    leaveCallback(void* data, wl_keyboard* keyboard, uint32_t serial, wl_surface* surface);
+    static void keyCallback(void* data,
+                            wl_keyboard* keyboard,
+                            uint32_t serial,
+                            uint32_t time,
+                            uint32_t key,
+                            uint32_t state);
+    static void modifiersCallback(void* data,
+                                  wl_keyboard* keyboard,
+                                  uint32_t serial,
+                                  uint32_t modsDepressed,
+                                  uint32_t modsLatched,
+                                  uint32_t modsLocked,
+                                  uint32_t group);
+    static void repeatInfoCallback(void* data,
+                                   wl_keyboard* keyboard,
+                                   int32_t charactersPerSecond,
+                                   int32_t delay);
+    Keyboard* q;
     static const wl_keyboard_listener s_listener;
 };
 
-Keyboard::Private::Private(Keyboard *q)
+Keyboard::Private::Private(Keyboard* q)
     : q(q)
 {
 }
 
-void Keyboard::Private::setup(wl_keyboard *k)
+void Keyboard::Private::setup(wl_keyboard* k)
 {
     Q_ASSERT(k);
     Q_ASSERT(!keyboard);
@@ -75,10 +95,10 @@ const wl_keyboard_listener Keyboard::Private::s_listener = {
     leaveCallback,
     keyCallback,
     modifiersCallback,
-    repeatInfoCallback
+    repeatInfoCallback,
 };
 
-Keyboard::Keyboard(QObject *parent)
+Keyboard::Keyboard(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -94,26 +114,33 @@ void Keyboard::release()
     d->keyboard.release();
 }
 
-void Keyboard::setup(wl_keyboard *keyboard)
+void Keyboard::setup(wl_keyboard* keyboard)
 {
     d->setup(keyboard);
 }
 
-void Keyboard::Private::enterCallback(void *data, wl_keyboard *keyboard, uint32_t serial, wl_surface *surface, wl_array *keys)
+void Keyboard::Private::enterCallback(void* data,
+                                      wl_keyboard* keyboard,
+                                      uint32_t serial,
+                                      wl_surface* surface,
+                                      wl_array* keys)
 {
     auto k = reinterpret_cast<Private*>(data);
     Q_ASSERT(k->keyboard == keyboard);
     k->enter(serial, surface, keys);
 }
 
-void Keyboard::Private::enter(uint32_t serial, wl_surface *surface, wl_array *keys)
+void Keyboard::Private::enter(uint32_t serial, wl_surface* surface, wl_array* keys)
 {
     Q_UNUSED(keys)
     enteredSurface = Surface::get(surface);
     emit q->entered(serial);
 }
 
-void Keyboard::Private::leaveCallback(void *data, wl_keyboard *keyboard, uint32_t serial, wl_surface *surface)
+void Keyboard::Private::leaveCallback(void* data,
+                                      wl_keyboard* keyboard,
+                                      uint32_t serial,
+                                      wl_surface* surface)
 {
     Q_UNUSED(surface)
     auto k = reinterpret_cast<Private*>(data);
@@ -127,7 +154,12 @@ void Keyboard::Private::leave(uint32_t serial)
     emit q->left(serial);
 }
 
-void Keyboard::Private::keyCallback(void *data, wl_keyboard *keyboard, uint32_t serial, uint32_t time, uint32_t key, uint32_t state)
+void Keyboard::Private::keyCallback(void* data,
+                                    wl_keyboard* keyboard,
+                                    uint32_t serial,
+                                    uint32_t time,
+                                    uint32_t key,
+                                    uint32_t state)
 {
     Q_UNUSED(serial)
     auto k = reinterpret_cast<Keyboard::Private*>(data);
@@ -142,7 +174,11 @@ void Keyboard::Private::keyCallback(void *data, wl_keyboard *keyboard, uint32_t 
     emit k->q->keyChanged(key, toState(), time);
 }
 
-void Keyboard::Private::keymapCallback(void *data, wl_keyboard *keyboard, uint32_t format, int fd, uint32_t size)
+void Keyboard::Private::keymapCallback(void* data,
+                                       wl_keyboard* keyboard,
+                                       uint32_t format,
+                                       int fd,
+                                       uint32_t size)
 {
     auto k = reinterpret_cast<Keyboard::Private*>(data);
     Q_ASSERT(k->keyboard == keyboard);
@@ -152,8 +188,13 @@ void Keyboard::Private::keymapCallback(void *data, wl_keyboard *keyboard, uint32
     emit k->q->keymapChanged(fd, size);
 }
 
-void Keyboard::Private::modifiersCallback(void *data, wl_keyboard *keyboard, uint32_t serial, uint32_t modsDepressed,
-                                 uint32_t modsLatched, uint32_t modsLocked, uint32_t group)
+void Keyboard::Private::modifiersCallback(void* data,
+                                          wl_keyboard* keyboard,
+                                          uint32_t serial,
+                                          uint32_t modsDepressed,
+                                          uint32_t modsLatched,
+                                          uint32_t modsLocked,
+                                          uint32_t group)
 {
     Q_UNUSED(serial)
     auto k = reinterpret_cast<Keyboard::Private*>(data);
@@ -161,7 +202,10 @@ void Keyboard::Private::modifiersCallback(void *data, wl_keyboard *keyboard, uin
     emit k->q->modifiersChanged(modsDepressed, modsLatched, modsLocked, group);
 }
 
-void Keyboard::Private::repeatInfoCallback(void *data, wl_keyboard *keyboard, int32_t charactersPerSecond, int32_t delay)
+void Keyboard::Private::repeatInfoCallback(void* data,
+                                           wl_keyboard* keyboard,
+                                           int32_t charactersPerSecond,
+                                           int32_t delay)
 {
     auto k = reinterpret_cast<Keyboard::Private*>(data);
     Q_ASSERT(k->keyboard == keyboard);
@@ -170,12 +214,12 @@ void Keyboard::Private::repeatInfoCallback(void *data, wl_keyboard *keyboard, in
     emit k->q->keyRepeatChanged();
 }
 
-Surface *Keyboard::enteredSurface()
+Surface* Keyboard::enteredSurface()
 {
     return d->enteredSurface.data();
 }
 
-Surface *Keyboard::enteredSurface() const
+Surface* Keyboard::enteredSurface() const
 {
     return d->enteredSurface.data();
 }

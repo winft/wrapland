@@ -22,9 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QPointer>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct zwp_pointer_gestures_v1;
 struct zwp_pointer_gesture_swipe_v1;
@@ -79,7 +79,7 @@ public:
      * to call setup. In order to get a ready to use PointerGestures prefer using
      * Registry::createPointerGestures.
      **/
-    explicit PointerGestures(QObject *parent = nullptr);
+    explicit PointerGestures(QObject* parent = nullptr);
     virtual ~PointerGestures();
 
     /**
@@ -87,7 +87,7 @@ public:
      * When using Registry::createPointerGestures there is no need to call this
      * method.
      **/
-    void setup(zwp_pointer_gestures_v1 *pointergestures);
+    void setup(zwp_pointer_gestures_v1* pointergestures);
     /**
      * @returns @c true if managing a zwp_pointer_gestures_v1.
      **/
@@ -102,21 +102,21 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this PointerGestures.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this PointerGestures.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates a PointerSwipeGesture for the given @p pointer with the @p parent.
      **/
-    PointerSwipeGesture *createSwipeGesture(Pointer *pointer, QObject *parent = nullptr);
+    PointerSwipeGesture* createSwipeGesture(Pointer* pointer, QObject* parent = nullptr);
 
     /**
      * Creates a PointerPinchGesture for the given @p pointer with the @p parent.
      **/
-    PointerPinchGesture *createPinchGesture(Pointer *pointer, QObject *parent = nullptr);
+    PointerPinchGesture* createPinchGesture(Pointer* pointer, QObject* parent = nullptr);
 
     operator zwp_pointer_gestures_v1*();
     operator zwp_pointer_gestures_v1*() const;
@@ -169,7 +169,7 @@ public:
      * When using PointerGestures::createPointerSwipeGesture there is no need to call this
      * method.
      **/
-    void setup(zwp_pointer_gesture_swipe_v1 *pointerswipegesture);
+    void setup(zwp_pointer_gesture_swipe_v1* pointerswipegesture);
     /**
      * @returns @c true if managing a zwp_pointer_gesture_swipe_v1.
      **/
@@ -209,13 +209,14 @@ Q_SIGNALS:
 
     /**
      * A gesture got updated.
-     * @param delta relative coordinates of the logical center of the gesture compared to the previous event
+     * @param delta relative coordinates of the logical center of the gesture compared to the
+     * previous event
      * @param time Timestamp in milliseconds granularity
      * @see started
      * @see ended
      * @see cancelled
      **/
-    void updated(const QSizeF &delta, quint32 time);
+    void updated(const QSizeF& delta, quint32 time);
 
     /**
      * A gesture ended.
@@ -241,7 +242,7 @@ Q_SIGNALS:
 
 private:
     friend class PointerGestures;
-    explicit PointerSwipeGesture(QObject *parent = nullptr);
+    explicit PointerSwipeGesture(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
@@ -280,7 +281,7 @@ public:
      * When using PointerGestures::createPointerPinchGesture there is no need to call this
      * method.
      **/
-    void setup(zwp_pointer_gesture_pinch_v1 *pointerpinchgesture);
+    void setup(zwp_pointer_gesture_pinch_v1* pointerpinchgesture);
     /**
      * @returns @c true if managing a zwp_pointer_gesture_pinch_v1.
      **/
@@ -320,15 +321,17 @@ Q_SIGNALS:
 
     /**
      * A gesture got updated.
-     * @param delta relative coordinates of the logical center of the gesture compared to the previous event
+     * @param delta relative coordinates of the logical center of the gesture compared to the
+     * previous event
      * @param scale an absolute scale compared to the start
-     * @param rotation relative angle in degrees clockwise compared to the previous start or update event.
+     * @param rotation relative angle in degrees clockwise compared to the previous start or update
+     * event.
      * @param time Timestamp in milliseconds granularity
      * @see started
      * @see ended
      * @see cancelled
      **/
-    void updated(const QSizeF &delta, qreal scale, qreal rotation, quint32 time);
+    void updated(const QSizeF& delta, qreal scale, qreal rotation, quint32 time);
 
     /**
      * A gesture ended.
@@ -354,11 +357,10 @@ Q_SIGNALS:
 
 private:
     friend class PointerGestures;
-    explicit PointerPinchGesture(QObject *parent = nullptr);
+    explicit PointerPinchGesture(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

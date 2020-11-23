@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_TEXTINPUT_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct wl_text_input;
 struct wl_text_input_manager;
@@ -67,10 +67,10 @@ public:
      * @see entered
      * @see left
      **/
-    Surface *enteredSurface() const;
+    Surface* enteredSurface() const;
 
-    void setEventQueue(EventQueue *queue);
-    EventQueue *eventQueue() const;
+    void setEventQueue(EventQueue* queue);
+    EventQueue* eventQueue() const;
 
     /**
      * @returns whether the input panel (virtual keyboard) is currently visible on the screen
@@ -86,14 +86,14 @@ public:
      * text (or keyboard) focus and is enabled.
      * @see deactivate
      **/
-    void enable(Surface *surface);
+    void enable(Surface* surface);
 
     /**
      * Disable text input in a @p surface (typically when there is no focus on any
      * text entry inside the surface).
      * @see enable
      **/
-    void disable(Surface *surface);
+    void disable(Surface* surface);
 
     /**
      * Requests input panels (virtual keyboard) to show.
@@ -121,7 +121,7 @@ public:
      * @param cursor Index in the text describing the cursor position
      * @param anchor Index of the selection anchor, if no selection same as cursor
      **/
-    void setSurroundingText(const QString &text, quint32 cursor, quint32 anchor);
+    void setSurroundingText(const QString& text, quint32 cursor, quint32 anchor);
 
     /**
      * The possible states for a keyEvent.
@@ -129,7 +129,7 @@ public:
      **/
     enum class KeyState {
         Pressed,
-        Released
+        Released,
     };
 
     /**
@@ -179,7 +179,7 @@ public:
         /**
          * the text input is multi line
          */
-        MultiLine = 1 << 9
+        MultiLine = 1 << 9,
     };
     Q_DECLARE_FLAGS(ContentHints, ContentHint)
 
@@ -241,7 +241,7 @@ public:
         /**
          * input for a terminal
          */
-        Terminal
+        Terminal,
     };
     /**
      * Sets the content @p purpose and content @p hints.
@@ -256,7 +256,7 @@ public:
      * Allows the compositor to e.g. put a window with word suggestions
      * near the cursor.
      **/
-    void setCursorRectangle(const QRect &rect);
+    void setCursorRectangle(const QRect& rect);
 
     /**
      * Sets a specific @p language.
@@ -264,7 +264,7 @@ public:
      * This allows for example a virtual keyboard to show a language specific layout.
      * The @p language argument is a RFC-3066 format language tag.
      **/
-    void setPreferredLanguage(const QString &language);
+    void setPreferredLanguage(const QString& language);
 
     /**
      * The text direction of input text.
@@ -387,7 +387,10 @@ Q_SIGNALS:
      * @param modifiers The hold modifiers on this event
      * @param time Timestamp of this event
      **/
-    void keyEvent(quint32 xkbKeySym, Wrapland::Client::TextInput::KeyState state, Qt::KeyboardModifiers modifiers, quint32 time);
+    void keyEvent(quint32 xkbKeySym,
+                  Wrapland::Client::TextInput::KeyState state,
+                  Qt::KeyboardModifiers modifiers,
+                  quint32 time);
 
     /**
      * Emitted whenever the composing text and related states changed.
@@ -412,7 +415,7 @@ Q_SIGNALS:
 protected:
     class Private;
     std::unique_ptr<Private> d;
-    explicit TextInput(Private *p, QObject *parent = nullptr);
+    explicit TextInput(Private* p, QObject* parent = nullptr);
 };
 
 /**
@@ -440,13 +443,13 @@ public:
      * When using Registry::createTextInputManager there is no need to call this
      * method.
      **/
-    void setup(wl_text_input_manager *textinputmanagerunstablev0);
+    void setup(wl_text_input_manager* textinputmanagerunstablev0);
     /**
      * Setup this TextInputManager to manage the @p textinputmanagerunstablev0.
      * When using Registry::createTextInputManager there is no need to call this
      * method.
      **/
-    void setup(zwp_text_input_manager_v2 *textinputmanagerunstablev2);
+    void setup(zwp_text_input_manager_v2* textinputmanagerunstablev2);
     /**
      * @returns @c true if managing a resource.
      **/
@@ -461,11 +464,11 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this TextInputManager.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this TextInputManager.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates a TextInput for the @p seat.
@@ -473,7 +476,7 @@ public:
      * @param seat The Seat to create the TextInput for
      * @param parent The parent to use for the TextInput
      **/
-    TextInput *createTextInput(Seat *seat, QObject *parent = nullptr);
+    TextInput* createTextInput(Seat* seat, QObject* parent = nullptr);
 
     /**
      * @returns @c null if not for a wl_text_input_manager
@@ -503,7 +506,7 @@ Q_SIGNALS:
 
 protected:
     class Private;
-    explicit TextInputManager(Private *p, QObject *parent = nullptr);
+    explicit TextInputManager(Private* p, QObject* parent = nullptr);
 
     std::unique_ptr<Private> d;
 };

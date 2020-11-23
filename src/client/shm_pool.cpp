@@ -18,9 +18,9 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "shm_pool.h"
-#include "event_queue.h"
 #include "buffer.h"
 #include "buffer_p.h"
+#include "event_queue.h"
 #include "logging.h"
 #include "wayland_pointer_p.h"
 // Qt
@@ -28,8 +28,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QImage>
 #include <QTemporaryFile>
 // system
-#include <unistd.h>
 #include <sys/mman.h>
+#include <unistd.h>
 // wayland
 #include <wayland-client-protocol.h>
 
@@ -41,31 +41,32 @@ namespace Client
 class Q_DECL_HIDDEN ShmPool::Private
 {
 public:
-    Private(ShmPool *q);
+    Private(ShmPool* q);
     bool createPool();
     bool resizePool(int32_t newSize);
-    QList<std::shared_ptr<Buffer>>::iterator getBuffer(const QSize &size, int32_t stride, Buffer::Format format);
+    QList<std::shared_ptr<Buffer>>::iterator
+    getBuffer(const QSize& size, int32_t stride, Buffer::Format format);
     WaylandPointer<wl_shm, wl_shm_destroy> shm;
     WaylandPointer<wl_shm_pool, wl_shm_pool_destroy> pool;
-    void *poolData = nullptr;
+    void* poolData = nullptr;
     int32_t size = 1024;
     std::unique_ptr<QTemporaryFile> tmpFile;
     bool valid = false;
     int offset = 0;
     QList<std::shared_ptr<Buffer>> buffers;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
+
 private:
-    ShmPool *q;
+    ShmPool* q;
 };
 
-ShmPool::Private::Private(ShmPool *q)
+ShmPool::Private::Private(ShmPool* q)
     : tmpFile(new QTemporaryFile())
     , q(q)
 {
 }
 
-
-ShmPool::ShmPool(QObject *parent)
+ShmPool::ShmPool(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -90,7 +91,7 @@ void ShmPool::release()
     d->offset = 0;
 }
 
-void ShmPool::setup(wl_shm *shm)
+void ShmPool::setup(wl_shm* shm)
 {
     Q_ASSERT(shm);
     Q_ASSERT(!d->shm);
@@ -98,12 +99,12 @@ void ShmPool::setup(wl_shm *shm)
     d->valid = d->createPool();
 }
 
-void ShmPool::setEventQueue(EventQueue *queue)
+void ShmPool::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *ShmPool::eventQueue()
+EventQueue* ShmPool::eventQueue()
 {
     return d->queue;
 }
@@ -149,8 +150,9 @@ bool ShmPool::Private::resizePool(int32_t newSize)
     return true;
 }
 
-namespace {
-static Buffer::Format toBufferFormat(const QImage &image)
+namespace
+{
+static Buffer::Format toBufferFormat(const QImage& image)
 {
     switch (image.format()) {
     case QImage::Format_ARGB32_Premultiplied:
@@ -158,10 +160,13 @@ static Buffer::Format toBufferFormat(const QImage &image)
     case QImage::Format_RGB32:
         return Buffer::Format::RGB32;
     case QImage::Format_ARGB32:
-        qCWarning(WRAPLAND_CLIENT) << "Unsupported image format: " << image.format() << ". expect slow performance. Use QImage::Format_ARGB32_Premultiplied";
+        qCWarning(WRAPLAND_CLIENT)
+            << "Unsupported image format: " << image.format()
+            << ". expect slow performance. Use QImage::Format_ARGB32_Premultiplied";
         return Buffer::Format::ARGB32;
     default:
-        qCWarning(WRAPLAND_CLIENT) << "Unsupported image format: " << image.format() << ". expect slow performance.";
+        qCWarning(WRAPLAND_CLIENT)
+            << "Unsupported image format: " << image.format() << ". expect slow performance.";
         return Buffer::Format::ARGB32;
     }
 }
@@ -186,7 +191,8 @@ Buffer::Ptr ShmPool::createBuffer(const QImage& image)
     return std::weak_ptr<Buffer>(*it);
 }
 
-Buffer::Ptr ShmPool::createBuffer(const QSize &size, int32_t stride, const void *src, Buffer::Format format)
+Buffer::Ptr
+ShmPool::createBuffer(const QSize& size, int32_t stride, const void* src, Buffer::Format format)
 {
     if (size.isEmpty() || !d->valid) {
         return std::weak_ptr<Buffer>();
@@ -199,7 +205,8 @@ Buffer::Ptr ShmPool::createBuffer(const QSize &size, int32_t stride, const void 
     return std::weak_ptr<Buffer>(*it);
 }
 
-namespace {
+namespace
+{
 static wl_shm_format toWaylandFormat(Buffer::Format format)
 {
     switch (format) {
@@ -212,7 +219,7 @@ static wl_shm_format toWaylandFormat(Buffer::Format format)
 }
 }
 
-Buffer::Ptr ShmPool::getBuffer(const QSize &size, int32_t stride, Buffer::Format format)
+Buffer::Ptr ShmPool::getBuffer(const QSize& size, int32_t stride, Buffer::Format format)
 {
     auto it = d->getBuffer(size, stride, format);
     if (it == d->buffers.end()) {
@@ -221,7 +228,8 @@ Buffer::Ptr ShmPool::getBuffer(const QSize &size, int32_t stride, Buffer::Format
     return std::weak_ptr<Buffer>(*it);
 }
 
-QList<std::shared_ptr<Buffer>>::iterator ShmPool::Private::getBuffer(const QSize &s, int32_t stride, Buffer::Format format)
+QList<std::shared_ptr<Buffer>>::iterator
+ShmPool::Private::getBuffer(const QSize& s, int32_t stride, Buffer::Format format)
 {
     for (auto it = buffers.begin(); it != buffers.end(); ++it) {
         auto buffer = *it;
@@ -241,15 +249,15 @@ QList<std::shared_ptr<Buffer>>::iterator ShmPool::Private::getBuffer(const QSize
         }
     }
     // we don't have a buffer which we could reuse - need to create a new one
-    wl_buffer *native = wl_shm_pool_create_buffer(pool, offset, s.width(), s.height(),
-                                                  stride, toWaylandFormat(format));
+    wl_buffer* native = wl_shm_pool_create_buffer(
+        pool, offset, s.width(), s.height(), stride, toWaylandFormat(format));
     if (!native) {
         return buffers.end();
     }
     if (queue) {
         queue->addProxy(native);
     }
-    Buffer *buffer = new Buffer(q, native, s, stride, offset, format);
+    Buffer* buffer = new Buffer(q, native, s, stride, offset, format);
     offset += byteCount;
     auto it = buffers.insert(buffers.end(), std::shared_ptr<Buffer>(buffer));
     return it;
@@ -265,7 +273,7 @@ void* ShmPool::poolAddress() const
     return d->poolData;
 }
 
-wl_shm *ShmPool::shm()
+wl_shm* ShmPool::shm()
 {
     return d->shm;
 }

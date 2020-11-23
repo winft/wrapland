@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QPoint>
 #include <QSize>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -55,7 +55,7 @@ public:
      * to call setup. In order to get a ready to use ContrastManager prefer using
      * Registry::createContrastManager.
      **/
-    explicit ContrastManager(QObject *parent = nullptr);
+    explicit ContrastManager(QObject* parent = nullptr);
     virtual ~ContrastManager();
 
     /**
@@ -67,7 +67,7 @@ public:
      * When using Registry::createContrastManager there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_contrast_manager *contrastManager);
+    void setup(org_kde_kwin_contrast_manager* contrastManager);
     /**
      * Releases the org_kde_kwin_contrast_manager interface.
      * After the interface has been released the ContrastManager instance is no
@@ -78,19 +78,19 @@ public:
     /**
      * Sets the @p queue to use for creating a Contrast.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Contrast.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Creates and setup a new Contrast with @p parent.
      * @param parent The parent to pass to the Contrast.
      * @returns The new created Contrast
      **/
-    Contrast *createContrast(Surface *surface, QObject *parent = nullptr);
-    void removeContrast(Surface *surface);
+    Contrast* createContrast(Surface* surface, QObject* parent = nullptr);
+    void removeContrast(Surface* surface);
 
     operator org_kde_kwin_contrast_manager*();
     operator org_kde_kwin_contrast_manager*() const;
@@ -135,7 +135,7 @@ public:
      * When using ContrastManager::createContrast there is no need to call this
      * method.
      **/
-    void setup(org_kde_kwin_contrast *contrast);
+    void setup(org_kde_kwin_contrast* contrast);
     /**
      * Releases the org_kde_kwin_contrast interface.
      * After the interface has been released the Contrast instance is no
@@ -170,7 +170,7 @@ public:
      * The region will have to be created with
      * Compositor::createRegion(QRegion)
      */
-    void setRegion(Region *region);
+    void setRegion(Region* region);
     void setContrast(qreal contrast);
     void setIntensity(qreal intensity);
     void setSaturation(qreal saturation);
@@ -180,7 +180,7 @@ public:
 
 private:
     friend class ContrastManager;
-    explicit Contrast(QObject *parent = nullptr);
+    explicit Contrast(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
@@ -189,4 +189,3 @@ private:
 }
 
 #endif
-

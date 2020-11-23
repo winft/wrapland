@@ -158,9 +158,10 @@ void ParamsV1::release()
     d_ptr->params.release();
 }
 
-void ParamsV1::Private::callbackCreateSucceeded([[maybe_unused]] void* data,
-                                                [[maybe_unused]] zwp_linux_buffer_params_v1* wlParams,
-                                                wl_buffer* wlBuffer)
+void ParamsV1::Private::callbackCreateSucceeded(
+    [[maybe_unused]] void* data,
+    [[maybe_unused]] zwp_linux_buffer_params_v1* wlParams,
+    wl_buffer* wlBuffer)
 {
     auto params = reinterpret_cast<ParamsV1*>(data);
     params->d_ptr->createdBuffer = wlBuffer;
@@ -215,8 +216,8 @@ ParamsV1::createDmabufImmediate(int32_t width, int32_t height, uint32_t format, 
     if (d_ptr->createdBuffer) {
         return d_ptr->createdBuffer;
     }
-    d_ptr->createdBuffer =
-        zwp_linux_buffer_params_v1_create_immed(d_ptr->params, width, height, format, flags);
+    d_ptr->createdBuffer
+        = zwp_linux_buffer_params_v1_create_immed(d_ptr->params, width, height, format, flags);
     return d_ptr->createdBuffer;
 }
 

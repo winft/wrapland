@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_REGION_H
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -49,7 +49,7 @@ class WRAPLANDCLIENT_EXPORT Region : public QObject
 {
     Q_OBJECT
 public:
-    explicit Region(const QRegion &region, QObject *parent = nullptr);
+    explicit Region(const QRegion& region, QObject* parent = nullptr);
     virtual ~Region();
 
     /**
@@ -57,7 +57,7 @@ public:
      * When using Compositor::createRegion there is no need to call this
      * method.
      **/
-    void setup(wl_region *region);
+    void setup(wl_region* region);
     /**
      * Releases the wl_region interface.
      * After the interface has been released the Region instance is no
@@ -73,19 +73,19 @@ public:
     /**
      * Adds the @p rect to this Region.
      **/
-    void add(const QRect &rect);
+    void add(const QRect& rect);
     /**
      * Adds the @p region to this Rregion.
      **/
-    void add(const QRegion &region);
+    void add(const QRegion& region);
     /**
      * Subtracts @p rect from this Region.
      **/
-    void subtract(const QRect &rect);
+    void subtract(const QRect& rect);
     /**
      * Subtracts @p region from this Region.
      **/
-    void subtract(const QRegion &region);
+    void subtract(const QRegion& region);
 
     /**
      * The geometry of this Region.

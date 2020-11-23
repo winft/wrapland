@@ -59,7 +59,7 @@ class WRAPLANDCLIENT_EXPORT Surface : public QObject
 {
     Q_OBJECT
 public:
-    explicit Surface(QObject *parent = nullptr);
+    explicit Surface(QObject* parent = nullptr);
     virtual ~Surface();
 
     /**
@@ -71,7 +71,7 @@ public:
      * destroyed together with the @p window.
      * @since 5.4
      **/
-    static Surface *fromWindow(QWindow *window);
+    static Surface* fromWindow(QWindow* window);
 
     /**
      * Creates a Surface for the given @p winId.
@@ -83,14 +83,14 @@ public:
      * the @p wid.
      * @since 5.5
      **/
-    static Surface *fromQtWinId(WId wid);
+    static Surface* fromQtWinId(WId wid);
 
     /**
      * Setup this Surface to manage the @p surface.
      * When using Compositor::createSurface there is no need to call this
      * method.
      **/
-    void setup(wl_surface *surface);
+    void setup(wl_surface* surface);
     /**
      * Releases the wl_surface interface.
      * After the interface has been released the Surface instance is no
@@ -130,45 +130,45 @@ public:
      **/
     enum class CommitFlag {
         None,
-        FrameCallback
+        FrameCallback,
     };
     void commit(CommitFlag flag = CommitFlag::FrameCallback);
     /**
      * Mark @p rect as damaged for the next frame.
      * @see damageBuffer
      **/
-    void damage(const QRect &rect);
+    void damage(const QRect& rect);
     /**
      * Mark @p region as damaged for the next frame.
      * @see damageBuffer
      **/
-    void damage(const QRegion &region);
+    void damage(const QRegion& region);
     /**
      * Mark @p rect in buffer coordinates as damaged for the next frame.
      * @see damage
      * @since 0.0.559
      **/
-    void damageBuffer(const QRect &rect);
+    void damageBuffer(const QRect& rect);
     /**
      * Mark @p region in buffer coordinates as damaged for the next frame.
      * @see damage
      * @since 0.0.559
      **/
-    void damageBuffer(const QRegion &region);
+    void damageBuffer(const QRegion& region);
     /**
      * Attaches the @p buffer to this Surface for the next frame.
      * @param buffer The buffer to attach to this Surface
      * @param offset Position of the new upper-left corner in relation to previous frame
      **/
-    void attachBuffer(wl_buffer *buffer, const QPoint &offset = QPoint());
+    void attachBuffer(wl_buffer* buffer, const QPoint& offset = QPoint());
     /**
      * Overloaded method for convenience.
      **/
-    void attachBuffer(Buffer *buffer, const QPoint &offset = QPoint());
+    void attachBuffer(Buffer* buffer, const QPoint& offset = QPoint());
     /**
      * Overloaded method for convenience.
      **/
-    void attachBuffer(Buffer::Ptr buffer, const QPoint &offset = QPoint());
+    void attachBuffer(Buffer::Ptr buffer, const QPoint& offset = QPoint());
     /**
      * Sets the input region to @p region.
      *
@@ -183,7 +183,7 @@ public:
      * @param region The new input region or an infinite region if @c null
      * @see commit
      **/
-    void setInputRegion(const Region *region = nullptr);
+    void setInputRegion(const Region* region = nullptr);
     /**
      * Sets the opaque region to @p region.
      *
@@ -198,8 +198,8 @@ public:
      * @param region The new opaque region or an empty region if @c null
      * @see commit
      **/
-    void setOpaqueRegion(const Region *region = nullptr);
-    void setSize(const QSize &size);
+    void setOpaqueRegion(const Region* region = nullptr);
+    void setSize(const QSize& size);
     QSize size() const;
 
     /**
@@ -242,17 +242,18 @@ public:
      * @see outputLeft
      * @since 0.0.527
      **/
-    QVector<Output *> outputs() const;
+    QVector<Output*> outputs() const;
 
     /**
      * All Surfaces which are currently created.
      * TODO: KF6 return QList<Surface*> instead of const-ref
      **/
-    static const QList<Surface*> &all(); // krazy:exclude=constref
+    static const QList<Surface*>& all(); // krazy:exclude=constref
     /**
-     * @returns The Surface referencing the @p native wl_surface or @c null if there is no such Surface.
+     * @returns The Surface referencing the @p native wl_surface or @c null if there is no such
+     * Surface.
      **/
-    static Surface *get(wl_surface *native);
+    static Surface* get(wl_surface* native);
 
 Q_SIGNALS:
     /**
@@ -274,7 +275,7 @@ Q_SIGNALS:
      * @see outputs
      * @since 0.0.527
      **/
-    void outputEntered(Wrapland::Client::Output *o);
+    void outputEntered(Wrapland::Client::Output* o);
 
     /**
      * Emitted whenever a change in the Surface (e.g. creation, movement, resize, unmapping)
@@ -285,7 +286,7 @@ Q_SIGNALS:
      * @see outputs
      * @since 0.0.527
      **/
-    void outputLeft(Wrapland::Client::Output *o);
+    void outputLeft(Wrapland::Client::Output* o);
 
 private:
     class Private;

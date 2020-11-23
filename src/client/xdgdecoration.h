@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WRAPLAND_CLIENT_XDG_DECORATION_UNSTABLE_V1_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct zxdg_decoration_manager_v1;
 struct zxdg_toplevel_decoration_v1;
@@ -73,7 +73,7 @@ public:
      * to call setup. In order to get a ready to use XdgDecorationManager prefer using
      * Registry::createXdgDecorationManager.
      **/
-    explicit XdgDecorationManager(QObject *parent = nullptr);
+    explicit XdgDecorationManager(QObject* parent = nullptr);
     virtual ~XdgDecorationManager();
 
     /**
@@ -81,7 +81,7 @@ public:
      * When using Registry::createXdgDecorationManager there is no need to call this
      * method.
      **/
-    void setup(zxdg_decoration_manager_v1 *xdgdecorationmanager);
+    void setup(zxdg_decoration_manager_v1* xdgdecorationmanager);
     /**
      * @returns @c true if managing a zxdg_decoration_manager_v1.
      **/
@@ -96,13 +96,13 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this XdgDecorationManager.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this XdgDecorationManager.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
-    XdgDecoration *getToplevelDecoration(XdgShellSurface *toplevel, QObject *parent = nullptr);
+    XdgDecoration* getToplevelDecoration(XdgShellSurface* toplevel, QObject* parent = nullptr);
 
     operator zxdg_decoration_manager_v1*();
     operator zxdg_decoration_manager_v1*() const;
@@ -127,7 +127,7 @@ class WRAPLANDCLIENT_EXPORT XdgDecoration : public QObject
 public:
     enum class Mode {
         ClientSide,
-        ServerSide
+        ServerSide,
     };
 
     Q_ENUM(Mode)
@@ -139,7 +139,7 @@ public:
      * When using XdgDecorationManager::createXdgDecoration there is no need to call this
      * method.
      **/
-    void setup(zxdg_toplevel_decoration_v1 *xdgdecoration);
+    void setup(zxdg_toplevel_decoration_v1* xdgdecoration);
     /**
      * @returns @c true if managing a zxdg_toplevel_decoration_v1.
      **/
@@ -152,13 +152,14 @@ public:
     void release();
 
     /**
-    * @brief Request that the server puts us in a given mode. The compositor will respond with a modeChange
-    * The compositor may ignore this request.
-    */
+     * @brief Request that the server puts us in a given mode. The compositor will respond with a
+     * modeChange The compositor may ignore this request.
+     */
     void setMode(Mode mode);
 
     /**
-     * @brief Unset our requested mode. The compositor can then configure this surface with the default mode
+     * @brief Unset our requested mode. The compositor can then configure this surface with the
+     * default mode
      */
     void unsetMode();
 
@@ -175,11 +176,10 @@ Q_SIGNALS:
 
 private:
     friend class XdgDecorationManager;
-    explicit XdgDecoration(QObject *parent = nullptr);
+    explicit XdgDecoration(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

@@ -19,8 +19,11 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "registry.h"
+#include "appmenu.h"
+#include "blur.h"
 #include "compositor.h"
 #include "connection_thread.h"
+#include "contrast.h"
 #include "datadevicemanager.h"
 #include "dpms.h"
 #include "event_queue.h"
@@ -28,77 +31,73 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "fullscreen_shell.h"
 #include "idle.h"
 #include "idleinhibit.h"
+#include "keyboard_shortcuts_inhibit.h"
 #include "keystate.h"
+#include "linux_dmabuf_v1.h"
 #include "logging.h"
 #include "output.h"
 #include "output_configuration_v1.h"
-#include "output_management_v1.h"
 #include "output_device_v1.h"
-#include "wlr_output_manager_v1.h"
+#include "output_management_v1.h"
 #include "plasmashell.h"
 #include "plasmavirtualdesktop.h"
 #include "plasmawindowmanagement.h"
 #include "pointerconstraints.h"
 #include "pointergestures.h"
 #include "presentation_time.h"
-#include "seat.h"
-#include "shadow.h"
-#include "blur.h"
-#include "contrast.h"
 #include "relativepointer.h"
-#include "slide.h"
+#include "seat.h"
+#include "server_decoration_palette.h"
+#include "shadow.h"
 #include "shell.h"
 #include "shm_pool.h"
+#include "slide.h"
 #include "subcompositor.h"
 #include "textinput_p.h"
 #include "viewporter.h"
+#include "wayland_pointer_p.h"
+#include "wlr_output_manager_v1.h"
+#include "xdgdecoration.h"
+#include "xdgforeign_v2.h"
+#include "xdgoutput.h"
 #include "xdgshell.h"
 #include "xdgshell_p.h"
-#include "wayland_pointer_p.h"
-#include "xdgforeign_v2.h"
-#include "appmenu.h"
-#include "server_decoration_palette.h"
-#include "xdgoutput.h"
-#include "xdgdecoration.h"
-#include "keyboard_shortcuts_inhibit.h"
-#include "linux_dmabuf_v1.h"
 // Qt
 #include <QDebug>
 // wayland
+#include <wayland-appmenu-client-protocol.h>
+#include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
+#include <wayland-contrast-client-protocol.h>
+#include <wayland-dpms-client-protocol.h>
+#include <wayland-fake-input-client-protocol.h>
 #include <wayland-fullscreen-shell-client-protocol.h>
+#include <wayland-idle-client-protocol.h>
+#include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
+#include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
+#include <wayland-keystate-client-protocol.h>
+#include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
+#include <wayland-output-device-v1-client-protocol.h>
+#include <wayland-output-management-v1-client-protocol.h>
 #include <wayland-plasma-shell-client-protocol.h>
 #include <wayland-plasma-virtual-desktop-client-protocol.h>
 #include <wayland-plasma-window-management-client-protocol.h>
-#include <wayland-idle-client-protocol.h>
-#include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
-#include <wayland-fake-input-client-protocol.h>
+#include <wayland-pointer-constraints-unstable-v1-client-protocol.h>
+#include <wayland-pointer-gestures-unstable-v1-client-protocol.h>
+#include <wayland-presentation-time-client-protocol.h>
+#include <wayland-relativepointer-unstable-v1-client-protocol.h>
+#include <wayland-server-decoration-palette-client-protocol.h>
 #include <wayland-shadow-client-protocol.h>
-#include <wayland-output-management-v1-client-protocol.h>
-#include <wayland-output-device-v1-client-protocol.h>
-#include <wayland-wlr-output-management-v1-client-protocol.h>
-#include <wayland-blur-client-protocol.h>
-#include <wayland-contrast-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
-#include <wayland-dpms-client-protocol.h>
 #include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
-#include "../compat/wayland-xdg-shell-v5-client-protocol.h"
-#include <wayland-xdg-shell-v6-client-protocol.h>
-#include <wayland-xdg-shell-client-protocol.h>
-#include <wayland-relativepointer-unstable-v1-client-protocol.h>
-#include <wayland-pointer-gestures-unstable-v1-client-protocol.h>
-#include <wayland-pointer-constraints-unstable-v1-client-protocol.h>
-#include <wayland-xdg-foreign-unstable-v2-client-protocol.h>
-#include <wayland-appmenu-client-protocol.h>
-#include <wayland-server-decoration-palette-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
-#include <wayland-xdg-output-unstable-v1-client-protocol.h>
+#include <wayland-wlr-output-management-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
-#include <wayland-keystate-client-protocol.h>
-#include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
-#include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
-#include <wayland-presentation-time-client-protocol.h>
+#include <wayland-xdg-foreign-unstable-v2-client-protocol.h>
+#include <wayland-xdg-output-unstable-v1-client-protocol.h>
+#include <wayland-xdg-shell-client-protocol.h>
+#include <wayland-xdg-shell-v6-client-protocol.h>
 
 /*****
  * How to add another interface:
@@ -118,305 +117,420 @@ namespace Wrapland
 namespace Client
 {
 
-namespace {
+namespace
+{
 struct SuppertedInterfaceData {
     quint32 maxVersion;
     QByteArray name;
-    const wl_interface *interface;
+    const wl_interface* interface;
     void (Registry::*announcedSignal)(quint32, quint32);
     void (Registry::*removedSignal)(quint32);
 };
+
 static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
-    {Registry::Interface::Compositor, {
-        4,
-        QByteArrayLiteral("wl_compositor"),
-        &wl_compositor_interface,
-        &Registry::compositorAnnounced,
-        &Registry::compositorRemoved
-    }},
-    {Registry::Interface::DataDeviceManager, {
-        3,
-        QByteArrayLiteral("wl_data_device_manager"),
-        &wl_data_device_manager_interface,
-        &Registry::dataDeviceManagerAnnounced,
-        &Registry::dataDeviceManagerRemoved
-    }},
-    {Registry::Interface::Output, {
-        3,
-        QByteArrayLiteral("wl_output"),
-        &wl_output_interface,
-        &Registry::outputAnnounced,
-        &Registry::outputRemoved
-    }},
-    {Registry::Interface::Shm, {
-        1,
-        QByteArrayLiteral("wl_shm"),
-        &wl_shm_interface,
-        &Registry::shmAnnounced,
-        &Registry::shmRemoved
-    }},
-    {Registry::Interface::Seat, {
-        5,
-        QByteArrayLiteral("wl_seat"),
-        &wl_seat_interface,
-        &Registry::seatAnnounced,
-        &Registry::seatRemoved
-    }},
-    {Registry::Interface::Shell, {
-        1,
-        QByteArrayLiteral("wl_shell"),
-        &wl_shell_interface,
-        &Registry::shellAnnounced,
-        &Registry::shellRemoved
-    }},
-    {Registry::Interface::SubCompositor, {
-        1,
-        QByteArrayLiteral("wl_subcompositor"),
-        &wl_subcompositor_interface,
-        &Registry::subCompositorAnnounced,
-        &Registry::subCompositorRemoved
-    }},
-    {Registry::Interface::PlasmaShell, {
-        6,
-        QByteArrayLiteral("org_kde_plasma_shell"),
-        &org_kde_plasma_shell_interface,
-        &Registry::plasmaShellAnnounced,
-        &Registry::plasmaShellRemoved
-    }},
-    {Registry::Interface::PlasmaVirtualDesktopManagement, {
-        2,
-        QByteArrayLiteral("org_kde_plasma_virtual_desktop_management"),
-        &org_kde_plasma_virtual_desktop_management_interface,
-        &Registry::plasmaVirtualDesktopManagementAnnounced,
-        &Registry::plasmaVirtualDesktopManagementRemoved
-    }},
-    {Registry::Interface::PlasmaWindowManagement, {
-        9,
-        QByteArrayLiteral("org_kde_plasma_window_management"),
-        &org_kde_plasma_window_management_interface,
-        &Registry::plasmaWindowManagementAnnounced,
-        &Registry::plasmaWindowManagementRemoved
-    }},
-    {Registry::Interface::Idle, {
-        1,
-        QByteArrayLiteral("org_kde_kwin_idle"),
-        &org_kde_kwin_idle_interface,
-        &Registry::idleAnnounced,
-        &Registry::idleRemoved
-    }},
-    {Registry::Interface::FakeInput, {
-        4,
-        QByteArrayLiteral("org_kde_kwin_fake_input"),
-        &org_kde_kwin_fake_input_interface,
-        &Registry::fakeInputAnnounced,
-        &Registry::fakeInputRemoved
-    }},
-    {Registry::Interface::OutputManagementV1, {
-        1,
-        QByteArrayLiteral("zkwinft_output_management_v1"),
-        &zkwinft_output_management_v1_interface,
-        &Registry::outputManagementV1Announced,
-        &Registry::outputManagementV1Removed
-    }},
-    {Registry::Interface::OutputDeviceV1, {
-        1,
-        QByteArrayLiteral("zkwinft_output_device_v1"),
-        &zkwinft_output_device_v1_interface,
-        &Registry::outputDeviceV1Announced,
-        &Registry::outputDeviceV1Removed
-    }},
-    {Registry::Interface::WlrOutputManagerV1, {
-        2,
-        QByteArrayLiteral("zwlr_output_manager_v1"),
-        &zwlr_output_manager_v1_interface,
-        &Registry::wlrOutputManagerV1Announced,
-        &Registry::wlrOutputManagerV1Removed
-    }},
-    {Registry::Interface::Shadow, {
-        2,
-        QByteArrayLiteral("org_kde_kwin_shadow_manager"),
-        &org_kde_kwin_shadow_manager_interface,
-        &Registry::shadowAnnounced,
-        &Registry::shadowRemoved
-    }},
-    {Registry::Interface::Blur, {
-        1,
-        QByteArrayLiteral("org_kde_kwin_blur_manager"),
-        &org_kde_kwin_blur_manager_interface,
-        &Registry::blurAnnounced,
-        &Registry::blurRemoved
-    }},
-    {Registry::Interface::Contrast, {
-        1,
-        QByteArrayLiteral("org_kde_kwin_contrast_manager"),
-        &org_kde_kwin_contrast_manager_interface,
-        &Registry::contrastAnnounced,
-        &Registry::contrastRemoved
-    }},
-    {Registry::Interface::Slide, {
-        1,
-        QByteArrayLiteral("org_kde_kwin_slide_manager"),
-        &org_kde_kwin_slide_manager_interface,
-        &Registry::slideAnnounced,
-        &Registry::slideRemoved
-    }},
-    {Registry::Interface::FullscreenShell, {
-        1,
-        QByteArrayLiteral("_wl_fullscreen_shell"),
-        &_wl_fullscreen_shell_interface,
-        &Registry::fullscreenShellAnnounced,
-        &Registry::fullscreenShellRemoved
-    }},
-    {Registry::Interface::Dpms, {
-        1,
-        QByteArrayLiteral("org_kde_kwin_dpms_manager"),
-        &org_kde_kwin_dpms_manager_interface,
-        &Registry::dpmsAnnounced,
-        &Registry::dpmsRemoved
-    }},
-    {Registry::Interface::TextInputManagerUnstableV0, {
-        1,
-        QByteArrayLiteral("wl_text_input_manager"),
-        &wl_text_input_manager_interface,
-        &Registry::textInputManagerUnstableV0Announced,
-        &Registry::textInputManagerUnstableV0Removed
-    }},
-    {Registry::Interface::TextInputManagerUnstableV2, {
-        1,
-        QByteArrayLiteral("zwp_text_input_manager_v2"),
-        &zwp_text_input_manager_v2_interface,
-        &Registry::textInputManagerUnstableV2Announced,
-        &Registry::textInputManagerUnstableV2Removed
-    }},
-    {Registry::Interface::Viewporter, {
-        1,
-        QByteArrayLiteral("wp_viewporter"),
-        &wp_viewporter_interface,
-        &Registry::viewporterAnnounced,
-        &Registry::viewporterRemoved
-    }},
-    {Registry::Interface::XdgShellUnstableV5, {
-        1,
-        QByteArrayLiteral("xdg_shell"),
-        &zxdg_shell_v5_interface,
-        &Registry::xdgShellUnstableV5Announced,
-        &Registry::xdgShellUnstableV5Removed
-    }},
-    {Registry::Interface::RelativePointerManagerUnstableV1, {
-        1,
-        QByteArrayLiteral("zwp_relative_pointer_manager_v1"),
-        &zwp_relative_pointer_manager_v1_interface,
-        &Registry::relativePointerManagerUnstableV1Announced,
-        &Registry::relativePointerManagerUnstableV1Removed
-    }},
-    {Registry::Interface::PointerGesturesUnstableV1, {
-        1,
-        QByteArrayLiteral("zwp_pointer_gestures_v1"),
-        &zwp_pointer_gestures_v1_interface,
-        &Registry::pointerGesturesUnstableV1Announced,
-        &Registry::pointerGesturesUnstableV1Removed
-    }},
-    {Registry::Interface::PointerConstraintsUnstableV1, {
-        1,
-        QByteArrayLiteral("zwp_pointer_constraints_v1"),
-        &zwp_pointer_constraints_v1_interface,
-        &Registry::pointerConstraintsUnstableV1Announced,
-        &Registry::pointerConstraintsUnstableV1Removed
-    }},
-    {Registry::Interface::PresentationManager, {
-        1,
-        QByteArrayLiteral("wp_presentation"),
-        &wp_presentation_interface,
-        &Registry::presentationManagerAnnounced,
-        &Registry::presentationManagerRemoved
-    }},
-    {Registry::Interface::XdgExporterUnstableV2, {
-        1,
-        QByteArrayLiteral("zxdg_exporter_v2"),
-        &zxdg_exporter_v2_interface,
-        &Registry::exporterUnstableV2Announced,
-        &Registry::exporterUnstableV2Removed
-    }},
-    {Registry::Interface::XdgImporterUnstableV2, {
-        1,
-        QByteArrayLiteral("zxdg_importer_v2"),
-        &zxdg_importer_v2_interface,
-        &Registry::importerUnstableV2Announced,
-        &Registry::importerUnstableV2Removed
-    }},
-    {Registry::Interface::XdgShellUnstableV6, {
-        1,
-        QByteArrayLiteral("zxdg_shell_v6"),
-        &zxdg_shell_v6_interface,
-        &Registry::xdgShellUnstableV6Announced,
-        &Registry::xdgShellUnstableV6Removed
-    }},
-    {Registry::Interface::IdleInhibitManagerUnstableV1, {
-        1,
-        QByteArrayLiteral("zwp_idle_inhibit_manager_v1"),
-        &zwp_idle_inhibit_manager_v1_interface,
-        &Registry::idleInhibitManagerUnstableV1Announced,
-        &Registry::idleInhibitManagerUnstableV1Removed
-    }},
-    {Registry::Interface::AppMenu, {
-        1,
-        QByteArrayLiteral("org_kde_kwin_appmenu_manager"),
-        &org_kde_kwin_appmenu_manager_interface,
-        &Registry::appMenuAnnounced,
-        &Registry::appMenuRemoved
-    }},
-    {Registry::Interface::ServerSideDecorationPalette, {
-        1,
-        QByteArrayLiteral("org_kde_kwin_server_decoration_palette_manager"),
-        &org_kde_kwin_server_decoration_palette_manager_interface,
-        &Registry::serverSideDecorationPaletteManagerAnnounced,
-        &Registry::serverSideDecorationPaletteManagerRemoved
-    }},
-    {Registry::Interface::XdgOutputUnstableV1, {
-        3,
-        QByteArrayLiteral("zxdg_output_manager_v1"),
-        &zxdg_output_manager_v1_interface,
-        &Registry::xdgOutputAnnounced,
-        &Registry::xdgOutputRemoved
-    }},
-    {Registry::Interface::XdgShellStable, {
-        1,
-        QByteArrayLiteral("xdg_wm_base"),
-        &xdg_wm_base_interface,
-        &Registry::xdgShellStableAnnounced,
-        &Registry::xdgShellStableRemoved
-    }},
-    {Registry::Interface::XdgDecorationUnstableV1, {
-        1,
-        QByteArrayLiteral("zxdg_decoration_manager_v1"),
-        &zxdg_decoration_manager_v1_interface,
-        &Registry::xdgDecorationAnnounced,
-        &Registry::xdgDecorationRemoved
-    }},
-    {Registry::Interface::Keystate, {
-        1,
-        QByteArrayLiteral("org_kde_kwin_keystate"),
-        &org_kde_kwin_keystate_interface,
-        &Registry::keystateAnnounced,
-        &Registry::keystateRemoved
-    }},
-    {Registry::Interface::KeyboardShortcutsInhibitManagerV1, {
-        1,
-        QByteArrayLiteral("zwp_keyboard_shortcuts_inhibit_manager_v1"),
-        &zwp_keyboard_shortcuts_inhibit_manager_v1_interface,
-        &Registry::keyboardShortcutsInhibitManagerAnnounced,
-        &Registry::keyboardShortcutsInhibitManagerRemoved
-    }},
-    {Registry::Interface::LinuxDmabufV1, {
-        3,
-        QByteArrayLiteral("zwp_linux_dmabuf_v1"),
-        &zwp_linux_dmabuf_v1_interface,
-        &Registry::LinuxDmabufV1Announced,
-        &Registry::LinuxDmabufV1Removed
-    }}
+    {
+        Registry::Interface::Compositor,
+        {
+            4,
+            QByteArrayLiteral("wl_compositor"),
+            &wl_compositor_interface,
+            &Registry::compositorAnnounced,
+            &Registry::compositorRemoved,
+        },
+    },
+    {
+        Registry::Interface::DataDeviceManager,
+        {
+            3,
+            QByteArrayLiteral("wl_data_device_manager"),
+            &wl_data_device_manager_interface,
+            &Registry::dataDeviceManagerAnnounced,
+            &Registry::dataDeviceManagerRemoved,
+        },
+    },
+    {
+        Registry::Interface::Output,
+        {
+            3,
+            QByteArrayLiteral("wl_output"),
+            &wl_output_interface,
+            &Registry::outputAnnounced,
+            &Registry::outputRemoved,
+        },
+    },
+    {
+        Registry::Interface::Shm,
+        {
+            1,
+            QByteArrayLiteral("wl_shm"),
+            &wl_shm_interface,
+            &Registry::shmAnnounced,
+            &Registry::shmRemoved,
+        },
+    },
+    {
+        Registry::Interface::Seat,
+        {
+            5,
+            QByteArrayLiteral("wl_seat"),
+            &wl_seat_interface,
+            &Registry::seatAnnounced,
+            &Registry::seatRemoved,
+        },
+    },
+    {
+        Registry::Interface::Shell,
+        {
+            1,
+            QByteArrayLiteral("wl_shell"),
+            &wl_shell_interface,
+            &Registry::shellAnnounced,
+            &Registry::shellRemoved,
+        },
+    },
+    {
+        Registry::Interface::SubCompositor,
+        {
+            1,
+            QByteArrayLiteral("wl_subcompositor"),
+            &wl_subcompositor_interface,
+            &Registry::subCompositorAnnounced,
+            &Registry::subCompositorRemoved,
+        },
+    },
+    {
+        Registry::Interface::PlasmaShell,
+        {
+            6,
+            QByteArrayLiteral("org_kde_plasma_shell"),
+            &org_kde_plasma_shell_interface,
+            &Registry::plasmaShellAnnounced,
+            &Registry::plasmaShellRemoved,
+        },
+    },
+    {
+        Registry::Interface::PlasmaVirtualDesktopManagement,
+        {
+            2,
+            QByteArrayLiteral("org_kde_plasma_virtual_desktop_management"),
+            &org_kde_plasma_virtual_desktop_management_interface,
+            &Registry::plasmaVirtualDesktopManagementAnnounced,
+            &Registry::plasmaVirtualDesktopManagementRemoved,
+        },
+    },
+    {
+        Registry::Interface::PlasmaWindowManagement,
+        {
+            9,
+            QByteArrayLiteral("org_kde_plasma_window_management"),
+            &org_kde_plasma_window_management_interface,
+            &Registry::plasmaWindowManagementAnnounced,
+            &Registry::plasmaWindowManagementRemoved,
+        },
+    },
+    {
+        Registry::Interface::Idle,
+        {
+            1,
+            QByteArrayLiteral("org_kde_kwin_idle"),
+            &org_kde_kwin_idle_interface,
+            &Registry::idleAnnounced,
+            &Registry::idleRemoved,
+        },
+    },
+    {
+        Registry::Interface::FakeInput,
+        {
+            4,
+            QByteArrayLiteral("org_kde_kwin_fake_input"),
+            &org_kde_kwin_fake_input_interface,
+            &Registry::fakeInputAnnounced,
+            &Registry::fakeInputRemoved,
+        },
+    },
+    {
+        Registry::Interface::OutputManagementV1,
+        {
+            1,
+            QByteArrayLiteral("zkwinft_output_management_v1"),
+            &zkwinft_output_management_v1_interface,
+            &Registry::outputManagementV1Announced,
+            &Registry::outputManagementV1Removed,
+        },
+    },
+    {
+        Registry::Interface::OutputDeviceV1,
+        {
+            1,
+            QByteArrayLiteral("zkwinft_output_device_v1"),
+            &zkwinft_output_device_v1_interface,
+            &Registry::outputDeviceV1Announced,
+            &Registry::outputDeviceV1Removed,
+        },
+    },
+    {
+        Registry::Interface::WlrOutputManagerV1,
+        {
+            2,
+            QByteArrayLiteral("zwlr_output_manager_v1"),
+            &zwlr_output_manager_v1_interface,
+            &Registry::wlrOutputManagerV1Announced,
+            &Registry::wlrOutputManagerV1Removed,
+        },
+    },
+    {
+        Registry::Interface::Shadow,
+        {
+            2,
+            QByteArrayLiteral("org_kde_kwin_shadow_manager"),
+            &org_kde_kwin_shadow_manager_interface,
+            &Registry::shadowAnnounced,
+            &Registry::shadowRemoved,
+        },
+    },
+    {
+        Registry::Interface::Blur,
+        {
+            1,
+            QByteArrayLiteral("org_kde_kwin_blur_manager"),
+            &org_kde_kwin_blur_manager_interface,
+            &Registry::blurAnnounced,
+            &Registry::blurRemoved,
+        },
+    },
+    {
+        Registry::Interface::Contrast,
+        {
+            1,
+            QByteArrayLiteral("org_kde_kwin_contrast_manager"),
+            &org_kde_kwin_contrast_manager_interface,
+            &Registry::contrastAnnounced,
+            &Registry::contrastRemoved,
+        },
+    },
+    {
+        Registry::Interface::Slide,
+        {
+            1,
+            QByteArrayLiteral("org_kde_kwin_slide_manager"),
+            &org_kde_kwin_slide_manager_interface,
+            &Registry::slideAnnounced,
+            &Registry::slideRemoved,
+        },
+    },
+    {
+        Registry::Interface::FullscreenShell,
+        {
+            1,
+            QByteArrayLiteral("_wl_fullscreen_shell"),
+            &_wl_fullscreen_shell_interface,
+            &Registry::fullscreenShellAnnounced,
+            &Registry::fullscreenShellRemoved,
+        },
+    },
+    {
+        Registry::Interface::Dpms,
+        {
+            1,
+            QByteArrayLiteral("org_kde_kwin_dpms_manager"),
+            &org_kde_kwin_dpms_manager_interface,
+            &Registry::dpmsAnnounced,
+            &Registry::dpmsRemoved,
+        },
+    },
+    {
+        Registry::Interface::TextInputManagerUnstableV0,
+        {
+            1,
+            QByteArrayLiteral("wl_text_input_manager"),
+            &wl_text_input_manager_interface,
+            &Registry::textInputManagerUnstableV0Announced,
+            &Registry::textInputManagerUnstableV0Removed,
+        },
+    },
+    {
+        Registry::Interface::TextInputManagerUnstableV2,
+        {
+            1,
+            QByteArrayLiteral("zwp_text_input_manager_v2"),
+            &zwp_text_input_manager_v2_interface,
+            &Registry::textInputManagerUnstableV2Announced,
+            &Registry::textInputManagerUnstableV2Removed,
+        },
+    },
+    {
+        Registry::Interface::Viewporter,
+        {
+            1,
+            QByteArrayLiteral("wp_viewporter"),
+            &wp_viewporter_interface,
+            &Registry::viewporterAnnounced,
+            &Registry::viewporterRemoved,
+        },
+    },
+    {
+        Registry::Interface::RelativePointerManagerUnstableV1,
+        {
+            1,
+            QByteArrayLiteral("zwp_relative_pointer_manager_v1"),
+            &zwp_relative_pointer_manager_v1_interface,
+            &Registry::relativePointerManagerUnstableV1Announced,
+            &Registry::relativePointerManagerUnstableV1Removed,
+        },
+    },
+    {
+        Registry::Interface::PointerGesturesUnstableV1,
+        {
+            1,
+            QByteArrayLiteral("zwp_pointer_gestures_v1"),
+            &zwp_pointer_gestures_v1_interface,
+            &Registry::pointerGesturesUnstableV1Announced,
+            &Registry::pointerGesturesUnstableV1Removed,
+        },
+    },
+    {
+        Registry::Interface::PointerConstraintsUnstableV1,
+        {
+            1,
+            QByteArrayLiteral("zwp_pointer_constraints_v1"),
+            &zwp_pointer_constraints_v1_interface,
+            &Registry::pointerConstraintsUnstableV1Announced,
+            &Registry::pointerConstraintsUnstableV1Removed,
+        },
+    },
+    {
+        Registry::Interface::PresentationManager,
+        {
+            1,
+            QByteArrayLiteral("wp_presentation"),
+            &wp_presentation_interface,
+            &Registry::presentationManagerAnnounced,
+            &Registry::presentationManagerRemoved,
+        },
+    },
+    {
+        Registry::Interface::XdgExporterUnstableV2,
+        {
+            1,
+            QByteArrayLiteral("zxdg_exporter_v2"),
+            &zxdg_exporter_v2_interface,
+            &Registry::exporterUnstableV2Announced,
+            &Registry::exporterUnstableV2Removed,
+        },
+    },
+    {
+        Registry::Interface::XdgImporterUnstableV2,
+        {
+            1,
+            QByteArrayLiteral("zxdg_importer_v2"),
+            &zxdg_importer_v2_interface,
+            &Registry::importerUnstableV2Announced,
+            &Registry::importerUnstableV2Removed,
+        },
+    },
+    {
+        Registry::Interface::XdgShellUnstableV6,
+        {
+            1,
+            QByteArrayLiteral("zxdg_shell_v6"),
+            &zxdg_shell_v6_interface,
+            &Registry::xdgShellUnstableV6Announced,
+            &Registry::xdgShellUnstableV6Removed,
+        },
+    },
+    {
+        Registry::Interface::IdleInhibitManagerUnstableV1,
+        {
+            1,
+            QByteArrayLiteral("zwp_idle_inhibit_manager_v1"),
+            &zwp_idle_inhibit_manager_v1_interface,
+            &Registry::idleInhibitManagerUnstableV1Announced,
+            &Registry::idleInhibitManagerUnstableV1Removed,
+        },
+    },
+    {
+        Registry::Interface::AppMenu,
+        {
+            1,
+            QByteArrayLiteral("org_kde_kwin_appmenu_manager"),
+            &org_kde_kwin_appmenu_manager_interface,
+            &Registry::appMenuAnnounced,
+            &Registry::appMenuRemoved,
+        },
+    },
+    {
+        Registry::Interface::ServerSideDecorationPalette,
+        {
+            1,
+            QByteArrayLiteral("org_kde_kwin_server_decoration_palette_manager"),
+            &org_kde_kwin_server_decoration_palette_manager_interface,
+            &Registry::serverSideDecorationPaletteManagerAnnounced,
+            &Registry::serverSideDecorationPaletteManagerRemoved,
+        },
+    },
+    {
+        Registry::Interface::XdgOutputUnstableV1,
+        {
+            3,
+            QByteArrayLiteral("zxdg_output_manager_v1"),
+            &zxdg_output_manager_v1_interface,
+            &Registry::xdgOutputAnnounced,
+            &Registry::xdgOutputRemoved,
+        },
+    },
+    {
+        Registry::Interface::XdgShellStable,
+        {
+            1,
+            QByteArrayLiteral("xdg_wm_base"),
+            &xdg_wm_base_interface,
+            &Registry::xdgShellStableAnnounced,
+            &Registry::xdgShellStableRemoved,
+        },
+    },
+    {
+        Registry::Interface::XdgDecorationUnstableV1,
+        {
+            1,
+            QByteArrayLiteral("zxdg_decoration_manager_v1"),
+            &zxdg_decoration_manager_v1_interface,
+            &Registry::xdgDecorationAnnounced,
+            &Registry::xdgDecorationRemoved,
+        },
+    },
+    {
+        Registry::Interface::Keystate,
+        {
+            1,
+            QByteArrayLiteral("org_kde_kwin_keystate"),
+            &org_kde_kwin_keystate_interface,
+            &Registry::keystateAnnounced,
+            &Registry::keystateRemoved,
+        },
+    },
+    {
+        Registry::Interface::KeyboardShortcutsInhibitManagerV1,
+        {
+            1,
+            QByteArrayLiteral("zwp_keyboard_shortcuts_inhibit_manager_v1"),
+            &zwp_keyboard_shortcuts_inhibit_manager_v1_interface,
+            &Registry::keyboardShortcutsInhibitManagerAnnounced,
+            &Registry::keyboardShortcutsInhibitManagerRemoved,
+        },
+    },
+    {
+        Registry::Interface::LinuxDmabufV1,
+        {
+            3,
+            QByteArrayLiteral("zwp_linux_dmabuf_v1"),
+            &zwp_linux_dmabuf_v1_interface,
+            &Registry::LinuxDmabufV1Announced,
+            &Registry::LinuxDmabufV1Removed,
+        },
+    },
 };
 
-static quint32 maxVersion(const Registry::Interface &interface)
+static quint32 maxVersion(const Registry::Interface& interface)
 {
     auto it = s_interfaces.find(interface);
     if (it != s_interfaces.end()) {
@@ -429,31 +543,38 @@ static quint32 maxVersion(const Registry::Interface &interface)
 class Q_DECL_HIDDEN Registry::Private
 {
 public:
-    Private(Registry *q);
+    Private(Registry* q);
     void setup();
     bool hasInterface(Interface interface) const;
     AnnouncedInterface interface(Interface interface) const;
     QVector<AnnouncedInterface> interfaces(Interface interface) const;
     Interface interfaceForName(quint32 name) const;
-    template <typename T>
-    T *bind(Interface interface, uint32_t name, uint32_t version) const;
-    template <class T, typename WL>
-    T *create(quint32 name, quint32 version, QObject *parent, WL *(Registry::*bindMethod)(uint32_t, uint32_t) const);
+    template<typename T>
+    T* bind(Interface interface, uint32_t name, uint32_t version) const;
+    template<class T, typename WL>
+    T* create(quint32 name,
+              quint32 version,
+              QObject* parent,
+              WL* (Registry::*bindMethod)(uint32_t, uint32_t) const);
 
     WaylandPointer<wl_registry, wl_registry_destroy> registry;
     static const struct wl_callback_listener s_callbackListener;
     WaylandPointer<wl_callback, wl_callback_destroy> callback;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 
 private:
-    void handleAnnounce(uint32_t name, const char *interface, uint32_t version);
+    void handleAnnounce(uint32_t name, const char* interface, uint32_t version);
     void handleRemove(uint32_t name);
     void handleGlobalSync();
-    static void globalAnnounce(void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version);
-    static void globalRemove(void *data, struct wl_registry *registry, uint32_t name);
-    static void globalSync(void *data, struct wl_callback *callback, uint32_t serial);
+    static void globalAnnounce(void* data,
+                               struct wl_registry* registry,
+                               uint32_t name,
+                               const char* interface,
+                               uint32_t version);
+    static void globalRemove(void* data, struct wl_registry* registry, uint32_t name);
+    static void globalSync(void* data, struct wl_callback* callback, uint32_t serial);
 
-    Registry *q;
+    Registry* q;
     struct InterfaceData {
         Interface interface;
         uint32_t name;
@@ -463,7 +584,7 @@ private:
     static const struct wl_registry_listener s_registryListener;
 };
 
-Registry::Private::Private(Registry *q)
+Registry::Private::Private(Registry* q)
     : q(q)
 {
 }
@@ -474,7 +595,7 @@ void Registry::Private::setup()
     wl_callback_add_listener(callback, &s_callbackListener, this);
 }
 
-Registry::Registry(QObject *parent)
+Registry::Registry(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -491,7 +612,7 @@ void Registry::release()
     d->callback.release();
 }
 
-void Registry::create(wl_display *display)
+void Registry::create(wl_display* display)
 {
     Q_ASSERT(display);
     Q_ASSERT(!isValid());
@@ -503,11 +624,10 @@ void Registry::create(wl_display *display)
     }
 }
 
-void Registry::create(ConnectionThread *connection)
+void Registry::create(ConnectionThread* connection)
 {
     create(connection->display());
-    connect(connection, &ConnectionThread::establishedChanged, this,
-            [this] (bool established) {
+    connect(connection, &ConnectionThread::establishedChanged, this, [this](bool established) {
         if (!established) {
             Q_EMIT registryReleased();
             release();
@@ -521,7 +641,7 @@ void Registry::setup()
     d->setup();
 }
 
-void Registry::setEventQueue(EventQueue *queue)
+void Registry::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
     if (!queue) {
@@ -535,7 +655,7 @@ void Registry::setEventQueue(EventQueue *queue)
     }
 }
 
-EventQueue *Registry::eventQueue()
+EventQueue* Registry::eventQueue()
 {
     return d->queue;
 }
@@ -543,22 +663,24 @@ EventQueue *Registry::eventQueue()
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 const struct wl_registry_listener Registry::Private::s_registryListener = {
     globalAnnounce,
-    globalRemove
+    globalRemove,
 };
 
-const struct wl_callback_listener Registry::Private::s_callbackListener = {
-   globalSync
-};
+const struct wl_callback_listener Registry::Private::s_callbackListener = {globalSync};
 #endif
 
-void Registry::Private::globalAnnounce(void *data, wl_registry *registry, uint32_t name, const char *interface, uint32_t version)
+void Registry::Private::globalAnnounce(void* data,
+                                       wl_registry* registry,
+                                       uint32_t name,
+                                       const char* interface,
+                                       uint32_t version)
 {
     auto r = reinterpret_cast<Registry::Private*>(data);
     Q_ASSERT(registry == r->registry);
     r->handleAnnounce(name, interface, version);
 }
 
-void Registry::Private::globalRemove(void *data, wl_registry *registry, uint32_t name)
+void Registry::Private::globalRemove(void* data, wl_registry* registry, uint32_t name)
 {
     auto r = reinterpret_cast<Registry::Private*>(data);
     Q_ASSERT(registry == r->registry);
@@ -579,8 +701,9 @@ void Registry::Private::handleGlobalSync()
     emit q->interfacesAnnounced();
 }
 
-namespace {
-static Registry::Interface nameToInterface(const char *interface)
+namespace
+{
+static Registry::Interface nameToInterface(const char* interface)
 {
     for (auto it = s_interfaces.constBegin(); it != s_interfaces.constEnd(); ++it) {
         if (qstrcmp(interface, it.value().name) == 0) {
@@ -591,35 +714,34 @@ static Registry::Interface nameToInterface(const char *interface)
 }
 }
 
-void Registry::Private::handleAnnounce(uint32_t name, const char *interface, uint32_t version)
+void Registry::Private::handleAnnounce(uint32_t name, const char* interface, uint32_t version)
 {
     Interface i = nameToInterface(interface);
     emit q->interfaceAnnounced(QByteArray(interface), name, version);
     if (i == Interface::Unknown) {
-        qCDebug(WRAPLAND_CLIENT) << "Unknown interface announced: " << interface << "/" << name << "/" << version;
+        qCDebug(WRAPLAND_CLIENT) << "Unknown interface announced: " << interface << "/" << name
+                                 << "/" << version;
         return;
     }
     qCDebug(WRAPLAND_CLIENT) << "Wayland Interface: " << interface << "/" << name << "/" << version;
     m_interfaces.append({i, name, version});
     auto it = s_interfaces.constFind(i);
     if (it != s_interfaces.end()) {
-        emit (q->*it.value().announcedSignal)(name, version);
+        emit(q->*it.value().announcedSignal)(name, version);
     }
 }
 
 void Registry::Private::handleRemove(uint32_t name)
 {
-    auto it = std::find_if(m_interfaces.begin(), m_interfaces.end(),
-        [name](const InterfaceData &data) {
-            return data.name == name;
-        }
-    );
+    auto it = std::find_if(m_interfaces.begin(),
+                           m_interfaces.end(),
+                           [name](const InterfaceData& data) { return data.name == name; });
     if (it != m_interfaces.end()) {
         InterfaceData data = *(it);
         m_interfaces.erase(it);
         auto sit = s_interfaces.find(data.interface);
         if (sit != s_interfaces.end()) {
-            emit (q->*sit.value().removedSignal)(data.name);
+            emit(q->*sit.value().removedSignal)(data.name);
         }
     }
     emit q->interfaceRemoved(name);
@@ -627,11 +749,10 @@ void Registry::Private::handleRemove(uint32_t name)
 
 bool Registry::Private::hasInterface(Registry::Interface interface) const
 {
-    auto it = std::find_if(m_interfaces.constBegin(), m_interfaces.constEnd(),
-        [interface](const InterfaceData &data) {
+    auto it = std::find_if(
+        m_interfaces.constBegin(), m_interfaces.constEnd(), [interface](const InterfaceData& data) {
             return data.interface == interface;
-        }
-    );
+        });
     return it != m_interfaces.constEnd();
 }
 
@@ -639,7 +760,7 @@ QVector<Registry::AnnouncedInterface> Registry::Private::interfaces(Interface in
 {
     QVector<Registry::AnnouncedInterface> retVal;
     for (auto it = m_interfaces.constBegin(); it != m_interfaces.constEnd(); ++it) {
-        const auto &data = *it;
+        const auto& data = *it;
         if (data.interface == interface) {
             retVal << AnnouncedInterface{data.name, data.version};
         }
@@ -658,10 +779,9 @@ Registry::AnnouncedInterface Registry::Private::interface(Interface interface) c
 
 Registry::Interface Registry::Private::interfaceForName(quint32 name) const
 {
-    auto it = std::find_if(m_interfaces.constBegin(), m_interfaces.constEnd(),
-        [name] (const InterfaceData &data) {
-            return data.name == name;
-        });
+    auto it = std::find_if(m_interfaces.constBegin(),
+                           m_interfaces.constEnd(),
+                           [name](const InterfaceData& data) { return data.name == name; });
     if (it == m_interfaces.constEnd()) {
         return Interface::Unknown;
     }
@@ -683,11 +803,12 @@ Registry::AnnouncedInterface Registry::interface(Interface interface) const
     return d->interface(interface);
 }
 
-#define BIND2(__NAME__, __INAME__, __WL__) \
-__WL__ *Registry::bind##__NAME__(uint32_t name, uint32_t version) const \
-{ \
-    return d->bind<__WL__>(Interface::__INAME__, name, qMin(maxVersion(Interface::__INAME__), version)); \
-}
+#define BIND2(__NAME__, __INAME__, __WL__)                                                         \
+    __WL__* Registry::bind##__NAME__(uint32_t name, uint32_t version) const                        \
+    {                                                                                              \
+        return d->bind<__WL__>(                                                                    \
+            Interface::__INAME__, name, qMin(maxVersion(Interface::__INAME__), version));          \
+    }
 
 #define BIND(__NAME__, __WL__) BIND2(__NAME__, __NAME__, __WL__)
 
@@ -710,7 +831,6 @@ BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
 BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
 BIND(Viewporter, wp_viewporter)
-BIND(XdgShellUnstableV5, xdg_shell)
 BIND(XdgShellUnstableV6, zxdg_shell_v6)
 BIND(XdgShellStable, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
@@ -727,7 +847,9 @@ BIND2(ContrastManager, Contrast, org_kde_kwin_contrast_manager)
 BIND2(SlideManager, Slide, org_kde_kwin_slide_manager)
 BIND2(DpmsManager, Dpms, org_kde_kwin_dpms_manager)
 BIND2(AppMenuManager, AppMenu, org_kde_kwin_appmenu_manager)
-BIND2(ServerSideDecorationPaletteManager, ServerSideDecorationPalette, org_kde_kwin_server_decoration_palette_manager)
+BIND2(ServerSideDecorationPaletteManager,
+      ServerSideDecorationPalette,
+      org_kde_kwin_server_decoration_palette_manager)
 BIND(XdgOutputUnstableV1, zxdg_output_manager_v1)
 BIND(XdgDecorationUnstableV1, zxdg_decoration_manager_v1)
 BIND(KeyboardShortcutsInhibitManagerV1, zwp_keyboard_shortcuts_inhibit_manager_v1)
@@ -735,28 +857,29 @@ BIND(LinuxDmabufV1, zwp_linux_dmabuf_v1)
 #undef BIND
 #undef BIND2
 
-template <class T, typename WL>
-T *Registry::Private::create(quint32 name, quint32 version, QObject *parent, WL *(Registry::*bindMethod)(uint32_t, uint32_t) const)
+template<class T, typename WL>
+T* Registry::Private::create(quint32 name,
+                             quint32 version,
+                             QObject* parent,
+                             WL* (Registry::*bindMethod)(uint32_t, uint32_t) const)
 {
-    T *t = new T(parent);
+    T* t = new T(parent);
     t->setEventQueue(queue);
     t->setup((q->*bindMethod)(name, version));
-    QObject::connect(q, &Registry::interfaceRemoved, t,
-        [t, name] (quint32 removed) {
-            if (name == removed) {
-                emit t->removed();
-            }
+    QObject::connect(q, &Registry::interfaceRemoved, t, [t, name](quint32 removed) {
+        if (name == removed) {
+            emit t->removed();
         }
-    );
+    });
     QObject::connect(q, &Registry::registryReleased, t, &T::release);
     return t;
 }
 
-#define CREATE2(__NAME__, __BINDNAME__) \
-__NAME__ *Registry::create##__NAME__(quint32 name, quint32 version, QObject *parent) \
-{ \
-    return d->create<__NAME__>(name, version, parent, &Registry::bind##__BINDNAME__); \
-}
+#define CREATE2(__NAME__, __BINDNAME__)                                                            \
+    __NAME__* Registry::create##__NAME__(quint32 name, quint32 version, QObject* parent)           \
+    {                                                                                              \
+        return d->create<__NAME__>(name, version, parent, &Registry::bind##__BINDNAME__);          \
+    }
 
 #define CREATE(__NAME__) CREATE2(__NAME__, __NAME__)
 
@@ -791,37 +914,40 @@ CREATE(PresentationManager)
 #undef CREATE
 #undef CREATE2
 
-XdgExporter *Registry::createXdgExporter(quint32 name, quint32 version, QObject *parent)
+XdgExporter* Registry::createXdgExporter(quint32 name, quint32 version, QObject* parent)
 {
-    //only V1 supported for now
-    return d->create<XdgExporterUnstableV2>(name, version, parent, &Registry::bindXdgExporterUnstableV2);
+    // only V1 supported for now
+    return d->create<XdgExporterUnstableV2>(
+        name, version, parent, &Registry::bindXdgExporterUnstableV2);
 }
 
-XdgImporter *Registry::createXdgImporter(quint32 name, quint32 version, QObject *parent)
+XdgImporter* Registry::createXdgImporter(quint32 name, quint32 version, QObject* parent)
 {
-    //only V1 supported for now
-    return d->create<XdgImporterUnstableV2>(name, version, parent, &Registry::bindXdgImporterUnstableV2);
+    // only V1 supported for now
+    return d->create<XdgImporterUnstableV2>(
+        name, version, parent, &Registry::bindXdgImporterUnstableV2);
 }
 
-TextInputManager *Registry::createTextInputManager(quint32 name, quint32 version, QObject *parent)
+TextInputManager* Registry::createTextInputManager(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
     case Interface::TextInputManagerUnstableV0:
-        return d->create<TextInputManagerUnstableV0>(name, version, parent, &Registry::bindTextInputManagerUnstableV0);
+        return d->create<TextInputManagerUnstableV0>(
+            name, version, parent, &Registry::bindTextInputManagerUnstableV0);
     case Interface::TextInputManagerUnstableV2:
-        return d->create<TextInputManagerUnstableV2>(name, version, parent, &Registry::bindTextInputManagerUnstableV2);
+        return d->create<TextInputManagerUnstableV2>(
+            name, version, parent, &Registry::bindTextInputManagerUnstableV2);
     default:
         return nullptr;
     }
 }
 
-XdgShell *Registry::createXdgShell(quint32 name, quint32 version, QObject *parent)
+XdgShell* Registry::createXdgShell(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
-    case Interface::XdgShellUnstableV5:
-        return d->create<XdgShellUnstableV5>(name, version, parent, &Registry::bindXdgShellUnstableV5);
     case Interface::XdgShellUnstableV6:
-        return d->create<XdgShellUnstableV6>(name, version, parent, &Registry::bindXdgShellUnstableV6);
+        return d->create<XdgShellUnstableV6>(
+            name, version, parent, &Registry::bindXdgShellUnstableV6);
     case Interface::XdgShellStable:
         return d->create<XdgShellStable>(name, version, parent, &Registry::bindXdgShellStable);
     default:
@@ -829,69 +955,79 @@ XdgShell *Registry::createXdgShell(quint32 name, quint32 version, QObject *paren
     }
 }
 
-RelativePointerManager *Registry::createRelativePointerManager(quint32 name, quint32 version, QObject *parent)
+RelativePointerManager*
+Registry::createRelativePointerManager(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
     case Interface::RelativePointerManagerUnstableV1:
-        return d->create<RelativePointerManager>(name, version, parent, &Registry::bindRelativePointerManagerUnstableV1);
+        return d->create<RelativePointerManager>(
+            name, version, parent, &Registry::bindRelativePointerManagerUnstableV1);
     default:
         return nullptr;
     }
 }
 
-PointerGestures *Registry::createPointerGestures(quint32 name, quint32 version, QObject *parent)
+PointerGestures* Registry::createPointerGestures(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
     case Interface::PointerGesturesUnstableV1:
-        return d->create<PointerGestures>(name, version, parent, &Registry::bindPointerGesturesUnstableV1);
+        return d->create<PointerGestures>(
+            name, version, parent, &Registry::bindPointerGesturesUnstableV1);
     default:
         return nullptr;
     }
 }
 
-PointerConstraints *Registry::createPointerConstraints(quint32 name, quint32 version, QObject *parent)
+PointerConstraints*
+Registry::createPointerConstraints(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
     case Interface::PointerConstraintsUnstableV1:
-        return d->create<PointerConstraints>(name, version, parent, &Registry::bindPointerConstraintsUnstableV1);
+        return d->create<PointerConstraints>(
+            name, version, parent, &Registry::bindPointerConstraintsUnstableV1);
     default:
         return nullptr;
     }
 }
 
-IdleInhibitManager *Registry::createIdleInhibitManager(quint32 name, quint32 version, QObject *parent)
+IdleInhibitManager*
+Registry::createIdleInhibitManager(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
     case Interface::IdleInhibitManagerUnstableV1:
-        return d->create<IdleInhibitManager>(name, version, parent, &Registry::bindIdleInhibitManagerUnstableV1);
+        return d->create<IdleInhibitManager>(
+            name, version, parent, &Registry::bindIdleInhibitManagerUnstableV1);
     default:
         return nullptr;
     }
 }
 
-XdgOutputManager *Registry::createXdgOutputManager(quint32 name, quint32 version, QObject *parent)
+XdgOutputManager* Registry::createXdgOutputManager(quint32 name, quint32 version, QObject* parent)
 {
-    switch(d->interfaceForName(name)) {
+    switch (d->interfaceForName(name)) {
     case Interface::XdgOutputUnstableV1:
-        return d->create<XdgOutputManager>(name, version, parent, &Registry::bindXdgOutputUnstableV1);
+        return d->create<XdgOutputManager>(
+            name, version, parent, &Registry::bindXdgOutputUnstableV1);
     default:
         return nullptr;
     }
 }
 
-XdgDecorationManager *Registry::createXdgDecorationManager(quint32 name, quint32 version, QObject *parent)
+XdgDecorationManager*
+Registry::createXdgDecorationManager(quint32 name, quint32 version, QObject* parent)
 {
-    switch(d->interfaceForName(name)) {
+    switch (d->interfaceForName(name)) {
     case Interface::XdgDecorationUnstableV1:
-        return d->create<XdgDecorationManager>(name, version, parent, &Registry::bindXdgDecorationUnstableV1);
+        return d->create<XdgDecorationManager>(
+            name, version, parent, &Registry::bindXdgDecorationUnstableV1);
     default:
         return nullptr;
     }
 }
 
-LinuxDmabufV1 *Registry::createLinuxDmabufV1(quint32 name, quint32 version, QObject *parent)
+LinuxDmabufV1* Registry::createLinuxDmabufV1(quint32 name, quint32 version, QObject* parent)
 {
-    switch(d->interfaceForName(name)) {
+    switch (d->interfaceForName(name)) {
     case Interface::LinuxDmabufV1:
         return d->create<LinuxDmabufV1>(name, version, parent, &Registry::bindLinuxDmabufV1);
     default:
@@ -899,8 +1035,9 @@ LinuxDmabufV1 *Registry::createLinuxDmabufV1(quint32 name, quint32 version, QObj
     }
 }
 
-namespace {
-static const wl_interface *wlInterface(Registry::Interface interface)
+namespace
+{
+static const wl_interface* wlInterface(Registry::Interface interface)
 {
     auto it = s_interfaces.find(interface);
     if (it != s_interfaces.end()) {
@@ -910,17 +1047,20 @@ static const wl_interface *wlInterface(Registry::Interface interface)
 }
 }
 
-template <typename T>
-T *Registry::Private::bind(Registry::Interface interface, uint32_t name, uint32_t version) const
+template<typename T>
+T* Registry::Private::bind(Registry::Interface interface, uint32_t name, uint32_t version) const
 {
-    auto it = std::find_if(m_interfaces.constBegin(), m_interfaces.constEnd(), [=](const InterfaceData &data) {
-        return data.interface == interface && data.name == name && data.version >= version;
-    });
+    auto it = std::find_if(
+        m_interfaces.constBegin(), m_interfaces.constEnd(), [=](const InterfaceData& data) {
+            return data.interface == interface && data.name == name && data.version >= version;
+        });
     if (it == m_interfaces.constEnd()) {
-        qCDebug(WRAPLAND_CLIENT) << "Don't have interface " << int(interface) << "with name " << name << "and minimum version" << version;
+        qCDebug(WRAPLAND_CLIENT) << "Don't have interface " << int(interface) << "with name "
+                                 << name << "and minimum version" << version;
         return nullptr;
     }
-    auto t = reinterpret_cast<T*>(wl_registry_bind(registry, name, wlInterface(interface), version));
+    auto t
+        = reinterpret_cast<T*>(wl_registry_bind(registry, name, wlInterface(interface), version));
     if (queue) {
         queue->addProxy(t);
     }
@@ -932,7 +1072,7 @@ bool Registry::isValid() const
     return d->registry.isValid();
 }
 
-wl_registry *Registry::registry()
+wl_registry* Registry::registry()
 {
     return d->registry;
 }

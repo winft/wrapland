@@ -75,7 +75,7 @@ public:
      * When using Registry::create there is no need to call this
      * method.
      **/
-    void setup(zxdg_exporter_v2 *);
+    void setup(zxdg_exporter_v2*);
     /**
      * @returns @c true if managing a zxdg_exporter_v2.
      **/
@@ -90,11 +90,11 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this .
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this .
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * The export request exports the passed surface so that it can later be
@@ -104,7 +104,7 @@ public:
      * @param surface the surface which we want to export an handle.
      * @param parent the parent in the QObject's hierarchy of the new XdgExported
      */
-    XdgExported *exportTopLevel(Surface *surface, QObject *parent = nullptr);
+    XdgExported* exportTopLevel(Surface* surface, QObject* parent = nullptr);
 
     operator zxdg_exporter_v2*();
     operator zxdg_exporter_v2*() const;
@@ -120,7 +120,7 @@ Q_SIGNALS:
 
 protected:
     class Private;
-    explicit XdgExporter(Private *p, QObject *parent = nullptr);
+    explicit XdgExporter(Private* p, QObject* parent = nullptr);
     std::unique_ptr<Private> d;
 };
 
@@ -158,7 +158,7 @@ public:
      * When using Registry::create there is no need to call this
      * method.
      **/
-    void setup(zxdg_importer_v2 *);
+    void setup(zxdg_importer_v2*);
     /**
      * @returns @c true if managing a zxdg_importer_v2.
      **/
@@ -173,11 +173,11 @@ public:
     /**
      * Sets the @p queue to use for creating objects with this .
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating objects with this .
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     /**
      * Imports a surface from any client given a handle
@@ -192,7 +192,7 @@ public:
      *               in some way, such as command line or a DBus call)
      * @param parent the parent in the QObject's hierarchy of the new XdgImported
      */
-    XdgImported *importTopLevel(const QString & handle, QObject *parent = nullptr);
+    XdgImported* importTopLevel(const QString& handle, QObject* parent = nullptr);
 
     operator zxdg_importer_v2*();
     operator zxdg_importer_v2*() const;
@@ -208,7 +208,7 @@ Q_SIGNALS:
 
 protected:
     class Private;
-    explicit XdgImporter(Private *p, QObject *parent = nullptr);
+    explicit XdgImporter(Private* p, QObject* parent = nullptr);
     std::unique_ptr<Private> d;
 };
 
@@ -223,7 +223,7 @@ public:
      * When using ::create there is no need to call this
      * method.
      **/
-    void setup(zxdg_exported_v2 *);
+    void setup(zxdg_exported_v2*);
     /**
      * @returns @c true if managing a zxdg_exported_v2.
      **/
@@ -255,7 +255,7 @@ Q_SIGNALS:
 protected:
     friend class XdgExporter;
     class Private;
-    explicit XdgExported(Private *p, QObject *parent = nullptr);
+    explicit XdgExported(Private* p, QObject* parent = nullptr);
     std::unique_ptr<Private> d;
 };
 
@@ -270,7 +270,7 @@ public:
      * When using ::create there is no need to call this
      * method.
      **/
-    void setup(zxdg_imported_v2 *);
+    void setup(zxdg_imported_v2*);
     /**
      * @returns @c true if managing a zxdg_imported_v2.
      **/
@@ -290,7 +290,7 @@ public:
      *
      * @param surface the child surface, which must belong to this process.
      */
-    void setParentOf(Surface *surface);
+    void setParentOf(Surface* surface);
 
     operator zxdg_imported_v2*();
     operator zxdg_imported_v2*() const;
@@ -305,10 +305,9 @@ Q_SIGNALS:
 protected:
     friend class XdgImporter;
     class Private;
-    explicit XdgImported(Private *p, QObject *parent = nullptr);
+    explicit XdgImported(Private* p, QObject* parent = nullptr);
     std::unique_ptr<Private> d;
 };
-
 
 }
 }

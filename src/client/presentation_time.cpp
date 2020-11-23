@@ -33,28 +33,29 @@ namespace Client
 class Q_DECL_HIDDEN PresentationManager::Private
 {
 public:
-    Private(PresentationManager *q);
+    Private(PresentationManager* q);
 
-    void setup(wp_presentation *presentation);
+    void setup(wp_presentation* presentation);
 
     clockid_t clockId = 0;
 
     WaylandPointer<wp_presentation, wp_presentation_destroy> presentationManager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 
-    PresentationManager *q;
+    PresentationManager* q;
 
 private:
-    static void clockIdCallback(void *data, wp_presentation *presentation, uint32_t clk_id);
+    static void clockIdCallback(void* data, wp_presentation* presentation, uint32_t clk_id);
 
     static const wp_presentation_listener s_listener;
 };
 
 const wp_presentation_listener PresentationManager::Private::s_listener = {
-    clockIdCallback
+    clockIdCallback,
 };
 
-void PresentationManager::Private::clockIdCallback(void *data, wp_presentation *presentation,
+void PresentationManager::Private::clockIdCallback(void* data,
+                                                   wp_presentation* presentation,
                                                    uint32_t clk_id)
 {
     auto p = reinterpret_cast<PresentationManager::Private*>(data);
@@ -63,12 +64,12 @@ void PresentationManager::Private::clockIdCallback(void *data, wp_presentation *
     Q_EMIT p->q->clockIdChanged();
 }
 
-PresentationManager::Private::Private(PresentationManager *q)
+PresentationManager::Private::Private(PresentationManager* q)
     : q(q)
 {
 }
 
-void PresentationManager::Private::setup(wp_presentation *presentation)
+void PresentationManager::Private::setup(wp_presentation* presentation)
 {
     Q_ASSERT(presentation);
     Q_ASSERT(!presentationManager);
@@ -76,7 +77,7 @@ void PresentationManager::Private::setup(wp_presentation *presentation)
     wp_presentation_add_listener(presentationManager, &s_listener, this);
 }
 
-PresentationManager::PresentationManager(QObject *parent)
+PresentationManager::PresentationManager(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -87,7 +88,7 @@ PresentationManager::~PresentationManager()
     release();
 }
 
-void PresentationManager::setup(wp_presentation *presentation)
+void PresentationManager::setup(wp_presentation* presentation)
 {
     d->setup(presentation);
 }
@@ -97,11 +98,13 @@ void PresentationManager::release()
     d->presentationManager.release();
 }
 
-PresentationManager::operator wp_presentation*() {
+PresentationManager::operator wp_presentation*()
+{
     return d->presentationManager;
 }
 
-PresentationManager::operator wp_presentation*() const {
+PresentationManager::operator wp_presentation*() const
+{
     return d->presentationManager;
 }
 
@@ -110,12 +113,12 @@ bool PresentationManager::isValid() const
     return d->presentationManager.isValid();
 }
 
-void PresentationManager::setEventQueue(EventQueue *queue)
+void PresentationManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *PresentationManager::eventQueue()
+EventQueue* PresentationManager::eventQueue()
 {
     return d->queue;
 }
@@ -125,7 +128,7 @@ clockid_t PresentationManager::clockId() const
     return d->clockId;
 }
 
-PresentationFeedback *PresentationManager::createFeedback(Surface *surface, QObject *parent)
+PresentationFeedback* PresentationManager::createFeedback(Surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
     auto feedback = new PresentationFeedback(parent);
@@ -140,7 +143,7 @@ PresentationFeedback *PresentationManager::createFeedback(Surface *surface, QObj
 class PresentationFeedback::Private
 {
 public:
-    Private(PresentationFeedback *q);
+    Private(PresentationFeedback* q);
 
     Output* syncOutput = nullptr;
 
@@ -152,22 +155,25 @@ public:
     uint32_t seqLo;
     Kinds flags;
 
-    void setup(struct wp_presentation_feedback *feedback);
+    void setup(struct wp_presentation_feedback* feedback);
 
     WaylandPointer<struct wp_presentation_feedback, wp_presentation_feedback_destroy> feedback;
 
 private:
-    static void syncOutputCallback(void *data,
-                                   struct wp_presentation_feedback *wlFeedback,
-                                   wl_output *output);
-    static void presentedCallback(void *data,
-                                  struct wp_presentation_feedback *wlFeedback,
-                                  uint32_t tv_sec_hi, uint32_t tv_sec_lo, uint32_t tv_nsec,
-                                  uint32_t refresh, uint32_t seq_hi, uint32_t seq_lo,
+    static void
+    syncOutputCallback(void* data, struct wp_presentation_feedback* wlFeedback, wl_output* output);
+    static void presentedCallback(void* data,
+                                  struct wp_presentation_feedback* wlFeedback,
+                                  uint32_t tv_sec_hi,
+                                  uint32_t tv_sec_lo,
+                                  uint32_t tv_nsec,
+                                  uint32_t refresh,
+                                  uint32_t seq_hi,
+                                  uint32_t seq_lo,
                                   uint32_t flags);
-    static void discardedCallback(void *data, struct wp_presentation_feedback *wlFeedback);
+    static void discardedCallback(void* data, struct wp_presentation_feedback* wlFeedback);
 
-    PresentationFeedback *q;
+    PresentationFeedback* q;
 
     static const wp_presentation_feedback_listener s_listener;
 };
@@ -175,12 +181,12 @@ private:
 const wp_presentation_feedback_listener PresentationFeedback::Private::s_listener = {
     syncOutputCallback,
     presentedCallback,
-    discardedCallback
+    discardedCallback,
 };
 
-void PresentationFeedback::Private::syncOutputCallback(void *data,
-                                        struct wp_presentation_feedback *wlFeedback,
-                                        wl_output *output)
+void PresentationFeedback::Private::syncOutputCallback(void* data,
+                                                       struct wp_presentation_feedback* wlFeedback,
+                                                       wl_output* output)
 {
     auto priv = reinterpret_cast<PresentationFeedback::Private*>(data);
     Q_ASSERT(priv->feedback == wlFeedback);
@@ -206,11 +212,15 @@ PresentationFeedback::Kinds toKinds(uint32_t flags)
     return ret;
 }
 
-void PresentationFeedback::Private::presentedCallback(void *data,
-                                        struct wp_presentation_feedback *wlFeedback,
-                                        uint32_t tv_sec_hi, uint32_t tv_sec_lo,
-                                        uint32_t tv_nsec, uint32_t refresh,
-                                        uint32_t seq_hi, uint32_t seq_lo, uint32_t flags)
+void PresentationFeedback::Private::presentedCallback(void* data,
+                                                      struct wp_presentation_feedback* wlFeedback,
+                                                      uint32_t tv_sec_hi,
+                                                      uint32_t tv_sec_lo,
+                                                      uint32_t tv_nsec,
+                                                      uint32_t refresh,
+                                                      uint32_t seq_hi,
+                                                      uint32_t seq_lo,
+                                                      uint32_t flags)
 {
     auto p = reinterpret_cast<PresentationFeedback::Private*>(data);
     Q_ASSERT(p->feedback == wlFeedback);
@@ -225,8 +235,8 @@ void PresentationFeedback::Private::presentedCallback(void *data,
     Q_EMIT p->q->presented();
 }
 
-void PresentationFeedback::Private::discardedCallback(void *data,
-                                        struct wp_presentation_feedback *wlFeedback)
+void PresentationFeedback::Private::discardedCallback(void* data,
+                                                      struct wp_presentation_feedback* wlFeedback)
 {
     auto p = reinterpret_cast<PresentationFeedback::Private*>(data);
     Q_ASSERT(p->feedback == wlFeedback);
@@ -234,12 +244,12 @@ void PresentationFeedback::Private::discardedCallback(void *data,
     Q_EMIT p->q->discarded();
 }
 
-PresentationFeedback::Private::Private(PresentationFeedback *q)
+PresentationFeedback::Private::Private(PresentationFeedback* q)
     : q(q)
 {
 }
 
-void PresentationFeedback::Private::setup(struct wp_presentation_feedback *feedback)
+void PresentationFeedback::Private::setup(struct wp_presentation_feedback* feedback)
 {
     Q_ASSERT(feedback);
     Q_ASSERT(!this->feedback);
@@ -247,7 +257,7 @@ void PresentationFeedback::Private::setup(struct wp_presentation_feedback *feedb
     wp_presentation_feedback_add_listener(feedback, &s_listener, this);
 }
 
-PresentationFeedback::PresentationFeedback(QObject *parent)
+PresentationFeedback::PresentationFeedback(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -255,7 +265,7 @@ PresentationFeedback::PresentationFeedback(QObject *parent)
 
 PresentationFeedback::~PresentationFeedback() = default;
 
-void PresentationFeedback::setup(struct wp_presentation_feedback *feedback)
+void PresentationFeedback::setup(struct wp_presentation_feedback* feedback)
 {
     d->setup(feedback);
 }
@@ -307,4 +317,3 @@ PresentationFeedback::Kinds PresentationFeedback::flags() const
 
 }
 }
-

@@ -22,9 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QPoint>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct wl_pointer;
 
@@ -50,19 +50,19 @@ class WRAPLANDCLIENT_EXPORT Pointer : public QObject
 public:
     enum class ButtonState {
         Released,
-        Pressed
+        Pressed,
     };
     enum class Axis {
         Vertical,
-        Horizontal
+        Horizontal,
     };
     enum class AxisSource {
         Wheel,
         Finger,
         Continuous,
-        WheelTilt
+        WheelTilt,
     };
-    explicit Pointer(QObject *parent = nullptr);
+    explicit Pointer(QObject* parent = nullptr);
     virtual ~Pointer();
 
     /**
@@ -74,7 +74,7 @@ public:
      * When using Seat::createPointer there is no need to call this
      * method.
      **/
-    void setup(wl_pointer *pointer);
+    void setup(wl_pointer* pointer);
     /**
      * Releases the wl_pointer interface.
      * After the interface has been released the Pointer instance is no
@@ -95,7 +95,7 @@ public:
      * @see hideCursor
      * @since 5.3
      **/
-    void setCursor(Surface *surface, const QPoint &hotspot = QPoint());
+    void setCursor(Surface* surface, const QPoint& hotspot = QPoint());
     /**
      * Hides the cursor. Same as calling setCursor with @c null for surface.
      * @see setCursor
@@ -106,11 +106,11 @@ public:
     /**
      * @returns The Surface the Pointer is on, may be @c null.
      **/
-    Surface *enteredSurface() const;
+    Surface* enteredSurface() const;
     /**
      * @overload
      **/
-    Surface *enteredSurface();
+    Surface* enteredSurface();
 
     operator wl_pointer*();
     operator wl_pointer*() const;
@@ -126,7 +126,7 @@ Q_SIGNALS:
      * @param serial The serial for this enter
      * @param relativeToSurface Coordinates relative to the upper-left corner of the Surface.
      **/
-    void entered(quint32 serial, const QPointF &relativeToSurface);
+    void entered(quint32 serial, const QPointF& relativeToSurface);
     /**
      * Notification that this seat's pointer is no longer focused on a certain surface.
      *
@@ -138,10 +138,11 @@ Q_SIGNALS:
     /**
      * Notification of pointer location change.
      *
-     * @param relativeToSurface  Coordinates relative to the upper-left corner of the entered Surface.
+     * @param relativeToSurface  Coordinates relative to the upper-left corner of the entered
+     * Surface.
      * @param time timestamp with millisecond granularity
      **/
-    void motion(const QPointF &relativeToSurface, quint32 time);
+    void motion(const QPointF& relativeToSurface, quint32 time);
     /**
      * Mouse button click and release notifications.
      *
@@ -152,7 +153,10 @@ Q_SIGNALS:
      * @param button The button which got changed
      * @param state @c Released or @c Pressed
      **/
-    void buttonStateChanged(quint32 serial, quint32 time, quint32 button, Wrapland::Client::Pointer::ButtonState state);
+    void buttonStateChanged(quint32 serial,
+                            quint32 time,
+                            quint32 button,
+                            Wrapland::Client::Pointer::ButtonState state);
     /**
      * Scroll and other axis notifications.
      *

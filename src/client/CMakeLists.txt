@@ -60,12 +60,10 @@ set(CLIENT_LIB_SRCS
     xdgshell.cpp
     xdgforeign_v2.cpp
     xdgforeign.cpp
-    xdgshell_v5.cpp
     xdgshell_v6.cpp
     xdgshell_stable.cpp
     xdgoutput.cpp
     linux_dmabuf_v1.cpp
-    ../compat/wayland-xdg-shell-v5-protocol.c
 )
 
 ecm_qt_declare_logging_category(CLIENT_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_CLIENT CATEGORY_NAME wrapland-client DEFAULT_SEVERITY Critical)

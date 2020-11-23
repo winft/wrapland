@@ -21,9 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_SEAT_H
 
 #include <QObject>
-//STD
-#include <memory>
+// STD
 #include <Wrapland/Client/wraplandclient_export.h>
+#include <memory>
 
 struct wl_seat;
 struct wl_touch;
@@ -68,7 +68,7 @@ class WRAPLANDCLIENT_EXPORT Seat : public QObject
 {
     Q_OBJECT
 public:
-    explicit Seat(QObject *parent = nullptr);
+    explicit Seat(QObject* parent = nullptr);
     virtual ~Seat();
 
     /**
@@ -80,7 +80,7 @@ public:
      * When using Registry::createSeat there is no need to call this
      * method.
      **/
-    void setup(wl_seat *seat);
+    void setup(wl_seat* seat);
     /**
      * Releases the wl_seat interface.
      * After the interface has been released the Seat instance is no
@@ -94,11 +94,11 @@ public:
     /**
      * Sets the @p queue to use for creating Keyboard, Pointer and Touch.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating Keyboard, Pointer and Touch.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     bool hasKeyboard() const;
     bool hasPointer() const;
@@ -115,7 +115,7 @@ public:
      * @param parent The parent to pass to the created Keyboard.
      * @returns The created Keyboard.
      **/
-    Keyboard *createKeyboard(QObject *parent = nullptr);
+    Keyboard* createKeyboard(QObject* parent = nullptr);
     /**
      * Creates a Pointer.
      *
@@ -124,7 +124,7 @@ public:
      * @param parent The parent to pass to the created Pointer.
      * @returns The created Pointer.
      **/
-    Pointer *createPointer(QObject *parent = nullptr);
+    Pointer* createPointer(QObject* parent = nullptr);
     /**
      * Creates a Touch.
      *
@@ -133,13 +133,13 @@ public:
      * @param parent The parent to pass to the created Touch.
      * @returns The created Touch.
      **/
-    Touch *createTouch(QObject *parent = nullptr);
+    Touch* createTouch(QObject* parent = nullptr);
 
 Q_SIGNALS:
     void hasKeyboardChanged(bool);
     void hasPointerChanged(bool);
     void hasTouchChanged(bool);
-    void nameChanged(const QString &name);
+    void nameChanged(const QString& name);
 
     /**
      * This signal is emitted right before the interface is going to be released.

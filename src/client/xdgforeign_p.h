@@ -37,15 +37,15 @@ public:
     Private();
     virtual ~Private();
 
-    virtual XdgExported *exportTopLevelV2(Surface *surface, QObject *parent) = 0;
+    virtual XdgExported* exportTopLevelV2(Surface* surface, QObject* parent) = 0;
 
-    virtual void setupV2(zxdg_exporter_v2 *arg) = 0;
-    virtual zxdg_exporter_v2 *exporterV2() = 0;
+    virtual void setupV2(zxdg_exporter_v2* arg) = 0;
+    virtual zxdg_exporter_v2* exporterV2() = 0;
 
     virtual void release() = 0;
     virtual bool isValid() = 0;
 
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
 class Q_DECL_HIDDEN XdgImporter::Private
@@ -54,26 +54,25 @@ public:
     Private();
     virtual ~Private();
 
-    virtual XdgImported *importTopLevelV2(const QString & handle, QObject *parent) = 0;
+    virtual XdgImported* importTopLevelV2(const QString& handle, QObject* parent) = 0;
 
-    virtual void setupV2(zxdg_importer_v2 *arg) = 0;
-    virtual zxdg_importer_v2 *importerV2() = 0;
+    virtual void setupV2(zxdg_importer_v2* arg) = 0;
+    virtual zxdg_importer_v2* importerV2() = 0;
 
     virtual void release() = 0;
     virtual bool isValid() = 0;
 
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
-
 
 class Q_DECL_HIDDEN XdgExported::Private
 {
 public:
-    Private(XdgExported *q);
+    Private(XdgExported* q);
     virtual ~Private();
 
-    virtual void setupV2(zxdg_exported_v2 *) = 0;
-    virtual zxdg_exported_v2 *exportedV2() = 0;
+    virtual void setupV2(zxdg_exported_v2*) = 0;
+    virtual zxdg_exported_v2* exportedV2() = 0;
 
     virtual void release() = 0;
     virtual bool isValid() = 0;
@@ -81,26 +80,24 @@ public:
     QString handle;
 
 protected:
-    XdgExported *q;
-
+    XdgExported* q;
 };
-
 
 class Q_DECL_HIDDEN XdgImported::Private
 {
 public:
-    Private(XdgImported *q);
+    Private(XdgImported* q);
     virtual ~Private();
 
-    virtual void setupV2(zxdg_imported_v2 *) = 0;
-    virtual zxdg_imported_v2 *importedV2() = 0;
+    virtual void setupV2(zxdg_imported_v2*) = 0;
+    virtual zxdg_imported_v2* importedV2() = 0;
 
-    virtual void setParentOf(Surface *surface) = 0;
+    virtual void setParentOf(Surface* surface) = 0;
     virtual void release() = 0;
     virtual bool isValid() = 0;
 
 protected:
-    XdgImported *q;
+    XdgImported* q;
 };
 
 }

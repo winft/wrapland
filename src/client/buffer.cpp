@@ -32,11 +32,17 @@ namespace Client
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 const struct wl_buffer_listener Buffer::Private::s_listener = {
-    Buffer::Private::releasedCallback
+    Buffer::Private::releasedCallback,
 };
 #endif
 
-Buffer::Private::Private(Buffer *q, ShmPool *parent, wl_buffer *nativeBuffer, const QSize &size, int32_t stride, size_t offset, Format format)
+Buffer::Private::Private(Buffer* q,
+                         ShmPool* parent,
+                         wl_buffer* nativeBuffer,
+                         const QSize& size,
+                         int32_t stride,
+                         size_t offset,
+                         Format format)
     : shm(parent)
     , nativeBuffer(nativeBuffer)
     , released(false)
@@ -55,31 +61,36 @@ Buffer::Private::~Private()
     nativeBuffer.release();
 }
 
-void Buffer::Private::releasedCallback(void *data, wl_buffer *buffer)
+void Buffer::Private::releasedCallback(void* data, wl_buffer* buffer)
 {
     auto b = reinterpret_cast<Buffer::Private*>(data);
     Q_ASSERT(b->nativeBuffer == buffer);
     b->q->setReleased(true);
 }
 
-Buffer::Buffer(ShmPool *parent, wl_buffer *buffer, const QSize &size, int32_t stride, size_t offset, Format format)
+Buffer::Buffer(ShmPool* parent,
+               wl_buffer* buffer,
+               const QSize& size,
+               int32_t stride,
+               size_t offset,
+               Format format)
     : d(new Private(this, parent, buffer, size, stride, offset, format))
 {
 }
 
 Buffer::~Buffer() = default;
 
-void Buffer::copy(const void *src)
+void Buffer::copy(const void* src)
 {
-    memcpy(address(), src, d->size.height()*d->stride);
+    memcpy(address(), src, d->size.height() * d->stride);
 }
 
-uchar *Buffer::address()
+uchar* Buffer::address()
 {
     return reinterpret_cast<uchar*>(d->shm->poolAddress()) + d->offset;
 }
 
-wl_buffer *Buffer::buffer() const
+wl_buffer* Buffer::buffer() const
 {
     return d->nativeBuffer;
 }
@@ -129,7 +140,7 @@ Buffer::Format Buffer::format() const
     return d->format;
 }
 
-quint32 Buffer::getId(wl_buffer *b)
+quint32 Buffer::getId(wl_buffer* b)
 {
     return wl_proxy_get_id(reinterpret_cast<wl_proxy*>(b));
 }

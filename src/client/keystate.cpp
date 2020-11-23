@@ -19,8 +19,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "keystate.h"
 #include "wayland_pointer_p.h"
-#include <QPointer>
 #include <QDebug>
+#include <QPointer>
 #include <wayland-client-protocol.h>
 #include <wayland-keystate-client-protocol.h>
 
@@ -32,11 +32,17 @@ namespace Client
 class Q_DECL_HIDDEN Keystate::Private
 {
 public:
-    Private() {}
+    Private()
+    {
+    }
 
     WaylandPointer<org_kde_kwin_keystate, org_kde_kwin_keystate_destroy> keystate;
 
-    static void org_kde_kwin_keystate_stateChanged(void *data, struct org_kde_kwin_keystate */*keystate*/, uint32_t k, uint32_t s) {
+    static void org_kde_kwin_keystate_stateChanged(void* data,
+                                                   struct org_kde_kwin_keystate* /*keystate*/,
+                                                   uint32_t k,
+                                                   uint32_t s)
+    {
         auto q = static_cast<Keystate*>(data);
         q->stateChanged(Key(k), State(s));
     }
@@ -45,10 +51,10 @@ public:
 };
 
 const org_kde_kwin_keystate_listener Keystate::Private::s_listener = {
-    org_kde_kwin_keystate_stateChanged
+    org_kde_kwin_keystate_stateChanged,
 };
 
-Keystate::Keystate(QObject *parent)
+Keystate::Keystate(QObject* parent)
     : QObject(parent)
     , d(new Private())
 {
@@ -75,7 +81,6 @@ void Keystate::release()
 void Keystate::setEventQueue(Wrapland::Client::EventQueue* /*queue*/)
 {
 }
-
 
 }
 }

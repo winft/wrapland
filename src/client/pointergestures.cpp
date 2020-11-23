@@ -18,8 +18,8 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include "pointergestures.h"
-#include "pointer.h"
 #include "event_queue.h"
+#include "pointer.h"
 #include "surface.h"
 #include "wayland_pointer_p.h"
 
@@ -38,10 +38,10 @@ public:
     Private() = default;
 
     WaylandPointer<zwp_pointer_gestures_v1, zwp_pointer_gestures_v1_destroy> pointergestures;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-PointerGestures::PointerGestures(QObject *parent)
+PointerGestures::PointerGestures(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -52,7 +52,7 @@ PointerGestures::~PointerGestures()
     release();
 }
 
-void PointerGestures::setup(zwp_pointer_gestures_v1 *pointergestures)
+void PointerGestures::setup(zwp_pointer_gestures_v1* pointergestures)
 {
     Q_ASSERT(pointergestures);
     Q_ASSERT(!d->pointergestures);
@@ -64,11 +64,13 @@ void PointerGestures::release()
     d->pointergestures.release();
 }
 
-PointerGestures::operator zwp_pointer_gestures_v1*() {
+PointerGestures::operator zwp_pointer_gestures_v1*()
+{
     return d->pointergestures;
 }
 
-PointerGestures::operator zwp_pointer_gestures_v1*() const {
+PointerGestures::operator zwp_pointer_gestures_v1*() const
+{
     return d->pointergestures;
 }
 
@@ -77,20 +79,20 @@ bool PointerGestures::isValid() const
     return d->pointergestures.isValid();
 }
 
-void PointerGestures::setEventQueue(EventQueue *queue)
+void PointerGestures::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *PointerGestures::eventQueue()
+EventQueue* PointerGestures::eventQueue()
 {
     return d->queue;
 }
 
-PointerSwipeGesture *PointerGestures::createSwipeGesture(Pointer *pointer, QObject *parent)
+PointerSwipeGesture* PointerGestures::createSwipeGesture(Pointer* pointer, QObject* parent)
 {
     Q_ASSERT(isValid());
-    PointerSwipeGesture *p = new PointerSwipeGesture(parent);
+    PointerSwipeGesture* p = new PointerSwipeGesture(parent);
     auto w = zwp_pointer_gestures_v1_get_swipe_gesture(d->pointergestures, *pointer);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -99,10 +101,10 @@ PointerSwipeGesture *PointerGestures::createSwipeGesture(Pointer *pointer, QObje
     return p;
 }
 
-PointerPinchGesture *PointerGestures::createPinchGesture(Pointer *pointer, QObject *parent)
+PointerPinchGesture* PointerGestures::createPinchGesture(Pointer* pointer, QObject* parent)
 {
     Q_ASSERT(isValid());
-    PointerPinchGesture *p = new PointerPinchGesture(parent);
+    PointerPinchGesture* p = new PointerPinchGesture(parent);
     auto w = zwp_pointer_gestures_v1_get_pinch_gesture(d->pointergestures, *pointer);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -114,30 +116,50 @@ PointerPinchGesture *PointerGestures::createPinchGesture(Pointer *pointer, QObje
 class Q_DECL_HIDDEN PointerSwipeGesture::Private
 {
 public:
-    Private(PointerSwipeGesture *q);
+    Private(PointerSwipeGesture* q);
 
-    void setup(zwp_pointer_gesture_swipe_v1 *pg);
+    void setup(zwp_pointer_gesture_swipe_v1* pg);
 
-    WaylandPointer<zwp_pointer_gesture_swipe_v1, zwp_pointer_gesture_swipe_v1_destroy> pointerswipegesture;
+    WaylandPointer<zwp_pointer_gesture_swipe_v1, zwp_pointer_gesture_swipe_v1_destroy>
+        pointerswipegesture;
     quint32 fingerCount = 0;
     QPointer<Surface> surface;
 
 private:
-    static void beginCallback(void *data, zwp_pointer_gesture_swipe_v1 *zwp_pointer_gesture_swipe_v1, uint32_t serial, uint32_t time, wl_surface *surface, uint32_t fingers);
-    static void updateCallback(void *data, zwp_pointer_gesture_swipe_v1 *zwp_pointer_gesture_swipe_v1, uint32_t time, wl_fixed_t dx, wl_fixed_t dy);
-    static void endCallback(void *data, zwp_pointer_gesture_swipe_v1 *zwp_pointer_gesture_swipe_v1, uint32_t serial, uint32_t time, int32_t cancelled);
+    static void beginCallback(void* data,
+                              zwp_pointer_gesture_swipe_v1* zwp_pointer_gesture_swipe_v1,
+                              uint32_t serial,
+                              uint32_t time,
+                              wl_surface* surface,
+                              uint32_t fingers);
+    static void updateCallback(void* data,
+                               zwp_pointer_gesture_swipe_v1* zwp_pointer_gesture_swipe_v1,
+                               uint32_t time,
+                               wl_fixed_t dx,
+                               wl_fixed_t dy);
+    static void endCallback(void* data,
+                            zwp_pointer_gesture_swipe_v1* zwp_pointer_gesture_swipe_v1,
+                            uint32_t serial,
+                            uint32_t time,
+                            int32_t cancelled);
 
-    PointerSwipeGesture *q;
+    PointerSwipeGesture* q;
     static const zwp_pointer_gesture_swipe_v1_listener s_listener;
 };
 
 const zwp_pointer_gesture_swipe_v1_listener PointerSwipeGesture::Private::s_listener = {
     beginCallback,
     updateCallback,
-    endCallback
+    endCallback,
 };
 
-void PointerSwipeGesture::Private::beginCallback(void *data, zwp_pointer_gesture_swipe_v1 *zwp_pointer_gesture_swipe_v1, uint32_t serial, uint32_t time, wl_surface *surface, uint32_t fingers)
+void PointerSwipeGesture::Private::beginCallback(
+    void* data,
+    zwp_pointer_gesture_swipe_v1* zwp_pointer_gesture_swipe_v1,
+    uint32_t serial,
+    uint32_t time,
+    wl_surface* surface,
+    uint32_t fingers)
 {
     auto p = reinterpret_cast<PointerSwipeGesture::Private*>(data);
     Q_ASSERT(p->pointerswipegesture == zwp_pointer_gesture_swipe_v1);
@@ -146,14 +168,24 @@ void PointerSwipeGesture::Private::beginCallback(void *data, zwp_pointer_gesture
     emit p->q->started(serial, time);
 }
 
-void PointerSwipeGesture::Private::updateCallback(void *data, zwp_pointer_gesture_swipe_v1 *zwp_pointer_gesture_swipe_v1, uint32_t time, wl_fixed_t dx, wl_fixed_t dy)
+void PointerSwipeGesture::Private::updateCallback(
+    void* data,
+    zwp_pointer_gesture_swipe_v1* zwp_pointer_gesture_swipe_v1,
+    uint32_t time,
+    wl_fixed_t dx,
+    wl_fixed_t dy)
 {
     auto p = reinterpret_cast<PointerSwipeGesture::Private*>(data);
     Q_ASSERT(p->pointerswipegesture == zwp_pointer_gesture_swipe_v1);
     emit p->q->updated(QSizeF(wl_fixed_to_double(dx), wl_fixed_to_double(dy)), time);
 }
 
-void PointerSwipeGesture::Private::endCallback(void *data, zwp_pointer_gesture_swipe_v1 *zwp_pointer_gesture_swipe_v1, uint32_t serial, uint32_t time, int32_t cancelled)
+void PointerSwipeGesture::Private::endCallback(
+    void* data,
+    zwp_pointer_gesture_swipe_v1* zwp_pointer_gesture_swipe_v1,
+    uint32_t serial,
+    uint32_t time,
+    int32_t cancelled)
 {
     auto p = reinterpret_cast<PointerSwipeGesture::Private*>(data);
     Q_ASSERT(p->pointerswipegesture == zwp_pointer_gesture_swipe_v1);
@@ -166,12 +198,12 @@ void PointerSwipeGesture::Private::endCallback(void *data, zwp_pointer_gesture_s
     p->surface.clear();
 }
 
-PointerSwipeGesture::Private::Private(PointerSwipeGesture *q)
+PointerSwipeGesture::Private::Private(PointerSwipeGesture* q)
     : q(q)
 {
 }
 
-PointerSwipeGesture::PointerSwipeGesture(QObject *parent)
+PointerSwipeGesture::PointerSwipeGesture(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -192,7 +224,7 @@ QPointer<Surface> PointerSwipeGesture::surface() const
     return d->surface;
 }
 
-void PointerSwipeGesture::Private::setup(zwp_pointer_gesture_swipe_v1 *pg)
+void PointerSwipeGesture::Private::setup(zwp_pointer_gesture_swipe_v1* pg)
 {
     Q_ASSERT(pg);
     Q_ASSERT(!pointerswipegesture);
@@ -200,7 +232,7 @@ void PointerSwipeGesture::Private::setup(zwp_pointer_gesture_swipe_v1 *pg)
     zwp_pointer_gesture_swipe_v1_add_listener(pointerswipegesture, &s_listener, this);
 }
 
-void PointerSwipeGesture::setup(zwp_pointer_gesture_swipe_v1 *pointerswipegesture)
+void PointerSwipeGesture::setup(zwp_pointer_gesture_swipe_v1* pointerswipegesture)
 {
     d->setup(pointerswipegesture);
 }
@@ -210,11 +242,13 @@ void PointerSwipeGesture::release()
     d->pointerswipegesture.release();
 }
 
-PointerSwipeGesture::operator zwp_pointer_gesture_swipe_v1*() {
+PointerSwipeGesture::operator zwp_pointer_gesture_swipe_v1*()
+{
     return d->pointerswipegesture;
 }
 
-PointerSwipeGesture::operator zwp_pointer_gesture_swipe_v1*() const {
+PointerSwipeGesture::operator zwp_pointer_gesture_swipe_v1*() const
+{
     return d->pointerswipegesture;
 }
 
@@ -226,30 +260,51 @@ bool PointerSwipeGesture::isValid() const
 class Q_DECL_HIDDEN PointerPinchGesture::Private
 {
 public:
-    Private(PointerPinchGesture *q);
+    Private(PointerPinchGesture* q);
 
-    void setup(zwp_pointer_gesture_pinch_v1 *pg);
+    void setup(zwp_pointer_gesture_pinch_v1* pg);
 
-    WaylandPointer<zwp_pointer_gesture_pinch_v1, zwp_pointer_gesture_pinch_v1_destroy> pointerpinchgesture;
+    WaylandPointer<zwp_pointer_gesture_pinch_v1, zwp_pointer_gesture_pinch_v1_destroy>
+        pointerpinchgesture;
     quint32 fingerCount = 0;
     QPointer<Surface> surface;
 
 private:
-    static void beginCallback(void *data, zwp_pointer_gesture_pinch_v1 *zwp_pointer_gesture_pinch_v1, uint32_t serial, uint32_t time, wl_surface *surface, uint32_t fingers);
-    static void updateCallback(void *data, zwp_pointer_gesture_pinch_v1 *zwp_pointer_gesture_pinch_v1, uint32_t time, wl_fixed_t dx, wl_fixed_t dy, wl_fixed_t scale, wl_fixed_t rotation);
-    static void endCallback(void *data, zwp_pointer_gesture_pinch_v1 *zwp_pointer_gesture_pinch_v1, uint32_t serial, uint32_t time, int32_t cancelled);
+    static void beginCallback(void* data,
+                              zwp_pointer_gesture_pinch_v1* zwp_pointer_gesture_pinch_v1,
+                              uint32_t serial,
+                              uint32_t time,
+                              wl_surface* surface,
+                              uint32_t fingers);
+    static void updateCallback(void* data,
+                               zwp_pointer_gesture_pinch_v1* zwp_pointer_gesture_pinch_v1,
+                               uint32_t time,
+                               wl_fixed_t dx,
+                               wl_fixed_t dy,
+                               wl_fixed_t scale,
+                               wl_fixed_t rotation);
+    static void endCallback(void* data,
+                            zwp_pointer_gesture_pinch_v1* zwp_pointer_gesture_pinch_v1,
+                            uint32_t serial,
+                            uint32_t time,
+                            int32_t cancelled);
 
-    PointerPinchGesture *q;
+    PointerPinchGesture* q;
     static const zwp_pointer_gesture_pinch_v1_listener s_listener;
 };
 
 const zwp_pointer_gesture_pinch_v1_listener PointerPinchGesture::Private::s_listener = {
     beginCallback,
     updateCallback,
-    endCallback
+    endCallback,
 };
 
-void PointerPinchGesture::Private::beginCallback(void *data, zwp_pointer_gesture_pinch_v1 *pg, uint32_t serial, uint32_t time, wl_surface *surface, uint32_t fingers)
+void PointerPinchGesture::Private::beginCallback(void* data,
+                                                 zwp_pointer_gesture_pinch_v1* pg,
+                                                 uint32_t serial,
+                                                 uint32_t time,
+                                                 wl_surface* surface,
+                                                 uint32_t fingers)
 {
     auto p = reinterpret_cast<PointerPinchGesture::Private*>(data);
     Q_ASSERT(p->pointerpinchgesture == pg);
@@ -258,14 +313,27 @@ void PointerPinchGesture::Private::beginCallback(void *data, zwp_pointer_gesture
     emit p->q->started(serial, time);
 }
 
-void PointerPinchGesture::Private::updateCallback(void *data, zwp_pointer_gesture_pinch_v1 *pg, uint32_t time, wl_fixed_t dx, wl_fixed_t dy, wl_fixed_t scale, wl_fixed_t rotation)
+void PointerPinchGesture::Private::updateCallback(void* data,
+                                                  zwp_pointer_gesture_pinch_v1* pg,
+                                                  uint32_t time,
+                                                  wl_fixed_t dx,
+                                                  wl_fixed_t dy,
+                                                  wl_fixed_t scale,
+                                                  wl_fixed_t rotation)
 {
     auto p = reinterpret_cast<PointerPinchGesture::Private*>(data);
     Q_ASSERT(p->pointerpinchgesture == pg);
-    emit p->q->updated(QSizeF(wl_fixed_to_double(dx), wl_fixed_to_double(dy)), wl_fixed_to_double(scale), wl_fixed_to_double(rotation), time);
+    emit p->q->updated(QSizeF(wl_fixed_to_double(dx), wl_fixed_to_double(dy)),
+                       wl_fixed_to_double(scale),
+                       wl_fixed_to_double(rotation),
+                       time);
 }
 
-void PointerPinchGesture::Private::endCallback(void *data, zwp_pointer_gesture_pinch_v1 *pg, uint32_t serial, uint32_t time, int32_t cancelled)
+void PointerPinchGesture::Private::endCallback(void* data,
+                                               zwp_pointer_gesture_pinch_v1* pg,
+                                               uint32_t serial,
+                                               uint32_t time,
+                                               int32_t cancelled)
 {
     auto p = reinterpret_cast<PointerPinchGesture::Private*>(data);
     Q_ASSERT(p->pointerpinchgesture == pg);
@@ -278,12 +346,12 @@ void PointerPinchGesture::Private::endCallback(void *data, zwp_pointer_gesture_p
     p->surface.clear();
 }
 
-PointerPinchGesture::Private::Private(PointerPinchGesture *q)
+PointerPinchGesture::Private::Private(PointerPinchGesture* q)
     : q(q)
 {
 }
 
-PointerPinchGesture::PointerPinchGesture(QObject *parent)
+PointerPinchGesture::PointerPinchGesture(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -294,7 +362,7 @@ PointerPinchGesture::~PointerPinchGesture()
     release();
 }
 
-void PointerPinchGesture::Private::setup(zwp_pointer_gesture_pinch_v1 *pg)
+void PointerPinchGesture::Private::setup(zwp_pointer_gesture_pinch_v1* pg)
 {
     Q_ASSERT(pg);
     Q_ASSERT(!pointerpinchgesture);
@@ -302,7 +370,7 @@ void PointerPinchGesture::Private::setup(zwp_pointer_gesture_pinch_v1 *pg)
     zwp_pointer_gesture_pinch_v1_add_listener(pointerpinchgesture, &s_listener, this);
 }
 
-void PointerPinchGesture::setup(zwp_pointer_gesture_pinch_v1 *pointerpinchgesture)
+void PointerPinchGesture::setup(zwp_pointer_gesture_pinch_v1* pointerpinchgesture)
 {
     d->setup(pointerpinchgesture);
 }
@@ -312,11 +380,13 @@ void PointerPinchGesture::release()
     d->pointerpinchgesture.release();
 }
 
-PointerPinchGesture::operator zwp_pointer_gesture_pinch_v1*() {
+PointerPinchGesture::operator zwp_pointer_gesture_pinch_v1*()
+{
     return d->pointerpinchgesture;
 }
 
-PointerPinchGesture::operator zwp_pointer_gesture_pinch_v1*() const {
+PointerPinchGesture::operator zwp_pointer_gesture_pinch_v1*() const
+{
     return d->pointerpinchgesture;
 }
 

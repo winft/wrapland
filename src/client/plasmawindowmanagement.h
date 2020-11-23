@@ -20,10 +20,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef WAYLAND_PLASMAWINDOWMANAGEMENT_H
 #define WAYLAND_PLASMAWINDOWMANAGEMENT_H
 
-#include <QObject>
 #include <QIcon>
+#include <QObject>
 #include <QSize>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -65,8 +65,8 @@ class PlasmaVirtualDesktop;
  * s->setup(registry->bindPlasmaWindowManagement(name, version));
  * @endcode
  *
- * The PlasmaWindowManagement can be used as a drop-in replacement for any org_kde_plasma_window_management
- * pointer as it provides matching cast operators.
+ * The PlasmaWindowManagement can be used as a drop-in replacement for any
+ * org_kde_plasma_window_management pointer as it provides matching cast operators.
  *
  * @see Registry
  * @see PlasmaWindowManagementSurface
@@ -75,7 +75,7 @@ class WRAPLANDCLIENT_EXPORT PlasmaWindowManagement : public QObject
 {
     Q_OBJECT
 public:
-    explicit PlasmaWindowManagement(QObject *parent = nullptr);
+    explicit PlasmaWindowManagement(QObject* parent = nullptr);
     virtual ~PlasmaWindowManagement();
 
     /**
@@ -97,16 +97,16 @@ public:
      * When using Registry::createShell there is no need to call this
      * method.
      **/
-    void setup(org_kde_plasma_window_management *shell);
+    void setup(org_kde_plasma_window_management* shell);
 
     /**
      * Sets the @p queue to use for creating a Surface.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for creating a Surface.
      **/
-    EventQueue *eventQueue();
+    EventQueue* eventQueue();
 
     operator org_kde_plasma_window_management*();
     operator org_kde_plasma_window_management*() const;
@@ -148,12 +148,12 @@ public:
      * returns @c true in {@link PlasmaWindow::isActive} or @c nullptr in case
      * there is no active window.
      **/
-    PlasmaWindow *activeWindow() const;
+    PlasmaWindow* activeWindow() const;
     /**
      * Factory method to create a PlasmaWindowModel.
      * @returns a new created PlasmaWindowModel
      **/
-    PlasmaWindowModel *createWindowModel();
+    PlasmaWindowModel* createWindowModel();
 
 Q_SIGNALS:
     /**
@@ -171,7 +171,7 @@ Q_SIGNALS:
      * A new @p window got created.
      * @see windows
      **/
-    void windowCreated(Wrapland::Client::PlasmaWindow *window);
+    void windowCreated(Wrapland::Client::PlasmaWindow* window);
     /**
      * The active window changed.
      * @see activeWindow
@@ -305,8 +305,8 @@ public:
      **/
     bool skipTaskbar() const;
     /**
-      * @returns Whether the window should be ignored by a switcher.
-      * @see skipSwitcherChanged
+     * @returns Whether the window should be ignored by a switcher.
+     * @see skipSwitcherChanged
      **/
     bool skipSwitcher() const;
     /**
@@ -398,13 +398,13 @@ public:
      * relative to a panel in particular
      * @since 5.5
      */
-    void setMinimizedGeometry(Surface *panel, const QRect &geom);
+    void setMinimizedGeometry(Surface* panel, const QRect& geom);
 
     /**
      * Remove the task geometry information for a particular panel
      * @since 5.5
      */
-    void unsetMinimizedGeometry(Surface *panel);
+    void unsetMinimizedGeometry(Surface* panel);
 
     /**
      * Requests the window at this model row index have its shaded state toggled.
@@ -445,7 +445,7 @@ public:
      *
      * @since 0.0.552
      */
-    void requestEnterVirtualDesktop(const QString &id);
+    void requestEnterVirtualDesktop(const QString& id);
 
     /**
      * Make the window enter a new virtual desktop. If the server consents the request,
@@ -461,7 +461,7 @@ public:
      *
      * @since 0.0.552
      */
-    void requestLeaveVirtualDesktop(const QString &id);
+    void requestLeaveVirtualDesktop(const QString& id);
 
     /**
      * Return all the virtual desktop ids this window is associated to.
@@ -612,7 +612,7 @@ Q_SIGNALS:
      * The window can be on more than one desktop, or none: then is considered on all of them.
      * @since 0.0.546
      */
-    void plasmaVirtualDesktopEntered(const QString &id);
+    void plasmaVirtualDesktopEntered(const QString& id);
 
     /**
      * This signal is emitted when the window left a virtual desktop.
@@ -620,11 +620,13 @@ Q_SIGNALS:
      *
      * @since 0.0.546
      */
-    void plasmaVirtualDesktopLeft(const QString &id);
+    void plasmaVirtualDesktopLeft(const QString& id);
 
 private:
     friend class PlasmaWindowManagement;
-    explicit PlasmaWindow(PlasmaWindowManagement *parent, org_kde_plasma_window *dataOffer, quint32 internalId);
+    explicit PlasmaWindow(PlasmaWindowManagement* parent,
+                          org_kde_plasma_window* dataOffer,
+                          quint32 internalId);
     class Private;
     std::unique_ptr<Private> d;
 };

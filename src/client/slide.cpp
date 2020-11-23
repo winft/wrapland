@@ -19,8 +19,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include "slide.h"
 #include "event_queue.h"
-#include "wayland_pointer_p.h"
 #include "surface.h"
+#include "wayland_pointer_p.h"
 
 #include <wayland-slide-client-protocol.h>
 
@@ -35,10 +35,10 @@ public:
     Private() = default;
 
     WaylandPointer<org_kde_kwin_slide_manager, org_kde_kwin_slide_manager_destroy> slidemanager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-SlideManager::SlideManager(QObject *parent)
+SlideManager::SlideManager(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -49,7 +49,7 @@ SlideManager::~SlideManager()
     release();
 }
 
-void SlideManager::setup(org_kde_kwin_slide_manager *slidemanager)
+void SlideManager::setup(org_kde_kwin_slide_manager* slidemanager)
 {
     Q_ASSERT(slidemanager);
     Q_ASSERT(!d->slidemanager);
@@ -61,21 +61,23 @@ void SlideManager::release()
     d->slidemanager.release();
 }
 
-void SlideManager::setEventQueue(EventQueue *queue)
+void SlideManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *SlideManager::eventQueue()
+EventQueue* SlideManager::eventQueue()
 {
     return d->queue;
 }
 
-SlideManager::operator org_kde_kwin_slide_manager*() {
+SlideManager::operator org_kde_kwin_slide_manager*()
+{
     return d->slidemanager;
 }
 
-SlideManager::operator org_kde_kwin_slide_manager*() const {
+SlideManager::operator org_kde_kwin_slide_manager*() const
+{
     return d->slidemanager;
 }
 
@@ -84,10 +86,10 @@ bool SlideManager::isValid() const
     return d->slidemanager.isValid();
 }
 
-Slide *SlideManager::createSlide(Surface *surface, QObject *parent)
+Slide* SlideManager::createSlide(Surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
-    Slide *s = new Slide(parent);
+    Slide* s = new Slide(parent);
     auto w = org_kde_kwin_slide_manager_create(d->slidemanager, *surface);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -96,7 +98,7 @@ Slide *SlideManager::createSlide(Surface *surface, QObject *parent)
     return s;
 }
 
-void SlideManager::removeSlide(Surface *surface)
+void SlideManager::removeSlide(Surface* surface)
 {
     org_kde_kwin_slide_manager_unset(d->slidemanager, *surface);
 }
@@ -109,7 +111,7 @@ public:
     WaylandPointer<org_kde_kwin_slide, org_kde_kwin_slide_release> slide;
 };
 
-Slide::Slide(QObject *parent)
+Slide::Slide(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -120,7 +122,7 @@ Slide::~Slide()
     release();
 }
 
-void Slide::setup(org_kde_kwin_slide *slide)
+void Slide::setup(org_kde_kwin_slide* slide)
 {
     Q_ASSERT(slide);
     Q_ASSERT(!d->slide);
@@ -132,11 +134,13 @@ void Slide::release()
     d->slide.release();
 }
 
-Slide::operator org_kde_kwin_slide*() {
+Slide::operator org_kde_kwin_slide*()
+{
     return d->slide;
 }
 
-Slide::operator org_kde_kwin_slide*() const {
+Slide::operator org_kde_kwin_slide*() const
+{
     return d->slide;
 }
 
@@ -161,7 +165,5 @@ void Slide::setOffset(qint32 offset)
     org_kde_kwin_slide_set_offset(d->slide, offset);
 }
 
-
 }
 }
-

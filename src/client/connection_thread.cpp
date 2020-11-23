@@ -22,10 +22,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "logging.h"
 
 #include <QAbstractEventDispatcher>
-#include <QGuiApplication>
 #include <QDebug>
 #include <QDir>
 #include <QFileSystemWatcher>
+#include <QGuiApplication>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QSocketNotifier>
@@ -43,7 +43,7 @@ namespace Client
 class Q_DECL_HIDDEN ConnectionThread::Private
 {
 public:
-    Private(ConnectionThread *q);
+    Private(ConnectionThread* q);
     ~Private();
 
     void doEstablishConnection();
@@ -53,7 +53,7 @@ public:
     int error = 0;
     int protocolError = 0;
 
-    wl_display *display = nullptr;
+    wl_display* display = nullptr;
     int fd = -1;
 
     QString socketName;
@@ -66,15 +66,15 @@ public:
 
     static QVector<ConnectionThread*> connections;
     static QMutex mutex;
+
 private:
-    ConnectionThread *q;
+    ConnectionThread* q;
 };
 
 QVector<ConnectionThread*> ConnectionThread::Private::connections = QVector<ConnectionThread*>{};
 QMutex ConnectionThread::Private::mutex{QMutex::Recursive};
 
-
-ConnectionThread::Private::Private(ConnectionThread *q)
+ConnectionThread::Private::Private(ConnectionThread* q)
     : socketName(QString::fromUtf8(qgetenv("WAYLAND_DISPLAY")))
     , runtimeDir(QString::fromUtf8(qgetenv("XDG_RUNTIME_DIR")))
     , q(q)
@@ -122,8 +122,8 @@ void ConnectionThread::Private::doEstablishConnection()
         return;
     }
     if (fd != -1) {
-        qCDebug(WRAPLAND_CLIENT)
-                << "Established connection to Wayland server over file descriptor:" << fd;
+        qCDebug(WRAPLAND_CLIENT) << "Established connection to Wayland server over file descriptor:"
+                                 << fd;
     } else {
         qCDebug(WRAPLAND_CLIENT) << "Established connection to Wayland server at:" << socketName;
     }
@@ -139,37 +139,38 @@ void ConnectionThread::Private::setupSocketNotifier()
 {
     const int fd = wl_display_get_fd(display);
     socketNotifier.reset(new QSocketNotifier(fd, QSocketNotifier::Read));
-    QObject::connect(socketNotifier.get(), &QSocketNotifier::activated, q,
-        [this](int count) {
-            Q_UNUSED(count)
-            if (!established) {
-                return;
-            }
-
-            int ret = wl_display_dispatch(display);
-            error = wl_display_get_error(display);
-
-            if (ret < 0) {
-                error = wl_display_get_error(display);
-                Q_ASSERT(error);
-                protocolError = wl_display_get_protocol_error(display, nullptr, nullptr);
-
-                established = false;
-                emit q->establishedChanged(false);
-                socketNotifier.reset();
-                return;
-            }
-
-            emit q->eventsRead();
+    QObject::connect(socketNotifier.get(), &QSocketNotifier::activated, q, [this](int count) {
+        Q_UNUSED(count)
+        if (!established) {
+            return;
         }
-    );
+
+        int ret = wl_display_dispatch(display);
+        error = wl_display_get_error(display);
+
+        if (ret < 0) {
+            error = wl_display_get_error(display);
+            Q_ASSERT(error);
+            protocolError = wl_display_get_protocol_error(display, nullptr, nullptr);
+
+            established = false;
+            emit q->establishedChanged(false);
+            socketNotifier.reset();
+            return;
+        }
+
+        emit q->eventsRead();
+    });
 }
 
-ConnectionThread::ConnectionThread(QObject *parent)
+ConnectionThread::ConnectionThread(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
-    d->eventDispatcherConnection = connect(QCoreApplication::eventDispatcher(), &QAbstractEventDispatcher::aboutToBlock, this,
+    d->eventDispatcherConnection = connect(
+        QCoreApplication::eventDispatcher(),
+        &QAbstractEventDispatcher::aboutToBlock,
+        this,
         [this] {
             if (d->display) {
                 wl_display_flush(d->display);
@@ -178,7 +179,7 @@ ConnectionThread::ConnectionThread(QObject *parent)
         Qt::DirectConnection);
 }
 
-ConnectionThread::ConnectionThread(wl_display *display, QObject *parent)
+ConnectionThread::ConnectionThread(wl_display* display, QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -191,18 +192,19 @@ ConnectionThread::~ConnectionThread()
     disconnect(d->eventDispatcherConnection);
 }
 
-ConnectionThread *ConnectionThread::fromApplication(QObject *parent)
+ConnectionThread* ConnectionThread::fromApplication(QObject* parent)
 {
-    QPlatformNativeInterface *native = qApp->platformNativeInterface();
+    QPlatformNativeInterface* native = qApp->platformNativeInterface();
     if (!native) {
         return nullptr;
     }
-    wl_display *display = reinterpret_cast<wl_display*>(native->nativeResourceForIntegration(QByteArrayLiteral("wl_display")));
+    wl_display* display = reinterpret_cast<wl_display*>(
+        native->nativeResourceForIntegration(QByteArrayLiteral("wl_display")));
     if (!display) {
         return nullptr;
     }
-    auto *ct = new ConnectionThread(display, parent);
-    connect(native, &QObject::destroyed, ct, [ct] { Q_EMIT ct->establishedChanged(false); } );
+    auto* ct = new ConnectionThread(display, parent);
+    connect(native, &QObject::destroyed, ct, [ct] { Q_EMIT ct->establishedChanged(false); });
     return ct;
 }
 
@@ -218,7 +220,7 @@ void ConnectionThread::doEstablishConnection()
     d->doEstablishConnection();
 }
 
-void ConnectionThread::setSocketName(const QString &socketName)
+void ConnectionThread::setSocketName(const QString& socketName)
 {
     if (d->display) {
         // already initialized
@@ -236,7 +238,7 @@ void ConnectionThread::setSocketFd(int fd)
     d->fd = fd;
 }
 
-wl_display *ConnectionThread::display()
+wl_display* ConnectionThread::display()
 {
     return d->display;
 }
@@ -261,9 +263,11 @@ void ConnectionThread::roundtrip()
     }
     if (d->foreign) {
         // try to perform roundtrip through the QPA plugin if it's supported
-        if (QPlatformNativeInterface *native = qApp->platformNativeInterface()) {
-            // in case the platform provides a dedicated roundtrip function use that install of wl_display_roundtrip
-            QFunctionPointer roundtripFunction = native->platformFunction(QByteArrayLiteral("roundtrip"));
+        if (QPlatformNativeInterface* native = qApp->platformNativeInterface()) {
+            // in case the platform provides a dedicated roundtrip function use that install of
+            // wl_display_roundtrip
+            QFunctionPointer roundtripFunction
+                = native->platformFunction(QByteArrayLiteral("roundtrip"));
             if (roundtripFunction) {
                 roundtripFunction();
                 return;

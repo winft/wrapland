@@ -83,11 +83,11 @@ public:
     bool isValid() const;
 
     void addDmabuf(int32_t fd,
-                    uint32_t plane_idx,
-                    uint32_t offset,
-                    uint32_t stride,
-                    uint32_t modifier_hi,
-                    uint32_t modifier_lo);
+                   uint32_t plane_idx,
+                   uint32_t offset,
+                   uint32_t stride,
+                   uint32_t modifier_hi,
+                   uint32_t modifier_lo);
     void createDmabuf(int32_t width, int32_t height, uint32_t format, uint32_t flags);
     wl_buffer*
     createDmabufImmediate(int32_t width, int32_t height, uint32_t format, uint32_t flags);

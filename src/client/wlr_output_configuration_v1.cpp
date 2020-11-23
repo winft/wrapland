@@ -33,12 +33,11 @@ namespace Wrapland
 namespace Client
 {
 
-struct ConfigurationHead
-{
-    WlrOutputHeadV1 *head = nullptr;
-    zwlr_output_configuration_head_v1 *native = nullptr;
+struct ConfigurationHead {
+    WlrOutputHeadV1* head = nullptr;
+    zwlr_output_configuration_head_v1* native = nullptr;
 
-    WlrOutputModeV1 *mode = nullptr;
+    WlrOutputModeV1* mode = nullptr;
 
     struct {
         QSize size;
@@ -58,33 +57,33 @@ class Q_DECL_HIDDEN WlrOutputConfigurationV1::Private
 public:
     Private() = default;
 
-    void setup(zwlr_output_configuration_v1 *outputConfiguration);
+    void setup(zwlr_output_configuration_v1* outputConfiguration);
 
-    WaylandPointer<zwlr_output_configuration_v1,
-                        zwlr_output_configuration_v1_destroy> outputConfiguration;
+    WaylandPointer<zwlr_output_configuration_v1, zwlr_output_configuration_v1_destroy>
+        outputConfiguration;
     static const struct zwlr_output_configuration_v1_listener s_listener;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 
     void send();
-    ConfigurationHead* getConfigurationHead(WlrOutputHeadV1 *head);
+    ConfigurationHead* getConfigurationHead(WlrOutputHeadV1* head);
 
     std::vector<std::unique_ptr<ConfigurationHead>> heads;
-    WlrOutputConfigurationV1 *q;
+    WlrOutputConfigurationV1* q;
 
 private:
-    static void succeededCallback(void *data, zwlr_output_configuration_v1 *config);
-    static void failedCallback(void *data, zwlr_output_configuration_v1 *config);
-    static void cancelledCallback(void *data, zwlr_output_configuration_v1 *config);
+    static void succeededCallback(void* data, zwlr_output_configuration_v1* config);
+    static void failedCallback(void* data, zwlr_output_configuration_v1* config);
+    static void cancelledCallback(void* data, zwlr_output_configuration_v1* config);
 };
 
 const zwlr_output_configuration_v1_listener WlrOutputConfigurationV1::Private::s_listener = {
     succeededCallback,
     failedCallback,
-    cancelledCallback
+    cancelledCallback,
 };
 
 void WlrOutputConfigurationV1::Private::succeededCallback(void* data,
-                                                          zwlr_output_configuration_v1 *config)
+                                                          zwlr_output_configuration_v1* config)
 {
     Q_UNUSED(config);
     auto priv = reinterpret_cast<WlrOutputConfigurationV1::Private*>(data);
@@ -92,7 +91,7 @@ void WlrOutputConfigurationV1::Private::succeededCallback(void* data,
 }
 
 void WlrOutputConfigurationV1::Private::failedCallback(void* data,
-                                                       zwlr_output_configuration_v1 *config)
+                                                       zwlr_output_configuration_v1* config)
 {
     Q_UNUSED(config);
     auto priv = reinterpret_cast<WlrOutputConfigurationV1::Private*>(data);
@@ -100,16 +99,16 @@ void WlrOutputConfigurationV1::Private::failedCallback(void* data,
 }
 
 void WlrOutputConfigurationV1::Private::cancelledCallback(void* data,
-                                                          zwlr_output_configuration_v1 *config)
+                                                          zwlr_output_configuration_v1* config)
 {
     Q_UNUSED(config);
     auto priv = reinterpret_cast<WlrOutputConfigurationV1::Private*>(data);
     Q_EMIT priv->q->cancelled();
 }
 
-WlrOutputConfigurationV1::WlrOutputConfigurationV1(QObject *parent)
-: QObject(parent)
-, d(new Private)
+WlrOutputConfigurationV1::WlrOutputConfigurationV1(QObject* parent)
+    : QObject(parent)
+    , d(new Private)
 {
     d->q = this;
 }
@@ -119,7 +118,7 @@ WlrOutputConfigurationV1::~WlrOutputConfigurationV1()
     release();
 }
 
-void WlrOutputConfigurationV1::setup(zwlr_output_configuration_v1 *outputConfiguration)
+void WlrOutputConfigurationV1::setup(zwlr_output_configuration_v1* outputConfiguration)
 {
     Q_ASSERT(outputConfiguration);
     Q_ASSERT(!d->outputConfiguration);
@@ -133,9 +132,9 @@ void WlrOutputConfigurationV1::Private::setup(zwlr_output_configuration_v1* outp
     zwlr_output_configuration_v1_add_listener(outputConfiguration, &s_listener, this);
 }
 
-ConfigurationHead* WlrOutputConfigurationV1::Private::getConfigurationHead(WlrOutputHeadV1 *head)
+ConfigurationHead* WlrOutputConfigurationV1::Private::getConfigurationHead(WlrOutputHeadV1* head)
 {
-    for (auto &configurationHead : heads) {
+    for (auto& configurationHead : heads) {
         if (configurationHead->head == head) {
             return configurationHead.get();
         }
@@ -152,7 +151,7 @@ ConfigurationHead* WlrOutputConfigurationV1::Private::getConfigurationHead(WlrOu
 
 void WlrOutputConfigurationV1::Private::send()
 {
-    for (auto &head : heads) {
+    for (auto& head : heads) {
         if (!head->native) {
             continue;
         }
@@ -167,37 +166,39 @@ void WlrOutputConfigurationV1::Private::send()
         }
 
         if (head->positionSet) {
-            zwlr_output_configuration_head_v1_set_position(head->native, head->position.x(),
-                                                           head->position.y());
+            zwlr_output_configuration_head_v1_set_position(
+                head->native, head->position.x(), head->position.y());
         }
 
         if (head->transformSet) {
             auto toNative = [](WlrOutputHeadV1::Transform transform) {
                 switch (transform) {
-                    case WlrOutputHeadV1::Transform::Normal:
-                        return WL_OUTPUT_TRANSFORM_NORMAL;
-                    case WlrOutputHeadV1::Transform::Rotated90:
-                        return WL_OUTPUT_TRANSFORM_90;
-                    case WlrOutputHeadV1::Transform::Rotated180:
-                        return WL_OUTPUT_TRANSFORM_180;
-                    case WlrOutputHeadV1::Transform::Rotated270:
-                        return WL_OUTPUT_TRANSFORM_270;
-                    case WlrOutputHeadV1::Transform::Flipped:
-                        return WL_OUTPUT_TRANSFORM_FLIPPED;
-                    case WlrOutputHeadV1::Transform::Flipped90:
-                        return WL_OUTPUT_TRANSFORM_FLIPPED_90;
-                    case WlrOutputHeadV1::Transform::Flipped180:
-                        return WL_OUTPUT_TRANSFORM_FLIPPED_180;
-                    case WlrOutputHeadV1::Transform::Flipped270:
-                        return WL_OUTPUT_TRANSFORM_FLIPPED_270;
+                case WlrOutputHeadV1::Transform::Normal:
+                    return WL_OUTPUT_TRANSFORM_NORMAL;
+                case WlrOutputHeadV1::Transform::Rotated90:
+                    return WL_OUTPUT_TRANSFORM_90;
+                case WlrOutputHeadV1::Transform::Rotated180:
+                    return WL_OUTPUT_TRANSFORM_180;
+                case WlrOutputHeadV1::Transform::Rotated270:
+                    return WL_OUTPUT_TRANSFORM_270;
+                case WlrOutputHeadV1::Transform::Flipped:
+                    return WL_OUTPUT_TRANSFORM_FLIPPED;
+                case WlrOutputHeadV1::Transform::Flipped90:
+                    return WL_OUTPUT_TRANSFORM_FLIPPED_90;
+                case WlrOutputHeadV1::Transform::Flipped180:
+                    return WL_OUTPUT_TRANSFORM_FLIPPED_180;
+                case WlrOutputHeadV1::Transform::Flipped270:
+                    return WL_OUTPUT_TRANSFORM_FLIPPED_270;
                 }
                 abort();
             };
-            zwlr_output_configuration_head_v1_set_transform(head->native, toNative(head->transform));
+            zwlr_output_configuration_head_v1_set_transform(head->native,
+                                                            toNative(head->transform));
         }
 
         if (head->scaleSet) {
-            zwlr_output_configuration_head_v1_set_scale(head->native, wl_fixed_from_double(head->scale));
+            zwlr_output_configuration_head_v1_set_scale(head->native,
+                                                        wl_fixed_from_double(head->scale));
         }
     }
 }
@@ -207,21 +208,23 @@ void WlrOutputConfigurationV1::release()
     d->outputConfiguration.release();
 }
 
-void WlrOutputConfigurationV1::setEventQueue(EventQueue *queue)
+void WlrOutputConfigurationV1::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *WlrOutputConfigurationV1::eventQueue()
+EventQueue* WlrOutputConfigurationV1::eventQueue()
 {
     return d->queue;
 }
 
-WlrOutputConfigurationV1::operator zwlr_output_configuration_v1*() {
+WlrOutputConfigurationV1::operator zwlr_output_configuration_v1*()
+{
     return d->outputConfiguration;
 }
 
-WlrOutputConfigurationV1::operator zwlr_output_configuration_v1*() const {
+WlrOutputConfigurationV1::operator zwlr_output_configuration_v1*() const
+{
     return d->outputConfiguration;
 }
 
@@ -230,26 +233,26 @@ bool WlrOutputConfigurationV1::isValid() const
     return d->outputConfiguration.isValid();
 }
 
-void WlrOutputConfigurationV1::setEnabled(WlrOutputHeadV1 *head, bool enable)
+void WlrOutputConfigurationV1::setEnabled(WlrOutputHeadV1* head, bool enable)
 {
     auto configurationHead = d->getConfigurationHead(head);
 
     if (enable) {
         if (!configurationHead->native) {
             configurationHead->native
-                    = zwlr_output_configuration_v1_enable_head(d->outputConfiguration, *head);
+                = zwlr_output_configuration_v1_enable_head(d->outputConfiguration, *head);
         }
     } else {
         zwlr_output_configuration_v1_disable_head(d->outputConfiguration, *head);
     }
 }
 
-void WlrOutputConfigurationV1::setMode(WlrOutputHeadV1 *head, WlrOutputModeV1 *mode)
+void WlrOutputConfigurationV1::setMode(WlrOutputHeadV1* head, WlrOutputModeV1* mode)
 {
     d->getConfigurationHead(head)->mode = mode;
 }
 
-void WlrOutputConfigurationV1::setTransform(WlrOutputHeadV1 *head,
+void WlrOutputConfigurationV1::setTransform(WlrOutputHeadV1* head,
                                             WlrOutputHeadV1::Transform transform)
 {
     auto configurationHead = d->getConfigurationHead(head);
@@ -258,7 +261,7 @@ void WlrOutputConfigurationV1::setTransform(WlrOutputHeadV1 *head,
     configurationHead->transformSet = true;
 }
 
-void WlrOutputConfigurationV1::setPosition(WlrOutputHeadV1 *head, const QPoint &pos)
+void WlrOutputConfigurationV1::setPosition(WlrOutputHeadV1* head, const QPoint& pos)
 {
     auto configurationHead = d->getConfigurationHead(head);
 
@@ -266,7 +269,7 @@ void WlrOutputConfigurationV1::setPosition(WlrOutputHeadV1 *head, const QPoint &
     configurationHead->positionSet = true;
 }
 
-void WlrOutputConfigurationV1::setScale(WlrOutputHeadV1 *head, double scale)
+void WlrOutputConfigurationV1::setScale(WlrOutputHeadV1* head, double scale)
 {
     auto configurationHead = d->getConfigurationHead(head);
 
@@ -288,4 +291,3 @@ void WlrOutputConfigurationV1::apply()
 
 }
 }
-

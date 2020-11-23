@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_FULLSCREEN_SHELL_H
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -65,10 +65,9 @@ class Output;
 class WRAPLANDCLIENT_EXPORT FullscreenShell : public QObject
 {
     Q_OBJECT
-    
-    
+
 public:
-    explicit FullscreenShell(QObject *parent = nullptr);
+    explicit FullscreenShell(QObject* parent = nullptr);
     virtual ~FullscreenShell();
 
     bool isValid() const;
@@ -76,18 +75,18 @@ public:
 
     bool hasCapabilityArbitraryModes() const;
     bool hasCapabilityCursorPlane() const;
-    void setup(_wl_fullscreen_shell *shell);
-    void present(wl_surface *surface, wl_output *output);
-    void present(Surface *surface, Output *output);
+    void setup(_wl_fullscreen_shell* shell);
+    void present(wl_surface* surface, wl_output* output);
+    void present(Surface* surface, Output* output);
 
     /**
      * Sets the @p queue to use for bound proxies.
      **/
-    void setEventQueue(EventQueue *queue);
+    void setEventQueue(EventQueue* queue);
     /**
      * @returns The event queue to use for bound proxies.
      **/
-    EventQueue *eventQueue() const;
+    EventQueue* eventQueue() const;
 
 Q_SIGNALS:
     void capabilityArbitraryModesChanged(bool);

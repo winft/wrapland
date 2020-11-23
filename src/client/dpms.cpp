@@ -34,10 +34,10 @@ class Q_DECL_HIDDEN DpmsManager::Private
 {
 public:
     WaylandPointer<org_kde_kwin_dpms_manager, org_kde_kwin_dpms_manager_destroy> manager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-DpmsManager::DpmsManager(QObject *parent)
+DpmsManager::DpmsManager(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -58,28 +58,28 @@ bool DpmsManager::isValid() const
     return d->manager.isValid();
 }
 
-void DpmsManager::setup(org_kde_kwin_dpms_manager *manager)
+void DpmsManager::setup(org_kde_kwin_dpms_manager* manager)
 {
     Q_ASSERT(manager);
     Q_ASSERT(!d->manager.isValid());
     d->manager.setup(manager);
 }
 
-EventQueue *DpmsManager::eventQueue()
+EventQueue* DpmsManager::eventQueue()
 {
     return d->queue;
 }
 
-void DpmsManager::setEventQueue(EventQueue *queue)
+void DpmsManager::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-Dpms *DpmsManager::getDpms(Output *output, QObject *parent)
+Dpms* DpmsManager::getDpms(Output* output, QObject* parent)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(output);
-    Dpms *dpms = new Dpms(output, parent);
+    Dpms* dpms = new Dpms(output, parent);
     auto w = org_kde_kwin_dpms_manager_get(d->manager, *output);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -98,12 +98,11 @@ DpmsManager::operator org_kde_kwin_dpms_manager*()
     return d->manager;
 }
 
-
 class Q_DECL_HIDDEN Dpms::Private
 {
 public:
-    explicit Private(const QPointer<Output> &output, Dpms *q);
-    void setup(org_kde_kwin_dpms *d);
+    explicit Private(const QPointer<Output>& output, Dpms* q);
+    void setup(org_kde_kwin_dpms* d);
 
     WaylandPointer<org_kde_kwin_dpms, org_kde_kwin_dpms_release> dpms;
     struct Data {
@@ -117,32 +116,34 @@ public:
     QPointer<Output> output;
 
 private:
-    static void supportedCallback(void *data, org_kde_kwin_dpms *org_kde_kwin_dpms, uint32_t supported);
-    static void modeCallback(void *data, org_kde_kwin_dpms *org_kde_kwin_dpms, uint32_t mode);
-    static void doneCallback(void *data, org_kde_kwin_dpms *org_kde_kwin_dpms);
+    static void
+    supportedCallback(void* data, org_kde_kwin_dpms* org_kde_kwin_dpms, uint32_t supported);
+    static void modeCallback(void* data, org_kde_kwin_dpms* org_kde_kwin_dpms, uint32_t mode);
+    static void doneCallback(void* data, org_kde_kwin_dpms* org_kde_kwin_dpms);
     static const struct org_kde_kwin_dpms_listener s_listener;
 
-    Dpms *q;
+    Dpms* q;
 };
-
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 const org_kde_kwin_dpms_listener Dpms::Private::s_listener = {
     supportedCallback,
     modeCallback,
-    doneCallback
+    doneCallback,
 };
 #endif
 
-void Dpms::Private::supportedCallback(void *data, org_kde_kwin_dpms *org_kde_kwin_dpms, uint32_t supported)
+void Dpms::Private::supportedCallback(void* data,
+                                      org_kde_kwin_dpms* org_kde_kwin_dpms,
+                                      uint32_t supported)
 {
     Q_UNUSED(org_kde_kwin_dpms)
-    Private *p = reinterpret_cast<Private*>(data);
+    Private* p = reinterpret_cast<Private*>(data);
     p->pending.supported = supported == 0 ? false : true;
     p->pending.supportedChanged = true;
 }
 
-void Dpms::Private::modeCallback(void *data, org_kde_kwin_dpms *org_kde_kwin_dpms, uint32_t mode)
+void Dpms::Private::modeCallback(void* data, org_kde_kwin_dpms* org_kde_kwin_dpms, uint32_t mode)
 {
     Q_UNUSED(org_kde_kwin_dpms)
     Mode m;
@@ -162,16 +163,17 @@ void Dpms::Private::modeCallback(void *data, org_kde_kwin_dpms *org_kde_kwin_dpm
     default:
         return;
     }
-    Private *p = reinterpret_cast<Private*>(data);
+    Private* p = reinterpret_cast<Private*>(data);
     p->pending.mode = m;
     p->pending.modeChanged = true;
 }
 
-void Dpms::Private::doneCallback(void *data, org_kde_kwin_dpms *org_kde_kwin_dpms)
+void Dpms::Private::doneCallback(void* data, org_kde_kwin_dpms* org_kde_kwin_dpms)
 {
     Q_UNUSED(org_kde_kwin_dpms)
-    Private *p = reinterpret_cast<Private*>(data);
-    const bool supportedChanged = p->pending.supportedChanged && p->pending.supported != p->current.supported;
+    Private* p = reinterpret_cast<Private*>(data);
+    const bool supportedChanged
+        = p->pending.supportedChanged && p->pending.supported != p->current.supported;
     const bool modeChanged = p->pending.modeChanged && p->pending.mode != p->current.mode;
     if (supportedChanged) {
         p->current.supported = p->pending.supported;
@@ -184,13 +186,13 @@ void Dpms::Private::doneCallback(void *data, org_kde_kwin_dpms *org_kde_kwin_dpm
     p->pending = Data();
 }
 
-Dpms::Private::Private(const QPointer<Output> &output, Dpms *q)
+Dpms::Private::Private(const QPointer<Output>& output, Dpms* q)
     : output(output)
     , q(q)
 {
 }
 
-void Dpms::Private::setup(org_kde_kwin_dpms *d)
+void Dpms::Private::setup(org_kde_kwin_dpms* d)
 {
     Q_ASSERT(d);
     Q_ASSERT(!dpms.isValid());
@@ -198,7 +200,7 @@ void Dpms::Private::setup(org_kde_kwin_dpms *d)
     org_kde_kwin_dpms_add_listener(dpms, &s_listener, this);
 }
 
-Dpms::Dpms(const QPointer<Output> &o, QObject *parent)
+Dpms::Dpms(const QPointer<Output>& o, QObject* parent)
     : QObject(parent)
     , d(new Private(o, this))
 {
@@ -219,7 +221,7 @@ bool Dpms::isValid() const
     return d->dpms.isValid();
 }
 
-void Dpms::setup(org_kde_kwin_dpms *dpms)
+void Dpms::setup(org_kde_kwin_dpms* dpms)
 {
     d->setup(dpms);
 }
@@ -256,7 +258,7 @@ void Dpms::requestMode(Dpms::Mode mode)
     org_kde_kwin_dpms_set(d->dpms, wlMode);
 }
 
-QPointer< Output > Dpms::output() const
+QPointer<Output> Dpms::output() const
 {
     return d->output;
 }

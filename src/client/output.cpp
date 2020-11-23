@@ -33,19 +33,20 @@ namespace Wrapland
 namespace Client
 {
 
-namespace {
+namespace
+{
 typedef QList<Output::Mode> Modes;
 }
 
 class Q_DECL_HIDDEN Output::Private
 {
 public:
-    Private(Output *q);
+    Private(Output* q);
     ~Private();
-    void setup(wl_output *o);
+    void setup(wl_output* o);
 
     WaylandPointer<wl_output, wl_output_release> output;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
     QSize physicalSize;
     QPoint globalPosition;
     QString manufacturer;
@@ -56,25 +57,37 @@ public:
     Modes modes;
     Modes::iterator currentMode = modes.end();
 
-    static Output *get(wl_output *o);
+    static Output* get(wl_output* o);
 
 private:
-    static void geometryCallback(void *data, wl_output *output, int32_t x, int32_t y,
-                                 int32_t physicalWidth, int32_t physicalHeight, int32_t subPixel,
-                                 const char *make, const char *model, int32_t transform);
-    static void modeCallback(void *data, wl_output *output, uint32_t flags, int32_t width, int32_t height, int32_t refresh);
-    static void doneCallback(void *data, wl_output *output);
-    static void scaleCallback(void *data, wl_output *output, int32_t scale);
-    void setPhysicalSize(const QSize &size);
-    void setGlobalPosition(const QPoint &pos);
-    void setManufacturer(const QString &manufacturer);
-    void setModel(const QString &model);
+    static void geometryCallback(void* data,
+                                 wl_output* output,
+                                 int32_t x,
+                                 int32_t y,
+                                 int32_t physicalWidth,
+                                 int32_t physicalHeight,
+                                 int32_t subPixel,
+                                 const char* make,
+                                 const char* model,
+                                 int32_t transform);
+    static void modeCallback(void* data,
+                             wl_output* output,
+                             uint32_t flags,
+                             int32_t width,
+                             int32_t height,
+                             int32_t refresh);
+    static void doneCallback(void* data, wl_output* output);
+    static void scaleCallback(void* data, wl_output* output, int32_t scale);
+    void setPhysicalSize(const QSize& size);
+    void setGlobalPosition(const QPoint& pos);
+    void setManufacturer(const QString& manufacturer);
+    void setModel(const QString& model);
     void setScale(int scale);
     void setSubPixel(SubPixel subPixel);
     void setTransform(Transform transform);
     void addMode(uint32_t flags, int32_t width, int32_t height, int32_t refresh);
 
-    Output *q;
+    Output* q;
     static struct wl_output_listener s_outputListener;
 
     static QVector<Private*> s_allOutputs;
@@ -82,7 +95,7 @@ private:
 
 QVector<Output::Private*> Output::Private::s_allOutputs;
 
-Output::Private::Private(Output *q)
+Output::Private::Private(Output* q)
     : q(q)
 {
     s_allOutputs << this;
@@ -93,21 +106,19 @@ Output::Private::~Private()
     s_allOutputs.removeOne(this);
 }
 
-Output *Output::Private::get(wl_output *o)
+Output* Output::Private::get(wl_output* o)
 {
-    auto it = std::find_if(s_allOutputs.constBegin(), s_allOutputs.constEnd(),
-        [o] (Private *p) {
-            const wl_output *reference = p->output;
-            return reference == o;
-        }
-    );
+    auto it = std::find_if(s_allOutputs.constBegin(), s_allOutputs.constEnd(), [o](Private* p) {
+        const wl_output* reference = p->output;
+        return reference == o;
+    });
     if (it != s_allOutputs.constEnd()) {
         return (*it)->q;
     }
     return nullptr;
 }
 
-void Output::Private::setup(wl_output *o)
+void Output::Private::setup(wl_output* o)
 {
     Q_ASSERT(o);
     Q_ASSERT(!output);
@@ -115,15 +126,12 @@ void Output::Private::setup(wl_output *o)
     wl_output_add_listener(output, &s_outputListener, this);
 }
 
-bool Output::Mode::operator==(const Output::Mode &m) const
+bool Output::Mode::operator==(const Output::Mode& m) const
 {
-    return size == m.size
-           && refreshRate == m.refreshRate
-           && flags == m.flags
-           && output == m.output;
+    return size == m.size && refreshRate == m.refreshRate && flags == m.flags && output == m.output;
 }
 
-Output::Output(QObject *parent)
+Output::Output(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -138,13 +146,19 @@ wl_output_listener Output::Private::s_outputListener = {
     geometryCallback,
     modeCallback,
     doneCallback,
-    scaleCallback
+    scaleCallback,
 };
 
-void Output::Private::geometryCallback(void *data, wl_output *output,
-                              int32_t x, int32_t y,
-                              int32_t physicalWidth, int32_t physicalHeight,
-                              int32_t subPixel, const char *make, const char *model, int32_t transform)
+void Output::Private::geometryCallback(void* data,
+                                       wl_output* output,
+                                       int32_t x,
+                                       int32_t y,
+                                       int32_t physicalWidth,
+                                       int32_t physicalHeight,
+                                       int32_t subPixel,
+                                       const char* make,
+                                       const char* model,
+                                       int32_t transform)
 {
     Q_UNUSED(transform)
     auto o = reinterpret_cast<Output::Private*>(data);
@@ -195,7 +209,12 @@ void Output::Private::geometryCallback(void *data, wl_output *output,
     o->setTransform(toTransform());
 }
 
-void Output::Private::modeCallback(void *data, wl_output *output, uint32_t flags, int32_t width, int32_t height, int32_t refresh)
+void Output::Private::modeCallback(void* data,
+                                   wl_output* output,
+                                   uint32_t flags,
+                                   int32_t width,
+                                   int32_t height,
+                                   int32_t refresh)
 {
     auto o = reinterpret_cast<Output::Private*>(data);
     Q_ASSERT(o->output == output);
@@ -219,7 +238,7 @@ void Output::Private::addMode(uint32_t flags, int32_t width, int32_t height, int
     if (flags & WL_OUTPUT_MODE_CURRENT) {
         auto it = modes.begin();
         while (it != currentIt) {
-            auto &m = (*it);
+            auto& m = (*it);
             if (m.flags.testFlag(Mode::Flag::Current)) {
                 m.flags &= ~Mode::Flags(Mode::Flag::Current);
                 emit q->modeChanged(m);
@@ -240,51 +259,51 @@ void Output::Private::addMode(uint32_t flags, int32_t width, int32_t height, int
     }
 }
 
-void Output::Private::scaleCallback(void *data, wl_output *output, int32_t scale)
+void Output::Private::scaleCallback(void* data, wl_output* output, int32_t scale)
 {
     auto o = reinterpret_cast<Output::Private*>(data);
     Q_ASSERT(o->output == output);
     o->setScale(scale);
 }
 
-void Output::Private::doneCallback(void *data, wl_output *output)
+void Output::Private::doneCallback(void* data, wl_output* output)
 {
     auto o = reinterpret_cast<Output::Private*>(data);
     Q_ASSERT(o->output == output);
     emit o->q->changed();
 }
 
-void Output::setup(wl_output *output)
+void Output::setup(wl_output* output)
 {
     d->setup(output);
 }
 
-EventQueue *Output::eventQueue() const
+EventQueue* Output::eventQueue() const
 {
     return d->queue;
 }
 
-void Output::setEventQueue(EventQueue *queue)
+void Output::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-void Output::Private::setGlobalPosition(const QPoint &pos)
+void Output::Private::setGlobalPosition(const QPoint& pos)
 {
     globalPosition = pos;
 }
 
-void Output::Private::setManufacturer(const QString &m)
+void Output::Private::setManufacturer(const QString& m)
 {
     manufacturer = m;
 }
 
-void Output::Private::setModel(const QString &m)
+void Output::Private::setModel(const QString& m)
 {
     model = m;
 }
 
-void Output::Private::setPhysicalSize(const QSize &size)
+void Output::Private::setPhysicalSize(const QSize& size)
 {
     physicalSize = size;
 }
@@ -327,7 +346,7 @@ QString Output::model() const
     return d->model;
 }
 
-wl_output *Output::output()
+wl_output* Output::output()
 {
     return d->output;
 }
@@ -373,20 +392,22 @@ Output::Transform Output::transform() const
     return d->transform;
 }
 
-QList< Output::Mode > Output::modes() const
+QList<Output::Mode> Output::modes() const
 {
     return d->modes;
 }
 
-Output::operator wl_output*() {
+Output::operator wl_output*()
+{
     return d->output;
 }
 
-Output::operator wl_output*() const {
+Output::operator wl_output*() const
+{
     return d->output;
 }
 
-Output *Output::get(wl_output *o)
+Output* Output::get(wl_output* o)
 {
     return Private::get(o);
 }

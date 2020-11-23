@@ -31,22 +31,22 @@ namespace Client
 class Q_DECL_HIDDEN EventQueue::Private
 {
 public:
-    Private(EventQueue *q);
+    Private(EventQueue* q);
 
-    wl_display *display = nullptr;
-    ConnectionThread *connection = nullptr;
+    wl_display* display = nullptr;
+    ConnectionThread* connection = nullptr;
     WaylandPointer<wl_event_queue, wl_event_queue_destroy> queue;
 
 private:
-    EventQueue *q;
+    EventQueue* q;
 };
 
-EventQueue::Private::Private(EventQueue *q)
+EventQueue::Private::Private(EventQueue* q)
     : q(q)
 {
 }
 
-EventQueue::EventQueue(QObject *parent)
+EventQueue::EventQueue(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -72,7 +72,7 @@ bool EventQueue::isValid()
     return d->queue.isValid();
 }
 
-void EventQueue::setup(wl_display *display)
+void EventQueue::setup(wl_display* display)
 {
     Q_ASSERT(display);
     Q_ASSERT(!d->display);
@@ -81,11 +81,15 @@ void EventQueue::setup(wl_display *display)
     d->queue.setup(wl_display_create_queue(display));
 }
 
-void EventQueue::setup(ConnectionThread *connection)
+void EventQueue::setup(ConnectionThread* connection)
 {
     d->connection = connection;
     setup(connection->display());
-    connect(connection, &ConnectionThread::eventsRead, this, &EventQueue::dispatch, Qt::QueuedConnection);
+    connect(connection,
+            &ConnectionThread::eventsRead,
+            this,
+            &EventQueue::dispatch,
+            Qt::QueuedConnection);
 }
 
 void EventQueue::dispatch()
@@ -97,7 +101,7 @@ void EventQueue::dispatch()
     wl_display_flush(d->display);
 }
 
-void EventQueue::addProxy(wl_proxy *proxy)
+void EventQueue::addProxy(wl_proxy* proxy)
 {
     Q_ASSERT(d->queue);
     wl_proxy_set_queue(proxy, d->queue);

@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_EVENT_QUEUE_H
 
 #include <QObject>
-//STD
+// STD
 #include <memory>
 
 #include <Wrapland/Client/wraplandclient_export.h>
@@ -72,7 +72,7 @@ class WRAPLANDCLIENT_EXPORT EventQueue : public QObject
 {
     Q_OBJECT
 public:
-    explicit EventQueue(QObject *parent = nullptr);
+    explicit EventQueue(QObject* parent = nullptr);
     virtual ~EventQueue();
 
     /**
@@ -83,7 +83,7 @@ public:
      * gets invoked whenever new events need to be dispatched.
      * @see dispatch
      **/
-    void setup(wl_display *display);
+    void setup(wl_display* display);
     /**
      * Creates the event queue for the @p connection.
      *
@@ -92,7 +92,7 @@ public:
      * the need to call dispatch manually.
      * @see dispatch
      **/
-    void setup(ConnectionThread *connection);
+    void setup(ConnectionThread* connection);
 
     /**
      * @returns @c true if EventQueue is setup.
@@ -108,17 +108,17 @@ public:
     /**
      * Adds the @p proxy to the EventQueue.
      **/
-    void addProxy(wl_proxy *proxy);
+    void addProxy(wl_proxy* proxy);
     /**
      * Adds the @p proxy of type wl_interface (e.g. wl_compositor) to the EventQueue.
      **/
-    template <typename wl_interface>
-    void addProxy(wl_interface *proxy);
+    template<typename wl_interface>
+    void addProxy(wl_interface* proxy);
     /**
      * Adds the @p proxy wrapper class of type T referencing the wl_interface to the EventQueue.
      **/
-    template <typename wl_interface, typename T>
-    void addProxy(T *proxy);
+    template<typename wl_interface, typename T>
+    void addProxy(T* proxy);
 
     operator wl_event_queue*();
     operator wl_event_queue*() const;
@@ -134,16 +134,14 @@ private:
     std::unique_ptr<Private> d;
 };
 
-template <typename wl_interface>
-inline
-void EventQueue::addProxy(wl_interface *proxy)
+template<typename wl_interface>
+inline void EventQueue::addProxy(wl_interface* proxy)
 {
     addProxy(reinterpret_cast<wl_proxy*>(proxy));
 }
 
-template <typename wl_interface, typename T>
-inline
-void EventQueue::addProxy(T *proxy)
+template<typename wl_interface, typename T>
+inline void EventQueue::addProxy(T* proxy)
 {
     addProxy(reinterpret_cast<wl_proxy*>((wl_interface*)*(proxy)));
 }

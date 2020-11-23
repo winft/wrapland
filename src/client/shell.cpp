@@ -40,10 +40,10 @@ class Q_DECL_HIDDEN Shell::Private
 {
 public:
     WaylandPointer<wl_shell, wl_shell_destroy> shell;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-Shell::Shell(QObject *parent)
+Shell::Shell(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -63,27 +63,27 @@ void Shell::release()
     d->shell.release();
 }
 
-void Shell::setup(wl_shell *shell)
+void Shell::setup(wl_shell* shell)
 {
     Q_ASSERT(!d->shell);
     Q_ASSERT(shell);
     d->shell.setup(shell);
 }
 
-void Shell::setEventQueue(EventQueue *queue)
+void Shell::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *Shell::eventQueue()
+EventQueue* Shell::eventQueue()
 {
     return d->queue;
 }
 
-ShellSurface *Shell::createSurface(wl_surface *surface, QObject *parent)
+ShellSurface* Shell::createSurface(wl_surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
-    ShellSurface *s = new ShellSurface(parent);
+    ShellSurface* s = new ShellSurface(parent);
     connect(this, &Shell::interfaceAboutToBeReleased, s, &ShellSurface::release);
     auto w = wl_shell_get_shell_surface(d->shell, surface);
     if (d->queue) {
@@ -93,7 +93,7 @@ ShellSurface *Shell::createSurface(wl_surface *surface, QObject *parent)
     return s;
 }
 
-ShellSurface *Shell::createSurface(Surface *surface, QObject *parent)
+ShellSurface* Shell::createSurface(Surface* surface, QObject* parent)
 {
     Q_ASSERT(surface);
     return createSurface(*surface, parent);
@@ -117,8 +117,8 @@ Shell::operator wl_shell*() const
 class Q_DECL_HIDDEN ShellSurface::Private
 {
 public:
-    Private(ShellSurface *q);
-    void setup(wl_shell_surface *surface);
+    Private(ShellSurface* q);
+    void setup(wl_shell_surface* surface);
 
     WaylandPointer<wl_shell_surface, wl_shell_surface_destroy> surface;
     QSize size;
@@ -126,22 +126,26 @@ public:
 
 private:
     void ping(uint32_t serial);
-    static void pingCallback(void *data, struct wl_shell_surface *shellSurface, uint32_t serial);
-    static void configureCallback(void *data, struct wl_shell_surface *shellSurface, uint32_t edges, int32_t width, int32_t height);
-    static void popupDoneCallback(void *data, struct wl_shell_surface *shellSurface);
+    static void pingCallback(void* data, struct wl_shell_surface* shellSurface, uint32_t serial);
+    static void configureCallback(void* data,
+                                  struct wl_shell_surface* shellSurface,
+                                  uint32_t edges,
+                                  int32_t width,
+                                  int32_t height);
+    static void popupDoneCallback(void* data, struct wl_shell_surface* shellSurface);
 
-    ShellSurface *q;
+    ShellSurface* q;
     static const struct wl_shell_surface_listener s_listener;
 };
 
 QVector<ShellSurface*> ShellSurface::Private::s_surfaces = QVector<ShellSurface*>();
 
-ShellSurface::Private::Private(ShellSurface *q)
+ShellSurface::Private::Private(ShellSurface* q)
     : q(q)
 {
 }
 
-void ShellSurface::Private::setup(wl_shell_surface *s)
+void ShellSurface::Private::setup(wl_shell_surface* s)
 {
     Q_ASSERT(s);
     Q_ASSERT(!surface);
@@ -149,31 +153,32 @@ void ShellSurface::Private::setup(wl_shell_surface *s)
     wl_shell_surface_add_listener(surface, &s_listener, this);
 }
 
-ShellSurface *ShellSurface::fromWindow(QWindow *window)
+ShellSurface* ShellSurface::fromWindow(QWindow* window)
 {
     if (!window) {
         return nullptr;
     }
-    QPlatformNativeInterface *native = qApp->platformNativeInterface();
+    QPlatformNativeInterface* native = qApp->platformNativeInterface();
     if (!native) {
         return nullptr;
     }
     window->create();
-    wl_shell_surface *s = reinterpret_cast<wl_shell_surface*>(native->nativeResourceForWindow(QByteArrayLiteral("wl_shell_surface"), window));
+    wl_shell_surface* s = reinterpret_cast<wl_shell_surface*>(
+        native->nativeResourceForWindow(QByteArrayLiteral("wl_shell_surface"), window));
     if (!s) {
         return nullptr;
     }
     if (auto surface = get(s)) {
         return surface;
     }
-    ShellSurface *surface = new ShellSurface(window);
+    ShellSurface* surface = new ShellSurface(window);
     surface->d->surface.setup(s, true);
     return surface;
 }
 
-ShellSurface *ShellSurface::fromQtWinId(WId wid)
+ShellSurface* ShellSurface::fromQtWinId(WId wid)
 {
-    QWindow *window = nullptr;
+    QWindow* window = nullptr;
 
     for (auto win : qApp->allWindows()) {
         if (win->winId() == wid) {
@@ -188,20 +193,18 @@ ShellSurface *ShellSurface::fromQtWinId(WId wid)
     return fromWindow(window);
 }
 
-ShellSurface *ShellSurface::get(wl_shell_surface *native)
+ShellSurface* ShellSurface::get(wl_shell_surface* native)
 {
-    auto it = std::find_if(Private::s_surfaces.constBegin(), Private::s_surfaces.constEnd(),
-        [native](ShellSurface *s) {
-            return s->d->surface == native;
-        }
-    );
+    auto it = std::find_if(Private::s_surfaces.constBegin(),
+                           Private::s_surfaces.constEnd(),
+                           [native](ShellSurface* s) { return s->d->surface == native; });
     if (it != Private::s_surfaces.constEnd()) {
         return *(it);
     }
     return nullptr;
 }
 
-ShellSurface::ShellSurface(QObject *parent)
+ShellSurface::ShellSurface(QObject* parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -223,11 +226,15 @@ void ShellSurface::release()
 const struct wl_shell_surface_listener ShellSurface::Private::s_listener = {
     pingCallback,
     configureCallback,
-    popupDoneCallback
+    popupDoneCallback,
 };
 #endif
 
-void ShellSurface::Private::configureCallback(void *data, wl_shell_surface *shellSurface, uint32_t edges, int32_t width, int32_t height)
+void ShellSurface::Private::configureCallback(void* data,
+                                              wl_shell_surface* shellSurface,
+                                              uint32_t edges,
+                                              int32_t width,
+                                              int32_t height)
 {
     Q_UNUSED(edges)
     auto s = reinterpret_cast<ShellSurface::Private*>(data);
@@ -235,21 +242,23 @@ void ShellSurface::Private::configureCallback(void *data, wl_shell_surface *shel
     s->q->setSize(QSize(width, height));
 }
 
-void ShellSurface::Private::pingCallback(void *data, wl_shell_surface *shellSurface, uint32_t serial)
+void ShellSurface::Private::pingCallback(void* data,
+                                         wl_shell_surface* shellSurface,
+                                         uint32_t serial)
 {
     auto s = reinterpret_cast<ShellSurface::Private*>(data);
     Q_ASSERT(s->surface == shellSurface);
     s->ping(serial);
 }
 
-void ShellSurface::Private::popupDoneCallback(void *data, wl_shell_surface *shellSurface)
+void ShellSurface::Private::popupDoneCallback(void* data, wl_shell_surface* shellSurface)
 {
     auto s = reinterpret_cast<ShellSurface::Private*>(data);
     Q_ASSERT(s->surface == shellSurface);
     emit s->q->popupDone();
 }
 
-void ShellSurface::setup(wl_shell_surface *surface)
+void ShellSurface::setup(wl_shell_surface* surface)
 {
     d->setup(surface);
 }
@@ -260,7 +269,7 @@ void ShellSurface::Private::ping(uint32_t serial)
     emit q->pinged();
 }
 
-void ShellSurface::setSize(const QSize &size)
+void ShellSurface::setSize(const QSize& size)
 {
     if (d->size == size) {
         return;
@@ -269,13 +278,16 @@ void ShellSurface::setSize(const QSize &size)
     emit sizeChanged(size);
 }
 
-void ShellSurface::setFullscreen(Output *output)
+void ShellSurface::setFullscreen(Output* output)
 {
     Q_ASSERT(isValid());
-    wl_shell_surface_set_fullscreen(d->surface, WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT, 0, output ? output->output() : nullptr);
+    wl_shell_surface_set_fullscreen(d->surface,
+                                    WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
+                                    0,
+                                    output ? output->output() : nullptr);
 }
 
-void ShellSurface::setMaximized(Output *output)
+void ShellSurface::setMaximized(Output* output)
 {
     Q_ASSERT(isValid());
     wl_shell_surface_set_maximized(d->surface, output ? output->output() : nullptr);
@@ -287,7 +299,7 @@ void ShellSurface::setToplevel()
     wl_shell_surface_set_toplevel(d->surface);
 }
 
-void ShellSurface::setTransient(Surface *parent, const QPoint &offset, TransientFlags flags)
+void ShellSurface::setTransient(Surface* parent, const QPoint& offset, TransientFlags flags)
 {
     Q_ASSERT(isValid());
     uint32_t wlFlags = 0;
@@ -297,7 +309,11 @@ void ShellSurface::setTransient(Surface *parent, const QPoint &offset, Transient
     wl_shell_surface_set_transient(d->surface, *parent, offset.x(), offset.y(), wlFlags);
 }
 
-void ShellSurface::setTransientPopup(Surface *parent, Seat *grabbedSeat, quint32 grabSerial, const QPoint &offset, TransientFlags flags)
+void ShellSurface::setTransientPopup(Surface* parent,
+                                     Seat* grabbedSeat,
+                                     quint32 grabSerial,
+                                     const QPoint& offset,
+                                     TransientFlags flags)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(parent);
@@ -306,10 +322,11 @@ void ShellSurface::setTransientPopup(Surface *parent, Seat *grabbedSeat, quint32
     if (flags.testFlag(TransientFlag::NoFocus)) {
         wlFlags |= WL_SHELL_SURFACE_TRANSIENT_INACTIVE;
     }
-    wl_shell_surface_set_popup(d->surface, *grabbedSeat, grabSerial, *parent, offset.x(), offset.y(), wlFlags);
+    wl_shell_surface_set_popup(
+        d->surface, *grabbedSeat, grabSerial, *parent, offset.x(), offset.y(), wlFlags);
 }
 
-void ShellSurface::requestMove(Seat *seat, quint32 serial)
+void ShellSurface::requestMove(Seat* seat, quint32 serial)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(seat);
@@ -317,7 +334,7 @@ void ShellSurface::requestMove(Seat *seat, quint32 serial)
     wl_shell_surface_move(d->surface, *seat, serial);
 }
 
-void ShellSurface::requestResize(Seat *seat, quint32 serial, Qt::Edges edges)
+void ShellSurface::requestResize(Seat* seat, quint32 serial, Qt::Edges edges)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(seat);
@@ -348,12 +365,12 @@ void ShellSurface::requestResize(Seat *seat, quint32 serial, Qt::Edges edges)
     wl_shell_surface_resize(d->surface, *seat, serial, wlEdge);
 }
 
-void ShellSurface::setTitle(const QString &title)
+void ShellSurface::setTitle(const QString& title)
 {
     wl_shell_surface_set_title(d->surface, title.toUtf8().constData());
 }
 
-void ShellSurface::setWindowClass(const QByteArray &windowClass)
+void ShellSurface::setWindowClass(const QByteArray& windowClass)
 {
     wl_shell_surface_set_class(d->surface, windowClass.constData());
 }

@@ -38,10 +38,10 @@ public:
     Private() = default;
 
     WaylandPointer<wp_viewporter, wp_viewporter_destroy> manager;
-    EventQueue *queue = nullptr;
+    EventQueue* queue = nullptr;
 };
 
-Viewporter::Viewporter(QObject *parent)
+Viewporter::Viewporter(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -62,27 +62,27 @@ bool Viewporter::isValid() const
     return d->manager.isValid();
 }
 
-void Viewporter::setup(wp_viewporter *manager)
+void Viewporter::setup(wp_viewporter* manager)
 {
     Q_ASSERT(manager);
     Q_ASSERT(!d->manager);
     d->manager.setup(manager);
 }
 
-void Viewporter::setEventQueue(EventQueue *queue)
+void Viewporter::setEventQueue(EventQueue* queue)
 {
     d->queue = queue;
 }
 
-EventQueue *Viewporter::eventQueue()
+EventQueue* Viewporter::eventQueue()
 {
     return d->queue;
 }
 
-Viewport *Viewporter::createViewport(Surface *surface, QObject *parent)
+Viewport* Viewporter::createViewport(Surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
-    Viewport *vp = new Viewport(parent);
+    Viewport* vp = new Viewport(parent);
     auto w = wp_viewporter_get_viewport(d->manager, *surface);
     if (d->queue) {
         d->queue->addProxy(w);
@@ -107,7 +107,7 @@ public:
     WaylandPointer<wp_viewport, wp_viewport_destroy> viewport;
 };
 
-Viewport::Viewport(QObject *parent)
+Viewport::Viewport(QObject* parent)
     : QObject(parent)
     , d(new Private)
 {
@@ -123,7 +123,7 @@ void Viewport::release()
     d->viewport.release();
 }
 
-void Viewport::setup(wp_viewport *viewport)
+void Viewport::setup(wp_viewport* viewport)
 {
     Q_ASSERT(viewport);
     Q_ASSERT(!d->viewport);
@@ -135,7 +135,7 @@ bool Viewport::isValid() const
     return d->viewport.isValid();
 }
 
-void Viewport::setSourceRectangle(const QRectF &source)
+void Viewport::setSourceRectangle(const QRectF& source)
 {
     Q_ASSERT(isValid());
     wp_viewport_set_source(d->viewport,
@@ -145,7 +145,7 @@ void Viewport::setSourceRectangle(const QRectF &source)
                            wl_fixed_from_double(source.height()));
 }
 
-void Viewport::setDestinationSize(const QSize &dest)
+void Viewport::setDestinationSize(const QSize& dest)
 {
     Q_ASSERT(isValid());
     wp_viewport_set_destination(d->viewport, dest.width(), dest.height());

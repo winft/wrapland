@@ -20,8 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef WAYLAND_BUFFER_H
 #define WAYLAND_BUFFER_H
 
-#include <QSize>
 #include <QScopedPointer>
+#include <QSize>
 #include <QWeakPointer>
 #include <memory>
 
@@ -50,15 +50,16 @@ public:
      * All image formats supported by the implementation.
      **/
     enum class Format {
-        ARGB32, ///< 32-bit ARGB format, can be used for QImage::Format_ARGB32 and QImage::Format_ARGB32_Premultiplied
-        RGB32 ///< 32-bit RGB format, can be used for QImage::Format_RGB32
+        ARGB32, ///< 32-bit ARGB format, can be used for QImage::Format_ARGB32 and
+                ///< QImage::Format_ARGB32_Premultiplied
+        RGB32,  ///< 32-bit RGB format, can be used for QImage::Format_RGB32
     };
 
     ~Buffer();
     /**
      * Copies the data from @p src into the Buffer.
      **/
-    void copy(const void *src);
+    void copy(const void* src);
     /**
      * Sets the Buffer as @p released.
      * This is automatically invoked when the Wayland server sends the release event.
@@ -80,7 +81,7 @@ public:
      **/
     void setUsed(bool used);
 
-    wl_buffer *buffer() const;
+    wl_buffer* buffer() const;
     /**
      * @returns The size of this Buffer.
      **/
@@ -100,7 +101,7 @@ public:
     /**
      * @returns the memory address of this Buffer.
      **/
-    uchar *address();
+    uchar* address();
     /**
      * @returns The image format used by this Buffer.
      **/
@@ -115,11 +116,16 @@ public:
      * Helper method to get the id for a provided native buffer.
      * @since 5.3
      **/
-    static quint32 getId(wl_buffer *b);
+    static quint32 getId(wl_buffer* b);
 
 private:
     friend class ShmPool;
-    explicit Buffer(ShmPool *parent, wl_buffer *buffer, const QSize &size, int32_t stride, size_t offset, Format format);
+    explicit Buffer(ShmPool* parent,
+                    wl_buffer* buffer,
+                    const QSize& size,
+                    int32_t stride,
+                    size_t offset,
+                    Format format);
     class Private;
     std::unique_ptr<Private> d;
 };
