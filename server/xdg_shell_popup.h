@@ -62,13 +62,9 @@ public:
 
     void popupDone();
 
-    bool has_window_geometry() const;
-    QRect windowGeometry() const;
-
 Q_SIGNALS:
     void configureAcknowledged(uint32_t serial);
     void grabRequested(Seat* seat, uint32_t serial);
-    void windowGeometryChanged(const QRect& windowGeometry);
     void resourceDestroyed();
 
 private:

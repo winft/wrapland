@@ -77,33 +77,6 @@ void XdgShellPopup::Private::ackConfigure(uint32_t serial)
     }
 }
 
-QRect XdgShellPopup::Private::windowGeometry() const
-{
-    return m_currentState.windowGeometry;
-}
-
-void XdgShellPopup::Private::commit()
-{
-    const bool windowGeometryChanged = m_pendingState.windowGeometryIsSet;
-
-    if (windowGeometryChanged) {
-        has_window_geometry = true;
-        m_currentState.windowGeometry = m_pendingState.windowGeometry;
-    }
-
-    m_pendingState = ShellSurfaceState{};
-
-    if (windowGeometryChanged) {
-        Q_EMIT handle()->windowGeometryChanged(m_currentState.windowGeometry);
-    }
-}
-
-void XdgShellPopup::Private::setWindowGeometry(const QRect& rect)
-{
-    m_pendingState.windowGeometry = rect;
-    m_pendingState.windowGeometryIsSet = true;
-}
-
 void XdgShellPopup::Private::grabCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,
                                           wl_resource* wlSeat,
@@ -212,16 +185,6 @@ QPoint XdgShellPopup::anchorOffset() const
 XdgShellSurface::ConstraintAdjustments XdgShellPopup::constraintAdjustments() const
 {
     return d_ptr->constraintAdjustments;
-}
-
-bool XdgShellPopup::has_window_geometry() const
-{
-    return d_ptr->has_window_geometry;
-}
-
-QRect XdgShellPopup::windowGeometry() const
-{
-    return d_ptr->windowGeometry();
 }
 
 void XdgShellPopup::popupDone()

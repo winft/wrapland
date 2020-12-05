@@ -40,23 +40,10 @@ public:
             XdgShellSurface* parent,
             XdgShellPopup* q);
 
-    QRect windowGeometry() const;
-    void setWindowGeometry(const QRect& rect);
-
-    void commit();
-
     uint32_t configure(const QRect& rect);
     void ackConfigure(uint32_t serial);
 
     void popupDone();
-
-    struct ShellSurfaceState {
-        QRect windowGeometry;
-        bool windowGeometryIsSet = false;
-    };
-
-    ShellSurfaceState m_currentState;
-    ShellSurfaceState m_pendingState;
 
     QSize initialSize;
     bool has_window_geometry{false};

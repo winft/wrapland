@@ -62,7 +62,10 @@ public:
     Surface* surface() const;
     void commit();
 
+    QRect window_geometry() const;
+
 Q_SIGNALS:
+    void window_geometry_changed(QRect const& windowGeometry);
     void resourceDestroyed();
 
 private:

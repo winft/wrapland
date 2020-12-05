@@ -927,6 +927,16 @@ QSize Surface::size() const
     return d_ptr->current.buffer->size() / scale();
 }
 
+QRect Surface::expanse() const
+{
+    auto ret = QRect(QPoint(), size());
+
+    for (auto const& sub : childSubsurfaces()) {
+        ret = ret.united(sub->surface()->expanse().translated(sub->position()));
+    }
+    return ret;
+}
+
 QPointer<Shadow> Surface::shadow() const
 {
     return d_ptr->current.shadow;

@@ -146,11 +146,8 @@ void XdgShellSurface::Private::setWindowGeometryCallback([[maybe_unused]] wl_cli
         return;
     }
 
-    if (priv->toplevel) {
-        priv->toplevel->d_ptr->setWindowGeometry(QRect(x, y, width, height));
-    } else if (priv->popup) {
-        priv->popup->d_ptr->setWindowGeometry(QRect(x, y, width, height));
-    }
+    priv->pending_state.window_geometry = QRect(x, y, width, height);
+    priv->pending_state.window_geometry_set = true;
 }
 
 void XdgShellSurface::Private::ackConfigureCallback([[maybe_unused]] wl_client* wlClient,
@@ -209,11 +206,33 @@ Surface* XdgShellSurface::surface() const
 
 void XdgShellSurface::commit()
 {
+    auto const geo_set = d_ptr->pending_state.window_geometry_set;
+
+    if (geo_set) {
+        d_ptr->current_state.window_geometry = d_ptr->pending_state.window_geometry;
+        d_ptr->current_state.window_geometry_set = true;
+    }
+
+    d_ptr->pending_state = Private::state{};
+
     if (d_ptr->toplevel) {
         d_ptr->toplevel->d_ptr->commit();
-    } else if (d_ptr->popup) {
-        d_ptr->popup->d_ptr->commit();
     }
+
+    if (geo_set) {
+        Q_EMIT window_geometry_changed(d_ptr->current_state.window_geometry);
+    }
+}
+
+QRect XdgShellSurface::window_geometry() const
+{
+    auto const bounds_geo = surface()->expanse();
+
+    if (!d_ptr->current_state.window_geometry_set) {
+        return bounds_geo;
+    }
+
+    return d_ptr->current_state.window_geometry.intersected(bounds_geo);
 }
 
 }

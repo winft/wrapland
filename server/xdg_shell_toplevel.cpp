@@ -214,11 +214,6 @@ uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, co
     return serial;
 }
 
-QRect XdgShellToplevel::Private::windowGeometry() const
-{
-    return m_currentState.windowGeometry;
-}
-
 QSize XdgShellToplevel::Private::minimumSize() const
 {
     return m_currentState.minimumSize;
@@ -237,14 +232,9 @@ void XdgShellToplevel::Private::close()
 
 void XdgShellToplevel::Private::commit()
 {
-    const bool windowGeometryChanged = m_pendingState.windowGeometryIsSet;
     const bool minimumSizeChanged = m_pendingState.minimumSizeIsSet;
     const bool maximumSizeChanged = m_pendingState.maximumSizeIsSet;
 
-    if (windowGeometryChanged) {
-        has_window_geometry = true;
-        m_currentState.windowGeometry = m_pendingState.windowGeometry;
-    }
     if (minimumSizeChanged) {
         m_currentState.minimumSize = m_pendingState.minimumSize;
     }
@@ -254,9 +244,6 @@ void XdgShellToplevel::Private::commit()
 
     m_pendingState = ShellSurfaceState{};
 
-    if (windowGeometryChanged) {
-        Q_EMIT handle()->windowGeometryChanged(m_currentState.windowGeometry);
-    }
     if (minimumSizeChanged) {
         Q_EMIT handle()->minSizeChanged(m_currentState.minimumSize);
     }
@@ -303,12 +290,6 @@ void XdgShellToplevel::Private::setMinSizeCallback([[maybe_unused]] wl_client* w
 
     priv->m_pendingState.minimumSize = QSize(width, height);
     priv->m_pendingState.minimumSizeIsSet = true;
-}
-
-void XdgShellToplevel::Private::setWindowGeometry(const QRect& rect)
-{
-    m_pendingState.windowGeometry = rect;
-    m_pendingState.windowGeometryIsSet = true;
 }
 
 void XdgShellToplevel::Private::setParentCallback([[maybe_unused]] wl_client* wlClient,
@@ -389,16 +370,6 @@ XdgShellToplevel::XdgShellToplevel(uint32_t version, uint32_t id, XdgShellSurfac
 XdgShellToplevel* XdgShellToplevel::transientFor() const
 {
     return d_ptr->parentSurface;
-}
-
-bool XdgShellToplevel::has_window_geometry() const
-{
-    return d_ptr->has_window_geometry;
-}
-
-QRect XdgShellToplevel::windowGeometry() const
-{
-    return d_ptr->windowGeometry();
 }
 
 QSize XdgShellToplevel::minimumSize() const

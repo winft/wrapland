@@ -80,6 +80,11 @@ public:
     QPoint offset() const;
     QSize size() const;
 
+    /**
+     * Bounds of the surface and all subsurfaces. Origin is the top-left corner of the surface.
+     */
+    QRect expanse() const;
+
     Subsurface* subsurface() const;
     std::vector<Subsurface*> childSubsurfaces() const;
 
