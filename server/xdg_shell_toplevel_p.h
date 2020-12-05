@@ -51,6 +51,8 @@ public:
     XdgShellSurface* shellSurface;
     XdgShellToplevel* parentSurface = nullptr;
 
+    bool has_window_geometry{false};
+
     std::string title;
     std::string appId;
 

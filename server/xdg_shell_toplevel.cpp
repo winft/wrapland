@@ -242,6 +242,7 @@ void XdgShellToplevel::Private::commit()
     const bool maximumSizeChanged = m_pendingState.maximumSizeIsSet;
 
     if (windowGeometryChanged) {
+        has_window_geometry = true;
         m_currentState.windowGeometry = m_pendingState.windowGeometry;
     }
     if (minimumSizeChanged) {
@@ -388,6 +389,11 @@ XdgShellToplevel::XdgShellToplevel(uint32_t version, uint32_t id, XdgShellSurfac
 XdgShellToplevel* XdgShellToplevel::transientFor() const
 {
     return d_ptr->parentSurface;
+}
+
+bool XdgShellToplevel::has_window_geometry() const
+{
+    return d_ptr->has_window_geometry;
 }
 
 QRect XdgShellToplevel::windowGeometry() const

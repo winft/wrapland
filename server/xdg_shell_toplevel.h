@@ -51,7 +51,9 @@ public:
     uint32_t configure(XdgShellSurface::States states, const QSize& size = QSize(0, 0));
     bool configurePending() const;
 
+    bool has_window_geometry() const;
     QRect windowGeometry() const;
+
     QSize minimumSize() const;
     QSize maximumSize() const;
 

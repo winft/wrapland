@@ -59,6 +59,7 @@ public:
     ShellSurfaceState m_pendingState;
 
     QSize initialSize;
+    bool has_window_geometry{false};
 
     QRect anchorRect;
     Qt::Edges anchorEdge;

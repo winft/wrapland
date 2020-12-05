@@ -87,6 +87,7 @@ void XdgShellPopup::Private::commit()
     const bool windowGeometryChanged = m_pendingState.windowGeometryIsSet;
 
     if (windowGeometryChanged) {
+        has_window_geometry = true;
         m_currentState.windowGeometry = m_pendingState.windowGeometry;
     }
 
@@ -211,6 +212,11 @@ QPoint XdgShellPopup::anchorOffset() const
 XdgShellSurface::ConstraintAdjustments XdgShellPopup::constraintAdjustments() const
 {
     return d_ptr->constraintAdjustments;
+}
+
+bool XdgShellPopup::has_window_geometry() const
+{
+    return d_ptr->has_window_geometry;
 }
 
 QRect XdgShellPopup::windowGeometry() const

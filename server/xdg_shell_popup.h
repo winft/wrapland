@@ -62,6 +62,7 @@ public:
 
     void popupDone();
 
+    bool has_window_geometry() const;
     QRect windowGeometry() const;
 
 Q_SIGNALS:
