@@ -64,6 +64,12 @@ public:
 
     QRect window_geometry() const;
 
+    /**
+     * Relative to main surface even when no explicit window geometry is set. Then describes the
+     * margins between main surface and its expanse, i.e. it's union with all subsurfaces.
+     */
+    QMargins window_margins() const;
+
 Q_SIGNALS:
     void window_geometry_changed(QRect const& windowGeometry);
     void resourceDestroyed();

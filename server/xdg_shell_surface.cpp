@@ -235,4 +235,21 @@ QRect XdgShellSurface::window_geometry() const
     return d_ptr->current_state.window_geometry.intersected(bounds_geo);
 }
 
+QMargins XdgShellSurface::window_margins() const
+{
+    auto const window_geo = window_geometry();
+
+    QMargins margins;
+
+    margins.setLeft(window_geo.left());
+    margins.setTop(window_geo.top());
+
+    auto const surface_size = surface()->size();
+
+    margins.setRight(surface_size.width() - window_geo.right() - 1);
+    margins.setBottom(surface_size.height() - window_geo.bottom() - 1);
+
+    return margins;
+}
+
 }
