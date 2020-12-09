@@ -32,6 +32,9 @@ WarningsAsErrors: "*"
 # llvm-header-guard: We use #pragma once.
 # llvm-namespace-comment: Same as google-readability-namespace-comments.
 # llvm-qualified-auto: We use auto without qualifiers when not needed like C++ Core Guiedelines do.
+# llvmlibc-callee-namespace: We don't require llvm-libc.
+# llvmlibc-implementation-in-namespace: We don't require llvm-libc.
+# llvmlibc-restrict-system-libc-headers: We don't require llvm-libc.
 # misc-non-private-member-variables-in-classes: See
 #   cppcoreguidelines-non-private-member-variables-in-classes.
 # modernize-use-nodiscard: Putting the nodiscard qualifier at every little getter seems
@@ -41,6 +44,7 @@ WarningsAsErrors: "*"
 # readability-implicit-bool-conversion: We use it quite often, it does not really
 #   improve the readability to explicitly cast everywhere.
 # readability-qualified-auto: Same as llvm-qualified-auto.
+# readability-use-anyofallof: Requires them also where a normal for-loop is more readable.
 #
 # Temporarily suppress (might be possilbe to remove or limit to certain subdirectories later on):
 # cppcoreguidelines-macro-usage: We currently still depend on some macros in Output implementation
@@ -54,6 +58,7 @@ WarningsAsErrors: "*"
 #   possible later on to remove Pimple or the need for dtors and use rule of zero.
 # hicpp-signed-bitwise: Qt macros like Q_DECLARE_OPERATORS_FOR_FLAGS conflict.
 #   hicpp-special-member-functions: See cppcoreguidelines-special-member-functions.
+# misc-no-recursion: Qt macros like Q_DECLARE_METATYPE are within recursive call chains.
 #
 
 Checks: "*,
@@ -81,11 +86,16 @@ Checks: "*,
 -llvm-header-guard,
 -llvm-namespace-comment,
 -llvm-qualified-auto,
+-llvmlibc-callee-namespace,
+-llvmlibc-implementation-in-namespace,
+-llvmlibc-restrict-system-libc-headers,
+-misc-no-recursion,
 -misc-non-private-member-variables-in-classes,
 -modernize-use-nodiscard,
 -modernize-use-trailing-return-type,
 -readability-implicit-bool-conversion,
--readability-qualified-auto
+-readability-qualified-auto,
+-readability-use-anyofallof
 "
 
 CheckOptions:
