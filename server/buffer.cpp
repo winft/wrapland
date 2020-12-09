@@ -38,11 +38,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace EGL
 {
-typedef GLboolean (*eglQueryWaylandBufferWL_func)(EGLDisplay dpy,
-                                                  struct wl_resource* buffer,
-                                                  EGLint attribute,
-                                                  EGLint* value);
-eglQueryWaylandBufferWL_func eglQueryWaylandBufferWL = nullptr;
+using eglQueryWaylandBufferWL_func
+    = GLboolean (*)(EGLDisplay dpy, struct wl_resource* buffer, EGLint attribute, EGLint* value);
+eglQueryWaylandBufferWL_func eglQueryWaylandBufferWL{nullptr};
 }
 
 namespace Wrapland::Server
