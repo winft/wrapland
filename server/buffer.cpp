@@ -40,7 +40,6 @@ namespace EGL
 {
 using eglQueryWaylandBufferWL_func
     = GLboolean (*)(EGLDisplay dpy, struct wl_resource* buffer, EGLint attribute, EGLint* value);
-eglQueryWaylandBufferWL_func eglQueryWaylandBufferWL{nullptr};
 }
 
 namespace Wrapland::Server
@@ -271,13 +270,17 @@ Buffer::Private::Private(Buffer* q,
         size = dmabufBuffer->size();
     } else if (surface) {
         EGLDisplay eglDisplay = surface->client()->display()->eglDisplay();
-        static bool resolved = false;
+
         using namespace EGL;
+        static eglQueryWaylandBufferWL_func eglQueryWaylandBufferWL{nullptr};
+        static bool resolved{false};
+
         if (!resolved && eglDisplay != EGL_NO_DISPLAY) {
             eglQueryWaylandBufferWL = reinterpret_cast<eglQueryWaylandBufferWL_func>(
                 eglGetProcAddress("eglQueryWaylandBufferWL"));
             resolved = true;
         }
+
         if (eglQueryWaylandBufferWL) {
             EGLint width = 0;
             EGLint height = 0;
