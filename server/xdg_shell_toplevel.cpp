@@ -187,6 +187,22 @@ uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, co
         auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
         *s = XDG_TOPLEVEL_STATE_ACTIVATED;
     }
+    if (states.testFlag(XdgShellSurface::State::TiledLeft)) {
+        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *s = XDG_TOPLEVEL_STATE_TILED_LEFT;
+    }
+    if (states.testFlag(XdgShellSurface::State::TiledRight)) {
+        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *s = XDG_TOPLEVEL_STATE_TILED_RIGHT;
+    }
+    if (states.testFlag(XdgShellSurface::State::TiledTop)) {
+        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *s = XDG_TOPLEVEL_STATE_TILED_TOP;
+    }
+    if (states.testFlag(XdgShellSurface::State::TiledBottom)) {
+        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *s = XDG_TOPLEVEL_STATE_TILED_BOTTOM;
+    }
 
     shellSurface->d_ptr->configureSerials.push_back(serial);
 
