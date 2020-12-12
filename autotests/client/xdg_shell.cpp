@@ -220,6 +220,7 @@ void XdgShellTest::init()
     QVERIFY(m_seat->isValid());
 
     QCOMPARE(xdgShellAnnouncedSpy.count(), 1);
+    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShellStable).version, 2);
 
     m_xdgShell = registry.createXdgShell(
         registry.interface(Client::Registry::Interface::XdgShellStable).name,
@@ -576,17 +577,29 @@ void XdgShellTest::testConfigureStates_data()
     const auto sm = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Maximized);
     const auto sf = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Fullscreen);
     const auto sr = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Resizing);
+    const auto stl = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledLeft);
+    const auto str = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledRight);
+    const auto stt = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledTop);
+    const auto stb = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledBottom);
 
     const auto ca = Client::XdgShellSurface::States(Client::XdgShellSurface::State::Activated);
     const auto cm = Client::XdgShellSurface::States(Client::XdgShellSurface::State::Maximized);
     const auto cf = Client::XdgShellSurface::States(Client::XdgShellSurface::State::Fullscreen);
     const auto cr = Client::XdgShellSurface::States(Client::XdgShellSurface::State::Resizing);
+    const auto ctl = Client::XdgShellSurface::States(Client::XdgShellSurface::State::TiledLeft);
+    const auto ctr = Client::XdgShellSurface::States(Client::XdgShellSurface::State::TiledRight);
+    const auto ctt = Client::XdgShellSurface::States(Client::XdgShellSurface::State::TiledTop);
+    const auto ctb = Client::XdgShellSurface::States(Client::XdgShellSurface::State::TiledBottom);
 
     QTest::newRow("none") << Server::XdgShellSurface::States() << Client::XdgShellSurface::States();
     QTest::newRow("Active") << sa << ca;
     QTest::newRow("Maximize") << sm << cm;
     QTest::newRow("Fullscreen") << sf << cf;
     QTest::newRow("Resizing") << sr << cr;
+    QTest::newRow("TiledLeft") << stl << ctl;
+    QTest::newRow("TiledRight") << str << ctr;
+    QTest::newRow("TiledTop") << stt << ctt;
+    QTest::newRow("TiledBottom") << stb << ctb;
 
     QTest::newRow("Active/Maximize") << (sa | sm) << (ca | cm);
     QTest::newRow("Active/Fullscreen") << (sa | sf) << (ca | cf);
@@ -594,6 +607,12 @@ void XdgShellTest::testConfigureStates_data()
     QTest::newRow("Maximize/Fullscreen") << (sm | sf) << (cm | cf);
     QTest::newRow("Maximize/Resizing") << (sm | sr) << (cm | cr);
     QTest::newRow("Fullscreen/Resizing") << (sf | sr) << (cf | cr);
+    QTest::newRow("TiledLeft/TiledRight") << (stl | str) << (ctl | ctr);
+    QTest::newRow("TiledLeft/TiledTop") << (stl | stt) << (ctl | ctt);
+    QTest::newRow("TiledLeft/TiledBottom") << (stl | stb) << (ctl | ctb);
+    QTest::newRow("TiledRight/TiledTop") << (str | stt) << (ctr | ctt);
+    QTest::newRow("TiledRight/TiledBottom") << (str | stb) << (ctr | ctb);
+    QTest::newRow("TiledTop/TiledBottom") << (stt | stb) << (ctt | ctb);
 
     QTest::newRow("Active/Maximize/Fullscreen") << (sa | sm | sf) << (ca | cm | cf);
     QTest::newRow("Active/Maximize/Resizing") << (sa | sm | sr) << (ca | cm | cr);
