@@ -293,6 +293,10 @@ public:
          * The Surface is considered active. Does not imply keyboard focus.
          **/
         Activated = 1 << 3,
+        TiledLeft = 1 << 4,
+        TiledTop = 1 << 5,
+        TiledRight = 1 << 6,
+        TiledBottom = 1 << 7,
     };
     Q_DECLARE_FLAGS(States, State)
 

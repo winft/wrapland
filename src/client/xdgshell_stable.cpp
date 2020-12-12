@@ -376,6 +376,18 @@ void XdgTopLevelStable::Private::configureCallback(void* data,
         case XDG_TOPLEVEL_STATE_ACTIVATED:
             states = states | XdgShellSurface::State::Activated;
             break;
+        case XDG_TOPLEVEL_STATE_TILED_LEFT:
+            states = states | XdgShellSurface::State::TiledLeft;
+            break;
+        case XDG_TOPLEVEL_STATE_TILED_RIGHT:
+            states = states | XdgShellSurface::State::TiledRight;
+            break;
+        case XDG_TOPLEVEL_STATE_TILED_TOP:
+            states = states | XdgShellSurface::State::TiledTop;
+            break;
+        case XDG_TOPLEVEL_STATE_TILED_BOTTOM:
+            states = states | XdgShellSurface::State::TiledBottom;
+            break;
         }
     }
     s->pendingSize = QSize(width, height);

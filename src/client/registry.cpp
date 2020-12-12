@@ -481,7 +481,7 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
     {
         Registry::Interface::XdgShellStable,
         {
-            1,
+            2,
             QByteArrayLiteral("xdg_wm_base"),
             &xdg_wm_base_interface,
             &Registry::xdgShellStableAnnounced,

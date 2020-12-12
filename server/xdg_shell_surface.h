@@ -40,6 +40,10 @@ public:
         Fullscreen = 1 << 1,
         Resizing = 1 << 2,
         Activated = 1 << 3,
+        TiledLeft = 1 << 4,
+        TiledRight = 1 << 5,
+        TiledTop = 1 << 6,
+        TiledBottom = 1 << 7,
     };
     Q_DECLARE_FLAGS(States, State)
 
