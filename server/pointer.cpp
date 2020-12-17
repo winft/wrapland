@@ -42,15 +42,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-QPointF surfacePosition(Surface* surface)
-{
-    if (!surface || !surface->subsurface()) {
-        return QPointF();
-    }
-    return surface->subsurface()->position()
-        + surfacePosition(surface->subsurface()->parentSurface());
-}
-
 const struct wl_pointer_interface Pointer::Private::s_interface = {
     setCursorCallback,
     destroyCallback,
@@ -92,26 +83,8 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
             return;
         }
         const QPointF pos = seat->focusedPointerSurfaceTransformation().map(seat->pointerPos());
-        auto targetSurface = focusedSurface->inputSurfaceAt(pos);
-
-        if (!targetSurface) {
-            targetSurface = focusedSurface;
-        }
-
-        if (targetSurface != focusedChildSurface.data()) {
-            const quint32 serial = this->client()->display()->handle()->nextSerial();
-            sendLeave(serial, focusedChildSurface.data());
-
-            focusedChildSurface = QPointer<Surface>(targetSurface);
-            sendEnter(serial, targetSurface, pos);
-
-            sendFrame();
-            this->client()->flush();
-        } else {
-            const QPointF adjustedPos = pos - surfacePosition(focusedChildSurface);
-            sendMotion(adjustedPos);
-            sendFrame();
-        }
+        sendMotion(pos);
+        sendFrame();
     });
 }
 
@@ -127,15 +100,12 @@ void Pointer::Private::setCursor(quint32 serial, Surface* surface, const QPoint&
     }
 }
 
-void Pointer::Private::sendEnter(quint32 serial,
-                                 Surface* surface,
-                                 const QPointF& parentSurfacePosition)
+void Pointer::Private::sendEnter(quint32 serial, Surface* surface, QPointF const& pos)
 {
-    const QPointF adjustedPos = parentSurfacePosition - surfacePosition(surface);
     send<wl_pointer_send_enter>(serial,
                                 surface->d_ptr->resource(),
-                                wl_fixed_from_double(adjustedPos.x()),
-                                wl_fixed_from_double(adjustedPos.y()));
+                                wl_fixed_from_double(pos.x()),
+                                wl_fixed_from_double(pos.y()));
 }
 
 void Pointer::Private::sendLeave(quint32 serial, Surface* surface)
@@ -277,13 +247,12 @@ void Pointer::Private::cancelPinchGesture(quint32 serial)
 
 void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
 {
-    sendLeave(serial, focusedChildSurface.data());
+    sendLeave(serial, focusedSurface);
     disconnect(surfaceDestroyConnection);
     disconnect(clientDestroyConnection);
 
     if (!surface) {
         focusedSurface = nullptr;
-        focusedChildSurface.clear();
         return;
     }
 
@@ -291,23 +260,17 @@ void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
     surfaceDestroyConnection
         = connect(focusedSurface, &Surface::resourceDestroyed, handle(), [this] {
               disconnect(clientDestroyConnection);
-              sendLeave(client()->display()->handle()->nextSerial(), focusedChildSurface.data());
+              sendLeave(client()->display()->handle()->nextSerial(), focusedSurface);
               sendFrame();
               focusedSurface = nullptr;
-              focusedChildSurface.clear();
           });
     clientDestroyConnection = connect(client()->handle(), &Client::disconnected, handle(), [this] {
         disconnect(surfaceDestroyConnection);
         focusedSurface = nullptr;
-        focusedChildSurface.clear();
     });
 
     const QPointF pos = seat->focusedPointerSurfaceTransformation().map(seat->pointerPos());
-    focusedChildSurface = QPointer<Surface>(focusedSurface->inputSurfaceAt(pos));
-    if (!focusedChildSurface) {
-        focusedChildSurface = QPointer<Surface>(focusedSurface);
-    }
-    sendEnter(serial, focusedChildSurface.data(), pos);
+    sendEnter(serial, focusedSurface, pos);
     client()->flush();
 }
 

@@ -39,6 +39,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/output.h"
 #include "../../server/surface.h"
 
+#include "../../tests/helpers.h"
+
 #include <wayland-client-protocol.h>
 
 class TestSurface : public QObject
@@ -974,7 +976,7 @@ void TestSurface::testSurfaceAt()
 
     // a newly created surface should not be mapped and not provide a surface at a position
     QVERIFY(!serverSurface->isMapped());
-    QVERIFY(!serverSurface->surfaceAt(QPointF(0, 0)));
+    QVERIFY(!Wrapland::Server::Test::surface_at(serverSurface, QPointF(0, 0)));
 
     // let's damage this surface
     QSignalSpy sizeChangedSpy(serverSurface, &Wrapland::Server::Surface::sizeChanged);
@@ -988,11 +990,11 @@ void TestSurface::testSurfaceAt()
 
     // now the surface is mapped and surfaceAt should give the surface
     QVERIFY(serverSurface->isMapped());
-    QCOMPARE(serverSurface->surfaceAt(QPointF(0, 0)), serverSurface);
-    QCOMPARE(serverSurface->surfaceAt(QPointF(100, 100)), serverSurface);
+    QCOMPARE(Wrapland::Server::Test::surface_at(serverSurface, QPointF(0, 0)), serverSurface);
+    QCOMPARE(Wrapland::Server::Test::surface_at(serverSurface, QPointF(100, 100)), serverSurface);
     // outside the geometry it should not give a surface
-    QVERIFY(!serverSurface->surfaceAt(QPointF(101, 101)));
-    QVERIFY(!serverSurface->surfaceAt(QPointF(-1, -1)));
+    QVERIFY(!Wrapland::Server::Test::surface_at(serverSurface, QPointF(101, 101)));
+    QVERIFY(!Wrapland::Server::Test::surface_at(serverSurface, QPointF(-1, -1)));
 }
 
 void TestSurface::testDestroyAttachedBuffer()
