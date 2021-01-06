@@ -50,6 +50,7 @@ public:
     virtual ~Display();
 
     void setSocketName(const std::string& name);
+    void add_socket_fd(int fd);
 
     void addGlobal(BasicNucleus* nucleus);
     void removeGlobal(BasicNucleus* nucleus);
