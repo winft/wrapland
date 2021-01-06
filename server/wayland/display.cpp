@@ -86,6 +86,17 @@ void Display::setSocketName(const std::string& name)
     m_socketName = name;
 }
 
+void Display::add_socket_fd(int fd)
+{
+    if (!m_display) {
+        m_display = wl_display_create();
+    }
+
+    if (wl_display_add_socket_fd(m_display, fd)) {
+        qCWarning(WRAPLAND_SERVER, "Failed to add fd %d.", fd);
+    }
+}
+
 bool Display::running() const
 {
     return m_running;
@@ -135,9 +146,10 @@ void Display::addSocket()
 void Display::start(bool createSocket)
 {
     Q_ASSERT(!m_running);
-    Q_ASSERT(!m_display);
 
-    m_display = wl_display_create();
+    if (!m_display) {
+        m_display = wl_display_create();
+    }
 
     if (createSocket) {
         try {
