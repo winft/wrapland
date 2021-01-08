@@ -131,6 +131,11 @@ std::string Display::socketName() const
     return d_ptr->socketName();
 }
 
+void Display::add_socket_fd(int fd)
+{
+    d_ptr->add_socket_fd(fd);
+}
+
 void Display::start(StartMode mode)
 {
     d_ptr->start(mode == StartMode::ConnectToSocket);

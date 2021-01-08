@@ -112,6 +112,7 @@ public:
     std::vector<Seat*>& seats() const;
 
     void setSocketName(const QString& name);
+    void add_socket_fd(int fd);
 
     void add_output_device_v1(OutputDeviceV1* output);
     void removeOutputDevice(OutputDeviceV1* outputDevice);
