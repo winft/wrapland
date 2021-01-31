@@ -51,7 +51,6 @@ public:
     uint32_t configure(XdgShellSurface::States states, const QSize& size = QSize(0, 0));
     bool configurePending() const;
 
-    QRect windowGeometry() const;
     QSize minimumSize() const;
     QSize maximumSize() const;
 
@@ -60,7 +59,6 @@ public:
 Q_SIGNALS:
     void titleChanged(std::string title);
     void appIdChanged(std::string appId);
-    void windowGeometryChanged(const QRect& windowGeometry);
     void minSizeChanged(const QSize& size);
     void maxSizeChanged(const QSize& size);
     void moveRequested(Seat* seat, uint32_t serial);

@@ -36,7 +36,6 @@ class XdgShellToplevel::Private : public Wayland::Resource<XdgShellToplevel>
 public:
     Private(uint32_t version, uint32_t id, XdgShellSurface* surface, XdgShellToplevel* q);
 
-    QRect windowGeometry() const;
     void setWindowGeometry(const QRect& rect);
 
     QSize minimumSize() const;
@@ -90,11 +89,9 @@ private:
     static const struct xdg_toplevel_interface s_interface;
 
     struct ShellSurfaceState {
-        QRect windowGeometry;
         QSize minimumSize = QSize(0, 0);
         QSize maximiumSize = QSize(INT32_MAX, INT32_MAX);
 
-        bool windowGeometryIsSet = false;
         bool minimumSizeIsSet = false;
         bool maximumSizeIsSet = false;
     };

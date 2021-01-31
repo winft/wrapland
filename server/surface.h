@@ -80,6 +80,11 @@ public:
     QPoint offset() const;
     QSize size() const;
 
+    /**
+     * Bounds of the surface and all subsurfaces. Origin is the top-left corner of the surface.
+     */
+    QRect expanse() const;
+
     Subsurface* subsurface() const;
     std::vector<Subsurface*> childSubsurfaces() const;
 
@@ -92,9 +97,6 @@ public:
     bool isMapped() const;
     QRegion trackedDamage() const;
     void resetTrackedDamage();
-
-    Surface* surfaceAt(const QPointF& position);
-    Surface* inputSurfaceAt(const QPointF& position);
 
     void setOutputs(std::vector<Output*> const& outputs);
     void setOutputs(std::vector<WlOutput*> const& outputs);

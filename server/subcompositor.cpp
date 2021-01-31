@@ -114,7 +114,7 @@ Subsurface::Private::Private(Client* client,
 {
     surface->d_ptr->subsurface = q;
 
-    QObject::connect(surface, &Surface::resourceDestroyed, q, [this] {
+    QObject::connect(surface, &Surface::resourceDestroyed, q, [this, q] {
         // From spec: "If the wl_surface associated with the wl_subsurface is destroyed,
         // the wl_subsurface object becomes inert. Note, that destroying either object
         // takes effect immediately."
@@ -123,6 +123,9 @@ Subsurface::Private::Private(Client* client,
             this->parent = nullptr;
         }
         this->surface = nullptr;
+
+        // TODO(romangg): do not use that but an extra signal or automatic with surface.
+        Q_EMIT q->resourceDestroyed();
     });
 }
 

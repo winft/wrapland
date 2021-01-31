@@ -43,16 +43,6 @@ const struct wl_keyboard_interface Keyboard::Private::s_interface {
     destroyCallback,
 };
 
-void Keyboard::Private::focusChildSurface(quint32 serial, const QPointer<Surface>& childSurface)
-{
-    if (focusedChildSurface == childSurface) {
-        return;
-    }
-    sendLeave(serial, focusedChildSurface.data());
-    focusedChildSurface = childSurface;
-    sendEnter(serial, focusedChildSurface.data());
-}
-
 void Keyboard::Private::sendLeave(quint32 serial, Surface* surface)
 {
     if (surface && surface->d_ptr->resource()) {
@@ -111,9 +101,8 @@ void Keyboard::setKeymap(int fd, quint32 size)
 
 void Keyboard::setFocusedSurface(quint32 serial, Surface* surface)
 {
-    d_ptr->sendLeave(serial, d_ptr->focusedChildSurface);
+    d_ptr->sendLeave(serial, d_ptr->focusedSurface);
     disconnect(d_ptr->destroyConnection);
-    d_ptr->focusedChildSurface.clear();
     d_ptr->focusedSurface = surface;
     if (!d_ptr->focusedSurface) {
         return;
@@ -123,9 +112,7 @@ void Keyboard::setFocusedSurface(quint32 serial, Surface* surface)
               d_ptr->sendLeave(d_ptr->client()->display()->handle()->nextSerial(),
                                d_ptr->focusedSurface);
               d_ptr->focusedSurface = nullptr;
-              d_ptr->focusedChildSurface.clear();
           });
-    d_ptr->focusedChildSurface = QPointer<Surface>(surface);
 
     d_ptr->sendEnter(serial, d_ptr->focusedSurface);
     d_ptr->client()->flush();
