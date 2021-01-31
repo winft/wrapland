@@ -56,7 +56,6 @@ public:
     Seat* seat;
 
     Surface* focusedSurface = nullptr;
-    QPointer<Surface> focusedChildSurface;
     QMetaObject::Connection surfaceDestroyConnection;
     QMetaObject::Connection clientDestroyConnection;
     std::unique_ptr<Cursor> cursor;
@@ -65,7 +64,7 @@ public:
     std::vector<PointerSwipeGestureV1*> swipeGestures;
     std::vector<PointerPinchGestureV1*> pinchGestures;
 
-    void sendEnter(quint32 serial, Surface* surface, const QPointF& parentSurfacePosition);
+    void sendEnter(quint32 serial, Surface* surface, QPointF const& pos);
     void sendLeave(quint32 serial, Surface* surface);
     void sendMotion(const QPointF& position);
     void sendAxis(Qt::Orientation orientation, quint32 delta);

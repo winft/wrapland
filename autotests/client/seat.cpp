@@ -82,15 +82,12 @@ private Q_SLOTS:
     void testPointerButton_data();
     void testPointerButton();
 
-    void testPointerSubSurfaceTree();
-
     void testPointerSwipeGesture_data();
     void testPointerSwipeGesture();
     void testPointerPinchGesture_data();
     void testPointerPinchGesture();
 
     void testPointerAxis();
-    void testKeyboardSubSurfaceTreeFromPointer();
     void testCursor();
     void testCursorDamage();
     void testKeyboard();
@@ -856,113 +853,6 @@ void TestSeat::testPointerButton()
              Clt::Pointer::ButtonState::Released);
 }
 
-void TestSeat::testPointerSubSurfaceTree()
-{
-    // This test verifies that pointer motion on a surface with sub-surfaces sends motion
-    // enter/leave to the sub-surface.
-
-    // First create the pointer.
-    QSignalSpy hasPointerChangedSpy(m_seat, &Clt::Seat::hasPointerChanged);
-    QVERIFY(hasPointerChangedSpy.isValid());
-    m_serverSeat->setHasPointer(true);
-    QVERIFY(hasPointerChangedSpy.wait());
-    QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
-
-    // Create a sub surface tree.
-    // Parent surface (100, 100) with one sub surface taking the half of it's size (50, 100)
-    // which has two further children (50, 50) which are overlapping.
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
-    QVERIFY(surfaceCreatedSpy.isValid());
-    QScopedPointer<Clt::Surface> parentSurface(m_compositor->createSurface());
-    QScopedPointer<Clt::Surface> childSurface(m_compositor->createSurface());
-    QScopedPointer<Clt::Surface> grandChild1Surface(m_compositor->createSurface());
-    QScopedPointer<Clt::Surface> grandChild2Surface(m_compositor->createSurface());
-
-    QScopedPointer<Clt::SubSurface> childSubSurface(
-        m_subCompositor->createSubSurface(childSurface.data(), parentSurface.data()));
-    QScopedPointer<Clt::SubSurface> grandChild1SubSurface(
-        m_subCompositor->createSubSurface(grandChild1Surface.data(), childSurface.data()));
-    QScopedPointer<Clt::SubSurface> grandChild2SubSurface(
-        m_subCompositor->createSubSurface(grandChild2Surface.data(), childSurface.data()));
-
-    grandChild2SubSurface->setPosition(QPoint(0, 25));
-
-    // Let's map the surfaces.
-    auto render = [this](Clt::Surface* s, const QSize& size) {
-        QImage image(size, QImage::Format_ARGB32_Premultiplied);
-        image.fill(Qt::black);
-        s->attachBuffer(m_shm->createBuffer(image));
-        s->damage(QRect(QPoint(0, 0), size));
-        s->commit(Clt::Surface::CommitFlag::None);
-    };
-    render(grandChild2Surface.data(), QSize(50, 50));
-    render(grandChild1Surface.data(), QSize(50, 50));
-    render(childSurface.data(), QSize(50, 100));
-    render(parentSurface.data(), QSize(100, 100));
-
-    QVERIFY(surfaceCreatedSpy.wait());
-    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
-    QVERIFY(serverSurface->isMapped());
-
-    // Send in pointer events.
-    QSignalSpy enteredSpy(pointer.data(), &Clt::Pointer::entered);
-    QVERIFY(enteredSpy.isValid());
-    QSignalSpy leftSpy(pointer.data(), &Clt::Pointer::left);
-    QVERIFY(leftSpy.isValid());
-    QSignalSpy motionSpy(pointer.data(), &Clt::Pointer::motion);
-    QVERIFY(motionSpy.isValid());
-
-    // First to the grandChild2 in the overlapped area.
-    quint32 timestamp = 1;
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->setPointerPos(QPointF(25, 50));
-    m_serverSeat->setFocusedPointerSurface(serverSurface);
-    QVERIFY(enteredSpy.wait());
-    QCOMPARE(enteredSpy.count(), 1);
-    QCOMPARE(leftSpy.count(), 0);
-    QCOMPARE(motionSpy.count(), 0);
-    QCOMPARE(enteredSpy.last().last().toPointF(), QPointF(25, 25));
-    QCOMPARE(pointer->enteredSurface(), grandChild2Surface.data());
-
-    // A motion on grandchild2.
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->setPointerPos(QPointF(25, 60));
-    QVERIFY(motionSpy.wait());
-    QCOMPARE(enteredSpy.count(), 1);
-    QCOMPARE(leftSpy.count(), 0);
-    QCOMPARE(motionSpy.count(), 1);
-    QCOMPARE(motionSpy.last().first().toPointF(), QPointF(25, 35));
-
-    // Motion which changes to childSurface.
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->setPointerPos(QPointF(25, 80));
-    QVERIFY(enteredSpy.wait());
-    QCOMPARE(enteredSpy.count(), 2);
-    QCOMPARE(leftSpy.count(), 1);
-    QCOMPARE(motionSpy.count(), 1);
-    QCOMPARE(enteredSpy.last().last().toPointF(), QPointF(25, 80));
-    QCOMPARE(pointer->enteredSurface(), childSurface.data());
-
-    // A leave for the whole surface.
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->setFocusedPointerSurface(nullptr);
-    QVERIFY(leftSpy.wait());
-    QCOMPARE(enteredSpy.count(), 2);
-    QCOMPARE(leftSpy.count(), 2);
-    QCOMPARE(motionSpy.count(), 1);
-
-    // A new enter on the main surface.
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->setPointerPos(QPointF(75, 50));
-    m_serverSeat->setFocusedPointerSurface(serverSurface);
-    QVERIFY(enteredSpy.wait());
-    QCOMPARE(enteredSpy.count(), 3);
-    QCOMPARE(leftSpy.count(), 2);
-    QCOMPARE(motionSpy.count(), 1);
-    QCOMPARE(enteredSpy.last().last().toPointF(), QPointF(75, 50));
-    QCOMPARE(pointer->enteredSurface(), parentSurface.data());
-}
-
 void TestSeat::testPointerSwipeGesture_data()
 {
     QTest::addColumn<bool>("cancel");
@@ -1332,114 +1222,6 @@ void TestSeat::testPointerAxis()
     QCOMPARE(axisSpy.last().at(2).value<qreal>(), 42.0);
 
     QCOMPARE(axisStoppedSpy.count(), 1);
-}
-
-void TestSeat::testKeyboardSubSurfaceTreeFromPointer()
-{
-    // This test verifies that when clicking on a sub-surface the keyboard focus passes to it.
-
-    // First create the pointer.
-    QSignalSpy hasPointerChangedSpy(m_seat, &Clt::Seat::hasPointerChanged);
-    QVERIFY(hasPointerChangedSpy.isValid());
-    m_serverSeat->setHasPointer(true);
-    QVERIFY(hasPointerChangedSpy.wait());
-    QScopedPointer<Clt::Pointer> pointer(m_seat->createPointer());
-
-    // And create keyboard.
-    QSignalSpy hasKeyboardChangedSpy(m_seat, &Clt::Seat::hasKeyboardChanged);
-    QVERIFY(hasKeyboardChangedSpy.isValid());
-    m_serverSeat->setHasKeyboard(true);
-    QVERIFY(hasKeyboardChangedSpy.wait());
-    QScopedPointer<Clt::Keyboard> keyboard(m_seat->createKeyboard());
-
-    // Create a sub surface tree.
-    // Parent surface (100, 100) with one sub surface taking the half of it's size (50, 100)
-    // which has two further children (50, 50) which are overlapping.
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
-    QVERIFY(surfaceCreatedSpy.isValid());
-
-    QScopedPointer<Clt::Surface> parentSurface(m_compositor->createSurface());
-    QScopedPointer<Clt::Surface> childSurface(m_compositor->createSurface());
-    QScopedPointer<Clt::Surface> grandChild1Surface(m_compositor->createSurface());
-    QScopedPointer<Clt::Surface> grandChild2Surface(m_compositor->createSurface());
-
-    QScopedPointer<Clt::SubSurface> childSubSurface(
-        m_subCompositor->createSubSurface(childSurface.data(), parentSurface.data()));
-    QScopedPointer<Clt::SubSurface> grandChild1SubSurface(
-        m_subCompositor->createSubSurface(grandChild1Surface.data(), childSurface.data()));
-    QScopedPointer<Clt::SubSurface> grandChild2SubSurface(
-        m_subCompositor->createSubSurface(grandChild2Surface.data(), childSurface.data()));
-
-    grandChild2SubSurface->setPosition(QPoint(0, 25));
-
-    // Let's map the surfaces.
-    auto render = [this](Clt::Surface* s, const QSize& size) {
-        QImage image(size, QImage::Format_ARGB32_Premultiplied);
-        image.fill(Qt::black);
-        s->attachBuffer(m_shm->createBuffer(image));
-        s->damage(QRect(QPoint(0, 0), size));
-        s->commit(Clt::Surface::CommitFlag::None);
-    };
-    render(grandChild2Surface.data(), QSize(50, 50));
-    render(grandChild1Surface.data(), QSize(50, 50));
-    render(childSurface.data(), QSize(50, 100));
-    render(parentSurface.data(), QSize(100, 100));
-
-    QVERIFY(surfaceCreatedSpy.wait());
-    auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
-    QVERIFY(serverSurface->isMapped());
-
-    // Pass keyboard focus to the main surface.
-    QSignalSpy enterSpy(keyboard.data(), &Clt::Keyboard::entered);
-    QVERIFY(enterSpy.isValid());
-    QSignalSpy leftSpy(keyboard.data(), &Clt::Keyboard::left);
-    QVERIFY(leftSpy.isValid());
-
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    QVERIFY(enterSpy.wait());
-    QCOMPARE(enterSpy.count(), 1);
-    QCOMPARE(leftSpy.count(), 0);
-    QCOMPARE(keyboard->enteredSurface(), parentSurface.data());
-
-    // Now pass also pointer focus to the surface.
-    QSignalSpy pointerEnterSpy(pointer.data(), &Clt::Pointer::entered);
-    QVERIFY(pointerEnterSpy.isValid());
-    quint32 timestamp = 1;
-
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->setPointerPos(QPointF(25, 50));
-    m_serverSeat->setFocusedPointerSurface(serverSurface);
-    QVERIFY(pointerEnterSpy.wait());
-    QCOMPARE(pointerEnterSpy.count(), 1);
-    // Should not have affected the keyboard.
-    QCOMPARE(enterSpy.count(), 1);
-    QCOMPARE(leftSpy.count(), 0);
-
-    // Let's click.
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->pointerButtonPressed(Qt::LeftButton);
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->pointerButtonReleased(Qt::LeftButton);
-    QVERIFY(enterSpy.wait());
-    QCOMPARE(enterSpy.count(), 2);
-    QCOMPARE(leftSpy.count(), 1);
-    QCOMPARE(keyboard->enteredSurface(), grandChild2Surface.data());
-
-    // Click on same surface should not trigger another enter.
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->pointerButtonPressed(Qt::LeftButton);
-    m_serverSeat->setTimestamp(timestamp++);
-    m_serverSeat->pointerButtonReleased(Qt::LeftButton);
-    QVERIFY(!enterSpy.wait(200));
-    QCOMPARE(enterSpy.count(), 2);
-    QCOMPARE(leftSpy.count(), 1);
-    QCOMPARE(keyboard->enteredSurface(), grandChild2Surface.data());
-
-    // Unfocus keyboard.
-    m_serverSeat->setFocusedKeyboardSurface(nullptr);
-    QVERIFY(leftSpy.wait());
-    QCOMPARE(enterSpy.count(), 2);
-    QCOMPARE(leftSpy.count(), 2);
 }
 
 void TestSeat::testCursor()

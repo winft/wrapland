@@ -97,9 +97,6 @@ void Surface::Private::addChild(Subsurface* child)
 
     QObject::connect(
         child, &Subsurface::positionChanged, handle(), &Surface::subsurfaceTreeChanged);
-
-    QObject::connect(
-        child->surface(), &Surface::damaged, handle(), &Surface::subsurfaceTreeChanged);
     QObject::connect(
         child->surface(), &Surface::unmapped, handle(), &Surface::subsurfaceTreeChanged);
     QObject::connect(child->surface(),
@@ -128,8 +125,6 @@ void Surface::Private::removeChild(Subsurface* child)
         child, &Subsurface::positionChanged, handle(), &Surface::subsurfaceTreeChanged);
 
     if (child->surface()) {
-        QObject::disconnect(
-            child->surface(), &Surface::damaged, handle(), &Surface::subsurfaceTreeChanged);
         QObject::disconnect(
             child->surface(), &Surface::unmapped, handle(), &Surface::subsurfaceTreeChanged);
         QObject::disconnect(child->surface(),
@@ -459,7 +454,6 @@ void Surface::Private::updateCurrentBuffer(SurfaceState const& source, bool& dam
     current.buffer = source.buffer;
 
     if (!current.buffer) {
-        //        subsurfaceIsMapped = false;
         if (wasMapped) {
             Q_EMIT handle()->unmapped();
         }
@@ -521,8 +515,6 @@ void Surface::Private::updateCurrentBuffer(SurfaceState const& source, bool& dam
     }
 
     current.damage = surfaceRegion.intersected(current.damage.united(bufferDamage));
-
-    //    subsurfaceIsMapped = true;
     trackedDamage = trackedDamage.united(current.damage);
     damaged = true;
 
@@ -935,6 +927,16 @@ QSize Surface::size() const
     return d_ptr->current.buffer->size() / scale();
 }
 
+QRect Surface::expanse() const
+{
+    auto ret = QRect(QPoint(), size());
+
+    for (auto const& sub : childSubsurfaces()) {
+        ret = ret.united(sub->surface()->expanse().translated(sub->position()));
+    }
+    return ret;
+}
+
 QPointer<Shadow> Surface::shadow() const
 {
     return d_ptr->current.shadow;
@@ -1044,60 +1046,6 @@ void Surface::setOutputs(std::vector<WlOutput*> const& outputs)
     // TODO(unknown author): send enter when the client binds the Output another time
 
     d_ptr->outputs = outputs;
-}
-
-Surface* Surface::surfaceAt(const QPointF& position)
-{
-    if (!isMapped()) {
-        return nullptr;
-    }
-
-    // Go from top to bottom. Top most child is last in the vector.
-    auto it = d_ptr->current.children.end();
-    while (it != d_ptr->current.children.begin()) {
-        auto const& current = *(--it);
-        auto surface = current->surface();
-        if (!surface) {
-            continue;
-        }
-        if (auto s = surface->surfaceAt(position - current->position())) {
-            return s;
-        }
-    }
-    // check whether the geometry contains the pos
-    if (!size().isEmpty() && QRectF(QPoint(0, 0), size()).contains(position)) {
-        return this;
-    }
-    return nullptr;
-}
-
-Surface* Surface::inputSurfaceAt(const QPointF& position)
-{
-    // TODO(unknown author): Most of this is very similar to Surface::surfaceAt
-    //                       Is there a way to reduce the code duplication?
-    if (!isMapped()) {
-        return nullptr;
-    }
-
-    // Go from top to bottom. Top most child is last in list.
-    auto it = d_ptr->current.children.end();
-    while (it != d_ptr->current.children.begin()) {
-        auto const& current = *(--it);
-        auto surface = current->surface();
-        if (!surface) {
-            continue;
-        }
-        if (auto s = surface->inputSurfaceAt(position - current->position())) {
-            return s;
-        }
-    }
-
-    // Check whether the geometry and input region contain the pos.
-    if (!size().isEmpty() && QRectF(QPoint(0, 0), size()).contains(position)
-        && (inputIsInfinite() || input().contains(position.toPoint()))) {
-        return this;
-    }
-    return nullptr;
 }
 
 QPointer<LockedPointerV1> Surface::lockedPointer() const

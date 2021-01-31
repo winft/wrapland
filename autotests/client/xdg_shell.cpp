@@ -906,30 +906,93 @@ void XdgShellTest::testMultipleRoles2()
 
 void XdgShellTest::testWindowGeometry()
 {
-    SURFACE
-    QSignalSpy windowGeometryChangedSpy(serverXdgSurface,
-                                        &Server::XdgShellToplevel::windowGeometryChanged);
-    xdgSurface->setWindowGeometry(QRect(50, 50, 400, 400));
+    QSignalSpy toplevel_created_spy(m_serverXdgShell, &Server::XdgShell::toplevelCreated);
+    QVERIFY(toplevel_created_spy.isValid());
+
+    std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Client::XdgShellSurface> toplevel(m_xdgShell->createSurface(surface.get()));
+
+    QVERIFY(toplevel_created_spy.wait());
+
+    auto server_toplevel = toplevel_created_spy.first().first().value<Server::XdgShellToplevel*>();
+    QVERIFY(server_toplevel);
+
+    QSignalSpy window_geometry_changed_spy(server_toplevel->surface(),
+                                           &Server::XdgShellSurface::window_geometry_changed);
+    toplevel->setWindowGeometry(QRect(50, 50, 400, 400));
     surface->commit(Client::Surface::CommitFlag::None);
-    QVERIFY(windowGeometryChangedSpy.wait());
-    QCOMPARE(serverXdgSurface->windowGeometry(), QRect(50, 50, 400, 400));
+    QVERIFY(window_geometry_changed_spy.wait());
 
-    // add a popup to this surface
+    // Window geometry is still invalid since surface has no size.
+    QVERIFY(!server_toplevel->surface()->window_geometry().isValid());
+
+    // Create a buffer for the surface.
+    QSignalSpy toplevel_commit_spy(server_toplevel->surface()->surface(),
+                                   &Server::Surface::committed);
+
+    QImage img(QSize(500, 500), QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::black);
+    auto buffer = m_shmPool->createBuffer(img);
+
+    // The x/y-coordinates of the attachement should not make a difference.
+    surface->attachBuffer(buffer, QPoint(55, 55));
+    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    QVERIFY(toplevel_commit_spy.wait());
+    QCOMPARE(toplevel_commit_spy.count(), 1);
+    QVERIFY(server_toplevel->surface()->surface()->isMapped());
+
+    // Now the window geometry is the full size.
+    QCOMPARE(server_toplevel->surface()->window_geometry(), QRect(50, 50, 400, 400));
+
+    // Reduce the size of the surface.
+    img = QImage(QSize(300, 300), QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::black);
+    buffer = m_shmPool->createBuffer(img);
+
+    // The x/y-coordinates of the attachement should not make a difference.
+    surface->attachBuffer(buffer, QPoint(55, 55));
+    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+
+    QVERIFY(toplevel_commit_spy.wait());
+    QCOMPARE(toplevel_commit_spy.count(), 2);
+
+    // Now the window geometry is clamped to the surface size.
+    QCOMPARE(server_toplevel->surface()->window_geometry(), QRect(50, 50, 250, 250));
+
+    // Add a popup to this toplevel.
     Client::XdgPositioner positioner(QSize(10, 10), QRect(100, 100, 50, 50));
-    QSignalSpy popupCreatedSpy(m_serverXdgShell, &Server::XdgShell::popupCreated);
-    std::unique_ptr<Client::Surface> popupSurface(m_compositor->createSurface());
-    std::unique_ptr<Client::XdgShellPopup> xdgPopupSurface(
-        m_xdgShell->createPopup(popupSurface.get(), xdgSurface.get(), positioner));
-    QVERIFY(popupCreatedSpy.wait());
-    auto serverXdgPopup = popupCreatedSpy.first().first().value<Server::XdgShellPopup*>();
-    QVERIFY(serverXdgPopup);
+    QSignalSpy popup_created_spy(m_serverXdgShell, &Server::XdgShell::popupCreated);
+    std::unique_ptr<Client::Surface> popup_surface(m_compositor->createSurface());
+    std::unique_ptr<Client::XdgShellPopup> popup(
+        m_xdgShell->createPopup(popup_surface.get(), toplevel.get(), positioner));
+    QVERIFY(popup_created_spy.wait());
+    auto server_popup = popup_created_spy.first().first().value<Server::XdgShellPopup*>();
+    QVERIFY(server_popup);
 
-    QSignalSpy popupWindowGeometryChangedSpy(serverXdgPopup,
-                                             &Server::XdgShellPopup::windowGeometryChanged);
-    xdgPopupSurface->setWindowGeometry(QRect(60, 60, 300, 300));
-    popupSurface->commit(Client::Surface::CommitFlag::None);
+    QSignalSpy popupWindowGeometryChangedSpy(server_popup->surface(),
+                                             &Server::XdgShellSurface::window_geometry_changed);
+    popup->setWindowGeometry(QRect(60, 60, 300, 300));
+    popup_surface->commit(Client::Surface::CommitFlag::None);
     QVERIFY(popupWindowGeometryChangedSpy.wait());
-    QCOMPARE(serverXdgPopup->windowGeometry(), QRect(60, 60, 300, 300));
+
+    // Window geometry is still invalid since surface has no size.
+    QVERIFY(!server_popup->surface()->window_geometry().isValid());
+
+    // Create a buffer for the surface.
+    QSignalSpy popup_commit_spy(server_popup->surface()->surface(), &Server::Surface::committed);
+    img = QImage(QSize(300, 300), QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::black);
+    buffer = m_shmPool->createBuffer(img);
+
+    // The x/y-coordinates of the attachement should not make a difference.
+    popup_surface->attachBuffer(buffer, QPoint(55, 55));
+    popup_surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+
+    QVERIFY(popup_commit_spy.wait());
+    QCOMPARE(popup_commit_spy.count(), 1);
+
+    // Window geometry is clamped to the surface size.
+    QCOMPARE(server_popup->surface()->window_geometry(), QRect(60, 60, 240, 240));
 }
 
 QTEST_GUILESS_MAIN(XdgShellTest)

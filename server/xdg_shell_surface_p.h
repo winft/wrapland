@@ -60,6 +60,14 @@ public:
 
     std::deque<uint32_t> configureSerials;
 
+    struct state {
+        QRect window_geometry;
+        bool window_geometry_set{false};
+    };
+
+    state current_state;
+    state pending_state;
+
 private:
     static void getTopLevelCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
     static void getPopupCallback(wl_client* wlClient,
