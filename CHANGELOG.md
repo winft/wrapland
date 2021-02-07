@@ -1,5 +1,42 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.521.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.520.0-beta.0...wrapland@0.521.0-beta.0) (2021-02-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **server:** Server library's xdg-shell surface class provides effective
+window geometry.
+* **server:** Server API expects now consumers to do subsurface input focus
+lookup.
+
+### Features
+
+* **client:** add support for xdg-shell v2 ([68e13de](https://gitlab.com/kwinft/wrapland/commit/68e13dec9443ea980a4829be8196158835ee131e))
+* **server:** add window geometry check ([09b48ec](https://gitlab.com/kwinft/wrapland/commit/09b48ec7a65b3e43b8216ac5d9beee25351ebf97))
+* **server:** add xdg-shell support for v2 ([ac39485](https://gitlab.com/kwinft/wrapland/commit/ac394853eb8c3ce8b811eb8f6542a45b411bff1d))
+* **server:** provide call to add socket fd to display ([fb64345](https://gitlab.com/kwinft/wrapland/commit/fb643451af02d091e108219c2b6ac35bb1174ccc))
+* **server:** provide effective window geometry from xdg-shell surface ([2aff7a8](https://gitlab.com/kwinft/wrapland/commit/2aff7a8a3aa81375fd17a621ed97cc226442a022))
+* **server:** provide window geometry margins ([7364928](https://gitlab.com/kwinft/wrapland/commit/73649283e96ed26296f5893dd3e8ea2d20e74148))
+
+
+### Bug Fixes
+
+* **client:** clean up wlr output modes with smart pointer ([9786f0f](https://gitlab.com/kwinft/wrapland/commit/9786f0f0d4c92f5a22d56633d58c08ad60a226cf))
+* **client:** delete wlr output head on finished callback ([5a4f334](https://gitlab.com/kwinft/wrapland/commit/5a4f334dd030e22d5f9f270f6e6bbce695318d5f))
+* **client:** initialize private wlr mode data ([a24ce31](https://gitlab.com/kwinft/wrapland/commit/a24ce318b4a7625ebc72d417075363026dfe5553))
+* **client:** make objects non-foreign ([5c97c20](https://gitlab.com/kwinft/wrapland/commit/5c97c207f74459a5361998c2ec8bda14cfc531a5))
+* **client:** remove wlr mode when finished ([c42c498](https://gitlab.com/kwinft/wrapland/commit/c42c4982d1aeec4eae1271401c643224e06b5e9b))
+* **server:** check for global being removed and destroyed ([37e6238](https://gitlab.com/kwinft/wrapland/commit/37e6238b3a631207b302f98aaf5f81d93cbc2e4e))
+
+
+### Refactors
+
+* **client:** remove xdg-shell v5 implementation ([d355a85](https://gitlab.com/kwinft/wrapland/commit/d355a85b079998a67092290f3bb4a3c3b8d1061e))
+* **server:** define static EGL function pointer with local scope ([8e6e225](https://gitlab.com/kwinft/wrapland/commit/8e6e225feaa546d63ba48735b7ee0de812896898))
+* **server:** introduce post_no_memory for globals ([491a4ac](https://gitlab.com/kwinft/wrapland/commit/491a4acee2a1a47ca50edcdd48c7dd4bf0e5bfe1))
+* **server:** remove subsurface input focus lookup ([318b3a6](https://gitlab.com/kwinft/wrapland/commit/318b3a69af33e31e7457a55b7f7ab5084e92783d))
+
 ## [0.520.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.520.0-beta.1...wrapland@0.520.0) (2020-10-13)
 
 ## [0.520.0-beta.1](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.520.0-beta.0...wrapland@0.520.0-beta.1) (2020-10-02)
