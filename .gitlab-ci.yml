@@ -53,12 +53,13 @@ clang-format:
       - ci-build
     expire_in: 1 week
 
-Normal build:
+Coverage build:
   <<: *common-build
   script:
     - pacman -Sy extra-cmake-modules --noconfirm --needed
     - mkdir ci-build && cd ci-build
     - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage
       -DCMAKE_INSTALL_PREFIX:PATH=/usr ../
     - make -j$(nproc)
     - make install -j$(nproc)
@@ -78,7 +79,7 @@ clang-tidy:
   stage: Compliance 2
   image: ${IMAGE_BASE}
   needs:
-    - job: Normal build
+    - job: Coverage build
       artifacts: true
   script:
     - pacman -Sy python2 --noconfirm --needed
@@ -89,29 +90,60 @@ clang-tidy:
 .common-test: &common-test
   stage: Test
   image: ${IMAGE_BASE}
-  script:
-    - pacman -Sy breeze-icons --noconfirm --needed
-    - cd ci-build
-    - Xvfb :1 -ac -screen 0 1920x1080x24 > /dev/null 2>&1 &
-    - export DISPLAY=:1
-    - export WAYLAND_DEBUG=1
-    - export QT_LOGGING_RULES="*=true"
-    - ctest -N
-    # Tests currently can only run in one thread, see issue #3.
-    - dbus-run-session ctest --output-on-failure
+
+.common-test-script: &common-test-script
+  - pacman -Sy breeze-icons --noconfirm --needed
+  - cd ci-build
+  - Xvfb :1 -ac -screen 0 1920x1080x24 > /dev/null 2>&1 &
+  - export DISPLAY=:1
+  - export WAYLAND_DEBUG=1
+  - export QT_LOGGING_RULES="*=true"
+  - ctest -N
+  # Tests currently can only run in one thread, see issue #3.
+  - dbus-run-session ctest --output-on-failure
 
 Autotests:
   <<: *common-test
+  script:
+    - *common-test-script
+    # Coverage report created from source dir with build dir exluded (MOC files etc.).
+    # First invokation for the GitLab pipeline regex, second for GitLab pages publishing.
+    - cd ..
+    - gcovr -e ci-build -e tests -r . ci-build
+    - mkdir coverage-html-output
+    - gcovr --html-details coverage-html-output/coverage.html -e ci-build -e tests -r . ci-build
   needs:
-    - job: Normal build
+    - job: Coverage build
       artifacts: true
+  artifacts:
+    paths:
+      - coverage-html-output
+    expire_in: 1 week
 
 Sanitizers:
   <<: *common-test
+  script:
+    - *common-test-script
   needs:
     - job: Sanitizers build
       artifacts: true
 
+
+pages:
+  stage: Integration
+  rules:
+    - if: '$CI_PROJECT_NAMESPACE == "kwinft" && $CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - when: never
+  needs:
+    - job: Autotests
+      artifacts: true
+  script:
+    - mv coverage-html-output public
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
 
 Master image trigger:
   stage: Integration
