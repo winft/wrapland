@@ -472,6 +472,20 @@ public:
      */
     QStringList plasmaVirtualDesktops() const;
 
+    /**
+     * Return the D-BUS service name for a window's
+     * application menu.
+     */
+    QString applicationMenuServiceName() const;
+
+    /**
+     * Return the D-BUS object path to a windows's
+     * application menu.
+     *
+     * @since 5.69
+     */
+    QString applicationMenuObjectPath() const;
+
 Q_SIGNALS:
     /**
      * The window title changed.
@@ -621,6 +635,12 @@ Q_SIGNALS:
      * @since 0.0.546
      */
     void plasmaVirtualDesktopLeft(const QString& id);
+
+    /**
+     *  This signal is emitted when either the D-BUS service name or
+     *  object path for the window's application menu changes.
+     **/
+    void applicationMenuChanged();
 
 private:
     friend class PlasmaWindowManagement;

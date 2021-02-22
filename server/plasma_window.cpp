@@ -227,6 +227,11 @@ void PlasmaWindow::Private::createResource(uint32_t version,
         windowRes->d_ptr->send<org_kde_plasma_window_send_title_changed>(
             m_title.toUtf8().constData());
     }
+    if (!m_applicationMenu.serviceName.isEmpty() || !m_applicationMenu.objectPath.isEmpty()) {
+        windowRes->d_ptr->send<org_kde_plasma_window_send_application_menu>(
+            m_applicationMenu.serviceName.toLatin1().constData(),
+            m_applicationMenu.objectPath.toLatin1().constData());
+    }
     windowRes->d_ptr->send<org_kde_plasma_window_send_state_changed>(m_desktopState);
     if (!m_themedIconName.isEmpty()) {
         windowRes->d_ptr->send<org_kde_plasma_window_send_themed_icon_name_changed>(
@@ -398,6 +403,22 @@ void PlasmaWindow::Private::setGeometry(const QRect& geo)
         }
         (*it)->d_ptr->send<org_kde_plasma_window_send_geometry>(
             geometry.x(), geometry.y(), geometry.width(), geometry.height());
+    }
+}
+
+void PlasmaWindow::Private::setApplicationMenuPaths(const QString& serviceName,
+                                                    const QString& objectPath) const
+{
+    if (m_applicationMenu.serviceName == serviceName
+        && m_applicationMenu.objectPath == objectPath) {
+        return;
+    }
+    auto const service_name = serviceName.toLatin1();
+    auto const object_path = objectPath.toLatin1();
+    for (auto resource : qAsConst(resources)) {
+        resource->d_ptr->send<org_kde_plasma_window_send_application_menu,
+                              ORG_KDE_PLASMA_WINDOW_APPLICATION_MENU_SINCE_VERSION>(
+            service_name.data(), object_path.data());
     }
 }
 
@@ -610,6 +631,12 @@ void PlasmaWindow::setMovable(bool set)
 void PlasmaWindow::setResizable(bool set)
 {
     d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_RESIZABLE, set);
+}
+
+void PlasmaWindow::setApplicationMenuPaths(const QString& serviceName,
+                                           const QString& objectPath) const
+{
+    d_ptr->setApplicationMenuPaths(serviceName, objectPath);
 }
 
 void PlasmaWindow::setVirtualDesktopChangeable(bool set)

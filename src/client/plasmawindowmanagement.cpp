@@ -102,6 +102,10 @@ public:
     QStringList plasmaVirtualDesktops;
     QRect geometry;
     quint32 pid = 0;
+    struct {
+        QString service_name;
+        QString object_path;
+    } application_menu;
 
 private:
     static void titleChangedCallback(void* data, org_kde_plasma_window* window, const char* title);
@@ -129,6 +133,11 @@ private:
     static void virtualDesktopLeftCallback(void* data,
                                            org_kde_plasma_window* org_kde_plasma_window,
                                            const char* id);
+    static void appmenuChangedCallback(void* data,
+                                       org_kde_plasma_window* org_kde_plasma_window,
+                                       char const* service_name,
+                                       char const* object_path);
+
     void setActive(bool set);
     void setMinimized(bool set);
     void setMaximized(bool set);
@@ -368,6 +377,7 @@ org_kde_plasma_window_listener PlasmaWindow::Private::s_listener = {
     pidChangedCallback,
     virtualDesktopEnteredCallback,
     virtualDesktopLeftCallback,
+    appmenuChangedCallback,
 };
 
 void PlasmaWindow::Private::parentWindowCallback(void* data,
@@ -473,6 +483,21 @@ void PlasmaWindow::Private::virtualDesktopChangedCallback(void* data,
     Q_UNUSED(data)
     Q_UNUSED(window)
     Q_UNUSED(number)
+}
+
+void PlasmaWindow::Private::appmenuChangedCallback(void* data,
+                                                   org_kde_plasma_window* window,
+                                                   char const* service_name,
+                                                   char const* object_path)
+{
+    Q_UNUSED(window)
+
+    auto priv = cast(data);
+
+    priv->application_menu.service_name = QString::fromLatin1(service_name);
+    priv->application_menu.object_path = QString::fromLatin1(object_path);
+
+    Q_EMIT priv->q->applicationMenuChanged();
 }
 
 void PlasmaWindow::Private::unmappedCallback(void* data, org_kde_plasma_window* window)
@@ -944,6 +969,16 @@ bool PlasmaWindow::isMovable() const
 bool PlasmaWindow::isVirtualDesktopChangeable() const
 {
     return d->virtualDesktopChangeable;
+}
+
+QString PlasmaWindow::applicationMenuObjectPath() const
+{
+    return d->application_menu.object_path;
+}
+
+QString PlasmaWindow::applicationMenuServiceName() const
+{
+    return d->application_menu.service_name;
 }
 
 void PlasmaWindow::requestActivate()
