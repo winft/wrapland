@@ -83,6 +83,7 @@ private Q_SLOTS:
     void testGeometry();
     void testIcon();
     void testPid();
+    void testApplicationMenu();
 
 private:
     Srv::Display* m_display;
@@ -729,6 +730,22 @@ void TestWindowManagement::testPid()
         windowSpy.first().first().value<Clt::PlasmaWindow*>());
     QVERIFY(newWindow);
     QVERIFY(newWindow->pid() == 0);
+}
+
+void TestWindowManagement::testApplicationMenu()
+{
+    const auto serviceName = QStringLiteral("org.kde.foo");
+    const auto objectPath = QStringLiteral("/org/kde/bar");
+
+    QSignalSpy applicationMenuChangedSpy(m_window, &Clt::PlasmaWindow::applicationMenuChanged);
+    QVERIFY(applicationMenuChangedSpy.isValid());
+
+    m_windowInterface->setApplicationMenuPaths(serviceName, objectPath);
+
+    QVERIFY(applicationMenuChangedSpy.wait());
+
+    QCOMPARE(m_window->applicationMenuServiceName(), serviceName);
+    QCOMPARE(m_window->applicationMenuObjectPath(), objectPath);
 }
 
 QTEST_GUILESS_MAIN(TestWindowManagement)
