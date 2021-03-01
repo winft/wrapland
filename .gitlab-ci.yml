@@ -12,6 +12,11 @@ workflow:
   rules:
     - when: always
 
+include:
+  - project: kwinft/tooling
+    ref: master
+    file: '/analysis/gitlab-ci/tests.yml'
+
 
 Message lint:
   stage: Compliance 1
@@ -90,60 +95,38 @@ clang-tidy:
 .common-test: &common-test
   stage: Test
   image: ${IMAGE_BASE}
-
-.common-test-script: &common-test-script
-  - pacman -Sy breeze-icons --noconfirm --needed
-  - cd build
-  - Xvfb :1 -ac -screen 0 1920x1080x24 > /dev/null 2>&1 &
-  - export DISPLAY=:1
-  - export WAYLAND_DEBUG=1
-  - export QT_LOGGING_RULES="*=true"
-  - ctest -N
-  # Tests currently can only run in one thread, see issue #3.
-  - dbus-run-session ctest --output-on-failure
+  before_script:
+    - pacman -Sy breeze-icons --noconfirm --needed
 
 Autotests:
+  extends: .tests-with-coverage
+  variables:
+    GCOVR_ARGS: -e tests
   <<: *common-test
-  script:
-    - *common-test-script
-    # Coverage report created from source dir with build dir exluded (MOC files etc.).
-    # First invokation for the GitLab pipeline regex, second for GitLab pages publishing.
-    - cd ..
-    - gcovr -e build -e tests -r . build
-    - mkdir coverage-html-output
-    - gcovr --html-details coverage-html-output/coverage.html -e build -e tests -r . build
   needs:
     - job: Coverage build
       artifacts: true
-  artifacts:
-    paths:
-      - coverage-html-output
-    expire_in: 1 week
 
 Sanitizers:
+  extends: .tests
   <<: *common-test
-  script:
-    - *common-test-script
   needs:
     - job: Sanitizers build
       artifacts: true
 
 
-pages:
+Add Coverage:
+  extends: .add-coverage
+  variables:
+    COVERAGE_JOB: Autotests
   stage: Integration
-  rules:
-    - if: '$CI_PROJECT_NAMESPACE == "kwinft" && $CI_COMMIT_BRANCH == "master"'
-      when: on_success
-    - when: never
+
+pages:
+  extends: .pages-coverage
+  stage: Integration
   needs:
     - job: Autotests
       artifacts: true
-  script:
-    - mv coverage-html-output public
-  artifacts:
-    paths:
-      - public
-    expire_in: 1 week
 
 Master image trigger:
   stage: Integration
