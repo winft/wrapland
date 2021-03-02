@@ -50,14 +50,14 @@ clang-format:
   image: ${IMAGE_BASE}
   artifacts:
     paths:
-      - ci-build
+      - build
     expire_in: 1 week
 
 Coverage build:
   <<: *common-build
   script:
     - pacman -Sy extra-cmake-modules --noconfirm --needed
-    - mkdir ci-build && cd ci-build
+    - mkdir build && cd build
     - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage
       -DCMAKE_INSTALL_PREFIX:PATH=/usr ../
@@ -68,7 +68,7 @@ Sanitizers build:
   <<: *common-build
   script:
     - pacman -Sy extra-cmake-modules --noconfirm --needed
-    - mkdir ci-build && cd ci-build
+    - mkdir build && cd build
     - cmake -DECM_ENABLE_SANITIZERS='address;leak;undefined'
       -DCMAKE_CXX_COMPILER=clang++ ../
     - make -j$(nproc)
@@ -84,7 +84,7 @@ clang-tidy:
   script:
     - pacman -Sy python2 --noconfirm --needed
     # Run clang-tidy via wrapper script.
-    - bash ci/compliance/clang-tidy.sh ci-build
+    - bash ci/compliance/clang-tidy.sh build
 
 
 .common-test: &common-test
@@ -93,7 +93,7 @@ clang-tidy:
 
 .common-test-script: &common-test-script
   - pacman -Sy breeze-icons --noconfirm --needed
-  - cd ci-build
+  - cd build
   - Xvfb :1 -ac -screen 0 1920x1080x24 > /dev/null 2>&1 &
   - export DISPLAY=:1
   - export WAYLAND_DEBUG=1
@@ -109,9 +109,9 @@ Autotests:
     # Coverage report created from source dir with build dir exluded (MOC files etc.).
     # First invokation for the GitLab pipeline regex, second for GitLab pages publishing.
     - cd ..
-    - gcovr -e ci-build -e tests -r . ci-build
+    - gcovr -e build -e tests -r . build
     - mkdir coverage-html-output
-    - gcovr --html-details coverage-html-output/coverage.html -e ci-build -e tests -r . ci-build
+    - gcovr --html-details coverage-html-output/coverage.html -e build -e tests -r . build
   needs:
     - job: Coverage build
       artifacts: true
