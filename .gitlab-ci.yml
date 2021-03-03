@@ -15,7 +15,9 @@ workflow:
 include:
   - project: kwinft/tooling
     ref: master
-    file: '/analysis/gitlab-ci/tests.yml'
+    file:
+      - '/analysis/gitlab-ci/static.yml'
+      - '/analysis/gitlab-ci/tests.yml'
 
 
 Message lint:
@@ -43,11 +45,9 @@ Message lint:
       - node_modules/
 
 clang-format:
+  extends: .clang-format
   stage: Compliance 1
   image: ${IMAGE_BASE}
-  script:
-    # Run clang-format via wrapper script.
-    - bash ci/compliance/clang-format.sh
 
 
 .common-build: &common-build
@@ -81,15 +81,12 @@ Sanitizers build:
 
 
 clang-tidy:
+  extends: .clang-tidy
   stage: Compliance 2
   image: ${IMAGE_BASE}
   needs:
     - job: Coverage build
       artifacts: true
-  script:
-    - pacman -Sy python2 --noconfirm --needed
-    # Run clang-tidy via wrapper script.
-    - bash ci/compliance/clang-tidy.sh build
 
 
 .common-test: &common-test
