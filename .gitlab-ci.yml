@@ -1,9 +1,8 @@
 stages:
-  - Compliance 1
+  - Compliance
   - Build
-  - Compliance 2
-  - Test
-  - Integration
+  - Analysis
+  - Deploy
 
 variables:
   IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base:latest
@@ -12,142 +11,133 @@ workflow:
   rules:
     - when: always
 
+include:
+  - project: kwinft/tooling
+    ref: master
+    file:
+      - '/analysis/gitlab-ci/static.yml'
+      - '/analysis/gitlab-ci/tests.yml'
+      - '/docs/gitlab-ci/commits.yml'
 
-Message lint:
-  stage: Compliance 1
-  image: node:latest
-  rules:
-    - if: $CI_MERGE_REQUEST_IID
-      when: always
-    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^Plasma\// || $CI_COMMIT_TAG'
-      when: never
-    - when: always
-  variables:
-    UPSTREAM: https://${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}@${CI_SERVER_HOST}/kwinft/wrapland.git
-  script:
-    - if [ -n "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" ];
-      then export COMPARE_BRANCH=$CI_MERGE_REQUEST_TARGET_BRANCH_NAME; else export COMPARE_BRANCH=master; fi
-    - "echo Branch to compare: $COMPARE_BRANCH"
-    - yarn global add @commitlint/cli
-    - yarn add conventional-changelog-conventionalcommits
-    - git remote add _upstream $UPSTREAM || git remote set-url _upstream $UPSTREAM
-    - git fetch -q _upstream $COMPARE_BRANCH
-    - commitlint --verbose --config=ci/compliance/commitlint.config.js --from=_upstream/$COMPARE_BRANCH
-  cache:
-    paths:
-      - node_modules/
 
-clang-format:
-  stage: Compliance 1
+####################################################################################################
+#
+# Compliance
+#
+
+Message Lint:
+  extends: .message-lint
+  stage: Compliance
+
+Clang-Format:
+  extends: .clang-format
+  stage: Compliance
   image: ${IMAGE_BASE}
-  script:
-    # Run clang-format via wrapper script.
-    - bash ci/compliance/clang-format.sh
 
 
-.common-build: &common-build
+####################################################################################################
+#
+# Build
+#
+
+Coverity Scan:
+  extends: .coverity-scan
   stage: Build
   image: ${IMAGE_BASE}
+
+.common-build:
+  variables:
+    CMAKE_ARGS: ''
+  stage: Build
+  image: ${IMAGE_BASE}
+  rules:
+    - if: '$COVERITY_SCAN_RUN'
+      when: never
+    - when: on_success
+  script:
+    - pacman -Sy extra-cmake-modules --noconfirm --needed
+    - mkdir build && cd build
+    - cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr $CMAKE_ARGS ../
+    - make -j$(nproc)
+    - make install -j$(nproc)
   artifacts:
     paths:
-      - ci-build
+      - build
     expire_in: 1 week
 
-Coverage build:
-  <<: *common-build
-  script:
-    - pacman -Sy extra-cmake-modules --noconfirm --needed
-    - mkdir ci-build && cd ci-build
-    - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage
-      -DCMAKE_INSTALL_PREFIX:PATH=/usr ../
-    - make -j$(nproc)
-    - make install -j$(nproc)
+Regular:
+  extends: .common-build
+  variables:
+    CMAKE_ARGS: -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+                -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage
 
-Sanitizers build:
-  <<: *common-build
-  script:
-    - pacman -Sy extra-cmake-modules --noconfirm --needed
-    - mkdir ci-build && cd ci-build
-    - cmake -DECM_ENABLE_SANITIZERS='address;leak;undefined'
-      -DCMAKE_CXX_COMPILER=clang++ ../
-    - make -j$(nproc)
-    - make install -j$(nproc)
+Sanitized:
+  extends: .common-build
+  variables:
+    CMAKE_ARGS: -DECM_ENABLE_SANITIZERS='address;leak;undefined'
+                -DCMAKE_CXX_COMPILER=clang++
 
 
-clang-tidy:
-  stage: Compliance 2
+####################################################################################################
+#
+# Analysis
+#
+
+Clang-Tidy:
+  extends: .clang-tidy
+  stage: Analysis
   image: ${IMAGE_BASE}
   needs:
-    - job: Coverage build
+    - job: Regular
       artifacts: true
-  script:
-    - pacman -Sy python2 --noconfirm --needed
-    # Run clang-tidy via wrapper script.
-    - bash ci/compliance/clang-tidy.sh ci-build
 
 
 .common-test: &common-test
-  stage: Test
+  stage: Analysis
   image: ${IMAGE_BASE}
+  before_script:
+    - pacman -Sy breeze-icons --noconfirm --needed
 
-.common-test-script: &common-test-script
-  - pacman -Sy breeze-icons --noconfirm --needed
-  - cd ci-build
-  - Xvfb :1 -ac -screen 0 1920x1080x24 > /dev/null 2>&1 &
-  - export DISPLAY=:1
-  - export WAYLAND_DEBUG=1
-  - export QT_LOGGING_RULES="*=true"
-  - ctest -N
-  # Tests currently can only run in one thread, see issue #3.
-  - dbus-run-session ctest --output-on-failure
-
-Autotests:
+Regular Tests:
+  extends: .tests-with-coverage
+  variables:
+    GCOVR_ARGS: -e tests
   <<: *common-test
-  script:
-    - *common-test-script
-    # Coverage report created from source dir with build dir exluded (MOC files etc.).
-    # First invokation for the GitLab pipeline regex, second for GitLab pages publishing.
-    - cd ..
-    - gcovr -e ci-build -e tests -r . ci-build
-    - mkdir coverage-html-output
-    - gcovr --html-details coverage-html-output/coverage.html -e ci-build -e tests -r . ci-build
   needs:
-    - job: Coverage build
-      artifacts: true
-  artifacts:
-    paths:
-      - coverage-html-output
-    expire_in: 1 week
-
-Sanitizers:
-  <<: *common-test
-  script:
-    - *common-test-script
-  needs:
-    - job: Sanitizers build
+    - job: Regular
       artifacts: true
 
+Sanitized Tests:
+  extends: .tests
+  <<: *common-test
+  needs:
+    - job: Sanitized
+      artifacts: true
+
+
+####################################################################################################
+#
+# Deploy
+#
+
+Add Coverage:
+  extends: .add-coverage
+  variables:
+    COVERAGE_JOB: Regular Tests
+  stage: Deploy
 
 pages:
-  stage: Integration
-  rules:
-    - if: '$CI_PROJECT_NAMESPACE == "kwinft" && $CI_COMMIT_BRANCH == "master"'
-      when: on_success
-    - when: never
+  extends: .pages-coverage
+  stage: Deploy
   needs:
-    - job: Autotests
+    - job: Regular Tests
       artifacts: true
-  script:
-    - mv coverage-html-output public
-  artifacts:
-    paths:
-      - public
-    expire_in: 1 week
 
-Master image trigger:
-  stage: Integration
+Master Image:
+  stage: Deploy
   rules:
+    - if: '$COVERITY_SCAN_RUN'
+      when: never
     - if: '$CI_PROJECT_NAMESPACE == "kwinft" && $CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
     - when: never
@@ -157,9 +147,11 @@ Master image trigger:
             --form "variables[TRIGGER_TYPE]=wrapland_rebuild"
             ${CI_API_V4_URL}/projects/${TARGET_ID}/trigger/pipeline
 
-Stable image trigger:
-  stage: Integration
+Stable Image:
+  stage: Deploy
   rules:
+    - if: '$COVERITY_SCAN_RUN'
+      when: never
     - if: '$CI_PROJECT_NAMESPACE == "kwinft" && $CI_COMMIT_BRANCH =~ /^Plasma\// && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
     - when: never
@@ -170,9 +162,11 @@ Stable image trigger:
             --form "variables[PLASMA_VERSION]=${CI_COMMIT_BRANCH}"
             ${CI_API_V4_URL}/projects/${TARGET_ID}/trigger/pipeline
 
-Stable image tag trigger:
-  stage: Integration
+Tagged Image:
+  stage: Deploy
   rules:
+    - if: '$COVERITY_SCAN_RUN'
+      when: never
     - if: '$CI_PROJECT_NAMESPACE == "kwinft" && $CI_COMMIT_TAG =~ /^wrapland@/ && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
     - when: never
