@@ -1,9 +1,8 @@
 stages:
-  - Compliance 1
+  - Compliance
   - Build
-  - Compliance 2
-  - Test
-  - Integration
+  - Analysis
+  - Deploy
 
 variables:
   IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base:latest
@@ -23,11 +22,11 @@ include:
 
 Message lint:
   extends: .message-lint
-  stage: Compliance 1
+  stage: Compliance
 
 clang-format:
   extends: .clang-format
-  stage: Compliance 1
+  stage: Compliance
   image: ${IMAGE_BASE}
 
 
@@ -73,7 +72,7 @@ Sanitizers build:
 
 clang-tidy:
   extends: .clang-tidy
-  stage: Compliance 2
+  stage: Analysis
   image: ${IMAGE_BASE}
   needs:
     - job: Coverage build
@@ -81,7 +80,7 @@ clang-tidy:
 
 
 .common-test: &common-test
-  stage: Test
+  stage: Analysis
   image: ${IMAGE_BASE}
   before_script:
     - pacman -Sy breeze-icons --noconfirm --needed
@@ -107,17 +106,17 @@ Add Coverage:
   extends: .add-coverage
   variables:
     COVERAGE_JOB: Autotests
-  stage: Integration
+  stage: Deploy
 
 pages:
   extends: .pages-coverage
-  stage: Integration
+  stage: Deploy
   needs:
     - job: Autotests
       artifacts: true
 
 Master image trigger:
-  stage: Integration
+  stage: Deploy
   rules:
     - if: '$COVERITY_SCAN_RUN'
       when: never
@@ -131,7 +130,7 @@ Master image trigger:
             ${CI_API_V4_URL}/projects/${TARGET_ID}/trigger/pipeline
 
 Stable image trigger:
-  stage: Integration
+  stage: Deploy
   rules:
     - if: '$COVERITY_SCAN_RUN'
       when: never
@@ -146,7 +145,7 @@ Stable image trigger:
             ${CI_API_V4_URL}/projects/${TARGET_ID}/trigger/pipeline
 
 Stable image tag trigger:
-  stage: Integration
+  stage: Deploy
   rules:
     - if: '$COVERITY_SCAN_RUN'
       when: never
