@@ -20,6 +20,11 @@ include:
       - '/docs/gitlab-ci/commits.yml'
 
 
+####################################################################################################
+#
+# Compliance
+#
+
 Message Lint:
   extends: .message-lint
   stage: Compliance
@@ -30,11 +35,15 @@ Clang-Format:
   image: ${IMAGE_BASE}
 
 
+####################################################################################################
+#
+# Build
+#
+
 Coverity Scan:
   extends: .coverity-scan
   stage: Build
   image: ${IMAGE_BASE}
-
 
 .common-build:
   variables:
@@ -69,6 +78,11 @@ Sanitized:
                 -DCMAKE_CXX_COMPILER=clang++
 
 
+####################################################################################################
+#
+# Analysis
+#
+
 Clang-Tidy:
   extends: .clang-tidy
   stage: Analysis
@@ -100,6 +114,11 @@ Sanitized Tests:
     - job: Sanitized
       artifacts: true
 
+
+####################################################################################################
+#
+# Deploy
+#
 
 Add Coverage:
   extends: .add-coverage
