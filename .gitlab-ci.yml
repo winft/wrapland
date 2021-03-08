@@ -20,11 +20,11 @@ include:
       - '/docs/gitlab-ci/commits.yml'
 
 
-Message lint:
+Message Lint:
   extends: .message-lint
   stage: Compliance
 
-clang-format:
+Clang-Format:
   extends: .clang-format
   stage: Compliance
   image: ${IMAGE_BASE}
@@ -48,7 +48,7 @@ Coverity Scan:
       - build
     expire_in: 1 week
 
-Coverage build:
+Regular:
   <<: *common-build
   script:
     - pacman -Sy extra-cmake-modules --noconfirm --needed
@@ -59,7 +59,7 @@ Coverage build:
     - make -j$(nproc)
     - make install -j$(nproc)
 
-Sanitizers build:
+Sanitized:
   <<: *common-build
   script:
     - pacman -Sy extra-cmake-modules --noconfirm --needed
@@ -70,12 +70,12 @@ Sanitizers build:
     - make install -j$(nproc)
 
 
-clang-tidy:
+Clang-Tidy:
   extends: .clang-tidy
   stage: Analysis
   image: ${IMAGE_BASE}
   needs:
-    - job: Coverage build
+    - job: Regular
       artifacts: true
 
 
@@ -85,37 +85,37 @@ clang-tidy:
   before_script:
     - pacman -Sy breeze-icons --noconfirm --needed
 
-Autotests:
+Regular Tests:
   extends: .tests-with-coverage
   variables:
     GCOVR_ARGS: -e tests
   <<: *common-test
   needs:
-    - job: Coverage build
+    - job: Regular
       artifacts: true
 
-Sanitizers:
+Sanitized Tests:
   extends: .tests
   <<: *common-test
   needs:
-    - job: Sanitizers build
+    - job: Sanitized
       artifacts: true
 
 
 Add Coverage:
   extends: .add-coverage
   variables:
-    COVERAGE_JOB: Autotests
+    COVERAGE_JOB: Regular Tests
   stage: Deploy
 
 pages:
   extends: .pages-coverage
   stage: Deploy
   needs:
-    - job: Autotests
+    - job: Regular Tests
       artifacts: true
 
-Master image trigger:
+Master Image:
   stage: Deploy
   rules:
     - if: '$COVERITY_SCAN_RUN'
@@ -129,7 +129,7 @@ Master image trigger:
             --form "variables[TRIGGER_TYPE]=wrapland_rebuild"
             ${CI_API_V4_URL}/projects/${TARGET_ID}/trigger/pipeline
 
-Stable image trigger:
+Stable Image:
   stage: Deploy
   rules:
     - if: '$COVERITY_SCAN_RUN'
@@ -144,7 +144,7 @@ Stable image trigger:
             --form "variables[PLASMA_VERSION]=${CI_COMMIT_BRANCH}"
             ${CI_API_V4_URL}/projects/${TARGET_ID}/trigger/pipeline
 
-Stable image tag trigger:
+Tagged Image:
   stage: Deploy
   rules:
     - if: '$COVERITY_SCAN_RUN'
