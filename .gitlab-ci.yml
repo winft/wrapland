@@ -36,38 +36,37 @@ Coverity Scan:
   image: ${IMAGE_BASE}
 
 
-.common-build: &common-build
+.common-build:
+  variables:
+    CMAKE_ARGS: ''
   stage: Build
   image: ${IMAGE_BASE}
   rules:
     - if: '$COVERITY_SCAN_RUN'
       when: never
     - when: on_success
+  script:
+    - pacman -Sy extra-cmake-modules --noconfirm --needed
+    - mkdir build && cd build
+    - cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr $CMAKE_ARGS ../
+    - make -j$(nproc)
+    - make install -j$(nproc)
   artifacts:
     paths:
       - build
     expire_in: 1 week
 
 Regular:
-  <<: *common-build
-  script:
-    - pacman -Sy extra-cmake-modules --noconfirm --needed
-    - mkdir build && cd build
-    - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage
-      -DCMAKE_INSTALL_PREFIX:PATH=/usr ../
-    - make -j$(nproc)
-    - make install -j$(nproc)
+  extends: .common-build
+  variables:
+    CMAKE_ARGS: -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+                -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage
 
 Sanitized:
-  <<: *common-build
-  script:
-    - pacman -Sy extra-cmake-modules --noconfirm --needed
-    - mkdir build && cd build
-    - cmake -DECM_ENABLE_SANITIZERS='address;leak;undefined'
-      -DCMAKE_CXX_COMPILER=clang++ ../
-    - make -j$(nproc)
-    - make install -j$(nproc)
+  extends: .common-build
+  variables:
+    CMAKE_ARGS: -DECM_ENABLE_SANITIZERS='address;leak;undefined'
+                -DCMAKE_CXX_COMPILER=clang++
 
 
 Clang-Tidy:
