@@ -46,6 +46,9 @@ Coverity Scan:
   image: ${IMAGE_BASE}
   variables:
     PROJECT_NAME: Wrapland
+  script:
+    - pacman -Sy extra-cmake-modules --noconfirm --needed
+    - !reference [.coverity-scan, script]
 
 .common-build:
   variables:
