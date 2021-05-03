@@ -60,6 +60,7 @@ struct xdg_shell;
 struct xdg_wm_base;
 struct zkwinft_output_management_v1;
 struct zkwinft_output_device_v1;
+struct zwlr_layer_shell_v1;
 struct zwlr_output_manager_v1;
 struct zwp_relative_pointer_manager_v1;
 struct zwp_pointer_gestures_v1;
@@ -91,6 +92,7 @@ class WlrOutputManagerV1;
 class Idle;
 class IdleInhibitManager;
 class Keystate;
+class LayerShellV1;
 class RemoteAccessManager;
 class Output;
 class PlasmaShell;
@@ -165,6 +167,7 @@ public:
         Shm,                              ///< Refers to the wl_shm interface
         Output,                           ///< Refers to the wl_output interface
         FullscreenShell,                  ///< Refers to the _wl_fullscreen_shell interface
+        LayerShellV1,                     ///< Refers to zwlr_layer_shell_v1 interface
         SubCompositor,                    ///< Refers to the wl_subcompositor interface;
         DataDeviceManager,                ///< Refers to the wl_data_device_manager interface
         PlasmaShell,                      ///< Refers to org_kde_plasma_shell interface
@@ -504,6 +507,16 @@ public:
      * @since 5.5
      **/
     org_kde_kwin_contrast_manager* bindContrastManager(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the zwlr_layer_shell_v1 with @p name and @p version.
+     * If the @p name does not exist or is not for the layer shell interface,
+     * @c null will be returned.
+     *
+     * Prefer using createLayerShellV1 instead.
+     * @see createLayerShellV1
+     * @since 0.522.0
+     **/
+    zwlr_layer_shell_v1* bindLayerShellV1(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_kwin_slide_manager with @p name and @p version.
      * If the @p name does not exist or is not for the slide manager interface,
@@ -1021,6 +1034,22 @@ public:
      **/
     ShadowManager* createShadowManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
+     * Creates a LayerShellV1 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the zwlr_layer_shell_v1 interface,
+     * the returned LayerShellV1 will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the zwlr_layer_shell_v1 interface to bind
+     * @param version The version or the zwlr_layer_shell_v1 interface to use
+     * @param parent The parent for LayerShellV1
+     *
+     * @returns The created LayerShellV1.
+     * @since 0.522.0
+     **/
+    LayerShellV1* createLayerShellV1(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
      * Creates a BlurManager and sets it up to manage the interface identified by
      * @p name and @p version.
      *
@@ -1441,6 +1470,13 @@ Q_SIGNALS:
      * @param version The maximum supported version of the announced interface
      **/
     void dataDeviceManagerAnnounced(quint32 name, quint32 version);
+    /**
+     * Emitted whenever a zwlr_layer_shell_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.522.0
+     **/
+    void layerShellV1Announced(quint32 name, quint32 version);
 
     /**
      * Emitted whenever a zkwinft_output_management_v1 interface gets announced.
@@ -1767,6 +1803,12 @@ Q_SIGNALS:
      * @since 5.4
      **/
     void fakeInputRemoved(quint32 name);
+    /**
+     * Emitted whenever a zwlr_layer_shell_v1 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.522.0
+     **/
+    void layerShellV1Removed(quint32 name);
     /**
      * Emitted whenever a org_kde_kwin_shadow_manager interface gets removed.
      * @param name The name for the removed interface

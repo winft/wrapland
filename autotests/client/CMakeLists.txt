@@ -52,6 +52,15 @@ if(Wayland_VERSION VERSION_GREATER "1.4.0")
 endif()
 
 ########################################################
+# Test layer-shell
+########################################################
+set(test_layer_shell_SRCS layer_shell.cpp)
+add_executable(testLayerShell ${test_layer_shell_SRCS})
+target_link_libraries(testLayerShell Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server Wayland::Client)
+add_test(NAME wrapland-testLayerShell COMMAND testLayerShell)
+ecm_mark_as_test(testLayerShell)
+
+########################################################
 # Test WaylandOutput
 ########################################################
 set(testOutput_SRCS output.cpp)

@@ -33,6 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "idleinhibit.h"
 #include "keyboard_shortcuts_inhibit.h"
 #include "keystate.h"
+#include "layer_shell_v1.h"
 #include "linux_dmabuf_v1.h"
 #include "logging.h"
 #include "output.h"
@@ -91,6 +92,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
+#include <wayland-wlr-layer-shell-client-protocol.h>
 #include <wayland-wlr-output-management-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-xdg-foreign-unstable-v2-client-protocol.h>
@@ -244,6 +246,16 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &org_kde_kwin_fake_input_interface,
             &Registry::fakeInputAnnounced,
             &Registry::fakeInputRemoved,
+        },
+    },
+    {
+        Registry::Interface::LayerShellV1,
+        {
+            4,
+            QByteArrayLiteral("zwlr_layer_shell_v1"),
+            &zwlr_layer_shell_v1_interface,
+            &Registry::layerShellV1Announced,
+            &Registry::layerShellV1Removed,
         },
     },
     {
@@ -813,6 +825,7 @@ BIND(PlasmaVirtualDesktopManagement, org_kde_plasma_virtual_desktop_management)
 BIND(PlasmaWindowManagement, org_kde_plasma_window_management)
 BIND(Idle, org_kde_kwin_idle)
 BIND(FakeInput, org_kde_kwin_fake_input)
+BIND(LayerShellV1, zwlr_layer_shell_v1)
 BIND(OutputManagementV1, zkwinft_output_management_v1)
 BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
@@ -882,6 +895,7 @@ CREATE(PlasmaVirtualDesktopManagement)
 CREATE(PlasmaWindowManagement)
 CREATE(Idle)
 CREATE(FakeInput)
+CREATE(LayerShellV1)
 CREATE(OutputManagementV1)
 CREATE(OutputDeviceV1)
 CREATE(WlrOutputManagerV1)
