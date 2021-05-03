@@ -23,9 +23,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "buffer.h"
 
+#include "client.h"
 #include "compositor.h"
 #include "idle_inhibit_v1.h"
 #include "idle_inhibit_v1_p.h"
+#include "layer_shell_v1_p.h"
 #include "pointer_constraints_v1.h"
 #include "pointer_constraints_v1_p.h"
 #include "presentation_time.h"
@@ -394,7 +396,7 @@ bool Surface::Private::has_role() const
 {
     auto const has_xdg_shell_role
         = shellSurface && (shellSurface->d_ptr->toplevel || shellSurface->d_ptr->popup);
-    return has_xdg_shell_role || subsurface;
+    return has_xdg_shell_role || subsurface || layer_surface;
 }
 
 void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
@@ -681,6 +683,11 @@ void Surface::Private::commit()
 
     if (shellSurface) {
         shellSurface->commit();
+    }
+
+    if (layer_surface && !layer_surface->d_ptr->commit()) {
+        // Error on layer-surface commit.
+        return;
     }
 
     Q_EMIT handle()->committed();

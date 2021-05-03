@@ -35,6 +35,7 @@ namespace Wrapland::Server
 
 class Feedbacks;
 class IdleInhibitor;
+class LayerSurfaceV1;
 class XdgShellSurface;
 
 class SurfaceState
@@ -127,6 +128,7 @@ public:
 
     XdgShellSurface* shellSurface = nullptr;
     Subsurface* subsurface = nullptr;
+    LayerSurfaceV1* layer_surface{nullptr};
 
     SurfaceState current;
     SurfaceState pending;
