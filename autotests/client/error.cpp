@@ -106,8 +106,8 @@ void ErrorTest::init()
         this);
     QVERIFY(m_compositor);
     m_shell = registry.createXdgShell(
-        registry.interface(Wrapland::Client::Registry::Interface::XdgShellStable).name,
-        registry.interface(Wrapland::Client::Registry::Interface::XdgShellStable).version,
+        registry.interface(Wrapland::Client::Registry::Interface::XdgShell).name,
+        registry.interface(Wrapland::Client::Registry::Interface::XdgShell).version,
         this);
     QVERIFY(m_shell);
     m_plasmaShell = registry.createPlasmaShell(

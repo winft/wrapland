@@ -103,7 +103,7 @@ void TestXdgDecoration::init()
 
     m_registry = new Client::Registry();
     QSignalSpy compositorSpy(m_registry, &Client::Registry::compositorAnnounced);
-    QSignalSpy xdgShellSpy(m_registry, &Client::Registry::xdgShellStableAnnounced);
+    QSignalSpy xdgShellSpy(m_registry, &Client::Registry::xdgShellAnnounced);
     QSignalSpy xdgDecorationManagerSpy(m_registry, &Client::Registry::xdgDecorationAnnounced);
 
     QVERIFY(!m_registry->eventQueue());

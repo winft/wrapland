@@ -152,6 +152,13 @@ class WRAPLANDCLIENT_EXPORT XdgShell : public QObject
 {
     Q_OBJECT
 public:
+    /**
+     * Creates a new XdgShell.
+     * Note: after constructing the XdgShell it is not yet valid and one needs
+     * to call setup. In order to get a ready to use XdgShell prefer using
+     * Registry::createXdgShell.
+     **/
+    explicit XdgShell(QObject* parent = nullptr);
     virtual ~XdgShell();
 
     /**
@@ -217,17 +224,8 @@ Q_SIGNALS:
      **/
     void removed();
 
-protected:
-    /**
-     * Creates a new XdgShell.
-     * Note: after constructing the XdgShell it is not yet valid and one needs
-     * to call setup. In order to get a ready to use XdgShell prefer using
-     * Registry::createXdgShell.
-     **/
-    class Private;
-    explicit XdgShell(Private* p, QObject* parent = nullptr);
-
 private:
+    class Private;
     std::unique_ptr<Private> d_ptr;
 };
 

@@ -61,7 +61,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdgforeign_v2.h"
 #include "xdgoutput.h"
 #include "xdgshell.h"
-#include "xdgshell_p.h"
 // Qt
 #include <QDebug>
 // wayland
@@ -468,13 +467,13 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         },
     },
     {
-        Registry::Interface::XdgShellStable,
+        Registry::Interface::XdgShell,
         {
             2,
             QByteArrayLiteral("xdg_wm_base"),
             &xdg_wm_base_interface,
-            &Registry::xdgShellStableAnnounced,
-            &Registry::xdgShellStableRemoved,
+            &Registry::xdgShellAnnounced,
+            &Registry::xdgShellRemoved,
         },
     },
     {
@@ -820,7 +819,7 @@ BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
 BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
 BIND(Viewporter, wp_viewporter)
-BIND(XdgShellStable, xdg_wm_base)
+BIND(XdgShell, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
 BIND(PointerGesturesUnstableV1, zwp_pointer_gestures_v1)
 BIND(PointerConstraintsUnstableV1, zwp_pointer_constraints_v1)
@@ -898,6 +897,7 @@ CREATE(ServerSideDecorationPaletteManager)
 CREATE(Viewporter)
 CREATE(KeyboardShortcutsInhibitManagerV1)
 CREATE(PresentationManager)
+CREATE(XdgShell)
 
 #undef CREATE
 #undef CREATE2
@@ -925,16 +925,6 @@ TextInputManager* Registry::createTextInputManager(quint32 name, quint32 version
     case Interface::TextInputManagerUnstableV2:
         return d->create<TextInputManagerUnstableV2>(
             name, version, parent, &Registry::bindTextInputManagerUnstableV2);
-    default:
-        return nullptr;
-    }
-}
-
-XdgShell* Registry::createXdgShell(quint32 name, quint32 version, QObject* parent)
-{
-    switch (d->interfaceForName(name)) {
-    case Interface::XdgShellStable:
-        return d->create<XdgShellStable>(name, version, parent, &Registry::bindXdgShellStable);
     default:
         return nullptr;
     }

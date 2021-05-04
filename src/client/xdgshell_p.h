@@ -12,90 +12,10 @@
 #include <QRect>
 #include <QSize>
 
+#include <wayland-xdg-shell-client-protocol.h>
+
 namespace Wrapland::Client
 {
-
-class Q_DECL_HIDDEN XdgShell::Private
-{
-public:
-    virtual ~Private();
-    virtual void setup(xdg_wm_base* xdgshell)
-    {
-        Q_UNUSED(xdgshell);
-    }
-    virtual void release() = 0;
-    virtual bool isValid() const = 0;
-    virtual operator xdg_wm_base*()
-    {
-        return nullptr;
-    }
-    virtual operator xdg_wm_base*() const
-    {
-        return nullptr;
-    }
-
-    virtual XdgShellSurface* getXdgSurface(Surface* surface, QObject* parent) = 0;
-
-    virtual XdgShellPopup* getXdgPopup(Surface* surface,
-                                       Surface* parentSurface,
-                                       Seat* seat,
-                                       quint32 serial,
-                                       const QPoint& parentPos,
-                                       QObject* parent)
-    {
-        Q_UNUSED(surface)
-        Q_UNUSED(parentSurface)
-        Q_UNUSED(seat)
-        Q_UNUSED(serial)
-        Q_UNUSED(parentPos)
-        Q_UNUSED(parent)
-        Q_ASSERT(false);
-        return nullptr;
-    };
-
-    virtual XdgShellPopup* getXdgPopup(Surface* surface,
-                                       XdgShellSurface* parentSurface,
-                                       const XdgPositioner& positioner,
-                                       QObject* parent)
-    {
-        Q_UNUSED(surface)
-        Q_UNUSED(parentSurface)
-        Q_UNUSED(positioner)
-        Q_UNUSED(parent)
-        Q_ASSERT(false);
-        return nullptr;
-    }
-
-    virtual XdgShellPopup* getXdgPopup(Surface* surface,
-                                       XdgShellPopup* parentSurface,
-                                       const XdgPositioner& positioner,
-                                       QObject* parent)
-    {
-
-        Q_UNUSED(surface)
-        Q_UNUSED(parentSurface)
-        Q_UNUSED(positioner)
-        Q_UNUSED(parent)
-        Q_ASSERT(false);
-        return nullptr;
-    }
-
-    EventQueue* queue = nullptr;
-
-protected:
-    Private() = default;
-};
-
-class XdgShellStable : public XdgShell
-{
-    Q_OBJECT
-public:
-    explicit XdgShellStable(QObject* parent = nullptr);
-    virtual ~XdgShellStable();
-
-private:
-    class Private;
-};
 
 class XdgTopLevelStable : public XdgShellSurface
 {
@@ -105,7 +25,7 @@ public:
 
 private:
     explicit XdgTopLevelStable(QObject* parent = nullptr);
-    friend class XdgShellStable;
+    friend class XdgShell;
     class Private;
 };
 
@@ -236,7 +156,7 @@ public:
 
 private:
     explicit XdgShellPopupStable(QObject* parent = nullptr);
-    friend class XdgShellStable;
+    friend class XdgShell;
     class Private;
 };
 

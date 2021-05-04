@@ -183,7 +183,7 @@ void XdgShellTest::init()
     QSignalSpy outputAnnouncedSpy(&registry, &Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    QSignalSpy xdgShellAnnouncedSpy(&registry, &Client::Registry::xdgShellStableAnnounced);
+    QSignalSpy xdgShellAnnouncedSpy(&registry, &Client::Registry::xdgShellAnnounced);
     QVERIFY(xdgShellAnnouncedSpy.isValid());
 
     registry.setEventQueue(m_queue);
@@ -221,12 +221,12 @@ void XdgShellTest::init()
     QVERIFY(m_seat->isValid());
 
     QCOMPARE(xdgShellAnnouncedSpy.count(), 1);
-    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShellStable).version, 2);
+    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShell).version, 2);
 
-    m_xdgShell = registry.createXdgShell(
-        registry.interface(Client::Registry::Interface::XdgShellStable).name,
-        registry.interface(Client::Registry::Interface::XdgShellStable).version,
-        this);
+    m_xdgShell
+        = registry.createXdgShell(registry.interface(Client::Registry::Interface::XdgShell).name,
+                                  registry.interface(Client::Registry::Interface::XdgShell).version,
+                                  this);
     QVERIFY(m_xdgShell);
     QVERIFY(m_xdgShell->isValid());
 }

@@ -198,7 +198,7 @@ public:
         PlasmaVirtualDesktopManagement, ///< Refers to org_kde_plasma_virtual_desktop_management
                                         ///< interface @since 0.0.552
         XdgOutputUnstableV1,            /// refers to zxdg_output_v1, @since 0.0.547
-        XdgShellStable,                 /// refers to xdg_wm_base @since 0.0.548
+        XdgShell,                       /// refers to xdg_wm_base @since 0.0.548
         XdgDecorationUnstableV1,        /// refers to zxdg_decoration_manager_v1, @since 0.0.554
         Keystate,                       ///< refers to org_kwin_keystate, @since 0.0.557
         Viewporter,                     ///< Refers to wp_viewporter, @since 0.518.0
@@ -564,7 +564,7 @@ public:
      * @see createXdgShell
      * @since 0.0.539
      **/
-    xdg_wm_base* bindXdgShellStable(uint32_t name, uint32_t version) const;
+    xdg_wm_base* bindXdgShell(uint32_t name, uint32_t version) const;
     /**
      * Binds the zwp_relative_pointer_manager_v1 with @p name and @p version.
      * If the @p name does not exist or is not for the relative pointer interface in unstable
@@ -1644,7 +1644,7 @@ Q_SIGNALS:
      * @param version The maximum supported version of the announced interface
      * @since 0.0.548
      **/
-    void xdgShellStableAnnounced(quint32 name, quint32 version);
+    void xdgShellAnnounced(quint32 name, quint32 version);
 
     /**
      * Emitted whenever a zxdg_decoration_manager_v1 interface gets announced.
@@ -1887,7 +1887,7 @@ Q_SIGNALS:
      * @param name The name for the removed interface
      * @since 0.0.548
      **/
-    void xdgShellStableRemoved(quint32 name);
+    void xdgShellRemoved(quint32 name);
 
     /**
      * Emitted whenever a zxdg_decoration_manager_v1 gets removed.
