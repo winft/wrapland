@@ -48,8 +48,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/subcompositor.h"
 #include "../../src/client/surface.h"
+#include "../../src/client/xdg_shell.h"
 #include "../../src/client/xdgdecoration.h"
-#include "../../src/client/xdgshell.h"
 
 #include "../../server/blur.h"
 #include "../../server/contrast.h"

@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/plasmashell.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/xdgshell.h"
+#include "../../src/client/xdg_shell.h"
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"

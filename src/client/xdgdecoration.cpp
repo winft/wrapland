@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "event_queue.h"
 #include "wayland_pointer_p.h"
-#include "xdgshell.h"
+#include "xdg_shell_toplevel.h"
 
 #include <QDebug>
 

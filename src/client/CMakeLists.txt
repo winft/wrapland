@@ -57,7 +57,10 @@ set(CLIENT_LIB_SRCS
     wlr_output_configuration_v1.cpp
     wlr_output_manager_v1.cpp
     xdgdecoration.cpp
-    xdgshell.cpp
+    xdg_shell.cpp
+    xdg_shell_popup.cpp
+    xdg_shell_positioner.cpp
+    xdg_shell_toplevel.cpp
     xdgforeign_v2.cpp
     xdgforeign.cpp
     xdgoutput.cpp
@@ -321,7 +324,10 @@ set(CLIENT_LIB_HEADERS
   textinput.h
   viewporter.h
   xdgdecoration.h
-  xdgshell.h
+  xdg_shell.h
+  xdg_shell_popup.h
+  xdg_shell_positioner.h
+  xdg_shell_toplevel.h
   xdgforeign.h
   xdgoutput.h
   linux_dmabuf_v1.h

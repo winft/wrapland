@@ -57,10 +57,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "viewporter.h"
 #include "wayland_pointer_p.h"
 #include "wlr_output_manager_v1.h"
+#include "xdg_shell.h"
 #include "xdgdecoration.h"
 #include "xdgforeign_v2.h"
 #include "xdgoutput.h"
-#include "xdgshell.h"
 // Qt
 #include <QDebug>
 // wayland

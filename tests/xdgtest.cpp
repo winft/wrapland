@@ -27,7 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/client/shell.h"
 #include "../src/client/shm_pool.h"
 #include "../src/client/surface.h"
-#include "../src/client/xdgshell.h"
+#include "../src/client/xdg_shell.h"
 // Qt
 #include <QGuiApplication>
 #include <QImage>

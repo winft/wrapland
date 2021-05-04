@@ -25,8 +25,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../src/client/registry.h"
 #include "../src/client/shell.h"
 #include "../src/client/shm_pool.h"
+#include "../src/client/xdg_shell.h"
 #include "../src/client/xdgdecoration.h"
-#include "../src/client/xdgshell.h"
 // Qt
 #include <QCommandLineParser>
 #include <QDebug>
