@@ -426,11 +426,11 @@ Q_SIGNALS:
      **/
     void sizeChanged(const QSize&);
 
-protected:
-    class Private;
-    explicit XdgShellToplevel(Private* p, QObject* parent = nullptr);
-
 private:
+    explicit XdgShellToplevel(QObject* parent = nullptr);
+    friend class XdgShell;
+
+    class Private;
     std::unique_ptr<Private> d_ptr;
 };
 
