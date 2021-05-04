@@ -79,6 +79,7 @@ private Q_SLOTS:
 
     void testMultipleRoles1();
     void testMultipleRoles2();
+    void test_role_after_buffer();
 
     void testWindowGeometry();
 
@@ -902,6 +903,39 @@ void XdgShellTest::testMultipleRoles2()
     xdg_popup_destroy(xdgPopup2);
     xdg_surface_destroy(xdgSurface);
     xdg_surface_destroy(parentXdgSurface);
+}
+
+void XdgShellTest::test_role_after_buffer()
+{
+    QSignalSpy surface_spy(m_serverCompositor, &Server::Compositor::surfaceCreated);
+    QVERIFY(surface_spy.isValid());
+    QSignalSpy xdg_toplevel_spy(m_serverXdgShell, &Server::XdgShell::toplevelCreated);
+    QVERIFY(xdg_toplevel_spy.isValid());
+
+    std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
+    auto xdg_surface = xdg_wm_base_get_xdg_surface(*m_xdgShell, *surface.get());
+
+    QVERIFY(surface_spy.wait());
+    auto server_surface = surface_spy.first().first().value<Server::Surface*>();
+
+    QSignalSpy commit_spy(server_surface, &Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
+
+    // Now commit a buffer before getting the toplevel from the surface.
+    auto img = QImage(QSize(300, 300), QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::black);
+    auto buffer = m_shmPool->createBuffer(img);
+
+    surface->attachBuffer(buffer);
+    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+
+    QVERIFY(commit_spy.wait());
+
+    auto xdg_toplevel = xdg_surface_get_toplevel(xdg_surface);
+    QVERIFY(!xdg_toplevel_spy.wait(100));
+
+    xdg_toplevel_destroy(xdg_toplevel);
+    xdg_surface_destroy(xdg_surface);
 }
 
 void XdgShellTest::testWindowGeometry()

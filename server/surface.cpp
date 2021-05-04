@@ -34,7 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "subsurface_p.h"
 #include "viewporter_p.h"
 #include "wl_output_p.h"
-#include "xdg_shell_surface.h"
+#include "xdg_shell_surface_p.h"
 
 #include <QListIterator>
 
@@ -390,6 +390,13 @@ void Surface::frameRendered(quint32 msec)
     }
 }
 
+bool Surface::Private::has_role() const
+{
+    auto const has_xdg_shell_role
+        = shellSurface && (shellSurface->d_ptr->toplevel || shellSurface->d_ptr->popup);
+    return has_xdg_shell_role || subsurface;
+}
+
 void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
                                                   const QRectF& sourceRectangle) const
 {
@@ -718,6 +725,8 @@ void Surface::Private::addFrameCallback(uint32_t callback)
 
 void Surface::Private::attachBuffer(wl_resource* wlBuffer, const QPoint& offset)
 {
+    had_buffer_attached = true;
+
     pending.bufferIsSet = true;
     pending.offset = offset;
 

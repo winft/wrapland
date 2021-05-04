@@ -121,12 +121,16 @@ public:
     void updateCurrentState(bool forceChildren);
     void updateCurrentState(SurfaceState& source, bool forceChildren);
 
+    bool has_role() const;
+
+    bool had_buffer_attached{false};
+
     XdgShellSurface* shellSurface = nullptr;
+    Subsurface* subsurface = nullptr;
 
     SurfaceState current;
     SurfaceState pending;
 
-    Subsurface* subsurface = nullptr;
     QRegion trackedDamage;
 
     // Workaround for https://bugreports.qt.io/browse/QTBUG-52192:
