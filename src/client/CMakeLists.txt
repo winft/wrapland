@@ -60,7 +60,6 @@ set(CLIENT_LIB_SRCS
     xdgshell.cpp
     xdgforeign_v2.cpp
     xdgforeign.cpp
-    xdgshell_stable.cpp
     xdgoutput.cpp
     linux_dmabuf_v1.cpp
 )

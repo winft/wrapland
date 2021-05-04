@@ -517,11 +517,11 @@ Q_SIGNALS:
      **/
     void configureRequested(const QRect& relativePosition, quint32 serial);
 
-protected:
-    class Private;
-    explicit XdgShellPopup(Private* p, QObject* parent = nullptr);
-
 private:
+    explicit XdgShellPopup(QObject* parent = nullptr);
+    friend class XdgShell;
+
+    class Private;
     std::unique_ptr<Private> d_ptr;
 };
 

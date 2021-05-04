@@ -234,7 +234,7 @@ XdgShellPopup* XdgShell::Private::internalGetXdgPopup(Surface* surface,
         xdg_positioner_set_constraint_adjustment(p, constraint);
     }
 
-    XdgShellPopup* s = new XdgShellPopupStable(parent);
+    XdgShellPopup* s = new XdgShellPopup(parent);
     auto popup = xdg_surface_get_popup(ss, parentSurface, p);
     if (queue) {
         // deliberately not adding the positioner because the positioner has no events sent to it
@@ -734,16 +734,148 @@ QSize XdgShellToplevel::size() const
     return d_ptr->size;
 }
 
-XdgShellPopup::Private::~Private() = default;
+class Q_DECL_HIDDEN XdgShellPopup::Private
+{
+public:
+    Private(XdgShellPopup* q);
+    virtual ~Private();
+
+    EventQueue* queue = nullptr;
+
+    void setup(xdg_surface* s, xdg_popup* p);
+    void release();
+    bool isValid() const;
+    void requestGrab(Seat* seat, quint32 serial);
+    void ackConfigure(quint32 serial);
+    void setWindowGeometry(const QRect& windowGeometry);
+
+    operator xdg_surface*()
+    {
+        return xdgsurface;
+    }
+    operator xdg_surface*() const
+    {
+        return xdgsurface;
+    }
+    operator xdg_popup*()
+    {
+        return xdgpopup;
+    }
+    operator xdg_popup*() const
+    {
+        return xdgpopup;
+    }
+
+private:
+    static void configureCallback(void* data,
+                                  xdg_popup* xdg_popup,
+                                  int32_t x,
+                                  int32_t y,
+                                  int32_t width,
+                                  int32_t height);
+    static void popupDoneCallback(void* data, xdg_popup* xdg_popup);
+    static void surfaceConfigureCallback(void* data, xdg_surface* xdg_surface, uint32_t serial);
+
+    QRect pendingRect;
+
+    static struct xdg_popup_listener const s_popupListener;
+    static struct xdg_surface_listener const s_surfaceListener;
+
+    WaylandPointer<xdg_surface, xdg_surface_destroy> xdgsurface;
+    WaylandPointer<xdg_popup, xdg_popup_destroy> xdgpopup;
+
+    XdgShellPopup* q_ptr;
+};
+
+struct xdg_popup_listener const XdgShellPopup::Private::s_popupListener = {
+    configureCallback,
+    popupDoneCallback,
+};
+
+struct xdg_surface_listener const XdgShellPopup::Private::s_surfaceListener = {
+    surfaceConfigureCallback,
+};
+
+void XdgShellPopup::Private::configureCallback(void* data,
+                                               xdg_popup* xdg_popup,
+                                               int32_t x,
+                                               int32_t y,
+                                               int32_t width,
+                                               int32_t height)
+{
+    Q_UNUSED(xdg_popup)
+    auto s = static_cast<Private*>(data);
+    s->pendingRect = QRect(x, y, width, height);
+}
+
+void XdgShellPopup::Private::surfaceConfigureCallback(void* data,
+                                                      struct xdg_surface* surface,
+                                                      uint32_t serial)
+{
+    Q_UNUSED(surface)
+    auto s = static_cast<Private*>(data);
+    s->q_ptr->configureRequested(s->pendingRect, serial);
+    s->pendingRect = QRect();
+}
+
+void XdgShellPopup::Private::popupDoneCallback(void* data, xdg_popup* xdg_popup)
+{
+    auto s = static_cast<XdgShellPopup::Private*>(data);
+    Q_ASSERT(s->xdgpopup == xdg_popup);
+    Q_EMIT s->q_ptr->popupDone();
+}
 
 XdgShellPopup::Private::Private(XdgShellPopup* q)
     : q_ptr(q)
 {
 }
 
-XdgShellPopup::XdgShellPopup(Private* p, QObject* parent)
+XdgShellPopup::Private::~Private() = default;
+
+void XdgShellPopup::Private::setup(xdg_surface* s, xdg_popup* p)
+{
+    Q_ASSERT(p);
+    Q_ASSERT(!xdgsurface);
+    Q_ASSERT(!xdgpopup);
+
+    xdgsurface.setup(s);
+    xdgpopup.setup(p);
+    xdg_surface_add_listener(xdgsurface, &s_surfaceListener, this);
+    xdg_popup_add_listener(xdgpopup, &s_popupListener, this);
+}
+
+void XdgShellPopup::Private::release()
+{
+    xdgpopup.release();
+}
+
+bool XdgShellPopup::Private::isValid() const
+{
+    return xdgpopup.isValid();
+}
+
+void XdgShellPopup::Private::requestGrab(Seat* seat, quint32 serial)
+{
+    xdg_popup_grab(xdgpopup, *seat, serial);
+}
+
+void XdgShellPopup::Private::ackConfigure(quint32 serial)
+{
+    xdg_surface_ack_configure(xdgsurface, serial);
+}
+
+void XdgShellPopup::Private::setWindowGeometry(const QRect& windowGeometry)
+{
+    xdg_surface_set_window_geometry(xdgsurface,
+                                    windowGeometry.x(),
+                                    windowGeometry.y(),
+                                    windowGeometry.width(),
+                                    windowGeometry.height());
+}
+
+XdgShellPopup::XdgShellPopup(QObject* parent)
     : QObject(parent)
-    , d_ptr(p)
+    , d_ptr{new Private(this)}
 {
 }
 
