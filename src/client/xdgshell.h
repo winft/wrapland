@@ -28,7 +28,7 @@ class Output;
 class Surface;
 class Seat;
 class XdgShellPopup;
-class XdgShellSurface;
+class XdgShellToplevel;
 
 /**
  * Builder class describing how a popup should be positioned
@@ -188,9 +188,9 @@ public:
     EventQueue* eventQueue();
 
     /**
-     * Creates a new XdgShellSurface for the given @p surface.
+     * Creates a new XdgShellToplevel for the given @p surface.
      **/
-    XdgShellSurface* createSurface(Surface* surface, QObject* parent = nullptr);
+    XdgShellToplevel* create_toplevel(Surface* surface, QObject* parent = nullptr);
 
     /**
      * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the
@@ -198,7 +198,7 @@ public:
      * @since 0.0.539
      **/
     XdgShellPopup* createPopup(Surface* surface,
-                               XdgShellSurface* parentSurface,
+                               XdgShellToplevel* parentSurface,
                                const XdgPositioner& positioner,
                                QObject* parent = nullptr);
 
@@ -233,11 +233,11 @@ private:
  *
  * @since 0.0.525
  **/
-class WRAPLANDCLIENT_EXPORT XdgShellSurface : public QObject
+class WRAPLANDCLIENT_EXPORT XdgShellToplevel : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~XdgShellSurface();
+    virtual ~XdgShellToplevel();
     /**
      * States the Surface can be in
      **/
@@ -266,8 +266,8 @@ public:
     Q_DECLARE_FLAGS(States, State)
 
     /**
-     * Setup this XdgShellSurface to manage the @p toplevel on the relevant @p xdgsurface
-     * When using XdgShell::createXdgShellSurface there is no need to call this
+     * Setup this XdgShellToplevel to manage the @p toplevel on the relevant @p xdgsurface
+     * When using XdgShell::createXdgShellToplevel there is no need to call this
      * method.
      **/
     void setup(xdg_surface* xdgsurface, xdg_toplevel* toplevel);
@@ -278,7 +278,7 @@ public:
     bool isValid() const;
     /**
      * Releases the xdg_surface interface.
-     * After the interface has been released the XdgShellSurface instance is no
+     * After the interface has been released the XdgShellToplevel instance is no
      * longer valid and can be setup with another xdg_surface interface.
      **/
     void release();
@@ -300,23 +300,23 @@ public:
     QSize size() const;
 
     /**
-     * Sets the size for the XdgShellSurface to @p size.
-     * This is mostly an internal information. The actual size of the XdgShellSurface is
-     * determined by the size of the Buffer attached to the XdgShellSurface's Surface.
+     * Sets the size for the XdgShellToplevel to @p size.
+     * This is mostly an internal information. The actual size of the XdgShellToplevel is
+     * determined by the size of the Buffer attached to the XdgShellToplevel's Surface.
      *
-     * @param size The new size to be used for the XdgShellSurface
+     * @param size The new size to be used for the XdgShellToplevel
      * @see size
      * @see sizeChanged
      **/
     void setSize(const QSize& size);
 
     /**
-     * Set this XdgShellSurface as transient for @p parent.
+     * Set this XdgShellToplevel as transient for @p parent.
      **/
-    void setTransientFor(XdgShellSurface* parent);
+    void setTransientFor(XdgShellToplevel* parent);
 
     /**
-     * Sets the window title of this XdgShellSurface to @p title.
+     * Sets the window title of this XdgShellToplevel to @p title.
      **/
     void setTitle(const QString& title);
 
@@ -358,15 +358,15 @@ public:
     void ackConfigure(quint32 serial);
 
     /**
-     * Request to set this XdgShellSurface to be maximized if @p set is @c true.
+     * Request to set this XdgShellToplevel to be maximized if @p set is @c true.
      * If @p set is @c false it requests to unset the maximized state - if set.
      *
-     * @param set Whether the XdgShellSurface should be maximized
+     * @param set Whether the XdgShellToplevel should be maximized
      **/
     void setMaximized(bool set);
 
     /**
-     * Request to set this XdgShellSurface as fullscreen on @p output.
+     * Request to set this XdgShellToplevel as fullscreen on @p output.
      * If @p set is @c true the Surface should be set to fullscreen, otherwise restore
      * from fullscreen state.
      *
@@ -376,7 +376,7 @@ public:
     void setFullscreen(bool set, Output* output = nullptr);
 
     /**
-     * Request to the compositor to minimize this XdgShellSurface.
+     * Request to the compositor to minimize this XdgShellToplevel.
      **/
     void requestMinimize();
 
@@ -413,11 +413,11 @@ Q_SIGNALS:
      * Before the next commit of the surface the @p serial needs to be passed to ackConfigure.
      **/
     void configureRequested(const QSize& size,
-                            Wrapland::Client::XdgShellSurface::States states,
+                            Wrapland::Client::XdgShellToplevel::States states,
                             quint32 serial);
 
     /**
-     * Emitted whenever the size of the XdgShellSurface changes by e.g. receiving a configure
+     * Emitted whenever the size of the XdgShellToplevel changes by e.g. receiving a configure
      * request.
      *
      * @see configureRequested
@@ -428,7 +428,7 @@ Q_SIGNALS:
 
 protected:
     class Private;
-    explicit XdgShellSurface(Private* p, QObject* parent = nullptr);
+    explicit XdgShellToplevel(Private* p, QObject* parent = nullptr);
 
 private:
     std::unique_ptr<Private> d_ptr;
@@ -528,11 +528,11 @@ private:
 }
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::XdgShellSurface::States)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::XdgShellToplevel::States)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::XdgPositioner::Constraints)
 
 Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner)
-Q_DECLARE_METATYPE(Wrapland::Client::XdgShellSurface::State)
-Q_DECLARE_METATYPE(Wrapland::Client::XdgShellSurface::States)
+Q_DECLARE_METATYPE(Wrapland::Client::XdgShellToplevel::State)
+Q_DECLARE_METATYPE(Wrapland::Client::XdgShellToplevel::States)
 Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner::Constraint)
 Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner::Constraints)

@@ -97,7 +97,7 @@ EventQueue* XdgDecorationManager::eventQueue()
     return d->queue;
 }
 
-XdgDecoration* XdgDecorationManager::getToplevelDecoration(XdgShellSurface* toplevel,
+XdgDecoration* XdgDecorationManager::getToplevelDecoration(XdgShellToplevel* toplevel,
                                                            QObject* parent)
 {
     Q_ASSERT(isValid());

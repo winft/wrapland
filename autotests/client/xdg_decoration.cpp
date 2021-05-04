@@ -204,7 +204,8 @@ void TestXdgDecoration::testDecoration()
 
     // Create shell surface and deco object.
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<Client::XdgShellSurface> shellSurface(m_xdgShell->createSurface(surface.get()));
+    std::unique_ptr<Client::XdgShellToplevel> shellSurface(
+        m_xdgShell->create_toplevel(surface.get()));
     std::unique_ptr<Client::XdgDecoration> decoration(
         m_xdgDecorationManager->getToplevelDecoration(shellSurface.get()));
 

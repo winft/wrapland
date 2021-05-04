@@ -16,10 +16,10 @@ namespace Wrapland::Client
 {
 
 // A top level wraps both xdg_surface and xdg_top_level into the public API XdgShelllSurface
-class XdgTopLevelStable::Private : public XdgShellSurface::Private
+class XdgTopLevelStable::Private : public XdgShellToplevel::Private
 {
 public:
-    Private(XdgShellSurface* q);
+    Private(XdgShellToplevel* q);
     WaylandPointer<xdg_toplevel, xdg_toplevel_destroy> xdgtoplevel;
     WaylandPointer<xdg_surface, xdg_surface_destroy> xdgsurface;
 
@@ -44,7 +44,7 @@ public:
         return xdgtoplevel;
     }
 
-    void setTransientFor(XdgShellSurface* parent) override;
+    void setTransientFor(XdgShellToplevel* parent) override;
     void setTitle(const QString& title) override;
     void setAppId(const QByteArray& appId) override;
     void showWindowMenu(Seat* seat, quint32 serial, qint32 x, qint32 y) override;
@@ -113,28 +113,28 @@ void XdgTopLevelStable::Private::configureCallback(void* data,
     for (size_t i = 0; i < state->size / sizeof(uint32_t); i++) {
         switch (statePtr[i]) {
         case XDG_TOPLEVEL_STATE_MAXIMIZED:
-            states = states | XdgShellSurface::State::Maximized;
+            states = states | XdgShellToplevel::State::Maximized;
             break;
         case XDG_TOPLEVEL_STATE_FULLSCREEN:
-            states = states | XdgShellSurface::State::Fullscreen;
+            states = states | XdgShellToplevel::State::Fullscreen;
             break;
         case XDG_TOPLEVEL_STATE_RESIZING:
-            states = states | XdgShellSurface::State::Resizing;
+            states = states | XdgShellToplevel::State::Resizing;
             break;
         case XDG_TOPLEVEL_STATE_ACTIVATED:
-            states = states | XdgShellSurface::State::Activated;
+            states = states | XdgShellToplevel::State::Activated;
             break;
         case XDG_TOPLEVEL_STATE_TILED_LEFT:
-            states = states | XdgShellSurface::State::TiledLeft;
+            states = states | XdgShellToplevel::State::TiledLeft;
             break;
         case XDG_TOPLEVEL_STATE_TILED_RIGHT:
-            states = states | XdgShellSurface::State::TiledRight;
+            states = states | XdgShellToplevel::State::TiledRight;
             break;
         case XDG_TOPLEVEL_STATE_TILED_TOP:
-            states = states | XdgShellSurface::State::TiledTop;
+            states = states | XdgShellToplevel::State::TiledTop;
             break;
         case XDG_TOPLEVEL_STATE_TILED_BOTTOM:
-            states = states | XdgShellSurface::State::TiledBottom;
+            states = states | XdgShellToplevel::State::TiledBottom;
             break;
         }
     }
@@ -149,8 +149,8 @@ void XdgTopLevelStable::Private::closeCallback(void* data, xdg_toplevel* xdg_top
     Q_EMIT s->q_ptr->closeRequested();
 }
 
-XdgTopLevelStable::Private::Private(XdgShellSurface* q)
-    : XdgShellSurface::Private(q)
+XdgTopLevelStable::Private::Private(XdgShellToplevel* q)
+    : XdgShellToplevel::Private(q)
 {
 }
 
@@ -175,7 +175,7 @@ bool XdgTopLevelStable::Private::isValid() const
     return xdgtoplevel.isValid() && xdgsurface.isValid();
 }
 
-void XdgTopLevelStable::Private::setTransientFor(XdgShellSurface* parent)
+void XdgTopLevelStable::Private::setTransientFor(XdgShellToplevel* parent)
 {
     xdg_toplevel* parentSurface = nullptr;
     if (parent) {
@@ -285,7 +285,7 @@ void XdgTopLevelStable::Private::setWindowGeometry(const QRect& windowGeometry)
 }
 
 XdgTopLevelStable::XdgTopLevelStable(QObject* parent)
-    : XdgShellSurface(new Private(this), parent)
+    : XdgShellToplevel(new Private(this), parent)
 {
 }
 

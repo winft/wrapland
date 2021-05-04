@@ -153,10 +153,10 @@ void ErrorTest::testMultipleShellSurfacesForSurface()
     QVERIFY(errorSpy.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<Wrapland::Client::XdgShellSurface> shellSurface1(
-        m_shell->createSurface(surface.get()));
-    std::unique_ptr<Wrapland::Client::XdgShellSurface> shellSurface2(
-        m_shell->createSurface(surface.get()));
+    std::unique_ptr<Wrapland::Client::XdgShellToplevel> shellSurface1(
+        m_shell->create_toplevel(surface.get()));
+    std::unique_ptr<Wrapland::Client::XdgShellToplevel> shellSurface2(
+        m_shell->create_toplevel(surface.get()));
 
     QCOMPARE(m_connection->error(), 0);
     QVERIFY(errorSpy.wait());

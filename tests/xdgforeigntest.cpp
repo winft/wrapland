@@ -52,11 +52,11 @@ private:
     EventQueue* m_eventQueue = nullptr;
     Compositor* m_compositor = nullptr;
     XdgShell* m_shell = nullptr;
-    XdgShellSurface* m_shellSurface = nullptr;
+    XdgShellToplevel* xdg_shell_toplevel = nullptr;
     ShmPool* m_shm = nullptr;
     Surface* m_surface = nullptr;
 
-    XdgShellSurface* m_childShellSurface = nullptr;
+    XdgShellToplevel* m_childShellSurface = nullptr;
     Surface* m_childSurface = nullptr;
 
     Wrapland::Client::XdgExporter* m_exporter = nullptr;
@@ -144,17 +144,17 @@ void XdgForeignTest::setupRegistry(Registry* registry)
         Q_ASSERT(m_importer);
         m_surface = m_compositor->createSurface(this);
         Q_ASSERT(m_surface);
-        auto parentDeco = m_decoration->getToplevelDecoration(m_shellSurface, this);
-        m_shellSurface = m_shell->createSurface(m_surface, this);
-        Q_ASSERT(m_shellSurface);
-        connect(m_shellSurface, &XdgShellSurface::sizeChanged, this, &XdgForeignTest::render);
+        auto parentDeco = m_decoration->getToplevelDecoration(xdg_shell_toplevel, this);
+        xdg_shell_toplevel = m_shell->create_toplevel(m_surface, this);
+        Q_ASSERT(xdg_shell_toplevel);
+        connect(xdg_shell_toplevel, &XdgShellToplevel::sizeChanged, this, &XdgForeignTest::render);
 
         m_childSurface = m_compositor->createSurface(this);
         Q_ASSERT(m_childSurface);
         auto childDeco = m_decoration->getToplevelDecoration(m_childShellSurface, this);
-        m_childShellSurface = m_shell->createSurface(m_childSurface, this);
+        m_childShellSurface = m_shell->create_toplevel(m_childSurface, this);
         Q_ASSERT(m_childShellSurface);
-        connect(m_childShellSurface, &XdgShellSurface::sizeChanged, this, &XdgForeignTest::render);
+        connect(m_childShellSurface, &XdgShellToplevel::sizeChanged, this, &XdgForeignTest::render);
 
         m_exported = m_exporter->exportTopLevel(m_surface, this);
         Q_ASSERT(m_decoration);
@@ -171,7 +171,8 @@ void XdgForeignTest::setupRegistry(Registry* registry)
 
 void XdgForeignTest::render()
 {
-    QSize size = m_shellSurface->size().isValid() ? m_shellSurface->size() : QSize(500, 500);
+    QSize size
+        = xdg_shell_toplevel->size().isValid() ? xdg_shell_toplevel->size() : QSize(500, 500);
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(

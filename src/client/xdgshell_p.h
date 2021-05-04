@@ -17,7 +17,7 @@
 namespace Wrapland::Client
 {
 
-class XdgTopLevelStable : public XdgShellSurface
+class XdgTopLevelStable : public XdgShellToplevel
 {
     Q_OBJECT
 public:
@@ -29,7 +29,7 @@ private:
     class Private;
 };
 
-class Q_DECL_HIDDEN XdgShellSurface::Private
+class Q_DECL_HIDDEN XdgShellToplevel::Private
 {
 public:
     virtual ~Private();
@@ -60,7 +60,7 @@ public:
         return nullptr;
     }
 
-    virtual void setTransientFor(XdgShellSurface* parent) = 0;
+    virtual void setTransientFor(XdgShellToplevel* parent) = 0;
     virtual void setTitle(const QString& title) = 0;
     virtual void setAppId(const QByteArray& appId) = 0;
     virtual void showWindowMenu(Seat* seat, quint32 serial, qint32 x, qint32 y) = 0;
@@ -80,9 +80,9 @@ public:
     }
 
 protected:
-    Private(XdgShellSurface* q);
+    Private(XdgShellToplevel* q);
 
-    XdgShellSurface* q_ptr;
+    XdgShellToplevel* q_ptr;
 };
 
 class Q_DECL_HIDDEN XdgShellPopup::Private

@@ -33,10 +33,10 @@ public:
         return xdg_shell_base;
     }
 
-    XdgShellSurface* getXdgSurface(Surface* surface, QObject* parent);
+    XdgShellToplevel* getXdgToplevel(Surface* surface, QObject* parent);
 
     XdgShellPopup* getXdgPopup(Surface* surface,
-                               XdgShellSurface* parentSurface,
+                               XdgShellToplevel* parentSurface,
                                const XdgPositioner& positioner,
                                QObject* parent);
     XdgShellPopup* getXdgPopup(Surface* surface,
@@ -87,7 +87,7 @@ bool XdgShell::Private::isValid() const
     return xdg_shell_base.isValid();
 }
 
-XdgShellSurface* XdgShell::Private::getXdgSurface(Surface* surface, QObject* parent)
+XdgShellToplevel* XdgShell::Private::getXdgToplevel(Surface* surface, QObject* parent)
 {
     Q_ASSERT(isValid());
     auto ss = xdg_wm_base_get_xdg_surface(xdg_shell_base, *surface);
@@ -107,7 +107,7 @@ XdgShellSurface* XdgShell::Private::getXdgSurface(Surface* surface, QObject* par
 }
 
 XdgShellPopup* XdgShell::Private::getXdgPopup(Surface* surface,
-                                              XdgShellSurface* parentSurface,
+                                              XdgShellToplevel* parentSurface,
                                               const XdgPositioner& positioner,
                                               QObject* parent)
 {
@@ -294,13 +294,13 @@ bool XdgShell::isValid() const
     return d_ptr->isValid();
 }
 
-XdgShellSurface* XdgShell::createSurface(Surface* surface, QObject* parent)
+XdgShellToplevel* XdgShell::create_toplevel(Surface* surface, QObject* parent)
 {
-    return d_ptr->getXdgSurface(surface, parent);
+    return d_ptr->getXdgToplevel(surface, parent);
 }
 
 XdgShellPopup* XdgShell::createPopup(Surface* surface,
-                                     XdgShellSurface* parentSurface,
+                                     XdgShellToplevel* parentSurface,
                                      const XdgPositioner& positioner,
                                      QObject* parent)
 {
@@ -315,105 +315,105 @@ XdgShellPopup* XdgShell::createPopup(Surface* surface,
     return d_ptr->getXdgPopup(surface, parentSurface, positioner, parent);
 }
 
-XdgShellSurface::Private::Private(XdgShellSurface* q)
+XdgShellToplevel::Private::Private(XdgShellToplevel* q)
     : q_ptr(q)
 {
 }
 
-XdgShellSurface::Private::~Private() = default;
+XdgShellToplevel::Private::~Private() = default;
 
-XdgShellSurface::XdgShellSurface(Private* p, QObject* parent)
+XdgShellToplevel::XdgShellToplevel(Private* p, QObject* parent)
     : QObject(parent)
     , d_ptr(p)
 {
 }
 
-XdgShellSurface::~XdgShellSurface()
+XdgShellToplevel::~XdgShellToplevel()
 {
     release();
 }
 
-void XdgShellSurface::setup(xdg_surface* xdgsurface, xdg_toplevel* xdgtoplevel)
+void XdgShellToplevel::setup(xdg_surface* xdgsurface, xdg_toplevel* xdgtoplevel)
 {
     d_ptr->setup(xdgsurface, xdgtoplevel);
 }
 
-void XdgShellSurface::release()
+void XdgShellToplevel::release()
 {
     d_ptr->release();
 }
 
-void XdgShellSurface::setEventQueue(EventQueue* queue)
+void XdgShellToplevel::setEventQueue(EventQueue* queue)
 {
     d_ptr->queue = queue;
 }
 
-EventQueue* XdgShellSurface::eventQueue()
+EventQueue* XdgShellToplevel::eventQueue()
 {
     return d_ptr->queue;
 }
 
-XdgShellSurface::operator xdg_surface*()
+XdgShellToplevel::operator xdg_surface*()
 {
     return *(d_ptr.get());
 }
 
-XdgShellSurface::operator xdg_surface*() const
+XdgShellToplevel::operator xdg_surface*() const
 {
     return *(d_ptr.get());
 }
 
-XdgShellSurface::operator xdg_toplevel*()
+XdgShellToplevel::operator xdg_toplevel*()
 {
     return *(d_ptr.get());
 }
 
-XdgShellSurface::operator xdg_toplevel*() const
+XdgShellToplevel::operator xdg_toplevel*() const
 {
     return *(d_ptr.get());
 }
 
-bool XdgShellSurface::isValid() const
+bool XdgShellToplevel::isValid() const
 {
     return d_ptr->isValid();
 }
 
-void XdgShellSurface::setTransientFor(XdgShellSurface* parent)
+void XdgShellToplevel::setTransientFor(XdgShellToplevel* parent)
 {
     d_ptr->setTransientFor(parent);
 }
 
-void XdgShellSurface::setTitle(const QString& title)
+void XdgShellToplevel::setTitle(const QString& title)
 {
     d_ptr->setTitle(title);
 }
 
-void XdgShellSurface::setAppId(const QByteArray& appId)
+void XdgShellToplevel::setAppId(const QByteArray& appId)
 {
     d_ptr->setAppId(appId);
 }
 
-void XdgShellSurface::requestShowWindowMenu(Seat* seat, quint32 serial, const QPoint& pos)
+void XdgShellToplevel::requestShowWindowMenu(Seat* seat, quint32 serial, const QPoint& pos)
 {
     d_ptr->showWindowMenu(seat, serial, pos.x(), pos.y());
 }
 
-void XdgShellSurface::requestMove(Seat* seat, quint32 serial)
+void XdgShellToplevel::requestMove(Seat* seat, quint32 serial)
 {
     d_ptr->move(seat, serial);
 }
 
-void XdgShellSurface::requestResize(Seat* seat, quint32 serial, Qt::Edges edges)
+void XdgShellToplevel::requestResize(Seat* seat, quint32 serial, Qt::Edges edges)
 {
     d_ptr->resize(seat, serial, edges);
 }
 
-void XdgShellSurface::ackConfigure(quint32 serial)
+void XdgShellToplevel::ackConfigure(quint32 serial)
 {
     d_ptr->ackConfigure(serial);
 }
 
-void XdgShellSurface::setMaximized(bool set)
+void XdgShellToplevel::setMaximized(bool set)
 {
     if (set) {
         d_ptr->setMaximized();
@@ -422,7 +422,7 @@ void XdgShellSurface::setMaximized(bool set)
     }
 }
 
-void XdgShellSurface::setFullscreen(bool set, Output* output)
+void XdgShellToplevel::setFullscreen(bool set, Output* output)
 {
     if (set) {
         d_ptr->setFullscreen(output);
@@ -431,27 +431,27 @@ void XdgShellSurface::setFullscreen(bool set, Output* output)
     }
 }
 
-void XdgShellSurface::setMaxSize(const QSize& size)
+void XdgShellToplevel::setMaxSize(const QSize& size)
 {
     d_ptr->setMaxSize(size);
 }
 
-void XdgShellSurface::setMinSize(const QSize& size)
+void XdgShellToplevel::setMinSize(const QSize& size)
 {
     d_ptr->setMinSize(size);
 }
 
-void XdgShellSurface::setWindowGeometry(const QRect& windowGeometry)
+void XdgShellToplevel::setWindowGeometry(const QRect& windowGeometry)
 {
     d_ptr->setWindowGeometry(windowGeometry);
 }
 
-void XdgShellSurface::requestMinimize()
+void XdgShellToplevel::requestMinimize()
 {
     d_ptr->setMinimized();
 }
 
-void XdgShellSurface::setSize(const QSize& size)
+void XdgShellToplevel::setSize(const QSize& size)
 {
     if (d_ptr->size == size) {
         return;
@@ -460,7 +460,7 @@ void XdgShellSurface::setSize(const QSize& size)
     emit sizeChanged(size);
 }
 
-QSize XdgShellSurface::size() const
+QSize XdgShellToplevel::size() const
 {
     return d_ptr->size;
 }

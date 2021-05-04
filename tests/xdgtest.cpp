@@ -57,7 +57,7 @@ private:
     ShmPool* m_shm = nullptr;
     Surface* m_surface = nullptr;
     XdgShell* m_xdgShell = nullptr;
-    XdgShellSurface* m_xdgShellSurface = nullptr;
+    XdgShellToplevel* xdg_shell_toplevel = nullptr;
     Surface* m_popupSurface = nullptr;
     XdgShellPopup* m_xdgShellPopup = nullptr;
 };
@@ -124,21 +124,21 @@ void XdgTest::setupRegistry(Registry* registry)
         Q_ASSERT(m_shm);
         m_surface = m_compositor->createSurface(this);
         Q_ASSERT(m_surface);
-        m_xdgShellSurface = m_xdgShell->createSurface(m_surface, this);
-        Q_ASSERT(m_xdgShellSurface);
-        connect(m_xdgShellSurface,
-                &XdgShellSurface::configureRequested,
+        xdg_shell_toplevel = m_xdgShell->create_toplevel(m_surface, this);
+        Q_ASSERT(xdg_shell_toplevel);
+        connect(xdg_shell_toplevel,
+                &XdgShellToplevel::configureRequested,
                 this,
                 [this](const QSize& size,
-                       Wrapland::Client::XdgShellSurface::States states,
+                       Wrapland::Client::XdgShellToplevel::States states,
                        int serial) {
                     Q_UNUSED(size);
                     Q_UNUSED(states);
-                    m_xdgShellSurface->ackConfigure(serial);
+                    xdg_shell_toplevel->ackConfigure(serial);
                     render();
                 });
 
-        m_xdgShellSurface->setTitle(QStringLiteral("Test Window"));
+        xdg_shell_toplevel->setTitle(QStringLiteral("Test Window"));
 
         m_surface->commit();
     });
@@ -187,14 +187,14 @@ void XdgTest::createPopup()
     positioner.setGravity(Qt::BottomEdge);
     positioner.setConstraints(XdgPositioner::Constraint::FlipX | XdgPositioner::Constraint::SlideY);
     m_xdgShellPopup
-        = m_xdgShell->createPopup(m_popupSurface, m_xdgShellSurface, positioner, m_popupSurface);
+        = m_xdgShell->createPopup(m_popupSurface, xdg_shell_toplevel, positioner, m_popupSurface);
     renderPopup();
 }
 
 void XdgTest::render()
 {
     const QSize& size
-        = m_xdgShellSurface->size().isValid() ? m_xdgShellSurface->size() : QSize(500, 500);
+        = xdg_shell_toplevel->size().isValid() ? xdg_shell_toplevel->size() : QSize(500, 500);
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(
