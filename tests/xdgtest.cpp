@@ -112,7 +112,7 @@ void XdgTest::setupRegistry(Registry* registry)
             m_shm = registry->createShmPool(name, version, this);
         });
     connect(registry,
-            &Registry::xdgShellUnstableV6Announced,
+            &Registry::xdgShellStableAnnounced,
             this,
             [this, registry](quint32 name, quint32 version) {
                 m_xdgShell = registry->createXdgShell(name, version, this);

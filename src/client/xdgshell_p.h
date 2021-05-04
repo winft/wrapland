@@ -34,10 +34,6 @@ class Q_DECL_HIDDEN XdgShell::Private
 {
 public:
     virtual ~Private();
-    virtual void setupV6(zxdg_shell_v6* xdgshellv6)
-    {
-        Q_UNUSED(xdgshellv6)
-    }
     virtual void setup(xdg_wm_base* xdgshell)
     {
         Q_UNUSED(xdgshell);
@@ -49,14 +45,6 @@ public:
         return nullptr;
     }
     virtual operator xdg_shell*() const
-    {
-        return nullptr;
-    }
-    virtual operator zxdg_shell_v6*()
-    {
-        return nullptr;
-    }
-    virtual operator zxdg_shell_v6*() const
     {
         return nullptr;
     }
@@ -121,17 +109,6 @@ protected:
     Private() = default;
 };
 
-class XdgShellUnstableV6 : public XdgShell
-{
-    Q_OBJECT
-public:
-    explicit XdgShellUnstableV6(QObject* parent = nullptr);
-    virtual ~XdgShellUnstableV6();
-
-private:
-    class Private;
-};
-
 class XdgShellStable : public XdgShell
 {
     Q_OBJECT
@@ -140,18 +117,6 @@ public:
     virtual ~XdgShellStable();
 
 private:
-    class Private;
-};
-
-class XdgTopLevelUnstableV6 : public XdgShellSurface
-{
-    Q_OBJECT
-public:
-    virtual ~XdgTopLevelUnstableV6();
-
-private:
-    explicit XdgTopLevelUnstableV6(QObject* parent = nullptr);
-    friend class XdgShellUnstableV6;
     class Private;
 };
 
@@ -174,11 +139,6 @@ public:
     EventQueue* queue = nullptr;
     QSize size;
 
-    virtual void setupV6(zxdg_surface_v6* surface, zxdg_toplevel_v6* toplevel)
-    {
-        Q_UNUSED(toplevel)
-        Q_UNUSED(surface)
-    }
     virtual void setup(xdg_surface* surface, xdg_toplevel* toplevel)
     {
         Q_UNUSED(surface)
@@ -199,22 +159,6 @@ public:
         return nullptr;
     }
     virtual operator xdg_toplevel*() const
-    {
-        return nullptr;
-    }
-    virtual operator zxdg_surface_v6*()
-    {
-        return nullptr;
-    }
-    virtual operator zxdg_surface_v6*() const
-    {
-        return nullptr;
-    }
-    virtual operator zxdg_toplevel_v6*()
-    {
-        return nullptr;
-    }
-    virtual operator zxdg_toplevel_v6*() const
     {
         return nullptr;
     }
@@ -252,11 +196,6 @@ public:
 
     EventQueue* queue = nullptr;
 
-    virtual void setupV6(zxdg_surface_v6* s, zxdg_popup_v6* p)
-    {
-        Q_UNUSED(s)
-        Q_UNUSED(p)
-    }
     virtual void setup(xdg_surface* s, xdg_popup* p)
     {
         Q_UNUSED(s)
@@ -295,22 +234,6 @@ public:
     {
         return nullptr;
     }
-    virtual operator zxdg_surface_v6*()
-    {
-        return nullptr;
-    }
-    virtual operator zxdg_surface_v6*() const
-    {
-        return nullptr;
-    }
-    virtual operator zxdg_popup_v6*()
-    {
-        return nullptr;
-    }
-    virtual operator zxdg_popup_v6*() const
-    {
-        return nullptr;
-    }
 
 protected:
     XdgShellPopup* q;
@@ -327,17 +250,6 @@ public:
     Qt::Edges anchorEdge;
     XdgPositioner::Constraints constraints;
     QPoint anchorOffset;
-};
-
-class XdgShellPopupUnstableV6 : public XdgShellPopup
-{
-public:
-    virtual ~XdgShellPopupUnstableV6();
-
-private:
-    explicit XdgShellPopupUnstableV6(QObject* parent = nullptr);
-    friend class XdgShellUnstableV6;
-    class Private;
 };
 
 class XdgShellPopupStable : public XdgShellPopup

@@ -48,7 +48,6 @@ public:
                                QObject* parent) override;
 
     using XdgShell::Private::operator xdg_shell*;
-    using XdgShell::Private::operator zxdg_shell_v6*;
     operator xdg_wm_base*() override
     {
         return xdg_shell_base;
@@ -277,8 +276,6 @@ public:
     void release() override;
     bool isValid() const override;
 
-    using XdgShellSurface::Private::operator zxdg_toplevel_v6*;
-    using XdgShellSurface::Private::operator zxdg_surface_v6*;
     operator xdg_surface*() override
     {
         return xdgsurface;
@@ -555,8 +552,6 @@ public:
     void ackConfigure(quint32 serial) override;
     void setWindowGeometry(const QRect& windowGeometry) override;
 
-    using XdgShellPopup::Private::operator zxdg_popup_v6*;
-    using XdgShellPopup::Private::operator zxdg_surface_v6*;
     operator xdg_surface*() override
     {
         return xdgsurface;

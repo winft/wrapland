@@ -34,12 +34,6 @@ struct xdg_surface;
 struct xdg_popup;
 struct xdg_toplevel;
 
-struct zxdg_shell_v6;
-struct zxdg_toplevel_v6;
-struct zxdg_surface_v6;
-struct zxdg_popup_v6;
-struct zxdg_position_v6;
-
 namespace Wrapland
 {
 namespace Client
@@ -177,13 +171,6 @@ public:
     virtual ~XdgShell();
 
     /**
-     * Setup this XdgShell to manage the @p xdgshellv6.
-     * When using Registry::createXdgShell there is no need to call this
-     * method.
-     **/
-    void setup(zxdg_shell_v6* xdgshellv6);
-
-    /**
      * Setup this XdgShell to manage the @p xdg_wm_base.
      * When using Registry::createXdgShell there is no need to call this
      * method.
@@ -216,7 +203,7 @@ public:
 
     /**
      * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the
-     * given @p positioner. This method is only valid for Xdgv6 onwards.
+     * given @p positioner.
      * @since 0.0.539
      **/
     XdgShellPopup* createPopup(Surface* surface,
@@ -238,8 +225,6 @@ public:
     operator xdg_wm_base*() const;
     operator xdg_shell*();
     operator xdg_shell*() const;
-    operator zxdg_shell_v6*();
-    operator zxdg_shell_v6*() const;
 
 Q_SIGNALS:
     /**
@@ -299,13 +284,6 @@ public:
         TiledBottom = 1 << 7,
     };
     Q_DECLARE_FLAGS(States, State)
-
-    /**
-     * Setup this XdgShellSurface to manage the @p toplevel on the relevant @p xdgsurfacev6
-     * When using XdgShell::createXdgShellSurface there is no need to call this
-     * method.
-     **/
-    void setup(zxdg_surface_v6* xdgsurfacev6, zxdg_toplevel_v6* toplevel);
 
     /**
      * Setup this XdgShellSurface to manage the @p toplevel on the relevant @p xdgsurface
@@ -444,10 +422,6 @@ public:
     operator xdg_surface*() const;
     operator xdg_toplevel*();
     operator xdg_toplevel*() const;
-    operator zxdg_surface_v6*();
-    operator zxdg_surface_v6*() const;
-    operator zxdg_toplevel_v6*();
-    operator zxdg_toplevel_v6*() const;
 
 Q_SIGNALS:
     /**
@@ -493,14 +467,6 @@ class WRAPLANDCLIENT_EXPORT XdgShellPopup : public QObject
     Q_OBJECT
 public:
     virtual ~XdgShellPopup();
-
-    /**
-     * Setup this XdgShellPopup to manage the @p xdgpopupv6 on associated @p xdgsurfacev6
-     * When using XdgShell::createXdgShellPopup there is no need to call this
-     * method.
-     * @since 0.0.539
-     **/
-    void setup(zxdg_surface_v6* xdgsurfacev6, zxdg_popup_v6* xdgpopup6);
 
     /**
      * Setup this XdgShellPopup to manage the @p xdgpopupv on associated @p xdgsurface
@@ -556,10 +522,6 @@ public:
     operator xdg_surface*() const;
     operator xdg_popup*();
     operator xdg_popup*() const;
-    operator zxdg_surface_v6*();
-    operator zxdg_surface_v6*() const;
-    operator zxdg_popup_v6*();
-    operator zxdg_popup_v6*() const;
 
 Q_SIGNALS:
     /**

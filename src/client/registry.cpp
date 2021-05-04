@@ -97,7 +97,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-xdg-foreign-unstable-v2-client-protocol.h>
 #include <wayland-xdg-output-unstable-v1-client-protocol.h>
 #include <wayland-xdg-shell-client-protocol.h>
-#include <wayland-xdg-shell-v6-client-protocol.h>
 
 /*****
  * How to add another interface:
@@ -426,16 +425,6 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &zxdg_importer_v2_interface,
             &Registry::importerUnstableV2Announced,
             &Registry::importerUnstableV2Removed,
-        },
-    },
-    {
-        Registry::Interface::XdgShellUnstableV6,
-        {
-            1,
-            QByteArrayLiteral("zxdg_shell_v6"),
-            &zxdg_shell_v6_interface,
-            &Registry::xdgShellUnstableV6Announced,
-            &Registry::xdgShellUnstableV6Removed,
         },
     },
     {
@@ -831,7 +820,6 @@ BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
 BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
 BIND(Viewporter, wp_viewporter)
-BIND(XdgShellUnstableV6, zxdg_shell_v6)
 BIND(XdgShellStable, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
 BIND(PointerGesturesUnstableV1, zwp_pointer_gestures_v1)
@@ -945,9 +933,6 @@ TextInputManager* Registry::createTextInputManager(quint32 name, quint32 version
 XdgShell* Registry::createXdgShell(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
-    case Interface::XdgShellUnstableV6:
-        return d->create<XdgShellUnstableV6>(
-            name, version, parent, &Registry::bindXdgShellUnstableV6);
     case Interface::XdgShellStable:
         return d->create<XdgShellStable>(name, version, parent, &Registry::bindXdgShellStable);
     default:

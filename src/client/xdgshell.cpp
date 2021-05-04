@@ -42,11 +42,6 @@ XdgShell::~XdgShell()
     release();
 }
 
-void XdgShell::setup(zxdg_shell_v6* xdgshellv6)
-{
-    d->setupV6(xdgshellv6);
-}
-
 void XdgShell::setup(xdg_wm_base* xdg_wm_base)
 {
     d->setup(xdg_wm_base);
@@ -73,16 +68,6 @@ XdgShell::operator xdg_shell*()
 }
 
 XdgShell::operator xdg_shell*() const
-{
-    return *(d.get());
-}
-
-XdgShell::operator zxdg_shell_v6*()
-{
-    return *(d.get());
-}
-
-XdgShell::operator zxdg_shell_v6*() const
 {
     return *(d.get());
 }
@@ -141,11 +126,6 @@ XdgShellSurface::~XdgShellSurface()
     release();
 }
 
-void XdgShellSurface::setup(zxdg_surface_v6* xdgsurfacev6, zxdg_toplevel_v6* xdgtoplevelv6)
-{
-    d->setupV6(xdgsurfacev6, xdgtoplevelv6);
-}
-
 void XdgShellSurface::setup(xdg_surface* xdgsurface, xdg_toplevel* xdgtoplevel)
 {
     d->setup(xdgsurface, xdgtoplevel);
@@ -182,26 +162,6 @@ XdgShellSurface::operator xdg_toplevel*()
 }
 
 XdgShellSurface::operator xdg_toplevel*() const
-{
-    return *(d.get());
-}
-
-XdgShellSurface::operator zxdg_surface_v6*()
-{
-    return *(d.get());
-}
-
-XdgShellSurface::operator zxdg_surface_v6*() const
-{
-    return *(d.get());
-}
-
-XdgShellSurface::operator zxdg_toplevel_v6*()
-{
-    return *(d.get());
-}
-
-XdgShellSurface::operator zxdg_toplevel_v6*() const
 {
     return *(d.get());
 }
@@ -316,11 +276,6 @@ XdgShellPopup::~XdgShellPopup()
     release();
 }
 
-void XdgShellPopup::setup(zxdg_surface_v6* xdgsurfacev6, zxdg_popup_v6* xdgpopupv6)
-{
-    d->setupV6(xdgsurfacev6, xdgpopupv6);
-}
-
 void XdgShellPopup::setup(xdg_surface* surface, xdg_popup* popup)
 {
     d->setup(surface, popup);
@@ -372,26 +327,6 @@ XdgShellPopup::operator xdg_popup*()
 }
 
 XdgShellPopup::operator xdg_popup*() const
-{
-    return *(d.get());
-}
-
-XdgShellPopup::operator zxdg_surface_v6*()
-{
-    return *(d.get());
-}
-
-XdgShellPopup::operator zxdg_surface_v6*() const
-{
-    return *(d.get());
-}
-
-XdgShellPopup::operator zxdg_popup_v6*()
-{
-    return *(d.get());
-}
-
-XdgShellPopup::operator zxdg_popup_v6*() const
 {
     return *(d.get());
 }
