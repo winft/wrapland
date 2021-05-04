@@ -1,33 +1,20 @@
-/****************************************************************************
-Copyright 2017  David Edmundson <davidedmundson@kde.org>
+/*
+    SPDX-FileCopyrightText: 2017 David Edmundson <davidedmundson@kde.org>
+    SPDX-FileCopyrightText: 2021 Roman Gilg <subdiff@gmail.com>
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) version 3, or any
-later version accepted by the membership of KDE e.V. (or its
-successor approved by the membership of KDE e.V.), which shall
-act as a proxy defined in Section 6 of version 3 of the license.
+    SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
+*/
+#include "xdgshell_p.h"
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library.  If not, see <http://www.gnu.org/licenses/>.
-****************************************************************************/
 #include "event_queue.h"
 #include "output.h"
 #include "seat.h"
 #include "surface.h"
 #include "wayland_pointer_p.h"
-#include "xdgshell_p.h"
+
 #include <wayland-xdg-shell-client-protocol.h>
 
-namespace Wrapland
-{
-namespace Client
+namespace Wrapland::Client
 {
 
 class XdgShellStable::Private : public XdgShell::Private
@@ -47,7 +34,6 @@ public:
                                const XdgPositioner& positioner,
                                QObject* parent) override;
 
-    using XdgShell::Private::operator xdg_shell*;
     operator xdg_wm_base*() override
     {
         return xdg_shell_base;
@@ -340,9 +326,9 @@ void XdgTopLevelStable::Private::surfaceConfigureCallback(void* data,
 {
     Q_UNUSED(surface)
     auto s = static_cast<Private*>(data);
-    s->q->configureRequested(s->pendingSize, s->pendingState, serial);
+    s->q_ptr->configureRequested(s->pendingSize, s->pendingState, serial);
     if (!s->pendingSize.isNull()) {
-        s->q->setSize(s->pendingSize);
+        s->q_ptr->setSize(s->pendingSize);
         s->pendingSize = QSize();
     }
     s->pendingState = {};
@@ -395,7 +381,7 @@ void XdgTopLevelStable::Private::closeCallback(void* data, xdg_toplevel* xdg_top
 {
     auto s = static_cast<XdgTopLevelStable::Private*>(data);
     Q_ASSERT(s->xdgtoplevel == xdg_toplevel);
-    emit s->q->closeRequested();
+    Q_EMIT s->q_ptr->closeRequested();
 }
 
 XdgTopLevelStable::Private::Private(XdgShellSurface* q)
@@ -614,7 +600,7 @@ void XdgShellPopupStable::Private::surfaceConfigureCallback(void* data,
 {
     Q_UNUSED(surface)
     auto s = static_cast<Private*>(data);
-    s->q->configureRequested(s->pendingRect, serial);
+    s->q_ptr->configureRequested(s->pendingRect, serial);
     s->pendingRect = QRect();
 }
 
@@ -622,7 +608,7 @@ void XdgShellPopupStable::Private::popupDoneCallback(void* data, xdg_popup* xdg_
 {
     auto s = static_cast<XdgShellPopupStable::Private*>(data);
     Q_ASSERT(s->xdgpopup == xdg_popup);
-    emit s->q->popupDone();
+    Q_EMIT s->q_ptr->popupDone();
 }
 
 XdgShellPopupStable::Private::Private(XdgShellPopup* q)
@@ -678,5 +664,4 @@ XdgShellPopupStable::XdgShellPopupStable(QObject* parent)
 
 XdgShellPopupStable::~XdgShellPopupStable() = default;
 
-}
 }

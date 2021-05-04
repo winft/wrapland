@@ -1,39 +1,25 @@
-/****************************************************************************
-Copyright 2016  Martin Gräßlin <mgraesslin@kde.org>
+/*
+    SPDX-FileCopyrightText: 2016 Martin Gräßlin <mgraesslin@kde.org>
+    SPDX-FileCopyrightText: 2021 Roman Gilg <subdiff@gmail.com>
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) version 3, or any
-later version accepted by the membership of KDE e.V. (or its
-successor approved by the membership of KDE e.V.), which shall
-act as a proxy defined in Section 6 of version 3 of the license.
+    SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
+*/
+#include "xdgshell_p.h"
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library.  If not, see <http://www.gnu.org/licenses/>.
-****************************************************************************/
 #include "event_queue.h"
 #include "output.h"
 #include "seat.h"
 #include "surface.h"
 #include "wayland_pointer_p.h"
-#include "xdgshell_p.h"
 
-namespace Wrapland
-{
-namespace Client
+namespace Wrapland::Client
 {
 
 XdgShell::Private::~Private() = default;
 
 XdgShell::XdgShell(Private* p, QObject* parent)
     : QObject(parent)
-    , d(p)
+    , d_ptr(p)
 {
 }
 
@@ -44,52 +30,42 @@ XdgShell::~XdgShell()
 
 void XdgShell::setup(xdg_wm_base* xdg_wm_base)
 {
-    d->setup(xdg_wm_base);
+    d_ptr->setup(xdg_wm_base);
 }
 
 void XdgShell::release()
 {
-    d->release();
+    d_ptr->release();
 }
 
 void XdgShell::setEventQueue(EventQueue* queue)
 {
-    d->queue = queue;
+    d_ptr->queue = queue;
 }
 
 EventQueue* XdgShell::eventQueue()
 {
-    return d->queue;
-}
-
-XdgShell::operator xdg_shell*()
-{
-    return *(d.get());
-}
-
-XdgShell::operator xdg_shell*() const
-{
-    return *(d.get());
+    return d_ptr->queue;
 }
 
 XdgShell::operator xdg_wm_base*()
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 XdgShell::operator xdg_wm_base*() const
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 bool XdgShell::isValid() const
 {
-    return d->isValid();
+    return d_ptr->isValid();
 }
 
 XdgShellSurface* XdgShell::createSurface(Surface* surface, QObject* parent)
 {
-    return d->getXdgSurface(surface, parent);
+    return d_ptr->getXdgSurface(surface, parent);
 }
 
 XdgShellPopup* XdgShell::createPopup(Surface* surface,
@@ -97,7 +73,7 @@ XdgShellPopup* XdgShell::createPopup(Surface* surface,
                                      const XdgPositioner& positioner,
                                      QObject* parent)
 {
-    return d->getXdgPopup(surface, parentSurface, positioner, parent);
+    return d_ptr->getXdgPopup(surface, parentSurface, positioner, parent);
 }
 
 XdgShellPopup* XdgShell::createPopup(Surface* surface,
@@ -105,11 +81,11 @@ XdgShellPopup* XdgShell::createPopup(Surface* surface,
                                      const XdgPositioner& positioner,
                                      QObject* parent)
 {
-    return d->getXdgPopup(surface, parentSurface, positioner, parent);
+    return d_ptr->getXdgPopup(surface, parentSurface, positioner, parent);
 }
 
 XdgShellSurface::Private::Private(XdgShellSurface* q)
-    : q(q)
+    : q_ptr(q)
 {
 }
 
@@ -117,7 +93,7 @@ XdgShellSurface::Private::~Private() = default;
 
 XdgShellSurface::XdgShellSurface(Private* p, QObject* parent)
     : QObject(parent)
-    , d(p)
+    , d_ptr(p)
 {
 }
 
@@ -128,146 +104,146 @@ XdgShellSurface::~XdgShellSurface()
 
 void XdgShellSurface::setup(xdg_surface* xdgsurface, xdg_toplevel* xdgtoplevel)
 {
-    d->setup(xdgsurface, xdgtoplevel);
+    d_ptr->setup(xdgsurface, xdgtoplevel);
 }
 
 void XdgShellSurface::release()
 {
-    d->release();
+    d_ptr->release();
 }
 
 void XdgShellSurface::setEventQueue(EventQueue* queue)
 {
-    d->queue = queue;
+    d_ptr->queue = queue;
 }
 
 EventQueue* XdgShellSurface::eventQueue()
 {
-    return d->queue;
+    return d_ptr->queue;
 }
 
 XdgShellSurface::operator xdg_surface*()
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 XdgShellSurface::operator xdg_surface*() const
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 XdgShellSurface::operator xdg_toplevel*()
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 XdgShellSurface::operator xdg_toplevel*() const
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 bool XdgShellSurface::isValid() const
 {
-    return d->isValid();
+    return d_ptr->isValid();
 }
 
 void XdgShellSurface::setTransientFor(XdgShellSurface* parent)
 {
-    d->setTransientFor(parent);
+    d_ptr->setTransientFor(parent);
 }
 
 void XdgShellSurface::setTitle(const QString& title)
 {
-    d->setTitle(title);
+    d_ptr->setTitle(title);
 }
 
 void XdgShellSurface::setAppId(const QByteArray& appId)
 {
-    d->setAppId(appId);
+    d_ptr->setAppId(appId);
 }
 
 void XdgShellSurface::requestShowWindowMenu(Seat* seat, quint32 serial, const QPoint& pos)
 {
-    d->showWindowMenu(seat, serial, pos.x(), pos.y());
+    d_ptr->showWindowMenu(seat, serial, pos.x(), pos.y());
 }
 
 void XdgShellSurface::requestMove(Seat* seat, quint32 serial)
 {
-    d->move(seat, serial);
+    d_ptr->move(seat, serial);
 }
 
 void XdgShellSurface::requestResize(Seat* seat, quint32 serial, Qt::Edges edges)
 {
-    d->resize(seat, serial, edges);
+    d_ptr->resize(seat, serial, edges);
 }
 
 void XdgShellSurface::ackConfigure(quint32 serial)
 {
-    d->ackConfigure(serial);
+    d_ptr->ackConfigure(serial);
 }
 
 void XdgShellSurface::setMaximized(bool set)
 {
     if (set) {
-        d->setMaximized();
+        d_ptr->setMaximized();
     } else {
-        d->unsetMaximized();
+        d_ptr->unsetMaximized();
     }
 }
 
 void XdgShellSurface::setFullscreen(bool set, Output* output)
 {
     if (set) {
-        d->setFullscreen(output);
+        d_ptr->setFullscreen(output);
     } else {
-        d->unsetFullscreen();
+        d_ptr->unsetFullscreen();
     }
 }
 
 void XdgShellSurface::setMaxSize(const QSize& size)
 {
-    d->setMaxSize(size);
+    d_ptr->setMaxSize(size);
 }
 
 void XdgShellSurface::setMinSize(const QSize& size)
 {
-    d->setMinSize(size);
+    d_ptr->setMinSize(size);
 }
 
 void XdgShellSurface::setWindowGeometry(const QRect& windowGeometry)
 {
-    d->setWindowGeometry(windowGeometry);
+    d_ptr->setWindowGeometry(windowGeometry);
 }
 
 void XdgShellSurface::requestMinimize()
 {
-    d->setMinimized();
+    d_ptr->setMinimized();
 }
 
 void XdgShellSurface::setSize(const QSize& size)
 {
-    if (d->size == size) {
+    if (d_ptr->size == size) {
         return;
     }
-    d->size = size;
+    d_ptr->size = size;
     emit sizeChanged(size);
 }
 
 QSize XdgShellSurface::size() const
 {
-    return d->size;
+    return d_ptr->size;
 }
 
 XdgShellPopup::Private::~Private() = default;
 
 XdgShellPopup::Private::Private(XdgShellPopup* q)
-    : q(q)
+    : q_ptr(q)
 {
 }
 
 XdgShellPopup::XdgShellPopup(Private* p, QObject* parent)
     : QObject(parent)
-    , d(p)
+    , d_ptr(p)
 {
 }
 
@@ -278,75 +254,75 @@ XdgShellPopup::~XdgShellPopup()
 
 void XdgShellPopup::setup(xdg_surface* surface, xdg_popup* popup)
 {
-    d->setup(surface, popup);
+    d_ptr->setup(surface, popup);
 }
 
 void XdgShellPopup::release()
 {
-    d->release();
+    d_ptr->release();
 }
 
 void XdgShellPopup::setEventQueue(EventQueue* queue)
 {
-    d->queue = queue;
+    d_ptr->queue = queue;
 }
 
 EventQueue* XdgShellPopup::eventQueue()
 {
-    return d->queue;
+    return d_ptr->queue;
 }
 
 void XdgShellPopup::requestGrab(Wrapland::Client::Seat* seat, quint32 serial)
 {
-    d->requestGrab(seat, serial);
+    d_ptr->requestGrab(seat, serial);
 }
 
 void XdgShellPopup::ackConfigure(quint32 serial)
 {
-    d->ackConfigure(serial);
+    d_ptr->ackConfigure(serial);
 }
 
 void XdgShellPopup::setWindowGeometry(const QRect& windowGeometry)
 {
-    d->setWindowGeometry(windowGeometry);
+    d_ptr->setWindowGeometry(windowGeometry);
 }
 
 XdgShellPopup::operator xdg_surface*()
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 XdgShellPopup::operator xdg_surface*() const
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 XdgShellPopup::operator xdg_popup*()
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 XdgShellPopup::operator xdg_popup*() const
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 bool XdgShellPopup::isValid() const
 {
-    return d->isValid();
+    return d_ptr->isValid();
 }
 
 XdgPositioner::XdgPositioner(const QSize& initialSize, const QRect& anchor)
-    : d(new Private)
+    : d_ptr(new Private)
 {
-    d->initialSize = initialSize;
-    d->anchorRect = anchor;
+    d_ptr->initialSize = initialSize;
+    d_ptr->anchorRect = anchor;
 }
 
 XdgPositioner::XdgPositioner(const XdgPositioner& other)
-    : d(new Private)
+    : d_ptr(new Private)
 {
-    *d = *other.d;
+    *d_ptr = *other.d_ptr;
 }
 
 XdgPositioner::~XdgPositioner()
@@ -355,63 +331,62 @@ XdgPositioner::~XdgPositioner()
 
 void XdgPositioner::setInitialSize(const QSize& size)
 {
-    d->initialSize = size;
+    d_ptr->initialSize = size;
 }
 
 QSize XdgPositioner::initialSize() const
 {
-    return d->initialSize;
+    return d_ptr->initialSize;
 }
 
 void XdgPositioner::setAnchorRect(const QRect& anchor)
 {
-    d->anchorRect = anchor;
+    d_ptr->anchorRect = anchor;
 }
 
 QRect XdgPositioner::anchorRect() const
 {
-    return d->anchorRect;
+    return d_ptr->anchorRect;
 }
 
 void XdgPositioner::setAnchorEdge(Qt::Edges edge)
 {
-    d->anchorEdge = edge;
+    d_ptr->anchorEdge = edge;
 }
 
 Qt::Edges XdgPositioner::anchorEdge() const
 {
-    return d->anchorEdge;
+    return d_ptr->anchorEdge;
 }
 
 void XdgPositioner::setAnchorOffset(const QPoint& offset)
 {
-    d->anchorOffset = offset;
+    d_ptr->anchorOffset = offset;
 }
 
 QPoint XdgPositioner::anchorOffset() const
 {
-    return d->anchorOffset;
+    return d_ptr->anchorOffset;
 }
 
 void XdgPositioner::setGravity(Qt::Edges edge)
 {
-    d->gravity = edge;
+    d_ptr->gravity = edge;
 }
 
 Qt::Edges XdgPositioner::gravity() const
 {
-    return d->gravity;
+    return d_ptr->gravity;
 }
 
 void XdgPositioner::setConstraints(Constraints constraints)
 {
-    d->constraints = constraints;
+    d_ptr->constraints = constraints;
 }
 
 XdgPositioner::Constraints XdgPositioner::constraints() const
 {
-    return d->constraints;
+    return d_ptr->constraints;
 }
 
-}
 }
