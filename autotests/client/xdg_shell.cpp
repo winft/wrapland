@@ -827,7 +827,7 @@ void XdgShellTest::testPopup()
 
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
     std::unique_ptr<Client::XdgShellPopup> xdgSurface(
-        m_xdgShell->createPopup(surface.get(), xdgParentSurface.get(), positioner));
+        m_xdgShell->create_popup(surface.get(), xdgParentSurface.get(), positioner));
     QVERIFY(popupCreatedSpy.wait());
     auto serverXdgPopup = popupCreatedSpy.first().first().value<Server::XdgShellPopup*>();
     QVERIFY(serverXdgPopup);
@@ -1005,7 +1005,7 @@ void XdgShellTest::testWindowGeometry()
     QSignalSpy popup_created_spy(m_serverXdgShell, &Server::XdgShell::popupCreated);
     std::unique_ptr<Client::Surface> popup_surface(m_compositor->createSurface());
     std::unique_ptr<Client::XdgShellPopup> popup(
-        m_xdgShell->createPopup(popup_surface.get(), toplevel.get(), positioner));
+        m_xdgShell->create_popup(popup_surface.get(), toplevel.get(), positioner));
     QVERIFY(popup_created_spy.wait());
     auto server_popup = popup_created_spy.first().first().value<Server::XdgShellPopup*>();
     QVERIFY(server_popup);

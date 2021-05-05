@@ -98,20 +98,20 @@ public:
      * given @p positioner.
      * @since 0.0.539
      **/
-    XdgShellPopup* createPopup(Surface* surface,
-                               XdgShellToplevel* parentSurface,
-                               XdgPositioner const& positioner,
-                               QObject* parent = nullptr);
+    XdgShellPopup* create_popup(Surface* surface,
+                                XdgShellToplevel* parentSurface,
+                                XdgPositioner const& positioner,
+                                QObject* parent = nullptr);
 
     /**
      * Creates a new XdgShellPopup for the given @p surface on top of @p parentSurface with the
      * given @p positioner.
      * @since 0.0.539
      **/
-    XdgShellPopup* createPopup(Surface* surface,
-                               XdgShellPopup* parentSurface,
-                               XdgPositioner const& positioner,
-                               QObject* parent = nullptr);
+    XdgShellPopup* create_popup(Surface* surface,
+                                XdgShellPopup* parentSurface,
+                                XdgPositioner const& positioner,
+                                QObject* parent = nullptr);
 
     operator xdg_wm_base*();
     operator xdg_wm_base*() const;

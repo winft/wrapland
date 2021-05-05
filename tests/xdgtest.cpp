@@ -187,7 +187,7 @@ void XdgTest::createPopup()
     positioner.setGravity(Qt::BottomEdge);
     positioner.setConstraints(XdgPositioner::Constraint::FlipX | XdgPositioner::Constraint::SlideY);
     m_xdgShellPopup
-        = m_xdgShell->createPopup(m_popupSurface, xdg_shell_toplevel, positioner, m_popupSurface);
+        = m_xdgShell->create_popup(m_popupSurface, xdg_shell_toplevel, positioner, m_popupSurface);
     renderPopup();
 }
 
