@@ -295,4 +295,10 @@ XdgShellPopup* XdgShell::create_popup(Surface* surface,
     return d_ptr->get_xdg_popup(surface, *parentSurface, positioner, parent);
 }
 
+XdgShellPopup*
+XdgShell::create_popup(Surface* surface, const XdgPositioner& positioner, QObject* parent)
+{
+    return d_ptr->get_xdg_popup(surface, nullptr, positioner, parent);
+}
+
 }

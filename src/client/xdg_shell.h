@@ -113,6 +113,14 @@ public:
                                 XdgPositioner const& positioner,
                                 QObject* parent = nullptr);
 
+    /**
+     * Creates a new XdgShellPopup for the given @p surface with no parent directly specified and
+     * with the given @p positioner.
+     * @since 0.522.0
+     **/
+    XdgShellPopup*
+    create_popup(Surface* surface, XdgPositioner const& positioner, QObject* parent = nullptr);
+
     operator xdg_wm_base*();
     operator xdg_wm_base*() const;
 
