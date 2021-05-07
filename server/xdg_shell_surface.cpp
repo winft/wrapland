@@ -65,7 +65,7 @@ void XdgShellSurface::Private::getTopLevelCallback([[maybe_unused]] wl_client* w
 {
     auto priv = handle(wlResource)->d_ptr;
 
-    if (!priv->checkAlreadyConstructed()) {
+    if (!priv->check_creation_error()) {
         return;
     }
     auto topLevel = new XdgShellToplevel(priv->version(), id, priv->handle());
@@ -88,7 +88,7 @@ void XdgShellSurface::Private::getPopupCallback([[maybe_unused]] wl_client* wlCl
 {
     auto priv = handle(wlResource)->d_ptr;
 
-    if (!priv->checkAlreadyConstructed()) {
+    if (!priv->check_creation_error()) {
         return;
     }
 
@@ -99,8 +99,8 @@ void XdgShellSurface::Private::getPopupCallback([[maybe_unused]] wl_client* wlCl
     }
 
     // TODO(romangg): Allow to set parent surface via side-channel (see protocol description).
-    auto parent = priv->m_shell->d_ptr->getSurface(wlParent);
-    if (!parent) {
+    auto parent = wlParent ? priv->m_shell->d_ptr->getSurface(wlParent) : nullptr;
+    if (wlParent && !parent) {
         priv->postError(XDG_WM_BASE_ERROR_INVALID_POPUP_PARENT, "Invalid popup parent");
         return;
     }
@@ -168,17 +168,15 @@ void XdgShellSurface::Private::ackConfigureCallback([[maybe_unused]] wl_client* 
     }
 }
 
-bool XdgShellSurface::Private::checkAlreadyConstructed()
+bool XdgShellSurface::Private::check_creation_error()
 {
-    // FIXME: That's incorrect! The client may have asked us to create an xdg-toplevel
-    // for a pointer surface or a subsurface. We have to post an error in that case.
-    if (toplevel) {
-        postError(XDG_SURFACE_ERROR_ALREADY_CONSTRUCTED,
-                  "Toplevel already created on this surface");
+    if (m_surface->d_ptr->has_role()) {
+        postError(XDG_SURFACE_ERROR_ALREADY_CONSTRUCTED, "Surface already has a role.");
         return false;
     }
-    if (popup) {
-        postError(XDG_SURFACE_ERROR_ALREADY_CONSTRUCTED, "Popup already created on this surface");
+    if (m_surface->d_ptr->had_buffer_attached) {
+        postError(XDG_SURFACE_ERROR_ALREADY_CONSTRUCTED,
+                  "Creation after a buffer was already attached.");
         return false;
     }
     return true;

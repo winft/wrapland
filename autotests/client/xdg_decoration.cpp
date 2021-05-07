@@ -25,8 +25,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/event_queue.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
+#include "../../src/client/xdg_shell.h"
 #include "../../src/client/xdgdecoration.h"
-#include "../../src/client/xdgshell.h"
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
@@ -103,7 +103,7 @@ void TestXdgDecoration::init()
 
     m_registry = new Client::Registry();
     QSignalSpy compositorSpy(m_registry, &Client::Registry::compositorAnnounced);
-    QSignalSpy xdgShellSpy(m_registry, &Client::Registry::xdgShellStableAnnounced);
+    QSignalSpy xdgShellSpy(m_registry, &Client::Registry::xdgShellAnnounced);
     QSignalSpy xdgDecorationManagerSpy(m_registry, &Client::Registry::xdgDecorationAnnounced);
 
     QVERIFY(!m_registry->eventQueue());
@@ -204,7 +204,8 @@ void TestXdgDecoration::testDecoration()
 
     // Create shell surface and deco object.
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<Client::XdgShellSurface> shellSurface(m_xdgShell->createSurface(surface.get()));
+    std::unique_ptr<Client::XdgShellToplevel> shellSurface(
+        m_xdgShell->create_toplevel(surface.get()));
     std::unique_ptr<Client::XdgDecoration> decoration(
         m_xdgDecorationManager->getToplevelDecoration(shellSurface.get()));
 

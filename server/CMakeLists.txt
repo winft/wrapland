@@ -19,6 +19,7 @@ set(SERVER_LIB_SRCS
     keyboard.cpp
     keystate.cpp
     keyboard_shortcuts_inhibit.cpp
+    layer_shell_v1.cpp
     linux_dmabuf_v1.cpp
     output.cpp
     output_changeset_v1.cpp
@@ -180,6 +181,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-layer-shell-unstable-v1.xml
+    BASENAME wlr-layer-shell
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-output/xdg-output-unstable-v1.xml
     BASENAME xdg-output
 )
@@ -262,6 +268,8 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-server-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-foreign-unstable-v2-client-protocol.h
@@ -325,6 +333,7 @@ set(SERVER_LIB_HEADERS
   keyboard.h
   keystate.h
   keyboard_shortcuts_inhibit.h
+  layer_shell_v1.h
   linux_dmabuf_v1.h
   output.h
   output_changeset_v1.h

@@ -26,6 +26,7 @@ set(CLIENT_LIB_SRCS
     keyboard.cpp
     keystate.cpp
     keyboard_shortcuts_inhibit.cpp
+    layer_shell_v1.cpp
     output.cpp
     output_configuration_v1.cpp
     output_management_v1.cpp
@@ -57,11 +58,12 @@ set(CLIENT_LIB_SRCS
     wlr_output_configuration_v1.cpp
     wlr_output_manager_v1.cpp
     xdgdecoration.cpp
-    xdgshell.cpp
+    xdg_shell.cpp
+    xdg_shell_popup.cpp
+    xdg_shell_positioner.cpp
+    xdg_shell_toplevel.cpp
     xdgforeign_v2.cpp
     xdgforeign.cpp
-    xdgshell_v6.cpp
-    xdgshell_stable.cpp
     xdgoutput.cpp
     linux_dmabuf_v1.cpp
 )
@@ -86,6 +88,11 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-output-management-unstable-v1.xml
     BASENAME wlr-output-management-v1
+)
+
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-layer-shell-unstable-v1.xml
+    BASENAME wlr-layer-shell
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
@@ -144,10 +151,6 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
     BASENAME text-input-v2
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-shell/xdg-shell-unstable-v6.xml
-    BASENAME xdg-shell-v6
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/relative-pointer/relative-pointer-unstable-v1.xml
@@ -235,13 +238,13 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-v0-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-shell-v6-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-gestures-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-constraints-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-presentation-time-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-foreign-unstable-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-inhibit-unstable-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-output-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-linux-dmabuf-unstable-v1-client-protocol.h
@@ -298,6 +301,7 @@ set(CLIENT_LIB_HEADERS
   keyboard.h
   keystate.h
   keyboard_shortcuts_inhibit.h
+  layer_shell_v1.h
   output.h
   output_configuration_v1.h
   output_management_v1.h
@@ -328,7 +332,10 @@ set(CLIENT_LIB_HEADERS
   textinput.h
   viewporter.h
   xdgdecoration.h
-  xdgshell.h
+  xdg_shell.h
+  xdg_shell_popup.h
+  xdg_shell_positioner.h
+  xdg_shell_toplevel.h
   xdgforeign.h
   xdgoutput.h
   linux_dmabuf_v1.h

@@ -48,8 +48,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/subcompositor.h"
 #include "../../src/client/surface.h"
+#include "../../src/client/xdg_shell.h"
 #include "../../src/client/xdgdecoration.h"
-#include "../../src/client/xdgshell.h"
 
 #include "../../server/blur.h"
 #include "../../server/contrast.h"
@@ -347,9 +347,9 @@ void TestWaylandRegistry::testBindTextInputManagerV2()
 
 void TestWaylandRegistry::testBindXdgShell()
 {
-    TEST_BIND(Wrapland::Client::Registry::Interface::XdgShellStable,
-              SIGNAL(xdgShellStableAnnounced(quint32, quint32)),
-              bindXdgShellStable,
+    TEST_BIND(Wrapland::Client::Registry::Interface::XdgShell,
+              SIGNAL(xdgShellAnnounced(quint32, quint32)),
+              bindXdgShell,
               xdg_wm_base_destroy)
 }
 
@@ -421,7 +421,7 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy outputDeviceAnnouncedSpy(&registry,
                                         SIGNAL(outputDeviceV1Announced(quint32, quint32)));
     QVERIFY(outputDeviceAnnouncedSpy.isValid());
-    QSignalSpy shellAnnouncedSpy(&registry, SIGNAL(xdgShellStableAnnounced(quint32, quint32)));
+    QSignalSpy shellAnnouncedSpy(&registry, SIGNAL(xdgShellAnnounced(quint32, quint32)));
     QVERIFY(shellAnnouncedSpy.isValid());
     QSignalSpy seatAnnouncedSpy(&registry, SIGNAL(seatAnnounced(quint32, quint32)));
     QVERIFY(seatAnnouncedSpy.isValid());
@@ -464,7 +464,7 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::OutputDeviceV1));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::PresentationManager));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::Seat));
-    QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::XdgShellStable));
+    QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::XdgShell));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::Shm));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::SubCompositor));
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::FullscreenShell));
@@ -480,7 +480,7 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(
         !registry.interfaces(Wrapland::Client::Registry::Interface::PresentationManager).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::Seat).isEmpty());
-    QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::XdgShellStable).isEmpty());
+    QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::XdgShell).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::Shm).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::SubCompositor).isEmpty());
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::FullscreenShell).isEmpty());
@@ -499,10 +499,9 @@ void TestWaylandRegistry::testRemoval()
     Seat* seat = registry.createSeat(registry.interface(Registry::Interface::Seat).name,
                                      registry.interface(Registry::Interface::Seat).version,
                                      &registry);
-    auto shell
-        = registry.createXdgShell(registry.interface(Registry::Interface::XdgShellStable).name,
-                                  registry.interface(Registry::Interface::XdgShellStable).version,
-                                  &registry);
+    auto shell = registry.createXdgShell(registry.interface(Registry::Interface::XdgShell).name,
+                                         registry.interface(Registry::Interface::XdgShell).version,
+                                         &registry);
     Output* output = registry.createOutput(registry.interface(Registry::Interface::Output).name,
                                            registry.interface(Registry::Interface::Output).version,
                                            &registry);
@@ -555,14 +554,14 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::Seat).isEmpty());
     QCOMPARE(seatObjectRemovedSpy.count(), 1);
 
-    QSignalSpy shellRemovedSpy(&registry, SIGNAL(xdgShellStableRemoved(quint32)));
+    QSignalSpy shellRemovedSpy(&registry, SIGNAL(xdgShellRemoved(quint32)));
     QVERIFY(shellRemovedSpy.isValid());
 
     m_serverXdgShell.reset();
     QVERIFY(shellRemovedSpy.wait());
     QCOMPARE(shellRemovedSpy.first().first(), shellAnnouncedSpy.first().first());
-    QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::XdgShellStable));
-    QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::XdgShellStable).isEmpty());
+    QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::XdgShell));
+    QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::XdgShell).isEmpty());
     QCOMPARE(shellObjectRemovedSpy.count(), 1);
 
     QSignalSpy outputRemovedSpy(&registry, SIGNAL(outputRemoved(quint32)));
@@ -790,7 +789,7 @@ void TestWaylandRegistry::testDestroy()
     QCOMPARE(connectedSpy.count(), 1);
 
     Registry registry;
-    QSignalSpy shellAnnouncedSpy(&registry, &Registry::xdgShellStableAnnounced);
+    QSignalSpy shellAnnouncedSpy(&registry, &Registry::xdgShellAnnounced);
 
     QVERIFY(!registry.isValid());
     registry.create(&connection);
@@ -800,8 +799,8 @@ void TestWaylandRegistry::testDestroy()
     // create some arbitrary Interface
     QVERIFY(shellAnnouncedSpy.wait());
     std::unique_ptr<XdgShell> shell(
-        registry.createXdgShell(registry.interface(Registry::Interface::XdgShellStable).name,
-                                registry.interface(Registry::Interface::XdgShellStable).version,
+        registry.createXdgShell(registry.interface(Registry::Interface::XdgShell).name,
+                                registry.interface(Registry::Interface::XdgShell).version,
                                 &registry));
 
     QSignalSpy registryDiedSpy(&registry, &Registry::registryReleased);

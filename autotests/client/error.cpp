@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/plasmashell.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/xdgshell.h"
+#include "../../src/client/xdg_shell.h"
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
@@ -106,8 +106,8 @@ void ErrorTest::init()
         this);
     QVERIFY(m_compositor);
     m_shell = registry.createXdgShell(
-        registry.interface(Wrapland::Client::Registry::Interface::XdgShellStable).name,
-        registry.interface(Wrapland::Client::Registry::Interface::XdgShellStable).version,
+        registry.interface(Wrapland::Client::Registry::Interface::XdgShell).name,
+        registry.interface(Wrapland::Client::Registry::Interface::XdgShell).version,
         this);
     QVERIFY(m_shell);
     m_plasmaShell = registry.createPlasmaShell(
@@ -153,10 +153,10 @@ void ErrorTest::testMultipleShellSurfacesForSurface()
     QVERIFY(errorSpy.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<Wrapland::Client::XdgShellSurface> shellSurface1(
-        m_shell->createSurface(surface.get()));
-    std::unique_ptr<Wrapland::Client::XdgShellSurface> shellSurface2(
-        m_shell->createSurface(surface.get()));
+    std::unique_ptr<Wrapland::Client::XdgShellToplevel> shellSurface1(
+        m_shell->create_toplevel(surface.get()));
+    std::unique_ptr<Wrapland::Client::XdgShellToplevel> shellSurface2(
+        m_shell->create_toplevel(surface.get()));
 
     QCOMPARE(m_connection->error(), 0);
     QVERIFY(errorSpy.wait());

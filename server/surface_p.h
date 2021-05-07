@@ -35,6 +35,7 @@ namespace Wrapland::Server
 
 class Feedbacks;
 class IdleInhibitor;
+class LayerSurfaceV1;
 class XdgShellSurface;
 
 class SurfaceState
@@ -121,12 +122,17 @@ public:
     void updateCurrentState(bool forceChildren);
     void updateCurrentState(SurfaceState& source, bool forceChildren);
 
+    bool has_role() const;
+
+    bool had_buffer_attached{false};
+
     XdgShellSurface* shellSurface = nullptr;
+    Subsurface* subsurface = nullptr;
+    LayerSurfaceV1* layer_surface{nullptr};
 
     SurfaceState current;
     SurfaceState pending;
 
-    Subsurface* subsurface = nullptr;
     QRegion trackedDamage;
 
     // Workaround for https://bugreports.qt.io/browse/QTBUG-52192:

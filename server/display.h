@@ -54,6 +54,7 @@ class Compositor;
 class KdeIdle;
 class IdleInhibitManagerV1;
 class FakeInput;
+class LayerShellV1;
 class PlasmaShell;
 class ShadowManager;
 class BlurManager;
@@ -128,6 +129,7 @@ public:
     PlasmaWindowManager* createPlasmaWindowManager(QObject* parent = nullptr);
     KdeIdle* createIdle(QObject* parent = nullptr);
     FakeInput* createFakeInput(QObject* parent = nullptr);
+    LayerShellV1* createLayerShellV1(QObject* parent = nullptr);
     ShadowManager* createShadowManager(QObject* parent = nullptr);
     BlurManager* createBlurManager(QObject* parent = nullptr);
     SlideManager* createSlideManager(QObject* parent = nullptr);

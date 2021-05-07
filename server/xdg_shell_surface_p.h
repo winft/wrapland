@@ -83,7 +83,7 @@ private:
                                           int32_t width,
                                           int32_t height);
 
-    bool checkAlreadyConstructed();
+    bool check_creation_error();
 
     static const struct xdg_surface_interface s_interface;
 };
