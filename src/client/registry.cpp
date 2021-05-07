@@ -33,6 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "idleinhibit.h"
 #include "keyboard_shortcuts_inhibit.h"
 #include "keystate.h"
+#include "layer_shell_v1.h"
 #include "linux_dmabuf_v1.h"
 #include "logging.h"
 #include "output.h"
@@ -57,11 +58,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "viewporter.h"
 #include "wayland_pointer_p.h"
 #include "wlr_output_manager_v1.h"
+#include "xdg_shell.h"
 #include "xdgdecoration.h"
 #include "xdgforeign_v2.h"
 #include "xdgoutput.h"
-#include "xdgshell.h"
-#include "xdgshell_p.h"
 // Qt
 #include <QDebug>
 // wayland
@@ -92,12 +92,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
+#include <wayland-wlr-layer-shell-client-protocol.h>
 #include <wayland-wlr-output-management-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-xdg-foreign-unstable-v2-client-protocol.h>
 #include <wayland-xdg-output-unstable-v1-client-protocol.h>
 #include <wayland-xdg-shell-client-protocol.h>
-#include <wayland-xdg-shell-v6-client-protocol.h>
 
 /*****
  * How to add another interface:
@@ -246,6 +246,16 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &org_kde_kwin_fake_input_interface,
             &Registry::fakeInputAnnounced,
             &Registry::fakeInputRemoved,
+        },
+    },
+    {
+        Registry::Interface::LayerShellV1,
+        {
+            4,
+            QByteArrayLiteral("zwlr_layer_shell_v1"),
+            &zwlr_layer_shell_v1_interface,
+            &Registry::layerShellV1Announced,
+            &Registry::layerShellV1Removed,
         },
     },
     {
@@ -429,16 +439,6 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         },
     },
     {
-        Registry::Interface::XdgShellUnstableV6,
-        {
-            1,
-            QByteArrayLiteral("zxdg_shell_v6"),
-            &zxdg_shell_v6_interface,
-            &Registry::xdgShellUnstableV6Announced,
-            &Registry::xdgShellUnstableV6Removed,
-        },
-    },
-    {
         Registry::Interface::IdleInhibitManagerUnstableV1,
         {
             1,
@@ -479,13 +479,13 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         },
     },
     {
-        Registry::Interface::XdgShellStable,
+        Registry::Interface::XdgShell,
         {
             2,
             QByteArrayLiteral("xdg_wm_base"),
             &xdg_wm_base_interface,
-            &Registry::xdgShellStableAnnounced,
-            &Registry::xdgShellStableRemoved,
+            &Registry::xdgShellAnnounced,
+            &Registry::xdgShellRemoved,
         },
     },
     {
@@ -825,14 +825,14 @@ BIND(PlasmaVirtualDesktopManagement, org_kde_plasma_virtual_desktop_management)
 BIND(PlasmaWindowManagement, org_kde_plasma_window_management)
 BIND(Idle, org_kde_kwin_idle)
 BIND(FakeInput, org_kde_kwin_fake_input)
+BIND(LayerShellV1, zwlr_layer_shell_v1)
 BIND(OutputManagementV1, zkwinft_output_management_v1)
 BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
 BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
 BIND(Viewporter, wp_viewporter)
-BIND(XdgShellUnstableV6, zxdg_shell_v6)
-BIND(XdgShellStable, xdg_wm_base)
+BIND(XdgShell, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
 BIND(PointerGesturesUnstableV1, zwp_pointer_gestures_v1)
 BIND(PointerConstraintsUnstableV1, zwp_pointer_constraints_v1)
@@ -895,6 +895,7 @@ CREATE(PlasmaVirtualDesktopManagement)
 CREATE(PlasmaWindowManagement)
 CREATE(Idle)
 CREATE(FakeInput)
+CREATE(LayerShellV1)
 CREATE(OutputManagementV1)
 CREATE(OutputDeviceV1)
 CREATE(WlrOutputManagerV1)
@@ -910,6 +911,7 @@ CREATE(ServerSideDecorationPaletteManager)
 CREATE(Viewporter)
 CREATE(KeyboardShortcutsInhibitManagerV1)
 CREATE(PresentationManager)
+CREATE(XdgShell)
 
 #undef CREATE
 #undef CREATE2
@@ -937,19 +939,6 @@ TextInputManager* Registry::createTextInputManager(quint32 name, quint32 version
     case Interface::TextInputManagerUnstableV2:
         return d->create<TextInputManagerUnstableV2>(
             name, version, parent, &Registry::bindTextInputManagerUnstableV2);
-    default:
-        return nullptr;
-    }
-}
-
-XdgShell* Registry::createXdgShell(quint32 name, quint32 version, QObject* parent)
-{
-    switch (d->interfaceForName(name)) {
-    case Interface::XdgShellUnstableV6:
-        return d->create<XdgShellUnstableV6>(
-            name, version, parent, &Registry::bindXdgShellUnstableV6);
-    case Interface::XdgShellStable:
-        return d->create<XdgShellStable>(name, version, parent, &Registry::bindXdgShellStable);
     default:
         return nullptr;
     }

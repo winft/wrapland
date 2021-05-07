@@ -37,6 +37,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "kde_idle.h"
 #include "keyboard_shortcuts_inhibit.h"
 #include "keystate.h"
+#include "layer_shell_v1.h"
 #include "linux_dmabuf_v1.h"
 #include "output_configuration_v1.h"
 #include "output_device_v1_p.h"
@@ -248,6 +249,11 @@ KeyboardShortcutsInhibitManagerV1* Display::createKeyboardShortcutsInhibitManage
 FakeInput* Display::createFakeInput(QObject* parent)
 {
     return new FakeInput(this, parent);
+}
+
+LayerShellV1* Display::createLayerShellV1(QObject* parent)
+{
+    return new LayerShellV1(this, parent);
 }
 
 ShadowManager* Display::createShadowManager(QObject* parent)

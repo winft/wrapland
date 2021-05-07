@@ -75,6 +75,7 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
+    friend class Surface;
     friend class XdgShell;
     friend class XdgShellToplevel;
     friend class XdgShellPopup;

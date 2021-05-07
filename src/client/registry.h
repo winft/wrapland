@@ -57,10 +57,10 @@ struct org_kde_plasma_window_management;
 struct org_kde_kwin_server_decoration_palette_manager;
 struct wp_viewporter;
 struct xdg_shell;
-struct zxdg_shell_v6;
 struct xdg_wm_base;
 struct zkwinft_output_management_v1;
 struct zkwinft_output_device_v1;
+struct zwlr_layer_shell_v1;
 struct zwlr_output_manager_v1;
 struct zwp_relative_pointer_manager_v1;
 struct zwp_pointer_gestures_v1;
@@ -92,6 +92,7 @@ class WlrOutputManagerV1;
 class Idle;
 class IdleInhibitManager;
 class Keystate;
+class LayerShellV1;
 class RemoteAccessManager;
 class Output;
 class PlasmaShell;
@@ -166,6 +167,7 @@ public:
         Shm,                              ///< Refers to the wl_shm interface
         Output,                           ///< Refers to the wl_output interface
         FullscreenShell,                  ///< Refers to the _wl_fullscreen_shell interface
+        LayerShellV1,                     ///< Refers to zwlr_layer_shell_v1 interface
         SubCompositor,                    ///< Refers to the wl_subcompositor interface;
         DataDeviceManager,                ///< Refers to the wl_data_device_manager interface
         PlasmaShell,                      ///< Refers to org_kde_plasma_shell interface
@@ -189,7 +191,6 @@ public:
         PresentationManager,              ///< Refers to wp_presentation, @since 0.519.0
         XdgExporterUnstableV2,            ///< refers to zxdg_exporter_v2, @since 0.0.540
         XdgImporterUnstableV2,            ///< refers to zxdg_importer_v2, @since 0.0.540
-        XdgShellUnstableV6, ///< Refers to zxdg_shell_v6 (unstable version 6), @since 0.0.539
         IdleInhibitManagerUnstableV1, ///< Refers to zwp_idle_inhibit_manager_v1 (unstable version
                                       ///< 1), @since 0.0.541
         AppMenu,                      /// Refers to org_kde_kwin_appmenu @since 0.0.542
@@ -200,7 +201,7 @@ public:
         PlasmaVirtualDesktopManagement, ///< Refers to org_kde_plasma_virtual_desktop_management
                                         ///< interface @since 0.0.552
         XdgOutputUnstableV1,            /// refers to zxdg_output_v1, @since 0.0.547
-        XdgShellStable,                 /// refers to xdg_wm_base @since 0.0.548
+        XdgShell,                       /// refers to xdg_wm_base @since 0.0.548
         XdgDecorationUnstableV1,        /// refers to zxdg_decoration_manager_v1, @since 0.0.554
         Keystate,                       ///< refers to org_kwin_keystate, @since 0.0.557
         Viewporter,                     ///< Refers to wp_viewporter, @since 0.518.0
@@ -507,6 +508,16 @@ public:
      **/
     org_kde_kwin_contrast_manager* bindContrastManager(uint32_t name, uint32_t version) const;
     /**
+     * Binds the zwlr_layer_shell_v1 with @p name and @p version.
+     * If the @p name does not exist or is not for the layer shell interface,
+     * @c null will be returned.
+     *
+     * Prefer using createLayerShellV1 instead.
+     * @see createLayerShellV1
+     * @since 0.522.0
+     **/
+    zwlr_layer_shell_v1* bindLayerShellV1(uint32_t name, uint32_t version) const;
+    /**
      * Binds the org_kde_kwin_slide_manager with @p name and @p version.
      * If the @p name does not exist or is not for the slide manager interface,
      * @c null will be returned.
@@ -558,7 +569,7 @@ public:
      **/
     wp_viewporter* bindViewporter(uint32_t name, uint32_t version) const;
     /**
-     * Binds the zxdg_shell_v6 (unstable version 6) with @p name and @p version.
+     * Binds the xdg_wm_base with @p name and @p version.
      * If the @p name does not exist or is not for the xdg shell interface in unstable version 5,
      * @c null will be returned.
      *
@@ -566,17 +577,7 @@ public:
      * @see createXdgShell
      * @since 0.0.539
      **/
-    zxdg_shell_v6* bindXdgShellUnstableV6(uint32_t name, uint32_t version) const;
-    /**
-     * Binds the zxdg_shell_v6 (unstable version 6) with @p name and @p version.
-     * If the @p name does not exist or is not for the xdg shell interface in unstable version 5,
-     * @c null will be returned.
-     *
-     * Prefer using createXdgShell instead.
-     * @see createXdgShell
-     * @since 0.0.539
-     **/
-    xdg_wm_base* bindXdgShellStable(uint32_t name, uint32_t version) const;
+    xdg_wm_base* bindXdgShell(uint32_t name, uint32_t version) const;
     /**
      * Binds the zwp_relative_pointer_manager_v1 with @p name and @p version.
      * If the @p name does not exist or is not for the relative pointer interface in unstable
@@ -1033,6 +1034,22 @@ public:
      **/
     ShadowManager* createShadowManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
+     * Creates a LayerShellV1 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the zwlr_layer_shell_v1 interface,
+     * the returned LayerShellV1 will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the zwlr_layer_shell_v1 interface to bind
+     * @param version The version or the zwlr_layer_shell_v1 interface to use
+     * @param parent The parent for LayerShellV1
+     *
+     * @returns The created LayerShellV1.
+     * @since 0.522.0
+     **/
+    LayerShellV1* createLayerShellV1(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
      * Creates a BlurManager and sets it up to manage the interface identified by
      * @p name and @p version.
      *
@@ -1453,6 +1470,13 @@ Q_SIGNALS:
      * @param version The maximum supported version of the announced interface
      **/
     void dataDeviceManagerAnnounced(quint32 name, quint32 version);
+    /**
+     * Emitted whenever a zwlr_layer_shell_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.522.0
+     **/
+    void layerShellV1Announced(quint32 name, quint32 version);
 
     /**
      * Emitted whenever a zkwinft_output_management_v1 interface gets announced.
@@ -1573,14 +1597,6 @@ Q_SIGNALS:
      **/
     void viewporterAnnounced(quint32 name, quint32 version);
     /**
-     * Emitted whenever a zxdg_shell_v6 (unstable version 6) interface gets announced.
-     * @param name The name for the announced interface
-     * @param version The maximum supported version of the announced interface
-     * @since 0.0.525
-     **/
-    void xdgShellUnstableV6Announced(quint32 name, quint32 version);
-
-    /**
      * Emitted whenever a zwp_relative_pointer_manager_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1664,7 +1680,7 @@ Q_SIGNALS:
      * @param version The maximum supported version of the announced interface
      * @since 0.0.548
      **/
-    void xdgShellStableAnnounced(quint32 name, quint32 version);
+    void xdgShellAnnounced(quint32 name, quint32 version);
 
     /**
      * Emitted whenever a zxdg_decoration_manager_v1 interface gets announced.
@@ -1788,6 +1804,12 @@ Q_SIGNALS:
      **/
     void fakeInputRemoved(quint32 name);
     /**
+     * Emitted whenever a zwlr_layer_shell_v1 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.522.0
+     **/
+    void layerShellV1Removed(quint32 name);
+    /**
      * Emitted whenever a org_kde_kwin_shadow_manager interface gets removed.
      * @param name The name for the removed interface
      * @since 5.4
@@ -1835,12 +1857,6 @@ Q_SIGNALS:
      * @since 0.518.0
      **/
     void viewporterRemoved(quint32 name);
-    /**
-     * Emitted whenever an xdg_shell (unstable version 5) interface gets removed.
-     * @param name The name for the removed interface
-     * @since 0.0.525
-     **/
-    void xdgShellUnstableV6Removed(quint32 name);
     /**
      * Emitted whenever a zwp_relative_pointer_manager_v1 interface gets removed.
      * @param name The name for the removed interface
@@ -1913,7 +1929,7 @@ Q_SIGNALS:
      * @param name The name for the removed interface
      * @since 0.0.548
      **/
-    void xdgShellStableRemoved(quint32 name);
+    void xdgShellRemoved(quint32 name);
 
     /**
      * Emitted whenever a zxdg_decoration_manager_v1 gets removed.

@@ -35,7 +35,7 @@ namespace Client
 
 class EventQueue;
 class XdgDecoration;
-class XdgShellSurface;
+class XdgShellToplevel;
 
 /**
  * @short Wrapper for the zxdg_decoration_manager_v1 interface.
@@ -102,7 +102,7 @@ public:
      **/
     EventQueue* eventQueue();
 
-    XdgDecoration* getToplevelDecoration(XdgShellSurface* toplevel, QObject* parent = nullptr);
+    XdgDecoration* getToplevelDecoration(XdgShellToplevel* toplevel, QObject* parent = nullptr);
 
     operator zxdg_decoration_manager_v1*();
     operator zxdg_decoration_manager_v1*() const;

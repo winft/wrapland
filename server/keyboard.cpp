@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keyboard.h"
 #include "keyboard_p.h"
 
+#include "client.h"
 #include "display.h"
 #include "seat.h"
 #include "surface.h"
@@ -92,6 +93,7 @@ Keyboard::Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat)
     : QObject(nullptr)
     , d_ptr(new Private(client, version, id, seat, this))
 {
+    connect(client, &Client::disconnected, this, [this] { disconnect(d_ptr->destroyConnection); });
 }
 
 void Keyboard::setKeymap(int fd, quint32 size)

@@ -29,7 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/shm_pool.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/xdgshell.h"
+#include "../../src/client/xdg_shell.h"
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
@@ -79,6 +79,7 @@ private Q_SLOTS:
 
     void testMultipleRoles1();
     void testMultipleRoles2();
+    void test_role_after_buffer();
 
     void testWindowGeometry();
 
@@ -124,7 +125,7 @@ XdgShellTest::XdgShellTest(QObject* parent)
     qRegisterMetaType<Server::XdgShellPopup*>();
     qRegisterMetaType<Server::Output*>();
     qRegisterMetaType<Server::Seat*>();
-    qRegisterMetaType<Client::XdgShellSurface::States>();
+    qRegisterMetaType<Client::XdgShellToplevel::States>();
     qRegisterMetaType<std::string>();
     qRegisterMetaType<uint32_t>();
 }
@@ -182,7 +183,7 @@ void XdgShellTest::init()
     QSignalSpy outputAnnouncedSpy(&registry, &Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    QSignalSpy xdgShellAnnouncedSpy(&registry, &Client::Registry::xdgShellStableAnnounced);
+    QSignalSpy xdgShellAnnouncedSpy(&registry, &Client::Registry::xdgShellAnnounced);
     QVERIFY(xdgShellAnnouncedSpy.isValid());
 
     registry.setEventQueue(m_queue);
@@ -220,12 +221,12 @@ void XdgShellTest::init()
     QVERIFY(m_seat->isValid());
 
     QCOMPARE(xdgShellAnnouncedSpy.count(), 1);
-    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShellStable).version, 2);
+    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShell).version, 2);
 
-    m_xdgShell = registry.createXdgShell(
-        registry.interface(Client::Registry::Interface::XdgShellStable).name,
-        registry.interface(Client::Registry::Interface::XdgShellStable).version,
-        this);
+    m_xdgShell
+        = registry.createXdgShell(registry.interface(Client::Registry::Interface::XdgShell).name,
+                                  registry.interface(Client::Registry::Interface::XdgShell).version,
+                                  this);
     QVERIFY(m_xdgShell);
     QVERIFY(m_xdgShell->isValid());
 }
@@ -268,7 +269,8 @@ void XdgShellTest::cleanup()
     QSignalSpy xdgSurfaceCreatedSpy(m_serverXdgShell, &Server::XdgShell::toplevelCreated);         \
     QVERIFY(xdgSurfaceCreatedSpy.isValid());                                                       \
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());                       \
-    std::unique_ptr<Client::XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get())); \
+    std::unique_ptr<Client::XdgShellToplevel> xdgSurface(                                          \
+        m_xdgShell->create_toplevel(surface.get()));                                               \
     QCOMPARE(xdgSurface->size(), QSize());                                                         \
     QVERIFY(xdgSurfaceCreatedSpy.wait());                                                          \
     auto serverXdgSurface                                                                          \
@@ -293,7 +295,8 @@ void XdgShellTest::testCreateSurface()
     QVERIFY(serverSurface);
 
     // create shell surface
-    std::unique_ptr<Client::XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get()));
+    std::unique_ptr<Client::XdgShellToplevel> xdgSurface(
+        m_xdgShell->create_toplevel(surface.get()));
     QVERIFY(xdgSurface != nullptr);
     QVERIFY(xdgSurfaceCreatedSpy.wait());
 
@@ -389,7 +392,8 @@ void XdgShellTest::testFullscreen()
     QSignalSpy xdgSurfaceCreatedSpy(m_serverXdgShell, &Server::XdgShell::toplevelCreated);
     QVERIFY(xdgSurfaceCreatedSpy.isValid());
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<Client::XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get()));
+    std::unique_ptr<Client::XdgShellToplevel> xdgSurface(
+        m_xdgShell->create_toplevel(surface.get()));
     QVERIFY(xdgSurfaceCreatedSpy.wait());
     auto serverXdgSurface = xdgSurfaceCreatedSpy.first().first().value<Server::XdgShellToplevel*>();
     QVERIFY(serverXdgSurface);
@@ -497,7 +501,8 @@ void XdgShellTest::testTransient()
     // this test verifies that setting the transient for works
     SURFACE
     std::unique_ptr<Client::Surface> surface2(m_compositor->createSurface());
-    std::unique_ptr<Client::XdgShellSurface> xdgSurface2(m_xdgShell->createSurface(surface2.get()));
+    std::unique_ptr<Client::XdgShellToplevel> xdgSurface2(
+        m_xdgShell->create_toplevel(surface2.get()));
     QVERIFY(xdgSurfaceCreatedSpy.wait());
     auto serverXdgSurface2 = xdgSurfaceCreatedSpy.last().first().value<Server::XdgShellToplevel*>();
     QVERIFY(serverXdgSurface2);
@@ -555,7 +560,7 @@ void XdgShellTest::testClose()
     // this test verifies that a close request is sent to the client
     SURFACE
 
-    QSignalSpy closeSpy(xdgSurface.get(), &Client::XdgShellSurface::closeRequested);
+    QSignalSpy closeSpy(xdgSurface.get(), &Client::XdgShellToplevel::closeRequested);
     QVERIFY(closeSpy.isValid());
 
     serverXdgSurface->close();
@@ -571,7 +576,7 @@ void XdgShellTest::testClose()
 void XdgShellTest::testConfigureStates_data()
 {
     QTest::addColumn<Server::XdgShellSurface::States>("serverStates");
-    QTest::addColumn<Client::XdgShellSurface::States>("clientStates");
+    QTest::addColumn<Client::XdgShellToplevel::States>("clientStates");
 
     const auto sa = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Activated);
     const auto sm = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Maximized);
@@ -582,16 +587,17 @@ void XdgShellTest::testConfigureStates_data()
     const auto stt = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledTop);
     const auto stb = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledBottom);
 
-    const auto ca = Client::XdgShellSurface::States(Client::XdgShellSurface::State::Activated);
-    const auto cm = Client::XdgShellSurface::States(Client::XdgShellSurface::State::Maximized);
-    const auto cf = Client::XdgShellSurface::States(Client::XdgShellSurface::State::Fullscreen);
-    const auto cr = Client::XdgShellSurface::States(Client::XdgShellSurface::State::Resizing);
-    const auto ctl = Client::XdgShellSurface::States(Client::XdgShellSurface::State::TiledLeft);
-    const auto ctr = Client::XdgShellSurface::States(Client::XdgShellSurface::State::TiledRight);
-    const auto ctt = Client::XdgShellSurface::States(Client::XdgShellSurface::State::TiledTop);
-    const auto ctb = Client::XdgShellSurface::States(Client::XdgShellSurface::State::TiledBottom);
+    const auto ca = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Activated);
+    const auto cm = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Maximized);
+    const auto cf = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Fullscreen);
+    const auto cr = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Resizing);
+    const auto ctl = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledLeft);
+    const auto ctr = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledRight);
+    const auto ctt = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledTop);
+    const auto ctb = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledBottom);
 
-    QTest::newRow("none") << Server::XdgShellSurface::States() << Client::XdgShellSurface::States();
+    QTest::newRow("none") << Server::XdgShellSurface::States()
+                          << Client::XdgShellToplevel::States();
     QTest::newRow("Active") << sa << ca;
     QTest::newRow("Maximize") << sm << cm;
     QTest::newRow("Fullscreen") << sf << cf;
@@ -627,7 +633,7 @@ void XdgShellTest::testConfigureStates()
     // this test verifies that configure states works
     SURFACE
 
-    QSignalSpy configureSpy(xdgSurface.get(), &Client::XdgShellSurface::configureRequested);
+    QSignalSpy configureSpy(xdgSurface.get(), &Client::XdgShellToplevel::configureRequested);
     QVERIFY(configureSpy.isValid());
 
     QFETCH(Server::XdgShellSurface::States, serverStates);
@@ -635,7 +641,7 @@ void XdgShellTest::testConfigureStates()
     QVERIFY(configureSpy.wait());
     QCOMPARE(configureSpy.count(), 1);
     QCOMPARE(configureSpy.first().at(0).toSize(), QSize(0, 0));
-    QTEST(configureSpy.first().at(1).value<Client::XdgShellSurface::States>(), "clientStates");
+    QTEST(configureSpy.first().at(1).value<Client::XdgShellToplevel::States>(), "clientStates");
     QCOMPARE(configureSpy.first().at(2).value<quint32>(), m_display->serial());
 
     QSignalSpy ackSpy(serverXdgSurface, &Server::XdgShellToplevel::configureAcknowledged);
@@ -653,9 +659,9 @@ void XdgShellTest::testConfigureMultipleAcks()
     // acknowledges all
     SURFACE
 
-    QSignalSpy configureSpy(xdgSurface.get(), &Client::XdgShellSurface::configureRequested);
+    QSignalSpy configureSpy(xdgSurface.get(), &Client::XdgShellToplevel::configureRequested);
     QVERIFY(configureSpy.isValid());
-    QSignalSpy sizeChangedSpy(xdgSurface.get(), &Client::XdgShellSurface::sizeChanged);
+    QSignalSpy sizeChangedSpy(xdgSurface.get(), &Client::XdgShellToplevel::sizeChanged);
     QVERIFY(sizeChangedSpy.isValid());
     QSignalSpy ackSpy(serverXdgSurface, &Server::XdgShellToplevel::configureAcknowledged);
     QVERIFY(ackSpy.isValid());
@@ -675,16 +681,16 @@ void XdgShellTest::testConfigureMultipleAcks()
     QVERIFY(!configureSpy.wait(100));
 
     QCOMPARE(configureSpy.at(0).at(0).toSize(), QSize(10, 20));
-    QCOMPARE(configureSpy.at(0).at(1).value<Client::XdgShellSurface::States>(),
-             Client::XdgShellSurface::States());
+    QCOMPARE(configureSpy.at(0).at(1).value<Client::XdgShellToplevel::States>(),
+             Client::XdgShellToplevel::States());
     QCOMPARE(configureSpy.at(0).at(2).value<quint32>(), serial1);
     QCOMPARE(configureSpy.at(1).at(0).toSize(), QSize(20, 30));
-    QCOMPARE(configureSpy.at(1).at(1).value<Client::XdgShellSurface::States>(),
-             Client::XdgShellSurface::States());
+    QCOMPARE(configureSpy.at(1).at(1).value<Client::XdgShellToplevel::States>(),
+             Client::XdgShellToplevel::States());
     QCOMPARE(configureSpy.at(1).at(2).value<quint32>(), serial2);
     QCOMPARE(configureSpy.at(2).at(0).toSize(), QSize(30, 40));
-    QCOMPARE(configureSpy.at(2).at(1).value<Client::XdgShellSurface::States>(),
-             Client::XdgShellSurface::States());
+    QCOMPARE(configureSpy.at(2).at(1).value<Client::XdgShellToplevel::States>(),
+             Client::XdgShellToplevel::States());
     QCOMPARE(configureSpy.at(2).at(2).value<quint32>(), serial3);
     QCOMPARE(sizeChangedSpy.count(), 3);
     QCOMPARE(sizeChangedSpy.at(0).at(0).toSize(), QSize(10, 20));
@@ -716,7 +722,8 @@ void XdgShellTest::testMaxSize()
     QVERIFY(xdgSurfaceCreatedSpy.isValid());
 
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<Client::XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get()));
+    std::unique_ptr<Client::XdgShellToplevel> xdgSurface(
+        m_xdgShell->create_toplevel(surface.get()));
 
     QVERIFY(xdgSurfaceCreatedSpy.wait());
 
@@ -747,7 +754,8 @@ void XdgShellTest::testMinSize()
     QSignalSpy xdgSurfaceCreatedSpy(m_serverXdgShell, &Server::XdgShell::toplevelCreated);
     QVERIFY(xdgSurfaceCreatedSpy.isValid());
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<Client::XdgShellSurface> xdgSurface(m_xdgShell->createSurface(surface.get()));
+    std::unique_ptr<Client::XdgShellToplevel> xdgSurface(
+        m_xdgShell->create_toplevel(surface.get()));
     QVERIFY(xdgSurfaceCreatedSpy.wait());
     auto serverXdgSurface = xdgSurfaceCreatedSpy.first().first().value<Server::XdgShellToplevel*>();
     QVERIFY(serverXdgSurface);
@@ -808,8 +816,8 @@ void XdgShellTest::testPopup()
     QSignalSpy popupCreatedSpy(m_serverXdgShell, &Server::XdgShell::popupCreated);
 
     std::unique_ptr<Client::Surface> parentSurface(m_compositor->createSurface());
-    std::unique_ptr<Client::XdgShellSurface> xdgParentSurface(
-        m_xdgShell->createSurface(parentSurface.get()));
+    std::unique_ptr<Client::XdgShellToplevel> xdgParentSurface(
+        m_xdgShell->create_toplevel(parentSurface.get()));
 
     QVERIFY(xdgTopLevelCreatedSpy.wait());
     auto serverXdgTopLevel
@@ -819,7 +827,7 @@ void XdgShellTest::testPopup()
 
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
     std::unique_ptr<Client::XdgShellPopup> xdgSurface(
-        m_xdgShell->createPopup(surface.get(), xdgParentSurface.get(), positioner));
+        m_xdgShell->create_popup(surface.get(), xdgParentSurface.get(), positioner));
     QVERIFY(popupCreatedSpy.wait());
     auto serverXdgPopup = popupCreatedSpy.first().first().value<Server::XdgShellPopup*>();
     QVERIFY(serverXdgPopup);
@@ -904,13 +912,46 @@ void XdgShellTest::testMultipleRoles2()
     xdg_surface_destroy(parentXdgSurface);
 }
 
+void XdgShellTest::test_role_after_buffer()
+{
+    QSignalSpy surface_spy(m_serverCompositor, &Server::Compositor::surfaceCreated);
+    QVERIFY(surface_spy.isValid());
+    QSignalSpy xdg_toplevel_spy(m_serverXdgShell, &Server::XdgShell::toplevelCreated);
+    QVERIFY(xdg_toplevel_spy.isValid());
+
+    std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
+    auto xdg_surface = xdg_wm_base_get_xdg_surface(*m_xdgShell, *surface.get());
+
+    QVERIFY(surface_spy.wait());
+    auto server_surface = surface_spy.first().first().value<Server::Surface*>();
+
+    QSignalSpy commit_spy(server_surface, &Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
+
+    // Now commit a buffer before getting the toplevel from the surface.
+    auto img = QImage(QSize(300, 300), QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::black);
+    auto buffer = m_shmPool->createBuffer(img);
+
+    surface->attachBuffer(buffer);
+    surface->commit(Wrapland::Client::Surface::CommitFlag::None);
+
+    QVERIFY(commit_spy.wait());
+
+    auto xdg_toplevel = xdg_surface_get_toplevel(xdg_surface);
+    QVERIFY(!xdg_toplevel_spy.wait(100));
+
+    xdg_toplevel_destroy(xdg_toplevel);
+    xdg_surface_destroy(xdg_surface);
+}
+
 void XdgShellTest::testWindowGeometry()
 {
     QSignalSpy toplevel_created_spy(m_serverXdgShell, &Server::XdgShell::toplevelCreated);
     QVERIFY(toplevel_created_spy.isValid());
 
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
-    std::unique_ptr<Client::XdgShellSurface> toplevel(m_xdgShell->createSurface(surface.get()));
+    std::unique_ptr<Client::XdgShellToplevel> toplevel(m_xdgShell->create_toplevel(surface.get()));
 
     QVERIFY(toplevel_created_spy.wait());
 
@@ -964,7 +1005,7 @@ void XdgShellTest::testWindowGeometry()
     QSignalSpy popup_created_spy(m_serverXdgShell, &Server::XdgShell::popupCreated);
     std::unique_ptr<Client::Surface> popup_surface(m_compositor->createSurface());
     std::unique_ptr<Client::XdgShellPopup> popup(
-        m_xdgShell->createPopup(popup_surface.get(), toplevel.get(), positioner));
+        m_xdgShell->create_popup(popup_surface.get(), toplevel.get(), positioner));
     QVERIFY(popup_created_spy.wait());
     auto server_popup = popup_created_spy.first().first().value<Server::XdgShellPopup*>();
     QVERIFY(server_popup);

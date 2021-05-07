@@ -155,6 +155,8 @@ private:
     friend class DataDevice;
     friend class Keyboard;
     friend class IdleInhibitManagerV1;
+    friend class LayerShellV1;
+    friend class LayerSurfaceV1;
     friend class PlasmaShell;
     friend class Pointer;
     friend class PointerConstraintsV1;
