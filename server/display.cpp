@@ -31,6 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "contrast.h"
 #include "data_device_manager.h"
 #include "dpms.h"
+#include "drm_lease_v1.h"
 #include "egl_stream_controller.h"
 #include "fake_input.h"
 #include "idle_inhibit_v1.h"
@@ -288,6 +289,11 @@ SlideManager* Display::createSlideManager(QObject* parent)
 DpmsManager* Display::createDpmsManager(QObject* parent)
 {
     return new DpmsManager(this, parent);
+}
+
+drm_lease_device_v1* Display::createDrmLeaseDeviceV1(QObject* parent)
+{
+    return new drm_lease_device_v1(this, parent);
 }
 
 TextInputManagerV2* Display::createTextInputManagerV2(QObject* parent)

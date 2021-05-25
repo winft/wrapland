@@ -225,6 +225,11 @@ void Output::set_physical_size(QSize const& size)
     d_ptr->pending.info.physical_size = size;
 }
 
+void Output::set_connector_id(int id)
+{
+    d_ptr->connector_id = id;
+}
+
 void Output::generate_description()
 {
     auto& info = d_ptr->pending.info;
@@ -258,6 +263,11 @@ void Output::set_enabled(bool enabled)
 QSize Output::physical_size() const
 {
     return d_ptr->pending.info.physical_size;
+}
+
+int Output::connector_id() const
+{
+    return d_ptr->connector_id;
 }
 
 std::vector<Output::Mode> Output::modes() const

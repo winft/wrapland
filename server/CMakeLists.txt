@@ -12,6 +12,7 @@ set(SERVER_LIB_SRCS
   display.cpp
   dpms.cpp
   drag_pool.cpp
+  drm_lease_v1.cpp
   egl_stream_controller.cpp
   fake_input.cpp
   filtered_display.cpp
@@ -128,6 +129,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
   PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/dpms.xml
   BASENAME dpms
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/staging/drm-lease/drm-lease-v1.xml
+  BASENAME drm-lease-v1
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
@@ -258,6 +264,8 @@ set(SERVER_GENERATED_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-contrast-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-dpms-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-dpms-server-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-drm-lease-v1-client-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-drm-lease-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-eglstream-controller-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-fake-input-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-fake-input-server-protocol.h
@@ -366,6 +374,7 @@ set(SERVER_LIB_HEADERS
   drag_pool.h
   display.h
   dpms.h
+  drm_lease_v1.h
   egl_stream_controller.h
   fake_input.h
   filtered_display.h
