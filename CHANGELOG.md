@@ -1,5 +1,38 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.522.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.521.0-beta.0...wrapland@0.522.0-beta.0) (2021-05-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **client:** The client xdg-shell API interface changes.
+* **client:** Client library xdg-shell v6 support removed.
+
+### Features
+
+* **client:** add application menu to org_kde_plasma_window client API ([6424454](https://gitlab.com/kwinft/wrapland/commit/6424454c1037cd013eef7da9fb60d492526c5e7a))
+* **client:** add support for wlr_layer_shell_unstable_v1 ([1fa2d50](https://gitlab.com/kwinft/wrapland/commit/1fa2d502359eb7e32a5546e1802fa5a011ec7cdb))
+* **client:** provide override to create xdg-popups without a parent ([d7852c0](https://gitlab.com/kwinft/wrapland/commit/d7852c0ed8882dc66b6f9ec9b32428560e01e9c0))
+* **client:** remove xdg-shell v6 ([31198d6](https://gitlab.com/kwinft/wrapland/commit/31198d6a0695dd1ffe86809b0107e842f2f05b39))
+* **server:** add application menu to org_kde_plasma_window server API ([a3d1794](https://gitlab.com/kwinft/wrapland/commit/a3d1794bae51683c6bc277e0f396e47cd82d1b0c))
+* **server:** add support for wlr_layer_shell_unstable_v1 ([f8199a9](https://gitlab.com/kwinft/wrapland/commit/f8199a9b9d7e787f11194fa5e9fb89252e70f57d))
+* update org_kde_plasma_window protocol to version 10 ([c546cce](https://gitlab.com/kwinft/wrapland/commit/c546cce300394b5c3d8b7dc275ec8f3bea501613))
+
+
+### Bug Fixes
+
+* **server:** allow getting xdg-popup without parent ([89cab1f](https://gitlab.com/kwinft/wrapland/commit/89cab1fa5be3cfd0d675516ace057b3e13568cef))
+* **server:** check all xdg-shell role creation errors ([f5d0403](https://gitlab.com/kwinft/wrapland/commit/f5d0403a08e283e74160dd0280e68c0d1f689e63))
+* **server:** omit sending keyboard leave on client destroy ([c30250a](https://gitlab.com/kwinft/wrapland/commit/c30250a1617c88a06595c74c70dba3ffd849f235))
+
+
+### Refactors
+
+* **client:** split up xdg-shell files ([9d7d0bc](https://gitlab.com/kwinft/wrapland/commit/9d7d0bc801cc7f4dc95a67c058a3ce53eb342ef5))
+* **client:** unvirtualize xdg-shell class ([62702d5](https://gitlab.com/kwinft/wrapland/commit/62702d5acd8edc74d87d15336361dee01fbd4614))
+* **client:** unvirtualize xdg-shell popup class ([924baf9](https://gitlab.com/kwinft/wrapland/commit/924baf9c977a4388c000419d386aabe3dd255f12))
+* **client:** unvirtualize xdg-shell toplevel class ([948de4e](https://gitlab.com/kwinft/wrapland/commit/948de4e2e91921577ac6427dc5cc70570ed8d0e8))
+
 ## [0.521.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.521.0-beta.0...wrapland@0.521.0) (2021-02-16)
 
 ## [0.521.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.520.0-beta.0...wrapland@0.521.0-beta.0) (2021-02-07)
