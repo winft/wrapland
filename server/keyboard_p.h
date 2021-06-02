@@ -24,9 +24,34 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/resource.h"
 
 #include <QPointer>
+#include <filesystem>
 
 namespace Wrapland::Server
 {
+
+struct file_wrap {
+    file_wrap() = default;
+    explicit file_wrap(FILE* file)
+        : file{file}
+    {
+    }
+    file_wrap(file_wrap const&) = delete;
+    file_wrap& operator=(file_wrap const&) = delete;
+    file_wrap(file_wrap&&) noexcept = delete;
+    file_wrap& operator=(file_wrap&& other) noexcept
+    {
+        this->file = other.file;
+        other.file = nullptr;
+        return *this;
+    }
+    ~file_wrap()
+    {
+        if (file) {
+            std::fclose(file);
+        }
+    }
+    FILE* file{nullptr};
+};
 
 class Keyboard::Private : public Wayland::Resource<Keyboard>
 {
@@ -46,6 +71,7 @@ public:
 
     Surface* focusedSurface = nullptr;
     QMetaObject::Connection destroyConnection;
+    file_wrap keymap;
 
     Seat* seat;
     Keyboard* q_ptr;

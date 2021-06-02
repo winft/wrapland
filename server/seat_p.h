@@ -112,7 +112,7 @@ public:
         QHash<quint32, State> states;
         struct Keymap {
             int fd = -1;
-            quint32 size = 0;
+            std::string content;
             bool xkbcommonCompatible = false;
         };
         Keymap keymap;

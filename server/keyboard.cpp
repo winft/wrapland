@@ -96,9 +96,15 @@ Keyboard::Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat)
     connect(client, &Client::disconnected, this, [this] { disconnect(d_ptr->destroyConnection); });
 }
 
-void Keyboard::setKeymap(int fd, quint32 size)
+void Keyboard::setKeymap(std::string const& content)
 {
-    d_ptr->sendKeymap(fd, size);
+    auto tmpf = std::tmpfile();
+
+    std::fputs(content.data(), tmpf);
+    std::rewind(tmpf);
+
+    d_ptr->sendKeymap(fileno(tmpf), content.size());
+    d_ptr->keymap = file_wrap(tmpf);
 }
 
 void Keyboard::setFocusedSurface(quint32 serial, Surface* surface)
