@@ -481,7 +481,7 @@ void Seat::Private::getKeyboard(SeatBind* bind, uint32_t id)
     keyboard->repeatInfo(keys.keyRepeat.charactersPerSecond, keys.keyRepeat.delay);
 
     if (keys.keymap.xkbcommonCompatible) {
-        keyboard->setKeymap(keys.keymap.fd, keys.keymap.size);
+        keyboard->setKeymap(keys.keymap.content);
     }
 
     keyboards << keyboard;
@@ -1103,13 +1103,12 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
     }
 }
 
-void Seat::setKeymap(int fd, quint32 size)
+void Seat::setKeymap(std::string const& content)
 {
     d_ptr->keys.keymap.xkbcommonCompatible = true;
-    d_ptr->keys.keymap.fd = fd;
-    d_ptr->keys.keymap.size = size;
+    d_ptr->keys.keymap.content = content;
     for (auto it = d_ptr->keyboards.constBegin(); it != d_ptr->keyboards.constEnd(); ++it) {
-        (*it)->setKeymap(fd, size);
+        (*it)->setKeymap(content);
     }
 }
 
@@ -1174,7 +1173,7 @@ int Seat::keymapFileDescriptor() const
 
 quint32 Seat::keymapSize() const
 {
-    return d_ptr->keys.keymap.size;
+    return d_ptr->keys.keymap.content.size();
 }
 
 quint32 Seat::depressedModifiers() const
