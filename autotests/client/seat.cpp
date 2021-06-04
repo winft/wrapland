@@ -99,7 +99,7 @@ private Q_SLOTS:
     void testTouch();
     void testDisconnect();
     void testPointerEnterOnUnboundSurface();
-    // TODO: add test for keymap
+    void testKeymap();
 
 private:
     Srv::Display* m_display;
@@ -1592,7 +1592,6 @@ void TestSeat::testKeyboard()
     m_serverSeat->setKeyRepeatInfo(30, 560);
     m_serverSeat->setKeyRepeatInfo(25, 660);
     m_serverSeat->updateKeyboardModifiers(5, 6, 7, 8);
-    m_serverSeat->setKeymap(open("/dev/null", O_RDONLY), 0);
     m_serverSeat->setFocusedKeyboardSurface(nullptr);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedKeyboardSurface(), serverSurface);
@@ -2334,6 +2333,47 @@ void TestSeat::testPointerEnterOnUnboundSurface()
     QCOMPARE(serverPointerChangedSpy.count(), 2);
     QVERIFY(!m_serverSeat->focusedPointerSurface());
 #endif
+}
+
+void TestSeat::testKeymap()
+{
+    m_serverSeat->setHasKeyboard(true);
+    QSignalSpy keyboardChangedSpy(m_seat, &Clt::Seat::hasKeyboardChanged);
+    QVERIFY(keyboardChangedSpy.isValid());
+    QVERIFY(keyboardChangedSpy.wait());
+
+    std::unique_ptr<Clt::Keyboard> keyboard(m_seat->createKeyboard());
+    QSignalSpy keymapChangedSpy(keyboard.get(), &Clt::Keyboard::keymapChanged);
+    QVERIFY(keymapChangedSpy.isValid());
+
+    m_serverSeat->setKeymap("foo");
+    QVERIFY(keymapChangedSpy.wait());
+
+    auto fd = keymapChangedSpy.first().first().toInt();
+    QVERIFY(fd != -1);
+    QCOMPARE(keymapChangedSpy.first().last().value<quint32>(), 3u);
+
+    QFile file;
+    QVERIFY(file.open(fd, QIODevice::ReadOnly));
+    auto address
+        = reinterpret_cast<char*>(file.map(0, keymapChangedSpy.first().last().value<quint32>()));
+    QVERIFY(address);
+    QCOMPARE(qstrcmp(address, "foo"), 0);
+    file.close();
+
+    // Change the keymap.
+    keymapChangedSpy.clear();
+    m_serverSeat->setKeymap("bar");
+    QVERIFY(keymapChangedSpy.wait());
+
+    fd = keymapChangedSpy.first().first().toInt();
+    QVERIFY(fd != -1);
+    QCOMPARE(keymapChangedSpy.first().last().value<quint32>(), 3u);
+    QVERIFY(file.open(fd, QIODevice::ReadWrite));
+    address
+        = reinterpret_cast<char*>(file.map(0, keymapChangedSpy.first().last().value<quint32>()));
+    QVERIFY(address);
+    QCOMPARE(qstrcmp(address, "bar"), 0);
 }
 
 QTEST_GUILESS_MAIN(TestSeat)
