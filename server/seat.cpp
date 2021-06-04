@@ -1135,11 +1135,8 @@ void Seat::updateKeyboardModifiers(quint32 depressed,
     saved_mods.serial = serial;
 
     if (d_ptr->keys.focus.surface) {
-        for (auto it = d_ptr->keys.focus.keyboards.constBegin(),
-                  end = d_ptr->keys.focus.keyboards.constEnd();
-             it != end;
-             ++it) {
-            (*it)->updateModifiers(serial, depressed, latched, locked, group);
+        for (auto& keyboard : d_ptr->keys.focus.keyboards) {
+            keyboard->updateModifiers(serial, depressed, latched, locked, group);
         }
     }
 }
