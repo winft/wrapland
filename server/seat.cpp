@@ -1118,20 +1118,22 @@ void Seat::updateKeyboardModifiers(quint32 depressed,
                                    quint32 group)
 {
     bool changed = false;
-#define UPDATE(value)                                                                              \
-    if (d_ptr->keys.modifiers.value != (value)) {                                                  \
-        d_ptr->keys.modifiers.value = value;                                                       \
-        changed = true;                                                                            \
+
+    auto& saved_mods = d_ptr->keys.modifiers;
+    auto mods
+        = Private::SeatKeyboard::Modifiers{depressed, latched, locked, group, saved_mods.serial};
+    if (saved_mods != mods) {
+        saved_mods = mods;
+        changed = true;
     }
-    UPDATE(depressed)
-    UPDATE(latched)
-    UPDATE(locked)
-    UPDATE(group)
+
     if (!changed) {
         return;
     }
+
     const quint32 serial = d_ptr->display()->handle()->nextSerial();
-    d_ptr->keys.modifiers.serial = serial;
+    saved_mods.serial = serial;
+
     if (d_ptr->keys.focus.surface) {
         for (auto it = d_ptr->keys.focus.keyboards.constBegin(),
                   end = d_ptr->keys.focus.keyboards.constEnd();

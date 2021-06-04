@@ -117,6 +117,15 @@ public:
         };
         Keymap keymap;
         struct Modifiers {
+            bool operator==(Modifiers const& other) const
+            {
+                return depressed == other.depressed && latched == other.latched
+                    && locked == other.locked && group == other.group && serial == other.serial;
+            }
+            bool operator!=(Modifiers const& other) const
+            {
+                return !(*this == other);
+            }
             quint32 depressed = 0;
             quint32 latched = 0;
             quint32 locked = 0;
