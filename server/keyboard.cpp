@@ -82,11 +82,11 @@ void Keyboard::Private::sendModifiers(quint32 serial,
 
 void Keyboard::Private::sendModifiers()
 {
-    sendModifiers(seat->depressedModifiers(),
+    sendModifiers(seat->lastModifiersSerial(),
+                  seat->depressedModifiers(),
                   seat->latchedModifiers(),
                   seat->lockedModifiers(),
-                  seat->groupModifiers(),
-                  seat->lastModifiersSerial());
+                  seat->groupModifiers());
 }
 
 Keyboard::Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat)
