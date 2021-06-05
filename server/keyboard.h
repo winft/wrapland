@@ -23,6 +23,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <string>
+
 namespace Wrapland::Server
 {
 class Client;
@@ -42,7 +44,7 @@ Q_SIGNALS:
 
 private:
     void setFocusedSurface(quint32 serial, Surface* surface);
-    void setKeymap(int fd, quint32 size);
+    void setKeymap(std::string const& content);
     void updateModifiers(quint32 serial,
                          quint32 depressed,
                          quint32 latched,

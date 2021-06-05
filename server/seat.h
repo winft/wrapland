@@ -112,7 +112,7 @@ public:
     void endPointerPinchGesture();
     void cancelPointerPinchGesture();
 
-    void setKeymap(int fd, quint32 size);
+    void setKeymap(std::string const& content);
     void keyPressed(quint32 key);
     void keyReleased(quint32 key);
     void updateKeyboardModifiers(quint32 depressed, quint32 latched, quint32 locked, quint32 group);

@@ -60,6 +60,7 @@ public:
     QVector<Touch*> touchsForSurface(Surface* surface) const;
     QVector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
     TextInputV2* textInputForSurface(Surface* surface) const;
+
     void registerDataDevice(DataDevice* dataDevice);
     void registerTextInput(TextInputV2* ti);
     void endDrag(quint32 serial);
@@ -112,11 +113,20 @@ public:
         QHash<quint32, State> states;
         struct Keymap {
             int fd = -1;
-            quint32 size = 0;
+            std::string content;
             bool xkbcommonCompatible = false;
         };
         Keymap keymap;
         struct Modifiers {
+            bool operator==(Modifiers const& other) const
+            {
+                return depressed == other.depressed && latched == other.latched
+                    && locked == other.locked && group == other.group && serial == other.serial;
+            }
+            bool operator!=(Modifiers const& other) const
+            {
+                return !(*this == other);
+            }
             quint32 depressed = 0;
             quint32 latched = 0;
             quint32 locked = 0;
