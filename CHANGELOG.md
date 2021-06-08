@@ -1,5 +1,19 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.522.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.522.0-beta.0...wrapland@0.522.0) (2021-06-08)
+
+
+### Bug Fixes
+
+* **server:** provide updated modifiers serial at right argument position ([ebcf597](https://gitlab.com/kwinft/wrapland/commit/ebcf597d8aed3bb66f193596ed58fa3ac2f6797b))
+* set keymap file per wl_keyboard resource ([9b831db](https://gitlab.com/kwinft/wrapland/commit/9b831dbbd6c411740f218ee4b2a6ce2ec261abf1))
+
+
+### Refactors
+
+* **server:** compare keyboard modifiers with operator ([77b8056](https://gitlab.com/kwinft/wrapland/commit/77b8056e0e0cddce0921deb6ebdc4016f58104c6))
+* **server:** use range-based for loop ([5e6cdc0](https://gitlab.com/kwinft/wrapland/commit/5e6cdc0f62d5ee20b39ae17c72e35eaee8ab169e))
+
 ## [0.522.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.521.0-beta.0...wrapland@0.522.0-beta.0) (2021-05-26)
 
 
