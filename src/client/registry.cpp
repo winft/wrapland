@@ -58,6 +58,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "viewporter.h"
 #include "wayland_pointer_p.h"
 #include "wlr_output_manager_v1.h"
+#include "xdg_activation_v1.h"
 #include "xdg_shell.h"
 #include "xdgdecoration.h"
 #include "xdgforeign_v2.h"
@@ -94,6 +95,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-viewporter-client-protocol.h>
 #include <wayland-wlr-layer-shell-client-protocol.h>
 #include <wayland-wlr-output-management-v1-client-protocol.h>
+#include <wayland-xdg-activation-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-xdg-foreign-unstable-v2-client-protocol.h>
 #include <wayland-xdg-output-unstable-v1-client-protocol.h>
@@ -416,6 +418,16 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &wp_presentation_interface,
             &Registry::presentationManagerAnnounced,
             &Registry::presentationManagerRemoved,
+        },
+    },
+    {
+        Registry::Interface::XdgActivationV1,
+        {
+            1,
+            QByteArrayLiteral("xdg_activation_v1"),
+            &xdg_activation_v1_interface,
+            &Registry::xdgActivationV1Announced,
+            &Registry::xdgActivationV1Removed,
         },
     },
     {
@@ -837,6 +849,7 @@ BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
 BIND(PointerGesturesUnstableV1, zwp_pointer_gestures_v1)
 BIND(PointerConstraintsUnstableV1, zwp_pointer_constraints_v1)
 BIND(PresentationManager, wp_presentation)
+BIND(XdgActivationV1, xdg_activation_v1)
 BIND(XdgExporterUnstableV2, zxdg_exporter_v2)
 BIND(XdgImporterUnstableV2, zxdg_importer_v2)
 BIND(IdleInhibitManagerUnstableV1, zwp_idle_inhibit_manager_v1)
@@ -911,6 +924,7 @@ CREATE(ServerSideDecorationPaletteManager)
 CREATE(Viewporter)
 CREATE(KeyboardShortcutsInhibitManagerV1)
 CREATE(PresentationManager)
+CREATE(XdgActivationV1)
 CREATE(XdgShell)
 
 #undef CREATE

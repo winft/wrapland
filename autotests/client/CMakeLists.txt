@@ -491,6 +491,22 @@ add_test(NAME wrapland-testPlasmaVirtualDesktop COMMAND testPlasmaVirtualDesktop
 ecm_mark_as_test(testPlasmaVirtualDesktop)
 
 ########################################################
+# Test XDG Activation
+########################################################
+set( testXdgActivation_SRCS xdg_activation.cpp )
+add_executable(testXdgActivation ${testXdgActivation_SRCS})
+target_link_libraries(testXdgActivation
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+    Wayland::Client
+    Wayland::Server
+)
+add_test(NAME wrapland-testXdgActivation COMMAND testXdgActivation)
+ecm_mark_as_test(testXdgActivation)
+
+########################################################
 # Test XDG Output
 ########################################################
 set( testXdgOutput_SRCS

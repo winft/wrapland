@@ -57,6 +57,7 @@ set(CLIENT_LIB_SRCS
     viewporter.cpp
     wlr_output_configuration_v1.cpp
     wlr_output_manager_v1.cpp
+    xdg_activation_v1.cpp
     xdgdecoration.cpp
     xdg_shell.cpp
     xdg_shell_popup.cpp
@@ -200,6 +201,11 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/staging/xdg-activation/xdg-activation-v1.xml
+    BASENAME xdg-activation-v1
+)
+
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml
     BASENAME xdg-decoration-unstable-v1
 )
@@ -246,6 +252,7 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-inhibit-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-output-unstable-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-activation-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-linux-dmabuf-unstable-v1-client-protocol.h
 )
@@ -331,6 +338,7 @@ set(CLIENT_LIB_HEADERS
   touch.h
   textinput.h
   viewporter.h
+  xdg_activation_v1.h
   xdgdecoration.h
   xdg_shell.h
   xdg_shell_popup.h
