@@ -41,7 +41,7 @@ set_package_properties(Wayland PROPERTIES
 
 find_package(WaylandScanner)
 
-find_package(WaylandProtocols 1.15)
+find_package(WaylandProtocols 1.21)
 set_package_properties(WaylandProtocols PROPERTIES TYPE REQUIRED)
 
 find_package(EGL)

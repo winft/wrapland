@@ -48,6 +48,7 @@ set(SERVER_LIB_SRCS
     wayland/client.cpp
     wayland/display.cpp
     wl_output.cpp
+    xdg_activation_v1.cpp
     xdg_decoration.cpp
     xdg_foreign.cpp
     xdg_foreign_v2.cpp
@@ -196,6 +197,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/staging/xdg-activation/xdg-activation-v1.xml
+    BASENAME xdg-activation-v1
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml
     BASENAME xdg-decoration
 )
@@ -270,6 +276,8 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-server-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-activation-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-activation-v1-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-foreign-unstable-v2-client-protocol.h
@@ -359,6 +367,7 @@ set(SERVER_LIB_HEADERS
   touch.h
   viewporter.h
   wl_output.h
+  xdg_activation_v1.h
   xdg_decoration.h
   xdg_output.h
   xdg_foreign.h
