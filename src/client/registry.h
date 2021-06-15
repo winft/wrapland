@@ -56,6 +56,7 @@ struct org_kde_plasma_virtual_desktop_management;
 struct org_kde_plasma_window_management;
 struct org_kde_kwin_server_decoration_palette_manager;
 struct wp_viewporter;
+struct xdg_activation_v1;
 struct xdg_shell;
 struct xdg_wm_base;
 struct zkwinft_output_management_v1;
@@ -116,6 +117,7 @@ class TextInputManagerUnstableV2;
 class Viewporter;
 class XdgShell;
 class RelativePointerManager;
+class XdgActivationV1;
 class XdgExporterUnstableV2;
 class XdgImporterUnstableV2;
 class XdgExporter;
@@ -189,6 +191,7 @@ public:
         PointerGesturesUnstableV1,        ///< Refers to zwp_pointer_gestures_v1, @since 0.0.529
         PointerConstraintsUnstableV1,     ///< Refers to zwp_pointer_constraints_v1, @since 0.0.529
         PresentationManager,              ///< Refers to wp_presentation, @since 0.519.0
+        XdgActivationV1,                  ///< refers to xdg_activation_v1, @since 0.523.0
         XdgExporterUnstableV2,            ///< refers to zxdg_exporter_v2, @since 0.0.540
         XdgImporterUnstableV2,            ///< refers to zxdg_importer_v2, @since 0.0.540
         IdleInhibitManagerUnstableV1, ///< Refers to zwp_idle_inhibit_manager_v1 (unstable version
@@ -624,6 +627,16 @@ public:
      * @since 0.520.0
      **/
     wp_presentation* bindPresentationManager(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the xdg_activation_v1 with @p name and @p version.
+     * If the @p name does not exist or is not for the activation interface,
+     * @c null will be returned.
+     *
+     * Prefer using createXdgActivationV1 instead.
+     * @see createXdgActivationV1
+     * @since 0.523.0
+     **/
+    xdg_activation_v1* bindXdgActivationV1(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the zxdg_exporter_v2 with @p name and @p version.
@@ -1245,6 +1258,24 @@ public:
     createPresentationManager(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
+     * Creates a XdgActivationV1 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the xdg_activation_v1 interface,
+     * the returned XdgActivationV1 will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the xdg_activation_v1 interface to bind
+     * @param version The version or the xdg_activation_v1 interface to use
+     * @param parent The parent for XdgActivationV1
+     *
+     * @returns The created XdgActivationV1.
+     * @since 0.523.0
+     **/
+    XdgActivationV1*
+    createXdgActivationV1(quint32 name, quint32 version, QObject* parent = nullptr);
+
+    /**
      * Creates an XdgExporter and sets it up to manage the interface identified by
      * @p name and @p version.
      *
@@ -1625,7 +1656,13 @@ Q_SIGNALS:
      * @since 0.520.0
      **/
     void presentationManagerAnnounced(quint32 name, quint32 version);
-
+    /**
+     * Emitted whenever a xdg_activation_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.523.0
+     **/
+    void xdgActivationV1Announced(quint32 name, quint32 version);
     /**
      * Emitted whenever a zxdg_exporter_v2 interface gets announced.
      * @param name The name for the announced interface
@@ -1918,6 +1955,12 @@ Q_SIGNALS:
      **/
     void serverSideDecorationPaletteManagerRemoved(quint32 name);
 
+    /**
+     * Emitted whenever a xdg_activation_v1 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.523.0
+     **/
+    void xdgActivationV1Removed(quint32 name);
     /**
      * Emitted whenever a zxdg_output_v1 gets removed.
      * @param name The name of the removed interface

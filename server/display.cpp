@@ -58,6 +58,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "text_input_v2.h"
 #include "viewporter.h"
 #include "wl_output_p.h"
+#include "xdg_activation_v1.h"
 #include "xdg_decoration.h"
 #include "xdg_foreign.h"
 #include "xdg_output.h"
@@ -345,6 +346,11 @@ Viewporter* Display::createViewporter(QObject* parent)
 XdgOutputManager* Display::xdgOutputManager() const
 {
     return d_ptr->xdg_output_manager.get();
+}
+
+XdgActivationV1* Display::createXdgActivationV1(QObject* parent)
+{
+    return new XdgActivationV1(this, parent);
 }
 
 XdgDecorationManager* Display::createXdgDecorationManager(XdgShell* shell, QObject* parent)
