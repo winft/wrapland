@@ -66,6 +66,7 @@ struct zwlr_output_manager_v1;
 struct zwp_relative_pointer_manager_v1;
 struct zwp_pointer_gestures_v1;
 struct zwp_pointer_constraints_v1;
+struct zwp_primary_selection_device_manager_v1;
 struct zxdg_exporter_v2;
 struct zxdg_importer_v2;
 struct zwp_idle_inhibit_manager_v1;
@@ -102,6 +103,7 @@ class PlasmaWindowManagement;
 class PointerConstraints;
 class PointerGestures;
 class PresentationManager;
+class PrimarySelectionDeviceManager;
 class Seat;
 class ShadowManager;
 class BlurManager;
@@ -210,6 +212,7 @@ public:
         Viewporter,                     ///< Refers to wp_viewporter, @since 0.518.0
         KeyboardShortcutsInhibitManagerV1,
         LinuxDmabufV1,
+        PrimarySelectionDeviceManager,
     };
     explicit Registry(QObject* parent = nullptr);
     virtual ~Registry();
@@ -637,6 +640,17 @@ public:
      * @since 0.523.0
      **/
     xdg_activation_v1* bindXdgActivationV1(uint32_t name, uint32_t version) const;
+
+    /**
+     * Binds the zwp_primary_selection_device_manager_v1 with @p name and @p version.
+     * If the @p name does not exist or is not for the primary selection manager interface,
+     * @c null will be returned.
+     *
+     * Prefer using createPrimarySelectionDeviceManager instead.
+     * @see createPrimarySelectionDeviceManager
+     **/
+    zwp_primary_selection_device_manager_v1*
+    bindPrimarySelectionDeviceManager(uint32_t name, uint32_t version) const;
 
     /**
      * Binds the zxdg_exporter_v2 with @p name and @p version.
@@ -1258,6 +1272,23 @@ public:
     createPresentationManager(quint32 name, quint32 version, QObject* parent = nullptr);
 
     /**
+     * Creates a PrimarySelectionDeviceManager and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the wl_data_device_manager interface,
+     * the returned PrimarySelectionDeviceManager will not be valid. Therefore it's recommended to
+     * call isValid on the created instance.
+     *
+     * @param name The name of the wl_data_device_manager interface to bind
+     * @param version The version or the wl_data_device_manager interface to use
+     * @param parent The parent for PrimarySelectionDeviceManager
+     *
+     * @returns The created PrimarySelectionDeviceManager.
+     **/
+    PrimarySelectionDeviceManager*
+    createPrimarySelectionDeviceManager(quint32 name, quint32 version, QObject* parent = nullptr);
+
+    /**
      * Creates a XdgActivationV1 and sets it up to manage the interface identified by
      * @p name and @p version.
      *
@@ -1664,6 +1695,13 @@ Q_SIGNALS:
      **/
     void xdgActivationV1Announced(quint32 name, quint32 version);
     /**
+     * Emitted whenever a zwp_primary_selection_device_manager_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     **/
+    void primarySelectionDeviceManagerAnnounced(quint32 name, quint32 version);
+
+    /**
      * Emitted whenever a zxdg_exporter_v2 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1919,6 +1957,12 @@ Q_SIGNALS:
      * @since 0.520.0
      **/
     void presentationManagerRemoved(quint32 name);
+
+    /**
+     * Emitted whenever a zwp_primary_selection_device_manager_v1 interface gets removed.
+     * @param name The name for the removed interface
+     **/
+    void primarySelectionDeviceManagerRemoved(quint32 name);
 
     /**
      * Emitted whenever a zxdg_exporter_v2 interface gets removed.

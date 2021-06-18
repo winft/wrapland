@@ -43,6 +43,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/pointerconstraints.h"
 #include "../../src/client/pointergestures.h"
 #include "../../src/client/presentation_time.h"
+#include "../../src/client/primary_selection.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/relativepointer.h"
 #include "../../src/client/seat.h"
@@ -58,6 +59,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/output_device_v1.h"
 #include "../../server/output_management_v1.h"
 #include "../../server/presentation_time.h"
+#include "../../server/primary_selection.h"
 #include "../../server/slide.h"
 #include "../../server/text_input_v2.h"
 #include "../../server/xdg_decoration.h"
@@ -71,6 +73,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-pointer-constraints-unstable-v1-client-protocol.h>
 #include <wayland-pointer-gestures-unstable-v1-client-protocol.h>
 #include <wayland-presentation-time-client-protocol.h>
+#include <wayland-primary-selection-unstable-v1-client-protocol.h>
 #include <wayland-relativepointer-unstable-v1-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
 #include <wayland-text-input-v0-client-protocol.h>
@@ -106,6 +109,7 @@ private Q_SLOTS:
     void testBindPointerGesturesUnstableV1();
     void testBindPointerConstraintsUnstableV1();
     void testBindPresentationTime();
+    void testBindPrimarySelectionDeviceManager();
     void testBindIdleIhibitManagerUnstableV1();
     void testRemoval();
     void testOutOfSyncRemoval();
@@ -130,6 +134,7 @@ private:
     std::unique_ptr<Wrapland::Server::PointerGesturesV1> m_pointerGesturesV1;
     std::unique_ptr<Wrapland::Server::PointerConstraintsV1> m_pointerConstraintsV1;
     std::unique_ptr<Wrapland::Server::PresentationManager> m_presentation;
+    std::unique_ptr<Wrapland::Server::PrimarySelectionDeviceManager> m_primarySelection;
     std::unique_ptr<Wrapland::Server::ContrastManager> m_contrast;
     std::unique_ptr<Wrapland::Server::BlurManager> m_blur;
     std::unique_ptr<Wrapland::Server::IdleInhibitManagerV1> m_idleInhibit;
@@ -167,6 +172,7 @@ void TestWaylandRegistry::init()
     m_pointerGesturesV1.reset(m_display->createPointerGestures());
     m_pointerConstraintsV1.reset(m_display->createPointerConstraints());
     m_presentation.reset(m_display->createPresentationManager());
+    m_primarySelection.reset(m_display->createPrimarySelectionDeviceManager());
     m_idleInhibit.reset(m_display->createIdleInhibitManager());
     m_dmabuf.reset(m_display->createLinuxDmabuf());
 
@@ -383,6 +389,14 @@ void TestWaylandRegistry::testBindPresentationTime()
               SIGNAL(presentationManagerAnnounced(quint32, quint32)),
               bindPresentationManager,
               wp_presentation_destroy)
+}
+
+void TestWaylandRegistry::testBindPrimarySelectionDeviceManager()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::PrimarySelectionDeviceManager,
+              SIGNAL(primarySelectionDeviceManagerAnnounced(quint32, quint32)),
+              bindPrimarySelectionDeviceManager,
+              zwp_primary_selection_device_manager_v1_destroy)
 }
 
 void TestWaylandRegistry::testBindIdleIhibitManagerUnstableV1()

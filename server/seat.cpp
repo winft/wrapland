@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keyboard_p.h"
 #include "pointer.h"
 #include "pointer_p.h"
+#include "primary_selection.h"
 #include "surface.h"
 #include "text_input_v2_p.h"
 #include "touch.h"
@@ -312,6 +313,96 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
                 dataDevice->sendSelection(currentSelection);
             }
         }
+    }
+}
+
+void Seat::Private::cleanupPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice)
+{
+    primarySelectionDevices.removeOne(primarySelectionDevice);
+    keys.focus.primarySelections.removeOne(primarySelectionDevice);
+    if (currentPrimarySelectionDevice == primarySelectionDevice) {
+        // current selection is cleared
+        currentPrimarySelectionDevice = nullptr;
+        Q_EMIT q_ptr->primarySelectionChanged(nullptr);
+        for (auto selection : keys.focus.primarySelections) {
+            selection->sendClearSelection();
+        }
+    }
+}
+
+template<>
+void Seat::Private::register_device(PrimarySelectionDevice* device)
+{
+    registerPrimarySelectionDevice(device);
+}
+
+void Seat::Private::registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice)
+{
+    primarySelectionDevices << primarySelectionDevice;
+
+    QObject::connect(
+        primarySelectionDevice,
+        &PrimarySelectionDevice::resourceDestroyed,
+        q_ptr,
+        [this, primarySelectionDevice] { cleanupPrimarySelectionDevice(primarySelectionDevice); });
+    QObject::connect(
+        primarySelectionDevice,
+        &PrimarySelectionDevice::selectionChanged,
+        q_ptr,
+        [this, primarySelectionDevice] { updateSelection(primarySelectionDevice, true); });
+    QObject::connect(
+        primarySelectionDevice,
+        &PrimarySelectionDevice::selectionCleared,
+        q_ptr,
+        [this, primarySelectionDevice] { updateSelection(primarySelectionDevice, false); });
+
+    // Is the new PrimarySelectionDevice for the current keyoard on focus?
+    if (keys.focus.surface) {
+        // Same client?
+        if (keys.focus.surface->client() == primarySelectionDevice->client()) {
+            keys.focus.primarySelections.append(primarySelectionDevice);
+            if (currentPrimarySelectionDevice && currentPrimarySelectionDevice->selection()) {
+                primarySelectionDevice->sendSelection(currentPrimarySelectionDevice);
+            }
+        }
+    }
+}
+
+void Seat::Private::cancelPreviousSelection(PrimarySelectionDevice* dataDevice) const
+{
+    if (!currentPrimarySelectionDevice) {
+        return;
+    }
+    if (auto s = currentPrimarySelectionDevice->selection()) {
+        if (currentPrimarySelectionDevice != dataDevice) {
+            s->cancel();
+        }
+    }
+}
+
+void Seat::Private::updateSelection(PrimarySelectionDevice* dataDevice, bool set)
+{
+    bool selChanged = currentPrimarySelectionDevice != dataDevice;
+    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client())) {
+        // cancel the previous selection
+        cancelPreviousSelection(dataDevice);
+        // new selection on a data device belonging to current keyboard focus
+        currentPrimarySelectionDevice = dataDevice;
+    }
+    if (dataDevice == currentPrimarySelectionDevice) {
+        // need to send out the selection
+        for (auto focussedDevice : qAsConst(keys.focus.primarySelections)) {
+            if (set) {
+                focussedDevice->sendSelection(dataDevice);
+            } else {
+                focussedDevice->sendClearSelection();
+                currentPrimarySelectionDevice = nullptr;
+                selChanged = true;
+            }
+        }
+    }
+    if (selChanged) {
+        Q_EMIT q_ptr->primarySelectionChanged(currentPrimarySelectionDevice);
     }
 }
 
@@ -1094,6 +1185,16 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
                 dataDevice->sendClearSelection();
             }
         }
+        auto const primarySelectionDevices
+            = interfacesForSurface(surface, d_ptr->primarySelectionDevices);
+        d_ptr->keys.focus.primarySelections = primarySelectionDevices;
+        for (auto dataDevice : primarySelectionDevices) {
+            if (d_ptr->currentPrimarySelectionDevice) {
+                dataDevice->sendSelection(d_ptr->currentPrimarySelectionDevice);
+            } else {
+                dataDevice->sendClearSelection();
+            }
+        }
     }
 
     for (auto it = d_ptr->keys.focus.keyboards.constBegin(),
@@ -1528,6 +1629,30 @@ void Seat::setSelection(DataDevice* dataDevice)
         }
     }
     Q_EMIT selectionChanged(dataDevice);
+}
+
+PrimarySelectionDevice* Seat::primarySelection() const
+{
+    return d_ptr->currentPrimarySelectionDevice;
+}
+
+void Seat::setPrimarySelection(PrimarySelectionDevice* dataDevice)
+{
+    if (d_ptr->currentPrimarySelectionDevice == dataDevice) {
+        return;
+    }
+    // cancel the previous selection
+    d_ptr->cancelPreviousSelection(dataDevice);
+    d_ptr->currentPrimarySelectionDevice = dataDevice;
+
+    for (auto focusedDevice : qAsConst(d_ptr->keys.focus.primarySelections)) {
+        if (dataDevice && dataDevice->selection()) {
+            focusedDevice->sendSelection(dataDevice);
+        } else {
+            focusedDevice->sendClearSelection();
+        }
+    }
+    Q_EMIT primarySelectionChanged(dataDevice);
 }
 
 }

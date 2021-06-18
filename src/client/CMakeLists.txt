@@ -39,6 +39,7 @@ set(CLIENT_LIB_SRCS
     plasmawindowmanagement.cpp
     plasmawindowmodel.cpp
     presentation_time.cpp
+    primary_selection.cpp
     region.cpp
     registry.cpp
     relativepointer.cpp
@@ -170,6 +171,10 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     BASENAME presentation-time
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/primary-selection/primary-selection-unstable-v1.xml
+    BASENAME primary-selection-unstable-v1
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-foreign/xdg-foreign-unstable-v2.xml
     BASENAME xdg-foreign-unstable-v2
 )
@@ -248,6 +253,7 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-gestures-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-constraints-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-presentation-time-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-primary-selection-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-foreign-unstable-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-inhibit-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-client-protocol.h
@@ -322,6 +328,7 @@ set(CLIENT_LIB_HEADERS
   plasmawindowmanagement.h
   plasmawindowmodel.h
   presentation_time.h
+  primary_selection.h
   pointergestures.h
   region.h
   registry.h

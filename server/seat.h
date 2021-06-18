@@ -36,6 +36,7 @@ class DataDevice;
 class Display;
 class Keyboard;
 class Pointer;
+class PrimarySelectionDevice;
 class Surface;
 class TextInputV2;
 class Touch;
@@ -154,6 +155,8 @@ public:
 
     DataDevice* selection() const;
     void setSelection(DataDevice* dataDevice);
+    PrimarySelectionDevice* primarySelection() const;
+    void setPrimarySelection(PrimarySelectionDevice* dataDevice);
 
 Q_SIGNALS:
     void nameChanged(std::string);
@@ -171,6 +174,7 @@ Q_SIGNALS:
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 
     void selectionChanged(DataDevice*);
+    void primarySelectionChanged(PrimarySelectionDevice*);
     void dragStarted();
     void dragEnded();
     void dragSurfaceChanged();
@@ -179,6 +183,7 @@ Q_SIGNALS:
 private:
     friend class Display;
     friend class DataDeviceManager;
+    friend class PrimarySelectionDeviceManager;
     friend class TextInputManagerV2;
 
     template<typename Global>
