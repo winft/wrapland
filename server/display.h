@@ -75,6 +75,7 @@ class EglStreamController;
 class KeyState;
 class LinuxDmabufV1;
 class KeyboardShortcutsInhibitManagerV1;
+class XdgActivationV1;
 
 class WRAPLANDSERVER_EXPORT Display : public QObject
 {
@@ -161,6 +162,7 @@ public:
     XdgOutputManager* xdgOutputManager() const;
 
     PlasmaVirtualDesktopManager* createPlasmaVirtualDesktopManager(QObject* parent = nullptr);
+    XdgActivationV1* createXdgActivationV1(QObject* parent = nullptr);
     XdgDecorationManager* createXdgDecorationManager(XdgShell* shell, QObject* parent = nullptr);
     EglStreamController* createEglStreamController(QObject* parent = nullptr);
 
