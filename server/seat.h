@@ -195,6 +195,7 @@ private:
 
     Seat(Display* display, QObject* parent);
 
+    // Returns whether an actual change took place.
     bool setFocusedTextInputV2Surface(Surface* surface);
 
     class Private;

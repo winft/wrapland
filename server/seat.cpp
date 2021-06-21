@@ -1563,37 +1563,55 @@ DataDevice* Seat::dragSource() const
     return d_ptr->drag.source;
 }
 
+bool Seat::setFocusedTextInputV2Surface(Surface* surface)
+{
+    auto const serial = d_ptr->display()->handle()->nextSerial();
+    auto const old_ti = d_ptr->global_text_input.v2.text_input;
+
+    if (old_ti) {
+        // TODO(unknown author): setFocusedSurface like in other interfaces
+        old_ti->d_ptr->sendLeave(serial, d_ptr->global_text_input.focus.surface);
+    }
+
+    auto ti = d_ptr->textInputV2ForSurface(surface);
+
+    if (ti && !ti->d_ptr->resource()) {
+        // TODO(romangg): can this check be removed?
+        ti = nullptr;
+    }
+
+    d_ptr->global_text_input.v2.text_input = ti;
+
+    if (surface) {
+        d_ptr->global_text_input.v2.serial = serial;
+    }
+
+    if (ti) {
+        // TODO(unknown author): setFocusedSurface like in other interfaces
+        ti->d_ptr->sendEnter(surface, serial);
+    }
+
+    return old_ti != ti;
+}
+
 void Seat::setFocusedTextInputSurface(Surface* surface)
 {
-    const quint32 serial = d_ptr->display()->handle()->nextSerial();
-    const auto old = d_ptr->global_text_input.v2.text_input;
-    if (d_ptr->global_text_input.v2.text_input) {
-        // TODO(unknown author): setFocusedSurface like in other interfaces
-        d_ptr->global_text_input.v2.text_input->d_ptr->sendLeave(
-            serial, d_ptr->global_text_input.focus.surface);
-    }
     if (d_ptr->global_text_input.focus.surface) {
         disconnect(d_ptr->global_text_input.focus.destroy_connection);
     }
+
+    auto changed = setFocusedTextInputV2Surface(surface);
     d_ptr->global_text_input.focus = {};
-    d_ptr->global_text_input.focus.surface = surface;
-    TextInputV2* t = d_ptr->textInputV2ForSurface(surface);
-    if (t && !t->d_ptr->resource()) {
-        t = nullptr;
-    }
-    d_ptr->global_text_input.v2.text_input = t;
-    if (d_ptr->global_text_input.focus.surface) {
+
+    if (surface) {
+        d_ptr->global_text_input.focus.surface = surface;
         d_ptr->global_text_input.focus.destroy_connection
             = connect(surface, &Surface::resourceDestroyed, this, [this] {
                   setFocusedTextInputSurface(nullptr);
               });
-        d_ptr->global_text_input.v2.serial = serial;
     }
-    if (t) {
-        // TODO(unknown author): setFocusedSurface like in other interfaces
-        t->d_ptr->sendEnter(surface, serial);
-    }
-    if (old != t) {
+
+    if (changed) {
         Q_EMIT focusedTextInputChanged();
     }
 }
