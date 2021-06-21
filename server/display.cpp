@@ -57,6 +57,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "slide.h"
 #include "subcompositor.h"
 #include "text_input_v2.h"
+#include "text_input_v3.h"
 #include "viewporter.h"
 #include "wl_output_p.h"
 #include "xdg_activation_v1.h"
@@ -291,6 +292,11 @@ DpmsManager* Display::createDpmsManager(QObject* parent)
 TextInputManagerV2* Display::createTextInputManagerV2(QObject* parent)
 {
     return new TextInputManagerV2(this, parent);
+}
+
+text_input_manager_v3* Display::createTextInputManagerV3(QObject* parent)
+{
+    return new text_input_manager_v3(this, parent);
 }
 
 XdgShell* Display::createXdgShell(QObject* parent)

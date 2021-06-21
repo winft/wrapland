@@ -61,6 +61,7 @@ public:
     QVector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
 
     TextInputV2* textInputV2ForSurface(Surface* surface) const;
+    text_input_v3* textInputV3ForSurface(Surface* surface) const;
 
     template<typename Device>
     void register_device(Device*);
@@ -68,6 +69,7 @@ public:
     void registerDataDevice(DataDevice* dataDevice);
     void registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
     void registerTextInput(TextInputV2* ti);
+    void registerTextInput(text_input_v3* ti);
     void endDrag(quint32 serial);
     void cancelPreviousSelection(DataDevice* newlySelectedDataDevice) const;
     void cancelPreviousSelection(PrimarySelectionDevice* dataDevice) const;
@@ -84,6 +86,7 @@ public:
     QVector<DataDevice*> dataDevices;
     QVector<PrimarySelectionDevice*> primarySelectionDevices;
     QVector<TextInputV2*> textInputs;
+    QVector<text_input_v3*> textInputsV3;
     DataDevice* currentSelection = nullptr;
     PrimarySelectionDevice* currentPrimarySelectionDevice = nullptr;
 
@@ -166,10 +169,16 @@ public:
             Surface* surface = nullptr;
             QMetaObject::Connection destroy_connection;
         } focus;
+
+        // Both text inputs may be active at a time.
+        // That doesn't make sense, but there's no reason to enforce only one.
         struct {
             quint32 serial = 0;
             TextInputV2* text_input{nullptr};
         } v2;
+        struct {
+            text_input_v3* text_input{nullptr};
+        } v3;
     } global_text_input;
 
     // Touch related members

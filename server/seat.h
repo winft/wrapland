@@ -39,6 +39,7 @@ class Pointer;
 class PrimarySelectionDevice;
 class Surface;
 class TextInputV2;
+class text_input_v3;
 class Touch;
 
 enum class PointerAxisSource {
@@ -152,6 +153,7 @@ public:
     void setFocusedTextInputSurface(Surface* surface);
     Surface* focusedTextInputSurface() const;
     TextInputV2* focusedTextInputV2() const;
+    text_input_v3* focusedTextInputV3() const;
 
     DataDevice* selection() const;
     void setSelection(DataDevice* dataDevice);
@@ -185,6 +187,7 @@ private:
     friend class DataDeviceManager;
     friend class PrimarySelectionDeviceManager;
     friend class TextInputManagerV2;
+    friend class text_input_manager_v3;
 
     template<typename Global>
     // NOLINTNEXTLINE(readability-redundant-declaration)
@@ -197,6 +200,7 @@ private:
 
     // Returns whether an actual change took place.
     bool setFocusedTextInputV2Surface(Surface* surface);
+    bool setFocusedTextInputV3Surface(Surface* surface);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

@@ -168,6 +168,7 @@ private:
     friend class SlideManager;
     friend class Subsurface;
     friend class TextInputV2;
+    friend class text_input_v3;
     friend class Viewporter;
     friend class XdgShell;
     friend class XdgShellSurface;

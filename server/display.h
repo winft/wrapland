@@ -62,6 +62,7 @@ class ContrastManager;
 class SlideManager;
 class Subcompositor;
 class TextInputManagerV2;
+class text_input_manager_v3;
 class RelativePointerManagerV1;
 class PointerGesturesV1;
 class PointerConstraintsV1;
@@ -143,6 +144,7 @@ public:
     PresentationManager* createPresentationManager(QObject* parent = nullptr);
 
     TextInputManagerV2* createTextInputManagerV2(QObject* parent = nullptr);
+    text_input_manager_v3* createTextInputManagerV3(QObject* parent = nullptr);
 
     XdgShell* createXdgShell(QObject* parent = nullptr);
 
