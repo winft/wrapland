@@ -93,7 +93,7 @@ void TextInputTest::init()
 
     m_serverCompositor = m_display->createCompositor();
 
-    m_textInputManagerV2Interface = m_display->createTextInputManager();
+    m_textInputManagerV2Interface = m_display->createTextInputManagerV2();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;

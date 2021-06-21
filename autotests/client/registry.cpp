@@ -167,7 +167,7 @@ void TestWaylandRegistry::init()
     m_display->createDpmsManager(this);
     m_serverXdgShell.reset(m_display->createXdgShell());
     m_xdgDecorationManager.reset(m_display->createXdgDecorationManager(m_serverXdgShell.get()));
-    m_textInputManagerV2.reset(m_display->createTextInputManager());
+    m_textInputManagerV2.reset(m_display->createTextInputManagerV2());
     m_relativePointerV1.reset(m_display->createRelativePointerManager());
     m_pointerGesturesV1.reset(m_display->createPointerGestures());
     m_pointerConstraintsV1.reset(m_display->createPointerConstraints());

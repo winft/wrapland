@@ -288,7 +288,7 @@ DpmsManager* Display::createDpmsManager(QObject* parent)
     return new DpmsManager(this, parent);
 }
 
-TextInputManagerV2* Display::createTextInputManager(QObject* parent)
+TextInputManagerV2* Display::createTextInputManagerV2(QObject* parent)
 {
     return new TextInputManagerV2(this, parent);
 }

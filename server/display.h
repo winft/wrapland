@@ -142,7 +142,7 @@ public:
     KeyState* createKeyState(QObject* parent = nullptr);
     PresentationManager* createPresentationManager(QObject* parent = nullptr);
 
-    TextInputManagerV2* createTextInputManager(QObject* parent = nullptr);
+    TextInputManagerV2* createTextInputManagerV2(QObject* parent = nullptr);
 
     XdgShell* createXdgShell(QObject* parent = nullptr);
 
