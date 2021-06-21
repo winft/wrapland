@@ -215,7 +215,7 @@ QVector<DataDevice*> Seat::Private::dataDevicesForSurface(Surface* surface) cons
     return interfacesForSurface(surface, dataDevices);
 }
 
-TextInputV2* Seat::Private::textInputForSurface(Surface* surface) const
+TextInputV2* Seat::Private::textInputV2ForSurface(Surface* surface) const
 {
     return interfaceForSurface(surface, textInputs);
 }
@@ -416,16 +416,16 @@ void Seat::Private::registerTextInput(TextInputV2* ti)
     if (global_text_input.focus.surface
         && global_text_input.focus.surface->client() == ti->d_ptr->client()->handle()) {
         // This is a text input for the currently focused text input surface.
-        if (!global_text_input.focus.text_input) {
-            global_text_input.focus.text_input = ti;
-            ti->d_ptr->sendEnter(global_text_input.focus.surface, global_text_input.focus.serial);
+        if (!global_text_input.v2.text_input) {
+            global_text_input.v2.text_input = ti;
+            ti->d_ptr->sendEnter(global_text_input.focus.surface, global_text_input.v2.serial);
             Q_EMIT q_ptr->focusedTextInputChanged();
         }
     }
     QObject::connect(ti, &TextInputV2::resourceDestroyed, q_ptr, [this, ti] {
         textInputs.removeAt(textInputs.indexOf(ti));
-        if (global_text_input.focus.text_input == ti) {
-            global_text_input.focus.text_input = nullptr;
+        if (global_text_input.v2.text_input == ti) {
+            global_text_input.v2.text_input = nullptr;
             Q_EMIT q_ptr->focusedTextInputChanged();
         }
     });
@@ -1566,10 +1566,10 @@ DataDevice* Seat::dragSource() const
 void Seat::setFocusedTextInputSurface(Surface* surface)
 {
     const quint32 serial = d_ptr->display()->handle()->nextSerial();
-    const auto old = d_ptr->global_text_input.focus.text_input;
-    if (d_ptr->global_text_input.focus.text_input) {
+    const auto old = d_ptr->global_text_input.v2.text_input;
+    if (d_ptr->global_text_input.v2.text_input) {
         // TODO(unknown author): setFocusedSurface like in other interfaces
-        d_ptr->global_text_input.focus.text_input->d_ptr->sendLeave(
+        d_ptr->global_text_input.v2.text_input->d_ptr->sendLeave(
             serial, d_ptr->global_text_input.focus.surface);
     }
     if (d_ptr->global_text_input.focus.surface) {
@@ -1577,17 +1577,17 @@ void Seat::setFocusedTextInputSurface(Surface* surface)
     }
     d_ptr->global_text_input.focus = {};
     d_ptr->global_text_input.focus.surface = surface;
-    TextInputV2* t = d_ptr->textInputForSurface(surface);
+    TextInputV2* t = d_ptr->textInputV2ForSurface(surface);
     if (t && !t->d_ptr->resource()) {
         t = nullptr;
     }
-    d_ptr->global_text_input.focus.text_input = t;
+    d_ptr->global_text_input.v2.text_input = t;
     if (d_ptr->global_text_input.focus.surface) {
         d_ptr->global_text_input.focus.destroy_connection
             = connect(surface, &Surface::resourceDestroyed, this, [this] {
                   setFocusedTextInputSurface(nullptr);
               });
-        d_ptr->global_text_input.focus.serial = serial;
+        d_ptr->global_text_input.v2.serial = serial;
     }
     if (t) {
         // TODO(unknown author): setFocusedSurface like in other interfaces
@@ -1603,9 +1603,9 @@ Surface* Seat::focusedTextInputSurface() const
     return d_ptr->global_text_input.focus.surface;
 }
 
-TextInputV2* Seat::focusedTextInput() const
+TextInputV2* Seat::focusedTextInputV2() const
 {
-    return d_ptr->global_text_input.focus.text_input;
+    return d_ptr->global_text_input.v2.text_input;
 }
 
 DataDevice* Seat::selection() const

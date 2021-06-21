@@ -151,7 +151,7 @@ public:
 
     void setFocusedTextInputSurface(Surface* surface);
     Surface* focusedTextInputSurface() const;
-    TextInputV2* focusedTextInput() const;
+    TextInputV2* focusedTextInputV2() const;
 
     DataDevice* selection() const;
     void setSelection(DataDevice* dataDevice);
@@ -194,6 +194,8 @@ private:
                                      wl_resource* wlSeat);
 
     Seat(Display* display, QObject* parent);
+
+    bool setFocusedTextInputV2Surface(Surface* surface);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

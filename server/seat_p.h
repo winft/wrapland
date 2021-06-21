@@ -59,10 +59,12 @@ public:
     QVector<Keyboard*> keyboardsForSurface(Surface* surface) const;
     QVector<Touch*> touchsForSurface(Surface* surface) const;
     QVector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
-    TextInputV2* textInputForSurface(Surface* surface) const;
+
+    TextInputV2* textInputV2ForSurface(Surface* surface) const;
 
     template<typename Device>
     void register_device(Device*);
+
     void registerDataDevice(DataDevice* dataDevice);
     void registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
     void registerTextInput(TextInputV2* ti);
@@ -163,9 +165,11 @@ public:
         struct {
             Surface* surface = nullptr;
             QMetaObject::Connection destroy_connection;
+        } focus;
+        struct {
             quint32 serial = 0;
             TextInputV2* text_input{nullptr};
-        } focus;
+        } v2;
     } global_text_input;
 
     // Touch related members
