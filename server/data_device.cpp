@@ -46,6 +46,7 @@ public:
     void update_drag_motion();
     void update_drag_pointer_motion();
     void update_drag_touch_motion();
+    void update_drag_target_offer(Surface* surface, uint32_t serial);
 
     Seat* seat;
     DataSource* source = nullptr;
@@ -290,6 +291,64 @@ void DataDevice::Private::update_drag_touch_motion()
         });
 }
 
+void DataDevice::Private::update_drag_target_offer(Surface* surface, uint32_t serial)
+{
+    auto source = seat->dragSource()->dragSource();
+    auto offer = createDataOffer(source);
+
+    // TODO(unknown author): handle touch position
+    auto const pos = seat->dragSurfaceTransformation().map(seat->pointerPos());
+    send<wl_data_device_send_enter>(serial,
+                                    surface->d_ptr->resource(),
+                                    wl_fixed_from_double(pos.x()),
+                                    wl_fixed_from_double(pos.y()),
+                                    offer ? offer->d_ptr->resource() : nullptr);
+
+    if (!offer) {
+        // No new offer.
+        return;
+    }
+
+    offer->d_ptr->sendSourceActions();
+
+    auto matchOffers = [source, offer] {
+        DataDeviceManager::DnDAction action{DataDeviceManager::DnDAction::None};
+
+        if (source->supportedDragAndDropActions().testFlag(offer->preferredDragAndDropAction())) {
+            action = offer->preferredDragAndDropAction();
+
+        } else {
+
+            if (source->supportedDragAndDropActions().testFlag(DataDeviceManager::DnDAction::Copy)
+                && offer->supportedDragAndDropActions().testFlag(
+                    DataDeviceManager::DnDAction::Copy)) {
+                action = DataDeviceManager::DnDAction::Copy;
+            }
+
+            else if (source->supportedDragAndDropActions().testFlag(
+                         DataDeviceManager::DnDAction::Move)
+                     && offer->supportedDragAndDropActions().testFlag(
+                         DataDeviceManager::DnDAction::Move)) {
+                action = DataDeviceManager::DnDAction::Move;
+            }
+
+            else if (source->supportedDragAndDropActions().testFlag(
+                         DataDeviceManager::DnDAction::Ask)
+                     && offer->supportedDragAndDropActions().testFlag(
+                         DataDeviceManager::DnDAction::Ask)) {
+                action = DataDeviceManager::DnDAction::Ask;
+            }
+        }
+
+        offer->dndAction(action);
+        source->dndAction(action);
+    };
+    drag.targetActionConnection
+        = connect(offer, &DataOffer::dragAndDropActionsChanged, offer, matchOffers);
+    drag.sourceActionConnection
+        = connect(source, &DataSource::supportedDragAndDropActionsChanged, source, matchOffers);
+}
+
 DataDevice::DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat)
     : d_ptr(new Private(client, version, id, seat, this))
 {
@@ -387,60 +446,7 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
         d_ptr->drag = Private::Drag();
     });
 
-    auto source = d_ptr->seat->dragSource()->dragSource();
-    auto offer = d_ptr->createDataOffer(source);
-
-    // TODO(unknown author): handle touch position
-    auto const pos = d_ptr->seat->dragSurfaceTransformation().map(d_ptr->seat->pointerPos());
-    d_ptr->send<wl_data_device_send_enter>(serial,
-                                           surface->d_ptr->resource(),
-                                           wl_fixed_from_double(pos.x()),
-                                           wl_fixed_from_double(pos.y()),
-                                           offer ? offer->d_ptr->resource() : nullptr);
-
-    if (offer) {
-        offer->d_ptr->sendSourceActions();
-
-        auto matchOffers = [source, offer] {
-            DataDeviceManager::DnDAction action{DataDeviceManager::DnDAction::None};
-
-            if (source->supportedDragAndDropActions().testFlag(
-                    offer->preferredDragAndDropAction())) {
-                action = offer->preferredDragAndDropAction();
-
-            } else {
-
-                if (source->supportedDragAndDropActions().testFlag(
-                        DataDeviceManager::DnDAction::Copy)
-                    && offer->supportedDragAndDropActions().testFlag(
-                        DataDeviceManager::DnDAction::Copy)) {
-                    action = DataDeviceManager::DnDAction::Copy;
-                }
-
-                else if (source->supportedDragAndDropActions().testFlag(
-                             DataDeviceManager::DnDAction::Move)
-                         && offer->supportedDragAndDropActions().testFlag(
-                             DataDeviceManager::DnDAction::Move)) {
-                    action = DataDeviceManager::DnDAction::Move;
-                }
-
-                else if (source->supportedDragAndDropActions().testFlag(
-                             DataDeviceManager::DnDAction::Ask)
-                         && offer->supportedDragAndDropActions().testFlag(
-                             DataDeviceManager::DnDAction::Ask)) {
-                    action = DataDeviceManager::DnDAction::Ask;
-                }
-            }
-
-            offer->dndAction(action);
-            source->dndAction(action);
-        };
-        d_ptr->drag.targetActionConnection
-            = connect(offer, &DataOffer::dragAndDropActionsChanged, offer, matchOffers);
-        d_ptr->drag.sourceActionConnection
-            = connect(source, &DataSource::supportedDragAndDropActionsChanged, source, matchOffers);
-    }
-
+    d_ptr->update_drag_target_offer(surface, serial);
     d_ptr->client()->flush();
 }
 
