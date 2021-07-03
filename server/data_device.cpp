@@ -374,11 +374,11 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
         return;
     }
 
+    d_ptr->update_drag_motion();
+
     auto source = d_ptr->seat->dragSource()->dragSource();
     auto offer = d_ptr->createDataOffer(source);
     d_ptr->drag.surface = surface;
-
-    d_ptr->update_drag_motion();
 
     d_ptr->drag.destroyConnection
         = connect(d_ptr->drag.surface, &Surface::resourceDestroyed, this, [this] {
