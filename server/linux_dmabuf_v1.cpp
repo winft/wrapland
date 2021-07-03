@@ -197,7 +197,7 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
     }
 
     QVector<LinuxDmabufV1::Plane> planes;
-    planes.reserve(m_planeCount);
+    planes.reserve(static_cast<int>(m_planeCount));
 
     for (uint32_t i = 0; i < m_planeCount; i++) {
         planes << m_planes.at(i);
@@ -235,8 +235,8 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
 
 bool ParamsV1::validate_params(QSize const& size)
 {
-    const uint32_t width = size.width();
-    const uint32_t height = size.height();
+    auto const width = static_cast<uint32_t>(size.width());
+    auto const height = static_cast<uint32_t>(size.height());
 
     if (m_createRequested) {
         postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_ALREADY_USED,
