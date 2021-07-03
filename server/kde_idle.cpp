@@ -147,7 +147,7 @@ void IdleTimeout::Private::simulateUserActivity()
 
 constexpr uint32_t minIdleTime = 5000;
 
-void IdleTimeout::Private::setup(quint32 timeout)
+void IdleTimeout::Private::setup(uint32_t timeout)
 {
     if (timer) {
         return;
@@ -157,7 +157,7 @@ void IdleTimeout::Private::setup(quint32 timeout)
     timer->setSingleShot(true);
 
     // less than 5 sec is not idle by definition
-    timer->setInterval(qMax(timeout, minIdleTime));
+    timer->setInterval(std::max(timeout, minIdleTime));
     QObject::connect(
         timer, &QTimer::timeout, q_ptr, [this] { send<org_kde_kwin_idle_timeout_send_idle>(); });
     if (manager->isInhibited()) {
