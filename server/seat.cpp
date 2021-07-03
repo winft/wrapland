@@ -642,7 +642,7 @@ Surface* Seat::focusedPointerSurface() const
 void Seat::setFocusedPointerSurface(Surface* surface, const QPointF& surfacePosition)
 {
     QMatrix4x4 m;
-    m.translate(-surfacePosition.x(), -surfacePosition.y());
+    m.translate(-static_cast<float>(surfacePosition.x()), -static_cast<float>(surfacePosition.y()));
     setFocusedPointerSurface(surface, m);
 
     if (d_ptr->globalPointer.focus.surface) {
@@ -725,8 +725,8 @@ void Seat::setFocusedPointerSurfacePosition(const QPointF& surfacePosition)
     if (d_ptr->globalPointer.focus.surface) {
         d_ptr->globalPointer.focus.offset = surfacePosition;
         d_ptr->globalPointer.focus.transformation = QMatrix4x4();
-        d_ptr->globalPointer.focus.transformation.translate(-surfacePosition.x(),
-                                                            -surfacePosition.y());
+        d_ptr->globalPointer.focus.transformation.translate(
+            -static_cast<float>(surfacePosition.x()), -static_cast<float>(surfacePosition.y()));
     }
 }
 
@@ -1303,7 +1303,7 @@ void Seat::setFocusedTouchSurfacePosition(const QPointF& surfacePosition)
 qint32 Seat::touchDown(const QPointF& globalPosition)
 {
     const qint32 id = d_ptr->globalTouch.ids.isEmpty() ? 0 : d_ptr->globalTouch.ids.lastKey() + 1;
-    const qint32 serial = d_ptr->display()->handle()->nextSerial();
+    auto const serial = d_ptr->display()->handle()->nextSerial();
     const auto pos = globalPosition - d_ptr->globalTouch.focus.offset;
     for (auto it = d_ptr->globalTouch.focus.touchs.constBegin(),
               end = d_ptr->globalTouch.focus.touchs.constEnd();
@@ -1361,7 +1361,7 @@ void Seat::touchMove(qint32 id, const QPointF& globalPosition)
 void Seat::touchUp(qint32 id)
 {
     Q_ASSERT(d_ptr->globalTouch.ids.contains(id));
-    const qint32 serial = d_ptr->display()->handle()->nextSerial();
+    auto const serial = d_ptr->display()->handle()->nextSerial();
     if (d_ptr->drag.mode == Private::Drag::Mode::Touch
         && d_ptr->drag.source->dragImplicitGrabSerial() == d_ptr->globalTouch.ids.value(id)) {
         // the implicitly grabbing touch point has been upped
