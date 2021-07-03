@@ -314,6 +314,7 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
         }
         // don't update serial, we need it
     }
+
     if (!surface) {
         if (auto s = d_ptr->seat->dragSource()->dragSource()) {
             s->dndAction(DataDeviceManager::DnDAction::None);
@@ -325,12 +326,14 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
         // are fine. Such surfaces get data offers from themselves while a drag is ongoing.
         return;
     }
-    auto* source = d_ptr->seat->dragSource()->dragSource();
-    DataOffer* offer = d_ptr->createDataOffer(source);
+
+    auto source = d_ptr->seat->dragSource()->dragSource();
+    auto offer = d_ptr->createDataOffer(source);
     d_ptr->drag.surface = surface;
+
     if (d_ptr->seat->isDragPointer()) {
         d_ptr->drag.posConnection = connect(d_ptr->seat, &Seat::pointerPosChanged, this, [this] {
-            const QPointF pos
+            auto const pos
                 = d_ptr->seat->dragSurfaceTransformation().map(d_ptr->seat->pointerPos());
             d_ptr->send<wl_data_device_send_motion>(d_ptr->seat->timestamp(),
                                                     wl_fixed_from_double(pos.x()),
@@ -342,13 +345,13 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
             = connect(d_ptr->seat,
                       &Seat::touchMoved,
                       this,
-                      [this](qint32 id, quint32 serial, const QPointF& globalPosition) {
+                      [this](auto id, auto serial, auto globalPosition) {
                           Q_UNUSED(id);
                           if (serial != d_ptr->drag.serial) {
                               // different touch down has been moved
                               return;
                           }
-                          const QPointF pos
+                          auto const pos
                               = d_ptr->seat->dragSurfaceTransformation().map(globalPosition);
                           d_ptr->send<wl_data_device_send_motion>(d_ptr->seat->timestamp(),
                                                                   wl_fixed_from_double(pos.x()),
@@ -356,6 +359,7 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
                           d_ptr->client()->flush();
                       });
     }
+
     d_ptr->drag.destroyConnection
         = connect(d_ptr->drag.surface, &Surface::resourceDestroyed, this, [this] {
               if (d_ptr->resource()) {
@@ -368,12 +372,13 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
           });
 
     // TODO(unknown author): handle touch position
-    const QPointF pos = d_ptr->seat->dragSurfaceTransformation().map(d_ptr->seat->pointerPos());
+    auto const pos = d_ptr->seat->dragSurfaceTransformation().map(d_ptr->seat->pointerPos());
     d_ptr->send<wl_data_device_send_enter>(serial,
                                            surface->d_ptr->resource(),
                                            wl_fixed_from_double(pos.x()),
                                            wl_fixed_from_double(pos.y()),
                                            offer ? offer->d_ptr->resource() : nullptr);
+
     if (offer) {
         offer->d_ptr->sendSourceActions();
 
@@ -416,6 +421,7 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
         d_ptr->drag.sourceActionConnection
             = connect(source, &DataSource::supportedDragAndDropActionsChanged, source, matchOffers);
     }
+
     d_ptr->client()->flush();
 }
 
