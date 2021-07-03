@@ -53,7 +53,7 @@ public:
     };
 
     Location location() const;
-    int offset() const;
+    uint32_t offset() const;
 
 Q_SIGNALS:
     void resourceDestroyed();

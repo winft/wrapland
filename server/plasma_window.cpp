@@ -891,12 +891,16 @@ void PlasmaWindowRes::Private::setMinimizedGeometryCallback([[maybe_unused]] wl_
     }
 
     auto panel = Wayland::Resource<Surface>::handle(wlPanel);
+    auto const rect = QRect(static_cast<int>(x),
+                            static_cast<int>(y),
+                            static_cast<int>(width),
+                            static_cast<int>(height));
 
-    if (priv->window->d_ptr->minimizedGeometries.value(panel) == QRect(x, y, width, height)) {
+    if (priv->window->d_ptr->minimizedGeometries.value(panel) == rect) {
         return;
     }
 
-    priv->window->d_ptr->minimizedGeometries[panel] = QRect(x, y, width, height);
+    priv->window->d_ptr->minimizedGeometries[panel] = rect;
     Q_EMIT priv->window->minimizedGeometriesChanged();
     connect(panel, &Surface::resourceDestroyed, priv->handle(), [priv, panel]() {
         if (priv->window && priv->window->d_ptr->minimizedGeometries.remove(panel)) {

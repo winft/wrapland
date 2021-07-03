@@ -192,95 +192,13 @@ void ParamsV1::createImmedCallback([[maybe_unused]] wl_client* wlClient,
 
 void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uint32_t flags)
 {
-    // Validate the parameters
-    // -----------------------
-    const uint32_t width = size.width();
-    const uint32_t height = size.height();
-
-    if (m_createRequested) {
-        postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_ALREADY_USED,
-                  "params was already used to create a wl_buffer");
-        return;
-    }
-    m_createRequested = true;
-
-    if (m_planeCount == 0) {
-        postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INCOMPLETE,
-                  "no dmabuf has been added to the params");
+    if (!validate_params(size)) {
         return;
     }
 
-    // Check for holes in the dmabufs set (e.g. [0, 1, 3])
-    for (uint32_t i = 0; i < m_planeCount; i++) {
-        if (m_planes.at(i).fd != -1) {
-            continue;
-        }
-        postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INCOMPLETE,
-                  "no dmabuf has been added for plane %i",
-                  i);
-        return;
-    }
-
-    if (width < 1 || height < 1) {
-        postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_DIMENSIONS,
-                  "invalid width %d or height %d",
-                  width,
-                  height);
-        return;
-    }
-
-    for (uint32_t i = 0; i < m_planeCount; i++) {
-        auto& plane = m_planes.at(i);
-
-        if (uint64_t(plane.offset) + plane.stride > UINT32_MAX) {
-            postError(
-                ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
-            return;
-        }
-
-        if (i == 0 && uint64_t(plane.offset) + plane.stride * height > UINT32_MAX) {
-            postError(
-                ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
-            return;
-        }
-
-        // Don't report an error as it might be caused by the kernel not supporting seeking on
-        // dmabuf
-        off_t size = ::lseek(plane.fd, 0, SEEK_END);
-        if (size == -1) {
-            continue;
-        }
-
-        if (plane.offset >= size) {
-            postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS,
-                      "invalid offset %i for plane %i",
-                      plane.offset,
-                      i);
-            return;
-        }
-
-        if (plane.offset + plane.stride > size) {
-            postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS,
-                      "invalid stride %i for plane %i",
-                      plane.stride,
-                      i);
-            return;
-        }
-
-        // Only valid for first plane as other planes might be
-        // sub-sampled according to fourcc format
-        if (i == 0 && plane.offset + plane.stride * height > size) {
-            postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS,
-                      "invalid buffer stride or height for plane %i",
-                      i);
-            return;
-        }
-    }
-
-    // Import the buffer
-    // -----------------
     QVector<LinuxDmabufV1::Plane> planes;
-    planes.reserve(m_planeCount);
+    planes.reserve(static_cast<int>(m_planeCount));
+
     for (uint32_t i = 0; i < m_planeCount; i++) {
         planes << m_planes.at(i);
     }
@@ -297,6 +215,7 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
         postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_WL_BUFFER,
                   "importing the supplied dmabufs failed");
     }
+
     // The buffer has ownership of the file descriptors now
     for (auto& plane : m_planes) {
         plane.fd = -1;
@@ -305,12 +224,101 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
     // We import the buffer from the consumer. The consumer ensures the buffer exists.
     // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
     buffer->d_ptr->buffer = new BufferV1(client()->handle(), 1, bufferId, buffer);
+
     // TODO(romangg): error handling
 
     // Send a 'created' event when the request is not for an immediate import, i.e. bufferId is 0.
     if (bufferId == 0) {
         send<zwp_linux_buffer_params_v1_send_created>(buffer->d_ptr->buffer->resource());
     }
+}
+
+bool ParamsV1::validate_params(QSize const& size)
+{
+    auto const width = static_cast<uint32_t>(size.width());
+    auto const height = static_cast<uint32_t>(size.height());
+
+    if (m_createRequested) {
+        postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_ALREADY_USED,
+                  "params was already used to create a wl_buffer");
+        return false;
+    }
+    m_createRequested = true;
+
+    if (m_planeCount == 0) {
+        postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INCOMPLETE,
+                  "no dmabuf has been added to the params");
+        return false;
+    }
+
+    // Check for holes in the dmabufs set (e.g. [0, 1, 3])
+    for (uint32_t i = 0; i < m_planeCount; i++) {
+        if (m_planes.at(i).fd != -1) {
+            continue;
+        }
+        postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INCOMPLETE,
+                  "no dmabuf has been added for plane %i",
+                  i);
+        return false;
+    }
+
+    if (width < 1 || height < 1) {
+        postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_DIMENSIONS,
+                  "invalid width %d or height %d",
+                  width,
+                  height);
+        return false;
+    }
+
+    for (uint32_t i = 0; i < m_planeCount; i++) {
+        auto& plane = m_planes.at(i);
+
+        if (uint64_t(plane.offset) + plane.stride > UINT32_MAX) {
+            postError(
+                ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
+            return false;
+        }
+
+        if (i == 0 && uint64_t(plane.offset) + plane.stride * height > UINT32_MAX) {
+            postError(
+                ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
+            return false;
+        }
+
+        // Don't report an error as it might be caused by the kernel not supporting seeking on
+        // dmabuf
+        off_t size = ::lseek(plane.fd, 0, SEEK_END);
+        if (size == -1) {
+            continue;
+        }
+
+        if (plane.offset >= size) {
+            postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS,
+                      "invalid offset %i for plane %i",
+                      plane.offset,
+                      i);
+            return false;
+        }
+
+        if (plane.offset + plane.stride > size) {
+            postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS,
+                      "invalid stride %i for plane %i",
+                      plane.stride,
+                      i);
+            return false;
+        }
+
+        // Only valid for first plane as other planes might be
+        // sub-sampled according to fourcc format
+        if (i == 0 && plane.offset + plane.stride * height > size) {
+            postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS,
+                      "invalid buffer stride or height for plane %i",
+                      i);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void ParamsV1::add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride, uint64_t modifier)

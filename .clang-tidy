@@ -47,6 +47,7 @@ WarningsAsErrors: "*"
 # readability-use-anyofallof: Requires them also where a normal for-loop is more readable.
 #
 # Temporarily suppress (might be possilbe to remove or limit to certain subdirectories later on):
+# altera-struct-pack-align: Qt macros like Q_OBJECT fail.
 # cppcoreguidelines-macro-usage: We currently still depend on some macros in Output implementation
 #   and some other classes where the Qt functionality can't be easily migrated to templates.
 # cppcoreguidelines-owning-memory: We have yet to fully define a structure without the need of raw
@@ -59,9 +60,11 @@ WarningsAsErrors: "*"
 # hicpp-signed-bitwise: Qt macros like Q_DECLARE_OPERATORS_FOR_FLAGS conflict.
 #   hicpp-special-member-functions: See cppcoreguidelines-special-member-functions.
 # misc-no-recursion: Qt macros like Q_DECLARE_METATYPE are within recursive call chains.
+# performance-no-int-to-ptr: Qt macros like Q_DECLARE_METATYPE fail.
 #
 
 Checks: "*,
+-altera-struct-pack-align,
 -cert-dcl50-cpp,
 -cppcoreguidelines-macro-usage,
 -cppcoreguidelines-non-private-member-variables-in-classes,
@@ -93,6 +96,7 @@ Checks: "*,
 -misc-non-private-member-variables-in-classes,
 -modernize-use-nodiscard,
 -modernize-use-trailing-return-type,
+-performance-no-int-to-ptr,
 -readability-implicit-bool-conversion,
 -readability-qualified-auto,
 -readability-use-anyofallof

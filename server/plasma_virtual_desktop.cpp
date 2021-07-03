@@ -151,7 +151,7 @@ PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::createDesktop(const QString& 
         return *it;
     }
 
-    uint32_t const actualPosition = qMin(position, static_cast<uint32_t>(d_ptr->desktops.count()));
+    auto const actualPosition = std::min(position, static_cast<uint32_t>(d_ptr->desktops.count()));
 
     auto desktop = new PlasmaVirtualDesktop(this);
     desktop->d_ptr->id = id;
@@ -162,7 +162,7 @@ PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::createDesktop(const QString& 
         desktop->d_ptr->active = true;
     }
 
-    d_ptr->desktops.insert(actualPosition, desktop);
+    d_ptr->desktops.insert(static_cast<int>(actualPosition), desktop);
 
     d_ptr->send<org_kde_plasma_virtual_desktop_management_send_desktop_created>(
         id.toUtf8().constData(), actualPosition);

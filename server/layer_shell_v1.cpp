@@ -149,7 +149,7 @@ void LayerSurfaceV1::Private::setSizeCallback([[maybe_unused]] wl_client* wlClie
                                               uint32_t height)
 {
     auto priv = handle(wlResource)->d_ptr;
-    priv->pending.size = QSize(width, height);
+    priv->pending.size = QSize(static_cast<int>(width), static_cast<int>(height));
     priv->pending.set = true;
 }
 
