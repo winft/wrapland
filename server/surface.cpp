@@ -384,7 +384,7 @@ void Surface::frameRendered(quint32 msec)
         wl_callback_send_done(resource, msec);
         wl_resource_destroy(resource);
     }
-    for (auto subsurface : d_ptr->current.children) {
+    for (auto& subsurface : d_ptr->current.children) {
         subsurface->d_ptr->surface->frameRendered(msec);
     }
     if (needsFlush) {
@@ -444,7 +444,7 @@ void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
     }
 }
 
-void Surface::Private::updateCurrentBuffer(SurfaceState const& source, bool& damaged, bool& resized)
+void Surface::Private::update_buffer(SurfaceState const& source, bool& damaged, bool& resized)
 {
     if (!source.bufferIsSet) {
         return;
@@ -548,13 +548,13 @@ void Surface::Private::updateCurrentState(bool forceChildren)
 
 void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildren)
 {
-    bool const scaleFactorChanged = source.scaleIsSet && (current.scale != source.scale);
-    bool const transformChanged = source.transformIsSet && (current.transform != source.transform);
+    auto const scaleFactorChanged = source.scaleIsSet && (current.scale != source.scale);
+    auto const transformChanged = source.transformIsSet && (current.transform != source.transform);
 
-    bool damaged = false;
-    bool resized = false;
+    auto damaged = false;
+    auto resized = false;
 
-    updateCurrentBuffer(source, damaged, resized);
+    update_buffer(source, damaged, resized);
 
     if (source.childrenChanged) {
         current.children = source.children;
@@ -663,7 +663,7 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
     source = SurfaceState();
     source.children = current.children;
 
-    for (auto subsurface : current.children) {
+    for (auto& subsurface : current.children) {
         if (subsurface) {
             subsurface->d_ptr->applyCached(forceChildren);
         }

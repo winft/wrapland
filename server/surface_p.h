@@ -155,7 +155,7 @@ public:
     Surface* dataProxy = nullptr;
 
 private:
-    void updateCurrentBuffer(SurfaceState const& source, bool& damaged, bool& resized);
+    void update_buffer(SurfaceState const& source, bool& damaged, bool& resized);
 
     void damage(const QRect& rect);
     void damageBuffer(const QRect& rect);
