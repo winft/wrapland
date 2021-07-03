@@ -42,6 +42,7 @@ public:
     ~Private() override;
 
     DataOffer* createDataOffer(DataSource* source);
+    void cancel_drag_target();
 
     Seat* seat;
     DataSource* source = nullptr;
@@ -223,6 +224,32 @@ DataOffer* DataDevice::Private::createDataOffer(DataSource* source)
     return offer;
 }
 
+void DataDevice::Private::cancel_drag_target()
+{
+    if (!drag.surface) {
+        return;
+    }
+    if (resource() && drag.surface->resource()) {
+        send<wl_data_device_send_leave>();
+    }
+    if (drag.posConnection) {
+        disconnect(drag.posConnection);
+        drag.posConnection = QMetaObject::Connection();
+    }
+    disconnect(drag.destroyConnection);
+    drag.destroyConnection = QMetaObject::Connection();
+    drag.surface = nullptr;
+    if (drag.sourceActionConnection) {
+        disconnect(drag.sourceActionConnection);
+        drag.sourceActionConnection = QMetaObject::Connection();
+    }
+    if (drag.targetActionConnection) {
+        disconnect(drag.targetActionConnection);
+        drag.targetActionConnection = QMetaObject::Connection();
+    }
+    // don't update serial, we need it
+}
+
 DataDevice::DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat)
     : d_ptr(new Private(client, version, id, seat, this))
 {
@@ -293,27 +320,7 @@ void DataDevice::drop()
 
 void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
 {
-    if (d_ptr->drag.surface) {
-        if (d_ptr->resource() && d_ptr->drag.surface->d_ptr->resource()) {
-            d_ptr->send<wl_data_device_send_leave>();
-        }
-        if (d_ptr->drag.posConnection) {
-            disconnect(d_ptr->drag.posConnection);
-            d_ptr->drag.posConnection = QMetaObject::Connection();
-        }
-        disconnect(d_ptr->drag.destroyConnection);
-        d_ptr->drag.destroyConnection = QMetaObject::Connection();
-        d_ptr->drag.surface = nullptr;
-        if (d_ptr->drag.sourceActionConnection) {
-            disconnect(d_ptr->drag.sourceActionConnection);
-            d_ptr->drag.sourceActionConnection = QMetaObject::Connection();
-        }
-        if (d_ptr->drag.targetActionConnection) {
-            disconnect(d_ptr->drag.targetActionConnection);
-            d_ptr->drag.targetActionConnection = QMetaObject::Connection();
-        }
-        // don't update serial, we need it
-    }
+    d_ptr->cancel_drag_target();
 
     if (!surface) {
         if (auto s = d_ptr->seat->dragSource()->dragSource()) {
