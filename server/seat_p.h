@@ -162,11 +162,11 @@ public:
     struct {
         struct {
             Surface* surface = nullptr;
-            QMetaObject::Connection destroyConnection;
+            QMetaObject::Connection destroy_connection;
             quint32 serial = 0;
-            TextInputV2* textInput = nullptr;
+            TextInputV2* text_input{nullptr};
         } focus;
-    } textInput;
+    } global_text_input;
 
     // Touch related members
     struct SeatTouch {
