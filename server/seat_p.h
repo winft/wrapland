@@ -159,16 +159,14 @@ public:
 
     bool updateKey(quint32 key, SeatKeyboard::State state);
 
-    struct structTextInput {
-        struct Focus {
+    struct {
+        struct {
             Surface* surface = nullptr;
             QMetaObject::Connection destroyConnection;
             quint32 serial = 0;
             TextInputV2* textInput = nullptr;
-        };
-        Focus focus;
-    };
-    structTextInput textInput;
+        } focus;
+    } textInput;
 
     // Touch related members
     struct SeatTouch {

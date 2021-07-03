@@ -1574,7 +1574,7 @@ void Seat::setFocusedTextInputSurface(Surface* surface)
     if (d_ptr->textInput.focus.surface) {
         disconnect(d_ptr->textInput.focus.destroyConnection);
     }
-    d_ptr->textInput.focus = Private::structTextInput::Focus();
+    d_ptr->textInput.focus = {};
     d_ptr->textInput.focus.surface = surface;
     TextInputV2* t = d_ptr->textInputForSurface(surface);
     if (t && !t->d_ptr->resource()) {
