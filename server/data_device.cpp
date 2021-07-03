@@ -376,10 +376,7 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
 
     d_ptr->update_drag_motion();
 
-    auto source = d_ptr->seat->dragSource()->dragSource();
-    auto offer = d_ptr->createDataOffer(source);
     d_ptr->drag.surface = surface;
-
     d_ptr->drag.destroyConnection = connect(surface, &Surface::resourceDestroyed, this, [this] {
         if (d_ptr->resource()) {
             d_ptr->send<wl_data_device_send_leave>();
@@ -389,6 +386,9 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
         }
         d_ptr->drag = Private::Drag();
     });
+
+    auto source = d_ptr->seat->dragSource()->dragSource();
+    auto offer = d_ptr->createDataOffer(source);
 
     // TODO(unknown author): handle touch position
     auto const pos = d_ptr->seat->dragSurfaceTransformation().map(d_ptr->seat->pointerPos());
