@@ -43,6 +43,9 @@ public:
 
     DataOffer* createDataOffer(DataSource* source);
     void cancel_drag_target();
+    void update_drag_motion();
+    void update_drag_pointer_motion();
+    void update_drag_touch_motion();
 
     Seat* seat;
     DataSource* source = nullptr;
@@ -250,6 +253,43 @@ void DataDevice::Private::cancel_drag_target()
     // don't update serial, we need it
 }
 
+void DataDevice::Private::update_drag_motion()
+{
+    if (seat->isDragPointer()) {
+        update_drag_pointer_motion();
+    } else if (seat->isDragTouch()) {
+        update_drag_touch_motion();
+    }
+}
+
+void DataDevice::Private::update_drag_pointer_motion()
+{
+    assert(seat->isDragPointer());
+    drag.posConnection = connect(seat, &Seat::pointerPosChanged, handle(), [this] {
+        auto const pos = seat->dragSurfaceTransformation().map(seat->pointerPos());
+        send<wl_data_device_send_motion>(
+            seat->timestamp(), wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
+        client()->flush();
+    });
+}
+
+void DataDevice::Private::update_drag_touch_motion()
+{
+    assert(seat->isDragTouch());
+    drag.posConnection = connect(
+        seat, &Seat::touchMoved, handle(), [this](auto id, auto serial, auto globalPosition) {
+            Q_UNUSED(id);
+            if (serial != drag.serial) {
+                // different touch down has been moved
+                return;
+            }
+            auto const pos = seat->dragSurfaceTransformation().map(globalPosition);
+            send<wl_data_device_send_motion>(
+                seat->timestamp(), wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
+            client()->flush();
+        });
+}
+
 DataDevice::DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat)
     : d_ptr(new Private(client, version, id, seat, this))
 {
@@ -338,34 +378,7 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
     auto offer = d_ptr->createDataOffer(source);
     d_ptr->drag.surface = surface;
 
-    if (d_ptr->seat->isDragPointer()) {
-        d_ptr->drag.posConnection = connect(d_ptr->seat, &Seat::pointerPosChanged, this, [this] {
-            auto const pos
-                = d_ptr->seat->dragSurfaceTransformation().map(d_ptr->seat->pointerPos());
-            d_ptr->send<wl_data_device_send_motion>(d_ptr->seat->timestamp(),
-                                                    wl_fixed_from_double(pos.x()),
-                                                    wl_fixed_from_double(pos.y()));
-            d_ptr->client()->flush();
-        });
-    } else if (d_ptr->seat->isDragTouch()) {
-        d_ptr->drag.posConnection
-            = connect(d_ptr->seat,
-                      &Seat::touchMoved,
-                      this,
-                      [this](auto id, auto serial, auto globalPosition) {
-                          Q_UNUSED(id);
-                          if (serial != d_ptr->drag.serial) {
-                              // different touch down has been moved
-                              return;
-                          }
-                          auto const pos
-                              = d_ptr->seat->dragSurfaceTransformation().map(globalPosition);
-                          d_ptr->send<wl_data_device_send_motion>(d_ptr->seat->timestamp(),
-                                                                  wl_fixed_from_double(pos.x()),
-                                                                  wl_fixed_from_double(pos.y()));
-                          d_ptr->client()->flush();
-                      });
-    }
+    d_ptr->update_drag_motion();
 
     d_ptr->drag.destroyConnection
         = connect(d_ptr->drag.surface, &Surface::resourceDestroyed, this, [this] {
