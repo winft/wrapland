@@ -103,7 +103,7 @@ wl_resource* Client::createResource(const wl_interface* interface, uint32_t vers
     if (!m_client) {
         return nullptr;
     }
-    return wl_resource_create(m_client, interface, version, id);
+    return wl_resource_create(m_client, interface, static_cast<int>(version), id);
 }
 
 wl_resource* Client::getResource(uint32_t id)
