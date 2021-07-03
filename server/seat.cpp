@@ -605,7 +605,7 @@ void Seat::setDragTarget(Surface* surface,
         setPointerPos(globalPosition);
     } else if (d_ptr->drag.mode == Private::Drag::Mode::Touch
                && d_ptr->globalTouch.focus.firstTouchPos != globalPosition) {
-        touchMove(d_ptr->globalTouch.ids.first(), globalPosition);
+        touchMove(d_ptr->globalTouch.ids.firstKey(), globalPosition);
     }
     if (d_ptr->drag.target) {
         d_ptr->drag.surface = surface;
