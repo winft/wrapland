@@ -118,6 +118,8 @@ private:
                                     uint32_t format,
                                     uint32_t flags);
 
+    bool validate_params(QSize const& size);
+
     static struct zwp_linux_buffer_params_v1_interface const s_interface;
 
     LinuxDmabufV1::Private* m_dmabuf;
