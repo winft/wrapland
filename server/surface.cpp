@@ -526,19 +526,6 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& damaged, 
     current.damage = surfaceRegion.intersected(current.damage.united(bufferDamage));
     trackedDamage = trackedDamage.united(current.damage);
     damaged = true;
-
-    // TODO(romangg): Confirm that this workaround is not needed anymore.
-#if 0
-    // workaround for https://bugreports.qt.io/browse/QTBUG-52092
-    // if the surface is a sub-surface, but the main surface is not yet mapped, fake
-    // frame rendered
-    if (subsurface) {
-        const auto mainSurface = subsurface->mainSurface();
-        if (!mainSurface || !mainSurface->buffer()) {
-            handle()->frameRendered(0);
-        }
-    }
-#endif
 }
 
 void Surface::Private::updateCurrentState(bool forceChildren)
