@@ -67,7 +67,6 @@ public:
     void sendEnter(quint32 serial, Surface* surface, QPointF const& pos);
     void sendLeave(quint32 serial, Surface* surface);
     void sendMotion(const QPointF& position);
-    void sendAxis(Qt::Orientation orientation, quint32 delta);
     void sendFrame();
 
     void registerRelativePointer(RelativePointerV1* relativePointer);
