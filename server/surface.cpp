@@ -655,9 +655,7 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
     source.children = current.children;
 
     for (auto& subsurface : current.children) {
-        if (subsurface) {
-            subsurface->d_ptr->applyCached(forceChildren);
-        }
+        subsurface->d_ptr->applyCached(forceChildren);
     }
 }
 
