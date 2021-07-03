@@ -353,7 +353,8 @@ void Pointer::axis(Qt::Orientation orientation, quint32 delta)
     Q_ASSERT(d_ptr->focusedSurface);
     auto const wlorient = (orientation == Qt::Vertical) ? WL_POINTER_AXIS_VERTICAL_SCROLL
                                                         : WL_POINTER_AXIS_HORIZONTAL_SCROLL;
-    d_ptr->send<wl_pointer_send_axis>(d_ptr->seat->timestamp(), wlorient, wl_fixed_from_int(delta));
+    d_ptr->send<wl_pointer_send_axis>(
+        d_ptr->seat->timestamp(), wlorient, wl_fixed_from_int(static_cast<int>(delta)));
     d_ptr->sendFrame();
 }
 
