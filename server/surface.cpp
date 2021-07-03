@@ -528,21 +528,8 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& damaged, 
     damaged = true;
 }
 
-void Surface::Private::updateCurrentState(bool forceChildren)
+void Surface::Private::copy_to_current(SurfaceState const& source, bool& resized)
 {
-    updateCurrentState(pending, forceChildren);
-}
-
-void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildren)
-{
-    auto const scaleFactorChanged = source.scaleIsSet && (current.scale != source.scale);
-    auto const transformChanged = source.transformIsSet && (current.transform != source.transform);
-
-    auto damaged = false;
-    auto resized = false;
-
-    update_buffer(source, damaged, resized);
-
     if (source.childrenChanged) {
         current.children = source.children;
     }
@@ -568,10 +555,10 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
     if (source.opaqueIsSet) {
         current.opaque = source.opaque;
     }
-    if (scaleFactorChanged) {
+    if (source.scaleIsSet) {
         current.scale = source.scale;
     }
-    if (transformChanged) {
+    if (source.transformIsSet) {
         current.transform = source.transform;
     }
 
@@ -591,6 +578,23 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
         }
         current.sourceRectangle = source.sourceRectangle;
     }
+}
+
+void Surface::Private::updateCurrentState(bool forceChildren)
+{
+    updateCurrentState(pending, forceChildren);
+}
+
+void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildren)
+{
+    auto const scaleFactorChanged = source.scaleIsSet && (current.scale != source.scale);
+    auto const transformChanged = source.transformIsSet && (current.transform != source.transform);
+
+    auto damaged = false;
+    auto resized = false;
+
+    update_buffer(source, damaged, resized);
+    copy_to_current(source, resized);
 
     // Now check that source rectangle is (still) well defined.
     soureRectangleIntegerCheck(current.destinationSize, current.sourceRectangle);

@@ -156,6 +156,7 @@ public:
 
 private:
     void update_buffer(SurfaceState const& source, bool& damaged, bool& resized);
+    void copy_to_current(SurfaceState const& source, bool& resized);
 
     void damage(const QRect& rect);
     void damageBuffer(const QRect& rect);
