@@ -945,13 +945,7 @@ XdgImporter* Registry::createXdgImporter(quint32 name, quint32 version, QObject*
 TextInputManagerV2*
 Registry::createTextInputManagerV2(quint32 name, quint32 version, QObject* parent)
 {
-    switch (d->interfaceForName(name)) {
-    case Interface::TextInputManagerV2:
-        return d->create<TextInputManagerV2>(
-            name, version, parent, &Registry::bindTextInputManagerV2);
-    default:
-        return nullptr;
-    }
+    return d->create<TextInputManagerV2>(name, version, parent, &Registry::bindTextInputManagerV2);
 }
 
 RelativePointerManager*
