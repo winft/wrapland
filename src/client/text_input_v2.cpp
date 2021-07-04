@@ -4,7 +4,7 @@
 
     SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
 */
-#include "textinput_p.h"
+#include "text_input_v2_p.h"
 
 #include "event_queue.h"
 #include "seat.h"

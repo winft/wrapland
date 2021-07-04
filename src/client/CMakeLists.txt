@@ -52,7 +52,7 @@ set(CLIENT_LIB_SRCS
     subsurface.cpp
     surface.cpp
     touch.cpp
-    textinput.cpp
+    text_input_v2.cpp
     viewporter.cpp
     wlr_output_configuration_v1.cpp
     wlr_output_manager_v1.cpp
@@ -336,7 +336,7 @@ set(CLIENT_LIB_HEADERS
   subsurface.h
   surface.h
   touch.h
-  textinput.h
+  text_input_v2.h
   viewporter.h
   xdg_activation_v1.h
   xdgdecoration.h

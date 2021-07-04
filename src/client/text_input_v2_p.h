@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "textinput.h"
+#include "text_input_v2.h"
 
 #include "wayland_pointer_p.h"
 

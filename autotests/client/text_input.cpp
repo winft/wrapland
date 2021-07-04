@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
-#include "../../src/client/textinput.h"
+#include "../../src/client/text_input_v2.h"
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"

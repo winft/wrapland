@@ -55,7 +55,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "shm_pool.h"
 #include "slide.h"
 #include "subcompositor.h"
-#include "textinput_p.h"
+#include "text_input_v2_p.h"
 #include "viewporter.h"
 #include "wayland_pointer_p.h"
 #include "wlr_output_manager_v1.h"
