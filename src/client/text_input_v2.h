@@ -95,7 +95,7 @@ protected:
     class Private;
     explicit TextInputManager(Private* p, QObject* parent = nullptr);
 
-    std::unique_ptr<Private> d;
+    std::unique_ptr<Private> d_ptr;
 };
 
 /**
@@ -472,7 +472,7 @@ Q_SIGNALS:
 
 protected:
     class Private;
-    std::unique_ptr<Private> d;
+    std::unique_ptr<Private> d_ptr;
     explicit TextInput(Private* p, QObject* parent = nullptr);
 };
 

@@ -32,7 +32,7 @@ public:
 
 private:
     class Private;
-    std::unique_ptr<Private> d;
+    std::unique_ptr<Private> d_ptr;
 };
 
 class Q_DECL_HIDDEN TextInputManager::Private

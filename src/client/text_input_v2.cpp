@@ -15,7 +15,7 @@ namespace Wrapland::Client
 
 TextInputManager::TextInputManager(Private* p, QObject* parent)
     : QObject(parent)
-    , d(p)
+    , d_ptr(p)
 {
 }
 
@@ -23,42 +23,42 @@ TextInputManager::~TextInputManager() = default;
 
 void TextInputManager::setup(zwp_text_input_manager_v2* textinputmanagerunstablev2)
 {
-    d->setupV2(textinputmanagerunstablev2);
+    d_ptr->setupV2(textinputmanagerunstablev2);
 }
 
 void TextInputManager::release()
 {
-    d->release();
+    d_ptr->release();
 }
 
 void TextInputManager::setEventQueue(EventQueue* queue)
 {
-    d->queue = queue;
+    d_ptr->queue = queue;
 }
 
 EventQueue* TextInputManager::eventQueue()
 {
-    return d->queue;
+    return d_ptr->queue;
 }
 
 TextInputManager::operator zwp_text_input_manager_v2*()
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 TextInputManager::operator zwp_text_input_manager_v2*() const
 {
-    return *(d.get());
+    return *(d_ptr.get());
 }
 
 bool TextInputManager::isValid() const
 {
-    return d->isValid();
+    return d_ptr->isValid();
 }
 
 TextInput* TextInputManager::createTextInput(Seat* seat, QObject* parent)
 {
-    return d->createTextInput(seat, parent);
+    return d_ptr->createTextInput(seat, parent);
 }
 
 void TextInputManagerUnstableV2::Private::release()
@@ -495,7 +495,7 @@ void TextInputUnstableV2::Private::setContentType(ContentHints hints, ContentPur
 
 TextInput::TextInput(Private* p, QObject* parent)
     : QObject(parent)
-    , d(p)
+    , d_ptr(p)
 {
 }
 
@@ -503,117 +503,117 @@ TextInput::~TextInput() = default;
 
 void TextInput::setEventQueue(EventQueue* queue)
 {
-    d->queue = queue;
+    d_ptr->queue = queue;
 }
 
 EventQueue* TextInput::eventQueue() const
 {
-    return d->queue;
+    return d_ptr->queue;
 }
 
 bool TextInput::isValid() const
 {
-    return d->isValid();
+    return d_ptr->isValid();
 }
 
 Surface* TextInput::enteredSurface() const
 {
-    return d->enteredSurface;
+    return d_ptr->enteredSurface;
 }
 
 bool TextInput::isInputPanelVisible() const
 {
-    return d->inputPanelVisible;
+    return d_ptr->inputPanelVisible;
 }
 
 void TextInput::enable(Surface* surface)
 {
-    d->enable(surface);
+    d_ptr->enable(surface);
 }
 
 void TextInput::disable(Surface* surface)
 {
-    d->disable(surface);
+    d_ptr->disable(surface);
 }
 
 void TextInput::showInputPanel()
 {
-    d->showInputPanel();
+    d_ptr->showInputPanel();
 }
 
 void TextInput::hideInputPanel()
 {
-    d->hideInputPanel();
+    d_ptr->hideInputPanel();
 }
 
 void TextInput::reset()
 {
-    d->reset();
+    d_ptr->reset();
 }
 
 void TextInput::setSurroundingText(const QString& text, quint32 cursor, quint32 anchor)
 {
-    d->setSurroundingText(text, cursor, anchor);
+    d_ptr->setSurroundingText(text, cursor, anchor);
 }
 
 void TextInput::setContentType(ContentHints hint, ContentPurpose purpose)
 {
-    d->setContentType(hint, purpose);
+    d_ptr->setContentType(hint, purpose);
 }
 
 void TextInput::setCursorRectangle(const QRect& rect)
 {
-    d->setCursorRectangle(rect);
+    d_ptr->setCursorRectangle(rect);
 }
 
 void TextInput::setPreferredLanguage(const QString& language)
 {
-    d->setPreferredLanguage(language);
+    d_ptr->setPreferredLanguage(language);
 }
 
 Qt::LayoutDirection TextInput::textDirection() const
 {
-    return d->textDirection;
+    return d_ptr->textDirection;
 }
 
 QByteArray TextInput::language() const
 {
-    return d->language;
+    return d_ptr->language;
 }
 
 qint32 TextInput::composingTextCursorPosition() const
 {
-    return d->currentPreEdit.cursor;
+    return d_ptr->currentPreEdit.cursor;
 }
 
 QByteArray TextInput::composingText() const
 {
-    return d->currentPreEdit.text;
+    return d_ptr->currentPreEdit.text;
 }
 
 QByteArray TextInput::composingFallbackText() const
 {
-    return d->currentPreEdit.commitText;
+    return d_ptr->currentPreEdit.commitText;
 }
 
 qint32 TextInput::anchorPosition() const
 {
-    return d->currentCommit.anchor;
+    return d_ptr->currentCommit.anchor;
 }
 
 qint32 TextInput::cursorPosition() const
 {
-    return d->currentCommit.cursor;
+    return d_ptr->currentCommit.cursor;
 }
 
 TextInput::DeleteSurroundingText TextInput::deleteSurroundingText() const
 {
-    return d->currentCommit.deleteSurrounding;
+    return d_ptr->currentCommit.deleteSurrounding;
 }
 
 QByteArray TextInput::commitText() const
 {
-    return d->currentCommit.text;
+    return d_ptr->currentCommit.text;
 }
 
 TextInputUnstableV2::TextInputUnstableV2(Seat* seat, QObject* parent)
@@ -628,7 +628,7 @@ TextInputUnstableV2::~TextInputUnstableV2()
 
 TextInputUnstableV2::Private* TextInputUnstableV2::d_func() const
 {
-    return reinterpret_cast<Private*>(d.get());
+    return reinterpret_cast<Private*>(d_ptr.get());
 }
 
 void TextInputUnstableV2::setup(zwp_text_input_v2* textinputunstablev2)
