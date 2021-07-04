@@ -13,9 +13,9 @@
 namespace Wrapland::Client
 {
 
-TextInputManager::TextInputManager(Private* p, QObject* parent)
+TextInputManager::TextInputManager(QObject* parent)
     : QObject(parent)
-    , d_ptr(p)
+    , d_ptr(new Private)
 {
 }
 
@@ -61,31 +61,24 @@ TextInput* TextInputManager::createTextInput(Seat* seat, QObject* parent)
     return d_ptr->createTextInput(seat, parent);
 }
 
-void TextInputManagerUnstableV2::Private::release()
+void TextInputManager::Private::release()
 {
     textinputmanagerunstablev2.release();
 }
 
-bool TextInputManagerUnstableV2::Private::isValid()
+bool TextInputManager::Private::isValid()
 {
     return textinputmanagerunstablev2.isValid();
 }
 
-TextInputManagerUnstableV2::TextInputManagerUnstableV2(QObject* parent)
-    : TextInputManager(new Private, parent)
-{
-}
-
-TextInputManagerUnstableV2::~TextInputManagerUnstableV2() = default;
-
-void TextInputManagerUnstableV2::Private::setupV2(zwp_text_input_manager_v2* ti)
+void TextInputManager::Private::setupV2(zwp_text_input_manager_v2* ti)
 {
     Q_ASSERT(ti);
     Q_ASSERT(!textinputmanagerunstablev2);
     textinputmanagerunstablev2.setup(ti);
 }
 
-TextInput* TextInputManagerUnstableV2::Private::createTextInput(Seat* seat, QObject* parent)
+TextInput* TextInputManager::Private::createTextInput(Seat* seat, QObject* parent)
 {
     Q_ASSERT(isValid());
     TextInputUnstableV2* t = new TextInputUnstableV2(seat, parent);

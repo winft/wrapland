@@ -946,7 +946,7 @@ TextInputManager* Registry::createTextInputManager(quint32 name, quint32 version
 {
     switch (d->interfaceForName(name)) {
     case Interface::TextInputManagerUnstableV2:
-        return d->create<TextInputManagerUnstableV2>(
+        return d->create<TextInputManager>(
             name, version, parent, &Registry::bindTextInputManagerUnstableV2);
     default:
         return nullptr;

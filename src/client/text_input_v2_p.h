@@ -17,69 +17,29 @@
 namespace Wrapland::Client
 {
 
-class TextInputManagerUnstableV2 : public TextInputManager
-{
-    Q_OBJECT
-public:
-    /**
-     * Creates a new TextInputManagerUnstableV2.
-     * Note: after constructing the TextInputManagerUnstableV2 it is not yet valid and one needs
-     * to call setup. In order to get a ready to use TextInputManagerUnstableV2 prefer using
-     * Registry::createTextInputManagerUnstableV2.
-     **/
-    explicit TextInputManagerUnstableV2(QObject* parent = nullptr);
-    virtual ~TextInputManagerUnstableV2();
-
-private:
-    class Private;
-    std::unique_ptr<Private> d_ptr;
-};
-
 class Q_DECL_HIDDEN TextInputManager::Private
 {
 public:
-    Private() = default;
-    virtual ~Private() = default;
+    ~Private() = default;
 
-    virtual void release() = 0;
-    virtual bool isValid() = 0;
-    virtual void setupV2(zwp_text_input_manager_v2* textinputmanagerunstablev2)
-    {
-        Q_UNUSED(textinputmanagerunstablev2)
-    }
-    virtual TextInput* createTextInput(Seat* seat, QObject* parent = nullptr) = 0;
-    virtual operator zwp_text_input_manager_v2*()
-    {
-        return nullptr;
-    }
-    virtual operator zwp_text_input_manager_v2*() const
-    {
-        return nullptr;
-    }
+    void release();
+    bool isValid();
+    void setupV2(zwp_text_input_manager_v2* ti);
+    TextInput* createTextInput(Seat* seat, QObject* parent = nullptr);
 
-    EventQueue* queue = nullptr;
-};
-
-class TextInputManagerUnstableV2::Private : public TextInputManager::Private
-{
-public:
-    Private() = default;
-
-    void release() override;
-    bool isValid() override;
-    void setupV2(zwp_text_input_manager_v2* ti) override;
-    TextInput* createTextInput(Seat* seat, QObject* parent = nullptr) override;
-    operator zwp_text_input_manager_v2*() override
+    operator zwp_text_input_manager_v2*()
     {
         return textinputmanagerunstablev2;
     }
-    operator zwp_text_input_manager_v2*() const override
+    operator zwp_text_input_manager_v2*() const
     {
         return textinputmanagerunstablev2;
     }
 
     WaylandPointer<zwp_text_input_manager_v2, zwp_text_input_manager_v2_destroy>
         textinputmanagerunstablev2;
+
+    EventQueue* queue = nullptr;
 };
 
 class TextInputUnstableV2 : public TextInput

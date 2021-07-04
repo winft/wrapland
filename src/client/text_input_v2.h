@@ -37,6 +37,7 @@ class WRAPLANDCLIENT_EXPORT TextInputManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit TextInputManager(QObject* parent = nullptr);
     virtual ~TextInputManager();
 
     /**
@@ -91,9 +92,8 @@ Q_SIGNALS:
      **/
     void removed();
 
-protected:
+private:
     class Private;
-    explicit TextInputManager(Private* p, QObject* parent = nullptr);
 
     std::unique_ptr<Private> d_ptr;
 };
