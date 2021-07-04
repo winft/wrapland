@@ -12,6 +12,7 @@
 #include <memory>
 
 struct zwp_text_input_manager_v2;
+struct zwp_text_input_v2;
 
 namespace Wrapland::Client
 {
@@ -115,10 +116,26 @@ class WRAPLANDCLIENT_EXPORT TextInput : public QObject
     Q_OBJECT
 public:
     virtual ~TextInput();
+
+    /**
+     * Setup this TextInputUnstableV2 to manage the @p textinputunstablev2.
+     * When using TextInputManagerUnstableV2::createTextInputUnstableV2 there is no need to call
+     * this method.
+     **/
+    void setup(zwp_text_input_v2* textinputunstablev2);
+    /**
+     * Releases the zwp_text_input_v2 interface.
+     * After the interface has been released the TextInputUnstableV2 instance is no
+     * longer valid and can be setup with another zwp_text_input_v2 interface.
+     **/
+    void release();
     /**
      * @returns @c true if managing a resource.
      **/
     bool isValid() const;
+
+    operator zwp_text_input_v2*();
+    operator zwp_text_input_v2*() const;
 
     /**
      * @returns The Surface which has the text input focus on this TextInput.
@@ -470,10 +487,12 @@ Q_SIGNALS:
      **/
     void committed();
 
-protected:
+private:
+    explicit TextInput(Seat* seat, QObject* parent = nullptr);
+    friend class TextInputManager;
+
     class Private;
     std::unique_ptr<Private> d_ptr;
-    explicit TextInput(Private* p, QObject* parent = nullptr);
 };
 
 }
