@@ -173,6 +173,8 @@ public:
             QPointF firstTouchPos;
         };
         Focus focus;
+
+        // Key: Distinct id per touch point, Value: Wayland display serial.
         QMap<qint32, quint32> ids;
     };
     SeatTouch globalTouch;

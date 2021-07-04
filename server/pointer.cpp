@@ -122,14 +122,6 @@ void Pointer::Private::sendMotion(const QPointF& position)
         seat->timestamp(), wl_fixed_from_double(position.x()), wl_fixed_from_double(position.y()));
 }
 
-void Pointer::Private::sendAxis(Qt::Orientation orientation, quint32 delta)
-{
-    const auto wlOrientation = (orientation == Qt::Vertical) ? WL_POINTER_AXIS_VERTICAL_SCROLL
-                                                             : WL_POINTER_AXIS_HORIZONTAL_SCROLL;
-
-    send<wl_pointer_send_axis>(seat->timestamp(), wlOrientation, wl_fixed_from_int(delta));
-}
-
 void Pointer::Private::sendFrame()
 {
     send<wl_pointer_send_frame, WL_POINTER_FRAME_SINCE_VERSION>();
@@ -355,10 +347,14 @@ void Pointer::axis(Qt::Orientation orientation,
     d_ptr->sendFrame();
 }
 
+// TODO(romangg): Remove this legacy function.
 void Pointer::axis(Qt::Orientation orientation, quint32 delta)
 {
     Q_ASSERT(d_ptr->focusedSurface);
-    d_ptr->sendAxis(orientation, delta);
+    auto const wlorient = (orientation == Qt::Vertical) ? WL_POINTER_AXIS_VERTICAL_SCROLL
+                                                        : WL_POINTER_AXIS_HORIZONTAL_SCROLL;
+    d_ptr->send<wl_pointer_send_axis>(
+        d_ptr->seat->timestamp(), wlorient, wl_fixed_from_int(static_cast<int>(delta)));
     d_ptr->sendFrame();
 }
 

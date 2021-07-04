@@ -125,7 +125,7 @@ Slide::Location Slide::location() const
     return d_ptr->currentLocation;
 }
 
-int Slide::offset() const
+uint32_t Slide::offset() const
 {
     return d_ptr->currentOffset;
 }

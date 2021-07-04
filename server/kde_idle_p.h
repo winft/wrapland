@@ -86,7 +86,7 @@ public:
             IdleTimeout* q);
 
     ~Private() override;
-    void setup(quint32 timeout);
+    void setup(uint32_t timeout);
 
     void simulateUserActivity();
 
