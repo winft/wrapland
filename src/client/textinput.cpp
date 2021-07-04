@@ -164,11 +164,6 @@ TextInputManager::TextInputManager(Private* p, QObject* parent)
 
 TextInputManager::~TextInputManager() = default;
 
-void TextInputManager::setup(wl_text_input_manager* textinputmanagerunstablev0)
-{
-    d->setupV0(textinputmanagerunstablev0);
-}
-
 void TextInputManager::setup(zwp_text_input_manager_v2* textinputmanagerunstablev2)
 {
     d->setupV2(textinputmanagerunstablev2);
@@ -187,16 +182,6 @@ void TextInputManager::setEventQueue(EventQueue* queue)
 EventQueue* TextInputManager::eventQueue()
 {
     return d->queue;
-}
-
-TextInputManager::operator wl_text_input_manager*()
-{
-    return *(d.get());
-}
-
-TextInputManager::operator wl_text_input_manager*() const
-{
-    return *(d.get());
 }
 
 TextInputManager::operator zwp_text_input_manager_v2*()

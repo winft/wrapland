@@ -35,7 +35,7 @@ class TextInputUnstableV2::Private : public TextInput::Private
 public:
     Private(TextInputUnstableV2* q, Seat* seat);
 
-    void setup(zwp_text_input_v2* textinputmanagerunstablev0);
+    void setup(zwp_text_input_v2* ti);
 
     bool isValid() const override;
     void enable(Surface* surface) override;
@@ -548,7 +548,6 @@ public:
     bool isValid() override;
     void setupV2(zwp_text_input_manager_v2* ti) override;
     TextInput* createTextInput(Seat* seat, QObject* parent = nullptr) override;
-    using TextInputManager::Private::operator wl_text_input_manager*;
     operator zwp_text_input_manager_v2*() override
     {
         return textinputmanagerunstablev2;

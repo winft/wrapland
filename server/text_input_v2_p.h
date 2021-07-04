@@ -26,7 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <wayland-text-input-unstable-v2-server-protocol.h>
-#include <wayland-text-server-protocol.h>
 
 namespace Wrapland::Server
 {

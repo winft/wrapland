@@ -37,7 +37,6 @@ struct wl_seat;
 struct wl_shell;
 struct wl_shm;
 struct wl_subcompositor;
-struct wl_text_input_manager;
 struct wp_presentation;
 struct zwp_text_input_manager_v2;
 struct _wl_fullscreen_shell;
@@ -114,7 +113,6 @@ class ShmPool;
 class ServerSideDecorationPaletteManager;
 class SubCompositor;
 class TextInputManager;
-class TextInputManagerUnstableV0;
 class TextInputManagerUnstableV2;
 class Viewporter;
 class XdgShell;
@@ -186,7 +184,6 @@ public:
         OutputManagementV1,               ///< Refers to the zkwinft_output_management_v1 interface
         OutputDeviceV1,                   ///< Refers to the zkwinft_output_device_v1 interface
         WlrOutputManagerV1,               ///< Refers to the zwlr_output_manager_v1 interface
-        TextInputManagerUnstableV0,       ///< Refers to wl_text_input_manager, @since 0.0.523
         TextInputManagerUnstableV2,       ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
         RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since
                                           ///< 0.0.528
@@ -543,16 +540,6 @@ public:
      * @since 5.5
      **/
     org_kde_kwin_dpms_manager* bindDpmsManager(uint32_t name, uint32_t version) const;
-    /**
-     * Binds the wl_text_input_manager with @p name and @p version.
-     * If the @p name does not exist or is not for the text input interface in unstable version 0,
-     * @c null will be returned.
-     *
-     * Prefer using createTextInputManager instead.
-     * @see createTextInputManager
-     * @since 0.0.523
-     **/
-    wl_text_input_manager* bindTextInputManagerUnstableV0(uint32_t name, uint32_t version) const;
     /**
      * Binds the zwp_text_input_manager_v2 with @p name and @p version.
      * If the @p name does not exist or is not for the text input interface in unstable version 2,
@@ -1146,7 +1133,6 @@ public:
      * @p name and @p version.
      *
      * This factory method supports the following interfaces:
-     * @li wl_text_input_manager
      * @li zwp_text_input_manager_v2
      *
      * If @p name is for one of the supported interfaces the corresponding manager will be created,
@@ -1638,13 +1624,6 @@ Q_SIGNALS:
      **/
     void dpmsAnnounced(quint32 name, quint32 version);
     /**
-     * Emitted whenever a wl_text_input_manager interface gets announced.
-     * @param name The name for the announced interface
-     * @param version The maximum supported version of the announced interface
-     * @since 0.0.523
-     **/
-    void textInputManagerUnstableV0Announced(quint32 name, quint32 version);
-    /**
      * Emitted whenever a zwp_text_input_manager_v2 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1914,12 +1893,6 @@ Q_SIGNALS:
      * @since 5.5
      **/
     void dpmsRemoved(quint32 name);
-    /**
-     * Emitted whenever a wl_text_input_manager interface gets removed.
-     * @param name The name for the removed interface
-     * @since 0.0.523
-     **/
-    void textInputManagerUnstableV0Removed(quint32 name);
     /**
      * Emitted whenever a zwp_text_input_manager_v2 interface gets removed.
      * @param name The name for the removed interface

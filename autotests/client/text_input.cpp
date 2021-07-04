@@ -72,7 +72,6 @@ private:
     Wrapland::Client::Seat* m_seat = nullptr;
     Wrapland::Client::Keyboard* m_keyboard = nullptr;
     Wrapland::Client::Compositor* m_compositor = nullptr;
-    Wrapland::Client::TextInputManager* m_textInputManagerV0 = nullptr;
     Wrapland::Client::TextInputManager* m_textInputManagerV2 = nullptr;
 };
 

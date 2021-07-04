@@ -23,8 +23,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 
-struct wl_text_input;
-struct wl_text_input_manager;
 struct zwp_text_input_v2;
 
 namespace Wrapland
@@ -33,37 +31,18 @@ namespace Client
 {
 
 class EventQueue;
-class TextInputUnstableV0;
 class Surface;
 class Seat;
-
-class TextInputManagerUnstableV0 : public TextInputManager
-{
-    Q_OBJECT
-public:
-    /**
-     * Creates a new TextInputManagerUnstableV0.
-     * Note: after constructing the TextInputManagerUnstableV0 it is not yet valid and one needs
-     * to call setup. In order to get a ready to use TextInputManagerUnstableV0 prefer using
-     * Registry::createTextInputManagerUnstableV0.
-     **/
-    explicit TextInputManagerUnstableV0(QObject* parent = nullptr);
-    virtual ~TextInputManagerUnstableV0();
-
-private:
-    class Private;
-    Private* d_func() const;
-};
 
 class TextInputManagerUnstableV2 : public TextInputManager
 {
     Q_OBJECT
 public:
     /**
-     * Creates a new TextInputManagerUnstableV0.
-     * Note: after constructing the TextInputManagerUnstableV0 it is not yet valid and one needs
-     * to call setup. In order to get a ready to use TextInputManagerUnstableV0 prefer using
-     * Registry::createTextInputManagerUnstableV0.
+     * Creates a new TextInputManagerUnstableV2.
+     * Note: after constructing the TextInputManagerUnstableV2 it is not yet valid and one needs
+     * to call setup. In order to get a ready to use TextInputManagerUnstableV2 prefer using
+     * Registry::createTextInputManagerUnstableV2.
      **/
     explicit TextInputManagerUnstableV2(QObject* parent = nullptr);
     virtual ~TextInputManagerUnstableV2();
@@ -81,23 +60,11 @@ public:
 
     virtual void release() = 0;
     virtual bool isValid() = 0;
-    virtual void setupV0(wl_text_input_manager* textinputmanagerunstablev0)
-    {
-        Q_UNUSED(textinputmanagerunstablev0)
-    }
     virtual void setupV2(zwp_text_input_manager_v2* textinputmanagerunstablev2)
     {
         Q_UNUSED(textinputmanagerunstablev2)
     }
     virtual TextInput* createTextInput(Seat* seat, QObject* parent = nullptr) = 0;
-    virtual operator wl_text_input_manager*()
-    {
-        return nullptr;
-    }
-    virtual operator wl_text_input_manager*() const
-    {
-        return nullptr;
-    }
     virtual operator zwp_text_input_manager_v2*()
     {
         return nullptr;
@@ -152,34 +119,6 @@ public:
     };
     Commit currentCommit;
     Commit pendingCommit;
-};
-
-class TextInputUnstableV0 : public TextInput
-{
-    Q_OBJECT
-public:
-    explicit TextInputUnstableV0(Seat* seat, QObject* parent = nullptr);
-    virtual ~TextInputUnstableV0();
-
-    /**
-     * Setup this TextInputUnstableV0 to manage the @p textinputunstablev0.
-     * When using TextInputManagerUnstableV0::createTextInputUnstableV0 there is no need to call
-     * this method.
-     **/
-    void setup(wl_text_input* textinputunstablev0);
-    /**
-     * Releases the wl_text_input interface.
-     * After the interface has been released the TextInputUnstableV0 instance is no
-     * longer valid and can be setup with another wl_text_input interface.
-     **/
-    void release();
-
-    operator wl_text_input*();
-    operator wl_text_input*() const;
-
-private:
-    class Private;
-    Private* d_func() const;
 };
 
 class TextInputUnstableV2 : public TextInput

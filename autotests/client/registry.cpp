@@ -76,7 +76,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-primary-selection-unstable-v1-client-protocol.h>
 #include <wayland-relativepointer-unstable-v1-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
-#include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-xdg-shell-client-protocol.h>

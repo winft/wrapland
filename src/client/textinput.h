@@ -25,8 +25,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
 
-struct wl_text_input;
-struct wl_text_input_manager;
 struct zwp_text_input_manager_v2;
 
 namespace Wrapland
@@ -35,7 +33,6 @@ namespace Client
 {
 
 class EventQueue;
-class TextInputUnstableV0;
 class Surface;
 class Seat;
 
@@ -47,7 +44,6 @@ class Seat;
  *
  * Depending on the interface the TextInputManager got created for this class
  * encapsulates one of the following interfaces:
- * @li wl_text_input
  * @li zwp_text_input_v2
  *
  * @since 0.0.523
@@ -422,7 +418,6 @@ protected:
  * @brief Manager class for the TextInputManager interfaces.
  *
  * The TextInputManager supports multiple interfaces:
- * @li wl_text_input_manager
  * @li zwp_text_input_manager_v2
  *
  * Due to that it is different to other manager classes. It can only be created through
@@ -438,12 +433,6 @@ class WRAPLANDCLIENT_EXPORT TextInputManager : public QObject
 public:
     virtual ~TextInputManager();
 
-    /**
-     * Setup this TextInputManager to manage the @p textinputmanagerunstablev0.
-     * When using Registry::createTextInputManager there is no need to call this
-     * method.
-     **/
-    void setup(wl_text_input_manager* textinputmanagerunstablev0);
     /**
      * Setup this TextInputManager to manage the @p textinputmanagerunstablev0.
      * When using Registry::createTextInputManager there is no need to call this
@@ -478,14 +467,6 @@ public:
      **/
     TextInput* createTextInput(Seat* seat, QObject* parent = nullptr);
 
-    /**
-     * @returns @c null if not for a wl_text_input_manager
-     **/
-    operator wl_text_input_manager*();
-    /**
-     * @returns @c null if not for a wl_text_input_manager
-     **/
-    operator wl_text_input_manager*() const;
     /**
      * @returns @c null if not for a zwp_text_input_manager_v2
      **/

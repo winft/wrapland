@@ -92,7 +92,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-server-decoration-palette-client-protocol.h>
 #include <wayland-shadow-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
-#include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
 #include <wayland-wlr-layer-shell-client-protocol.h>
@@ -356,16 +355,6 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &org_kde_kwin_dpms_manager_interface,
             &Registry::dpmsAnnounced,
             &Registry::dpmsRemoved,
-        },
-    },
-    {
-        Registry::Interface::TextInputManagerUnstableV0,
-        {
-            1,
-            QByteArrayLiteral("wl_text_input_manager"),
-            &wl_text_input_manager_interface,
-            &Registry::textInputManagerUnstableV0Announced,
-            &Registry::textInputManagerUnstableV0Removed,
         },
     },
     {
@@ -849,7 +838,6 @@ BIND(LayerShellV1, zwlr_layer_shell_v1)
 BIND(OutputManagementV1, zkwinft_output_management_v1)
 BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
-BIND(TextInputManagerUnstableV0, wl_text_input_manager)
 BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
 BIND(Viewporter, wp_viewporter)
 BIND(XdgShell, xdg_wm_base)
@@ -957,9 +945,6 @@ XdgImporter* Registry::createXdgImporter(quint32 name, quint32 version, QObject*
 TextInputManager* Registry::createTextInputManager(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
-    case Interface::TextInputManagerUnstableV0:
-        return d->create<TextInputManagerUnstableV0>(
-            name, version, parent, &Registry::bindTextInputManagerUnstableV0);
     case Interface::TextInputManagerUnstableV2:
         return d->create<TextInputManagerUnstableV2>(
             name, version, parent, &Registry::bindTextInputManagerUnstableV2);
