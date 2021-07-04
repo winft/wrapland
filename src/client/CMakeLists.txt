@@ -53,7 +53,6 @@ set(CLIENT_LIB_SRCS
     surface.cpp
     touch.cpp
     textinput.cpp
-    textinput_v2.cpp
     viewporter.cpp
     wlr_output_configuration_v1.cpp
     wlr_output_manager_v1.cpp
