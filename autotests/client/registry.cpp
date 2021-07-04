@@ -344,9 +344,9 @@ void TestWaylandRegistry::testBindXdgDecorationUnstableV1()
 
 void TestWaylandRegistry::testBindTextInputManagerV2()
 {
-    TEST_BIND(Wrapland::Client::Registry::Interface::TextInputManagerUnstableV2,
-              SIGNAL(textInputManagerUnstableV2Announced(quint32, quint32)),
-              bindTextInputManagerUnstableV2,
+    TEST_BIND(Wrapland::Client::Registry::Interface::TextInputManagerV2,
+              SIGNAL(textInputManagerV2Announced(quint32, quint32)),
+              bindTextInputManagerV2,
               zwp_text_input_manager_v2_destroy)
 }
 

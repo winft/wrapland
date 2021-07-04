@@ -112,8 +112,7 @@ class Shell;
 class ShmPool;
 class ServerSideDecorationPaletteManager;
 class SubCompositor;
-class TextInputManager;
-class TextInputManagerUnstableV2;
+class TextInputManagerV2;
 class Viewporter;
 class XdgShell;
 class RelativePointerManager;
@@ -184,7 +183,7 @@ public:
         OutputManagementV1,               ///< Refers to the zkwinft_output_management_v1 interface
         OutputDeviceV1,                   ///< Refers to the zkwinft_output_device_v1 interface
         WlrOutputManagerV1,               ///< Refers to the zwlr_output_manager_v1 interface
-        TextInputManagerUnstableV2,       ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
+        TextInputManagerV2,               ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
         RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since
                                           ///< 0.0.528
         PointerGesturesUnstableV1,        ///< Refers to zwp_pointer_gestures_v1, @since 0.0.529
@@ -545,12 +544,11 @@ public:
      * If the @p name does not exist or is not for the text input interface in unstable version 2,
      * @c null will be returned.
      *
-     * Prefer using createTextInputManager instead.
-     * @see createTextInputManager
+     * Prefer using createTextInputManagerV2 instead.
+     * @see createTextInputManagerV2
      * @since 0.0.523
      **/
-    zwp_text_input_manager_v2* bindTextInputManagerUnstableV2(uint32_t name,
-                                                              uint32_t version) const;
+    zwp_text_input_manager_v2* bindTextInputManagerV2(uint32_t name, uint32_t version) const;
     /**
      * Binds the wp_viewporter with @p name and @p version.
      * If the @p name does not exist or is not for the viewporter interface,
@@ -1129,7 +1127,7 @@ public:
      **/
     DpmsManager* createDpmsManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
-     * Creates a TextInputManager and sets it up to manage the interface identified by
+     * Creates a TextInputManagerV2 and sets it up to manage the interface identified by
      * @p name and @p version.
      *
      * This factory method supports the following interfaces:
@@ -1140,13 +1138,13 @@ public:
      *
      * @param name The name of the interface to bind
      * @param version The version of the interface to use
-     * @param parent The parent for the TextInputManager
+     * @param parent The parent for the TextInputManagerV2
      *
-     * @returns The created TextInputManager
+     * @returns The created TextInputManagerV2
      * @since 0.0.523
      **/
-    TextInputManager*
-    createTextInputManager(quint32 name, quint32 version, QObject* parent = nullptr);
+    TextInputManagerV2*
+    createTextInputManagerV2(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a Viewporter and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1629,7 +1627,7 @@ Q_SIGNALS:
      * @param version The maximum supported version of the announced interface
      * @since 0.0.523
      **/
-    void textInputManagerUnstableV2Announced(quint32 name, quint32 version);
+    void textInputManagerV2Announced(quint32 name, quint32 version);
     /**
      * Emitted whenever a wp_viewporter interface gets announced.
      * @param name The name for the announced interface
@@ -1898,7 +1896,7 @@ Q_SIGNALS:
      * @param name The name for the removed interface
      * @since 0.0.523
      **/
-    void textInputManagerUnstableV2Removed(quint32 name);
+    void textInputManagerV2Removed(quint32 name);
     /**
      * Emitted whenever a wp_viewporter interface gets removed.
      * @param name The name for the removed interface

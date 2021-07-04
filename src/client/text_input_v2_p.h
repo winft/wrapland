@@ -17,35 +17,34 @@
 namespace Wrapland::Client
 {
 
-class Q_DECL_HIDDEN TextInputManager::Private
+class Q_DECL_HIDDEN TextInputManagerV2::Private
 {
 public:
     ~Private() = default;
 
     void release();
     bool isValid();
-    void setupV2(zwp_text_input_manager_v2* ti);
-    TextInput* createTextInput(Seat* seat, QObject* parent = nullptr);
+    void setupV2(zwp_text_input_manager_v2* manager);
+    TextInputV2* createTextInput(Seat* seat, QObject* parent = nullptr);
 
     operator zwp_text_input_manager_v2*()
     {
-        return textinputmanagerunstablev2;
+        return manager_ptr;
     }
     operator zwp_text_input_manager_v2*() const
     {
-        return textinputmanagerunstablev2;
+        return manager_ptr;
     }
 
-    WaylandPointer<zwp_text_input_manager_v2, zwp_text_input_manager_v2_destroy>
-        textinputmanagerunstablev2;
+    WaylandPointer<zwp_text_input_manager_v2, zwp_text_input_manager_v2_destroy> manager_ptr;
 
     EventQueue* queue = nullptr;
 };
 
-class Q_DECL_HIDDEN TextInput::Private
+class Q_DECL_HIDDEN TextInputV2::Private
 {
 public:
-    Private(TextInput* q, Seat* seat);
+    Private(TextInputV2* q, Seat* seat);
     virtual ~Private() = default;
 
     void setup(zwp_text_input_v2* ti);
@@ -61,7 +60,7 @@ public:
     void reset();
     void setContentType(ContentHints hint, ContentPurpose purpose);
 
-    WaylandPointer<zwp_text_input_v2, zwp_text_input_v2_destroy> textinputunstablev2;
+    WaylandPointer<zwp_text_input_v2, zwp_text_input_v2_destroy> text_input_ptr;
 
     EventQueue* queue = nullptr;
     Seat* seat;
@@ -147,7 +146,7 @@ private:
                                            uint32_t serial,
                                            uint32_t flags);
 
-    TextInput* q;
+    TextInputV2* q;
 
     static const zwp_text_input_v2_listener s_listener;
 };

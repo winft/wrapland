@@ -13,76 +13,76 @@
 namespace Wrapland::Client
 {
 
-TextInputManager::TextInputManager(QObject* parent)
+TextInputManagerV2::TextInputManagerV2(QObject* parent)
     : QObject(parent)
     , d_ptr(new Private)
 {
 }
 
-TextInputManager::~TextInputManager() = default;
+TextInputManagerV2::~TextInputManagerV2() = default;
 
-void TextInputManager::setup(zwp_text_input_manager_v2* textinputmanagerunstablev2)
+void TextInputManagerV2::setup(zwp_text_input_manager_v2* manager)
 {
-    d_ptr->setupV2(textinputmanagerunstablev2);
+    d_ptr->setupV2(manager);
 }
 
-void TextInputManager::release()
+void TextInputManagerV2::release()
 {
     d_ptr->release();
 }
 
-void TextInputManager::setEventQueue(EventQueue* queue)
+void TextInputManagerV2::setEventQueue(EventQueue* queue)
 {
     d_ptr->queue = queue;
 }
 
-EventQueue* TextInputManager::eventQueue()
+EventQueue* TextInputManagerV2::eventQueue()
 {
     return d_ptr->queue;
 }
 
-TextInputManager::operator zwp_text_input_manager_v2*()
+TextInputManagerV2::operator zwp_text_input_manager_v2*()
 {
     return *(d_ptr.get());
 }
 
-TextInputManager::operator zwp_text_input_manager_v2*() const
+TextInputManagerV2::operator zwp_text_input_manager_v2*() const
 {
     return *(d_ptr.get());
 }
 
-bool TextInputManager::isValid() const
+bool TextInputManagerV2::isValid() const
 {
     return d_ptr->isValid();
 }
 
-TextInput* TextInputManager::createTextInput(Seat* seat, QObject* parent)
+TextInputV2* TextInputManagerV2::createTextInput(Seat* seat, QObject* parent)
 {
     return d_ptr->createTextInput(seat, parent);
 }
 
-void TextInputManager::Private::release()
+void TextInputManagerV2::Private::release()
 {
-    textinputmanagerunstablev2.release();
+    manager_ptr.release();
 }
 
-bool TextInputManager::Private::isValid()
+bool TextInputManagerV2::Private::isValid()
 {
-    return textinputmanagerunstablev2.isValid();
+    return manager_ptr.isValid();
 }
 
-void TextInputManager::Private::setupV2(zwp_text_input_manager_v2* ti)
+void TextInputManagerV2::Private::setupV2(zwp_text_input_manager_v2* manager)
 {
-    Q_ASSERT(ti);
-    Q_ASSERT(!textinputmanagerunstablev2);
-    textinputmanagerunstablev2.setup(ti);
+    Q_ASSERT(manager);
+    Q_ASSERT(!manager_ptr);
+    manager_ptr.setup(manager);
 }
 
-TextInput* TextInputManager::Private::createTextInput(Seat* seat, QObject* parent)
+TextInputV2* TextInputManagerV2::Private::createTextInput(Seat* seat, QObject* parent)
 {
     Q_ASSERT(isValid());
-    auto t = new TextInput(seat, parent);
-    auto w = zwp_text_input_manager_v2_get_text_input(textinputmanagerunstablev2, *seat);
+    auto t = new TextInputV2(seat, parent);
+    auto w = zwp_text_input_manager_v2_get_text_input(manager_ptr, *seat);
     if (queue) {
         queue->addProxy(w);
     }
@@ -90,7 +90,7 @@ TextInput* TextInputManager::Private::createTextInput(Seat* seat, QObject* paren
     return t;
 }
 
-TextInput::Private::Private(TextInput* q, Seat* seat)
+TextInputV2::Private::Private(TextInputV2* q, Seat* seat)
     : q{q}
     , seat(seat)
 {
@@ -100,7 +100,7 @@ TextInput::Private::Private(TextInput* q, Seat* seat)
     pendingCommit.deleteSurrounding.beforeLength = 0;
 }
 
-const zwp_text_input_v2_listener TextInput::Private::s_listener = {
+const zwp_text_input_v2_listener TextInputV2::Private::s_listener = {
     enterCallback,
     leaveCallback,
     inputPanelStateCallback,
@@ -118,45 +118,45 @@ const zwp_text_input_v2_listener TextInput::Private::s_listener = {
     inputMethodChangedCallback,
 };
 
-void TextInput::Private::enterCallback(void* data,
-                                       zwp_text_input_v2* zwp_text_input_v2,
-                                       uint32_t serial,
-                                       wl_surface* surface)
+void TextInputV2::Private::enterCallback(void* data,
+                                         zwp_text_input_v2* zwp_text_input_v2,
+                                         uint32_t serial,
+                                         wl_surface* surface)
 {
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     t->latestSerial = serial;
     t->enteredSurface = Surface::get(surface);
     emit t->q->entered();
 }
 
-void TextInput::Private::leaveCallback(void* data,
-                                       zwp_text_input_v2* zwp_text_input_v2,
-                                       uint32_t serial,
-                                       wl_surface* surface)
+void TextInputV2::Private::leaveCallback(void* data,
+                                         zwp_text_input_v2* zwp_text_input_v2,
+                                         uint32_t serial,
+                                         wl_surface* surface)
 {
     Q_UNUSED(surface)
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     t->enteredSurface = nullptr;
     t->latestSerial = serial;
     emit t->q->left();
 }
 
-void TextInput::Private::inputPanelStateCallback(void* data,
-                                                 zwp_text_input_v2* zwp_text_input_v2,
-                                                 uint32_t state,
-                                                 int32_t x,
-                                                 int32_t y,
-                                                 int32_t width,
-                                                 int32_t height)
+void TextInputV2::Private::inputPanelStateCallback(void* data,
+                                                   zwp_text_input_v2* zwp_text_input_v2,
+                                                   uint32_t state,
+                                                   int32_t x,
+                                                   int32_t y,
+                                                   int32_t width,
+                                                   int32_t height)
 {
     Q_UNUSED(x)
     Q_UNUSED(y)
     Q_UNUSED(width)
     Q_UNUSED(height)
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     // TODO: add rect
     if (t->inputPanelVisible != state) {
         t->inputPanelVisible = state;
@@ -164,112 +164,112 @@ void TextInput::Private::inputPanelStateCallback(void* data,
     }
 }
 
-void TextInput::Private::preeditStringCallback(void* data,
-                                               zwp_text_input_v2* zwp_text_input_v2,
-                                               const char* text,
-                                               const char* commit)
+void TextInputV2::Private::preeditStringCallback(void* data,
+                                                 zwp_text_input_v2* zwp_text_input_v2,
+                                                 const char* text,
+                                                 const char* commit)
 {
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     t->pendingPreEdit.commitText = QByteArray(commit);
     t->pendingPreEdit.text = QByteArray(text);
     if (!t->pendingPreEdit.cursorSet) {
         t->pendingPreEdit.cursor = t->pendingPreEdit.text.length();
     }
     t->currentPreEdit = t->pendingPreEdit;
-    t->pendingPreEdit = TextInput::Private::PreEdit();
+    t->pendingPreEdit = TextInputV2::Private::PreEdit();
     emit t->q->composingTextChanged();
 }
 
-void TextInput::Private::preeditStylingCallback(void* data,
-                                                zwp_text_input_v2* zwp_text_input_v2,
-                                                uint32_t index,
-                                                uint32_t length,
-                                                uint32_t style)
+void TextInputV2::Private::preeditStylingCallback(void* data,
+                                                  zwp_text_input_v2* zwp_text_input_v2,
+                                                  uint32_t index,
+                                                  uint32_t length,
+                                                  uint32_t style)
 {
     Q_UNUSED(index)
     Q_UNUSED(length)
     Q_UNUSED(style)
     // TODO: implement
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
 }
 
-void TextInput::Private::preeditCursorCallback(void* data,
-                                               zwp_text_input_v2* zwp_text_input_v2,
-                                               int32_t index)
+void TextInputV2::Private::preeditCursorCallback(void* data,
+                                                 zwp_text_input_v2* zwp_text_input_v2,
+                                                 int32_t index)
 {
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     t->pendingPreEdit.cursor = index;
     t->pendingPreEdit.cursorSet = true;
 }
 
-void TextInput::Private::commitStringCallback(void* data,
-                                              zwp_text_input_v2* zwp_text_input_v2,
-                                              const char* text)
+void TextInputV2::Private::commitStringCallback(void* data,
+                                                zwp_text_input_v2* zwp_text_input_v2,
+                                                const char* text)
 {
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     t->pendingCommit.text = QByteArray(text);
     t->currentCommit = t->pendingCommit;
     // TODO: what are the proper values it should be set to?
-    t->pendingCommit = TextInput::Private::Commit();
+    t->pendingCommit = TextInputV2::Private::Commit();
     t->pendingCommit.deleteSurrounding.beforeLength = 0;
     t->pendingCommit.deleteSurrounding.afterLength = 0;
     emit t->q->committed();
 }
 
-void TextInput::Private::cursorPositionCallback(void* data,
-                                                zwp_text_input_v2* zwp_text_input_v2,
-                                                int32_t index,
-                                                int32_t anchor)
+void TextInputV2::Private::cursorPositionCallback(void* data,
+                                                  zwp_text_input_v2* zwp_text_input_v2,
+                                                  int32_t index,
+                                                  int32_t anchor)
 {
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     t->pendingCommit.cursor = index;
     t->pendingCommit.anchor = anchor;
 }
 
-void TextInput::Private::deleteSurroundingTextCallback(void* data,
-                                                       zwp_text_input_v2* zwp_text_input_v2,
-                                                       uint32_t before_length,
-                                                       uint32_t after_length)
+void TextInputV2::Private::deleteSurroundingTextCallback(void* data,
+                                                         zwp_text_input_v2* zwp_text_input_v2,
+                                                         uint32_t before_length,
+                                                         uint32_t after_length)
 {
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     t->pendingCommit.deleteSurrounding.beforeLength = before_length;
     t->pendingCommit.deleteSurrounding.afterLength = after_length;
 }
 
-void TextInput::Private::modifiersMapCallback(void* data,
-                                              zwp_text_input_v2* zwp_text_input_v2,
-                                              wl_array* map)
+void TextInputV2::Private::modifiersMapCallback(void* data,
+                                                zwp_text_input_v2* zwp_text_input_v2,
+                                                wl_array* map)
 {
     // TODO: implement
     Q_UNUSED(map)
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
 }
 
-void TextInput::Private::keysymCallback(void* data,
-                                        zwp_text_input_v2* zwp_text_input_v2,
-                                        uint32_t time,
-                                        uint32_t sym,
-                                        uint32_t wlState,
-                                        uint32_t modifiers)
+void TextInputV2::Private::keysymCallback(void* data,
+                                          zwp_text_input_v2* zwp_text_input_v2,
+                                          uint32_t time,
+                                          uint32_t sym,
+                                          uint32_t wlState,
+                                          uint32_t modifiers)
 {
     // TODO: add support for modifiers
     Q_UNUSED(modifiers)
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
-    TextInput::KeyState state;
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
+    TextInputV2::KeyState state;
     switch (wlState) {
     case WL_KEYBOARD_KEY_STATE_RELEASED:
-        state = TextInput::KeyState::Released;
+        state = TextInputV2::KeyState::Released;
         break;
     case WL_KEYBOARD_KEY_STATE_PRESSED:
-        state = TextInput::KeyState::Pressed;
+        state = TextInputV2::KeyState::Pressed;
         break;
     default:
         // invalid
@@ -278,24 +278,24 @@ void TextInput::Private::keysymCallback(void* data,
     emit t->q->keyEvent(sym, state, Qt::KeyboardModifiers(), time);
 }
 
-void TextInput::Private::languageCallback(void* data,
-                                          zwp_text_input_v2* zwp_text_input_v2,
-                                          const char* language)
+void TextInputV2::Private::languageCallback(void* data,
+                                            zwp_text_input_v2* zwp_text_input_v2,
+                                            const char* language)
 {
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     if (qstrcmp(t->language, language) != 0) {
         t->language = QByteArray(language);
         emit t->q->languageChanged();
     }
 }
 
-void TextInput::Private::textDirectionCallback(void* data,
-                                               zwp_text_input_v2* zwp_text_input_v2,
-                                               uint32_t wlDirection)
+void TextInputV2::Private::textDirectionCallback(void* data,
+                                                 zwp_text_input_v2* zwp_text_input_v2,
+                                                 uint32_t wlDirection)
 {
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     Qt::LayoutDirection direction;
     switch (wlDirection) {
     case ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_LTR:
@@ -317,89 +317,89 @@ void TextInput::Private::textDirectionCallback(void* data,
     }
 }
 
-void TextInput::Private::configureSurroundingTextCallback(void* data,
-                                                          zwp_text_input_v2* zwp_text_input_v2,
-                                                          int32_t before_cursor,
-                                                          int32_t after_cursor)
+void TextInputV2::Private::configureSurroundingTextCallback(void* data,
+                                                            zwp_text_input_v2* zwp_text_input_v2,
+                                                            int32_t before_cursor,
+                                                            int32_t after_cursor)
 {
     // TODO: implement
     Q_UNUSED(before_cursor)
     Q_UNUSED(after_cursor)
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
 }
 
-void TextInput::Private::inputMethodChangedCallback(void* data,
-                                                    zwp_text_input_v2* zwp_text_input_v2,
-                                                    uint32_t serial,
-                                                    uint32_t flags)
+void TextInputV2::Private::inputMethodChangedCallback(void* data,
+                                                      zwp_text_input_v2* zwp_text_input_v2,
+                                                      uint32_t serial,
+                                                      uint32_t flags)
 {
     Q_UNUSED(serial)
     Q_UNUSED(flags)
     // TODO: implement
-    auto t = reinterpret_cast<TextInput::Private*>(data);
-    Q_ASSERT(t->textinputunstablev2 == zwp_text_input_v2);
+    auto t = reinterpret_cast<TextInputV2::Private*>(data);
+    Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
 }
 
-void TextInput::Private::setup(zwp_text_input_v2* ti)
+void TextInputV2::Private::setup(zwp_text_input_v2* text_input)
 {
-    Q_ASSERT(ti);
-    Q_ASSERT(!textinputunstablev2);
-    textinputunstablev2.setup(ti);
-    zwp_text_input_v2_add_listener(ti, &s_listener, this);
+    Q_ASSERT(text_input);
+    Q_ASSERT(!text_input_ptr);
+    text_input_ptr.setup(text_input);
+    zwp_text_input_v2_add_listener(text_input, &s_listener, this);
 }
 
-bool TextInput::Private::isValid() const
+bool TextInputV2::Private::isValid() const
 {
-    return textinputunstablev2.isValid();
+    return text_input_ptr.isValid();
 }
 
-void TextInput::Private::enable(Surface* surface)
+void TextInputV2::Private::enable(Surface* surface)
 {
-    zwp_text_input_v2_enable(textinputunstablev2, *surface);
+    zwp_text_input_v2_enable(text_input_ptr, *surface);
 }
 
-void TextInput::Private::disable(Surface* surface)
+void TextInputV2::Private::disable(Surface* surface)
 {
-    zwp_text_input_v2_disable(textinputunstablev2, *surface);
+    zwp_text_input_v2_disable(text_input_ptr, *surface);
 }
 
-void TextInput::Private::showInputPanel()
+void TextInputV2::Private::showInputPanel()
 {
-    zwp_text_input_v2_show_input_panel(textinputunstablev2);
+    zwp_text_input_v2_show_input_panel(text_input_ptr);
 }
 
-void TextInput::Private::hideInputPanel()
+void TextInputV2::Private::hideInputPanel()
 {
-    zwp_text_input_v2_hide_input_panel(textinputunstablev2);
+    zwp_text_input_v2_hide_input_panel(text_input_ptr);
 }
 
-void TextInput::Private::setCursorRectangle(const QRect& rect)
+void TextInputV2::Private::setCursorRectangle(const QRect& rect)
 {
     zwp_text_input_v2_set_cursor_rectangle(
-        textinputunstablev2, rect.x(), rect.y(), rect.width(), rect.height());
+        text_input_ptr, rect.x(), rect.y(), rect.width(), rect.height());
 }
 
-void TextInput::Private::setPreferredLanguage(const QString& lang)
+void TextInputV2::Private::setPreferredLanguage(const QString& lang)
 {
-    zwp_text_input_v2_set_preferred_language(textinputunstablev2, lang.toUtf8().constData());
+    zwp_text_input_v2_set_preferred_language(text_input_ptr, lang.toUtf8().constData());
 }
 
-void TextInput::Private::setSurroundingText(const QString& text, quint32 cursor, quint32 anchor)
+void TextInputV2::Private::setSurroundingText(const QString& text, quint32 cursor, quint32 anchor)
 {
-    zwp_text_input_v2_set_surrounding_text(textinputunstablev2,
+    zwp_text_input_v2_set_surrounding_text(text_input_ptr,
                                            text.toUtf8().constData(),
                                            text.leftRef(cursor).toUtf8().length(),
                                            text.leftRef(anchor).toUtf8().length());
 }
 
-void TextInput::Private::reset()
+void TextInputV2::Private::reset()
 {
     zwp_text_input_v2_update_state(
-        textinputunstablev2, latestSerial, ZWP_TEXT_INPUT_V2_UPDATE_STATE_RESET);
+        text_input_ptr, latestSerial, ZWP_TEXT_INPUT_V2_UPDATE_STATE_RESET);
 }
 
-void TextInput::Private::setContentType(ContentHints hints, ContentPurpose purpose)
+void TextInputV2::Private::setContentType(ContentHints hints, ContentPurpose purpose)
 {
     uint32_t wlHints = 0;
     uint32_t wlPurpose = 0;
@@ -474,153 +474,153 @@ void TextInput::Private::setContentType(ContentHints hints, ContentPurpose purpo
         wlPurpose = ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_TERMINAL;
         break;
     }
-    zwp_text_input_v2_set_content_type(textinputunstablev2, wlHints, wlPurpose);
+    zwp_text_input_v2_set_content_type(text_input_ptr, wlHints, wlPurpose);
 }
 
-TextInput::TextInput(Seat* seat, QObject* parent)
+TextInputV2::TextInputV2(Seat* seat, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, seat))
 {
 }
 
-TextInput::~TextInput()
+TextInputV2::~TextInputV2()
 {
     release();
 }
 
-void TextInput::setEventQueue(EventQueue* queue)
+void TextInputV2::setEventQueue(EventQueue* queue)
 {
     d_ptr->queue = queue;
 }
 
-EventQueue* TextInput::eventQueue() const
+EventQueue* TextInputV2::eventQueue() const
 {
     return d_ptr->queue;
 }
 
-bool TextInput::isValid() const
+bool TextInputV2::isValid() const
 {
     return d_ptr->isValid();
 }
 
-Surface* TextInput::enteredSurface() const
+Surface* TextInputV2::enteredSurface() const
 {
     return d_ptr->enteredSurface;
 }
 
-bool TextInput::isInputPanelVisible() const
+bool TextInputV2::isInputPanelVisible() const
 {
     return d_ptr->inputPanelVisible;
 }
 
-void TextInput::enable(Surface* surface)
+void TextInputV2::enable(Surface* surface)
 {
     d_ptr->enable(surface);
 }
 
-void TextInput::disable(Surface* surface)
+void TextInputV2::disable(Surface* surface)
 {
     d_ptr->disable(surface);
 }
 
-void TextInput::showInputPanel()
+void TextInputV2::showInputPanel()
 {
     d_ptr->showInputPanel();
 }
 
-void TextInput::hideInputPanel()
+void TextInputV2::hideInputPanel()
 {
     d_ptr->hideInputPanel();
 }
 
-void TextInput::reset()
+void TextInputV2::reset()
 {
     d_ptr->reset();
 }
 
-void TextInput::setSurroundingText(const QString& text, quint32 cursor, quint32 anchor)
+void TextInputV2::setSurroundingText(const QString& text, quint32 cursor, quint32 anchor)
 {
     d_ptr->setSurroundingText(text, cursor, anchor);
 }
 
-void TextInput::setContentType(ContentHints hint, ContentPurpose purpose)
+void TextInputV2::setContentType(ContentHints hint, ContentPurpose purpose)
 {
     d_ptr->setContentType(hint, purpose);
 }
 
-void TextInput::setCursorRectangle(const QRect& rect)
+void TextInputV2::setCursorRectangle(const QRect& rect)
 {
     d_ptr->setCursorRectangle(rect);
 }
 
-void TextInput::setPreferredLanguage(const QString& language)
+void TextInputV2::setPreferredLanguage(const QString& language)
 {
     d_ptr->setPreferredLanguage(language);
 }
 
-Qt::LayoutDirection TextInput::textDirection() const
+Qt::LayoutDirection TextInputV2::textDirection() const
 {
     return d_ptr->textDirection;
 }
 
-QByteArray TextInput::language() const
+QByteArray TextInputV2::language() const
 {
     return d_ptr->language;
 }
 
-qint32 TextInput::composingTextCursorPosition() const
+qint32 TextInputV2::composingTextCursorPosition() const
 {
     return d_ptr->currentPreEdit.cursor;
 }
 
-QByteArray TextInput::composingText() const
+QByteArray TextInputV2::composingText() const
 {
     return d_ptr->currentPreEdit.text;
 }
 
-QByteArray TextInput::composingFallbackText() const
+QByteArray TextInputV2::composingFallbackText() const
 {
     return d_ptr->currentPreEdit.commitText;
 }
 
-qint32 TextInput::anchorPosition() const
+qint32 TextInputV2::anchorPosition() const
 {
     return d_ptr->currentCommit.anchor;
 }
 
-qint32 TextInput::cursorPosition() const
+qint32 TextInputV2::cursorPosition() const
 {
     return d_ptr->currentCommit.cursor;
 }
 
-TextInput::DeleteSurroundingText TextInput::deleteSurroundingText() const
+TextInputV2::DeleteSurroundingText TextInputV2::deleteSurroundingText() const
 {
     return d_ptr->currentCommit.deleteSurrounding;
 }
 
-QByteArray TextInput::commitText() const
+QByteArray TextInputV2::commitText() const
 {
     return d_ptr->currentCommit.text;
 }
 
-void TextInput::setup(zwp_text_input_v2* textinputunstablev2)
+void TextInputV2::setup(zwp_text_input_v2* text_input)
 {
-    d_ptr->setup(textinputunstablev2);
+    d_ptr->setup(text_input);
 }
 
-void TextInput::release()
+void TextInputV2::release()
 {
-    d_ptr->textinputunstablev2.release();
+    d_ptr->text_input_ptr.release();
 }
 
-TextInput::operator zwp_text_input_v2*()
+TextInputV2::operator zwp_text_input_v2*()
 {
-    return d_ptr->textinputunstablev2;
+    return d_ptr->text_input_ptr;
 }
 
-TextInput::operator zwp_text_input_v2*() const
+TextInputV2::operator zwp_text_input_v2*() const
 {
-    return d_ptr->textinputunstablev2;
+    return d_ptr->text_input_ptr;
 }
 
 }

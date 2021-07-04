@@ -19,51 +19,62 @@ namespace Wrapland::Client
 class EventQueue;
 class Seat;
 class Surface;
-class TextInput;
+class TextInputV2;
 
 /**
- * @brief Manager class for the TextInputManager interfaces.
+ * @short Wrapper for the zwp_text_input_manager_v2 interface.
  *
- * The TextInputManager supports multiple interfaces:
- * @li zwp_text_input_manager_v2
+ * This class provides a convenient wrapper for the zwp_text_input_manager_v2 interface.
  *
- * Due to that it is different to other manager classes. It can only be created through
- * the corresponding factory method in Registry. A manual setup is not directly possible.
+ * To use this class one needs to interact with the Registry. There are two
+ * possible ways to create the TextInputManagerV2 interface:
+ * @code
+ * auto c = registry->createTextInputManagerV2(name, version);
+ * @endcode
  *
- * The only task of a TextInputManager is to create TextInput for a given Seat.
+ * This creates the TextInputManagerV2 and sets it up directly. As an alternative this
+ * can also be done in a more low level way:
+ * @code
+ * auto c = new TextInputManagerV2;
+ * c->setup(registry->bindTextInputManagerV2(name, version));
+ * @endcode
  *
- * @since 0.0.523
+ * The TextInputManagerV2 can be used as a drop-in replacement for any zwp_text_input_manager_v2
+ * pointer as it provides matching cast operators.
+ *
+ * @see Registry
+ * @since 0.523.0
  **/
-class WRAPLANDCLIENT_EXPORT TextInputManager : public QObject
+class WRAPLANDCLIENT_EXPORT TextInputManagerV2 : public QObject
 {
     Q_OBJECT
 public:
-    explicit TextInputManager(QObject* parent = nullptr);
-    virtual ~TextInputManager();
+    explicit TextInputManagerV2(QObject* parent = nullptr);
+    virtual ~TextInputManagerV2();
 
     /**
-     * Setup this TextInputManager to manage the @p textinputmanagerunstablev0.
-     * When using Registry::createTextInputManager there is no need to call this
+     * Setup this TextInputManagerV2 to manage the @p manager.
+     * When using Registry::createTextInputManagerV2 there is no need to call this
      * method.
      **/
-    void setup(zwp_text_input_manager_v2* textinputmanagerunstablev2);
+    void setup(zwp_text_input_manager_v2* manager);
     /**
      * @returns @c true if managing a resource.
      **/
     bool isValid() const;
     /**
      * Releases the interface.
-     * After the interface has been released the TextInputManager instance is no
+     * After the interface has been released the TextInputManagerV2 instance is no
      * longer valid and can be setup with another interface.
      **/
     void release();
 
     /**
-     * Sets the @p queue to use for creating objects with this TextInputManager.
+     * Sets the @p queue to use for creating objects with this TextInputManagerV2.
      **/
     void setEventQueue(EventQueue* queue);
     /**
-     * @returns The event queue to use for creating objects with this TextInputManager.
+     * @returns The event queue to use for creating objects with this TextInputManagerV2.
      **/
     EventQueue* eventQueue();
 
@@ -73,7 +84,7 @@ public:
      * @param seat The Seat to create the TextInput for
      * @param parent The parent to use for the TextInput
      **/
-    TextInput* createTextInput(Seat* seat, QObject* parent = nullptr);
+    TextInputV2* createTextInput(Seat* seat, QObject* parent = nullptr);
 
     /**
      * @returns @c null if not for a zwp_text_input_manager_v2
@@ -88,8 +99,8 @@ Q_SIGNALS:
     /**
      * The corresponding global for this interface on the Registry got removed.
      *
-     * This signal gets only emitted if the TextInputManager got created by
-     * Registry::createTextInputManager
+     * This signal gets only emitted if the TextInputManagerV2 got created by
+     * Registry::createTextInputManagerV2
      **/
     void removed();
 
@@ -100,32 +111,34 @@ private:
 };
 
 /**
- * @brief TextInput represents a Wayland interface for text input.
+ * @short Wrapper for the zwp_text_input_v2 interface.
  *
- * The TextInput allows to have text composed by the Compositor and be sent to
- * the client.
+ * This class is a convenient wrapper for the zwp_text_input_v2 interface.
+ * To create a TextInputV2 call TextInputManagerV2::createTextInput.
  *
- * Depending on the interface the TextInputManager got created for this class
- * encapsulates one of the following interfaces:
- * @li zwp_text_input_v2
+ * The main purpose of this class is to setup the next frame which
+ * should be rendered. Therefore it provides methods to add damage
+ * and to attach a new Buffer and to finalize the frame by calling
+ * commit.
  *
- * @since 0.0.523
+ * @see TextInputManagerV2
+ * @since 0.523.0
  **/
-class WRAPLANDCLIENT_EXPORT TextInput : public QObject
+class WRAPLANDCLIENT_EXPORT TextInputV2 : public QObject
 {
     Q_OBJECT
 public:
-    virtual ~TextInput();
+    virtual ~TextInputV2();
 
     /**
-     * Setup this TextInputUnstableV2 to manage the @p textinputunstablev2.
-     * When using TextInputManagerUnstableV2::createTextInputUnstableV2 there is no need to call
+     * Setup this TextInputV2 to manage the @p text_input.
+     * When using TextInputManagerUnstableV2::createTextInput there is no need to call
      * this method.
      **/
-    void setup(zwp_text_input_v2* textinputunstablev2);
+    void setup(zwp_text_input_v2* text_input);
     /**
      * Releases the zwp_text_input_v2 interface.
-     * After the interface has been released the TextInputUnstableV2 instance is no
+     * After the interface has been released the TextInputV2 instance is no
      * longer valid and can be setup with another zwp_text_input_v2 interface.
      **/
     void release();
@@ -138,7 +151,7 @@ public:
     operator zwp_text_input_v2*() const;
 
     /**
-     * @returns The Surface which has the text input focus on this TextInput.
+     * @returns The Surface which has the text input focus on this TextInputV2.
      * @see entered
      * @see left
      **/
@@ -425,13 +438,13 @@ public:
 
 Q_SIGNALS:
     /**
-     * Emitted whenever a Surface is focused on this TextInput.
+     * Emitted whenever a Surface is focused on this TextInputV2.
      * @see enteredSurface
      * @see left
      **/
     void entered();
     /**
-     * Emitted whenever a Surface loses the focus on this TextInput.
+     * Emitted whenever a Surface loses the focus on this TextInputV2.
      * @see enteredSurface
      * @see entered
      **/
@@ -463,7 +476,7 @@ Q_SIGNALS:
      * @param time Timestamp of this event
      **/
     void keyEvent(quint32 xkbKeySym,
-                  Wrapland::Client::TextInput::KeyState state,
+                  Wrapland::Client::TextInputV2::KeyState state,
                   Qt::KeyboardModifiers modifiers,
                   quint32 time);
 
@@ -488,8 +501,8 @@ Q_SIGNALS:
     void committed();
 
 private:
-    explicit TextInput(Seat* seat, QObject* parent = nullptr);
-    friend class TextInputManager;
+    explicit TextInputV2(Seat* seat, QObject* parent = nullptr);
+    friend class TextInputManagerV2;
 
     class Private;
     std::unique_ptr<Private> d_ptr;
@@ -497,8 +510,8 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(Wrapland::Client::TextInput::KeyState)
-Q_DECLARE_METATYPE(Wrapland::Client::TextInput::ContentHint)
-Q_DECLARE_METATYPE(Wrapland::Client::TextInput::ContentPurpose)
-Q_DECLARE_METATYPE(Wrapland::Client::TextInput::ContentHints)
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::TextInput::ContentHints)
+Q_DECLARE_METATYPE(Wrapland::Client::TextInputV2::KeyState)
+Q_DECLARE_METATYPE(Wrapland::Client::TextInputV2::ContentHint)
+Q_DECLARE_METATYPE(Wrapland::Client::TextInputV2::ContentPurpose)
+Q_DECLARE_METATYPE(Wrapland::Client::TextInputV2::ContentHints)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::TextInputV2::ContentHints)

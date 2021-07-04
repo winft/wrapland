@@ -358,13 +358,13 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         },
     },
     {
-        Registry::Interface::TextInputManagerUnstableV2,
+        Registry::Interface::TextInputManagerV2,
         {
             1,
             QByteArrayLiteral("zwp_text_input_manager_v2"),
             &zwp_text_input_manager_v2_interface,
-            &Registry::textInputManagerUnstableV2Announced,
-            &Registry::textInputManagerUnstableV2Removed,
+            &Registry::textInputManagerV2Announced,
+            &Registry::textInputManagerV2Removed,
         },
     },
     {
@@ -838,7 +838,7 @@ BIND(LayerShellV1, zwlr_layer_shell_v1)
 BIND(OutputManagementV1, zkwinft_output_management_v1)
 BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
-BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
+BIND(TextInputManagerV2, zwp_text_input_manager_v2)
 BIND(Viewporter, wp_viewporter)
 BIND(XdgShell, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
@@ -942,12 +942,13 @@ XdgImporter* Registry::createXdgImporter(quint32 name, quint32 version, QObject*
         name, version, parent, &Registry::bindXdgImporterUnstableV2);
 }
 
-TextInputManager* Registry::createTextInputManager(quint32 name, quint32 version, QObject* parent)
+TextInputManagerV2*
+Registry::createTextInputManagerV2(quint32 name, quint32 version, QObject* parent)
 {
     switch (d->interfaceForName(name)) {
-    case Interface::TextInputManagerUnstableV2:
-        return d->create<TextInputManager>(
-            name, version, parent, &Registry::bindTextInputManagerUnstableV2);
+    case Interface::TextInputManagerV2:
+        return d->create<TextInputManagerV2>(
+            name, version, parent, &Registry::bindTextInputManagerV2);
     default:
         return nullptr;
     }
