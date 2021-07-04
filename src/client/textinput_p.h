@@ -1,38 +1,18 @@
-/****************************************************************************
-Copyright 2016  Martin Gräßlin <mgraesslin@kde.org>
+/*
+    SPDX-FileCopyrightText: 2016 Martin Gräßlin <mgraesslin@kde.org>
+    SPDX-FileCopyrightText: 2021 Roman Gilg <subdiff@gmail.com>
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) version 3, or any
-later version accepted by the membership of KDE e.V. (or its
-successor approved by the membership of KDE e.V.), which shall
-act as a proxy defined in Section 6 of version 3 of the license.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library.  If not, see <http://www.gnu.org/licenses/>.
-****************************************************************************/
-#ifndef WRAPLAND_CLIENT_TEXTINPUT_P_H
-#define WRAPLAND_CLIENT_TEXTINPUT_P_H
+    SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
+*/
+#pragma once
 #include "textinput.h"
 
 #include <QObject>
 
 struct zwp_text_input_v2;
 
-namespace Wrapland
+namespace Wrapland::Client
 {
-namespace Client
-{
-
-class EventQueue;
-class Surface;
-class Seat;
 
 class TextInputManagerUnstableV2 : public TextInputManager
 {
@@ -75,6 +55,34 @@ public:
     }
 
     EventQueue* queue = nullptr;
+};
+
+class TextInputUnstableV2 : public TextInput
+{
+    Q_OBJECT
+public:
+    explicit TextInputUnstableV2(Seat* seat, QObject* parent = nullptr);
+    virtual ~TextInputUnstableV2();
+
+    /**
+     * Setup this TextInputUnstableV2 to manage the @p textinputunstablev2.
+     * When using TextInputManagerUnstableV2::createTextInputUnstableV2 there is no need to call
+     * this method.
+     **/
+    void setup(zwp_text_input_v2* textinputunstablev2);
+    /**
+     * Releases the zwp_text_input_v2 interface.
+     * After the interface has been released the TextInputUnstableV2 instance is no
+     * longer valid and can be setup with another zwp_text_input_v2 interface.
+     **/
+    void release();
+
+    operator zwp_text_input_v2*();
+    operator zwp_text_input_v2*() const;
+
+private:
+    class Private;
+    Private* d_func() const;
 };
 
 class Q_DECL_HIDDEN TextInput::Private
@@ -121,35 +129,4 @@ public:
     Commit pendingCommit;
 };
 
-class TextInputUnstableV2 : public TextInput
-{
-    Q_OBJECT
-public:
-    explicit TextInputUnstableV2(Seat* seat, QObject* parent = nullptr);
-    virtual ~TextInputUnstableV2();
-
-    /**
-     * Setup this TextInputUnstableV2 to manage the @p textinputunstablev2.
-     * When using TextInputManagerUnstableV2::createTextInputUnstableV2 there is no need to call
-     * this method.
-     **/
-    void setup(zwp_text_input_v2* textinputunstablev2);
-    /**
-     * Releases the zwp_text_input_v2 interface.
-     * After the interface has been released the TextInputUnstableV2 instance is no
-     * longer valid and can be setup with another zwp_text_input_v2 interface.
-     **/
-    void release();
-
-    operator zwp_text_input_v2*();
-    operator zwp_text_input_v2*() const;
-
-private:
-    class Private;
-    Private* d_func() const;
-};
-
 }
-}
-
-#endif

@@ -1,40 +1,102 @@
-/****************************************************************************
-Copyright 2016  Martin Gräßlin <mgraesslin@kde.org>
+/*
+    SPDX-FileCopyrightText: 2016 Martin Gräßlin <mgraesslin@kde.org>
+    SPDX-FileCopyrightText: 2021 Roman Gilg <subdiff@gmail.com>
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) version 3, or any
-later version accepted by the membership of KDE e.V. (or its
-successor approved by the membership of KDE e.V.), which shall
-act as a proxy defined in Section 6 of version 3 of the license.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library.  If not, see <http://www.gnu.org/licenses/>.
-****************************************************************************/
-#ifndef WRAPLAND_CLIENT_TEXTINPUT_H
-#define WRAPLAND_CLIENT_TEXTINPUT_H
+    SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
+*/
+#pragma once
 
 #include <QObject>
-// STD
+
 #include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
 
 struct zwp_text_input_manager_v2;
 
-namespace Wrapland
+namespace Wrapland::Client
 {
-namespace Client
-{
-
 class EventQueue;
-class Surface;
 class Seat;
+class Surface;
+class TextInput;
+
+/**
+ * @brief Manager class for the TextInputManager interfaces.
+ *
+ * The TextInputManager supports multiple interfaces:
+ * @li zwp_text_input_manager_v2
+ *
+ * Due to that it is different to other manager classes. It can only be created through
+ * the corresponding factory method in Registry. A manual setup is not directly possible.
+ *
+ * The only task of a TextInputManager is to create TextInput for a given Seat.
+ *
+ * @since 0.0.523
+ **/
+class WRAPLANDCLIENT_EXPORT TextInputManager : public QObject
+{
+    Q_OBJECT
+public:
+    virtual ~TextInputManager();
+
+    /**
+     * Setup this TextInputManager to manage the @p textinputmanagerunstablev0.
+     * When using Registry::createTextInputManager there is no need to call this
+     * method.
+     **/
+    void setup(zwp_text_input_manager_v2* textinputmanagerunstablev2);
+    /**
+     * @returns @c true if managing a resource.
+     **/
+    bool isValid() const;
+    /**
+     * Releases the interface.
+     * After the interface has been released the TextInputManager instance is no
+     * longer valid and can be setup with another interface.
+     **/
+    void release();
+
+    /**
+     * Sets the @p queue to use for creating objects with this TextInputManager.
+     **/
+    void setEventQueue(EventQueue* queue);
+    /**
+     * @returns The event queue to use for creating objects with this TextInputManager.
+     **/
+    EventQueue* eventQueue();
+
+    /**
+     * Creates a TextInput for the @p seat.
+     *
+     * @param seat The Seat to create the TextInput for
+     * @param parent The parent to use for the TextInput
+     **/
+    TextInput* createTextInput(Seat* seat, QObject* parent = nullptr);
+
+    /**
+     * @returns @c null if not for a zwp_text_input_manager_v2
+     **/
+    operator zwp_text_input_manager_v2*();
+    /**
+     * @returns @c null if not for a zwp_text_input_manager_v2
+     **/
+    operator zwp_text_input_manager_v2*() const;
+
+Q_SIGNALS:
+    /**
+     * The corresponding global for this interface on the Registry got removed.
+     *
+     * This signal gets only emitted if the TextInputManager got created by
+     * Registry::createTextInputManager
+     **/
+    void removed();
+
+protected:
+    class Private;
+    explicit TextInputManager(Private* p, QObject* parent = nullptr);
+
+    std::unique_ptr<Private> d;
+};
 
 /**
  * @brief TextInput represents a Wayland interface for text input.
@@ -414,85 +476,6 @@ protected:
     explicit TextInput(Private* p, QObject* parent = nullptr);
 };
 
-/**
- * @brief Manager class for the TextInputManager interfaces.
- *
- * The TextInputManager supports multiple interfaces:
- * @li zwp_text_input_manager_v2
- *
- * Due to that it is different to other manager classes. It can only be created through
- * the corresponding factory method in Registry. A manual setup is not directly possible.
- *
- * The only task of a TextInputManager is to create TextInput for a given Seat.
- *
- * @since 0.0.523
- **/
-class WRAPLANDCLIENT_EXPORT TextInputManager : public QObject
-{
-    Q_OBJECT
-public:
-    virtual ~TextInputManager();
-
-    /**
-     * Setup this TextInputManager to manage the @p textinputmanagerunstablev0.
-     * When using Registry::createTextInputManager there is no need to call this
-     * method.
-     **/
-    void setup(zwp_text_input_manager_v2* textinputmanagerunstablev2);
-    /**
-     * @returns @c true if managing a resource.
-     **/
-    bool isValid() const;
-    /**
-     * Releases the interface.
-     * After the interface has been released the TextInputManager instance is no
-     * longer valid and can be setup with another interface.
-     **/
-    void release();
-
-    /**
-     * Sets the @p queue to use for creating objects with this TextInputManager.
-     **/
-    void setEventQueue(EventQueue* queue);
-    /**
-     * @returns The event queue to use for creating objects with this TextInputManager.
-     **/
-    EventQueue* eventQueue();
-
-    /**
-     * Creates a TextInput for the @p seat.
-     *
-     * @param seat The Seat to create the TextInput for
-     * @param parent The parent to use for the TextInput
-     **/
-    TextInput* createTextInput(Seat* seat, QObject* parent = nullptr);
-
-    /**
-     * @returns @c null if not for a zwp_text_input_manager_v2
-     **/
-    operator zwp_text_input_manager_v2*();
-    /**
-     * @returns @c null if not for a zwp_text_input_manager_v2
-     **/
-    operator zwp_text_input_manager_v2*() const;
-
-Q_SIGNALS:
-    /**
-     * The corresponding global for this interface on the Registry got removed.
-     *
-     * This signal gets only emitted if the TextInputManager got created by
-     * Registry::createTextInputManager
-     **/
-    void removed();
-
-protected:
-    class Private;
-    explicit TextInputManager(Private* p, QObject* parent = nullptr);
-
-    std::unique_ptr<Private> d;
-};
-
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Client::TextInput::KeyState)
@@ -500,5 +483,3 @@ Q_DECLARE_METATYPE(Wrapland::Client::TextInput::ContentHint)
 Q_DECLARE_METATYPE(Wrapland::Client::TextInput::ContentPurpose)
 Q_DECLARE_METATYPE(Wrapland::Client::TextInput::ContentHints)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::TextInput::ContentHints)
-
-#endif
