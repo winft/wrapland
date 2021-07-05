@@ -391,6 +391,17 @@ add_test(NAME wrapland-testTextInput COMMAND testTextInput)
 ecm_mark_as_test(testTextInput)
 
 ########################################################
+# Test text-input v3
+########################################################
+set( test_text_input_v3_SRCS
+        text_input_v3.cpp
+    )
+add_executable(test_text_input_v3 ${test_text_input_v3_SRCS})
+target_link_libraries(test_text_input_v3 Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-test_text_input_v3 COMMAND test_text_input_v3)
+ecm_mark_as_test(test_text_input_v3)
+
+########################################################
 # Test Error
 ########################################################
 set( testError_SRCS

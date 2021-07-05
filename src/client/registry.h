@@ -39,6 +39,7 @@ struct wl_shm;
 struct wl_subcompositor;
 struct wp_presentation;
 struct zwp_text_input_manager_v2;
+struct zwp_text_input_manager_v3;
 struct _wl_fullscreen_shell;
 struct org_kde_kwin_appmenu_manager;
 struct org_kde_kwin_fake_input;
@@ -113,6 +114,7 @@ class ShmPool;
 class ServerSideDecorationPaletteManager;
 class SubCompositor;
 class TextInputManagerV2;
+class text_input_manager_v3;
 class Viewporter;
 class XdgShell;
 class RelativePointerManager;
@@ -184,6 +186,7 @@ public:
         OutputDeviceV1,                   ///< Refers to the zkwinft_output_device_v1 interface
         WlrOutputManagerV1,               ///< Refers to the zwlr_output_manager_v1 interface
         TextInputManagerV2,               ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
+        TextInputManagerV3,               ///< Refers to zwp_text_input_manager_v3, @since 0.523.0
         RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since
                                           ///< 0.0.528
         PointerGesturesUnstableV1,        ///< Refers to zwp_pointer_gestures_v1, @since 0.0.529
@@ -549,6 +552,16 @@ public:
      * @since 0.0.523
      **/
     zwp_text_input_manager_v2* bindTextInputManagerV2(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the zwp_text_input_manager_v3 with @p name and @p version.
+     * If the @p name does not exist or is not for the text input interface in unstable version 3,
+     * @c null will be returned.
+     *
+     * Prefer using createTextInputManagerV3 instead.
+     * @see createTextInputManagerV3
+     * @since 0.523.0
+     **/
+    zwp_text_input_manager_v3* bindTextInputManagerV3(uint32_t name, uint32_t version) const;
     /**
      * Binds the wp_viewporter with @p name and @p version.
      * If the @p name does not exist or is not for the viewporter interface,
@@ -1146,6 +1159,25 @@ public:
     TextInputManagerV2*
     createTextInputManagerV2(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
+     * Creates a text_input_manager_v3 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * This factory method supports the following interfaces:
+     * @li zwp_text_input_manager_v3
+     *
+     * If @p name is for one of the supported interfaces the corresponding manager will be created,
+     * otherwise @c null will be returned.
+     *
+     * @param name The name of the interface to bind
+     * @param version The version of the interface to use
+     * @param parent The parent for the text_input_manager_v3
+     *
+     * @returns The created text_input_manager_v3
+     * @since 0.523.0
+     **/
+    text_input_manager_v3*
+    createTextInputManagerV3(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
      * Creates a Viewporter and sets it up to manage the interface identified by
      * @p name and @p version.
      *
@@ -1629,6 +1661,13 @@ Q_SIGNALS:
      **/
     void textInputManagerV2Announced(quint32 name, quint32 version);
     /**
+     * Emitted whenever a zwp_text_input_manager_v3 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.523.0
+     **/
+    void textInputManagerV3Announced(quint32 name, quint32 version);
+    /**
      * Emitted whenever a wp_viewporter interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1897,6 +1936,12 @@ Q_SIGNALS:
      * @since 0.0.523
      **/
     void textInputManagerV2Removed(quint32 name);
+    /**
+     * Emitted whenever a zwp_text_input_manager_v3 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.523.0
+     **/
+    void textInputManagerV3Removed(quint32 name);
     /**
      * Emitted whenever a wp_viewporter interface gets removed.
      * @param name The name for the removed interface

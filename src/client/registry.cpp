@@ -56,6 +56,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "slide.h"
 #include "subcompositor.h"
 #include "text_input_v2_p.h"
+#include "text_input_v3_p.h"
 #include "viewporter.h"
 #include "wayland_pointer_p.h"
 #include "wlr_output_manager_v1.h"
@@ -93,6 +94,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-shadow-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
+#include <wayland-text-input-v3-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
 #include <wayland-wlr-layer-shell-client-protocol.h>
 #include <wayland-wlr-output-management-v1-client-protocol.h>
@@ -365,6 +367,16 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &zwp_text_input_manager_v2_interface,
             &Registry::textInputManagerV2Announced,
             &Registry::textInputManagerV2Removed,
+        },
+    },
+    {
+        Registry::Interface::TextInputManagerV3,
+        {
+            1,
+            QByteArrayLiteral("zwp_text_input_manager_v3"),
+            &zwp_text_input_manager_v3_interface,
+            &Registry::textInputManagerV3Announced,
+            &Registry::textInputManagerV3Removed,
         },
     },
     {
@@ -839,6 +851,7 @@ BIND(OutputManagementV1, zkwinft_output_management_v1)
 BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
 BIND(TextInputManagerV2, zwp_text_input_manager_v2)
+BIND(TextInputManagerV3, zwp_text_input_manager_v3)
 BIND(Viewporter, wp_viewporter)
 BIND(XdgShell, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
@@ -946,6 +959,13 @@ TextInputManagerV2*
 Registry::createTextInputManagerV2(quint32 name, quint32 version, QObject* parent)
 {
     return d->create<TextInputManagerV2>(name, version, parent, &Registry::bindTextInputManagerV2);
+}
+
+text_input_manager_v3*
+Registry::createTextInputManagerV3(quint32 name, quint32 version, QObject* parent)
+{
+    return d->create<text_input_manager_v3>(
+        name, version, parent, &Registry::bindTextInputManagerV3);
 }
 
 RelativePointerManager*

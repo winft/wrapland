@@ -53,6 +53,7 @@ set(CLIENT_LIB_SRCS
     surface.cpp
     touch.cpp
     text_input_v2.cpp
+    text_input_v3.cpp
     viewporter.cpp
     wlr_output_configuration_v1.cpp
     wlr_output_manager_v1.cpp
@@ -147,6 +148,10 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
     BASENAME text-input-v2
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/text-input/text-input-unstable-v3.xml
+    BASENAME text-input-v3
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/relative-pointer/relative-pointer-unstable-v1.xml
@@ -337,6 +342,7 @@ set(CLIENT_LIB_HEADERS
   surface.h
   touch.h
   text_input_v2.h
+  text_input_v3.h
   viewporter.h
   xdg_activation_v1.h
   xdgdecoration.h
