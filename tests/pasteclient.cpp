@@ -144,7 +144,7 @@ void PasteClient::setupRegistry(Registry* registry)
         m_shellSurface->setFullscreen();
         connect(m_shellSurface, &ShellSurface::sizeChanged, this, &PasteClient::render);
 
-        m_dataDevice = m_dataDeviceManager->getDataDevice(m_seat, this);
+        m_dataDevice = m_dataDeviceManager->getDevice(m_seat, this);
         connect(m_dataDevice, &DataDevice::selectionOffered, this, [this] {
             auto dataOffer = m_dataDevice->offeredSelection();
             if (!dataOffer) {

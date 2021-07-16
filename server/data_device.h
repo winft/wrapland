@@ -35,6 +35,8 @@ class WRAPLANDSERVER_EXPORT DataDevice : public QObject
 {
     Q_OBJECT
 public:
+    using source_t = Wrapland::Server::DataSource;
+
     Seat* seat() const;
     Client* client() const;
 

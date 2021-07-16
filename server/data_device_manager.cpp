@@ -69,7 +69,7 @@ void DataDeviceManager::Private::createDataSourceCallback(DataDeviceManagerBind*
         return;
     }
 
-    Q_EMIT priv->handle()->dataSourceCreated(dataSource);
+    Q_EMIT priv->handle()->sourceCreated(dataSource);
 }
 
 void DataDeviceManager::Private::getDataDeviceCallback(DataDeviceManagerBind* bind,
@@ -85,7 +85,7 @@ void DataDeviceManager::Private::getDataDeviceCallback(DataDeviceManagerBind* bi
     }
 
     seat->d_ptr->registerDataDevice(dataDevice);
-    Q_EMIT priv->handle()->dataDeviceCreated(dataDevice);
+    Q_EMIT priv->handle()->deviceCreated(dataDevice);
 }
 
 DataDeviceManager::DataDeviceManager(Display* display, [[maybe_unused]] QObject* parent)

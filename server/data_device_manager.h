@@ -35,6 +35,9 @@ class WRAPLANDSERVER_EXPORT DataDeviceManager : public QObject
 {
     Q_OBJECT
 public:
+    using device_t = Wrapland::Server::DataDevice;
+    using source_t = Wrapland::Server::DataSource;
+
     ~DataDeviceManager() override;
 
     enum class DnDAction {
@@ -46,8 +49,8 @@ public:
     Q_DECLARE_FLAGS(DnDActions, DnDAction)
 
 Q_SIGNALS:
-    void dataSourceCreated(Wrapland::Server::DataSource* source);
-    void dataDeviceCreated(Wrapland::Server::DataDevice* device);
+    void sourceCreated(Wrapland::Server::DataSource* source);
+    void deviceCreated(Wrapland::Server::DataDevice* device);
 
 private:
     friend class Display;

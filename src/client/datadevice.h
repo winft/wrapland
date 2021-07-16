@@ -41,7 +41,7 @@ class Surface;
  * @short DataDevice allows clients to share data by copy-and-paste and drag-and-drop.
  *
  * This class is a convenient wrapper for the wl_data_device interface.
- * To create a DataDevice call DataDeviceManager::getDataDevice.
+ * To create a DataDevice call DataDeviceManager::getDevice.
  *
  * @see DataDeviceManager
  **/
@@ -49,6 +49,8 @@ class WRAPLANDCLIENT_EXPORT DataDevice : public QObject
 {
     Q_OBJECT
 public:
+    using source_t = Wrapland::Client::DataSource;
+
     explicit DataDevice(QObject* parent = nullptr);
     virtual ~DataDevice();
 

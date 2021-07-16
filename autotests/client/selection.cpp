@@ -161,7 +161,7 @@ bool SelectionTest::setupConnection(Connection* c)
     if (!c->keyboard->isValid()) {
         return false;
     }
-    c->dataDevice = c->ddm->getDataDevice(c->seat, this);
+    c->dataDevice = c->ddm->getDevice(c->seat, this);
     if (!c->dataDevice->isValid()) {
         return false;
     }
@@ -236,7 +236,7 @@ void SelectionTest::testClearOnEnter()
     QVERIFY(selectionClearedClient1Spy.wait());
 
     // Let's set a selection.
-    std::unique_ptr<Wrapland::Client::DataSource> dataSource(m_client1.ddm->createDataSource());
+    std::unique_ptr<Wrapland::Client::DataSource> dataSource(m_client1.ddm->createSource());
     dataSource->offer(QStringLiteral("text/plain"));
     m_client1.dataDevice->setSelection(keyboardEnteredClient1Spy.first().first().value<quint32>(),
                                        dataSource.get());
@@ -261,7 +261,7 @@ void SelectionTest::testClearOnEnter()
     QVERIFY(selectionClearedClient2Spy.isEmpty());
 
     // Set a data source but without offers.
-    std::unique_ptr<Wrapland::Client::DataSource> dataSource2(m_client2.ddm->createDataSource());
+    std::unique_ptr<Wrapland::Client::DataSource> dataSource2(m_client2.ddm->createSource());
     m_client2.dataDevice->setSelection(keyboardEnteredClient2Spy.first().first().value<quint32>(),
                                        dataSource2.get());
     QVERIFY(selectionOfferedClient2Spy.wait());
