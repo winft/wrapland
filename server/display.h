@@ -53,6 +53,7 @@ class XdgShell;
 class Compositor;
 class KdeIdle;
 class IdleInhibitManagerV1;
+class input_method_manager_v2;
 class FakeInput;
 class LayerShellV1;
 class PlasmaShell;
@@ -145,6 +146,7 @@ public:
 
     TextInputManagerV2* createTextInputManagerV2(QObject* parent = nullptr);
     text_input_manager_v3* createTextInputManagerV3(QObject* parent = nullptr);
+    input_method_manager_v2* createInputMethodManagerV2(QObject* parent = nullptr);
 
     XdgShell* createXdgShell(QObject* parent = nullptr);
 

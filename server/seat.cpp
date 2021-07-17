@@ -24,6 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_device.h"
 #include "data_source.h"
 #include "display.h"
+#include "input_method_v2.h"
 #include "keyboard.h"
 #include "keyboard_p.h"
 #include "pointer.h"
@@ -410,6 +411,18 @@ void Seat::Private::updateSelection(PrimarySelectionDevice* dataDevice, bool set
     if (selChanged) {
         Q_EMIT q_ptr->primarySelectionChanged(currentPrimarySelectionDevice);
     }
+}
+
+void Seat::Private::registerInputMethod(input_method_v2* im)
+{
+    assert(!input_method);
+    input_method = im;
+
+    QObject::connect(im, &input_method_v2::resourceDestroyed, q_ptr, [this] {
+        input_method = nullptr;
+        Q_EMIT q_ptr->input_method_v2_changed();
+    });
+    Q_EMIT q_ptr->input_method_v2_changed();
 }
 
 void Seat::Private::registerTextInput(TextInputV2* ti)
@@ -1542,6 +1555,11 @@ bool Seat::hasImplicitTouchGrab(quint32 serial) const
         return false;
     }
     return d_ptr->globalTouch.ids.key(serial, -1) != -1;
+}
+
+input_method_v2* Seat::get_input_method_v2() const
+{
+    return d_ptr->input_method;
 }
 
 bool Seat::isDrag() const

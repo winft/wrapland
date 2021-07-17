@@ -15,6 +15,7 @@ set(SERVER_LIB_SRCS
     fake_input.cpp
     filtered_display.cpp
     idle_inhibit_v1.cpp
+    input_method_v2.cpp
     kde_idle.cpp
     keyboard.cpp
     keystate.cpp
@@ -97,6 +98,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/idle.xml
     BASENAME idle
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/input-method-unstable-v2.xml
+    BASENAME input-method-unstable-v2
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
@@ -347,6 +353,7 @@ set(SERVER_LIB_HEADERS
   fake_input.h
   filtered_display.h
   idle_inhibit_v1.h
+  input_method_v2.h
   kde_idle.h
   keyboard.h
   keystate.h

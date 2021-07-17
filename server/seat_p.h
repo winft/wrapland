@@ -68,6 +68,7 @@ public:
 
     void registerDataDevice(DataDevice* dataDevice);
     void registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
+    void registerInputMethod(input_method_v2* im);
     void registerTextInput(TextInputV2* ti);
     void registerTextInput(text_input_v3* ti);
     void endDrag(quint32 serial);
@@ -85,6 +86,7 @@ public:
     QVector<Touch*> touchs;
     QVector<DataDevice*> dataDevices;
     QVector<PrimarySelectionDevice*> primarySelectionDevices;
+    input_method_v2* input_method{nullptr};
     QVector<TextInputV2*> textInputs;
     QVector<text_input_v3*> textInputsV3;
     DataDevice* currentSelection = nullptr;

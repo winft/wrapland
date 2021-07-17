@@ -34,6 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "egl_stream_controller.h"
 #include "fake_input.h"
 #include "idle_inhibit_v1.h"
+#include "input_method_v2.h"
 #include "kde_idle.h"
 #include "keyboard_shortcuts_inhibit.h"
 #include "keystate.h"
@@ -327,6 +328,11 @@ XdgForeign* Display::createXdgForeign(QObject* parent)
 IdleInhibitManagerV1* Display::createIdleInhibitManager(QObject* parent)
 {
     return new IdleInhibitManagerV1(this, parent);
+}
+
+input_method_manager_v2* Display::createInputMethodManagerV2(QObject* parent)
+{
+    return new input_method_manager_v2(this, parent);
 }
 
 AppmenuManager* Display::createAppmenuManager(QObject* parent)
