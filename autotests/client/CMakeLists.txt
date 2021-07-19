@@ -310,6 +310,17 @@ add_test(NAME wrapland-testPrimarySelection COMMAND testPrimarySelection)
 ecm_mark_as_test(testPrimarySelection)
 
 ########################################################
+# Test input-method-unstable-v2
+########################################################
+set(test_input_method_v2_SRCS
+    input_method_v2.cpp
+)
+add_executable(test_input_method_v2 ${test_input_method_v2_SRCS})
+target_link_libraries(test_input_method_v2 Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+add_test(NAME wrapland-test_input_method_v2 COMMAND test_input_method_v2)
+ecm_mark_as_test(test_input_method_v2)
+
+########################################################
 # Test PlasmaShell
 ########################################################
 set( testPlasmaShell_SRCS

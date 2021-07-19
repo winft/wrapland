@@ -55,6 +55,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/blur.h"
 #include "../../server/contrast.h"
 #include "../../server/idle_inhibit_v1.h"
+#include "../../server/input_method_v2.h"
 #include "../../server/linux_dmabuf_v1.h"
 #include "../../server/output_device_v1.h"
 #include "../../server/output_management_v1.h"
@@ -70,6 +71,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
+#include <wayland-input-method-v2-client-protocol.h>
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
 #include <wayland-pointer-constraints-unstable-v1-client-protocol.h>
 #include <wayland-pointer-gestures-unstable-v1-client-protocol.h>
@@ -103,6 +105,7 @@ private Q_SLOTS:
     void testBindContrastManager();
     void testBindSlideManager();
     void testBindDpmsManager();
+    void testBindInputMethodManagerV2();
     void testBindXdgDecorationUnstableV1();
     void testBindTextInputManagerV2();
     void testBindTextInputManagerV3();
@@ -128,6 +131,7 @@ private:
     std::unique_ptr<Wrapland::Server::Seat> m_seat;
     std::unique_ptr<Wrapland::Server::Subcompositor> m_subcompositor;
     std::unique_ptr<Wrapland::Server::DataDeviceManager> m_dataDeviceManager;
+    std::unique_ptr<Wrapland::Server::input_method_manager_v2> m_inputMethodManagerV2;
     std::unique_ptr<Wrapland::Server::OutputManagementV1> m_outputManagement;
     std::unique_ptr<Wrapland::Server::XdgDecorationManager> m_xdgDecorationManager;
     std::unique_ptr<Wrapland::Server::TextInputManagerV2> m_textInputManagerV2;
@@ -168,6 +172,7 @@ void TestWaylandRegistry::init()
     m_contrast.reset(m_display->createContrastManager());
     m_display->createSlideManager(this);
     m_display->createDpmsManager(this);
+    m_inputMethodManagerV2.reset(m_display->createInputMethodManagerV2());
     m_serverXdgShell.reset(m_display->createXdgShell());
     m_xdgDecorationManager.reset(m_display->createXdgDecorationManager(m_serverXdgShell.get()));
     m_textInputManagerV2.reset(m_display->createTextInputManagerV2());
@@ -337,6 +342,14 @@ void TestWaylandRegistry::testBindDpmsManager()
               SIGNAL(dpmsAnnounced(quint32, quint32)),
               bindDpmsManager,
               org_kde_kwin_dpms_manager_destroy)
+}
+
+void TestWaylandRegistry::testBindInputMethodManagerV2()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::InputMethodManagerV2,
+              SIGNAL(inputMethodManagerV2Announced(quint32, quint32)),
+              bindInputMethodManagerV2,
+              zwp_input_method_manager_v2_destroy)
 }
 
 void TestWaylandRegistry::testBindXdgDecorationUnstableV1()

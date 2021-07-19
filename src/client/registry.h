@@ -59,6 +59,7 @@ struct wp_viewporter;
 struct xdg_activation_v1;
 struct xdg_shell;
 struct xdg_wm_base;
+struct zwp_input_method_manager_v2;
 struct zkwinft_output_management_v1;
 struct zkwinft_output_device_v1;
 struct zwlr_layer_shell_v1;
@@ -93,6 +94,7 @@ class OutputDeviceV1;
 class WlrOutputManagerV1;
 class Idle;
 class IdleInhibitManager;
+class input_method_manager_v2;
 class Keystate;
 class LayerShellV1;
 class RemoteAccessManager;
@@ -176,6 +178,7 @@ public:
         PlasmaShell,                      ///< Refers to org_kde_plasma_shell interface
         PlasmaWindowManagement,           ///< Refers to org_kde_plasma_window_management interface
         Idle,                             ///< Refers to org_kde_kwin_idle_interface interface
+        InputMethodManagerV2,             ///< Refers to zwp_input_method_manager_v2, @since 0.523.0
         FakeInput,                        ///< Refers to org_kde_kwin_fake_input interface
         Shadow,                           ///< Refers to org_kde_kwin_shadow_manager interface
         Blur,                             ///< refers to org_kde_kwin_blur_manager interface
@@ -409,6 +412,16 @@ public:
      * @see createDataDeviceManager
      **/
     wl_data_device_manager* bindDataDeviceManager(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the zwp_input_method_manager_v2 with @p name and @p version.
+     * If the @p name does not exist or is not for the input method interface in unstable version 2,
+     * @c null will be returned.
+     *
+     * Prefer using createInputMethodManagerV2 instead.
+     * @see createInputMethodManagerV2
+     * @since 0.523.0
+     **/
+    zwp_input_method_manager_v2* bindInputMethodManagerV2(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_plasma_shell with @p name and @p version.
      * If the @p name does not exist or is not for the Plasma shell interface,
@@ -993,6 +1006,25 @@ public:
      * @since 5.4
      **/
     Idle* createIdle(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
+     * Creates a input_method_manager_v2 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * This factory method supports the following interfaces:
+     * @li zwp_input_method_manager_v2
+     *
+     * If @p name is for one of the supported interfaces the corresponding manager will be created,
+     * otherwise @c null will be returned.
+     *
+     * @param name The name of the interface to bind
+     * @param version The version of the interface to use
+     * @param parent The parent for the input_method_manager_v2
+     *
+     * @returns The created input_method_manager_v2
+     * @since 0.523.0
+     **/
+    input_method_manager_v2*
+    createInputMethodManagerV2(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a KEystate and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1605,6 +1637,13 @@ Q_SIGNALS:
      **/
     void idleAnnounced(quint32 name, quint32 version);
     /**
+     * Emitted whenever a zwp_input_method_manager_v2 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.523.0
+     **/
+    void inputMethodManagerV2Announced(quint32 name, quint32 version);
+    /**
      * Emitted whenever a org_kde_kwin_remote_access_manager interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1882,6 +1921,12 @@ Q_SIGNALS:
      * @since 5.4
      **/
     void idleRemoved(quint32 name);
+    /**
+     * Emitted whenever a zwp_input_method_manager_v2 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.523.0
+     **/
+    void inputMethodManagerV2Removed(quint32 name);
     /**
      * Emitted whenever a org_kde_kwin_remote_access_manager interface gets removed.
      * @param name The name for the removed interface

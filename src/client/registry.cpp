@@ -31,6 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "fullscreen_shell.h"
 #include "idle.h"
 #include "idleinhibit.h"
+#include "input_method_v2.h"
 #include "keyboard_shortcuts_inhibit.h"
 #include "keystate.h"
 #include "layer_shell_v1.h"
@@ -77,6 +78,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-fullscreen-shell-client-protocol.h>
 #include <wayland-idle-client-protocol.h>
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
+#include <wayland-input-method-v2-client-protocol.h>
 #include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
 #include <wayland-keystate-client-protocol.h>
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
@@ -247,6 +249,16 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &org_kde_kwin_idle_interface,
             &Registry::idleAnnounced,
             &Registry::idleRemoved,
+        },
+    },
+    {
+        Registry::Interface::InputMethodManagerV2,
+        {
+            1,
+            QByteArrayLiteral("zwp_input_method_manager_v2"),
+            &zwp_input_method_manager_v2_interface,
+            &Registry::inputMethodManagerV2Announced,
+            &Registry::inputMethodManagerV2Removed,
         },
     },
     {
@@ -845,6 +857,7 @@ BIND(PlasmaShell, org_kde_plasma_shell)
 BIND(PlasmaVirtualDesktopManagement, org_kde_plasma_virtual_desktop_management)
 BIND(PlasmaWindowManagement, org_kde_plasma_window_management)
 BIND(Idle, org_kde_kwin_idle)
+BIND(InputMethodManagerV2, zwp_input_method_manager_v2)
 BIND(FakeInput, org_kde_kwin_fake_input)
 BIND(LayerShellV1, zwlr_layer_shell_v1)
 BIND(OutputManagementV1, zkwinft_output_management_v1)
@@ -953,6 +966,13 @@ XdgImporter* Registry::createXdgImporter(quint32 name, quint32 version, QObject*
     // only V1 supported for now
     return d->create<XdgImporterUnstableV2>(
         name, version, parent, &Registry::bindXdgImporterUnstableV2);
+}
+
+input_method_manager_v2*
+Registry::createInputMethodManagerV2(quint32 name, quint32 version, QObject* parent)
+{
+    return d->create<input_method_manager_v2>(
+        name, version, parent, &Registry::bindInputMethodManagerV2);
 }
 
 TextInputManagerV2*
