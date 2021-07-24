@@ -37,9 +37,6 @@ public:
     DataSource* q_ptr;
 
 private:
-    void offer(std::string const& mimeType);
-
-    static void offerCallback(wl_client* wlClient, wl_resource* wlResource, const char* mimeType);
     static void
     setActionsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t dnd_actions);
 
