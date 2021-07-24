@@ -22,6 +22,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
+
+#include <wayland-server.h>
+
 #include <memory>
 
 namespace Wrapland::Server
@@ -55,6 +58,16 @@ Q_SIGNALS:
 private:
     friend class Display;
     explicit DataDeviceManager(Display* display, QObject* parent = nullptr);
+
+    template<typename Global>
+    // NOLINTNEXTLINE(readability-redundant-declaration)
+    friend void create_selection_source(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
+    template<typename Global>
+    // NOLINTNEXTLINE(readability-redundant-declaration)
+    friend void get_selection_device(wl_client* wlClient,
+                                     wl_resource* wlResource,
+                                     uint32_t id,
+                                     wl_resource* wlSeat);
 
     class Private;
     std::unique_ptr<Private> d_ptr;
