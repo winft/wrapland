@@ -61,6 +61,8 @@ public:
     QVector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
     TextInputV2* textInputForSurface(Surface* surface) const;
 
+    template<typename Device>
+    void register_device(Device*);
     void registerDataDevice(DataDevice* dataDevice);
     void registerTextInput(TextInputV2* ti);
     void endDrag(quint32 serial);

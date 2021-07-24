@@ -233,6 +233,12 @@ void Seat::Private::cleanupDataDevice(DataDevice* dataDevice)
     }
 }
 
+template<>
+void Seat::Private::register_device(DataDevice* device)
+{
+    registerDataDevice(device);
+}
+
 void Seat::Private::registerDataDevice(DataDevice* dataDevice)
 {
     dataDevices << dataDevice;
