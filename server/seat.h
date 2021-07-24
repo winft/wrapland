@@ -24,6 +24,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 
 #include <Wrapland/Server/wraplandserver_export.h>
+
+#include <wayland-server.h>
+
 #include <memory>
 
 namespace Wrapland::Server
@@ -177,6 +180,13 @@ private:
     friend class Display;
     friend class DataDeviceManager;
     friend class TextInputManagerV2;
+
+    template<typename Global>
+    // NOLINTNEXTLINE(readability-redundant-declaration)
+    friend void get_selection_device([[maybe_unused]] wl_client* wlClient,
+                                     wl_resource* wlResource,
+                                     uint32_t id,
+                                     wl_resource* wlSeat);
 
     Seat(Display* display, QObject* parent);
 
