@@ -38,7 +38,6 @@ public:
     WaylandPointer<wl_data_source, wl_data_source_destroy> source;
     DataDeviceManager::DnDAction selectedAction = DataDeviceManager::DnDAction::None;
 
-private:
     void setAction(DataDeviceManager::DnDAction action);
     static void targetCallback(void* data, wl_data_source* dataSource, const char* mimeType);
     static void

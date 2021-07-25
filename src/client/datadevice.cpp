@@ -46,7 +46,6 @@ public:
     };
     Drag drag;
 
-private:
     void dataOffer(wl_data_offer* id);
     void selection(wl_data_offer* id);
     void dragEnter(quint32 serial,

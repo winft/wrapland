@@ -41,7 +41,6 @@ public:
     DataDeviceManager::DnDActions sourceActions = DataDeviceManager::DnDAction::None;
     DataDeviceManager::DnDAction selectedAction = DataDeviceManager::DnDAction::None;
 
-private:
     void offer(const QString& mimeType);
     void setAction(DataDeviceManager::DnDAction action);
     static void offerCallback(void* data, wl_data_offer* dataOffer, const char* mimeType);
