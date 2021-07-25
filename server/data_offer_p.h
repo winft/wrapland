@@ -48,8 +48,6 @@ private:
                                wl_resource* wlResource,
                                uint32_t serial,
                                char const* mimeType);
-    static void
-    receiveCallback(wl_client* wlClient, wl_resource* wlResource, char const* mimeType, int32_t fd);
     static void finishCallback(wl_client* wlClient, wl_resource* wlResource);
     static void setActionsCallback(wl_client* wlClient,
                                    wl_resource* wlResource,
