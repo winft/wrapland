@@ -50,6 +50,7 @@ class WRAPLANDCLIENT_EXPORT DataDevice : public QObject
     Q_OBJECT
 public:
     using source_t = Wrapland::Client::DataSource;
+    using offer_type = Wrapland::Client::DataOffer;
 
     explicit DataDevice(QObject* parent = nullptr);
     virtual ~DataDevice();
