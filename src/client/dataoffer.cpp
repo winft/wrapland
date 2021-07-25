@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "dataoffer.h"
 #include "datadevice.h"
+#include "selection_offer_p.h"
 #include "wayland_pointer_p.h"
 // Qt
 #include <QMimeDatabase>
@@ -41,9 +42,7 @@ public:
     DataDeviceManager::DnDActions sourceActions = DataDeviceManager::DnDAction::None;
     DataDeviceManager::DnDAction selectedAction = DataDeviceManager::DnDAction::None;
 
-    void offer(const QString& mimeType);
     void setAction(DataDeviceManager::DnDAction action);
-    static void offerCallback(void* data, wl_data_offer* dataOffer, const char* mimeType);
     static void
     sourceActionsCallback(void* data, wl_data_offer* wl_data_offer, uint32_t source_actions);
     static void actionCallback(void* data, wl_data_offer* wl_data_offer, uint32_t dnd_action);
@@ -54,7 +53,7 @@ public:
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 const struct wl_data_offer_listener DataOffer::Private::s_listener
-    = {offerCallback, sourceActionsCallback, actionCallback};
+    = {offer_callback<Private>, sourceActionsCallback, actionCallback};
 #endif
 
 DataOffer::Private::Private(wl_data_offer* offer, DataOffer* q)
@@ -62,23 +61,6 @@ DataOffer::Private::Private(wl_data_offer* offer, DataOffer* q)
 {
     dataOffer.setup(offer);
     wl_data_offer_add_listener(offer, &s_listener, this);
-}
-
-void DataOffer::Private::offerCallback(void* data, wl_data_offer* dataOffer, const char* mimeType)
-{
-    auto d = reinterpret_cast<Private*>(data);
-    Q_ASSERT(d->dataOffer == dataOffer);
-    d->offer(QString::fromUtf8(mimeType));
-}
-
-void DataOffer::Private::offer(const QString& mimeType)
-{
-    QMimeDatabase db;
-    const auto& m = db.mimeTypeForName(mimeType);
-    if (m.isValid()) {
-        mimeTypes << m;
-        emit q->mimeTypeOffered(m.name());
-    }
 }
 
 void DataOffer::Private::sourceActionsCallback(void* data,
