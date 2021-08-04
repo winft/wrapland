@@ -296,6 +296,20 @@ add_test(NAME wrapland-testDragAndDrop COMMAND testDragAndDrop)
 ecm_mark_as_test(testDragAndDrop)
 
 ########################################################
+# Test KWin Primary Selection
+########################################################
+set( testPrimarySelection_SRCS primary_selection.cpp )
+add_executable(testPrimarySelection ${testPrimarySelection_SRCS})
+target_link_libraries( testPrimarySelection
+    Qt5::Test
+    Qt5::Gui
+    Wrapland::Client
+    Wrapland::Server
+    Wayland::Client)
+add_test(NAME wrapland-testPrimarySelection COMMAND testPrimarySelection)
+ecm_mark_as_test(testPrimarySelection)
+
+########################################################
 # Test PlasmaShell
 ########################################################
 set( testPlasmaShell_SRCS

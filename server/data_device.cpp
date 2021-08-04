@@ -23,8 +23,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_offer_p.h"
 #include "data_source.h"
 #include "data_source_p.h"
-
 #include "seat.h"
+#include "selection_device_p.h"
 #include "surface.h"
 #include "surface_p.h"
 
@@ -75,13 +75,8 @@ private:
                                   wl_resource* wlOrigin,
                                   wl_resource* wlIcon,
                                   uint32_t serial);
-    static void setSelectionCallback(wl_client* wlClient,
-                                     wl_resource* wlResource,
-                                     wl_resource* wlSource,
-                                     uint32_t serial);
 
     void startDrag(DataSource* dataSource, Surface* origin, Surface* icon, quint32 serial);
-    void setSelection(wl_resource* sourceResource);
 
     static const struct wl_data_device_interface s_interface;
 
@@ -90,7 +85,7 @@ private:
 
 const struct wl_data_device_interface DataDevice::Private::s_interface = {
     startDragCallback,
-    setSelectionCallback,
+    set_selection_callback<Wayland::Resource<DataDevice>>,
     destroyCallback,
 };
 
@@ -158,54 +153,6 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
     icon = _icon;
     drag.serial = serial;
     Q_EMIT q_ptr->dragStarted();
-}
-
-void DataDevice::Private::setSelectionCallback([[maybe_unused]] wl_client* wlClient,
-                                               wl_resource* wlResource,
-                                               wl_resource* wlSource,
-                                               [[maybe_unused]] uint32_t serial)
-{
-    // TODO(unknown author): verify serial
-    auto priv = handle(wlResource)->d_ptr;
-    priv->setSelection(wlSource);
-}
-
-void DataDevice::Private::setSelection(wl_resource* sourceResource)
-{
-    // TODO(unknown author): verify serial
-
-    auto dataSource = sourceResource ? Resource<DataSource>::handle(sourceResource) : nullptr;
-
-    // TODO(romangg): move errors into Wayland namespace.
-    if (dataSource && dataSource->supportedDragAndDropActions()
-        && wl_resource_get_version(sourceResource) >= WL_DATA_SOURCE_ACTION_SINCE_VERSION) {
-        wl_resource_post_error(sourceResource,
-                               WL_DATA_SOURCE_ERROR_INVALID_SOURCE,
-                               "Data source is for drag and drop");
-        return;
-    }
-
-    if (selection == dataSource) {
-        return;
-    }
-
-    QObject::disconnect(selectionDestroyedConnection);
-
-    if (selection) {
-        selection->cancel();
-    }
-
-    selection = dataSource;
-
-    if (selection) {
-        auto clearSelection = [this] { setSelection(nullptr); };
-        selectionDestroyedConnection
-            = QObject::connect(selection, &DataSource::resourceDestroyed, q_ptr, clearSelection);
-        Q_EMIT q_ptr->selectionChanged(selection);
-    } else {
-        selectionDestroyedConnection = QMetaObject::Connection();
-        Q_EMIT q_ptr->selectionCleared();
-    }
 }
 
 DataOffer* DataDevice::Private::createDataOffer(DataSource* source)

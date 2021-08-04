@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "datadevice.h"
 #include "dataoffer.h"
 #include "datasource.h"
+#include "selection_device_p.h"
 #include "surface.h"
 #include "wayland_pointer_p.h"
 // Qt
@@ -46,15 +47,11 @@ public:
     };
     Drag drag;
 
-private:
-    void dataOffer(wl_data_offer* id);
-    void selection(wl_data_offer* id);
     void dragEnter(quint32 serial,
                    const QPointer<Surface>& surface,
                    const QPointF& relativeToSurface,
                    wl_data_offer* dataOffer);
     void dragLeft();
-    static void dataOfferCallback(void* data, wl_data_device* dataDevice, wl_data_offer* id);
     static void enterCallback(void* data,
                               wl_data_device* dataDevice,
                               uint32_t serial,
@@ -69,7 +66,6 @@ private:
                                wl_fixed_t x,
                                wl_fixed_t y);
     static void dropCallback(void* data, wl_data_device* dataDevice);
-    static void selectionCallback(void* data, wl_data_device* dataDevice, wl_data_offer* id);
 
     static const struct wl_data_device_listener s_listener;
 
@@ -78,29 +74,13 @@ private:
 };
 
 const wl_data_device_listener DataDevice::Private::s_listener = {
-    dataOfferCallback,
+    data_offer_callback<Private>,
     enterCallback,
     leaveCallback,
     motionCallback,
     dropCallback,
-    selectionCallback,
+    selection_callback<Private>,
 };
-
-void DataDevice::Private::dataOfferCallback(void* data,
-                                            wl_data_device* dataDevice,
-                                            wl_data_offer* id)
-{
-    auto d = reinterpret_cast<Private*>(data);
-    Q_ASSERT(d->device == dataDevice);
-    d->dataOffer(id);
-}
-
-void DataDevice::Private::dataOffer(wl_data_offer* id)
-{
-    Q_ASSERT(!lastOffer);
-    lastOffer = new DataOffer(q, id);
-    Q_ASSERT(lastOffer->isValid());
-}
 
 void DataDevice::Private::enterCallback(void* data,
                                         wl_data_device* dataDevice,
@@ -162,28 +142,6 @@ void DataDevice::Private::dropCallback(void* data, wl_data_device* dataDevice)
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->device == dataDevice);
     emit d->q->dropped();
-}
-
-void DataDevice::Private::selectionCallback(void* data,
-                                            wl_data_device* dataDevice,
-                                            wl_data_offer* id)
-{
-    auto d = reinterpret_cast<Private*>(data);
-    Q_ASSERT(d->device == dataDevice);
-    d->selection(id);
-}
-
-void DataDevice::Private::selection(wl_data_offer* id)
-{
-    if (!id) {
-        selectionOffer.reset();
-        emit q->selectionCleared();
-        return;
-    }
-    Q_ASSERT(*lastOffer == id);
-    selectionOffer.reset(lastOffer);
-    lastOffer = nullptr;
-    emit q->selectionOffered(selectionOffer.get());
 }
 
 DataDevice::Private::Private(DataDevice* q)

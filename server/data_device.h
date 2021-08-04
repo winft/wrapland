@@ -23,6 +23,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <wayland-server.h>
+
 namespace Wrapland::Server
 {
 class Client;
@@ -35,6 +37,10 @@ class WRAPLANDSERVER_EXPORT DataDevice : public QObject
 {
     Q_OBJECT
 public:
+    using source_t = Wrapland::Server::DataSource;
+
+    explicit DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
+
     Seat* seat() const;
     Client* client() const;
 
@@ -61,11 +67,12 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    friend class DataDeviceManager;
-    explicit DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
-
     class Private;
     Private* d_ptr;
+
+    template<typename Handle>
+    // NOLINTNEXTLINE(readability-redundant-declaration)
+    friend void set_selection(Handle* handle, wl_resource* wlSource);
 };
 
 }

@@ -17,5 +17,10 @@ Makefile
 avail
 random_seed
 /build*/
+/.cache/
 CMakeLists.txt.user*
 *.unc-backup*
+
+# Arch Linux stuff
+PKGBUILD
+pkg/

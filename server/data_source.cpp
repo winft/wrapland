@@ -21,6 +21,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_source_p.h"
 
 #include "data_device_manager.h"
+#include "selection_source_p.h"
+
+#include "wayland/resource.h"
 
 #include <unistd.h>
 
@@ -37,24 +40,10 @@ DataSource::Private::Private(Client* client, uint32_t version, uint32_t id, Data
 }
 
 const struct wl_data_source_interface DataSource::Private::s_interface = {
-    offerCallback,
+    add_offered_mime_type<Wayland::Resource<DataSource>>,
     destroyCallback,
     setActionsCallback,
 };
-
-void DataSource::Private::offerCallback([[maybe_unused]] wl_client* wlClient,
-                                        wl_resource* wlResource,
-                                        const char* mimeType)
-{
-    auto priv = handle(wlResource)->d_ptr;
-    priv->offer(mimeType);
-}
-
-void DataSource::Private::offer(std::string const& mimeType)
-{
-    mimeTypes.push_back(mimeType);
-    Q_EMIT q_ptr->mimeTypeOffered(mimeType);
-}
 
 void DataSource::Private::setActionsCallback([[maybe_unused]] wl_client* wlClient,
                                              wl_resource* wlResource,

@@ -76,7 +76,7 @@ void DataDeviceManager::setEventQueue(EventQueue* queue)
     d->queue = queue;
 }
 
-DataSource* DataDeviceManager::createDataSource(QObject* parent)
+DataSource* DataDeviceManager::createSource(QObject* parent)
 {
     Q_ASSERT(isValid());
     DataSource* s = new DataSource(parent);
@@ -88,7 +88,7 @@ DataSource* DataDeviceManager::createDataSource(QObject* parent)
     return s;
 }
 
-DataDevice* DataDeviceManager::getDataDevice(Seat* seat, QObject* parent)
+DataDevice* DataDeviceManager::getDevice(Seat* seat, QObject* parent)
 {
     Q_ASSERT(isValid());
     Q_ASSERT(seat);

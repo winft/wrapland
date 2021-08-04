@@ -18,6 +18,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "datasource.h"
+#include "selection_source_p.h"
 #include "wayland_pointer_p.h"
 // Qt
 #include <QMimeType>
@@ -38,12 +39,8 @@ public:
     WaylandPointer<wl_data_source, wl_data_source_destroy> source;
     DataDeviceManager::DnDAction selectedAction = DataDeviceManager::DnDAction::None;
 
-private:
     void setAction(DataDeviceManager::DnDAction action);
     static void targetCallback(void* data, wl_data_source* dataSource, const char* mimeType);
-    static void
-    sendCallback(void* data, wl_data_source* dataSource, const char* mimeType, int32_t fd);
-    static void cancelledCallback(void* data, wl_data_source* dataSource);
     static void dndDropPerformedCallback(void* data, wl_data_source* wl_data_source);
     static void dndFinishedCallback(void* data, wl_data_source* wl_data_source);
     static void actionCallback(void* data, wl_data_source* wl_data_source, uint32_t dnd_action);
@@ -55,8 +52,8 @@ private:
 
 const wl_data_source_listener DataSource::Private::s_listener = {
     targetCallback,
-    sendCallback,
-    cancelledCallback,
+    send_callback<Private>,
+    cancelled_callback<Private>,
     dndDropPerformedCallback,
     dndFinishedCallback,
     actionCallback,
@@ -74,23 +71,6 @@ void DataSource::Private::targetCallback(void* data,
     auto d = reinterpret_cast<DataSource::Private*>(data);
     Q_ASSERT(d->source == dataSource);
     emit d->q->targetAccepts(QString::fromUtf8(mimeType));
-}
-
-void DataSource::Private::sendCallback(void* data,
-                                       wl_data_source* dataSource,
-                                       const char* mimeType,
-                                       int32_t fd)
-{
-    auto d = reinterpret_cast<DataSource::Private*>(data);
-    Q_ASSERT(d->source == dataSource);
-    emit d->q->sendDataRequested(QString::fromUtf8(mimeType), fd);
-}
-
-void DataSource::Private::cancelledCallback(void* data, wl_data_source* dataSource)
-{
-    auto d = reinterpret_cast<DataSource::Private*>(data);
-    Q_ASSERT(d->source == dataSource);
-    emit d->q->cancelled();
 }
 
 void DataSource::Private::dndDropPerformedCallback(void* data, wl_data_source* wl_data_source)

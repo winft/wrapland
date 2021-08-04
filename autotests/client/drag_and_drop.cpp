@@ -159,9 +159,9 @@ void TestDragAndDrop::init()
         QVERIFY(client->touch->isValid());
 
         QSignalSpy device_created_spy(m_server_device_manager,
-                                      &Wrapland::Server::DataDeviceManager::dataDeviceCreated);
+                                      &Wrapland::Server::DataDeviceManager::deviceCreated);
         QVERIFY(device_created_spy.isValid());
-        client->device = client->ddm->getDataDevice(client->seat, this);
+        client->device = client->ddm->getDevice(client->seat, this);
         QVERIFY(client->device->isValid());
 
         QVERIFY(device_created_spy.wait());
@@ -170,7 +170,7 @@ void TestDragAndDrop::init()
             = device_created_spy.first().first().value<Wrapland::Server::DataDevice*>();
         QVERIFY(client->server_device);
 
-        client->source = client->ddm->createDataSource(this);
+        client->source = client->ddm->createSource(this);
         QVERIFY(client->source->isValid());
         client->source->offer(QStringLiteral("text/plain"));
     }

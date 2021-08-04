@@ -33,6 +33,7 @@ set(SERVER_LIB_SRCS
     pointer_constraints_v1.cpp
     pointer_gestures_v1.cpp
     presentation_time.cpp
+    primary_selection.cpp
     region.cpp
     relative_pointer_v1.cpp
     seat.cpp
@@ -167,6 +168,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/primary-selection/primary-selection-unstable-v1.xml
+    BASENAME primary-selection-unstable-v1
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/appmenu.xml
     BASENAME appmenu
 )
@@ -258,6 +264,7 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-gestures-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-gestures-unstable-v1-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-presentation-time-server-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-primary-selection-unstable-v1-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-qt-surface-extension-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-qt-surface-extension-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-client-protocol.h
@@ -355,6 +362,7 @@ set(SERVER_LIB_HEADERS
   pointer_constraints_v1.h
   pointer_gestures_v1.h
   presentation_time.h
+  primary_selection.h
   region.h
   relative_pointer_v1.h
   seat.h
