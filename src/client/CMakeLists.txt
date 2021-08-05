@@ -23,6 +23,7 @@ set(CLIENT_LIB_SRCS
     fullscreen_shell.cpp
     idle.cpp
     idleinhibit.cpp
+    input_method_v2.cpp
     keyboard.cpp
     keystate.cpp
     keyboard_shortcuts_inhibit.cpp
@@ -52,9 +53,8 @@ set(CLIENT_LIB_SRCS
     subsurface.cpp
     surface.cpp
     touch.cpp
-    textinput.cpp
-    textinput_v0.cpp
-    textinput_v2.cpp
+    text_input_v2.cpp
+    text_input_v3.cpp
     viewporter.cpp
     wlr_output_configuration_v1.cpp
     wlr_output_manager_v1.cpp
@@ -121,6 +121,10 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/fake-input.xml
     BASENAME fake-input
 )
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/input-method-unstable-v2.xml
+    BASENAME input-method-v2
+)
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/shadow.xml
@@ -147,12 +151,12 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     BASENAME dpms
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input.xml
-    BASENAME text-input-v0
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
     BASENAME text-input-v2
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/text-input/text-input-unstable-v3.xml
+    BASENAME text-input-v3
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
     PROTOCOL ${WaylandProtocols_DATADIR}/unstable/relative-pointer/relative-pointer-unstable-v1.xml
@@ -239,6 +243,7 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-window-management-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-input-method-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-fake-input-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-shadow-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-blur-client-protocol.h
@@ -246,7 +251,6 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-slide-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-dpms-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-server-decoration-palette-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-v0-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-client-protocol.h
@@ -311,6 +315,7 @@ set(CLIENT_LIB_HEADERS
   fullscreen_shell.h
   idle.h
   idleinhibit.h
+  input_method_v2.h
   keyboard.h
   keystate.h
   keyboard_shortcuts_inhibit.h
@@ -343,7 +348,8 @@ set(CLIENT_LIB_HEADERS
   subsurface.h
   surface.h
   touch.h
-  textinput.h
+  text_input_v2.h
+  text_input_v3.h
   viewporter.h
   xdg_activation_v1.h
   xdgdecoration.h

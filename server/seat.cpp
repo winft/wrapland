@@ -24,6 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_device.h"
 #include "data_source.h"
 #include "display.h"
+#include "input_method_v2.h"
 #include "keyboard.h"
 #include "keyboard_p.h"
 #include "pointer.h"
@@ -31,6 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "primary_selection.h"
 #include "surface.h"
 #include "text_input_v2_p.h"
+#include "text_input_v3_p.h"
 #include "touch.h"
 
 #include <config-wrapland.h>
@@ -215,9 +217,14 @@ QVector<DataDevice*> Seat::Private::dataDevicesForSurface(Surface* surface) cons
     return interfacesForSurface(surface, dataDevices);
 }
 
-TextInputV2* Seat::Private::textInputForSurface(Surface* surface) const
+TextInputV2* Seat::Private::textInputV2ForSurface(Surface* surface) const
 {
     return interfaceForSurface(surface, textInputs);
+}
+
+text_input_v3* Seat::Private::textInputV3ForSurface(Surface* surface) const
+{
+    return interfaceForSurface(surface, textInputsV3);
 }
 
 void Seat::Private::cleanupDataDevice(DataDevice* dataDevice)
@@ -406,6 +413,18 @@ void Seat::Private::updateSelection(PrimarySelectionDevice* dataDevice, bool set
     }
 }
 
+void Seat::Private::registerInputMethod(input_method_v2* im)
+{
+    assert(!input_method);
+    input_method = im;
+
+    QObject::connect(im, &input_method_v2::resourceDestroyed, q_ptr, [this] {
+        input_method = nullptr;
+        Q_EMIT q_ptr->input_method_v2_changed();
+    });
+    Q_EMIT q_ptr->input_method_v2_changed();
+}
+
 void Seat::Private::registerTextInput(TextInputV2* ti)
 {
     // Text input version 0 might call this multiple times.
@@ -413,19 +432,44 @@ void Seat::Private::registerTextInput(TextInputV2* ti)
         return;
     }
     textInputs << ti;
-    if (textInput.focus.surface
-        && textInput.focus.surface->client() == ti->d_ptr->client()->handle()) {
+    if (global_text_input.focus.surface
+        && global_text_input.focus.surface->client() == ti->d_ptr->client()->handle()) {
         // This is a text input for the currently focused text input surface.
-        if (!textInput.focus.textInput) {
-            textInput.focus.textInput = ti;
-            ti->d_ptr->sendEnter(textInput.focus.surface, textInput.focus.serial);
+        if (!global_text_input.v2.text_input) {
+            global_text_input.v2.text_input = ti;
+            ti->d_ptr->sendEnter(global_text_input.focus.surface, global_text_input.v2.serial);
             Q_EMIT q_ptr->focusedTextInputChanged();
         }
     }
     QObject::connect(ti, &TextInputV2::resourceDestroyed, q_ptr, [this, ti] {
         textInputs.removeAt(textInputs.indexOf(ti));
-        if (textInput.focus.textInput == ti) {
-            textInput.focus.textInput = nullptr;
+        if (global_text_input.v2.text_input == ti) {
+            global_text_input.v2.text_input = nullptr;
+            Q_EMIT q_ptr->focusedTextInputChanged();
+        }
+    });
+}
+
+void Seat::Private::registerTextInput(text_input_v3* ti)
+{
+    // Text input version 0 might call this multiple times.
+    if (textInputsV3.contains(ti)) {
+        return;
+    }
+    textInputsV3 << ti;
+    if (global_text_input.focus.surface
+        && global_text_input.focus.surface->client() == ti->d_ptr->client()->handle()) {
+        // This is a text input for the currently focused text input surface.
+        if (!global_text_input.v3.text_input) {
+            global_text_input.v3.text_input = ti;
+            ti->d_ptr->send_enter(global_text_input.focus.surface);
+            Q_EMIT q_ptr->focusedTextInputChanged();
+        }
+    }
+    QObject::connect(ti, &text_input_v3::resourceDestroyed, q_ptr, [this, ti] {
+        textInputsV3.removeAt(textInputsV3.indexOf(ti));
+        if (global_text_input.v3.text_input == ti) {
+            global_text_input.v3.text_input = nullptr;
             Q_EMIT q_ptr->focusedTextInputChanged();
         }
     });
@@ -1513,6 +1557,11 @@ bool Seat::hasImplicitTouchGrab(quint32 serial) const
     return d_ptr->globalTouch.ids.key(serial, -1) != -1;
 }
 
+input_method_v2* Seat::get_input_method_v2() const
+{
+    return d_ptr->input_method;
+}
+
 bool Seat::isDrag() const
 {
     return d_ptr->drag.mode != Private::Drag::Mode::None;
@@ -1563,48 +1612,96 @@ DataDevice* Seat::dragSource() const
     return d_ptr->drag.source;
 }
 
+bool Seat::setFocusedTextInputV2Surface(Surface* surface)
+{
+    auto const serial = d_ptr->display()->handle()->nextSerial();
+    auto const old_ti = d_ptr->global_text_input.v2.text_input;
+
+    if (old_ti) {
+        // TODO(unknown author): setFocusedSurface like in other interfaces
+        old_ti->d_ptr->sendLeave(serial, d_ptr->global_text_input.focus.surface);
+    }
+
+    auto ti = d_ptr->textInputV2ForSurface(surface);
+
+    if (ti && !ti->d_ptr->resource()) {
+        // TODO(romangg): can this check be removed?
+        ti = nullptr;
+    }
+
+    d_ptr->global_text_input.v2.text_input = ti;
+
+    if (surface) {
+        d_ptr->global_text_input.v2.serial = serial;
+    }
+
+    if (ti) {
+        // TODO(unknown author): setFocusedSurface like in other interfaces
+        ti->d_ptr->sendEnter(surface, serial);
+    }
+
+    return old_ti != ti;
+}
+
+bool Seat::setFocusedTextInputV3Surface(Surface* surface)
+{
+    auto const old_ti = d_ptr->global_text_input.v3.text_input;
+
+    if (old_ti) {
+        old_ti->d_ptr->send_leave(d_ptr->global_text_input.focus.surface);
+    }
+
+    auto ti = d_ptr->textInputV3ForSurface(surface);
+
+    if (ti && !ti->d_ptr->resource()) {
+        // TODO(romangg): can this check be removed?
+        ti = nullptr;
+    }
+
+    d_ptr->global_text_input.v3.text_input = ti;
+
+    if (ti) {
+        ti->d_ptr->send_enter(surface);
+    }
+
+    return old_ti != ti;
+}
+
 void Seat::setFocusedTextInputSurface(Surface* surface)
 {
-    const quint32 serial = d_ptr->display()->handle()->nextSerial();
-    const auto old = d_ptr->textInput.focus.textInput;
-    if (d_ptr->textInput.focus.textInput) {
-        // TODO(unknown author): setFocusedSurface like in other interfaces
-        d_ptr->textInput.focus.textInput->d_ptr->sendLeave(serial, d_ptr->textInput.focus.surface);
+    if (d_ptr->global_text_input.focus.surface) {
+        disconnect(d_ptr->global_text_input.focus.destroy_connection);
     }
-    if (d_ptr->textInput.focus.surface) {
-        disconnect(d_ptr->textInput.focus.destroyConnection);
-    }
-    d_ptr->textInput.focus = Private::structTextInput::Focus();
-    d_ptr->textInput.focus.surface = surface;
-    TextInputV2* t = d_ptr->textInputForSurface(surface);
-    if (t && !t->d_ptr->resource()) {
-        t = nullptr;
-    }
-    d_ptr->textInput.focus.textInput = t;
-    if (d_ptr->textInput.focus.surface) {
-        d_ptr->textInput.focus.destroyConnection
+
+    auto changed = setFocusedTextInputV2Surface(surface) || setFocusedTextInputV3Surface(surface);
+    d_ptr->global_text_input.focus = {};
+
+    if (surface) {
+        d_ptr->global_text_input.focus.surface = surface;
+        d_ptr->global_text_input.focus.destroy_connection
             = connect(surface, &Surface::resourceDestroyed, this, [this] {
                   setFocusedTextInputSurface(nullptr);
               });
-        d_ptr->textInput.focus.serial = serial;
     }
-    if (t) {
-        // TODO(unknown author): setFocusedSurface like in other interfaces
-        t->d_ptr->sendEnter(surface, serial);
-    }
-    if (old != t) {
+
+    if (changed) {
         Q_EMIT focusedTextInputChanged();
     }
 }
 
 Surface* Seat::focusedTextInputSurface() const
 {
-    return d_ptr->textInput.focus.surface;
+    return d_ptr->global_text_input.focus.surface;
 }
 
-TextInputV2* Seat::focusedTextInput() const
+TextInputV2* Seat::focusedTextInputV2() const
 {
-    return d_ptr->textInput.focus.textInput;
+    return d_ptr->global_text_input.v2.text_input;
+}
+
+text_input_v3* Seat::focusedTextInputV3() const
+{
+    return d_ptr->global_text_input.v3.text_input;
 }
 
 DataDevice* Seat::selection() const

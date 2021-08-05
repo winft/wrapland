@@ -15,6 +15,7 @@ set(SERVER_LIB_SRCS
     fake_input.cpp
     filtered_display.cpp
     idle_inhibit_v1.cpp
+    input_method_v2.cpp
     kde_idle.cpp
     keyboard.cpp
     keystate.cpp
@@ -43,6 +44,7 @@ set(SERVER_LIB_SRCS
     subcompositor.cpp
     surface.cpp
     text_input_v2.cpp
+    text_input_v3.cpp
     touch.cpp
     viewporter.cpp
     wayland/buffer_manager.cpp
@@ -99,6 +101,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/input-method-unstable-v2.xml
+    BASENAME input-method-unstable-v2
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
     PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/fake-input.xml
     BASENAME fake-input
 )
@@ -133,13 +140,13 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input.xml
-    BASENAME text
+    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
+    BASENAME text-input-unstable-v2
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
-    BASENAME text-input-unstable-v2
+    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/text-input/text-input-unstable-v3.xml
+    BASENAME text-input-unstable-v3
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
@@ -278,6 +285,8 @@ set(SERVER_GENERATED_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-unstable-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-unstable-v2-server-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-unstable-v3-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-unstable-v3-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-server-protocol.h
@@ -344,6 +353,7 @@ set(SERVER_LIB_HEADERS
   fake_input.h
   filtered_display.h
   idle_inhibit_v1.h
+  input_method_v2.h
   kde_idle.h
   keyboard.h
   keystate.h
@@ -372,6 +382,7 @@ set(SERVER_LIB_HEADERS
   subcompositor.h
   surface.h
   text_input_v2.h
+  text_input_v3.h
   touch.h
   viewporter.h
   wl_output.h

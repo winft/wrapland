@@ -31,6 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "fullscreen_shell.h"
 #include "idle.h"
 #include "idleinhibit.h"
+#include "input_method_v2.h"
 #include "keyboard_shortcuts_inhibit.h"
 #include "keystate.h"
 #include "layer_shell_v1.h"
@@ -55,7 +56,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "shm_pool.h"
 #include "slide.h"
 #include "subcompositor.h"
-#include "textinput_p.h"
+#include "text_input_v2_p.h"
+#include "text_input_v3_p.h"
 #include "viewporter.h"
 #include "wayland_pointer_p.h"
 #include "wlr_output_manager_v1.h"
@@ -76,6 +78,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-fullscreen-shell-client-protocol.h>
 #include <wayland-idle-client-protocol.h>
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
+#include <wayland-input-method-v2-client-protocol.h>
 #include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
 #include <wayland-keystate-client-protocol.h>
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
@@ -92,8 +95,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-server-decoration-palette-client-protocol.h>
 #include <wayland-shadow-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
-#include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
+#include <wayland-text-input-v3-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
 #include <wayland-wlr-layer-shell-client-protocol.h>
 #include <wayland-wlr-output-management-v1-client-protocol.h>
@@ -249,6 +252,16 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         },
     },
     {
+        Registry::Interface::InputMethodManagerV2,
+        {
+            1,
+            QByteArrayLiteral("zwp_input_method_manager_v2"),
+            &zwp_input_method_manager_v2_interface,
+            &Registry::inputMethodManagerV2Announced,
+            &Registry::inputMethodManagerV2Removed,
+        },
+    },
+    {
         Registry::Interface::FakeInput,
         {
             4,
@@ -359,23 +372,23 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
         },
     },
     {
-        Registry::Interface::TextInputManagerUnstableV0,
-        {
-            1,
-            QByteArrayLiteral("wl_text_input_manager"),
-            &wl_text_input_manager_interface,
-            &Registry::textInputManagerUnstableV0Announced,
-            &Registry::textInputManagerUnstableV0Removed,
-        },
-    },
-    {
-        Registry::Interface::TextInputManagerUnstableV2,
+        Registry::Interface::TextInputManagerV2,
         {
             1,
             QByteArrayLiteral("zwp_text_input_manager_v2"),
             &zwp_text_input_manager_v2_interface,
-            &Registry::textInputManagerUnstableV2Announced,
-            &Registry::textInputManagerUnstableV2Removed,
+            &Registry::textInputManagerV2Announced,
+            &Registry::textInputManagerV2Removed,
+        },
+    },
+    {
+        Registry::Interface::TextInputManagerV3,
+        {
+            1,
+            QByteArrayLiteral("zwp_text_input_manager_v3"),
+            &zwp_text_input_manager_v3_interface,
+            &Registry::textInputManagerV3Announced,
+            &Registry::textInputManagerV3Removed,
         },
     },
     {
@@ -844,13 +857,14 @@ BIND(PlasmaShell, org_kde_plasma_shell)
 BIND(PlasmaVirtualDesktopManagement, org_kde_plasma_virtual_desktop_management)
 BIND(PlasmaWindowManagement, org_kde_plasma_window_management)
 BIND(Idle, org_kde_kwin_idle)
+BIND(InputMethodManagerV2, zwp_input_method_manager_v2)
 BIND(FakeInput, org_kde_kwin_fake_input)
 BIND(LayerShellV1, zwlr_layer_shell_v1)
 BIND(OutputManagementV1, zkwinft_output_management_v1)
 BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
-BIND(TextInputManagerUnstableV0, wl_text_input_manager)
-BIND(TextInputManagerUnstableV2, zwp_text_input_manager_v2)
+BIND(TextInputManagerV2, zwp_text_input_manager_v2)
+BIND(TextInputManagerV3, zwp_text_input_manager_v3)
 BIND(Viewporter, wp_viewporter)
 BIND(XdgShell, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
@@ -954,18 +968,24 @@ XdgImporter* Registry::createXdgImporter(quint32 name, quint32 version, QObject*
         name, version, parent, &Registry::bindXdgImporterUnstableV2);
 }
 
-TextInputManager* Registry::createTextInputManager(quint32 name, quint32 version, QObject* parent)
+input_method_manager_v2*
+Registry::createInputMethodManagerV2(quint32 name, quint32 version, QObject* parent)
 {
-    switch (d->interfaceForName(name)) {
-    case Interface::TextInputManagerUnstableV0:
-        return d->create<TextInputManagerUnstableV0>(
-            name, version, parent, &Registry::bindTextInputManagerUnstableV0);
-    case Interface::TextInputManagerUnstableV2:
-        return d->create<TextInputManagerUnstableV2>(
-            name, version, parent, &Registry::bindTextInputManagerUnstableV2);
-    default:
-        return nullptr;
-    }
+    return d->create<input_method_manager_v2>(
+        name, version, parent, &Registry::bindInputMethodManagerV2);
+}
+
+TextInputManagerV2*
+Registry::createTextInputManagerV2(quint32 name, quint32 version, QObject* parent)
+{
+    return d->create<TextInputManagerV2>(name, version, parent, &Registry::bindTextInputManagerV2);
+}
+
+text_input_manager_v3*
+Registry::createTextInputManagerV3(quint32 name, quint32 version, QObject* parent)
+{
+    return d->create<text_input_manager_v3>(
+        name, version, parent, &Registry::bindTextInputManagerV3);
 }
 
 RelativePointerManager*
