@@ -134,10 +134,10 @@ void TestDataSource::test_offer()
 {
     qRegisterMetaType<Wrapland::Server::DataSource*>();
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::dataSourceCreated);
+                                  &Wrapland::Server::DataDeviceManager::sourceCreated);
     QVERIFY(source_created_spy.isValid());
 
-    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createDataSource());
+    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
     QVERIFY(source->isValid());
 
     QVERIFY(source_created_spy.wait());
@@ -193,10 +193,10 @@ void TestDataSource::test_target_accepts_data()
 void TestDataSource::test_target_accepts()
 {
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::dataSourceCreated);
+                                  &Wrapland::Server::DataDeviceManager::sourceCreated);
     QVERIFY(source_created_spy.isValid());
 
-    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createDataSource());
+    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
     QVERIFY(source->isValid());
 
     QSignalSpy target_accepts_spy(source.get(), &Wrapland::Client::DataSource::targetAccepts);
@@ -217,10 +217,10 @@ void TestDataSource::test_target_accepts()
 void TestDataSource::test_request_send()
 {
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::dataSourceCreated);
+                                  &Wrapland::Server::DataDeviceManager::sourceCreated);
     QVERIFY(source_created_spy.isValid());
 
-    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createDataSource());
+    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
     QVERIFY(source->isValid());
 
     QSignalSpy send_requested_spy(source.get(), &Wrapland::Client::DataSource::sendDataRequested);
@@ -253,10 +253,10 @@ void TestDataSource::test_request_send_on_unbound()
 {
     // This test verifies that the server doesn't crash when requesting a send on an unbound
     // DataSource.
-    QSignalSpy source_created_spy(m_server_device_manager, &Wrapland::Server::DataDeviceManager::dataSourceCreated);
+    QSignalSpy source_created_spy(m_server_device_manager, &Wrapland::Server::DataDeviceManager::sourceCreated);
     QVERIFY(source_created_spy.isValid());
 
-    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createDataSource());
+    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
     QVERIFY(source->isValid());
     QVERIFY(source_created_spy.wait());
     QCOMPARE(source_created_spy.count(), 1);
@@ -274,10 +274,10 @@ void TestDataSource::test_request_send_on_unbound()
 void TestDataSource::test_cancel()
 {
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::dataSourceCreated);
+                                  &Wrapland::Server::DataDeviceManager::sourceCreated);
     QVERIFY(source_created_spy.isValid());
 
-    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createDataSource());
+    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
     QVERIFY(source->isValid());
     QSignalSpy cancelled_spy(source.get(), &Wrapland::Client::DataSource::cancelled);
     QVERIFY(cancelled_spy.isValid());
@@ -294,10 +294,10 @@ void TestDataSource::test_cancel()
 void TestDataSource::test_server_get()
 {
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::dataSourceCreated);
+                                  &Wrapland::Server::DataDeviceManager::sourceCreated);
     QVERIFY(source_created_spy.isValid());
 
-    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createDataSource());
+    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
     QVERIFY(source->isValid());
 
     QVERIFY(source_created_spy.wait());
@@ -307,7 +307,7 @@ void TestDataSource::test_server_get()
 
 void TestDataSource::test_destroy()
 {
-    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createDataSource());
+    std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
     QVERIFY(source->isValid());
 
     connect(m_connection,

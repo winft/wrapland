@@ -24,6 +24,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 
 #include <Wrapland/Server/wraplandserver_export.h>
+
+#include <wayland-server.h>
+
 #include <memory>
 
 namespace Wrapland::Server
@@ -33,6 +36,7 @@ class DataDevice;
 class Display;
 class Keyboard;
 class Pointer;
+class PrimarySelectionDevice;
 class Surface;
 class TextInputV2;
 class Touch;
@@ -151,6 +155,8 @@ public:
 
     DataDevice* selection() const;
     void setSelection(DataDevice* dataDevice);
+    PrimarySelectionDevice* primarySelection() const;
+    void setPrimarySelection(PrimarySelectionDevice* dataDevice);
 
 Q_SIGNALS:
     void nameChanged(std::string);
@@ -168,6 +174,7 @@ Q_SIGNALS:
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 
     void selectionChanged(DataDevice*);
+    void primarySelectionChanged(PrimarySelectionDevice*);
     void dragStarted();
     void dragEnded();
     void dragSurfaceChanged();
@@ -176,7 +183,15 @@ Q_SIGNALS:
 private:
     friend class Display;
     friend class DataDeviceManager;
+    friend class PrimarySelectionDeviceManager;
     friend class TextInputManagerV2;
+
+    template<typename Global>
+    // NOLINTNEXTLINE(readability-redundant-declaration)
+    friend void get_selection_device([[maybe_unused]] wl_client* wlClient,
+                                     wl_resource* wlResource,
+                                     uint32_t id,
+                                     wl_resource* wlSeat);
 
     Seat(Display* display, QObject* parent);
 

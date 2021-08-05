@@ -21,12 +21,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "data_device.h"
 #include "data_source.h"
-
 #include "display.h"
-#include "seat_p.h"
+#include "selection_device_manager_p.h"
 
 #include "wayland/global.h"
-#include "wayland/resource.h"
 
 #include <wayland-server.h>
 
@@ -35,7 +33,6 @@ namespace Wrapland::Server
 
 constexpr uint32_t DataDeviceManagerVersion = 3;
 using DataDeviceManagerGlobal = Wayland::Global<DataDeviceManager, DataDeviceManagerVersion>;
-using DataDeviceManagerBind = Wayland::Bind<DataDeviceManagerGlobal>;
 
 class DataDeviceManager::Private : public DataDeviceManagerGlobal
 {
@@ -43,49 +40,17 @@ public:
     Private(DataDeviceManager* q, Display* display);
 
 private:
-    static void createDataSourceCallback(DataDeviceManagerBind* bind, uint32_t id);
-    static void
-    getDataDeviceCallback(DataDeviceManagerBind* bind, uint32_t id, wl_resource* wlSeat);
-
     static const struct wl_data_device_manager_interface s_interface;
 };
 
 const struct wl_data_device_manager_interface DataDeviceManager::Private::s_interface = {
-    cb<createDataSourceCallback>,
-    cb<getDataDeviceCallback>,
+    create_selection_source<DataDeviceManagerGlobal>,
+    get_selection_device<DataDeviceManagerGlobal>,
 };
 
 DataDeviceManager::Private::Private(DataDeviceManager* q, Display* display)
     : DataDeviceManagerGlobal(q, display, &wl_data_device_manager_interface, &s_interface)
 {
-}
-
-void DataDeviceManager::Private::createDataSourceCallback(DataDeviceManagerBind* bind, uint32_t id)
-{
-    auto priv = bind->global()->handle()->d_ptr.get();
-
-    auto dataSource = new DataSource(bind->client()->handle(), bind->version(), id);
-    if (!dataSource) {
-        return;
-    }
-
-    Q_EMIT priv->handle()->dataSourceCreated(dataSource);
-}
-
-void DataDeviceManager::Private::getDataDeviceCallback(DataDeviceManagerBind* bind,
-                                                       uint32_t id,
-                                                       wl_resource* wlSeat)
-{
-    auto priv = bind->global()->handle()->d_ptr.get();
-    auto seat = SeatGlobal::handle(wlSeat);
-
-    auto dataDevice = new DataDevice(bind->client()->handle(), bind->version(), id, seat);
-    if (!dataDevice) {
-        return;
-    }
-
-    seat->d_ptr->registerDataDevice(dataDevice);
-    Q_EMIT priv->handle()->dataDeviceCreated(dataDevice);
 }
 
 DataDeviceManager::DataDeviceManager(Display* display, [[maybe_unused]] QObject* parent)

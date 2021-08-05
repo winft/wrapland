@@ -65,6 +65,9 @@ class WRAPLANDCLIENT_EXPORT DataDeviceManager : public QObject
 {
     Q_OBJECT
 public:
+    using device_t = Wrapland::Client::DataDevice;
+    using source_t = Wrapland::Client::DataSource;
+
     /**
      * Drag and Drop actions supported by DataSource and DataOffer.
      * @since 0.0.542
@@ -112,9 +115,9 @@ public:
      **/
     EventQueue* eventQueue();
 
-    DataSource* createDataSource(QObject* parent = nullptr);
+    DataSource* createSource(QObject* parent = nullptr);
 
-    DataDevice* getDataDevice(Seat* seat, QObject* parent = nullptr);
+    DataDevice* getDevice(Seat* seat, QObject* parent = nullptr);
 
     operator wl_data_device_manager*();
     operator wl_data_device_manager*() const;

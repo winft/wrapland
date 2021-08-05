@@ -39,7 +39,7 @@ namespace Client
  * @short Wrapper for the wl_data_source interface.
  *
  * This class is a convenient wrapper for the wl_data_source interface.
- * To create a DataSource call DataDeviceManager::createDataSource.
+ * To create a DataSource call DataDeviceManager::createSource.
  *
  * @see DataDeviceManager
  **/
@@ -52,7 +52,7 @@ public:
 
     /**
      * Setup this DataSource to manage the @p dataSource.
-     * When using DataDeviceManager::createDataSource there is no need to call this
+     * When using DataDeviceManager::createSource there is no need to call this
      * method.
      **/
     void setup(wl_data_source* dataSource);

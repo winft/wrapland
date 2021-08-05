@@ -65,6 +65,7 @@ class TextInputManagerV2;
 class RelativePointerManagerV1;
 class PointerGesturesV1;
 class PointerConstraintsV1;
+class PrimarySelectionDeviceManager;
 class XdgForeign;
 class AppmenuManager;
 class ServerSideDecorationPaletteManager;
@@ -128,6 +129,7 @@ public:
     OutputManagementV1* createOutputManagementV1(QObject* parent = nullptr);
     PlasmaShell* createPlasmaShell(QObject* parent = nullptr);
     PlasmaWindowManager* createPlasmaWindowManager(QObject* parent = nullptr);
+    PrimarySelectionDeviceManager* createPrimarySelectionDeviceManager(QObject* parent = nullptr);
     KdeIdle* createIdle(QObject* parent = nullptr);
     FakeInput* createFakeInput(QObject* parent = nullptr);
     LayerShellV1* createLayerShellV1(QObject* parent = nullptr);

@@ -50,6 +50,7 @@ class WRAPLANDCLIENT_EXPORT DataOffer : public QObject
 {
     Q_OBJECT
 public:
+    explicit DataOffer(DataDevice* parent, wl_data_offer* dataOffer);
     virtual ~DataOffer();
 
     /**
@@ -120,8 +121,6 @@ Q_SIGNALS:
     void selectedDragAndDropActionChanged();
 
 private:
-    friend class DataDevice;
-    explicit DataOffer(DataDevice* parent, wl_data_offer* dataOffer);
     class Private;
     std::unique_ptr<Private> d;
 };

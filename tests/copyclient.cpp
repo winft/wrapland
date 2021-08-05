@@ -150,8 +150,8 @@ void CopyClient::setupRegistry(Registry* registry)
         m_shellSurface->setFullscreen();
         connect(m_shellSurface, &ShellSurface::sizeChanged, this, &CopyClient::render);
 
-        m_dataDevice = m_dataDeviceManager->getDataDevice(m_seat, this);
-        m_copySource = m_dataDeviceManager->createDataSource(this);
+        m_dataDevice = m_dataDeviceManager->getDevice(m_seat, this);
+        m_copySource = m_dataDeviceManager->createSource(this);
         m_copySource->offer(QStringLiteral("text/plain"));
         connect(m_copySource, &DataSource::sendDataRequested, this, &CopyClient::copy);
     });

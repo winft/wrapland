@@ -46,6 +46,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointerconstraints.h"
 #include "pointergestures.h"
 #include "presentation_time.h"
+#include "primary_selection.h"
 #include "relativepointer.h"
 #include "seat.h"
 #include "server_decoration_palette.h"
@@ -86,6 +87,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-pointer-constraints-unstable-v1-client-protocol.h>
 #include <wayland-pointer-gestures-unstable-v1-client-protocol.h>
 #include <wayland-presentation-time-client-protocol.h>
+#include <wayland-primary-selection-unstable-v1-client-protocol.h>
 #include <wayland-relativepointer-unstable-v1-client-protocol.h>
 #include <wayland-server-decoration-palette-client-protocol.h>
 #include <wayland-shadow-client-protocol.h>
@@ -150,6 +152,12 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &Registry::dataDeviceManagerRemoved,
         },
     },
+    {Registry::Interface::PrimarySelectionDeviceManager,
+     {1,
+      QByteArrayLiteral("zwp_primary_selection_device_manager_v1"),
+      &zwp_primary_selection_device_manager_v1_interface,
+      &Registry::primarySelectionDeviceManagerAnnounced,
+      &Registry::primarySelectionDeviceManagerRemoved}},
     {
         Registry::Interface::Output,
         {
@@ -849,6 +857,7 @@ BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
 BIND(PointerGesturesUnstableV1, zwp_pointer_gestures_v1)
 BIND(PointerConstraintsUnstableV1, zwp_pointer_constraints_v1)
 BIND(PresentationManager, wp_presentation)
+BIND(PrimarySelectionDeviceManager, zwp_primary_selection_device_manager_v1)
 BIND(XdgActivationV1, xdg_activation_v1)
 BIND(XdgExporterUnstableV2, zxdg_exporter_v2)
 BIND(XdgImporterUnstableV2, zxdg_importer_v2)
@@ -906,6 +915,7 @@ CREATE(DataDeviceManager)
 CREATE(PlasmaShell)
 CREATE(PlasmaVirtualDesktopManagement)
 CREATE(PlasmaWindowManagement)
+CREATE(PrimarySelectionDeviceManager)
 CREATE(Idle)
 CREATE(FakeInput)
 CREATE(LayerShellV1)

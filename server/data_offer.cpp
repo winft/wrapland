@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "data_device.h"
 #include "data_source.h"
+#include "selection_offer_p.h"
 
 #include <QStringList>
 
@@ -34,7 +35,7 @@ namespace Wrapland::Server
 
 const struct wl_data_offer_interface DataOffer::Private::s_interface = {
     acceptCallback,
-    receiveCallback,
+    receive_selection_offer<Wayland::Resource<DataOffer>>,
     destroyCallback,
     finishCallback,
     setActionsCallback,
@@ -59,19 +60,6 @@ void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
         return;
     }
     priv->source->accept(mimeType ? mimeType : std::string());
-}
-
-void DataOffer::Private::receiveCallback([[maybe_unused]] wl_client* wlClient,
-                                         wl_resource* wlResource,
-                                         char const* mimeType,
-                                         int32_t fd)
-{
-    auto priv = handle(wlResource)->d_ptr;
-    if (!priv->source) {
-        close(fd);
-        return;
-    }
-    priv->source->requestData(mimeType, fd);
 }
 
 void DataOffer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,

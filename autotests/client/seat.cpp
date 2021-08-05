@@ -1744,7 +1744,7 @@ void TestSeat::testSelection()
                                          dataDeviceManagerSpy.first().last().value<quint32>()));
     QVERIFY(ddm->isValid());
 
-    QScopedPointer<Clt::DataDevice> dd1(ddm->getDataDevice(m_seat));
+    QScopedPointer<Clt::DataDevice> dd1(ddm->getDevice(m_seat));
     QVERIFY(dd1->isValid());
     QSignalSpy selectionSpy(dd1.data(), &Clt::DataDevice::selectionOffered);
     QVERIFY(selectionSpy.isValid());
@@ -1771,7 +1771,7 @@ void TestSeat::testSelection()
     QVERIFY(!m_serverSeat->selection());
 
     // Now let's try to set a selection - we have keyboard focus, so it should be sent to us.
-    QScopedPointer<Clt::DataSource> ds(ddm->createDataSource());
+    QScopedPointer<Clt::DataSource> ds(ddm->createSource());
     QVERIFY(ds->isValid());
 
     ds->offer(QStringLiteral("text/plain"));
@@ -1833,9 +1833,9 @@ void TestSeat::testSelection()
     QCOMPARE(selectionSpy.count(), 2);
 
     // Create a second ddi and a data source.
-    QScopedPointer<Clt::DataDevice> dd2(ddm->getDataDevice(m_seat));
+    QScopedPointer<Clt::DataDevice> dd2(ddm->getDevice(m_seat));
     QVERIFY(dd2->isValid());
-    QScopedPointer<Clt::DataSource> ds2(ddm->createDataSource());
+    QScopedPointer<Clt::DataSource> ds2(ddm->createSource());
     QVERIFY(ds2->isValid());
     ds2->offer(QStringLiteral("text/plain"));
     dd2->setSelection(0, ds2.data());
@@ -1864,7 +1864,7 @@ void TestSeat::testSelectionNoDataSource()
 
     // First create the DataDevice.
     QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::dataDeviceCreated);
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::deviceCreated);
     QVERIFY(ddiCreatedSpy.isValid());
 
     Clt::Registry registry;
@@ -1881,7 +1881,7 @@ void TestSeat::testSelectionNoDataSource()
                                          dataDeviceManagerSpy.first().last().value<quint32>()));
     QVERIFY(ddm->isValid());
 
-    QScopedPointer<Clt::DataDevice> dd(ddm->getDataDevice(m_seat));
+    QScopedPointer<Clt::DataDevice> dd(ddm->getDevice(m_seat));
     QVERIFY(dd->isValid());
 
     QVERIFY(ddiCreatedSpy.wait());
@@ -1914,7 +1914,7 @@ void TestSeat::testDataDeviceForKeyboardSurface()
 
     // Create the DataDeviceManager.
     QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::dataDeviceCreated);
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::deviceCreated);
     QVERIFY(ddiCreatedSpy.isValid());
 
     // Create a second Wayland client connection to use it for setSelection.
@@ -1953,7 +1953,7 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     QVERIFY(ddm1->isValid());
 
     // Now create our first datadevice.
-    QScopedPointer<Clt::DataDevice> dd1(ddm1->getDataDevice(seat.data()));
+    QScopedPointer<Clt::DataDevice> dd1(ddm1->getDevice(seat.data()));
     QVERIFY(ddiCreatedSpy.wait());
     auto* ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
     QVERIFY(ddi);
@@ -1985,7 +1985,7 @@ void TestSeat::testDataDeviceForKeyboardSurface()
                                           dataDeviceManagerSpy.first().last().value<quint32>()));
     QVERIFY(ddm->isValid());
 
-    QScopedPointer<Clt::DataDevice> dd(ddm->getDataDevice(m_seat));
+    QScopedPointer<Clt::DataDevice> dd(ddm->getDevice(m_seat));
     QVERIFY(dd->isValid());
     QVERIFY(ddiCreatedSpy.wait());
 
