@@ -34,11 +34,13 @@ namespace Wrapland::Server
 
 class DataDevice;
 class Display;
+class input_method_v2;
 class Keyboard;
 class Pointer;
 class PrimarySelectionDevice;
 class Surface;
 class TextInputV2;
+class text_input_v3;
 class Touch;
 
 enum class PointerAxisSource {
@@ -149,9 +151,12 @@ public:
     bool isTouchSequence() const;
     bool hasImplicitTouchGrab(quint32 serial) const;
 
+    input_method_v2* get_input_method_v2() const;
+
     void setFocusedTextInputSurface(Surface* surface);
     Surface* focusedTextInputSurface() const;
-    TextInputV2* focusedTextInput() const;
+    TextInputV2* focusedTextInputV2() const;
+    text_input_v3* focusedTextInputV3() const;
 
     DataDevice* selection() const;
     void setSelection(DataDevice* dataDevice);
@@ -170,6 +175,7 @@ Q_SIGNALS:
     void pointerCreated(Wrapland::Server::Pointer*);
     void keyboardCreated(Wrapland::Server::Keyboard*);
     void touchCreated(Wrapland::Server::Touch*);
+    void input_method_v2_changed();
 
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 
@@ -184,7 +190,9 @@ private:
     friend class Display;
     friend class DataDeviceManager;
     friend class PrimarySelectionDeviceManager;
+    friend class input_method_manager_v2;
     friend class TextInputManagerV2;
+    friend class text_input_manager_v3;
 
     template<typename Global>
     // NOLINTNEXTLINE(readability-redundant-declaration)
@@ -194,6 +202,10 @@ private:
                                      wl_resource* wlSeat);
 
     Seat(Display* display, QObject* parent);
+
+    // Returns whether an actual change took place.
+    bool setFocusedTextInputV2Surface(Surface* surface);
+    bool setFocusedTextInputV3Surface(Surface* surface);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

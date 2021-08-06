@@ -37,9 +37,9 @@ struct wl_seat;
 struct wl_shell;
 struct wl_shm;
 struct wl_subcompositor;
-struct wl_text_input_manager;
 struct wp_presentation;
 struct zwp_text_input_manager_v2;
+struct zwp_text_input_manager_v3;
 struct _wl_fullscreen_shell;
 struct org_kde_kwin_appmenu_manager;
 struct org_kde_kwin_fake_input;
@@ -59,6 +59,7 @@ struct wp_viewporter;
 struct xdg_activation_v1;
 struct xdg_shell;
 struct xdg_wm_base;
+struct zwp_input_method_manager_v2;
 struct zkwinft_output_management_v1;
 struct zkwinft_output_device_v1;
 struct zwlr_layer_shell_v1;
@@ -93,6 +94,7 @@ class OutputDeviceV1;
 class WlrOutputManagerV1;
 class Idle;
 class IdleInhibitManager;
+class input_method_manager_v2;
 class Keystate;
 class LayerShellV1;
 class RemoteAccessManager;
@@ -113,9 +115,8 @@ class Shell;
 class ShmPool;
 class ServerSideDecorationPaletteManager;
 class SubCompositor;
-class TextInputManager;
-class TextInputManagerUnstableV0;
-class TextInputManagerUnstableV2;
+class TextInputManagerV2;
+class text_input_manager_v3;
 class Viewporter;
 class XdgShell;
 class RelativePointerManager;
@@ -177,6 +178,7 @@ public:
         PlasmaShell,                      ///< Refers to org_kde_plasma_shell interface
         PlasmaWindowManagement,           ///< Refers to org_kde_plasma_window_management interface
         Idle,                             ///< Refers to org_kde_kwin_idle_interface interface
+        InputMethodManagerV2,             ///< Refers to zwp_input_method_manager_v2, @since 0.523.0
         FakeInput,                        ///< Refers to org_kde_kwin_fake_input interface
         Shadow,                           ///< Refers to org_kde_kwin_shadow_manager interface
         Blur,                             ///< refers to org_kde_kwin_blur_manager interface
@@ -186,8 +188,8 @@ public:
         OutputManagementV1,               ///< Refers to the zkwinft_output_management_v1 interface
         OutputDeviceV1,                   ///< Refers to the zkwinft_output_device_v1 interface
         WlrOutputManagerV1,               ///< Refers to the zwlr_output_manager_v1 interface
-        TextInputManagerUnstableV0,       ///< Refers to wl_text_input_manager, @since 0.0.523
-        TextInputManagerUnstableV2,       ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
+        TextInputManagerV2,               ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
+        TextInputManagerV3,               ///< Refers to zwp_text_input_manager_v3, @since 0.523.0
         RelativePointerManagerUnstableV1, ///< Refers to zwp_relative_pointer_manager_v1, @since
                                           ///< 0.0.528
         PointerGesturesUnstableV1,        ///< Refers to zwp_pointer_gestures_v1, @since 0.0.529
@@ -411,6 +413,16 @@ public:
      **/
     wl_data_device_manager* bindDataDeviceManager(uint32_t name, uint32_t version) const;
     /**
+     * Binds the zwp_input_method_manager_v2 with @p name and @p version.
+     * If the @p name does not exist or is not for the input method interface in unstable version 2,
+     * @c null will be returned.
+     *
+     * Prefer using createInputMethodManagerV2 instead.
+     * @see createInputMethodManagerV2
+     * @since 0.523.0
+     **/
+    zwp_input_method_manager_v2* bindInputMethodManagerV2(uint32_t name, uint32_t version) const;
+    /**
      * Binds the org_kde_plasma_shell with @p name and @p version.
      * If the @p name does not exist or is not for the Plasma shell interface,
      * @c null will be returned.
@@ -544,26 +556,25 @@ public:
      **/
     org_kde_kwin_dpms_manager* bindDpmsManager(uint32_t name, uint32_t version) const;
     /**
-     * Binds the wl_text_input_manager with @p name and @p version.
-     * If the @p name does not exist or is not for the text input interface in unstable version 0,
-     * @c null will be returned.
-     *
-     * Prefer using createTextInputManager instead.
-     * @see createTextInputManager
-     * @since 0.0.523
-     **/
-    wl_text_input_manager* bindTextInputManagerUnstableV0(uint32_t name, uint32_t version) const;
-    /**
      * Binds the zwp_text_input_manager_v2 with @p name and @p version.
      * If the @p name does not exist or is not for the text input interface in unstable version 2,
      * @c null will be returned.
      *
-     * Prefer using createTextInputManager instead.
-     * @see createTextInputManager
+     * Prefer using createTextInputManagerV2 instead.
+     * @see createTextInputManagerV2
      * @since 0.0.523
      **/
-    zwp_text_input_manager_v2* bindTextInputManagerUnstableV2(uint32_t name,
-                                                              uint32_t version) const;
+    zwp_text_input_manager_v2* bindTextInputManagerV2(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the zwp_text_input_manager_v3 with @p name and @p version.
+     * If the @p name does not exist or is not for the text input interface in unstable version 3,
+     * @c null will be returned.
+     *
+     * Prefer using createTextInputManagerV3 instead.
+     * @see createTextInputManagerV3
+     * @since 0.523.0
+     **/
+    zwp_text_input_manager_v3* bindTextInputManagerV3(uint32_t name, uint32_t version) const;
     /**
      * Binds the wp_viewporter with @p name and @p version.
      * If the @p name does not exist or is not for the viewporter interface,
@@ -996,6 +1007,25 @@ public:
      **/
     Idle* createIdle(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
+     * Creates a input_method_manager_v2 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * This factory method supports the following interfaces:
+     * @li zwp_input_method_manager_v2
+     *
+     * If @p name is for one of the supported interfaces the corresponding manager will be created,
+     * otherwise @c null will be returned.
+     *
+     * @param name The name of the interface to bind
+     * @param version The version of the interface to use
+     * @param parent The parent for the input_method_manager_v2
+     *
+     * @returns The created input_method_manager_v2
+     * @since 0.523.0
+     **/
+    input_method_manager_v2*
+    createInputMethodManagerV2(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
      * Creates a KEystate and sets it up to manage the interface identified by
      * @p name and @p version.
      *
@@ -1142,11 +1172,10 @@ public:
      **/
     DpmsManager* createDpmsManager(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
-     * Creates a TextInputManager and sets it up to manage the interface identified by
+     * Creates a TextInputManagerV2 and sets it up to manage the interface identified by
      * @p name and @p version.
      *
      * This factory method supports the following interfaces:
-     * @li wl_text_input_manager
      * @li zwp_text_input_manager_v2
      *
      * If @p name is for one of the supported interfaces the corresponding manager will be created,
@@ -1154,13 +1183,32 @@ public:
      *
      * @param name The name of the interface to bind
      * @param version The version of the interface to use
-     * @param parent The parent for the TextInputManager
+     * @param parent The parent for the TextInputManagerV2
      *
-     * @returns The created TextInputManager
+     * @returns The created TextInputManagerV2
      * @since 0.0.523
      **/
-    TextInputManager*
-    createTextInputManager(quint32 name, quint32 version, QObject* parent = nullptr);
+    TextInputManagerV2*
+    createTextInputManagerV2(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
+     * Creates a text_input_manager_v3 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * This factory method supports the following interfaces:
+     * @li zwp_text_input_manager_v3
+     *
+     * If @p name is for one of the supported interfaces the corresponding manager will be created,
+     * otherwise @c null will be returned.
+     *
+     * @param name The name of the interface to bind
+     * @param version The version of the interface to use
+     * @param parent The parent for the text_input_manager_v3
+     *
+     * @returns The created text_input_manager_v3
+     * @since 0.523.0
+     **/
+    text_input_manager_v3*
+    createTextInputManagerV3(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a Viewporter and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1589,6 +1637,13 @@ Q_SIGNALS:
      **/
     void idleAnnounced(quint32 name, quint32 version);
     /**
+     * Emitted whenever a zwp_input_method_manager_v2 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.523.0
+     **/
+    void inputMethodManagerV2Announced(quint32 name, quint32 version);
+    /**
      * Emitted whenever a org_kde_kwin_remote_access_manager interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1638,19 +1693,19 @@ Q_SIGNALS:
      **/
     void dpmsAnnounced(quint32 name, quint32 version);
     /**
-     * Emitted whenever a wl_text_input_manager interface gets announced.
-     * @param name The name for the announced interface
-     * @param version The maximum supported version of the announced interface
-     * @since 0.0.523
-     **/
-    void textInputManagerUnstableV0Announced(quint32 name, quint32 version);
-    /**
      * Emitted whenever a zwp_text_input_manager_v2 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
      * @since 0.0.523
      **/
-    void textInputManagerUnstableV2Announced(quint32 name, quint32 version);
+    void textInputManagerV2Announced(quint32 name, quint32 version);
+    /**
+     * Emitted whenever a zwp_text_input_manager_v3 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.523.0
+     **/
+    void textInputManagerV3Announced(quint32 name, quint32 version);
     /**
      * Emitted whenever a wp_viewporter interface gets announced.
      * @param name The name for the announced interface
@@ -1867,6 +1922,12 @@ Q_SIGNALS:
      **/
     void idleRemoved(quint32 name);
     /**
+     * Emitted whenever a zwp_input_method_manager_v2 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.523.0
+     **/
+    void inputMethodManagerV2Removed(quint32 name);
+    /**
      * Emitted whenever a org_kde_kwin_remote_access_manager interface gets removed.
      * @param name The name for the removed interface
      * @since 0.0.545
@@ -1915,17 +1976,17 @@ Q_SIGNALS:
      **/
     void dpmsRemoved(quint32 name);
     /**
-     * Emitted whenever a wl_text_input_manager interface gets removed.
-     * @param name The name for the removed interface
-     * @since 0.0.523
-     **/
-    void textInputManagerUnstableV0Removed(quint32 name);
-    /**
      * Emitted whenever a zwp_text_input_manager_v2 interface gets removed.
      * @param name The name for the removed interface
      * @since 0.0.523
      **/
-    void textInputManagerUnstableV2Removed(quint32 name);
+    void textInputManagerV2Removed(quint32 name);
+    /**
+     * Emitted whenever a zwp_text_input_manager_v3 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.523.0
+     **/
+    void textInputManagerV3Removed(quint32 name);
     /**
      * Emitted whenever a wp_viewporter interface gets removed.
      * @param name The name for the removed interface

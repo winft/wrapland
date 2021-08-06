@@ -59,13 +59,18 @@ public:
     QVector<Keyboard*> keyboardsForSurface(Surface* surface) const;
     QVector<Touch*> touchsForSurface(Surface* surface) const;
     QVector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
-    TextInputV2* textInputForSurface(Surface* surface) const;
+
+    TextInputV2* textInputV2ForSurface(Surface* surface) const;
+    text_input_v3* textInputV3ForSurface(Surface* surface) const;
 
     template<typename Device>
     void register_device(Device*);
+
     void registerDataDevice(DataDevice* dataDevice);
     void registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
+    void registerInputMethod(input_method_v2* im);
     void registerTextInput(TextInputV2* ti);
+    void registerTextInput(text_input_v3* ti);
     void endDrag(quint32 serial);
     void cancelPreviousSelection(DataDevice* newlySelectedDataDevice) const;
     void cancelPreviousSelection(PrimarySelectionDevice* dataDevice) const;
@@ -81,7 +86,9 @@ public:
     QVector<Touch*> touchs;
     QVector<DataDevice*> dataDevices;
     QVector<PrimarySelectionDevice*> primarySelectionDevices;
+    input_method_v2* input_method{nullptr};
     QVector<TextInputV2*> textInputs;
+    QVector<text_input_v3*> textInputsV3;
     DataDevice* currentSelection = nullptr;
     PrimarySelectionDevice* currentPrimarySelectionDevice = nullptr;
 
@@ -159,16 +166,22 @@ public:
 
     bool updateKey(quint32 key, SeatKeyboard::State state);
 
-    struct structTextInput {
-        struct Focus {
+    struct {
+        struct {
             Surface* surface = nullptr;
-            QMetaObject::Connection destroyConnection;
+            QMetaObject::Connection destroy_connection;
+        } focus;
+
+        // Both text inputs may be active at a time.
+        // That doesn't make sense, but there's no reason to enforce only one.
+        struct {
             quint32 serial = 0;
-            TextInputV2* textInput = nullptr;
-        };
-        Focus focus;
-    };
-    structTextInput textInput;
+            TextInputV2* text_input{nullptr};
+        } v2;
+        struct {
+            text_input_v3* text_input{nullptr};
+        } v3;
+    } global_text_input;
 
     // Touch related members
     struct SeatTouch {

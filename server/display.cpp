@@ -34,6 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "egl_stream_controller.h"
 #include "fake_input.h"
 #include "idle_inhibit_v1.h"
+#include "input_method_v2.h"
 #include "kde_idle.h"
 #include "keyboard_shortcuts_inhibit.h"
 #include "keystate.h"
@@ -57,6 +58,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "slide.h"
 #include "subcompositor.h"
 #include "text_input_v2.h"
+#include "text_input_v3.h"
 #include "viewporter.h"
 #include "wl_output_p.h"
 #include "xdg_activation_v1.h"
@@ -288,9 +290,14 @@ DpmsManager* Display::createDpmsManager(QObject* parent)
     return new DpmsManager(this, parent);
 }
 
-TextInputManagerV2* Display::createTextInputManager(QObject* parent)
+TextInputManagerV2* Display::createTextInputManagerV2(QObject* parent)
 {
     return new TextInputManagerV2(this, parent);
+}
+
+text_input_manager_v3* Display::createTextInputManagerV3(QObject* parent)
+{
+    return new text_input_manager_v3(this, parent);
 }
 
 XdgShell* Display::createXdgShell(QObject* parent)
@@ -321,6 +328,11 @@ XdgForeign* Display::createXdgForeign(QObject* parent)
 IdleInhibitManagerV1* Display::createIdleInhibitManager(QObject* parent)
 {
     return new IdleInhibitManagerV1(this, parent);
+}
+
+input_method_manager_v2* Display::createInputMethodManagerV2(QObject* parent)
+{
+    return new input_method_manager_v2(this, parent);
 }
 
 AppmenuManager* Display::createAppmenuManager(QObject* parent)

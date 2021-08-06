@@ -55,6 +55,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/blur.h"
 #include "../../server/contrast.h"
 #include "../../server/idle_inhibit_v1.h"
+#include "../../server/input_method_v2.h"
 #include "../../server/linux_dmabuf_v1.h"
 #include "../../server/output_device_v1.h"
 #include "../../server/output_management_v1.h"
@@ -62,6 +63,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/primary_selection.h"
 #include "../../server/slide.h"
 #include "../../server/text_input_v2.h"
+#include "../../server/text_input_v3.h"
 #include "../../server/xdg_decoration.h"
 
 #include <wayland-blur-client-protocol.h>
@@ -69,6 +71,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
+#include <wayland-input-method-v2-client-protocol.h>
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
 #include <wayland-pointer-constraints-unstable-v1-client-protocol.h>
 #include <wayland-pointer-gestures-unstable-v1-client-protocol.h>
@@ -76,8 +79,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-primary-selection-unstable-v1-client-protocol.h>
 #include <wayland-relativepointer-unstable-v1-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
-#include <wayland-text-input-v0-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
+#include <wayland-text-input-v3-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-xdg-shell-client-protocol.h>
 
@@ -102,8 +105,10 @@ private Q_SLOTS:
     void testBindContrastManager();
     void testBindSlideManager();
     void testBindDpmsManager();
+    void testBindInputMethodManagerV2();
     void testBindXdgDecorationUnstableV1();
     void testBindTextInputManagerV2();
+    void testBindTextInputManagerV3();
     void testBindXdgShell();
     void testBindRelativePointerManagerUnstableV1();
     void testBindPointerGesturesUnstableV1();
@@ -126,9 +131,11 @@ private:
     std::unique_ptr<Wrapland::Server::Seat> m_seat;
     std::unique_ptr<Wrapland::Server::Subcompositor> m_subcompositor;
     std::unique_ptr<Wrapland::Server::DataDeviceManager> m_dataDeviceManager;
+    std::unique_ptr<Wrapland::Server::input_method_manager_v2> m_inputMethodManagerV2;
     std::unique_ptr<Wrapland::Server::OutputManagementV1> m_outputManagement;
     std::unique_ptr<Wrapland::Server::XdgDecorationManager> m_xdgDecorationManager;
     std::unique_ptr<Wrapland::Server::TextInputManagerV2> m_textInputManagerV2;
+    std::unique_ptr<Wrapland::Server::text_input_manager_v3> m_textInputManagerV3;
     std::unique_ptr<Wrapland::Server::XdgShell> m_serverXdgShell;
     std::unique_ptr<Wrapland::Server::RelativePointerManagerV1> m_relativePointerV1;
     std::unique_ptr<Wrapland::Server::PointerGesturesV1> m_pointerGesturesV1;
@@ -165,9 +172,11 @@ void TestWaylandRegistry::init()
     m_contrast.reset(m_display->createContrastManager());
     m_display->createSlideManager(this);
     m_display->createDpmsManager(this);
+    m_inputMethodManagerV2.reset(m_display->createInputMethodManagerV2());
     m_serverXdgShell.reset(m_display->createXdgShell());
     m_xdgDecorationManager.reset(m_display->createXdgDecorationManager(m_serverXdgShell.get()));
-    m_textInputManagerV2.reset(m_display->createTextInputManager());
+    m_textInputManagerV2.reset(m_display->createTextInputManagerV2());
+    m_textInputManagerV3.reset(m_display->createTextInputManagerV3());
     m_relativePointerV1.reset(m_display->createRelativePointerManager());
     m_pointerGesturesV1.reset(m_display->createPointerGestures());
     m_pointerConstraintsV1.reset(m_display->createPointerConstraints());
@@ -335,6 +344,14 @@ void TestWaylandRegistry::testBindDpmsManager()
               org_kde_kwin_dpms_manager_destroy)
 }
 
+void TestWaylandRegistry::testBindInputMethodManagerV2()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::InputMethodManagerV2,
+              SIGNAL(inputMethodManagerV2Announced(quint32, quint32)),
+              bindInputMethodManagerV2,
+              zwp_input_method_manager_v2_destroy)
+}
+
 void TestWaylandRegistry::testBindXdgDecorationUnstableV1()
 {
     TEST_BIND(Wrapland::Client::Registry::Interface::XdgDecorationUnstableV1,
@@ -345,10 +362,18 @@ void TestWaylandRegistry::testBindXdgDecorationUnstableV1()
 
 void TestWaylandRegistry::testBindTextInputManagerV2()
 {
-    TEST_BIND(Wrapland::Client::Registry::Interface::TextInputManagerUnstableV2,
-              SIGNAL(textInputManagerUnstableV2Announced(quint32, quint32)),
-              bindTextInputManagerUnstableV2,
+    TEST_BIND(Wrapland::Client::Registry::Interface::TextInputManagerV2,
+              SIGNAL(textInputManagerV2Announced(quint32, quint32)),
+              bindTextInputManagerV2,
               zwp_text_input_manager_v2_destroy)
+}
+
+void TestWaylandRegistry::testBindTextInputManagerV3()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::TextInputManagerV3,
+              SIGNAL(textInputManagerV3Announced(quint32, quint32)),
+              bindTextInputManagerV3,
+              zwp_text_input_manager_v3_destroy)
 }
 
 void TestWaylandRegistry::testBindXdgShell()
