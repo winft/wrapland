@@ -349,7 +349,11 @@ set( testKeyboardShortcutsInhibitor_SRCS
         keyboard_shortcuts_inhibitor.cpp
     )
 add_executable(testKeyboardShortcutsInhibitor ${testKeyboardShortcutsInhibitor_SRCS})
-target_link_libraries( testKeyboardShortcutsInhibitor Qt5::Test Qt5::Gui Wrapland::Client Wrapland::Server)
+target_link_libraries( testKeyboardShortcutsInhibitor
+    Qt5::Test Qt5::Gui
+    Wrapland::Client Wrapland::Server
+    Wayland::Client
+)
 add_test(NAME wrapland-testKeyboardShortcutsInhibitor COMMAND testKeyboardShortcutsInhibitor)
 ecm_mark_as_test(testKeyboardShortcutsInhibitor)
 
