@@ -84,7 +84,7 @@ public:
     void setState(org_kde_plasma_window_management_state flag, bool set);
     void setParentWindow(PlasmaWindow* window);
     void setGeometry(const QRect& geometry);
-    void setApplicationMenuPaths(QString const& serviceName, QString const& objectPath) const;
+    void setApplicationMenuPaths(QString const& serviceName, QString const& objectPath);
 
     // TODO(romangg): Might make sense to have this as a non-static member function instead.
     static PlasmaWindowRes* getResourceOfParent(PlasmaWindow* parent, PlasmaWindowRes* childRes);
