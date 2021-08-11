@@ -407,7 +407,7 @@ void PlasmaWindow::Private::setGeometry(const QRect& geo)
 }
 
 void PlasmaWindow::Private::setApplicationMenuPaths(const QString& serviceName,
-                                                    const QString& objectPath) const
+                                                    const QString& objectPath)
 {
     if (m_applicationMenu.serviceName == serviceName
         && m_applicationMenu.objectPath == objectPath) {
@@ -415,6 +415,10 @@ void PlasmaWindow::Private::setApplicationMenuPaths(const QString& serviceName,
     }
     auto const service_name = serviceName.toLatin1();
     auto const object_path = objectPath.toLatin1();
+
+    m_applicationMenu.serviceName = serviceName;
+    m_applicationMenu.objectPath = objectPath;
+
     for (auto resource : qAsConst(resources)) {
         resource->d_ptr->send<org_kde_plasma_window_send_application_menu,
                               ORG_KDE_PLASMA_WINDOW_APPLICATION_MENU_SINCE_VERSION>(
