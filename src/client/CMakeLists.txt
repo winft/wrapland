@@ -70,168 +70,173 @@ set(CLIENT_LIB_SRCS
     linux_dmabuf_v1.cpp
 )
 
-ecm_qt_declare_logging_category(CLIENT_LIB_SRCS HEADER logging.h IDENTIFIER WRAPLAND_CLIENT CATEGORY_NAME wrapland-client DEFAULT_SEVERITY Critical)
-
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/fullscreen-shell.xml
-    BASENAME fullscreen-shell
+ecm_qt_declare_logging_category(CLIENT_LIB_SRCS
+  HEADER logging.h
+  IDENTIFIER WRAPLAND_CLIENT
+  CATEGORY_NAME wrapland-client
+  DEFAULT_SEVERITY Critical
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-management-unstable-v1.xml
-    BASENAME output-management-v1
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/fullscreen-shell.xml
+  BASENAME fullscreen-shell
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-device-unstable-v1.xml
-    BASENAME output-device-v1
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-management-unstable-v1.xml
+  BASENAME output-management-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-output-management-unstable-v1.xml
-    BASENAME wlr-output-management-v1
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-device-unstable-v1.xml
+  BASENAME output-device-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-layer-shell-unstable-v1.xml
-    BASENAME wlr-layer-shell
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-output-management-unstable-v1.xml
+  BASENAME wlr-output-management-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/plasma-shell.xml
-    BASENAME plasma-shell
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-layer-shell-unstable-v1.xml
+  BASENAME wlr-layer-shell
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/plasma-virtual-desktop.xml
-    BASENAME plasma-virtual-desktop
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/plasma-shell.xml
+  BASENAME plasma-shell
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/plasma-window-management.xml
-    BASENAME plasma-window-management
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/plasma-virtual-desktop.xml
+  BASENAME plasma-virtual-desktop
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/idle.xml
-    BASENAME idle
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/plasma-window-management.xml
+  BASENAME plasma-window-management
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/fake-input.xml
-    BASENAME fake-input
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/input-method-unstable-v2.xml
-    BASENAME input-method-v2
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/idle.xml
+  BASENAME idle
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/shadow.xml
-    BASENAME shadow
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/fake-input.xml
+  BASENAME fake-input
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/input-method-unstable-v2.xml
+  BASENAME input-method-v2
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/blur.xml
-    BASENAME blur
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/shadow.xml
+  BASENAME shadow
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/contrast.xml
-    BASENAME contrast
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/blur.xml
+  BASENAME blur
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/slide.xml
-    BASENAME slide
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/contrast.xml
+  BASENAME contrast
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/dpms.xml
-    BASENAME dpms
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
-    BASENAME text-input-v2
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/text-input/text-input-unstable-v3.xml
-    BASENAME text-input-v3
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/relative-pointer/relative-pointer-unstable-v1.xml
-    BASENAME relativepointer-unstable-v1
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/pointer-gestures/pointer-gestures-unstable-v1.xml
-    BASENAME pointer-gestures-unstable-v1
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/pointer-constraints/pointer-constraints-unstable-v1.xml
-    BASENAME pointer-constraints-unstable-v1
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/stable/presentation-time/presentation-time.xml
-    BASENAME presentation-time
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/primary-selection/primary-selection-unstable-v1.xml
-    BASENAME primary-selection-unstable-v1
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-foreign/xdg-foreign-unstable-v2.xml
-    BASENAME xdg-foreign-unstable-v2
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/idle-inhibit/idle-inhibit-unstable-v1.xml
-    BASENAME idle-inhibit-unstable-v1
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/appmenu.xml
-    BASENAME appmenu
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/server-decoration-palette.xml
-    BASENAME server-decoration-palette
-)
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/stable/viewporter/viewporter.xml
-    BASENAME viewporter
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/slide.xml
+  BASENAME slide
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-output/xdg-output-unstable-v1.xml
-    BASENAME xdg-output-unstable-v1
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/dpms.xml
+  BASENAME dpms
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/text-input-unstable-v2.xml
+  BASENAME text-input-v2
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/text-input/text-input-unstable-v3.xml
+  BASENAME text-input-v3
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/relative-pointer/relative-pointer-unstable-v1.xml
+  BASENAME relativepointer-unstable-v1
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/pointer-gestures/pointer-gestures-unstable-v1.xml
+  BASENAME pointer-gestures-unstable-v1
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/pointer-constraints/pointer-constraints-unstable-v1.xml
+  BASENAME pointer-constraints-unstable-v1
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/stable/presentation-time/presentation-time.xml
+  BASENAME presentation-time
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/primary-selection/primary-selection-unstable-v1.xml
+  BASENAME primary-selection-unstable-v1
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-foreign/xdg-foreign-unstable-v2.xml
+  BASENAME xdg-foreign-unstable-v2
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/idle-inhibit/idle-inhibit-unstable-v1.xml
+  BASENAME idle-inhibit-unstable-v1
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/appmenu.xml
+  BASENAME appmenu
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/server-decoration-palette.xml
+  BASENAME server-decoration-palette
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/stable/viewporter/viewporter.xml
+  BASENAME viewporter
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/stable/xdg-shell/xdg-shell.xml
-    BASENAME xdg-shell
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-output/xdg-output-unstable-v1.xml
+  BASENAME xdg-output-unstable-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/staging/xdg-activation/xdg-activation-v1.xml
-    BASENAME xdg-activation-v1
+  PROTOCOL ${WaylandProtocols_DATADIR}/stable/xdg-shell/xdg-shell.xml
+  BASENAME xdg-shell
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml
-    BASENAME xdg-decoration-unstable-v1
+  PROTOCOL ${WaylandProtocols_DATADIR}/staging/xdg-activation/xdg-activation-v1.xml
+  BASENAME xdg-activation-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/keystate.xml
-    BASENAME keystate
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml
+  BASENAME xdg-decoration-unstable-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/keyboard-shortcuts-inhibit/keyboard-shortcuts-inhibit-unstable-v1.xml
-    BASENAME keyboard-shortcuts-inhibit
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/keystate.xml
+  BASENAME keystate
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-    PROTOCOL ${WaylandProtocols_DATADIR}/unstable/linux-dmabuf/linux-dmabuf-unstable-v1.xml
-    BASENAME linux-dmabuf-unstable-v1
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/keyboard-shortcuts-inhibit/keyboard-shortcuts-inhibit-unstable-v1.xml
+  BASENAME keyboard-shortcuts-inhibit
+)
+
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/unstable/linux-dmabuf/linux-dmabuf-unstable-v1.xml
+  BASENAME linux-dmabuf-unstable-v1
 )
 
 set(CLIENT_GENERATED_FILES
@@ -273,100 +278,113 @@ add_library(WraplandClient ${CLIENT_LIB_SRCS})
 add_library(Wrapland::Client ALIAS WraplandClient)
 
 ecm_generate_export_header(WraplandClient
-    BASE_NAME
-        WraplandClient
-    EXPORT_FILE_NAME
-        Wrapland/Client/wraplandclient_export.h
-    GROUP_BASE_NAME KF
-    VERSION ${PROJECT_VERSION}
+  BASE_NAME WraplandClient
+  EXPORT_FILE_NAME Wrapland/Client/wraplandclient_export.h
+  GROUP_BASE_NAME KF
+  VERSION ${PROJECT_VERSION}
 )
 
-target_include_directories(WraplandClient INTERFACE
-    "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/Wrapland/Client>")
+target_include_directories(WraplandClient
+  INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/Wrapland/Client>"
+)
 
 target_link_libraries(WraplandClient
-    PUBLIC Qt5::Gui
-    PRIVATE Wayland::Client
-        Qt5::Concurrent
+  PUBLIC
+    Qt5::Gui
+  PRIVATE
+    Wayland::Client
+    Qt5::Concurrent
 )
 
-set_target_properties(WraplandClient PROPERTIES VERSION   ${WRAPLAND_VERSION_STRING}
-                                                 SOVERSION ${WRAPLAND_SOVERSION}
-                                                 EXPORT_NAME WraplandClient
+set_target_properties(WraplandClient PROPERTIES
+  VERSION ${WRAPLAND_VERSION_STRING}
+  SOVERSION ${WRAPLAND_SOVERSION}
+  EXPORT_NAME WraplandClient
 )
 
-install(TARGETS WraplandClient EXPORT WraplandTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
+install(
+  TARGETS WraplandClient
+  EXPORT WraplandTargets
+  ${INSTALL_TARGETS_DEFAULT_ARGS}
+)
 
 set(CLIENT_LIB_HEADERS
-  ${CMAKE_CURRENT_BINARY_DIR}/Wrapland/Client/wraplandclient_export.h
-  appmenu.h
-  blur.h
-  buffer.h
-  compositor.h
-  connection_thread.h
-  contrast.h
-  event_queue.h
-  datadevice.h
-  datadevicemanager.h
-  dataoffer.h
-  datasource.h
-  dpms.h
-  fakeinput.h
-  fullscreen_shell.h
-  idle.h
-  idleinhibit.h
-  input_method_v2.h
-  keyboard.h
-  keystate.h
-  keyboard_shortcuts_inhibit.h
-  layer_shell_v1.h
-  output.h
-  output_configuration_v1.h
-  output_management_v1.h
-  output_device_v1.h
-  wlr_output_configuration_v1.h
-  wlr_output_manager_v1.h
-  pointer.h
-  pointerconstraints.h
-  plasmashell.h
-  plasmavirtualdesktop.h
-  plasmawindowmanagement.h
-  plasmawindowmodel.h
-  presentation_time.h
-  primary_selection.h
-  pointergestures.h
-  region.h
-  registry.h
-  relativepointer.h
-  seat.h
-  server_decoration_palette.h
-  shadow.h
-  shell.h
-  shm_pool.h
-  slide.h
-  subcompositor.h
-  subsurface.h
-  surface.h
-  touch.h
-  text_input_v2.h
-  text_input_v3.h
-  viewporter.h
-  xdg_activation_v1.h
-  xdgdecoration.h
-  xdg_shell.h
-  xdg_shell_popup.h
-  xdg_shell_positioner.h
-  xdg_shell_toplevel.h
-  xdgforeign.h
-  xdgoutput.h
-  linux_dmabuf_v1.h
+    ${CMAKE_CURRENT_BINARY_DIR}/Wrapland/Client/wraplandclient_export.h
+    appmenu.h
+    blur.h
+    buffer.h
+    compositor.h
+    connection_thread.h
+    contrast.h
+    event_queue.h
+    datadevice.h
+    datadevicemanager.h
+    dataoffer.h
+    datasource.h
+    dpms.h
+    fakeinput.h
+    fullscreen_shell.h
+    idle.h
+    idleinhibit.h
+    input_method_v2.h
+    keyboard.h
+    keystate.h
+    keyboard_shortcuts_inhibit.h
+    layer_shell_v1.h
+    output.h
+    output_configuration_v1.h
+    output_management_v1.h
+    output_device_v1.h
+    wlr_output_configuration_v1.h
+    wlr_output_manager_v1.h
+    pointer.h
+    pointerconstraints.h
+    plasmashell.h
+    plasmavirtualdesktop.h
+    plasmawindowmanagement.h
+    plasmawindowmodel.h
+    presentation_time.h
+    primary_selection.h
+    pointergestures.h
+    region.h
+    registry.h
+    relativepointer.h
+    seat.h
+    server_decoration_palette.h
+    shadow.h
+    shell.h
+    shm_pool.h
+    slide.h
+    subcompositor.h
+    subsurface.h
+    surface.h
+    touch.h
+    text_input_v2.h
+    text_input_v3.h
+    viewporter.h
+    xdg_activation_v1.h
+    xdgdecoration.h
+    xdg_shell.h
+    xdg_shell_popup.h
+    xdg_shell_positioner.h
+    xdg_shell_toplevel.h
+    xdgforeign.h
+    xdgoutput.h
+    linux_dmabuf_v1.h
 )
 
-install(FILES
-  ${CLIENT_LIB_HEADERS}
-  DESTINATION ${INCLUDE_INSTALL_DIR}/Wrapland/Client COMPONENT Devel
+install(
+  FILES ${CLIENT_LIB_HEADERS}
+  DESTINATION ${INCLUDE_INSTALL_DIR}/Wrapland/Client
+  COMPONENT Devel
 )
 
 # make available to ecm_add_qch in parent folder
-set(WraplandClient_APIDOX_SRCS ${CLIENT_LIB_HEADERS} PARENT_SCOPE)
-set(WraplandClient_APIDOX_BUILD_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} PARENT_SCOPE)
+set(WraplandClient_APIDOX_SRCS
+    ${CLIENT_LIB_HEADERS}
+    PARENT_SCOPE
+)
+set(WraplandClient_APIDOX_BUILD_INCLUDE_DIRS
+    ${CMAKE_CURRENT_BINARY_DIR}
+    PARENT_SCOPE
+)

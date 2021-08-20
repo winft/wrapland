@@ -8,7 +8,8 @@ include("${CMAKE_CURRENT_LIST_DIR}/WraplandTargets.cmake")
 
 function(wraplandtest testBinaryName)
 
-    add_test(NAME ${testBinaryName}-wrapland-test COMMAND
-            @CMAKE_INSTALL_FULL_LIBEXECDIR@/org-kde-kf5-wrapland-testserver ${CMAKE_CURRENT_BINARY_DIR}/${testBinaryName}
-    )
+  add_test(NAME ${testBinaryName}-wrapland-test
+           COMMAND @CMAKE_INSTALL_FULL_LIBEXECDIR@/org-kde-kf5-wrapland-testserver
+                   ${CMAKE_CURRENT_BINARY_DIR}/${testBinaryName}
+  )
 endfunction()
