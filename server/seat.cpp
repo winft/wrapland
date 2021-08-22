@@ -134,12 +134,6 @@ void Seat::Private::cleanupDataDevice(DataDevice* dataDevice)
     }
 }
 
-template<>
-void Seat::Private::register_device(DataDevice* device)
-{
-    registerDataDevice(device);
-}
-
 void Seat::Private::registerDataDevice(DataDevice* dataDevice)
 {
     dataDevices.push_back(dataDevice);
@@ -153,10 +147,6 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
     });
     QObject::connect(dataDevice, &DataDevice::selectionCleared, q_ptr, [this, dataDevice] {
         updateSelection(dataDevice, false);
-    });
-
-    QObject::connect(dataDevice, &DataDevice::dragStarted, q_ptr, [this, dataDevice] {
-        drags.perform_drag(dataDevice);
     });
 
     // Is the new DataDevice for the current keyoard focus?
@@ -183,12 +173,6 @@ void Seat::Private::cleanupPrimarySelectionDevice(PrimarySelectionDevice* primar
             selection->sendClearSelection();
         }
     }
-}
-
-template<>
-void Seat::Private::register_device(PrimarySelectionDevice* device)
-{
-    registerPrimarySelectionDevice(device);
 }
 
 void Seat::Private::registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice)

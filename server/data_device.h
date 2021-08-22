@@ -39,8 +39,6 @@ class WRAPLANDSERVER_EXPORT DataDevice : public QObject
 public:
     using source_t = Wrapland::Server::DataSource;
 
-    explicit DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
-
     Seat* seat() const;
     Client* client() const;
 
@@ -67,6 +65,9 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
+    friend class DataDeviceManager;
+    DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
+
     class Private;
     Private* d_ptr;
 

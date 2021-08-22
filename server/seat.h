@@ -201,13 +201,6 @@ private:
     friend class text_input_manager_v3;
     friend class touch_pool;
 
-    template<typename Global>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void get_selection_device([[maybe_unused]] wl_client* wlClient,
-                                     wl_resource* wlResource,
-                                     uint32_t id,
-                                     wl_resource* wlSeat);
-
     Seat(Display* display, QObject* parent);
 
     // Returns whether an actual change took place.

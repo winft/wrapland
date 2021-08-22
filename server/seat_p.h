@@ -65,9 +65,6 @@ public:
     TextInputV2* textInputV2ForSurface(Surface* surface) const;
     text_input_v3* textInputV3ForSurface(Surface* surface) const;
 
-    template<typename Device>
-    void register_device(Device*);
-
     void registerDataDevice(DataDevice* dataDevice);
     void registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
     void registerInputMethod(input_method_v2* im);
@@ -117,12 +114,12 @@ public:
 
     Seat* q_ptr;
 
-private:
     void updateSelection(DataDevice* dataDevice, bool set);
     void updateSelection(PrimarySelectionDevice* dataDevice, bool set);
     void cleanupDataDevice(DataDevice* dataDevice);
     void cleanupPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
 
+private:
     static void getPointerCallback(SeatBind* bind, uint32_t id);
     static void getKeyboardCallback(SeatBind* bind, uint32_t id);
     static void getTouchCallback(SeatBind* bind, uint32_t id);

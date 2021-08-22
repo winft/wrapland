@@ -38,6 +38,7 @@ set(SERVER_LIB_SRCS
   pointer_pool.cpp
   presentation_time.cpp
   primary_selection.cpp
+  primary_selection_device_manager.cpp
   region.cpp
   relative_pointer_v1.cpp
   seat.cpp
