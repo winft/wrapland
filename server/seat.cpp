@@ -24,7 +24,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_device.h"
 #include "data_source.h"
 #include "display.h"
-#include "input_method_v2.h"
 #include "primary_selection.h"
 #include "surface.h"
 
@@ -103,18 +102,6 @@ uint32_t Seat::Private::getCapabilities() const
 void Seat::Private::sendCapabilities()
 {
     send<wl_seat_send_capabilities>(getCapabilities());
-}
-
-void Seat::Private::registerInputMethod(input_method_v2* im)
-{
-    assert(!input_method);
-    input_method = im;
-
-    QObject::connect(im, &input_method_v2::resourceDestroyed, q_ptr, [this] {
-        input_method = nullptr;
-        Q_EMIT q_ptr->input_method_v2_changed();
-    });
-    Q_EMIT q_ptr->input_method_v2_changed();
 }
 
 void Seat::setHasKeyboard(bool has)

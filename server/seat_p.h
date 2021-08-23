@@ -59,8 +59,6 @@ public:
 
     uint32_t getCapabilities() const;
 
-    void registerInputMethod(input_method_v2* im);
-
     std::string name;
     bool pointer = false;
     bool keyboard = false;
