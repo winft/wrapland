@@ -105,6 +105,8 @@ Q_SIGNALS:
      **/
     void configureRequested(const QRect& relativePosition, quint32 serial);
 
+    void repositionRequested(xdg_popup* positioner, uint32_t token);
+
 private:
     explicit XdgShellPopup(QObject* parent = nullptr);
     friend class XdgShell;
