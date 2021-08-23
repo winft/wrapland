@@ -88,7 +88,7 @@ void DataDeviceManager::get_device(Client* client, uint32_t version, uint32_t id
         seat->d_ptr->drags.perform_drag(device);
     });
 
-    seat->d_ptr->registerDataDevice(device);
+    seat->d_ptr->data_devices.register_device(device);
     Q_EMIT deviceCreated(device);
 }
 

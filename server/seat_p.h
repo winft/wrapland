@@ -24,6 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "drag_pool.h"
 #include "keyboard_pool.h"
 #include "pointer_pool.h"
+#include "selection_pool.h"
 #include "touch_pool.h"
 
 #include "wayland/global.h"
@@ -41,7 +42,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class DataDevice;
 class TextInputV2;
 
 constexpr uint32_t SeatVersion = 5;
@@ -60,18 +60,12 @@ public:
 
     uint32_t getCapabilities() const;
 
-    std::vector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
-
     TextInputV2* textInputV2ForSurface(Surface* surface) const;
     text_input_v3* textInputV3ForSurface(Surface* surface) const;
 
-    void registerDataDevice(DataDevice* dataDevice);
-    void registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
     void registerInputMethod(input_method_v2* im);
     void registerTextInput(TextInputV2* ti);
     void registerTextInput(text_input_v3* ti);
-    void cancelPreviousSelection(DataDevice* newlySelectedDataDevice) const;
-    void cancelPreviousSelection(PrimarySelectionDevice* dataDevice) const;
 
     std::string name;
     bool pointer = false;
@@ -83,13 +77,12 @@ public:
     keyboard_pool keyboards;
     touch_pool touches;
     drag_pool drags;
-    std::vector<DataDevice*> dataDevices;
-    std::vector<PrimarySelectionDevice*> primarySelectionDevices;
+    selection_pool<DataDevice, &Seat::selectionChanged> data_devices;
+    selection_pool<PrimarySelectionDevice, &Seat::primarySelectionChanged>
+        primary_selection_devices;
     input_method_v2* input_method{nullptr};
     std::vector<TextInputV2*> textInputs;
     std::vector<text_input_v3*> textInputsV3;
-    DataDevice* currentSelection = nullptr;
-    PrimarySelectionDevice* currentPrimarySelectionDevice = nullptr;
 
     struct {
         struct {
@@ -113,11 +106,6 @@ public:
     //
 
     Seat* q_ptr;
-
-    void updateSelection(DataDevice* dataDevice, bool set);
-    void updateSelection(PrimarySelectionDevice* dataDevice, bool set);
-    void cleanupDataDevice(DataDevice* dataDevice);
-    void cleanupPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
 
 private:
     static void getPointerCallback(SeatBind* bind, uint32_t id);

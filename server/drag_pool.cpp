@@ -66,7 +66,7 @@ void drag_pool::set_target(Surface* new_surface,
     // In theory we can have multiple data devices and we should send the drag to all of them, but
     // that seems overly complicated. In practice so far the only case for multiple data devices is
     // for clipboard overriding.
-    target = interfaceForSurface(new_surface, seat->d_ptr->dataDevices);
+    target = interfaceForSurface(new_surface, seat->d_ptr->data_devices.devices);
 
     if (mode == Mode::Pointer) {
         seat->setPointerPos(globalPosition);

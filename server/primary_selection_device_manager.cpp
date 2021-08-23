@@ -67,7 +67,7 @@ void PrimarySelectionDeviceManager::get_device(Client* client,
         return;
     }
 
-    seat->d_ptr->registerPrimarySelectionDevice(device);
+    seat->d_ptr->primary_selection_devices.register_device(device);
     Q_EMIT deviceCreated(device);
 }
 

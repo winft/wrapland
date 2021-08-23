@@ -16,8 +16,6 @@ namespace Wrapland::Server
 class Client;
 class Keyboard;
 class Surface;
-class DataDevice;
-class PrimarySelectionDevice;
 class Seat;
 
 enum class button_state;
@@ -27,8 +25,6 @@ struct keyboard_focus {
     std::vector<Keyboard*> devices;
     QMetaObject::Connection destroyConnection;
     uint32_t serial = 0;
-    std::vector<DataDevice*> selections;
-    std::vector<PrimarySelectionDevice*> primarySelections;
 };
 
 struct keyboard_map {
