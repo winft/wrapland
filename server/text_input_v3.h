@@ -92,7 +92,7 @@ class WRAPLANDSERVER_EXPORT text_input_v3 : public QObject
     Q_OBJECT
 public:
     text_input_v3_state const& state() const;
-    Surface* surface() const;
+    Surface* entered_surface() const;
     Client* client() const;
 
     void delete_surrounding_text(uint32_t before_length, uint32_t after_length);
