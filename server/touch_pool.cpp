@@ -121,9 +121,9 @@ void touch_pool::touch_up(int32_t id)
 {
     Q_ASSERT(ids.count(id));
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
-    if (seat->isDragTouch() && seat->d_ptr->drag.source->dragImplicitGrabSerial() == ids[id]) {
+    if (seat->isDragTouch() && seat->d_ptr->drags.source->dragImplicitGrabSerial() == ids[id]) {
         // the implicitly grabbing touch point has been upped
-        seat->d_ptr->endDrag(serial);
+        seat->d_ptr->drags.end(serial);
     }
     for (auto touch : focus.devices) {
         touch->up(id, serial);
@@ -177,13 +177,13 @@ void touch_pool::cancel_sequence()
     }
     if (seat->isDragTouch()) {
         // cancel the drag, don't drop.
-        if (seat->d_ptr->drag.target) {
+        if (seat->d_ptr->drags.target) {
             // remove the current target
-            seat->d_ptr->drag.target->updateDragTarget(nullptr, 0);
-            seat->d_ptr->drag.target = nullptr;
+            seat->d_ptr->drags.target->updateDragTarget(nullptr, 0);
+            seat->d_ptr->drags.target = nullptr;
         }
         // and end the drag for the source, serial does not matter
-        seat->d_ptr->endDrag(0);
+        seat->d_ptr->drags.end(0);
     }
     ids.clear();
 }

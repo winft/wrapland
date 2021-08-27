@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "seat.h"
 
+#include "drag_pool.h"
 #include "keyboard_pool.h"
 #include "pointer_pool.h"
 #include "touch_pool.h"
@@ -72,7 +73,6 @@ public:
     void registerInputMethod(input_method_v2* im);
     void registerTextInput(TextInputV2* ti);
     void registerTextInput(text_input_v3* ti);
-    void endDrag(uint32_t serial);
     void cancelPreviousSelection(DataDevice* newlySelectedDataDevice) const;
     void cancelPreviousSelection(PrimarySelectionDevice* dataDevice) const;
 
@@ -85,6 +85,7 @@ public:
     pointer_pool pointers;
     keyboard_pool keyboards;
     touch_pool touches;
+    drag_pool drags;
     std::vector<DataDevice*> dataDevices;
     std::vector<PrimarySelectionDevice*> primarySelectionDevices;
     input_method_v2* input_method{nullptr};
@@ -109,25 +110,6 @@ public:
             text_input_v3* text_input{nullptr};
         } v3;
     } global_text_input;
-
-    struct Drag {
-        enum class Mode {
-            None,
-            Pointer,
-            Touch,
-        };
-        Mode mode = Mode::None;
-        DataDevice* source = nullptr;
-        DataDevice* target = nullptr;
-        Surface* surface = nullptr;
-        Pointer* sourcePointer = nullptr;
-        Touch* sourceTouch = nullptr;
-        QMatrix4x4 transformation;
-        QMetaObject::Connection destroyConnection;
-        QMetaObject::Connection dragSourceDestroyConnection;
-        QMetaObject::Connection target_destroy_connection;
-    };
-    Drag drag;
 
     // legacy
     friend class SeatInterface;

@@ -29,7 +29,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "surface.h"
 #include "text_input_v2_p.h"
 #include "text_input_v3_p.h"
-#include "touch.h"
 #include "utils.h"
 
 #include <config-wrapland.h>
@@ -47,6 +46,7 @@ Seat::Private::Private(Seat* q, Display* display)
     , pointers(q)
     , keyboards(q)
     , touches(q)
+    , drags(q)
     , q_ptr(q)
 {
 }
@@ -156,52 +156,7 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
     });
 
     QObject::connect(dataDevice, &DataDevice::dragStarted, q_ptr, [this, dataDevice] {
-        const auto dragSerial = dataDevice->dragImplicitGrabSerial();
-        auto* dragSurface = dataDevice->origin();
-        if (q_ptr->hasImplicitPointerGrab(dragSerial)) {
-            drag.mode = Drag::Mode::Pointer;
-            drag.sourcePointer = interfaceForSurface(dragSurface, pointers.devices);
-            drag.transformation = pointers.focus.transformation;
-        } else if (q_ptr->hasImplicitTouchGrab(dragSerial)) {
-            drag.mode = Drag::Mode::Touch;
-            drag.sourceTouch = interfaceForSurface(dragSurface, touches.devices);
-            // TODO(unknown author): touch transformation
-        } else {
-            // no implicit grab, abort drag
-            return;
-        }
-        auto* originSurface = dataDevice->origin();
-        const bool proxied = originSurface->dataProxy();
-        if (!proxied) {
-            // origin surface
-            drag.target = dataDevice;
-            drag.surface = originSurface;
-            // TODO(unknown author): transformation needs to be either pointer or touch
-            drag.transformation = pointers.focus.transformation;
-        }
-        drag.source = dataDevice;
-        drag.sourcePointer = interfaceForSurface(originSurface, pointers.devices);
-        drag.destroyConnection
-            = QObject::connect(dataDevice, &DataDevice::resourceDestroyed, q_ptr, [this] {
-                  endDrag(display()->handle()->nextSerial());
-              });
-        if (dataDevice->dragSource()) {
-            drag.dragSourceDestroyConnection = QObject::connect(
-                dataDevice->dragSource(), &DataSource::resourceDestroyed, q_ptr, [this] {
-                    const auto serial = display()->handle()->nextSerial();
-                    if (drag.target) {
-                        drag.target->updateDragTarget(nullptr, serial);
-                        drag.target = nullptr;
-                    }
-                    endDrag(serial);
-                });
-        } else {
-            drag.dragSourceDestroyConnection = QMetaObject::Connection();
-        }
-        dataDevice->updateDragTarget(proxied ? nullptr : originSurface,
-                                     dataDevice->dragImplicitGrabSerial());
-        Q_EMIT q_ptr->dragStarted();
-        Q_EMIT q_ptr->dragSurfaceChanged();
+        drags.perform_drag(dataDevice);
     });
 
     // Is the new DataDevice for the current keyoard focus?
@@ -368,23 +323,6 @@ void Seat::Private::registerTextInput(text_input_v3* ti)
     });
 }
 
-void Seat::Private::endDrag(uint32_t serial)
-{
-    auto target = drag.target;
-    QObject::disconnect(drag.destroyConnection);
-    QObject::disconnect(drag.dragSourceDestroyConnection);
-    if (drag.source && drag.source->dragSource()) {
-        drag.source->dragSource()->dropPerformed();
-    }
-    if (target) {
-        target->drop();
-        target->updateDragTarget(nullptr, serial);
-    }
-    drag = Drag();
-    Q_EMIT q_ptr->dragSurfaceChanged();
-    Q_EMIT q_ptr->dragEnded();
-}
-
 void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice) const
 {
     if (!currentSelection) {
@@ -527,56 +465,12 @@ void Seat::setDragTarget(Surface* surface,
                          const QPointF& globalPosition,
                          const QMatrix4x4& inputTransformation)
 {
-    if (surface == d_ptr->drag.surface) {
-        // no change
-        return;
-    }
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    if (d_ptr->drag.target) {
-        d_ptr->drag.target->updateDragTarget(nullptr, serial);
-        QObject::disconnect(d_ptr->drag.target_destroy_connection);
-        d_ptr->drag.target_destroy_connection = QMetaObject::Connection();
-    }
-
-    // In theory we can have multiple data devices and we should send the drag to all of them, but
-    // that seems overly complicated. In practice so far the only case for multiple data devices is
-    // for clipboard overriding.
-    d_ptr->drag.target = nullptr;
-    if (!d_ptr->dataDevicesForSurface(surface).empty()) {
-        d_ptr->drag.target = d_ptr->dataDevicesForSurface(surface).front();
-    }
-
-    if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
-        setPointerPos(globalPosition);
-    } else if (d_ptr->drag.mode == Private::Drag::Mode::Touch
-               && d_ptr->touches.focus.firstTouchPos != globalPosition) {
-        touchMove(d_ptr->touches.ids.cbegin()->first, globalPosition);
-    }
-    if (d_ptr->drag.target) {
-        d_ptr->drag.surface = surface;
-        d_ptr->drag.transformation = inputTransformation;
-        d_ptr->drag.target->updateDragTarget(surface, serial);
-        d_ptr->drag.target_destroy_connection
-            = QObject::connect(d_ptr->drag.target, &DataDevice::resourceDestroyed, this, [this] {
-                  QObject::disconnect(d_ptr->drag.target_destroy_connection);
-                  d_ptr->drag.target_destroy_connection = QMetaObject::Connection();
-                  d_ptr->drag.target = nullptr;
-              });
-
-    } else {
-        d_ptr->drag.surface = nullptr;
-    }
-    Q_EMIT dragSurfaceChanged();
+    d_ptr->drags.set_target(surface, globalPosition, inputTransformation);
 }
 
 void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation)
 {
-    if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
-        setDragTarget(surface, pointerPos(), inputTransformation);
-    } else {
-        Q_ASSERT(d_ptr->drag.mode == Private::Drag::Mode::Touch);
-        setDragTarget(surface, d_ptr->touches.focus.firstTouchPos, inputTransformation);
-    }
+    d_ptr->drags.set_target(surface, inputTransformation);
 }
 
 Surface* Seat::focusedPointerSurface() const
@@ -920,17 +814,17 @@ input_method_v2* Seat::get_input_method_v2() const
 
 bool Seat::isDrag() const
 {
-    return d_ptr->drag.mode != Private::Drag::Mode::None;
+    return d_ptr->drags.is_in_progress();
 }
 
 bool Seat::isDragPointer() const
 {
-    return d_ptr->drag.mode == Private::Drag::Mode::Pointer;
+    return d_ptr->drags.is_pointer_drag();
 }
 
 bool Seat::isDragTouch() const
 {
-    return d_ptr->drag.mode == Private::Drag::Mode::Touch;
+    return d_ptr->drags.is_touch_drag();
 }
 
 bool Seat::hasImplicitPointerGrab(uint32_t serial) const
@@ -940,26 +834,26 @@ bool Seat::hasImplicitPointerGrab(uint32_t serial) const
 
 QMatrix4x4 Seat::dragSurfaceTransformation() const
 {
-    return d_ptr->drag.transformation;
+    return d_ptr->drags.transformation;
 }
 
 Surface* Seat::dragSurface() const
 {
-    return d_ptr->drag.surface;
+    return d_ptr->drags.surface;
 }
 
 Pointer* Seat::dragPointer() const
 {
-    if (d_ptr->drag.mode != Private::Drag::Mode::Pointer) {
+    if (d_ptr->drags.mode != drag_pool::Mode::Pointer) {
         return nullptr;
     }
 
-    return d_ptr->drag.sourcePointer;
+    return d_ptr->drags.sourcePointer;
 }
 
 DataDevice* Seat::dragSource() const
 {
-    return d_ptr->drag.source;
+    return d_ptr->drags.source;
 }
 
 bool Seat::setFocusedTextInputV2Surface(Surface* surface)

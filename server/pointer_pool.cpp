@@ -244,11 +244,11 @@ void pointer_pool::button_released(uint32_t button)
     update_button_serial(button, serial);
     update_button_state(button, button_state::released);
     if (seat->isDragPointer()) {
-        if (seat->d_ptr->drag.source->dragImplicitGrabSerial() != currentButtonSerial) {
+        if (seat->d_ptr->drags.source->dragImplicitGrabSerial() != currentButtonSerial) {
             // not our drag button - ignore
             return;
         }
-        seat->d_ptr->endDrag(serial);
+        seat->d_ptr->drags.end(serial);
         return;
     }
     if (focus.surface) {

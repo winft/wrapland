@@ -11,6 +11,7 @@ set(SERVER_LIB_SRCS
   data_source.cpp
   display.cpp
   dpms.cpp
+  drag_pool.cpp
   egl_stream_controller.cpp
   fake_input.cpp
   filtered_display.cpp

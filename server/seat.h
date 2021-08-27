@@ -192,6 +192,7 @@ Q_SIGNALS:
 private:
     friend class Display;
     friend class DataDeviceManager;
+    friend class drag_pool;
     friend class keyboard_pool;
     friend class pointer_pool;
     friend class PrimarySelectionDeviceManager;
