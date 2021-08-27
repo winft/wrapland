@@ -19,6 +19,7 @@ set(SERVER_LIB_SRCS
   kde_idle.cpp
   keyboard.cpp
   keystate.cpp
+  keyboard_pool.cpp
   keyboard_shortcuts_inhibit.cpp
   layer_shell_v1.cpp
   linux_dmabuf_v1.cpp

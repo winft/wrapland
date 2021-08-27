@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "seat.h"
 
+#include "keyboard_pool.h"
 #include "pointer_pool.h"
 #include "touch_pool.h"
 
@@ -58,7 +59,6 @@ public:
 
     uint32_t getCapabilities() const;
 
-    std::vector<Keyboard*> keyboardsForSurface(Surface* surface) const;
     std::vector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
 
     TextInputV2* textInputV2ForSurface(Surface* surface) const;
@@ -83,7 +83,7 @@ public:
     QList<wl_resource*> resources;
     uint32_t timestamp = 0;
     pointer_pool pointers;
-    std::vector<Keyboard*> keyboards;
+    keyboard_pool keyboards;
     touch_pool touches;
     std::vector<DataDevice*> dataDevices;
     std::vector<PrimarySelectionDevice*> primarySelectionDevices;
@@ -92,55 +92,6 @@ public:
     std::vector<text_input_v3*> textInputsV3;
     DataDevice* currentSelection = nullptr;
     PrimarySelectionDevice* currentPrimarySelectionDevice = nullptr;
-
-    // Keyboard related members
-    struct SeatKeyboard {
-        enum class State {
-            Released,
-            Pressed,
-        };
-        QHash<uint32_t, State> states;
-        struct Keymap {
-            int fd = -1;
-            std::string content;
-            bool xkbcommonCompatible = false;
-        };
-        Keymap keymap;
-        struct Modifiers {
-            bool operator==(Modifiers const& other) const
-            {
-                return depressed == other.depressed && latched == other.latched
-                    && locked == other.locked && group == other.group && serial == other.serial;
-            }
-            bool operator!=(Modifiers const& other) const
-            {
-                return !(*this == other);
-            }
-            uint32_t depressed = 0;
-            uint32_t latched = 0;
-            uint32_t locked = 0;
-            uint32_t group = 0;
-            uint32_t serial = 0;
-        };
-        Modifiers modifiers;
-        struct Focus {
-            Surface* surface = nullptr;
-            std::vector<Keyboard*> keyboards;
-            QMetaObject::Connection destroyConnection;
-            uint32_t serial = 0;
-            std::vector<DataDevice*> selections;
-            std::vector<PrimarySelectionDevice*> primarySelections;
-        };
-        Focus focus;
-        uint32_t lastStateSerial = 0;
-        struct {
-            int32_t charactersPerSecond = 0;
-            int32_t delay = 0;
-        } keyRepeat;
-    };
-    SeatKeyboard keys;
-
-    bool updateKey(uint32_t key, SeatKeyboard::State state);
 
     struct {
         struct {
@@ -185,8 +136,6 @@ public:
     Seat* q_ptr;
 
 private:
-    void getKeyboard(SeatBind* bind, uint32_t id);
-
     void updateSelection(DataDevice* dataDevice, bool set);
     void updateSelection(PrimarySelectionDevice* dataDevice, bool set);
     void cleanupDataDevice(DataDevice* dataDevice);

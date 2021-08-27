@@ -55,6 +55,7 @@ private:
     void repeatInfo(qint32 charactersPerSecond, qint32 delay);
 
     friend class Seat;
+    friend class keyboard_pool;
     Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
     class Private;

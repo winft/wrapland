@@ -25,8 +25,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_source.h"
 #include "display.h"
 #include "input_method_v2.h"
-#include "keyboard.h"
-#include "keyboard_p.h"
 #include "primary_selection.h"
 #include "surface.h"
 #include "text_input_v2_p.h"
@@ -35,6 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "utils.h"
 
 #include <config-wrapland.h>
+#include <cstdint>
 
 #ifndef WL_SEAT_NAME_SINCE_VERSION
 #define WL_SEAT_NAME_SINCE_VERSION 2
@@ -46,6 +45,7 @@ namespace Wrapland::Server
 Seat::Private::Private(Seat* q, Display* display)
     : SeatGlobal(q, display, &wl_seat_interface, &s_interface)
     , pointers(q)
+    , keyboards(q)
     , touches(q)
     , q_ptr(q)
 {
@@ -80,20 +80,6 @@ void Seat::Private::bindInit(SeatBind* bind)
     send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(bind, name.c_str());
 }
 
-bool Seat::Private::updateKey(uint32_t key, SeatKeyboard::State state)
-{
-    auto it = keys.states.find(key);
-    if (it == keys.states.end()) {
-        keys.states.insert(key, state);
-        return true;
-    }
-    if (it.value() == state) {
-        return false;
-    }
-    it.value() = state;
-    return true;
-}
-
 void Seat::Private::sendName()
 {
     send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(name.c_str());
@@ -119,11 +105,6 @@ void Seat::Private::sendCapabilities()
     send<wl_seat_send_capabilities>(getCapabilities());
 }
 
-std::vector<Keyboard*> Seat::Private::keyboardsForSurface(Surface* surface) const
-{
-    return interfacesForSurface(surface, keyboards);
-}
-
 std::vector<DataDevice*> Seat::Private::dataDevicesForSurface(Surface* surface) const
 {
     return interfacesForSurface(surface, dataDevices);
@@ -142,12 +123,12 @@ text_input_v3* Seat::Private::textInputV3ForSurface(Surface* surface) const
 void Seat::Private::cleanupDataDevice(DataDevice* dataDevice)
 {
     remove_one(dataDevices, dataDevice);
-    remove_one(keys.focus.selections, dataDevice);
+    remove_one(keyboards.focus.selections, dataDevice);
     if (currentSelection == dataDevice) {
         // current selection is cleared
         currentSelection = nullptr;
         Q_EMIT q_ptr->selectionChanged(nullptr);
-        for (auto selection : keys.focus.selections) {
+        for (auto selection : keyboards.focus.selections) {
             selection->sendClearSelection();
         }
     }
@@ -224,10 +205,10 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
     });
 
     // Is the new DataDevice for the current keyoard focus?
-    if (keys.focus.surface) {
+    if (keyboards.focus.surface) {
         // Same client?
-        if (keys.focus.surface->client() == dataDevice->client()) {
-            keys.focus.selections.push_back(dataDevice);
+        if (keyboards.focus.surface->client() == dataDevice->client()) {
+            keyboards.focus.selections.push_back(dataDevice);
             if (currentSelection && currentSelection->selection()) {
                 dataDevice->sendSelection(currentSelection);
             }
@@ -238,12 +219,12 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
 void Seat::Private::cleanupPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice)
 {
     remove_one(primarySelectionDevices, primarySelectionDevice);
-    remove_one(keys.focus.primarySelections, primarySelectionDevice);
+    remove_one(keyboards.focus.primarySelections, primarySelectionDevice);
     if (currentPrimarySelectionDevice == primarySelectionDevice) {
         // current selection is cleared
         currentPrimarySelectionDevice = nullptr;
         Q_EMIT q_ptr->primarySelectionChanged(nullptr);
-        for (auto selection : keys.focus.primarySelections) {
+        for (auto selection : keyboards.focus.primarySelections) {
             selection->sendClearSelection();
         }
     }
@@ -276,10 +257,10 @@ void Seat::Private::registerPrimarySelectionDevice(PrimarySelectionDevice* prima
         [this, primarySelectionDevice] { updateSelection(primarySelectionDevice, false); });
 
     // Is the new PrimarySelectionDevice for the current keyoard on focus?
-    if (keys.focus.surface) {
+    if (keyboards.focus.surface) {
         // Same client?
-        if (keys.focus.surface->client() == primarySelectionDevice->client()) {
-            keys.focus.primarySelections.push_back(primarySelectionDevice);
+        if (keyboards.focus.surface->client() == primarySelectionDevice->client()) {
+            keyboards.focus.primarySelections.push_back(primarySelectionDevice);
             if (currentPrimarySelectionDevice && currentPrimarySelectionDevice->selection()) {
                 primarySelectionDevice->sendSelection(currentPrimarySelectionDevice);
             }
@@ -302,7 +283,7 @@ void Seat::Private::cancelPreviousSelection(PrimarySelectionDevice* dataDevice) 
 void Seat::Private::updateSelection(PrimarySelectionDevice* dataDevice, bool set)
 {
     bool selChanged = currentPrimarySelectionDevice != dataDevice;
-    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client())) {
+    if (keyboards.focus.surface && (keyboards.focus.surface->client() == dataDevice->client())) {
         // cancel the previous selection
         cancelPreviousSelection(dataDevice);
         // new selection on a data device belonging to current keyboard focus
@@ -310,7 +291,7 @@ void Seat::Private::updateSelection(PrimarySelectionDevice* dataDevice, bool set
     }
     if (dataDevice == currentPrimarySelectionDevice) {
         // need to send out the selection
-        for (auto focussedDevice : keys.focus.primarySelections) {
+        for (auto focussedDevice : keyboards.focus.primarySelections) {
             if (set) {
                 focussedDevice->sendSelection(dataDevice);
             } else {
@@ -421,7 +402,7 @@ void Seat::Private::cancelPreviousSelection(DataDevice* dataDevice) const
 void Seat::Private::updateSelection(DataDevice* dataDevice, bool set)
 {
     bool selChanged = currentSelection != dataDevice;
-    if (keys.focus.surface && (keys.focus.surface->client() == dataDevice->client())) {
+    if (keyboards.focus.surface && (keyboards.focus.surface->client() == dataDevice->client())) {
         // cancel the previous selection
         cancelPreviousSelection(dataDevice);
         // new selection on a data device belonging to current keyboard focus
@@ -429,7 +410,7 @@ void Seat::Private::updateSelection(DataDevice* dataDevice, bool set)
     }
     if (dataDevice == currentSelection) {
         // need to send out the selection
-        for (auto focussedDevice : keys.focus.selections) {
+        for (auto focussedDevice : keyboards.focus.selections) {
             if (set) {
                 focussedDevice->sendSelection(dataDevice);
             } else {
@@ -488,37 +469,8 @@ void Seat::Private::getPointerCallback(SeatBind* bind, uint32_t id)
 
 void Seat::Private::getKeyboardCallback(SeatBind* bind, uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
-
-    priv->getKeyboard(bind, id);
-}
-
-void Seat::Private::getKeyboard(SeatBind* bind, uint32_t id)
-{
-    auto client = bind->client()->handle();
-
-    // TODO(unknown author): only create if seat has keyboard?
-    auto keyboard = new Keyboard(client, bind->version(), id, q_ptr);
-
-    keyboard->repeatInfo(keys.keyRepeat.charactersPerSecond, keys.keyRepeat.delay);
-
-    if (keys.keymap.xkbcommonCompatible) {
-        keyboard->setKeymap(keys.keymap.content);
-    }
-
-    keyboards.push_back(keyboard);
-
-    if (keys.focus.surface && keys.focus.surface->client() == client) {
-        // this is a keyboard for the currently focused keyboard surface
-        keys.focus.keyboards.push_back(keyboard);
-        keyboard->setFocusedSurface(keys.focus.serial, keys.focus.surface);
-    }
-
-    QObject::connect(keyboard, &Keyboard::resourceDestroyed, q_ptr, [keyboard, this] {
-        remove_one(keyboards, keyboard);
-        remove_one(keys.focus.keyboards, keyboard);
-    });
-    Q_EMIT q_ptr->keyboardCreated(keyboard);
+    auto& manager = bind->global()->handle()->d_ptr->keyboards;
+    manager.create_device(bind->client()->handle(), bind->version(), id);
 }
 
 void Seat::Private::getTouchCallback(SeatBind* bind, uint32_t id)
@@ -772,60 +724,26 @@ void Seat::cancelPointerPinchGesture()
 
 void Seat::keyPressed(uint32_t key)
 {
-    d_ptr->keys.lastStateSerial = d_ptr->display()->handle()->nextSerial();
-    if (!d_ptr->updateKey(key, Private::SeatKeyboard::State::Pressed)) {
-        return;
-    }
-    if (d_ptr->keys.focus.surface) {
-        for (auto kbd : d_ptr->keys.focus.keyboards) {
-            kbd->keyPressed(d_ptr->keys.lastStateSerial, key);
-        }
-    }
+    d_ptr->keyboards.key_pressed(key);
 }
 
 void Seat::keyReleased(uint32_t key)
 {
-    d_ptr->keys.lastStateSerial = d_ptr->display()->handle()->nextSerial();
-    if (!d_ptr->updateKey(key, Private::SeatKeyboard::State::Released)) {
-        return;
-    }
-    if (d_ptr->keys.focus.surface) {
-        for (auto kbd : d_ptr->keys.focus.keyboards) {
-            kbd->keyReleased(d_ptr->keys.lastStateSerial, key);
-        }
-    }
+    d_ptr->keyboards.key_released(key);
 }
 
 Surface* Seat::focusedKeyboardSurface() const
 {
-    return d_ptr->keys.focus.surface;
+    return d_ptr->keyboards.focus.surface;
 }
 
 void Seat::setFocusedKeyboardSurface(Surface* surface)
 {
-    auto const serial = d_ptr->display()->handle()->nextSerial();
+    d_ptr->keyboards.set_focused_surface(surface);
 
-    for (auto kbd : d_ptr->keys.focus.keyboards) {
-        kbd->setFocusedSurface(serial, nullptr);
-    }
-
-    if (d_ptr->keys.focus.surface) {
-        disconnect(d_ptr->keys.focus.destroyConnection);
-    }
-
-    d_ptr->keys.focus = Private::SeatKeyboard::Focus();
-    d_ptr->keys.focus.surface = surface;
-    d_ptr->keys.focus.keyboards = d_ptr->keyboardsForSurface(surface);
-
-    if (d_ptr->keys.focus.surface) {
-        d_ptr->keys.focus.destroyConnection
-            = connect(surface, &Surface::resourceDestroyed, this, [this] {
-                  d_ptr->keys.focus = Private::SeatKeyboard::Focus();
-              });
-        d_ptr->keys.focus.serial = serial;
-
+    if (d_ptr->keyboards.focus.surface) {
         auto dataDevices = d_ptr->dataDevicesForSurface(surface);
-        d_ptr->keys.focus.selections = dataDevices;
+        d_ptr->keyboards.focus.selections = dataDevices;
         for (auto dataDevice : dataDevices) {
             if (d_ptr->currentSelection) {
                 dataDevice->sendSelection(d_ptr->currentSelection);
@@ -835,7 +753,7 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
         }
         auto const primarySelectionDevices
             = interfacesForSurface(surface, d_ptr->primarySelectionDevices);
-        d_ptr->keys.focus.primarySelections = primarySelectionDevices;
+        d_ptr->keyboards.focus.primarySelections = primarySelectionDevices;
         for (auto dataDevice : primarySelectionDevices) {
             if (d_ptr->currentPrimarySelectionDevice) {
                 dataDevice->sendSelection(d_ptr->currentPrimarySelectionDevice);
@@ -843,10 +761,6 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
                 dataDevice->sendClearSelection();
             }
         }
-    }
-
-    for (auto kbd : d_ptr->keys.focus.keyboards) {
-        kbd->setFocusedSurface(serial, surface);
     }
 
     // Focused text input surface follows keyboard.
@@ -857,11 +771,7 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
 
 void Seat::setKeymap(std::string const& content)
 {
-    d_ptr->keys.keymap.xkbcommonCompatible = true;
-    d_ptr->keys.keymap.content = content;
-    for (auto kbd : d_ptr->keyboards) {
-        kbd->setKeymap(content);
-    }
+    d_ptr->keyboards.set_keymap(content);
 }
 
 void Seat::updateKeyboardModifiers(uint32_t depressed,
@@ -869,106 +779,75 @@ void Seat::updateKeyboardModifiers(uint32_t depressed,
                                    uint32_t locked,
                                    uint32_t group)
 {
-    bool changed = false;
-
-    auto& saved_mods = d_ptr->keys.modifiers;
-    auto mods
-        = Private::SeatKeyboard::Modifiers{depressed, latched, locked, group, saved_mods.serial};
-    if (saved_mods != mods) {
-        saved_mods = mods;
-        changed = true;
-    }
-
-    if (!changed) {
-        return;
-    }
-
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    saved_mods.serial = serial;
-
-    if (d_ptr->keys.focus.surface) {
-        for (auto kbd : d_ptr->keys.focus.keyboards) {
-            kbd->updateModifiers(serial, depressed, latched, locked, group);
-        }
-    }
+    d_ptr->keyboards.update_modifiers(depressed, latched, locked, group);
 }
 
 void Seat::setKeyRepeatInfo(int32_t charactersPerSecond, int32_t delay)
 {
-    d_ptr->keys.keyRepeat.charactersPerSecond = qMax(charactersPerSecond, 0);
-    d_ptr->keys.keyRepeat.delay = qMax(delay, 0);
-    for (auto kbd : d_ptr->keyboards) {
-        kbd->repeatInfo(d_ptr->keys.keyRepeat.charactersPerSecond, d_ptr->keys.keyRepeat.delay);
-    }
+    d_ptr->keyboards.set_repeat_info(charactersPerSecond, delay);
 }
 
 int32_t Seat::keyRepeatDelay() const
 {
-    return d_ptr->keys.keyRepeat.delay;
+    return d_ptr->keyboards.keyRepeat.delay;
 }
 
 int32_t Seat::keyRepeatRate() const
 {
-    return d_ptr->keys.keyRepeat.charactersPerSecond;
+    return d_ptr->keyboards.keyRepeat.charactersPerSecond;
 }
 
 bool Seat::isKeymapXkbCompatible() const
 {
-    return d_ptr->keys.keymap.xkbcommonCompatible;
+    return d_ptr->keyboards.keymap.xkbcommonCompatible;
 }
 
 int Seat::keymapFileDescriptor() const
 {
-    return d_ptr->keys.keymap.fd;
+    return d_ptr->keyboards.keymap.fd;
 }
 
 uint32_t Seat::keymapSize() const
 {
-    return d_ptr->keys.keymap.content.size();
+    return d_ptr->keyboards.keymap.content.size();
 }
 
 uint32_t Seat::depressedModifiers() const
 {
-    return d_ptr->keys.modifiers.depressed;
+    return d_ptr->keyboards.modifiers.depressed;
 }
 
 uint32_t Seat::groupModifiers() const
 {
-    return d_ptr->keys.modifiers.group;
+    return d_ptr->keyboards.modifiers.group;
 }
 
 uint32_t Seat::latchedModifiers() const
 {
-    return d_ptr->keys.modifiers.latched;
+    return d_ptr->keyboards.modifiers.latched;
 }
 
 uint32_t Seat::lockedModifiers() const
 {
-    return d_ptr->keys.modifiers.locked;
+    return d_ptr->keyboards.modifiers.locked;
 }
 
 uint32_t Seat::lastModifiersSerial() const
 {
-    return d_ptr->keys.modifiers.serial;
+    return d_ptr->keyboards.modifiers.serial;
 }
 
 std::vector<uint32_t> Seat::pressedKeys() const
 {
-    std::vector<uint32_t> keys;
-    for (auto it = d_ptr->keys.states.constBegin(); it != d_ptr->keys.states.constEnd(); ++it) {
-        if (it.value() == Private::SeatKeyboard::State::Pressed) {
-            keys.push_back(it.key());
-        }
-    }
-    return keys;
+    return d_ptr->keyboards.pressed_keys();
 }
 
 Keyboard* Seat::focusedKeyboard() const
 {
-    if (d_ptr->keys.focus.keyboards.empty()) {
+    if (d_ptr->keyboards.focus.devices.empty()) {
         return nullptr;
     }
-    return d_ptr->keys.focus.keyboards.front();
+    return d_ptr->keyboards.focus.devices.front();
 }
 
 void Seat::cancelTouchSequence()
@@ -1189,7 +1068,7 @@ void Seat::setSelection(DataDevice* dataDevice)
     d_ptr->cancelPreviousSelection(dataDevice);
     d_ptr->currentSelection = dataDevice;
 
-    for (auto focusedDevice : d_ptr->keys.focus.selections) {
+    for (auto focusedDevice : d_ptr->keyboards.focus.selections) {
         if (dataDevice && dataDevice->selection()) {
             focusedDevice->sendSelection(dataDevice);
         } else {
@@ -1213,7 +1092,7 @@ void Seat::setPrimarySelection(PrimarySelectionDevice* dataDevice)
     d_ptr->cancelPreviousSelection(dataDevice);
     d_ptr->currentPrimarySelectionDevice = dataDevice;
 
-    for (auto focusedDevice : d_ptr->keys.focus.primarySelections) {
+    for (auto focusedDevice : d_ptr->keyboards.focus.primarySelections) {
         if (dataDevice && dataDevice->selection()) {
             focusedDevice->sendSelection(dataDevice);
         } else {
