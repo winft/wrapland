@@ -33,6 +33,7 @@ set(SERVER_LIB_SRCS
   pointer.cpp
   pointer_constraints_v1.cpp
   pointer_gestures_v1.cpp
+  pointer_pool.cpp
   presentation_time.cpp
   primary_selection.cpp
   region.cpp

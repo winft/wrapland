@@ -21,6 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "seat.h"
 
+#include "pointer_pool.h"
+
 #include "wayland/global.h"
 
 #include <QHash>
@@ -55,7 +57,6 @@ public:
 
     uint32_t getCapabilities() const;
 
-    std::vector<Pointer*> pointersForSurface(Surface* surface) const;
     std::vector<Keyboard*> keyboardsForSurface(Surface* surface) const;
     std::vector<Touch*> touchsForSurface(Surface* surface) const;
     std::vector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
@@ -81,7 +82,7 @@ public:
     bool touch = false;
     QList<wl_resource*> resources;
     uint32_t timestamp = 0;
-    std::vector<Pointer*> pointers;
+    pointer_pool pointers;
     std::vector<Keyboard*> keyboards;
     std::vector<Touch*> touchs;
     std::vector<DataDevice*> dataDevices;
@@ -91,31 +92,6 @@ public:
     std::vector<text_input_v3*> textInputsV3;
     DataDevice* currentSelection = nullptr;
     PrimarySelectionDevice* currentPrimarySelectionDevice = nullptr;
-
-    // Pointer related members
-    struct SeatPointer {
-        enum class State {
-            Released,
-            Pressed,
-        };
-        QHash<uint32_t, uint32_t> buttonSerials;
-        QHash<uint32_t, State> buttonStates;
-        QPointF pos;
-        struct Focus {
-            Surface* surface = nullptr;
-            std::vector<Pointer*> pointers;
-            QMetaObject::Connection destroyConnection;
-            QPointF offset = QPointF();
-            QMatrix4x4 transformation;
-            uint32_t serial = 0;
-        };
-        Focus focus;
-        QPointer<Surface> gestureSurface;
-    };
-    SeatPointer globalPointer;
-
-    void updatePointerButtonSerial(uint32_t button, uint32_t serial);
-    void updatePointerButtonState(uint32_t button, SeatPointer::State state);
 
     // Keyboard related members
     struct SeatKeyboard {
@@ -225,7 +201,6 @@ public:
     Seat* q_ptr;
 
 private:
-    void getPointer(SeatBind* bind, uint32_t id);
     void getKeyboard(SeatBind* bind, uint32_t id);
     void getTouch(SeatBind* bind, uint32_t id);
 

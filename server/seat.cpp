@@ -46,13 +46,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <linux/input.h>
 #endif
 
-#include <unordered_set>
-
 namespace Wrapland::Server
 {
 
 Seat::Private::Private(Seat* q, Display* display)
     : SeatGlobal(q, display, &wl_seat_interface, &s_interface)
+    , pointers(q)
     , q_ptr(q)
 {
 }
@@ -84,26 +83,6 @@ void Seat::Private::bindInit(SeatBind* bind)
 {
     send<wl_seat_send_capabilities>(bind, getCapabilities());
     send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(bind, name.c_str());
-}
-
-void Seat::Private::updatePointerButtonSerial(uint32_t button, uint32_t serial)
-{
-    auto it = globalPointer.buttonSerials.find(button);
-    if (it == globalPointer.buttonSerials.end()) {
-        globalPointer.buttonSerials.insert(button, serial);
-        return;
-    }
-    it.value() = serial;
-}
-
-void Seat::Private::updatePointerButtonState(uint32_t button, SeatPointer::State state)
-{
-    auto it = globalPointer.buttonStates.find(button);
-    if (it == globalPointer.buttonStates.end()) {
-        globalPointer.buttonStates.insert(button, state);
-        return;
-    }
-    it.value() = state;
 }
 
 bool Seat::Private::updateKey(uint32_t key, SeatKeyboard::State state)
@@ -143,11 +122,6 @@ uint32_t Seat::Private::getCapabilities() const
 void Seat::Private::sendCapabilities()
 {
     send<wl_seat_send_capabilities>(getCapabilities());
-}
-
-std::vector<Pointer*> Seat::Private::pointersForSurface(Surface* surface) const
-{
-    return interfacesForSurface(surface, pointers);
 }
 
 std::vector<Keyboard*> Seat::Private::keyboardsForSurface(Surface* surface) const
@@ -215,8 +189,8 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
         auto* dragSurface = dataDevice->origin();
         if (q_ptr->hasImplicitPointerGrab(dragSerial)) {
             drag.mode = Drag::Mode::Pointer;
-            drag.sourcePointer = interfaceForSurface(dragSurface, pointers);
-            drag.transformation = globalPointer.focus.transformation;
+            drag.sourcePointer = interfaceForSurface(dragSurface, pointers.devices);
+            drag.transformation = pointers.focus.transformation;
         } else if (q_ptr->hasImplicitTouchGrab(dragSerial)) {
             drag.mode = Drag::Mode::Touch;
             drag.sourceTouch = interfaceForSurface(dragSurface, touchs);
@@ -232,10 +206,10 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
             drag.target = dataDevice;
             drag.surface = originSurface;
             // TODO(unknown author): transformation needs to be either pointer or touch
-            drag.transformation = globalPointer.focus.transformation;
+            drag.transformation = pointers.focus.transformation;
         }
         drag.source = dataDevice;
-        drag.sourcePointer = interfaceForSurface(originSurface, pointers);
+        drag.sourcePointer = interfaceForSurface(originSurface, pointers.devices);
         drag.destroyConnection
             = QObject::connect(dataDevice, &DataDevice::resourceDestroyed, q_ptr, [this] {
                   endDrag(display()->handle()->nextSerial());
@@ -518,39 +492,8 @@ void Seat::setName(const std::string& name)
 
 void Seat::Private::getPointerCallback(SeatBind* bind, uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
-
-    priv->getPointer(bind, id);
-}
-
-void Seat::Private::getPointer(SeatBind* bind, uint32_t id)
-{
-    auto client = bind->client()->handle();
-    auto pointer = new Pointer(client, bind->version(), id, q_ptr);
-
-    pointers.push_back(pointer);
-
-    if (globalPointer.focus.surface && globalPointer.focus.surface->client() == client) {
-        // this is a pointer for the currently focused pointer surface
-        globalPointer.focus.pointers.push_back(pointer);
-        pointer->setFocusedSurface(globalPointer.focus.serial, globalPointer.focus.surface);
-        pointer->d_ptr->sendFrame();
-        if (globalPointer.focus.pointers.size() == 1) {
-            // got a new pointer
-            Q_EMIT q_ptr->focusedPointerChanged(pointer);
-        }
-    }
-
-    connect(pointer, &Pointer::resourceDestroyed, q_ptr, [pointer, this] {
-        remove_one(pointers, pointer);
-        if (remove_one(globalPointer.focus.pointers, pointer)) {
-            if (globalPointer.focus.pointers.empty()) {
-                Q_EMIT q_ptr->focusedPointerChanged(nullptr);
-            }
-        }
-    });
-
-    Q_EMIT q_ptr->pointerCreated(pointer);
+    auto& manager = bind->global()->handle()->d_ptr->pointers;
+    manager.create_device(bind->client()->handle(), bind->version(), id);
 }
 
 void Seat::Private::getKeyboardCallback(SeatBind* bind, uint32_t id)
@@ -641,16 +584,12 @@ bool Seat::hasTouch() const
 
 QPointF Seat::pointerPos() const
 {
-    return d_ptr->globalPointer.pos;
+    return d_ptr->pointers.pos;
 }
 
 void Seat::setPointerPos(const QPointF& pos)
 {
-    if (d_ptr->globalPointer.pos == pos) {
-        return;
-    }
-    d_ptr->globalPointer.pos = pos;
-    Q_EMIT pointerPosChanged(pos);
+    d_ptr->pointers.set_position(pos);
 }
 
 uint32_t Seat::timestamp() const
@@ -725,158 +664,55 @@ void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation
 
 Surface* Seat::focusedPointerSurface() const
 {
-    return d_ptr->globalPointer.focus.surface;
+    return d_ptr->pointers.focus.surface;
 }
 
 void Seat::setFocusedPointerSurface(Surface* surface, const QPointF& surfacePosition)
 {
-    QMatrix4x4 m;
-    m.translate(-static_cast<float>(surfacePosition.x()), -static_cast<float>(surfacePosition.y()));
-    setFocusedPointerSurface(surface, m);
-
-    if (d_ptr->globalPointer.focus.surface) {
-        d_ptr->globalPointer.focus.offset = surfacePosition;
-    }
+    d_ptr->pointers.set_focused_surface(surface, surfacePosition);
 }
 
 void Seat::setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transformation)
 {
-    if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
-        // ignore
-        return;
-    }
-
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    std::unordered_set<Pointer*> framePointers;
-
-    for (auto pointer : d_ptr->globalPointer.focus.pointers) {
-        pointer->setFocusedSurface(serial, nullptr);
-        framePointers.insert(pointer);
-    }
-
-    if (d_ptr->globalPointer.focus.surface) {
-        disconnect(d_ptr->globalPointer.focus.destroyConnection);
-    }
-
-    d_ptr->globalPointer.focus = Private::SeatPointer::Focus();
-    d_ptr->globalPointer.focus.surface = surface;
-
-    d_ptr->globalPointer.focus.pointers.clear();
-
-    if (surface) {
-        d_ptr->globalPointer.focus.pointers = d_ptr->pointersForSurface(surface);
-
-        d_ptr->globalPointer.focus.destroyConnection
-            = connect(surface, &Surface::resourceDestroyed, this, [this] {
-                  d_ptr->globalPointer.focus = Private::SeatPointer::Focus();
-                  Q_EMIT focusedPointerChanged(nullptr);
-              });
-        d_ptr->globalPointer.focus.offset = QPointF();
-        d_ptr->globalPointer.focus.transformation = transformation;
-        d_ptr->globalPointer.focus.serial = serial;
-    }
-
-    auto& pointers = d_ptr->globalPointer.focus.pointers;
-    if (pointers.empty()) {
-        Q_EMIT focusedPointerChanged(nullptr);
-        for (auto p : framePointers) {
-            p->d_ptr->sendFrame();
-        }
-        return;
-    }
-
-    // TODO(unknown author): signal with all pointers
-    Q_EMIT focusedPointerChanged(pointers.front());
-
-    for (auto p : pointers) {
-        p->setFocusedSurface(serial, surface);
-        framePointers.insert(p);
-    }
-
-    for (auto p : framePointers) {
-        p->d_ptr->sendFrame();
-    }
+    d_ptr->pointers.set_focused_surface(surface, transformation);
 }
 
 Pointer* Seat::focusedPointer() const
 {
-    if (d_ptr->globalPointer.focus.pointers.empty()) {
+    if (d_ptr->pointers.focus.devices.empty()) {
         return nullptr;
     }
-    return d_ptr->globalPointer.focus.pointers.front();
+    return d_ptr->pointers.focus.devices.front();
 }
 
 void Seat::setFocusedPointerSurfacePosition(const QPointF& surfacePosition)
 {
-    if (d_ptr->globalPointer.focus.surface) {
-        d_ptr->globalPointer.focus.offset = surfacePosition;
-        d_ptr->globalPointer.focus.transformation = QMatrix4x4();
-        d_ptr->globalPointer.focus.transformation.translate(
-            -static_cast<float>(surfacePosition.x()), -static_cast<float>(surfacePosition.y()));
-    }
+    d_ptr->pointers.set_focused_surface_position(surfacePosition);
 }
 
 QPointF Seat::focusedPointerSurfacePosition() const
 {
-    return d_ptr->globalPointer.focus.offset;
+    return d_ptr->pointers.focus.offset;
 }
 
 void Seat::setFocusedPointerSurfaceTransformation(const QMatrix4x4& transformation)
 {
-
-    if (d_ptr->globalPointer.focus.surface) {
-        d_ptr->globalPointer.focus.transformation = transformation;
-    }
+    d_ptr->pointers.set_focused_surface_transformation(transformation);
 }
 
 QMatrix4x4 Seat::focusedPointerSurfaceTransformation() const
 {
-    return d_ptr->globalPointer.focus.transformation;
-}
-
-namespace
-{
-uint32_t qtToWaylandButton(Qt::MouseButton button)
-{
-#if HAVE_LINUX_INPUT_H
-    static const QHash<Qt::MouseButton, uint32_t> s_buttons({
-        {Qt::LeftButton, BTN_LEFT},
-        {Qt::RightButton, BTN_RIGHT},
-        {Qt::MiddleButton, BTN_MIDDLE},
-        {Qt::ExtraButton1, BTN_BACK},    // note: QtWayland maps BTN_SIDE
-        {Qt::ExtraButton2, BTN_FORWARD}, // note: QtWayland maps BTN_EXTRA
-        {Qt::ExtraButton3, BTN_TASK},    // note: QtWayland maps BTN_FORWARD
-        {Qt::ExtraButton4, BTN_EXTRA},   // note: QtWayland maps BTN_BACK
-        {Qt::ExtraButton5, BTN_SIDE},    // note: QtWayland maps BTN_TASK
-        {Qt::ExtraButton6, BTN_TASK + 1},
-        {Qt::ExtraButton7, BTN_TASK + 2},
-        {Qt::ExtraButton8, BTN_TASK + 3},
-        {Qt::ExtraButton9, BTN_TASK + 4},
-        {Qt::ExtraButton10, BTN_TASK + 5},
-        {Qt::ExtraButton11, BTN_TASK + 6},
-        {Qt::ExtraButton12, BTN_TASK + 7},
-        {Qt::ExtraButton13, BTN_TASK + 8}
-        // further mapping not possible, 0x120 is BTN_JOYSTICK
-    });
-    return s_buttons.value(button, 0);
-#else
-    return 0;
-#endif
-}
+    return d_ptr->pointers.focus.transformation;
 }
 
 bool Seat::isPointerButtonPressed(Qt::MouseButton button) const
 {
-    return isPointerButtonPressed(qtToWaylandButton(button));
+    return d_ptr->pointers.is_button_pressed(button);
 }
 
 bool Seat::isPointerButtonPressed(uint32_t button) const
 {
-    auto it = d_ptr->globalPointer.buttonStates.constFind(button);
-    if (it == d_ptr->globalPointer.buttonStates.constEnd()) {
-        return false;
-    }
-    return it.value() == Private::SeatPointer::State::Pressed;
+    return d_ptr->pointers.is_button_pressed(button);
 }
 
 void Seat::pointerAxisV5(Qt::Orientation orientation,
@@ -884,210 +720,89 @@ void Seat::pointerAxisV5(Qt::Orientation orientation,
                          int32_t discreteDelta,
                          PointerAxisSource source)
 {
-    if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
-        // ignore
-        return;
-    }
-    if (d_ptr->globalPointer.focus.surface) {
-        for (auto pointer : d_ptr->globalPointer.focus.pointers) {
-            pointer->axis(orientation, delta, discreteDelta, source);
-        }
-    }
+    d_ptr->pointers.send_axis(orientation, delta, discreteDelta, source);
 }
 
 void Seat::pointerAxis(Qt::Orientation orientation, uint32_t delta)
 {
-    if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
-        // ignore
-        return;
-    }
-    if (d_ptr->globalPointer.focus.surface) {
-        for (auto pointer : d_ptr->globalPointer.focus.pointers) {
-            pointer->axis(orientation, delta);
-        }
-    }
+    d_ptr->pointers.send_axis(orientation, delta);
 }
 
 void Seat::pointerButtonPressed(Qt::MouseButton button)
 {
-    auto const nativeButton = qtToWaylandButton(button);
-    if (nativeButton == 0) {
-        return;
-    }
-    pointerButtonPressed(nativeButton);
+    d_ptr->pointers.button_pressed(button);
 }
 
 void Seat::pointerButtonPressed(uint32_t button)
 {
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    d_ptr->updatePointerButtonSerial(button, serial);
-    d_ptr->updatePointerButtonState(button, Private::SeatPointer::State::Pressed);
-    if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
-        // ignore
-        return;
-    }
-    if (d_ptr->globalPointer.focus.surface) {
-        for (auto pointer : d_ptr->globalPointer.focus.pointers) {
-            pointer->buttonPressed(serial, button);
-        }
-    }
+    d_ptr->pointers.button_pressed(button);
 }
 
 void Seat::pointerButtonReleased(Qt::MouseButton button)
 {
-    auto const nativeButton = qtToWaylandButton(button);
-    if (nativeButton == 0) {
-        return;
-    }
-    pointerButtonReleased(nativeButton);
+    d_ptr->pointers.button_released(button);
 }
 
 void Seat::pointerButtonReleased(uint32_t button)
 {
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    auto const currentButtonSerial = pointerButtonSerial(button);
-    d_ptr->updatePointerButtonSerial(button, serial);
-    d_ptr->updatePointerButtonState(button, Private::SeatPointer::State::Released);
-    if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
-        if (d_ptr->drag.source->dragImplicitGrabSerial() != currentButtonSerial) {
-            // not our drag button - ignore
-            return;
-        }
-        d_ptr->endDrag(serial);
-        return;
-    }
-    if (d_ptr->globalPointer.focus.surface) {
-        for (auto pointer : d_ptr->globalPointer.focus.pointers) {
-            pointer->buttonReleased(serial, button);
-        }
-    }
+    d_ptr->pointers.button_released(button);
 }
 
 uint32_t Seat::pointerButtonSerial(Qt::MouseButton button) const
 {
-    return pointerButtonSerial(qtToWaylandButton(button));
+    return d_ptr->pointers.button_serial(button);
 }
 
 uint32_t Seat::pointerButtonSerial(uint32_t button) const
 {
-    auto it = d_ptr->globalPointer.buttonSerials.constFind(button);
-    if (it == d_ptr->globalPointer.buttonSerials.constEnd()) {
-        return 0;
-    }
-    return it.value();
+    return d_ptr->pointers.button_serial(button);
 }
 
 void Seat::relativePointerMotion(const QSizeF& delta,
                                  const QSizeF& deltaNonAccelerated,
                                  uint64_t microseconds)
 {
-    if (d_ptr->globalPointer.focus.surface) {
-        for (auto pointer : d_ptr->globalPointer.focus.pointers) {
-            pointer->relativeMotion(delta, deltaNonAccelerated, microseconds);
-        }
-    }
+    d_ptr->pointers.relative_motion(delta, deltaNonAccelerated, microseconds);
 }
 
 void Seat::startPointerSwipeGesture(uint32_t fingerCount)
 {
-    if (!d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    d_ptr->globalPointer.gestureSurface = QPointer<Surface>(d_ptr->globalPointer.focus.surface);
-    if (d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    forEachInterface(
-        d_ptr->globalPointer.gestureSurface.data(),
-        d_ptr->pointers,
-        [serial, fingerCount](Pointer* p) { p->d_ptr->startSwipeGesture(serial, fingerCount); });
+    d_ptr->pointers.start_swipe_gesture(fingerCount);
 }
 
 void Seat::updatePointerSwipeGesture(const QSizeF& delta)
 {
-    if (d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    forEachInterface(d_ptr->globalPointer.gestureSurface.data(),
-                     d_ptr->pointers,
-                     [delta](Pointer* p) { p->d_ptr->updateSwipeGesture(delta); });
+    d_ptr->pointers.update_swipe_gesture(delta);
 }
 
 void Seat::endPointerSwipeGesture()
 {
-    if (d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    forEachInterface(d_ptr->globalPointer.gestureSurface.data(),
-                     d_ptr->pointers,
-                     [serial](Pointer* p) { p->d_ptr->endSwipeGesture(serial); });
-    d_ptr->globalPointer.gestureSurface.clear();
+    d_ptr->pointers.end_swipe_gesture();
 }
 
 void Seat::cancelPointerSwipeGesture()
 {
-    if (d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    forEachInterface(d_ptr->globalPointer.gestureSurface.data(),
-                     d_ptr->pointers,
-                     [serial](Pointer* p) { p->d_ptr->cancelSwipeGesture(serial); });
-    d_ptr->globalPointer.gestureSurface.clear();
+    d_ptr->pointers.cancel_swipe_gesture();
 }
 
 void Seat::startPointerPinchGesture(uint32_t fingerCount)
 {
-    if (!d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    d_ptr->globalPointer.gestureSurface = QPointer<Surface>(d_ptr->globalPointer.focus.surface);
-    if (d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    forEachInterface(
-        d_ptr->globalPointer.gestureSurface.data(),
-        d_ptr->pointers,
-        [serial, fingerCount](Pointer* p) { p->d_ptr->startPinchGesture(serial, fingerCount); });
+    d_ptr->pointers.start_pinch_gesture(fingerCount);
 }
 
 void Seat::updatePointerPinchGesture(const QSizeF& delta, qreal scale, qreal rotation)
 {
-    if (d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    forEachInterface(d_ptr->globalPointer.gestureSurface.data(),
-                     d_ptr->pointers,
-                     [delta, scale, rotation](Pointer* p) {
-                         p->d_ptr->updatePinchGesture(delta, scale, rotation);
-                     });
+    d_ptr->pointers.update_pinch_gesture(delta, scale, rotation);
 }
 
 void Seat::endPointerPinchGesture()
 {
-    if (d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    forEachInterface(d_ptr->globalPointer.gestureSurface.data(),
-                     d_ptr->pointers,
-                     [serial](Pointer* p) { p->d_ptr->endPinchGesture(serial); });
-    d_ptr->globalPointer.gestureSurface.clear();
+    d_ptr->pointers.end_pinch_gesture();
 }
 
 void Seat::cancelPointerPinchGesture()
 {
-    if (d_ptr->globalPointer.gestureSurface.isNull()) {
-        return;
-    }
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    forEachInterface(d_ptr->globalPointer.gestureSurface.data(),
-                     d_ptr->pointers,
-                     [serial](Pointer* p) { p->d_ptr->cancelPinchGesture(serial); });
-    d_ptr->globalPointer.gestureSurface.clear();
+    d_ptr->pointers.cancel_pinch_gesture();
 }
 
 void Seat::keyPressed(uint32_t key)
@@ -1383,12 +1098,13 @@ int32_t Seat::touchDown(const QPointF& globalPosition)
     if (id == 0 && d_ptr->globalTouch.focus.touchs.empty()) {
         // If the client did not bind the touch interface fall back
         // to at least emulating touch through pointer events.
-        forEachInterface(focusedTouchSurface(), d_ptr->pointers, [this, pos, serial](Pointer* p) {
-            p->d_ptr->sendEnter(serial, focusedTouchSurface(), pos);
-            p->d_ptr->sendMotion(pos);
-            p->buttonPressed(serial, BTN_LEFT);
-            p->d_ptr->sendFrame();
-        });
+        forEachInterface(
+            focusedTouchSurface(), d_ptr->pointers.devices, [this, pos, serial](Pointer* p) {
+                p->d_ptr->sendEnter(serial, focusedTouchSurface(), pos);
+                p->d_ptr->sendMotion(pos);
+                p->buttonPressed(serial, BTN_LEFT);
+                p->d_ptr->sendFrame();
+            });
     }
 #endif
 
@@ -1410,7 +1126,7 @@ void Seat::touchMove(int32_t id, const QPointF& globalPosition)
 
     if (id == 0 && d_ptr->globalTouch.focus.touchs.empty()) {
         // Client did not bind touch, fall back to emulating with pointer events.
-        forEachInterface(focusedTouchSurface(), d_ptr->pointers, [pos](Pointer* p) {
+        forEachInterface(focusedTouchSurface(), d_ptr->pointers.devices, [pos](Pointer* p) {
             p->d_ptr->sendMotion(pos);
         });
     }
@@ -1434,7 +1150,7 @@ void Seat::touchUp(int32_t id)
     if (id == 0 && d_ptr->globalTouch.focus.touchs.empty()) {
         // Client did not bind touch, fall back to emulating with pointer events.
         auto const serial = d_ptr->display()->handle()->nextSerial();
-        forEachInterface(focusedTouchSurface(), d_ptr->pointers, [serial](Pointer* p) {
+        forEachInterface(focusedTouchSurface(), d_ptr->pointers.devices, [serial](Pointer* p) {
             p->buttonReleased(serial, BTN_LEFT);
         });
     }
@@ -1481,13 +1197,7 @@ bool Seat::isDragTouch() const
 
 bool Seat::hasImplicitPointerGrab(uint32_t serial) const
 {
-    const auto& serials = d_ptr->globalPointer.buttonSerials;
-    for (auto it = serials.constBegin(), end = serials.constEnd(); it != end; it++) {
-        if (it.value() == serial) {
-            return isPointerButtonPressed(it.key());
-        }
-    }
-    return false;
+    return d_ptr->pointers.has_implicit_grab(serial);
 }
 
 QMatrix4x4 Seat::dragSurfaceTransformation() const

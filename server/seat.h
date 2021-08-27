@@ -192,6 +192,7 @@ Q_SIGNALS:
 private:
     friend class Display;
     friend class DataDeviceManager;
+    friend class pointer_pool;
     friend class PrimarySelectionDeviceManager;
     friend class input_method_manager_v2;
     friend class TextInputManagerV2;
