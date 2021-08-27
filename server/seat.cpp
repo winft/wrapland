@@ -27,8 +27,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "input_method_v2.h"
 #include "keyboard.h"
 #include "keyboard_p.h"
-#include "pointer.h"
-#include "pointer_p.h"
 #include "primary_selection.h"
 #include "surface.h"
 #include "text_input_v2_p.h"
@@ -42,16 +40,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WL_SEAT_NAME_SINCE_VERSION 2
 #endif
 
-#if HAVE_LINUX_INPUT_H
-#include <linux/input.h>
-#endif
-
 namespace Wrapland::Server
 {
 
 Seat::Private::Private(Seat* q, Display* display)
     : SeatGlobal(q, display, &wl_seat_interface, &s_interface)
     , pointers(q)
+    , touches(q)
     , q_ptr(q)
 {
 }
@@ -129,11 +124,6 @@ std::vector<Keyboard*> Seat::Private::keyboardsForSurface(Surface* surface) cons
     return interfacesForSurface(surface, keyboards);
 }
 
-std::vector<Touch*> Seat::Private::touchsForSurface(Surface* surface) const
-{
-    return interfacesForSurface(surface, touchs);
-}
-
 std::vector<DataDevice*> Seat::Private::dataDevicesForSurface(Surface* surface) const
 {
     return interfacesForSurface(surface, dataDevices);
@@ -193,7 +183,7 @@ void Seat::Private::registerDataDevice(DataDevice* dataDevice)
             drag.transformation = pointers.focus.transformation;
         } else if (q_ptr->hasImplicitTouchGrab(dragSerial)) {
             drag.mode = Drag::Mode::Touch;
-            drag.sourceTouch = interfaceForSurface(dragSurface, touchs);
+            drag.sourceTouch = interfaceForSurface(dragSurface, touches.devices);
             // TODO(unknown author): touch transformation
         } else {
             // no implicit grab, abort drag
@@ -533,33 +523,8 @@ void Seat::Private::getKeyboard(SeatBind* bind, uint32_t id)
 
 void Seat::Private::getTouchCallback(SeatBind* bind, uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
-
-    priv->getTouch(bind, id);
-}
-
-void Seat::Private::getTouch(SeatBind* bind, uint32_t id)
-{
-    auto client = bind->client()->handle();
-
-    // TODO(unknown author): only create if seat has touch?
-    auto touch = new Touch(client, bind->version(), id, q_ptr);
-    // TODO(romangg): check for error
-
-    touchs.push_back(touch);
-
-    if (globalTouch.focus.surface && globalTouch.focus.surface->client() == client) {
-        // this is a touch for the currently focused touch surface
-        globalTouch.focus.touchs.push_back(touch);
-        if (!globalTouch.ids.empty()) {
-            // TODO(unknown author): send out all the points
-        }
-    }
-    QObject::connect(touch, &Touch::resourceDestroyed, q_ptr, [touch, this] {
-        remove_one(touchs, touch);
-        remove_one(globalTouch.focus.touchs, touch);
-    });
-    Q_EMIT q_ptr->touchCreated(touch);
+    auto& manager = bind->global()->handle()->d_ptr->touches;
+    manager.create_device(bind->client()->handle(), bind->version(), id);
 }
 
 std::string Seat::name() const
@@ -632,8 +597,8 @@ void Seat::setDragTarget(Surface* surface,
     if (d_ptr->drag.mode == Private::Drag::Mode::Pointer) {
         setPointerPos(globalPosition);
     } else if (d_ptr->drag.mode == Private::Drag::Mode::Touch
-               && d_ptr->globalTouch.focus.firstTouchPos != globalPosition) {
-        touchMove(d_ptr->globalTouch.ids.firstKey(), globalPosition);
+               && d_ptr->touches.focus.firstTouchPos != globalPosition) {
+        touchMove(d_ptr->touches.ids.cbegin()->first, globalPosition);
     }
     if (d_ptr->drag.target) {
         d_ptr->drag.surface = surface;
@@ -658,7 +623,7 @@ void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation
         setDragTarget(surface, pointerPos(), inputTransformation);
     } else {
         Q_ASSERT(d_ptr->drag.mode == Private::Drag::Mode::Touch);
-        setDragTarget(surface, d_ptr->globalTouch.focus.firstTouchPos, inputTransformation);
+        setDragTarget(surface, d_ptr->touches.focus.firstTouchPos, inputTransformation);
     }
 }
 
@@ -1008,171 +973,65 @@ Keyboard* Seat::focusedKeyboard() const
 
 void Seat::cancelTouchSequence()
 {
-    for (auto touch : d_ptr->globalTouch.focus.touchs) {
-        touch->cancel();
-    }
-    if (d_ptr->drag.mode == Private::Drag::Mode::Touch) {
-        // cancel the drag, don't drop.
-        if (d_ptr->drag.target) {
-            // remove the current target
-            d_ptr->drag.target->updateDragTarget(nullptr, 0);
-            d_ptr->drag.target = nullptr;
-        }
-        // and end the drag for the source, serial does not matter
-        d_ptr->endDrag(0);
-    }
-    d_ptr->globalTouch.ids.clear();
+    d_ptr->touches.cancel_sequence();
 }
 
 Touch* Seat::focusedTouch() const
 {
-    if (d_ptr->globalTouch.focus.touchs.empty()) {
+    if (d_ptr->touches.focus.devices.empty()) {
         return nullptr;
     }
-    return d_ptr->globalTouch.focus.touchs.front();
+    return d_ptr->touches.focus.devices.front();
 }
 
 Surface* Seat::focusedTouchSurface() const
 {
-    return d_ptr->globalTouch.focus.surface;
+    return d_ptr->touches.focus.surface;
 }
 
 QPointF Seat::focusedTouchSurfacePosition() const
 {
-    return d_ptr->globalTouch.focus.offset;
+    return d_ptr->touches.focus.offset;
 }
 
 bool Seat::isTouchSequence() const
 {
-    return !d_ptr->globalTouch.ids.empty();
+    return d_ptr->touches.is_in_progress();
 }
 
 void Seat::setFocusedTouchSurface(Surface* surface, const QPointF& surfacePosition)
 {
-    if (isTouchSequence()) {
-        // changing surface not allowed during a touch sequence
-        return;
-    }
-    Q_ASSERT(!isDragTouch());
-
-    if (d_ptr->globalTouch.focus.surface) {
-        disconnect(d_ptr->globalTouch.focus.destroyConnection);
-    }
-    d_ptr->globalTouch.focus = Private::SeatTouch::Focus();
-    d_ptr->globalTouch.focus.surface = surface;
-    d_ptr->globalTouch.focus.offset = surfacePosition;
-    d_ptr->globalTouch.focus.touchs = d_ptr->touchsForSurface(surface);
-    if (d_ptr->globalTouch.focus.surface) {
-        d_ptr->globalTouch.focus.destroyConnection
-            = connect(surface, &Surface::resourceDestroyed, this, [this] {
-                  if (isTouchSequence()) {
-                      // Surface destroyed during touch sequence - send a cancel
-                      for (auto touch : d_ptr->globalTouch.focus.touchs) {
-                          touch->cancel();
-                      }
-                  }
-                  d_ptr->globalTouch.focus = Private::SeatTouch::Focus();
-              });
-    }
+    d_ptr->touches.set_focused_surface(surface, surfacePosition);
 }
 
 void Seat::setFocusedTouchSurfacePosition(const QPointF& surfacePosition)
 {
-    d_ptr->globalTouch.focus.offset = surfacePosition;
+    d_ptr->touches.set_focused_surface_position(surfacePosition);
 }
 
 int32_t Seat::touchDown(const QPointF& globalPosition)
 {
-    auto const id = d_ptr->globalTouch.ids.empty() ? 0 : d_ptr->globalTouch.ids.lastKey() + 1;
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    const auto pos = globalPosition - d_ptr->globalTouch.focus.offset;
-    for (auto touch : d_ptr->globalTouch.focus.touchs) {
-        touch->down(id, serial, pos);
-    }
-
-    if (id == 0) {
-        d_ptr->globalTouch.focus.firstTouchPos = globalPosition;
-    }
-
-#if HAVE_LINUX_INPUT_H
-    if (id == 0 && d_ptr->globalTouch.focus.touchs.empty()) {
-        // If the client did not bind the touch interface fall back
-        // to at least emulating touch through pointer events.
-        forEachInterface(
-            focusedTouchSurface(), d_ptr->pointers.devices, [this, pos, serial](Pointer* p) {
-                p->d_ptr->sendEnter(serial, focusedTouchSurface(), pos);
-                p->d_ptr->sendMotion(pos);
-                p->buttonPressed(serial, BTN_LEFT);
-                p->d_ptr->sendFrame();
-            });
-    }
-#endif
-
-    d_ptr->globalTouch.ids[id] = serial;
-    return id;
+    return d_ptr->touches.touch_down(globalPosition);
 }
 
 void Seat::touchMove(int32_t id, const QPointF& globalPosition)
 {
-    Q_ASSERT(d_ptr->globalTouch.ids.contains(id));
-    const auto pos = globalPosition - d_ptr->globalTouch.focus.offset;
-    for (auto touch : d_ptr->globalTouch.focus.touchs) {
-        touch->move(id, pos);
-    }
-
-    if (id == 0) {
-        d_ptr->globalTouch.focus.firstTouchPos = globalPosition;
-    }
-
-    if (id == 0 && d_ptr->globalTouch.focus.touchs.empty()) {
-        // Client did not bind touch, fall back to emulating with pointer events.
-        forEachInterface(focusedTouchSurface(), d_ptr->pointers.devices, [pos](Pointer* p) {
-            p->d_ptr->sendMotion(pos);
-        });
-    }
-    Q_EMIT touchMoved(id, d_ptr->globalTouch.ids[id], globalPosition);
+    d_ptr->touches.touch_move(id, globalPosition);
 }
 
 void Seat::touchUp(int32_t id)
 {
-    Q_ASSERT(d_ptr->globalTouch.ids.contains(id));
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    if (d_ptr->drag.mode == Private::Drag::Mode::Touch
-        && d_ptr->drag.source->dragImplicitGrabSerial() == d_ptr->globalTouch.ids.value(id)) {
-        // the implicitly grabbing touch point has been upped
-        d_ptr->endDrag(serial);
-    }
-    for (auto touch : d_ptr->globalTouch.focus.touchs) {
-        touch->up(id, serial);
-    }
-
-#if HAVE_LINUX_INPUT_H
-    if (id == 0 && d_ptr->globalTouch.focus.touchs.empty()) {
-        // Client did not bind touch, fall back to emulating with pointer events.
-        auto const serial = d_ptr->display()->handle()->nextSerial();
-        forEachInterface(focusedTouchSurface(), d_ptr->pointers.devices, [serial](Pointer* p) {
-            p->buttonReleased(serial, BTN_LEFT);
-        });
-    }
-#endif
-
-    d_ptr->globalTouch.ids.remove(id);
+    d_ptr->touches.touch_up(id);
 }
 
 void Seat::touchFrame()
 {
-    for (auto touch : d_ptr->globalTouch.focus.touchs) {
-        touch->frame();
-    }
+    d_ptr->touches.touch_frame();
 }
 
 bool Seat::hasImplicitTouchGrab(uint32_t serial) const
 {
-    if (!d_ptr->globalTouch.focus.surface) {
-        // origin surface has been destroyed
-        return false;
-    }
-    return d_ptr->globalTouch.ids.key(serial, -1) != -1;
+    return d_ptr->touches.has_implicit_grab(serial);
 }
 
 input_method_v2* Seat::get_input_method_v2() const

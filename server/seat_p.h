@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "seat.h"
 
 #include "pointer_pool.h"
+#include "touch_pool.h"
 
 #include "wayland/global.h"
 
@@ -58,7 +59,6 @@ public:
     uint32_t getCapabilities() const;
 
     std::vector<Keyboard*> keyboardsForSurface(Surface* surface) const;
-    std::vector<Touch*> touchsForSurface(Surface* surface) const;
     std::vector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
 
     TextInputV2* textInputV2ForSurface(Surface* surface) const;
@@ -84,7 +84,7 @@ public:
     uint32_t timestamp = 0;
     pointer_pool pointers;
     std::vector<Keyboard*> keyboards;
-    std::vector<Touch*> touchs;
+    touch_pool touches;
     std::vector<DataDevice*> dataDevices;
     std::vector<PrimarySelectionDevice*> primarySelectionDevices;
     input_method_v2* input_method{nullptr};
@@ -159,22 +159,6 @@ public:
         } v3;
     } global_text_input;
 
-    // Touch related members
-    struct SeatTouch {
-        struct Focus {
-            Surface* surface = nullptr;
-            std::vector<Touch*> touchs;
-            QMetaObject::Connection destroyConnection;
-            QPointF offset = QPointF();
-            QPointF firstTouchPos;
-        };
-        Focus focus;
-
-        // Key: Distinct id per touch point, Value: Wayland display serial.
-        QMap<int32_t, uint32_t> ids;
-    };
-    SeatTouch globalTouch;
-
     struct Drag {
         enum class Mode {
             None,
@@ -202,7 +186,6 @@ public:
 
 private:
     void getKeyboard(SeatBind* bind, uint32_t id);
-    void getTouch(SeatBind* bind, uint32_t id);
 
     void updateSelection(DataDevice* dataDevice, bool set);
     void updateSelection(PrimarySelectionDevice* dataDevice, bool set);
