@@ -47,6 +47,7 @@ set(SERVER_LIB_SRCS
   slide.cpp
   subcompositor.cpp
   surface.cpp
+  text_input_pool.cpp
   text_input_v2.cpp
   text_input_v3.cpp
   touch.cpp

@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "keyboard_pool.h"
 #include "pointer_pool.h"
 #include "selection_pool.h"
+#include "text_input_pool.h"
 #include "touch_pool.h"
 
 #include "wayland/global.h"
@@ -42,8 +43,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class TextInputV2;
-
 constexpr uint32_t SeatVersion = 5;
 using SeatGlobal = Wayland::Global<Seat, SeatVersion>;
 using SeatBind = Wayland::Bind<SeatGlobal>;
@@ -60,12 +59,7 @@ public:
 
     uint32_t getCapabilities() const;
 
-    TextInputV2* textInputV2ForSurface(Surface* surface) const;
-    text_input_v3* textInputV3ForSurface(Surface* surface) const;
-
     void registerInputMethod(input_method_v2* im);
-    void registerTextInput(TextInputV2* ti);
-    void registerTextInput(text_input_v3* ti);
 
     std::string name;
     bool pointer = false;
@@ -81,25 +75,7 @@ public:
     selection_pool<PrimarySelectionDevice, &Seat::primarySelectionChanged>
         primary_selection_devices;
     input_method_v2* input_method{nullptr};
-    std::vector<TextInputV2*> textInputs;
-    std::vector<text_input_v3*> textInputsV3;
-
-    struct {
-        struct {
-            Surface* surface = nullptr;
-            QMetaObject::Connection destroy_connection;
-        } focus;
-
-        // Both text inputs may be active at a time.
-        // That doesn't make sense, but there's no reason to enforce only one.
-        struct {
-            uint32_t serial = 0;
-            TextInputV2* text_input{nullptr};
-        } v2;
-        struct {
-            text_input_v3* text_input{nullptr};
-        } v3;
-    } global_text_input;
+    text_input_pool text_inputs;
 
     // legacy
     friend class SeatInterface;

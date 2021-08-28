@@ -19,13 +19,17 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
+#include <QObject>
+
 #include <Wrapland/Server/wraplandserver_export.h>
+
 #include <memory>
 
 namespace Wrapland::Server
 {
-class Seat;
 class Display;
+class Client;
+class Seat;
 class Surface;
 
 class WRAPLANDSERVER_EXPORT TextInputV2 : public QObject
@@ -101,6 +105,8 @@ private:
     explicit TextInputV2(Client* client, uint32_t version, uint32_t id);
     friend class TextInputManagerV2;
     friend class Seat;
+    friend class text_input_pool;
+
     class Private;
     Private* d_ptr;
 };

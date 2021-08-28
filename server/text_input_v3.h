@@ -109,6 +109,7 @@ private:
     explicit text_input_v3(Client* client, uint32_t version, uint32_t id);
     friend class text_input_manager_v3;
     friend class Seat;
+    friend class text_input_pool;
 
     class Private;
     Private* d_ptr;

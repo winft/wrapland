@@ -199,6 +199,7 @@ private:
     friend class input_method_manager_v2;
     friend class TextInputManagerV2;
     friend class text_input_manager_v3;
+    friend class text_input_pool;
     friend class touch_pool;
 
     Seat(Display* display, QObject* parent);

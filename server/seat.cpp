@@ -27,9 +27,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "input_method_v2.h"
 #include "primary_selection.h"
 #include "surface.h"
-#include "text_input_v2_p.h"
-#include "text_input_v3_p.h"
-#include "utils.h"
 
 #include <config-wrapland.h>
 #include <cstdint>
@@ -49,6 +46,7 @@ Seat::Private::Private(Seat* q, Display* display)
     , drags(q)
     , data_devices(q)
     , primary_selection_devices(q)
+    , text_inputs(q)
     , q_ptr(q)
 {
 }
@@ -107,16 +105,6 @@ void Seat::Private::sendCapabilities()
     send<wl_seat_send_capabilities>(getCapabilities());
 }
 
-TextInputV2* Seat::Private::textInputV2ForSurface(Surface* surface) const
-{
-    return interfaceForSurface(surface, textInputs);
-}
-
-text_input_v3* Seat::Private::textInputV3ForSurface(Surface* surface) const
-{
-    return interfaceForSurface(surface, textInputsV3);
-}
-
 void Seat::Private::registerInputMethod(input_method_v2* im)
 {
     assert(!input_method);
@@ -127,56 +115,6 @@ void Seat::Private::registerInputMethod(input_method_v2* im)
         Q_EMIT q_ptr->input_method_v2_changed();
     });
     Q_EMIT q_ptr->input_method_v2_changed();
-}
-
-void Seat::Private::registerTextInput(TextInputV2* ti)
-{
-    // Text input version 0 might call this multiple times.
-    if (std::find(textInputs.begin(), textInputs.end(), ti) != textInputs.end()) {
-        return;
-    }
-    textInputs.push_back(ti);
-    if (global_text_input.focus.surface
-        && global_text_input.focus.surface->client() == ti->d_ptr->client()->handle()) {
-        // This is a text input for the currently focused text input surface.
-        if (!global_text_input.v2.text_input) {
-            global_text_input.v2.text_input = ti;
-            ti->d_ptr->sendEnter(global_text_input.focus.surface, global_text_input.v2.serial);
-            Q_EMIT q_ptr->focusedTextInputChanged();
-        }
-    }
-    QObject::connect(ti, &TextInputV2::resourceDestroyed, q_ptr, [this, ti] {
-        remove_one(textInputs, ti);
-        if (global_text_input.v2.text_input == ti) {
-            global_text_input.v2.text_input = nullptr;
-            Q_EMIT q_ptr->focusedTextInputChanged();
-        }
-    });
-}
-
-void Seat::Private::registerTextInput(text_input_v3* ti)
-{
-    // Text input version 0 might call this multiple times.
-    if (find(textInputsV3.begin(), textInputsV3.end(), ti) != textInputsV3.end()) {
-        return;
-    }
-    textInputsV3.push_back(ti);
-    if (global_text_input.focus.surface
-        && global_text_input.focus.surface->client() == ti->d_ptr->client()->handle()) {
-        // This is a text input for the currently focused text input surface.
-        if (!global_text_input.v3.text_input) {
-            global_text_input.v3.text_input = ti;
-            ti->d_ptr->send_enter(global_text_input.focus.surface);
-            Q_EMIT q_ptr->focusedTextInputChanged();
-        }
-    }
-    QObject::connect(ti, &text_input_v3::resourceDestroyed, q_ptr, [this, ti] {
-        remove_one(textInputsV3, ti);
-        if (global_text_input.v3.text_input == ti) {
-            global_text_input.v3.text_input = nullptr;
-            Q_EMIT q_ptr->focusedTextInputChanged();
-        }
-    });
 }
 
 void Seat::setHasKeyboard(bool has)
@@ -654,94 +592,32 @@ DataDevice* Seat::dragSource() const
 
 bool Seat::setFocusedTextInputV2Surface(Surface* surface)
 {
-    auto const serial = d_ptr->display()->handle()->nextSerial();
-    auto const old_ti = d_ptr->global_text_input.v2.text_input;
-
-    if (old_ti) {
-        // TODO(unknown author): setFocusedSurface like in other interfaces
-        old_ti->d_ptr->sendLeave(serial, d_ptr->global_text_input.focus.surface);
-    }
-
-    auto ti = d_ptr->textInputV2ForSurface(surface);
-
-    if (ti && !ti->d_ptr->resource()) {
-        // TODO(romangg): can this check be removed?
-        ti = nullptr;
-    }
-
-    d_ptr->global_text_input.v2.text_input = ti;
-
-    if (surface) {
-        d_ptr->global_text_input.v2.serial = serial;
-    }
-
-    if (ti) {
-        // TODO(unknown author): setFocusedSurface like in other interfaces
-        ti->d_ptr->sendEnter(surface, serial);
-    }
-
-    return old_ti != ti;
+    return d_ptr->text_inputs.set_v2_focused_surface(surface);
 }
 
 bool Seat::setFocusedTextInputV3Surface(Surface* surface)
 {
-    auto const old_ti = d_ptr->global_text_input.v3.text_input;
-
-    if (old_ti) {
-        old_ti->d_ptr->send_leave(d_ptr->global_text_input.focus.surface);
-    }
-
-    auto ti = d_ptr->textInputV3ForSurface(surface);
-
-    if (ti && !ti->d_ptr->resource()) {
-        // TODO(romangg): can this check be removed?
-        ti = nullptr;
-    }
-
-    d_ptr->global_text_input.v3.text_input = ti;
-
-    if (ti) {
-        ti->d_ptr->send_enter(surface);
-    }
-
-    return old_ti != ti;
+    return d_ptr->text_inputs.set_v3_focused_surface(surface);
 }
 
 void Seat::setFocusedTextInputSurface(Surface* surface)
 {
-    if (d_ptr->global_text_input.focus.surface) {
-        disconnect(d_ptr->global_text_input.focus.destroy_connection);
-    }
-
-    auto changed = setFocusedTextInputV2Surface(surface) || setFocusedTextInputV3Surface(surface);
-    d_ptr->global_text_input.focus = {};
-
-    if (surface) {
-        d_ptr->global_text_input.focus.surface = surface;
-        d_ptr->global_text_input.focus.destroy_connection
-            = connect(surface, &Surface::resourceDestroyed, this, [this] {
-                  setFocusedTextInputSurface(nullptr);
-              });
-    }
-
-    if (changed) {
-        Q_EMIT focusedTextInputChanged();
-    }
+    d_ptr->text_inputs.set_focused_surface(surface);
 }
 
 Surface* Seat::focusedTextInputSurface() const
 {
-    return d_ptr->global_text_input.focus.surface;
+    return d_ptr->text_inputs.focus.surface;
 }
 
 TextInputV2* Seat::focusedTextInputV2() const
 {
-    return d_ptr->global_text_input.v2.text_input;
+    return d_ptr->text_inputs.v2.text_input;
 }
 
 text_input_v3* Seat::focusedTextInputV3() const
 {
-    return d_ptr->global_text_input.v3.text_input;
+    return d_ptr->text_inputs.v3.text_input;
 }
 
 DataDevice* Seat::selection() const
