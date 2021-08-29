@@ -34,6 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "text_input_v2_p.h"
 #include "text_input_v3_p.h"
 #include "touch.h"
+#include "utils.h"
 
 #include <config-wrapland.h>
 
@@ -45,7 +46,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <linux/input.h>
 #endif
 
-#include <algorithm>
 #include <unordered_set>
 
 namespace Wrapland::Server
@@ -143,59 +143,6 @@ uint32_t Seat::Private::getCapabilities() const
 void Seat::Private::sendCapabilities()
 {
     send<wl_seat_send_capabilities>(getCapabilities());
-}
-
-template<typename T>
-static T* interfaceForSurface(Surface* surface, const std::vector<T*>& interfaces)
-{
-    if (!surface) {
-        return nullptr;
-    }
-
-    auto it = std::find_if(interfaces.begin(), interfaces.end(), [surface](auto const* c) {
-        return surface->client() == c->client();
-    });
-    return it == interfaces.end() ? nullptr : *it;
-}
-
-template<typename Surface, typename T>
-static std::vector<T*> interfacesForSurface(Surface const* surface,
-                                            std::vector<T*> const& interfaces)
-{
-    std::vector<T*> ret;
-    if (!surface) {
-        return ret;
-    }
-
-    std::copy_if(interfaces.cbegin(),
-                 interfaces.cend(),
-                 std::back_inserter(ret),
-                 [surface](T* device) { return device->client() == surface->client(); });
-    return ret;
-}
-
-template<typename Surface, typename Vector, typename UnaryFunction>
-static void forEachInterface(Surface* surface, Vector const& interfaces, UnaryFunction method)
-{
-    if (!surface) {
-        return;
-    }
-    for (auto it : interfaces) {
-        if (it->client() == surface->client()) {
-            method(it);
-        }
-    }
-}
-
-template<typename V, typename T>
-bool remove_one(V& container, T const& arg)
-{
-    auto it = std::find(container.begin(), container.end(), arg);
-    if (it == container.end()) {
-        return false;
-    }
-    container.erase(it);
-    return true;
 }
 
 std::vector<Pointer*> Seat::Private::pointersForSurface(Surface* surface) const
