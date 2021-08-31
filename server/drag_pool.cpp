@@ -44,7 +44,8 @@ void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransfor
         set_target(new_surface, seat->pointerPos(), inputTransformation);
     } else {
         Q_ASSERT(mode == Mode::Touch);
-        set_target(new_surface, seat->d_ptr->touches.focus.firstTouchPos, inputTransformation);
+        set_target(
+            new_surface, seat->d_ptr->touches.value().focus.firstTouchPos, inputTransformation);
     }
 }
 
@@ -70,8 +71,9 @@ void drag_pool::set_target(Surface* new_surface,
 
     if (mode == Mode::Pointer) {
         seat->setPointerPos(globalPosition);
-    } else if (mode == Mode::Touch && seat->d_ptr->touches.focus.firstTouchPos != globalPosition) {
-        seat->touchMove(seat->d_ptr->touches.ids.cbegin()->first, globalPosition);
+    } else if (mode == Mode::Touch
+               && seat->d_ptr->touches.value().focus.firstTouchPos != globalPosition) {
+        seat->touchMove(seat->d_ptr->touches.value().ids.cbegin()->first, globalPosition);
     }
     if (target) {
         surface = new_surface;
@@ -111,11 +113,11 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
     auto* dragSurface = dataDevice->origin();
     if (seat->hasImplicitPointerGrab(dragSerial)) {
         mode = Mode::Pointer;
-        sourcePointer = interfaceForSurface(dragSurface, seat->d_ptr->pointers.devices);
+        sourcePointer = interfaceForSurface(dragSurface, seat->d_ptr->pointers.value().devices);
         transformation = seat->focusedPointerSurfaceTransformation();
     } else if (seat->hasImplicitTouchGrab(dragSerial)) {
         mode = Mode::Touch;
-        sourceTouch = interfaceForSurface(dragSurface, seat->d_ptr->touches.devices);
+        sourceTouch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().devices);
         // TODO(unknown author): touch transformation
     } else {
         // no implicit grab, abort drag
@@ -131,7 +133,7 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
         transformation = seat->focusedPointerSurfaceTransformation();
     }
     source = dataDevice;
-    sourcePointer = interfaceForSurface(originSurface, seat->d_ptr->pointers.devices);
+    sourcePointer = interfaceForSurface(originSurface, seat->d_ptr->pointers.value().devices);
     destroyConnection = QObject::connect(dataDevice, &DataDevice::resourceDestroyed, seat, [this] {
         end(seat->d_ptr->display()->handle()->nextSerial());
     });

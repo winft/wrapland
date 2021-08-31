@@ -36,6 +36,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 #include <wayland-server.h>
@@ -65,9 +66,9 @@ public:
     bool touch = false;
     QList<wl_resource*> resources;
     uint32_t timestamp = 0;
-    pointer_pool pointers;
-    keyboard_pool keyboards;
-    touch_pool touches;
+    std::optional<pointer_pool> pointers;
+    std::optional<keyboard_pool> keyboards;
+    std::optional<touch_pool> touches;
     drag_pool drags;
     selection_pool<DataDevice, &Seat::selectionChanged> data_devices;
     selection_pool<PrimarySelectionDevice, &Seat::primarySelectionChanged>
