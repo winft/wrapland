@@ -99,29 +99,17 @@ void Seat::Private::sendCapabilities()
 
 void Seat::setHasKeyboard(bool has)
 {
-    if (d_ptr->keyboard == has) {
-        return;
-    }
-    d_ptr->keyboard = has;
-    d_ptr->sendCapabilities();
+    d_ptr->set_capability(d_ptr->keyboard, has);
 }
 
 void Seat::setHasPointer(bool has)
 {
-    if (d_ptr->pointer == has) {
-        return;
-    }
-    d_ptr->pointer = has;
-    d_ptr->sendCapabilities();
+    d_ptr->set_capability(d_ptr->pointer, has);
 }
 
 void Seat::setHasTouch(bool has)
 {
-    if (d_ptr->touch == has) {
-        return;
-    }
-    d_ptr->touch = has;
-    d_ptr->sendCapabilities();
+    d_ptr->set_capability(d_ptr->touch, has);
 }
 
 void Seat::setName(const std::string& name)

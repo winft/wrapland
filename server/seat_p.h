@@ -60,6 +60,15 @@ public:
 
     uint32_t getCapabilities() const;
 
+    void set_capability(bool& dev, bool has)
+    {
+        if (dev == has) {
+            return;
+        }
+        dev = has;
+        sendCapabilities();
+    }
+
     std::string name;
     bool pointer = false;
     bool keyboard = false;
