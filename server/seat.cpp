@@ -61,8 +61,6 @@ Seat::Seat(Display* display, QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {
-    connect(this, &Seat::nameChanged, this, [this] { d_ptr->sendName(); });
-
     d_ptr->create();
 }
 
@@ -132,7 +130,7 @@ void Seat::setName(const std::string& name)
         return;
     }
     d_ptr->name = name;
-    Q_EMIT nameChanged(d_ptr->name);
+    d_ptr->sendName();
 }
 
 void Seat::Private::getPointerCallback(SeatBind* bind, uint32_t id)
