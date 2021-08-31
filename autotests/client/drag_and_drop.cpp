@@ -38,6 +38,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
+#include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
 
@@ -249,9 +250,9 @@ void TestDragAndDrop::test_pointer()
     // now we need to pass pointer focus to the Surface and simulate a button press
     QSignalSpy button_press_spy(c_1.pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(button_press_spy.isValid());
-    m_server_seat->setFocusedPointerSurface(server_surface);
+    m_server_seat->pointers().set_focused_surface(server_surface);
     m_server_seat->setTimestamp(2);
-    m_server_seat->pointerButtonPressed(1);
+    m_server_seat->pointers().button_pressed(1);
     QVERIFY(button_press_spy.wait());
     QCOMPARE(button_press_spy.first().at(1).value<quint32>(), quint32(2));
 
@@ -311,7 +312,7 @@ void TestDragAndDrop::test_pointer()
 
     // Simulate motion.
     m_server_seat->setTimestamp(3);
-    m_server_seat->setPointerPos(QPointF(3, 3));
+    m_server_seat->pointers().set_position(QPointF(3, 3));
     QVERIFY(drag_motion_spy.wait());
     QCOMPARE(drag_motion_spy.count(), 1);
     QCOMPARE(drag_motion_spy.first().first().toPointF(), QPointF(3, 3));
@@ -323,7 +324,7 @@ void TestDragAndDrop::test_pointer()
     QSignalSpy dropped_spy(c_1.device, &Wrapland::Client::DataDevice::dropped);
     QVERIFY(dropped_spy.isValid());
     m_server_seat->setTimestamp(4);
-    m_server_seat->pointerButtonReleased(1);
+    m_server_seat->pointers().button_released(1);
     QVERIFY(source_drop_spy.isEmpty());
     QVERIFY(dropped_spy.wait());
     QCOMPARE(source_drop_spy.count(), 1);
@@ -466,9 +467,9 @@ void TestDragAndDrop::test_cancel_by_destroyed_data_source()
     // Now we need to pass pointer focus to the Surface and simulate a button press.
     QSignalSpy button_press_spy(c_1.pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(button_press_spy.isValid());
-    m_server_seat->setFocusedPointerSurface(server_surface);
+    m_server_seat->pointers().set_focused_surface(server_surface);
     m_server_seat->setTimestamp(2);
-    m_server_seat->pointerButtonPressed(1);
+    m_server_seat->pointers().button_pressed(1);
     QVERIFY(button_press_spy.wait());
     QCOMPARE(button_press_spy.first().at(1).value<quint32>(), quint32(2));
 
@@ -530,7 +531,7 @@ void TestDragAndDrop::test_cancel_by_destroyed_data_source()
 
     // Simulate motion.
     m_server_seat->setTimestamp(3);
-    m_server_seat->setPointerPos(QPointF(3, 3));
+    m_server_seat->pointers().set_position(QPointF(3, 3));
     QVERIFY(drag_motion_spy.wait());
     QCOMPARE(drag_motion_spy.count(), 1);
     QCOMPARE(drag_motion_spy.first().first().toPointF(), QPointF(3, 3));
@@ -550,7 +551,7 @@ void TestDragAndDrop::test_cancel_by_destroyed_data_source()
     QSignalSpy dropped_spy(c_1.device, &Wrapland::Client::DataDevice::dropped);
     QVERIFY(dropped_spy.isValid());
     m_server_seat->setTimestamp(4);
-    m_server_seat->pointerButtonReleased(1);
+    m_server_seat->pointers().button_released(1);
     QVERIFY(!dropped_spy.wait(500));
 
     // Verify that we did not get any further input events.
@@ -576,9 +577,9 @@ void TestDragAndDrop::test_target_removed()
     // Now we need to pass pointer focus to the Surface and simulate a button press.
     QSignalSpy button_press_spy(c_1.pointer, &Wrapland::Client::Pointer::buttonStateChanged);
     QVERIFY(button_press_spy.isValid());
-    m_server_seat->setFocusedPointerSurface(server_surface_1);
+    m_server_seat->pointers().set_focused_surface(server_surface_1);
     m_server_seat->setTimestamp(2);
-    m_server_seat->pointerButtonPressed(1);
+    m_server_seat->pointers().button_pressed(1);
     QVERIFY(button_press_spy.wait());
     QCOMPARE(button_press_spy.first().at(1).value<quint32>(), quint32(2));
 
@@ -650,7 +651,7 @@ void TestDragAndDrop::test_target_removed()
     QSignalSpy dropped_spy(c_1.source, &Wrapland::Client::DataSource::dragAndDropPerformed);
     QVERIFY(dropped_spy.isValid());
     m_server_seat->setTimestamp(4);
-    m_server_seat->pointerButtonReleased(1);
+    m_server_seat->pointers().button_released(1);
     QVERIFY(dropped_spy.wait(500));
 }
 
@@ -665,7 +666,7 @@ void TestDragAndDrop::test_pointer_events_ignored()
     QVERIFY(server_surface);
 
     // pass it pointer focus
-    m_server_seat->setFocusedPointerSurface(server_surface);
+    m_server_seat->pointers().set_focused_surface(server_surface);
 
     // create signal spies for all the pointer events
     QSignalSpy pointer_entered_spy(c_1.pointer, &Wrapland::Client::Pointer::entered);
@@ -684,9 +685,9 @@ void TestDragAndDrop::test_pointer_events_ignored()
     // first simulate a few things
     quint32 timestamp = 1;
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->setPointerPos(QPointF(10, 10));
+    m_server_seat->pointers().set_position(QPointF(10, 10));
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->pointerAxis(Qt::Vertical, 5);
+    m_server_seat->pointers().send_axis(Qt::Vertical, 5);
     // verify that we have those
     QVERIFY(axis_spy.wait());
     QCOMPARE(axis_spy.count(), 1);
@@ -697,7 +698,7 @@ void TestDragAndDrop::test_pointer_events_ignored()
 
     // let's start the drag
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->pointerButtonPressed(1);
+    m_server_seat->pointers().button_pressed(1);
     QVERIFY(button_spy.wait());
     QCOMPARE(button_spy.count(), 1);
     c_1.device->startDrag(button_spy.first().first().value<quint32>(), c_1.source, s.get());
@@ -705,25 +706,25 @@ void TestDragAndDrop::test_pointer_events_ignored()
 
     // now simulate all the possible pointer interactions
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->pointerButtonPressed(2);
+    m_server_seat->pointers().button_pressed(2);
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->pointerButtonReleased(2);
+    m_server_seat->pointers().button_released(2);
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->pointerAxis(Qt::Vertical, 5);
+    m_server_seat->pointers().send_axis(Qt::Vertical, 5);
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->pointerAxis(Qt::Horizontal, 5);
+    m_server_seat->pointers().send_axis(Qt::Horizontal, 5);
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->setFocusedPointerSurface(nullptr);
+    m_server_seat->pointers().set_focused_surface(nullptr);
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->setFocusedPointerSurface(server_surface);
+    m_server_seat->pointers().set_focused_surface(server_surface);
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->setPointerPos(QPointF(50, 50));
+    m_server_seat->pointers().set_position(QPointF(50, 50));
 
     // last but not least, simulate the drop
     QSignalSpy dropped_spy(c_1.device, &Wrapland::Client::DataDevice::dropped);
     QVERIFY(dropped_spy.isValid());
     m_server_seat->setTimestamp(timestamp++);
-    m_server_seat->pointerButtonReleased(1);
+    m_server_seat->pointers().button_released(1);
     QVERIFY(dropped_spy.wait());
 
     // all the changes should have been ignored

@@ -9,6 +9,8 @@
 #include "pointer.h"
 #include "surface.h"
 
+#include <Wrapland/Server/wraplandserver_export.h>
+
 #include <QMatrix4x4>
 #include <QObject>
 #include <QPoint>
@@ -40,7 +42,7 @@ struct pointer_focus {
  * Clients are allowed to mantain multiple pointers for the same seat,
  * that can receive focus and should be updated together.
  */
-class pointer_pool
+class WRAPLANDSERVER_EXPORT pointer_pool
 {
 public:
     explicit pointer_pool(Seat* seat);

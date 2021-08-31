@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../../server/compositor.h"
 #include "../../../server/display.h"
+#include "../../../server/pointer_pool.h"
 #include "../../../server/seat.h"
 #include "../../../server/subcompositor.h"
 #include "../../../server/surface.h"
@@ -91,24 +92,24 @@ void TestServer::init()
             device, &FakeInputDevice::pointerMotionRequested, this, [this](const QSizeF& delta) {
                 m_seat->setTimestamp(m_timeSinceStart->elapsed());
                 m_cursorPos = m_cursorPos + QPointF(delta.width(), delta.height());
-                m_seat->setPointerPos(m_cursorPos);
+                m_seat->pointers().set_position(m_cursorPos);
             });
         connect(
             device, &FakeInputDevice::pointerButtonPressRequested, this, [this](quint32 button) {
                 m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                m_seat->pointerButtonPressed(button);
+                m_seat->pointers().button_pressed(button);
             });
         connect(
             device, &FakeInputDevice::pointerButtonReleaseRequested, this, [this](quint32 button) {
                 m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                m_seat->pointerButtonReleased(button);
+                m_seat->pointers().button_released(button);
             });
         connect(device,
                 &FakeInputDevice::pointerAxisRequested,
                 this,
                 [this](Qt::Orientation orientation, qreal delta) {
                     m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                    m_seat->pointerAxis(orientation, delta);
+                    m_seat->pointers().send_axis(orientation, delta);
                 });
         connect(device,
                 &FakeInputDevice::touchDownRequested,

@@ -39,6 +39,7 @@ class Display;
 class input_method_v2;
 class Keyboard;
 class Pointer;
+class pointer_pool;
 class PrimarySelectionDevice;
 class Surface;
 class TextInputV2;
@@ -69,6 +70,8 @@ public:
     void setHasKeyboard(bool has);
     void setHasTouch(bool has);
 
+    pointer_pool& pointers() const;
+
     void setTimestamp(uint32_t time);
     uint32_t timestamp() const;
 
@@ -83,42 +86,6 @@ public:
                        const QPointF& globalPosition,
                        const QMatrix4x4& inputTransformation);
     void setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation = QMatrix4x4());
-
-    void setPointerPos(const QPointF& pos);
-    QPointF pointerPos() const;
-    void setFocusedPointerSurface(Surface* surface, const QPointF& surfacePosition = QPoint());
-    void setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transformation);
-    Surface* focusedPointerSurface() const;
-    Pointer* focusedPointer() const;
-    void setFocusedPointerSurfacePosition(const QPointF& surfacePosition);
-    QPointF focusedPointerSurfacePosition() const;
-    void setFocusedPointerSurfaceTransformation(const QMatrix4x4& transformation);
-    QMatrix4x4 focusedPointerSurfaceTransformation() const;
-    void pointerButtonPressed(uint32_t button);
-    void pointerButtonPressed(Qt::MouseButton button);
-    void pointerButtonReleased(uint32_t button);
-    void pointerButtonReleased(Qt::MouseButton button);
-    bool isPointerButtonPressed(uint32_t button) const;
-    bool isPointerButtonPressed(Qt::MouseButton button) const;
-    uint32_t pointerButtonSerial(uint32_t button) const;
-    uint32_t pointerButtonSerial(Qt::MouseButton button) const;
-    void pointerAxisV5(Qt::Orientation orientation,
-                       qreal delta,
-                       int32_t discreteDelta,
-                       PointerAxisSource source);
-    void pointerAxis(Qt::Orientation orientation, uint32_t delta);
-    bool hasImplicitPointerGrab(uint32_t serial) const;
-    void relativePointerMotion(const QSizeF& delta,
-                               const QSizeF& deltaNonAccelerated,
-                               uint64_t microseconds);
-    void startPointerSwipeGesture(uint32_t fingerCount);
-    void updatePointerSwipeGesture(const QSizeF& delta);
-    void endPointerSwipeGesture();
-    void cancelPointerSwipeGesture();
-    void startPointerPinchGesture(uint32_t fingerCount);
-    void updatePointerPinchGesture(const QSizeF& delta, qreal scale, qreal rotation);
-    void endPointerPinchGesture();
-    void cancelPointerPinchGesture();
 
     void setKeymap(std::string const& content);
     void keyPressed(uint32_t key);

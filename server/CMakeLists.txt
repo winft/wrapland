@@ -387,6 +387,7 @@ set(SERVER_LIB_HEADERS
   pointer.h
   pointer_constraints_v1.h
   pointer_gestures_v1.h
+  pointer_pool.h
   presentation_time.h
   primary_selection.h
   region.h

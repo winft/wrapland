@@ -109,6 +109,11 @@ void Seat::setHasTouch(bool has)
     d_ptr->set_capability(d_ptr->touches, has);
 }
 
+pointer_pool& Seat::pointers() const
+{
+    return *d_ptr->pointers;
+}
+
 void Seat::setName(const std::string& name)
 {
     if (d_ptr->name == name) {
@@ -168,16 +173,6 @@ bool Seat::hasTouch() const
     return d_ptr->touches.has_value();
 }
 
-QPointF Seat::pointerPos() const
-{
-    return d_ptr->pointers.value().pos;
-}
-
-void Seat::setPointerPos(const QPointF& pos)
-{
-    d_ptr->pointers.value().set_position(pos);
-}
-
 uint32_t Seat::timestamp() const
 {
     return d_ptr->timestamp;
@@ -202,152 +197,6 @@ void Seat::setDragTarget(Surface* surface,
 void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation)
 {
     d_ptr->drags.set_target(surface, inputTransformation);
-}
-
-Surface* Seat::focusedPointerSurface() const
-{
-    if (!d_ptr->pointers) {
-        return nullptr;
-    }
-    return d_ptr->pointers.value().focus.surface;
-}
-
-void Seat::setFocusedPointerSurface(Surface* surface, const QPointF& surfacePosition)
-{
-    d_ptr->pointers.value().set_focused_surface(surface, surfacePosition);
-}
-
-void Seat::setFocusedPointerSurface(Surface* surface, const QMatrix4x4& transformation)
-{
-    d_ptr->pointers.value().set_focused_surface(surface, transformation);
-}
-
-Pointer* Seat::focusedPointer() const
-{
-    if (d_ptr->pointers.value().focus.devices.empty()) {
-        return nullptr;
-    }
-    return d_ptr->pointers.value().focus.devices.front();
-}
-
-void Seat::setFocusedPointerSurfacePosition(const QPointF& surfacePosition)
-{
-    d_ptr->pointers.value().set_focused_surface_position(surfacePosition);
-}
-
-QPointF Seat::focusedPointerSurfacePosition() const
-{
-    return d_ptr->pointers.value().focus.offset;
-}
-
-void Seat::setFocusedPointerSurfaceTransformation(const QMatrix4x4& transformation)
-{
-    d_ptr->pointers.value().set_focused_surface_transformation(transformation);
-}
-
-QMatrix4x4 Seat::focusedPointerSurfaceTransformation() const
-{
-    return d_ptr->pointers.value().focus.transformation;
-}
-
-bool Seat::isPointerButtonPressed(Qt::MouseButton button) const
-{
-    return d_ptr->pointers.value().is_button_pressed(button);
-}
-
-bool Seat::isPointerButtonPressed(uint32_t button) const
-{
-    return d_ptr->pointers.value().is_button_pressed(button);
-}
-
-void Seat::pointerAxisV5(Qt::Orientation orientation,
-                         qreal delta,
-                         int32_t discreteDelta,
-                         PointerAxisSource source)
-{
-    d_ptr->pointers.value().send_axis(orientation, delta, discreteDelta, source);
-}
-
-void Seat::pointerAxis(Qt::Orientation orientation, uint32_t delta)
-{
-    d_ptr->pointers.value().send_axis(orientation, delta);
-}
-
-void Seat::pointerButtonPressed(Qt::MouseButton button)
-{
-    d_ptr->pointers.value().button_pressed(button);
-}
-
-void Seat::pointerButtonPressed(uint32_t button)
-{
-    d_ptr->pointers.value().button_pressed(button);
-}
-
-void Seat::pointerButtonReleased(Qt::MouseButton button)
-{
-    d_ptr->pointers.value().button_released(button);
-}
-
-void Seat::pointerButtonReleased(uint32_t button)
-{
-    d_ptr->pointers.value().button_released(button);
-}
-
-uint32_t Seat::pointerButtonSerial(Qt::MouseButton button) const
-{
-    return d_ptr->pointers.value().button_serial(button);
-}
-
-uint32_t Seat::pointerButtonSerial(uint32_t button) const
-{
-    return d_ptr->pointers.value().button_serial(button);
-}
-
-void Seat::relativePointerMotion(const QSizeF& delta,
-                                 const QSizeF& deltaNonAccelerated,
-                                 uint64_t microseconds)
-{
-    d_ptr->pointers.value().relative_motion(delta, deltaNonAccelerated, microseconds);
-}
-
-void Seat::startPointerSwipeGesture(uint32_t fingerCount)
-{
-    d_ptr->pointers.value().start_swipe_gesture(fingerCount);
-}
-
-void Seat::updatePointerSwipeGesture(const QSizeF& delta)
-{
-    d_ptr->pointers.value().update_swipe_gesture(delta);
-}
-
-void Seat::endPointerSwipeGesture()
-{
-    d_ptr->pointers.value().end_swipe_gesture();
-}
-
-void Seat::cancelPointerSwipeGesture()
-{
-    d_ptr->pointers.value().cancel_swipe_gesture();
-}
-
-void Seat::startPointerPinchGesture(uint32_t fingerCount)
-{
-    d_ptr->pointers.value().start_pinch_gesture(fingerCount);
-}
-
-void Seat::updatePointerPinchGesture(const QSizeF& delta, qreal scale, qreal rotation)
-{
-    d_ptr->pointers.value().update_pinch_gesture(delta, scale, rotation);
-}
-
-void Seat::endPointerPinchGesture()
-{
-    d_ptr->pointers.value().end_pinch_gesture();
-}
-
-void Seat::cancelPointerPinchGesture()
-{
-    d_ptr->pointers.value().cancel_pinch_gesture();
 }
 
 void Seat::keyPressed(uint32_t key)
@@ -548,14 +397,6 @@ bool Seat::isDragPointer() const
 bool Seat::isDragTouch() const
 {
     return d_ptr->drags.is_touch_drag();
-}
-
-bool Seat::hasImplicitPointerGrab(uint32_t serial) const
-{
-    if (!d_ptr->pointers) {
-        return false;
-    }
-    return d_ptr->pointers.value().has_implicit_grab(serial);
 }
 
 QMatrix4x4 Seat::dragSurfaceTransformation() const

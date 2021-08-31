@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/compositor.h"
 #include "../server/data_device_manager.h"
 #include "../server/display.h"
+#include "../server/pointer_pool.h"
 #include "../server/seat.h"
 #include "../server/surface.h"
 #include "../server/wl_output.h"
@@ -163,7 +164,7 @@ void CompositorWindow::updateFocus()
     if (it == m_stackingOrder.constEnd()) {
         return;
     }
-    m_seat->setFocusedPointerSurface((*it)->surface()->surface());
+    m_seat->pointers().set_focused_surface((*it)->surface()->surface());
     m_seat->setFocusedKeyboardSurface((*it)->surface()->surface());
 }
 
@@ -210,30 +211,30 @@ void CompositorWindow::keyReleaseEvent(QKeyEvent* event)
 void CompositorWindow::mouseMoveEvent(QMouseEvent* event)
 {
     QWidget::mouseMoveEvent(event);
-    if (!m_seat->focusedPointerSurface()) {
+    if (!m_seat->pointers().focus.surface) {
         updateFocus();
     }
     m_seat->setTimestamp(event->timestamp());
-    m_seat->setPointerPos(event->localPos().toPoint());
+    m_seat->pointers().set_position(event->localPos().toPoint());
 }
 
 void CompositorWindow::mousePressEvent(QMouseEvent* event)
 {
     QWidget::mousePressEvent(event);
-    if (!m_seat->focusedPointerSurface()) {
+    if (!m_seat->pointers().focus.surface) {
         if (!m_stackingOrder.isEmpty()) {
-            m_seat->setFocusedPointerSurface(m_stackingOrder.last()->surface()->surface());
+            m_seat->pointers().set_focused_surface(m_stackingOrder.last()->surface()->surface());
         }
     }
     m_seat->setTimestamp(event->timestamp());
-    m_seat->pointerButtonPressed(event->button());
+    m_seat->pointers().button_pressed(event->button());
 }
 
 void CompositorWindow::mouseReleaseEvent(QMouseEvent* event)
 {
     QWidget::mouseReleaseEvent(event);
     m_seat->setTimestamp(event->timestamp());
-    m_seat->pointerButtonReleased(event->button());
+    m_seat->pointers().button_released(event->button());
 }
 
 void CompositorWindow::wheelEvent(QWheelEvent* event)
@@ -242,10 +243,10 @@ void CompositorWindow::wheelEvent(QWheelEvent* event)
     m_seat->setTimestamp(event->timestamp());
     const QPoint& angle = event->angleDelta() / (8 * 15);
     if (angle.x() != 0) {
-        m_seat->pointerAxis(Qt::Horizontal, angle.x());
+        m_seat->pointers().send_axis(Qt::Horizontal, angle.x());
     }
     if (angle.y() != 0) {
-        m_seat->pointerAxis(Qt::Vertical, angle.y());
+        m_seat->pointers().send_axis(Qt::Vertical, angle.y());
     }
 }
 

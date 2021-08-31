@@ -131,8 +131,11 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
         focusSurface = proxyRemoteSurface.data();
     }
 
-    const bool pointerGrab
-        = seat->hasImplicitPointerGrab(serial) && seat->focusedPointerSurface() == focusSurface;
+    auto pointerGrab = false;
+    if (seat->hasPointer()) {
+        auto& pointers = seat->pointers();
+        pointerGrab = pointers.has_implicit_grab(serial) && pointers.focus.surface == focusSurface;
+    }
 
     if (!pointerGrab) {
         // Client doesn't have pointer grab.
@@ -214,7 +217,7 @@ void DataDevice::Private::update_drag_pointer_motion()
 {
     assert(seat->isDragPointer());
     drag.posConnection = connect(seat, &Seat::pointerPosChanged, handle(), [this] {
-        auto const pos = seat->dragSurfaceTransformation().map(seat->pointerPos());
+        auto const pos = seat->dragSurfaceTransformation().map(seat->pointers().pos);
         send<wl_data_device_send_motion>(
             seat->timestamp(), wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
         client()->flush();
@@ -244,7 +247,7 @@ void DataDevice::Private::update_drag_target_offer(Surface* surface, uint32_t se
     auto offer = createDataOffer(source);
 
     // TODO(unknown author): handle touch position
-    auto const pos = seat->dragSurfaceTransformation().map(seat->pointerPos());
+    auto const pos = seat->dragSurfaceTransformation().map(seat->pointers().pos);
     send<wl_data_device_send_enter>(serial,
                                     surface->d_ptr->resource(),
                                     wl_fixed_from_double(pos.x()),

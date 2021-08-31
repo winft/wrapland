@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtTest>
 
 #include "../../server/display.h"
-#include "../../server/pointer.h"
+#include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 
 using namespace Wrapland::Server;
@@ -88,28 +88,27 @@ void TestWaylandServerSeat::testPointerButton()
     std::unique_ptr<Seat> seat{display.createSeat()};
     seat->setHasPointer(true);
 
-    auto pointer = seat->focusedPointer();
-    QVERIFY(!pointer);
+    QVERIFY(seat->pointers().focus.devices.empty());
 
     // no button pressed yet, should be released and no serial
-    QVERIFY(!seat->isPointerButtonPressed(0));
-    QVERIFY(!seat->isPointerButtonPressed(1));
-    QCOMPARE(seat->pointerButtonSerial(0), quint32(0));
-    QCOMPARE(seat->pointerButtonSerial(1), quint32(0));
+    QVERIFY(!seat->pointers().is_button_pressed(0));
+    QVERIFY(!seat->pointers().is_button_pressed(1));
+    QCOMPARE(seat->pointers().button_serial(0), quint32(0));
+    QCOMPARE(seat->pointers().button_serial(1), quint32(0));
 
     // mark the button as pressed
-    seat->pointerButtonPressed(0);
-    QVERIFY(seat->isPointerButtonPressed(0));
-    QCOMPARE(seat->pointerButtonSerial(0), display.serial());
+    seat->pointers().button_pressed(0);
+    QVERIFY(seat->pointers().is_button_pressed(0));
+    QCOMPARE(seat->pointers().button_serial(0), display.serial());
 
     // other button should still be unpressed
-    QVERIFY(!seat->isPointerButtonPressed(1));
-    QCOMPARE(seat->pointerButtonSerial(1), quint32(0));
+    QVERIFY(!seat->pointers().is_button_pressed(1));
+    QCOMPARE(seat->pointers().button_serial(1), quint32(0));
 
     // release it again
-    seat->pointerButtonReleased(0);
-    QVERIFY(!seat->isPointerButtonPressed(0));
-    QCOMPARE(seat->pointerButtonSerial(0), display.serial());
+    seat->pointers().button_released(0);
+    QVERIFY(!seat->pointers().is_button_pressed(0));
+    QCOMPARE(seat->pointers().button_serial(0), display.serial());
 }
 
 void TestWaylandServerSeat::testPointerPos()
@@ -123,21 +122,19 @@ void TestWaylandServerSeat::testPointerPos()
     QVERIFY(seatPosSpy.isValid());
     seat->setHasPointer(true);
 
-    auto pointer = seat->focusedPointer();
-    QVERIFY(!pointer);
+    QVERIFY(seat->pointers().focus.devices.empty());
+    QCOMPARE(seat->pointers().pos, QPointF());
 
-    QCOMPARE(seat->pointerPos(), QPointF());
-
-    seat->setPointerPos(QPointF(10, 15));
-    QCOMPARE(seat->pointerPos(), QPointF(10, 15));
+    seat->pointers().set_position(QPointF(10, 15));
+    QCOMPARE(seat->pointers().pos, QPointF(10, 15));
     QCOMPARE(seatPosSpy.count(), 1);
     QCOMPARE(seatPosSpy.first().first().toPointF(), QPointF(10, 15));
 
-    seat->setPointerPos(QPointF(10, 15));
+    seat->pointers().set_position(QPointF(10, 15));
     QCOMPARE(seatPosSpy.count(), 1);
 
-    seat->setPointerPos(QPointF(5, 7));
-    QCOMPARE(seat->pointerPos(), QPointF(5, 7));
+    seat->pointers().set_position(QPointF(5, 7));
+    QCOMPARE(seat->pointers().pos, QPointF(5, 7));
     QCOMPARE(seatPosSpy.count(), 2);
     QCOMPARE(seatPosSpy.first().first().toPointF(), QPointF(10, 15));
     QCOMPARE(seatPosSpy.last().first().toPointF(), QPointF(5, 7));

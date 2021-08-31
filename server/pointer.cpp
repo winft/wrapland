@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "pointer.h"
 #include "pointer_p.h"
+#include "pointer_pool.h"
 
 #include "client.h"
 #include "data_device.h"
@@ -82,7 +83,8 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
             && focusedSurface->lockedPointer()->isLocked()) {
             return;
         }
-        const QPointF pos = seat->focusedPointerSurfaceTransformation().map(seat->pointerPos());
+        auto& pointers = seat->pointers();
+        auto const pos = pointers.focus.transformation.map(pointers.pos);
         sendMotion(pos);
         sendFrame();
     });
@@ -261,7 +263,8 @@ void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
         focusedSurface = nullptr;
     });
 
-    const QPointF pos = seat->focusedPointerSurfaceTransformation().map(seat->pointerPos());
+    auto& pointers = seat->pointers();
+    auto const pos = pointers.focus.transformation.map(pointers.pos);
     sendEnter(serial, focusedSurface, pos);
     client()->flush();
 }

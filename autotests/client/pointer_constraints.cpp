@@ -32,6 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/pointer_constraints_v1.h"
+#include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
 
@@ -250,16 +251,16 @@ void TestPointerConstraints::testLockPointer()
     QSignalSpy lockedChangedSpy(serverLockedPointer.data(),
                                 &Wrapland::Server::LockedPointerV1::lockedChanged);
     QVERIFY(lockedChangedSpy.isValid());
-    m_serverSeat->setFocusedPointerSurface(serverSurface);
+    m_serverSeat->pointers().set_focused_surface(serverSurface);
 
     QSignalSpy pointerMotionSpy(m_pointer, &Wrapland::Client::Pointer::motion);
     QVERIFY(pointerMotionSpy.isValid());
-    m_serverSeat->setPointerPos(QPoint(0, 1));
+    m_serverSeat->pointers().set_position(QPoint(0, 1));
     QVERIFY(pointerMotionSpy.wait());
 
     serverLockedPointer->setLocked(true);
     QCOMPARE(serverLockedPointer->isLocked(), true);
-    m_serverSeat->setPointerPos(QPoint(1, 1));
+    m_serverSeat->pointers().set_position(QPoint(1, 1));
     QCOMPARE(lockedChangedSpy.count(), 1);
     QCOMPARE(pointerMotionSpy.count(), 1);
     QVERIFY(lockedSpy.isEmpty());
@@ -287,7 +288,7 @@ void TestPointerConstraints::testLockPointer()
     QCOMPARE(lockedSpy.count(), 1);
 
     // Now motion should work again.
-    m_serverSeat->setPointerPos(QPoint(0, 1));
+    m_serverSeat->pointers().set_position(QPoint(0, 1));
     QVERIFY(pointerMotionSpy.wait());
     QCOMPARE(pointerMotionSpy.count(), 2);
 
@@ -384,7 +385,7 @@ void TestPointerConstraints::testConfinePointer()
     QSignalSpy confinedChangedSpy(serverConfinedPointer.data(),
                                   &Wrapland::Server::ConfinedPointerV1::confinedChanged);
     QVERIFY(confinedChangedSpy.isValid());
-    m_serverSeat->setFocusedPointerSurface(serverSurface);
+    m_serverSeat->pointers().set_focused_surface(serverSurface);
     serverConfinedPointer->setConfined(true);
     QCOMPARE(serverConfinedPointer->isConfined(), true);
     QCOMPARE(confinedChangedSpy.count(), 1);

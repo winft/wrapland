@@ -41,7 +41,7 @@ void drag_pool::end(uint32_t serial)
 void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransformation)
 {
     if (mode == Mode::Pointer) {
-        set_target(new_surface, seat->pointerPos(), inputTransformation);
+        set_target(new_surface, seat->pointers().pos, inputTransformation);
     } else {
         Q_ASSERT(mode == Mode::Touch);
         set_target(
@@ -70,7 +70,7 @@ void drag_pool::set_target(Surface* new_surface,
     target = interfaceForSurface(new_surface, seat->d_ptr->data_devices.devices);
 
     if (mode == Mode::Pointer) {
-        seat->setPointerPos(globalPosition);
+        seat->pointers().set_position(globalPosition);
     } else if (mode == Mode::Touch
                && seat->d_ptr->touches.value().focus.firstTouchPos != globalPosition) {
         seat->touchMove(seat->d_ptr->touches.value().ids.cbegin()->first, globalPosition);
@@ -111,10 +111,12 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
 {
     const auto dragSerial = dataDevice->dragImplicitGrabSerial();
     auto* dragSurface = dataDevice->origin();
-    if (seat->hasImplicitPointerGrab(dragSerial)) {
+    auto& pointers = seat->pointers();
+
+    if (pointers.has_implicit_grab(dragSerial)) {
         mode = Mode::Pointer;
         sourcePointer = interfaceForSurface(dragSurface, seat->d_ptr->pointers.value().devices);
-        transformation = seat->focusedPointerSurfaceTransformation();
+        transformation = pointers.focus.transformation;
     } else if (seat->hasImplicitTouchGrab(dragSerial)) {
         mode = Mode::Touch;
         sourceTouch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().devices);
@@ -130,7 +132,7 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
         target = dataDevice;
         surface = originSurface;
         // TODO(unknown author): transformation needs to be either pointer or touch
-        transformation = seat->focusedPointerSurfaceTransformation();
+        transformation = pointers.focus.transformation;
     }
     source = dataDevice;
     sourcePointer = interfaceForSurface(originSurface, seat->d_ptr->pointers.value().devices);
