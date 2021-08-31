@@ -135,11 +135,12 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
         // TODO(unknown author): transformation needs to be either pointer or touch
         transformation = pointers.focus.transformation;
     }
+
     source = dataDevice;
-    sourcePointer = interfaceForSurface(originSurface, seat->d_ptr->pointers.value().devices);
     destroyConnection = QObject::connect(dataDevice, &DataDevice::resourceDestroyed, seat, [this] {
         end(seat->d_ptr->display()->handle()->nextSerial());
     });
+
     if (dataDevice->dragSource()) {
         dragSourceDestroyConnection = QObject::connect(
             dataDevice->dragSource(), &DataSource::resourceDestroyed, seat, [this] {

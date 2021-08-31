@@ -258,10 +258,6 @@ Surface* Seat::dragSurface() const
 
 Pointer* Seat::dragPointer() const
 {
-    if (d_ptr->drags.mode != drag_pool::Mode::Pointer) {
-        return nullptr;
-    }
-
     return d_ptr->drags.sourcePointer;
 }
 
