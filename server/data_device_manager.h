@@ -25,14 +25,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-server.h>
 
+#include <cstdint>
 #include <memory>
 
 namespace Wrapland::Server
 {
-
+class Client;
 class DataDevice;
 class DataSource;
 class Display;
+class Seat;
 
 class WRAPLANDSERVER_EXPORT DataDeviceManager : public QObject
 {
@@ -51,6 +53,9 @@ public:
     };
     Q_DECLARE_FLAGS(DnDActions, DnDAction)
 
+    void create_source(Client* client, uint32_t version, uint32_t id);
+    void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
+
 Q_SIGNALS:
     void sourceCreated(Wrapland::Server::DataSource* source);
     void deviceCreated(Wrapland::Server::DataDevice* device);
@@ -58,16 +63,6 @@ Q_SIGNALS:
 private:
     friend class Display;
     explicit DataDeviceManager(Display* display, QObject* parent = nullptr);
-
-    template<typename Global>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void create_selection_source(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
-    template<typename Global>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void get_selection_device(wl_client* wlClient,
-                                     wl_resource* wlResource,
-                                     uint32_t id,
-                                     wl_resource* wlSeat);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

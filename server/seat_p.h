@@ -21,6 +21,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "seat.h"
 
+#include "drag_pool.h"
+#include "keyboard_pool.h"
+#include "pointer_pool.h"
+#include "selection_pool.h"
+#include "text_input_pool.h"
+#include "touch_pool.h"
+
 #include "wayland/global.h"
 
 #include <QHash>
@@ -28,16 +35,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPointer>
 #include <QVector>
 
+#include <map>
 #include <string>
+#include <vector>
 #include <wayland-server.h>
 
-namespace Wrapland
+namespace Wrapland::Server
 {
-namespace Server
-{
-
-class DataDevice;
-class TextInputV2;
 
 constexpr uint32_t SeatVersion = 5;
 using SeatGlobal = Wayland::Global<Seat, SeatVersion>;
@@ -55,168 +59,21 @@ public:
 
     uint32_t getCapabilities() const;
 
-    QVector<Pointer*> pointersForSurface(Surface* surface) const;
-    QVector<Keyboard*> keyboardsForSurface(Surface* surface) const;
-    QVector<Touch*> touchsForSurface(Surface* surface) const;
-    QVector<DataDevice*> dataDevicesForSurface(Surface* surface) const;
-
-    TextInputV2* textInputV2ForSurface(Surface* surface) const;
-    text_input_v3* textInputV3ForSurface(Surface* surface) const;
-
-    template<typename Device>
-    void register_device(Device*);
-
-    void registerDataDevice(DataDevice* dataDevice);
-    void registerPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
-    void registerInputMethod(input_method_v2* im);
-    void registerTextInput(TextInputV2* ti);
-    void registerTextInput(text_input_v3* ti);
-    void endDrag(quint32 serial);
-    void cancelPreviousSelection(DataDevice* newlySelectedDataDevice) const;
-    void cancelPreviousSelection(PrimarySelectionDevice* dataDevice) const;
-
     std::string name;
     bool pointer = false;
     bool keyboard = false;
     bool touch = false;
     QList<wl_resource*> resources;
-    quint32 timestamp = 0;
-    QVector<Pointer*> pointers;
-    QVector<Keyboard*> keyboards;
-    QVector<Touch*> touchs;
-    QVector<DataDevice*> dataDevices;
-    QVector<PrimarySelectionDevice*> primarySelectionDevices;
+    uint32_t timestamp = 0;
+    pointer_pool pointers;
+    keyboard_pool keyboards;
+    touch_pool touches;
+    drag_pool drags;
+    selection_pool<DataDevice, &Seat::selectionChanged> data_devices;
+    selection_pool<PrimarySelectionDevice, &Seat::primarySelectionChanged>
+        primary_selection_devices;
     input_method_v2* input_method{nullptr};
-    QVector<TextInputV2*> textInputs;
-    QVector<text_input_v3*> textInputsV3;
-    DataDevice* currentSelection = nullptr;
-    PrimarySelectionDevice* currentPrimarySelectionDevice = nullptr;
-
-    // Pointer related members
-    struct SeatPointer {
-        enum class State {
-            Released,
-            Pressed,
-        };
-        QHash<quint32, quint32> buttonSerials;
-        QHash<quint32, State> buttonStates;
-        QPointF pos;
-        struct Focus {
-            Surface* surface = nullptr;
-            QVector<Pointer*> pointers;
-            QMetaObject::Connection destroyConnection;
-            QPointF offset = QPointF();
-            QMatrix4x4 transformation;
-            quint32 serial = 0;
-        };
-        Focus focus;
-        QPointer<Surface> gestureSurface;
-    };
-    SeatPointer globalPointer;
-
-    void updatePointerButtonSerial(quint32 button, quint32 serial);
-    void updatePointerButtonState(quint32 button, SeatPointer::State state);
-
-    // Keyboard related members
-    struct SeatKeyboard {
-        enum class State {
-            Released,
-            Pressed,
-        };
-        QHash<quint32, State> states;
-        struct Keymap {
-            int fd = -1;
-            std::string content;
-            bool xkbcommonCompatible = false;
-        };
-        Keymap keymap;
-        struct Modifiers {
-            bool operator==(Modifiers const& other) const
-            {
-                return depressed == other.depressed && latched == other.latched
-                    && locked == other.locked && group == other.group && serial == other.serial;
-            }
-            bool operator!=(Modifiers const& other) const
-            {
-                return !(*this == other);
-            }
-            quint32 depressed = 0;
-            quint32 latched = 0;
-            quint32 locked = 0;
-            quint32 group = 0;
-            quint32 serial = 0;
-        };
-        Modifiers modifiers;
-        struct Focus {
-            Surface* surface = nullptr;
-            QVector<Keyboard*> keyboards;
-            QMetaObject::Connection destroyConnection;
-            quint32 serial = 0;
-            QVector<DataDevice*> selections;
-            QVector<PrimarySelectionDevice*> primarySelections;
-        };
-        Focus focus;
-        quint32 lastStateSerial = 0;
-        struct {
-            qint32 charactersPerSecond = 0;
-            qint32 delay = 0;
-        } keyRepeat;
-    };
-    SeatKeyboard keys;
-
-    bool updateKey(quint32 key, SeatKeyboard::State state);
-
-    struct {
-        struct {
-            Surface* surface = nullptr;
-            QMetaObject::Connection destroy_connection;
-        } focus;
-
-        // Both text inputs may be active at a time.
-        // That doesn't make sense, but there's no reason to enforce only one.
-        struct {
-            quint32 serial = 0;
-            TextInputV2* text_input{nullptr};
-        } v2;
-        struct {
-            text_input_v3* text_input{nullptr};
-        } v3;
-    } global_text_input;
-
-    // Touch related members
-    struct SeatTouch {
-        struct Focus {
-            Surface* surface = nullptr;
-            QVector<Touch*> touchs;
-            QMetaObject::Connection destroyConnection;
-            QPointF offset = QPointF();
-            QPointF firstTouchPos;
-        };
-        Focus focus;
-
-        // Key: Distinct id per touch point, Value: Wayland display serial.
-        QMap<qint32, quint32> ids;
-    };
-    SeatTouch globalTouch;
-
-    struct Drag {
-        enum class Mode {
-            None,
-            Pointer,
-            Touch,
-        };
-        Mode mode = Mode::None;
-        DataDevice* source = nullptr;
-        DataDevice* target = nullptr;
-        Surface* surface = nullptr;
-        Pointer* sourcePointer = nullptr;
-        Touch* sourceTouch = nullptr;
-        QMatrix4x4 transformation;
-        QMetaObject::Connection destroyConnection;
-        QMetaObject::Connection dragSourceDestroyConnection;
-        QMetaObject::Connection target_destroy_connection;
-    };
-    Drag drag;
+    text_input_pool text_inputs;
 
     // legacy
     friend class SeatInterface;
@@ -225,15 +82,6 @@ public:
     Seat* q_ptr;
 
 private:
-    void getPointer(SeatBind* bind, uint32_t id);
-    void getKeyboard(SeatBind* bind, uint32_t id);
-    void getTouch(SeatBind* bind, uint32_t id);
-
-    void updateSelection(DataDevice* dataDevice, bool set);
-    void updateSelection(PrimarySelectionDevice* dataDevice, bool set);
-    void cleanupDataDevice(DataDevice* dataDevice);
-    void cleanupPrimarySelectionDevice(PrimarySelectionDevice* primarySelectionDevice);
-
     static void getPointerCallback(SeatBind* bind, uint32_t id);
     static void getKeyboardCallback(SeatBind* bind, uint32_t id);
     static void getTouchCallback(SeatBind* bind, uint32_t id);
@@ -241,5 +89,4 @@ private:
     static const struct wl_seat_interface s_interface;
 };
 
-}
 }

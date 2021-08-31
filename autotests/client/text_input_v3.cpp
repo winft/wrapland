@@ -199,6 +199,7 @@ void text_input_v3_test::test_enter_leave()
     auto server_text_input = server.seat->focusedTextInputV3();
     QVERIFY(server_text_input);
     QCOMPARE(text_input_focus_spy.count(), 1);
+    QCOMPARE(server_text_input->entered_surface(), server_surface);
 
     QVERIFY(entered_spy.wait());
     QCOMPARE(entered_spy.count(), 1);
@@ -223,6 +224,7 @@ void text_input_v3_test::test_enter_leave()
     QVERIFY(left_spy.wait());
     QCOMPARE(left_spy.count(), 1);
     QVERIFY(!text_input->entered_surface());
+    QVERIFY(!server_text_input->entered_surface());
 
     // Enter one more time. All data is reset.
     server.seat->setFocusedKeyboardSurface(server_surface);
@@ -232,6 +234,7 @@ void text_input_v3_test::test_enter_leave()
     QVERIFY(entered_spy.wait());
     QCOMPARE(entered_spy.count(), 2);
     QCOMPARE(text_input->entered_surface(), surface.get());
+    QCOMPARE(server_text_input->entered_surface(), server_surface);
 
     text_input->enable();
     text_input->commit();
@@ -251,6 +254,7 @@ void text_input_v3_test::test_enter_leave()
     // No focus change.
     QCOMPARE(text_input_focus_spy.count(), 3);
     QCOMPARE(server.seat->focusedTextInputV3(), server_text_input);
+    QCOMPARE(server_text_input->entered_surface(), server_surface);
 
     // Enable again.
     text_input->enable();
@@ -261,6 +265,7 @@ void text_input_v3_test::test_enter_leave()
     QCOMPARE(server_text_input->state().enabled, true);
 
     QCOMPARE(text_input->entered_surface(), surface.get());
+    QCOMPARE(server_text_input->entered_surface(), server_surface);
 
     // delete the client and wait for the server to catch up
     QSignalSpy server_surface_destroy_spy(server_surface, &QObject::destroyed);
@@ -270,6 +275,7 @@ void text_input_v3_test::test_enter_leave()
     QVERIFY(server.seat->focusedTextInputV3());
     QVERIFY(server_surface_destroy_spy.wait());
     QVERIFY(!server.seat->focusedTextInputV3());
+    QVERIFY(!server_text_input->entered_surface());
 }
 
 void text_input_v3_test::test_cursor_rectangle()

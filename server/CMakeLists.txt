@@ -11,6 +11,7 @@ set(SERVER_LIB_SRCS
   data_source.cpp
   display.cpp
   dpms.cpp
+  drag_pool.cpp
   egl_stream_controller.cpp
   fake_input.cpp
   filtered_display.cpp
@@ -19,6 +20,7 @@ set(SERVER_LIB_SRCS
   kde_idle.cpp
   keyboard.cpp
   keystate.cpp
+  keyboard_pool.cpp
   keyboard_shortcuts_inhibit.cpp
   layer_shell_v1.cpp
   linux_dmabuf_v1.cpp
@@ -33,8 +35,10 @@ set(SERVER_LIB_SRCS
   pointer.cpp
   pointer_constraints_v1.cpp
   pointer_gestures_v1.cpp
+  pointer_pool.cpp
   presentation_time.cpp
   primary_selection.cpp
+  primary_selection_device_manager.cpp
   region.cpp
   relative_pointer_v1.cpp
   seat.cpp
@@ -43,9 +47,11 @@ set(SERVER_LIB_SRCS
   slide.cpp
   subcompositor.cpp
   surface.cpp
+  text_input_pool.cpp
   text_input_v2.cpp
   text_input_v3.cpp
   touch.cpp
+  touch_pool.cpp
   viewporter.cpp
   wayland/buffer_manager.cpp
   wayland/client.cpp

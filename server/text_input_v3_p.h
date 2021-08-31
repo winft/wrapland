@@ -46,6 +46,7 @@ public:
     void send_leave(Surface* surface);
 
     Seat* seat{nullptr};
+    Surface* entered_surface{nullptr};
     uint32_t serial{0};
 
     text_input_v3_state current;

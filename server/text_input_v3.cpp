@@ -201,7 +201,7 @@ void text_input_manager_v3::Private::get_text_input_callback(text_input_manager_
 
     auto textInput = new text_input_v3(bind->client()->handle(), bind->version(), id);
     textInput->d_ptr->seat = seat;
-    seat->d_ptr->registerTextInput(textInput);
+    seat->d_ptr->text_inputs.register_device(textInput);
 }
 
 text_input_manager_v3::text_input_manager_v3(Display* display, QObject* parent)
@@ -236,6 +236,7 @@ text_input_v3::Private::Private(Client* client, uint32_t version, uint32_t id, t
 void text_input_v3::Private::send_enter(Surface* surface)
 {
     assert(surface);
+    entered_surface = surface;
     send<zwp_text_input_v3_send_enter>(surface->d_ptr->resource());
 }
 
@@ -244,6 +245,7 @@ void text_input_v3::Private::send_leave(Surface* surface)
     assert(surface);
     current = {};
     pending = {};
+    entered_surface = nullptr;
     send<zwp_text_input_v3_send_leave>(surface->d_ptr->resource());
 }
 
@@ -352,4 +354,10 @@ Client* text_input_v3::client() const
 {
     return d_ptr->client()->handle();
 }
+
+Surface* text_input_v3::entered_surface() const
+{
+    return d_ptr->entered_surface;
+}
+
 }

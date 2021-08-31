@@ -45,6 +45,7 @@ private:
     void move(qint32 id, const QPointF& localPos);
 
     friend class Seat;
+    friend class touch_pool;
 
     Touch(Client* client, uint32_t version, uint32_t id, Seat* seat);
     class Private;

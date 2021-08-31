@@ -68,6 +68,8 @@ private:
     friend class PointerConstraintsV1;
 
     friend class Seat;
+    friend class pointer_pool;
+    friend class touch_pool;
     Pointer(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
     class Private;
