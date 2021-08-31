@@ -43,6 +43,7 @@ class Pointer;
 class pointer_pool;
 class PrimarySelectionDevice;
 class Surface;
+class text_input_pool;
 class TextInputV2;
 class text_input_v3;
 class Touch;
@@ -76,6 +77,8 @@ public:
     keyboard_pool& keyboards() const;
     touch_pool& touches() const;
 
+    text_input_pool& text_inputs() const;
+
     void setTimestamp(uint32_t time);
     uint32_t timestamp() const;
 
@@ -94,11 +97,6 @@ public:
     void setFocusedKeyboardSurface(Surface* surface);
 
     input_method_v2* get_input_method_v2() const;
-
-    void setFocusedTextInputSurface(Surface* surface);
-    Surface* focusedTextInputSurface() const;
-    TextInputV2* focusedTextInputV2() const;
-    text_input_v3* focusedTextInputV3() const;
 
     DataDevice* selection() const;
     void setSelection(DataDevice* dataDevice);

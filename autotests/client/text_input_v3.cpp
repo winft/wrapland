@@ -17,6 +17,7 @@
 #include "../../server/display.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
+#include "../../server/text_input_pool.h"
 #include "../../server/text_input_v3.h"
 
 class text_input_v3_test : public QObject
@@ -191,12 +192,12 @@ void text_input_v3_test::test_enter_leave()
     QVERIFY(text_input_focus_spy.isValid());
 
     // Enter now.
-    QVERIFY(!server.seat->focusedTextInputV3());
-    QVERIFY(!server.seat->focusedTextInputSurface());
+    QVERIFY(!server.seat->text_inputs().v3.text_input);
+    QVERIFY(!server.seat->text_inputs().focus.surface);
     server.seat->setFocusedKeyboardSurface(server_surface);
-    QCOMPARE(server.seat->focusedTextInputSurface(), server_surface);
+    QCOMPARE(server.seat->text_inputs().focus.surface, server_surface);
 
-    auto server_text_input = server.seat->focusedTextInputV3();
+    auto server_text_input = server.seat->text_inputs().v3.text_input;
     QVERIFY(server_text_input);
     QCOMPARE(text_input_focus_spy.count(), 1);
     QCOMPARE(server_text_input->entered_surface(), server_surface);
@@ -218,7 +219,7 @@ void text_input_v3_test::test_enter_leave()
     // Leave now.
     server.seat->setFocusedKeyboardSurface(nullptr);
     QCOMPARE(text_input_focus_spy.count(), 2);
-    QVERIFY(!server.seat->focusedTextInputV3());
+    QVERIFY(!server.seat->text_inputs().v3.text_input);
     QVERIFY(!server_text_input->state().enabled);
 
     QVERIFY(left_spy.wait());
@@ -228,7 +229,7 @@ void text_input_v3_test::test_enter_leave()
 
     // Enter one more time. All data is reset.
     server.seat->setFocusedKeyboardSurface(server_surface);
-    QCOMPARE(server_text_input, server.seat->focusedTextInputV3());
+    QCOMPARE(server_text_input, server.seat->text_inputs().v3.text_input);
     QCOMPARE(text_input_focus_spy.count(), 3);
 
     QVERIFY(entered_spy.wait());
@@ -253,7 +254,7 @@ void text_input_v3_test::test_enter_leave()
 
     // No focus change.
     QCOMPARE(text_input_focus_spy.count(), 3);
-    QCOMPARE(server.seat->focusedTextInputV3(), server_text_input);
+    QCOMPARE(server.seat->text_inputs().v3.text_input, server_text_input);
     QCOMPARE(server_text_input->entered_surface(), server_surface);
 
     // Enable again.
@@ -272,9 +273,9 @@ void text_input_v3_test::test_enter_leave()
     surface.reset();
     QVERIFY(!text_input->entered_surface());
 
-    QVERIFY(server.seat->focusedTextInputV3());
+    QVERIFY(server.seat->text_inputs().v3.text_input);
     QVERIFY(server_surface_destroy_spy.wait());
-    QVERIFY(!server.seat->focusedTextInputV3());
+    QVERIFY(!server.seat->text_inputs().v3.text_input);
     QVERIFY(!server_text_input->entered_surface());
 }
 
@@ -293,9 +294,9 @@ void text_input_v3_test::test_cursor_rectangle()
 
     // Enter now.
     server.seat->setFocusedKeyboardSurface(server_surface);
-    QCOMPARE(server.seat->focusedTextInputSurface(), server_surface);
+    QCOMPARE(server.seat->text_inputs().focus.surface, server_surface);
 
-    auto server_text_input = server.seat->focusedTextInputV3();
+    auto server_text_input = server.seat->text_inputs().v3.text_input;
     QVERIFY(server_text_input);
 
     QVERIFY(entered_spy.wait());
@@ -330,9 +331,9 @@ void text_input_v3_test::test_surrounding_text()
 
     // Enter now.
     server.seat->setFocusedKeyboardSurface(server_surface);
-    QCOMPARE(server.seat->focusedTextInputSurface(), server_surface);
+    QCOMPARE(server.seat->text_inputs().focus.surface, server_surface);
 
-    auto server_text_input = server.seat->focusedTextInputV3();
+    auto server_text_input = server.seat->text_inputs().v3.text_input;
     QVERIFY(server_text_input);
 
     QVERIFY(entered_spy.wait());
@@ -428,9 +429,9 @@ void text_input_v3_test::test_content_hints()
 
     // Enter now.
     server.seat->setFocusedKeyboardSurface(server_surface);
-    QCOMPARE(server.seat->focusedTextInputSurface(), server_surface);
+    QCOMPARE(server.seat->text_inputs().focus.surface, server_surface);
 
-    auto server_text_input = server.seat->focusedTextInputV3();
+    auto server_text_input = server.seat->text_inputs().v3.text_input;
     QVERIFY(server_text_input);
 
     QVERIFY(entered_spy.wait());
@@ -490,9 +491,9 @@ void text_input_v3_test::test_content_purpose()
 
     // Enter now.
     server.seat->setFocusedKeyboardSurface(server_surface);
-    QCOMPARE(server.seat->focusedTextInputSurface(), server_surface);
+    QCOMPARE(server.seat->text_inputs().focus.surface, server_surface);
 
-    auto server_text_input = server.seat->focusedTextInputV3();
+    auto server_text_input = server.seat->text_inputs().v3.text_input;
     QVERIFY(server_text_input);
 
     QVERIFY(entered_spy.wait());
@@ -533,9 +534,9 @@ void text_input_v3_test::test_preedit()
 
     // Enter now.
     server.seat->setFocusedKeyboardSurface(server_surface);
-    QCOMPARE(server.seat->focusedTextInputSurface(), server_surface);
+    QCOMPARE(server.seat->text_inputs().focus.surface, server_surface);
 
-    auto server_text_input = server.seat->focusedTextInputV3();
+    auto server_text_input = server.seat->text_inputs().v3.text_input;
     QVERIFY(server_text_input);
 
     QVERIFY(entered_spy.wait());

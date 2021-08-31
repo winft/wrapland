@@ -124,6 +124,11 @@ touch_pool& Seat::touches() const
     return *d_ptr->touches;
 }
 
+text_input_pool& Seat::text_inputs() const
+{
+    return d_ptr->text_inputs;
+}
+
 void Seat::setName(const std::string& name)
 {
     if (d_ptr->name == name) {
@@ -218,7 +223,7 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
     d_ptr->primary_selection_devices.set_focused_surface(surface);
 
     // Focused text input surface follows keyboard.
-    setFocusedTextInputSurface(surface);
+    d_ptr->text_inputs.set_focused_surface(surface);
 }
 
 input_method_v2* Seat::get_input_method_v2() const
@@ -263,36 +268,6 @@ Pointer* Seat::dragPointer() const
 DataDevice* Seat::dragSource() const
 {
     return d_ptr->drags.source;
-}
-
-bool Seat::setFocusedTextInputV2Surface(Surface* surface)
-{
-    return d_ptr->text_inputs.set_v2_focused_surface(surface);
-}
-
-bool Seat::setFocusedTextInputV3Surface(Surface* surface)
-{
-    return d_ptr->text_inputs.set_v3_focused_surface(surface);
-}
-
-void Seat::setFocusedTextInputSurface(Surface* surface)
-{
-    d_ptr->text_inputs.set_focused_surface(surface);
-}
-
-Surface* Seat::focusedTextInputSurface() const
-{
-    return d_ptr->text_inputs.focus.surface;
-}
-
-TextInputV2* Seat::focusedTextInputV2() const
-{
-    return d_ptr->text_inputs.v2.text_input;
-}
-
-text_input_v3* Seat::focusedTextInputV3() const
-{
-    return d_ptr->text_inputs.v3.text_input;
 }
 
 DataDevice* Seat::selection() const

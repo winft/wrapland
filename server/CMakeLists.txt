@@ -399,6 +399,7 @@ set(SERVER_LIB_HEADERS
   slide.h
   subcompositor.h
   surface.h
+  text_input_pool.h
   text_input_v2.h
   text_input_v3.h
   touch.h

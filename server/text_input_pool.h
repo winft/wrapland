@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <Wrapland/Server/wraplandserver_export.h>
+
 #include <QObject>
 
 namespace Wrapland::Server
@@ -16,7 +18,7 @@ class Surface;
 class TextInputV2;
 class text_input_v3;
 
-class text_input_pool
+class WRAPLANDSERVER_EXPORT text_input_pool
 {
 public:
     explicit text_input_pool(Seat* seat);
