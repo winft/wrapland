@@ -60,19 +60,21 @@ public:
 
     uint32_t getCapabilities() const;
 
-    void set_capability(bool& dev, bool has)
+    template<typename Dev>
+    void set_capability(std::optional<Dev>& dev, bool has)
     {
-        if (dev == has) {
+        if (static_cast<bool>(dev) == has) {
             return;
         }
-        dev = has;
+        if (has) {
+            dev = Dev(q_ptr);
+        } else {
+            dev.reset();
+        }
         sendCapabilities();
     }
 
     std::string name;
-    bool pointer = false;
-    bool keyboard = false;
-    bool touch = false;
     QList<wl_resource*> resources;
     uint32_t timestamp = 0;
     std::optional<pointer_pool> pointers;

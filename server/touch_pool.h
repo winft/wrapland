@@ -34,6 +34,7 @@ class touch_pool
 {
 public:
     explicit touch_pool(Seat* seat);
+    ~touch_pool();
 
     void set_focused_surface(Surface* surface, const QPointF& surfacePosition = QPointF());
     void set_focused_surface_position(const QPointF& surfacePosition);

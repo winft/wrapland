@@ -28,6 +28,14 @@ touch_pool::touch_pool(Seat* seat)
 {
 }
 
+touch_pool::~touch_pool()
+{
+    QObject::disconnect(focus.destroyConnection);
+    for (auto dev : devices) {
+        QObject::disconnect(dev, nullptr, seat, nullptr);
+    }
+}
+
 void touch_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     // TODO(unknown author): only create if seat has touch?

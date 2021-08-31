@@ -22,6 +22,14 @@ keyboard_pool::keyboard_pool(Seat* seat)
 {
 }
 
+keyboard_pool::~keyboard_pool()
+{
+    QObject::disconnect(focus.destroyConnection);
+    for (auto dev : devices) {
+        QObject::disconnect(dev, nullptr, seat, nullptr);
+    }
+}
+
 void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     auto keyboard = new Keyboard(client, version, id, seat);

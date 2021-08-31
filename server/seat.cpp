@@ -39,9 +39,6 @@ namespace Wrapland::Server
 
 Seat::Private::Private(Seat* q, Display* display)
     : SeatGlobal(q, display, &wl_seat_interface, &s_interface)
-    , pointers(q)
-    , keyboards(q)
-    , touches(q)
     , drags(q)
     , data_devices(q)
     , primary_selection_devices(q)
@@ -80,13 +77,13 @@ void Seat::Private::sendName()
 uint32_t Seat::Private::getCapabilities() const
 {
     uint32_t capabilities = 0;
-    if (pointer) {
+    if (pointers) {
         capabilities |= WL_SEAT_CAPABILITY_POINTER;
     }
-    if (keyboard) {
+    if (keyboards) {
         capabilities |= WL_SEAT_CAPABILITY_KEYBOARD;
     }
-    if (touch) {
+    if (touches) {
         capabilities |= WL_SEAT_CAPABILITY_TOUCH;
     }
     return capabilities;
@@ -99,17 +96,17 @@ void Seat::Private::sendCapabilities()
 
 void Seat::setHasKeyboard(bool has)
 {
-    d_ptr->set_capability(d_ptr->keyboard, has);
+    d_ptr->set_capability(d_ptr->keyboards, has);
 }
 
 void Seat::setHasPointer(bool has)
 {
-    d_ptr->set_capability(d_ptr->pointer, has);
+    d_ptr->set_capability(d_ptr->pointers, has);
 }
 
 void Seat::setHasTouch(bool has)
 {
-    d_ptr->set_capability(d_ptr->touch, has);
+    d_ptr->set_capability(d_ptr->touches, has);
 }
 
 void Seat::setName(const std::string& name)
@@ -158,17 +155,17 @@ std::string Seat::name() const
 
 bool Seat::hasPointer() const
 {
-    return d_ptr->pointer;
+    return d_ptr->pointers.has_value();
 }
 
 bool Seat::hasKeyboard() const
 {
-    return d_ptr->keyboard;
+    return d_ptr->keyboards.has_value();
 }
 
 bool Seat::hasTouch() const
 {
-    return d_ptr->touch;
+    return d_ptr->touches.has_value();
 }
 
 QPointF Seat::pointerPos() const
@@ -209,6 +206,9 @@ void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation
 
 Surface* Seat::focusedPointerSurface() const
 {
+    if (!d_ptr->pointers) {
+        return nullptr;
+    }
     return d_ptr->pointers.value().focus.surface;
 }
 
@@ -362,19 +362,22 @@ void Seat::keyReleased(uint32_t key)
 
 Surface* Seat::focusedKeyboardSurface() const
 {
+    if (!d_ptr->keyboards) {
+        return nullptr;
+    }
     return d_ptr->keyboards.value().focus.surface;
 }
 
 void Seat::setFocusedKeyboardSurface(Surface* surface)
 {
+    assert(hasKeyboard());
+
     d_ptr->keyboards.value().set_focused_surface(surface);
     d_ptr->data_devices.set_focused_surface(surface);
     d_ptr->primary_selection_devices.set_focused_surface(surface);
 
     // Focused text input surface follows keyboard.
-    if (hasKeyboard()) {
-        setFocusedTextInputSurface(surface);
-    }
+    setFocusedTextInputSurface(surface);
 }
 
 void Seat::setKeymap(std::string const& content)
@@ -473,6 +476,9 @@ Touch* Seat::focusedTouch() const
 
 Surface* Seat::focusedTouchSurface() const
 {
+    if (!d_ptr->touches) {
+        return nullptr;
+    }
     return d_ptr->touches.value().focus.surface;
 }
 
@@ -518,6 +524,9 @@ void Seat::touchFrame()
 
 bool Seat::hasImplicitTouchGrab(uint32_t serial) const
 {
+    if (!d_ptr->touches) {
+        return false;
+    }
     return d_ptr->touches.value().has_implicit_grab(serial);
 }
 
@@ -543,6 +552,9 @@ bool Seat::isDragTouch() const
 
 bool Seat::hasImplicitPointerGrab(uint32_t serial) const
 {
+    if (!d_ptr->pointers) {
+        return false;
+    }
     return d_ptr->pointers.value().has_implicit_grab(serial);
 }
 

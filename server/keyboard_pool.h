@@ -68,6 +68,7 @@ class keyboard_pool
 {
 public:
     explicit keyboard_pool(Seat* seat);
+    ~keyboard_pool();
 
     void key_pressed(uint32_t key);
     void key_released(uint32_t key);

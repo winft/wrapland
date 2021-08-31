@@ -1760,6 +1760,7 @@ void TestSeat::testSelection()
     auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(!m_serverSeat->selection());
 
+    m_serverSeat->setHasKeyboard(true);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedKeyboardSurface(), serverSurface);
     QVERIFY(!m_serverSeat->focusedKeyboard());
@@ -1899,6 +1900,8 @@ void TestSeat::testSelectionNoDataSource()
 
     auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(!m_serverSeat->selection());
+
+    m_serverSeat->setHasKeyboard(true);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedKeyboardSurface(), serverSurface);
 
@@ -1967,6 +1970,8 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     QVERIFY(surface->isValid());
     QVERIFY(surfaceCreatedSpy.wait());
     auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
+
+    m_serverSeat->setHasKeyboard(true);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(m_serverSeat->focusedKeyboardSurface(), serverSurface);
 

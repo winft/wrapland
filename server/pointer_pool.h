@@ -44,6 +44,7 @@ class pointer_pool
 {
 public:
     explicit pointer_pool(Seat* seat);
+    ~pointer_pool();
 
     void set_position(const QPointF& position);
     void set_focused_surface(Surface* surface, const QPointF& surfacePosition = QPoint());

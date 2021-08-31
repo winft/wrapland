@@ -86,6 +86,8 @@ void TestWaylandServerSeat::testPointerButton()
     display.setSocketName(s_socketName);
     display.start();
     std::unique_ptr<Seat> seat{display.createSeat()};
+    seat->setHasPointer(true);
+
     auto pointer = seat->focusedPointer();
     QVERIFY(!pointer);
 
@@ -119,6 +121,8 @@ void TestWaylandServerSeat::testPointerPos()
     std::unique_ptr<Seat> seat{display.createSeat()};
     QSignalSpy seatPosSpy(seat.get(), SIGNAL(pointerPosChanged(QPointF)));
     QVERIFY(seatPosSpy.isValid());
+    seat->setHasPointer(true);
+
     auto pointer = seat->focusedPointer();
     QVERIFY(!pointer);
 
@@ -161,6 +165,7 @@ void TestWaylandServerSeat::testRepeatInfo()
     display.start();
 
     std::unique_ptr<Seat> seat{display.createSeat()};
+    seat->setHasKeyboard(true);
     QCOMPARE(seat->keyRepeatRate(), 0);
     QCOMPARE(seat->keyRepeatDelay(), 0);
     seat->setKeyRepeatInfo(25, 660);

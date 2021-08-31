@@ -61,6 +61,14 @@ pointer_pool::pointer_pool(Seat* seat)
 {
 }
 
+pointer_pool::~pointer_pool()
+{
+    QObject::disconnect(focus.destroyConnection);
+    for (auto dev : devices) {
+        QObject::disconnect(dev, nullptr, seat, nullptr);
+    }
+}
+
 void pointer_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     auto pointer = new Pointer(client, version, id, seat);
