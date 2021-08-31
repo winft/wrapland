@@ -19,8 +19,8 @@ class QMimeType;
 namespace Wrapland::Server
 {
 
-class Display;
 class Client;
+class Display;
 class Seat;
 class PrimarySelectionSource;
 class PrimarySelectionDevice;
@@ -35,6 +35,9 @@ public:
 
     ~PrimarySelectionDeviceManager() override;
 
+    void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
+    void create_source(Client* client, uint32_t version, uint32_t id);
+
 Q_SIGNALS:
     void deviceCreated(Wrapland::Server::PrimarySelectionDevice* device);
     void sourceCreated(Wrapland::Server::PrimarySelectionSource* source);
@@ -42,16 +45,6 @@ Q_SIGNALS:
 private:
     friend class Display;
     explicit PrimarySelectionDeviceManager(Display* display, QObject* parent = nullptr);
-
-    template<typename Global>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void create_selection_source(wl_client* wlClient, wl_resource* wlResource, uint32_t id);
-    template<typename Global>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void get_selection_device(wl_client* wlClient,
-                                     wl_resource* wlResource,
-                                     uint32_t id,
-                                     wl_resource* wlSeat);
 
     class Private;
     std::unique_ptr<Private> d_ptr;
@@ -63,7 +56,6 @@ class WRAPLANDSERVER_EXPORT PrimarySelectionDevice : public QObject
 public:
     using source_t = Wrapland::Server::PrimarySelectionSource;
 
-    PrimarySelectionDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
     ~PrimarySelectionDevice() override;
 
     PrimarySelectionSource* selection();
@@ -79,6 +71,9 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
+    PrimarySelectionDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
+    friend class PrimarySelectionDeviceManager;
+
     template<typename Resource>
     // NOLINTNEXTLINE(readability-redundant-declaration)
     friend void set_selection(Resource* handle, wl_resource* wlSource);
@@ -119,7 +114,6 @@ class WRAPLANDSERVER_EXPORT PrimarySelectionSource : public QObject
 {
     Q_OBJECT
 public:
-    PrimarySelectionSource(Client* client, uint32_t version, uint32_t id);
     ~PrimarySelectionSource() override;
 
     void cancel();
@@ -134,6 +128,10 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
+    PrimarySelectionSource(Client* client, uint32_t version, uint32_t id);
+    friend class PrimarySelectionDeviceManager;
+    friend class PrimarySelectionDevice;
+
     template<typename Resource>
     // NOLINTNEXTLINE(readability-redundant-declaration)
     friend void

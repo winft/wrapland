@@ -9,6 +9,7 @@
 #include "primary_selection.h"
 
 #include "seat.h"
+#include "selection_device_manager_p.h"
 #include "wayland/global.h"
 #include "wayland/resource.h"
 
@@ -21,7 +22,8 @@ constexpr uint32_t PrimarySelectionDeviceManagerVersion = 1;
 using PrimarySelectionDeviceManagerGlobal
     = Wayland::Global<PrimarySelectionDeviceManager, PrimarySelectionDeviceManagerVersion>;
 
-class PrimarySelectionDeviceManager::Private : public PrimarySelectionDeviceManagerGlobal
+class PrimarySelectionDeviceManager::Private
+    : public device_manager<PrimarySelectionDeviceManagerGlobal>
 {
 public:
     Private(Display* display, PrimarySelectionDeviceManager* q);

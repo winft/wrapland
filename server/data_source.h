@@ -32,8 +32,6 @@ class WRAPLANDSERVER_EXPORT DataSource : public QObject
 {
     Q_OBJECT
 public:
-    explicit DataSource(Client* client, uint32_t version, uint32_t id);
-
     void accept(std::string const& mimeType);
     void requestData(std::string const& mimeType, qint32 fd);
     void cancel();
@@ -54,6 +52,10 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
+    friend class DataDeviceManager;
+    friend class DataDevice;
+    explicit DataSource(Client* client, uint32_t version, uint32_t id);
+
     class Private;
     Private* d_ptr;
 

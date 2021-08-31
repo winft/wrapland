@@ -35,7 +35,14 @@ void input_method_manager_v2::Private::get_input_method_callback(input_method_ma
         return;
     }
     im->d_ptr->seat = seat;
-    seat->d_ptr->registerInputMethod(im);
+
+    seat->d_ptr->input_method = im;
+
+    QObject::connect(im, &input_method_v2::resourceDestroyed, seat, [seat] {
+        seat->d_ptr->input_method = nullptr;
+        Q_EMIT seat->input_method_v2_changed();
+    });
+    Q_EMIT seat->input_method_v2_changed();
 }
 
 input_method_manager_v2::Private::Private(Display* display, input_method_manager_v2* q)
