@@ -168,9 +168,6 @@ public:
 
 Q_SIGNALS:
     void nameChanged(std::string);
-    void hasPointerChanged(bool);
-    void hasKeyboardChanged(bool);
-    void hasTouchChanged(bool);
     void pointerPosChanged(const QPointF& pos);
     void touchMoved(int32_t id, uint32_t serial, const QPointF& globalPosition);
     void timestampChanged(uint32_t);

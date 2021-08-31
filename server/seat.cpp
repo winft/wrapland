@@ -63,11 +63,6 @@ Seat::Seat(Display* display, QObject* parent)
 {
     connect(this, &Seat::nameChanged, this, [this] { d_ptr->sendName(); });
 
-    auto sendCapabilities = [this] { d_ptr->sendCapabilities(); };
-    connect(this, &Seat::hasPointerChanged, this, sendCapabilities);
-    connect(this, &Seat::hasKeyboardChanged, this, sendCapabilities);
-    connect(this, &Seat::hasTouchChanged, this, sendCapabilities);
-
     d_ptr->create();
 }
 
@@ -110,7 +105,7 @@ void Seat::setHasKeyboard(bool has)
         return;
     }
     d_ptr->keyboard = has;
-    Q_EMIT hasKeyboardChanged(d_ptr->keyboard);
+    d_ptr->sendCapabilities();
 }
 
 void Seat::setHasPointer(bool has)
@@ -119,7 +114,7 @@ void Seat::setHasPointer(bool has)
         return;
     }
     d_ptr->pointer = has;
-    Q_EMIT hasPointerChanged(d_ptr->pointer);
+    d_ptr->sendCapabilities();
 }
 
 void Seat::setHasTouch(bool has)
@@ -128,7 +123,7 @@ void Seat::setHasTouch(bool has)
         return;
     }
     d_ptr->touch = has;
-    Q_EMIT hasTouchChanged(d_ptr->touch);
+    d_ptr->sendCapabilities();
 }
 
 void Seat::setName(const std::string& name)
