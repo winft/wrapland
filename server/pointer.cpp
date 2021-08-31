@@ -24,6 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "client.h"
 #include "data_device.h"
 #include "display.h"
+#include "drag_pool.h"
 #include "seat.h"
 
 #include "wayland/client.h"
@@ -70,8 +71,8 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
         if (!focusedSurface) {
             return;
         }
-        if (seat->isDragPointer()) {
-            const auto* originSurface = seat->dragSource()->origin();
+        if (seat->drags().is_pointer_drag()) {
+            const auto* originSurface = seat->drags().source->origin();
             const bool proxyRemoteFocused
                 = originSurface->dataProxy() && originSurface == focusedSurface;
             if (!proxyRemoteFocused) {

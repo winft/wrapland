@@ -129,6 +129,11 @@ text_input_pool& Seat::text_inputs() const
     return d_ptr->text_inputs;
 }
 
+drag_pool& Seat::drags() const
+{
+    return d_ptr->drags;
+}
+
 void Seat::setName(const std::string& name)
 {
     if (d_ptr->name == name) {
@@ -202,18 +207,6 @@ void Seat::setTimestamp(uint32_t time)
     Q_EMIT timestampChanged(time);
 }
 
-void Seat::setDragTarget(Surface* surface,
-                         const QPointF& globalPosition,
-                         const QMatrix4x4& inputTransformation)
-{
-    d_ptr->drags.set_target(surface, globalPosition, inputTransformation);
-}
-
-void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation)
-{
-    d_ptr->drags.set_target(surface, inputTransformation);
-}
-
 void Seat::setFocusedKeyboardSurface(Surface* surface)
 {
     assert(hasKeyboard());
@@ -229,41 +222,6 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
 input_method_v2* Seat::get_input_method_v2() const
 {
     return d_ptr->input_method;
-}
-
-bool Seat::isDrag() const
-{
-    return d_ptr->drags.is_in_progress();
-}
-
-bool Seat::isDragPointer() const
-{
-    return d_ptr->drags.is_pointer_drag();
-}
-
-bool Seat::isDragTouch() const
-{
-    return d_ptr->drags.is_touch_drag();
-}
-
-QMatrix4x4 Seat::dragSurfaceTransformation() const
-{
-    return d_ptr->drags.transformation;
-}
-
-Surface* Seat::dragSurface() const
-{
-    return d_ptr->drags.surface;
-}
-
-Pointer* Seat::dragPointer() const
-{
-    return d_ptr->drags.sourcePointer;
-}
-
-DataDevice* Seat::dragSource() const
-{
-    return d_ptr->drags.source;
 }
 
 DataDevice* Seat::selection() const

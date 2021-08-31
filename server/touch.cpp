@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "touch.h"
 #include "touch_pool.h"
 
+#include "drag_pool.h"
 #include "seat.h"
 #include "surface.h"
 
@@ -71,7 +72,7 @@ void Touch::frame()
 
 void Touch::move(qint32 id, const QPointF& localPos)
 {
-    if (d_ptr->seat->isDragTouch()) {
+    if (d_ptr->seat->drags().is_touch_drag()) {
         // handled by DataDevice
         return;
     }

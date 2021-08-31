@@ -66,7 +66,7 @@ void touch_pool::set_focused_surface(Surface* surface, const QPointF& surfacePos
         // changing surface not allowed during a touch sequence
         return;
     }
-    Q_ASSERT(!seat->isDragTouch());
+    Q_ASSERT(!seat->drags().is_touch_drag());
 
     if (focus.surface) {
         QObject::disconnect(focus.destroyConnection);
@@ -129,7 +129,8 @@ void touch_pool::touch_up(int32_t id)
 {
     Q_ASSERT(ids.count(id));
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
-    if (seat->isDragTouch() && seat->d_ptr->drags.source->dragImplicitGrabSerial() == ids[id]) {
+    if (seat->drags().is_touch_drag()
+        && seat->d_ptr->drags.source->dragImplicitGrabSerial() == ids[id]) {
         // the implicitly grabbing touch point has been upped
         seat->d_ptr->drags.end(serial);
     }
@@ -183,7 +184,7 @@ void touch_pool::cancel_sequence()
     for (auto touch : focus.devices) {
         touch->cancel();
     }
-    if (seat->isDragTouch()) {
+    if (seat->drags().is_touch_drag()) {
         // cancel the drag, don't drop.
         if (seat->d_ptr->drags.target) {
             // remove the current target

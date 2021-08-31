@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <Wrapland/Server/wraplandserver_export.h>
+
 #include <QMatrix4x4>
 #include <QObject>
 
@@ -20,7 +22,7 @@ class Touch;
 /*
  * Handle drags on behalf of a seat.
  */
-class drag_pool
+class WRAPLANDSERVER_EXPORT drag_pool
 {
 public:
     explicit drag_pool(Seat* seat);

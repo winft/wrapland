@@ -137,7 +137,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QPointF& surfaceP
 
 void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& transformation)
 {
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         // ignore
         return;
     }
@@ -225,7 +225,7 @@ void pointer_pool::button_pressed(uint32_t button)
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
     update_button_serial(button, serial);
     update_button_state(button, button_state::pressed);
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         // ignore
         return;
     }
@@ -251,7 +251,7 @@ void pointer_pool::button_released(uint32_t button)
     const uint32_t currentButtonSerial = button_serial(button);
     update_button_serial(button, serial);
     update_button_state(button, button_state::released);
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         if (seat->d_ptr->drags.source->dragImplicitGrabSerial() != currentButtonSerial) {
             // not our drag button - ignore
             return;
@@ -299,7 +299,7 @@ void pointer_pool::send_axis(Qt::Orientation orientation,
                              int32_t discreteDelta,
                              PointerAxisSource source) const
 {
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         // ignore
         return;
     }
@@ -312,7 +312,7 @@ void pointer_pool::send_axis(Qt::Orientation orientation,
 
 void pointer_pool::send_axis(Qt::Orientation orientation, uint32_t delta) const
 {
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         // ignore
         return;
     }

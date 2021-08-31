@@ -36,6 +36,7 @@ namespace Wrapland::Server
 
 class DataDevice;
 class Display;
+class drag_pool;
 class input_method_v2;
 class Keyboard;
 class keyboard_pool;
@@ -78,21 +79,10 @@ public:
     touch_pool& touches() const;
 
     text_input_pool& text_inputs() const;
+    drag_pool& drags() const;
 
     void setTimestamp(uint32_t time);
     uint32_t timestamp() const;
-
-    bool isDrag() const;
-    bool isDragPointer() const;
-    bool isDragTouch() const;
-    QMatrix4x4 dragSurfaceTransformation() const;
-    Surface* dragSurface() const;
-    Pointer* dragPointer() const;
-    DataDevice* dragSource() const;
-    void setDragTarget(Surface* surface,
-                       const QPointF& globalPosition,
-                       const QMatrix4x4& inputTransformation);
-    void setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation = QMatrix4x4());
 
     void setFocusedKeyboardSurface(Surface* surface);
 

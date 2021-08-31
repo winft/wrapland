@@ -363,6 +363,7 @@ set(SERVER_LIB_HEADERS
   data_device_manager.h
   data_offer.h
   data_source.h
+  drag_pool.h
   display.h
   dpms.h
   egl_stream_controller.h
