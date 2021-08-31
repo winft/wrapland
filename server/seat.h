@@ -38,6 +38,7 @@ class DataDevice;
 class Display;
 class input_method_v2;
 class Keyboard;
+class keyboard_pool;
 class Pointer;
 class pointer_pool;
 class PrimarySelectionDevice;
@@ -71,6 +72,7 @@ public:
     void setHasTouch(bool has);
 
     pointer_pool& pointers() const;
+    keyboard_pool& keyboards() const;
 
     void setTimestamp(uint32_t time);
     uint32_t timestamp() const;
@@ -87,26 +89,7 @@ public:
                        const QMatrix4x4& inputTransformation);
     void setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation = QMatrix4x4());
 
-    void setKeymap(std::string const& content);
-    void keyPressed(uint32_t key);
-    void keyReleased(uint32_t key);
-    void
-    updateKeyboardModifiers(uint32_t depressed, uint32_t latched, uint32_t locked, uint32_t group);
-    void setKeyRepeatInfo(int32_t charactersPerSecond, int32_t delay);
-    uint32_t depressedModifiers() const;
-    uint32_t latchedModifiers() const;
-    uint32_t lockedModifiers() const;
-    uint32_t groupModifiers() const;
-    uint32_t lastModifiersSerial() const;
-    int keymapFileDescriptor() const;
-    uint32_t keymapSize() const;
-    bool isKeymapXkbCompatible() const;
-    std::vector<uint32_t> pressedKeys() const;
-    int32_t keyRepeatRate() const;
-    int32_t keyRepeatDelay() const;
     void setFocusedKeyboardSurface(Surface* surface);
-    Surface* focusedKeyboardSurface() const;
-    Keyboard* focusedKeyboard() const;
 
     void setFocusedTouchSurface(Surface* surface, const QPointF& surfacePosition = QPointF());
     Surface* focusedTouchSurface() const;

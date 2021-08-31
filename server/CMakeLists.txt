@@ -372,6 +372,7 @@ set(SERVER_LIB_HEADERS
   input_method_v2.h
   kde_idle.h
   keyboard.h
+  keyboard_pool.h
   keystate.h
   keyboard_shortcuts_inhibit.h
   layer_shell_v1.h

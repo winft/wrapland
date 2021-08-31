@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/compositor.h"
 #include "../server/data_device_manager.h"
 #include "../server/display.h"
+#include "../server/keyboard_pool.h"
 #include "../server/pointer_pool.h"
 #include "../server/seat.h"
 #include "../server/surface.h"
@@ -191,11 +192,11 @@ void CompositorWindow::keyPressEvent(QKeyEvent* event)
     if (!m_seat) {
         return;
     }
-    if (!m_seat->focusedKeyboardSurface()) {
+    if (!m_seat->keyboards().focus.surface) {
         updateFocus();
     }
     m_seat->setTimestamp(event->timestamp());
-    m_seat->keyPressed(event->nativeScanCode() - 8);
+    m_seat->keyboards().key_pressed(event->nativeScanCode() - 8);
 }
 
 void CompositorWindow::keyReleaseEvent(QKeyEvent* event)
@@ -205,7 +206,7 @@ void CompositorWindow::keyReleaseEvent(QKeyEvent* event)
         return;
     }
     m_seat->setTimestamp(event->timestamp());
-    m_seat->keyReleased(event->nativeScanCode() - 8);
+    m_seat->keyboards().key_released(event->nativeScanCode() - 8);
 }
 
 void CompositorWindow::mouseMoveEvent(QMouseEvent* event)

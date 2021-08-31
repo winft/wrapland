@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtTest>
 
 #include "../../server/display.h"
+#include "../../server/keyboard_pool.h"
 #include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 
@@ -163,15 +164,18 @@ void TestWaylandServerSeat::testRepeatInfo()
 
     std::unique_ptr<Seat> seat{display.createSeat()};
     seat->setHasKeyboard(true);
-    QCOMPARE(seat->keyRepeatRate(), 0);
-    QCOMPARE(seat->keyRepeatDelay(), 0);
-    seat->setKeyRepeatInfo(25, 660);
-    QCOMPARE(seat->keyRepeatRate(), 25);
-    QCOMPARE(seat->keyRepeatDelay(), 660);
+    auto& keyboards = seat->keyboards();
+
+    QCOMPARE(keyboards.keyRepeat.charactersPerSecond, 0);
+    QCOMPARE(keyboards.keyRepeat.delay, 0);
+    keyboards.set_repeat_info(25, 660);
+    QCOMPARE(keyboards.keyRepeat.charactersPerSecond, 25);
+    QCOMPARE(keyboards.keyRepeat.delay, 660);
+
     // setting negative values should result in 0
-    seat->setKeyRepeatInfo(-25, -660);
-    QCOMPARE(seat->keyRepeatRate(), 0);
-    QCOMPARE(seat->keyRepeatDelay(), 0);
+    keyboards.set_repeat_info(-25, -660);
+    QCOMPARE(keyboards.keyRepeat.charactersPerSecond, 0);
+    QCOMPARE(keyboards.keyRepeat.delay, 0);
 }
 
 void TestWaylandServerSeat::testMultiple()

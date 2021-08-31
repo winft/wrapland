@@ -114,6 +114,11 @@ pointer_pool& Seat::pointers() const
     return *d_ptr->pointers;
 }
 
+keyboard_pool& Seat::keyboards() const
+{
+    return *d_ptr->keyboards;
+}
+
 void Seat::setName(const std::string& name)
 {
     if (d_ptr->name == name) {
@@ -199,24 +204,6 @@ void Seat::setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation
     d_ptr->drags.set_target(surface, inputTransformation);
 }
 
-void Seat::keyPressed(uint32_t key)
-{
-    d_ptr->keyboards.value().key_pressed(key);
-}
-
-void Seat::keyReleased(uint32_t key)
-{
-    d_ptr->keyboards.value().key_released(key);
-}
-
-Surface* Seat::focusedKeyboardSurface() const
-{
-    if (!d_ptr->keyboards) {
-        return nullptr;
-    }
-    return d_ptr->keyboards.value().focus.surface;
-}
-
 void Seat::setFocusedKeyboardSurface(Surface* surface)
 {
     assert(hasKeyboard());
@@ -227,87 +214,6 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
 
     // Focused text input surface follows keyboard.
     setFocusedTextInputSurface(surface);
-}
-
-void Seat::setKeymap(std::string const& content)
-{
-    d_ptr->keyboards.value().set_keymap(content);
-}
-
-void Seat::updateKeyboardModifiers(uint32_t depressed,
-                                   uint32_t latched,
-                                   uint32_t locked,
-                                   uint32_t group)
-{
-    d_ptr->keyboards.value().update_modifiers(depressed, latched, locked, group);
-}
-
-void Seat::setKeyRepeatInfo(int32_t charactersPerSecond, int32_t delay)
-{
-    d_ptr->keyboards.value().set_repeat_info(charactersPerSecond, delay);
-}
-
-int32_t Seat::keyRepeatDelay() const
-{
-    return d_ptr->keyboards.value().keyRepeat.delay;
-}
-
-int32_t Seat::keyRepeatRate() const
-{
-    return d_ptr->keyboards.value().keyRepeat.charactersPerSecond;
-}
-
-bool Seat::isKeymapXkbCompatible() const
-{
-    return d_ptr->keyboards.value().keymap.xkbcommonCompatible;
-}
-
-int Seat::keymapFileDescriptor() const
-{
-    return d_ptr->keyboards.value().keymap.fd;
-}
-
-uint32_t Seat::keymapSize() const
-{
-    return d_ptr->keyboards.value().keymap.content.size();
-}
-
-uint32_t Seat::depressedModifiers() const
-{
-    return d_ptr->keyboards.value().modifiers.depressed;
-}
-
-uint32_t Seat::groupModifiers() const
-{
-    return d_ptr->keyboards.value().modifiers.group;
-}
-
-uint32_t Seat::latchedModifiers() const
-{
-    return d_ptr->keyboards.value().modifiers.latched;
-}
-
-uint32_t Seat::lockedModifiers() const
-{
-    return d_ptr->keyboards.value().modifiers.locked;
-}
-
-uint32_t Seat::lastModifiersSerial() const
-{
-    return d_ptr->keyboards.value().modifiers.serial;
-}
-
-std::vector<uint32_t> Seat::pressedKeys() const
-{
-    return d_ptr->keyboards.value().pressed_keys();
-}
-
-Keyboard* Seat::focusedKeyboard() const
-{
-    if (d_ptr->keyboards.value().focus.devices.empty()) {
-        return nullptr;
-    }
-    return d_ptr->keyboards.value().focus.devices.front();
 }
 
 void Seat::cancelTouchSequence()

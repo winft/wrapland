@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <Wrapland/Server/wraplandserver_export.h>
+
 #include <QObject>
 
 #include <cstdint>
@@ -64,7 +66,7 @@ struct keyboard_repeat_info {
  * On seats with keyboard capability, keyboard focus is relevant for
  * selections and text input.
  */
-class keyboard_pool
+class WRAPLANDSERVER_EXPORT keyboard_pool
 {
 public:
     explicit keyboard_pool(Seat* seat);

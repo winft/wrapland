@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "keyboard.h"
 #include "keyboard_p.h"
+#include "keyboard_pool.h"
 
 #include "client.h"
 #include "display.h"
@@ -55,7 +56,7 @@ void Keyboard::Private::sendEnter(quint32 serial, Surface* surface)
 {
     wl_array keys;
     wl_array_init(&keys);
-    auto const& states = seat->pressedKeys();
+    auto const& states = seat->keyboards().pressed_keys();
     for (auto const btn : states) {
         auto key = static_cast<uint32_t*>(wl_array_add(&keys, sizeof(uint32_t)));
         *key = btn;
@@ -82,11 +83,12 @@ void Keyboard::Private::sendModifiers(quint32 serial,
 
 void Keyboard::Private::sendModifiers()
 {
-    sendModifiers(seat->lastModifiersSerial(),
-                  seat->depressedModifiers(),
-                  seat->latchedModifiers(),
-                  seat->lockedModifiers(),
-                  seat->groupModifiers());
+    auto& pool = seat->keyboards();
+    sendModifiers(pool.modifiers.serial,
+                  pool.modifiers.depressed,
+                  pool.modifiers.latched,
+                  pool.modifiers.locked,
+                  pool.modifiers.group);
 }
 
 Keyboard::Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat)
