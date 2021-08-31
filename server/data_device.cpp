@@ -139,7 +139,12 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
 
     if (!pointerGrab) {
         // Client doesn't have pointer grab.
-        if (!seat->hasImplicitTouchGrab(serial) || seat->focusedTouchSurface() != focusSurface) {
+        if (!seat->hasTouch()) {
+            // Client has no pointer grab and no touch capability.
+            return;
+        }
+        auto& touches = seat->touches();
+        if (!touches.has_implicit_grab(serial) || touches.focus.surface != focusSurface) {
             // Client neither has pointer nor touch grab. No drag start allowed.
             return;
         }

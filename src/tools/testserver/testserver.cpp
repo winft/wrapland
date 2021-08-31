@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../../server/seat.h"
 #include "../../../server/subcompositor.h"
 #include "../../../server/surface.h"
+#include "../../../server/touch_pool.h"
 #include "../../../server/wl_output.h"
 
 #include "../../../server/fake_input.h"
@@ -116,7 +117,7 @@ void TestServer::init()
                 this,
                 [this](quint32 id, const QPointF& pos) {
                     m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                    m_touchIdMapper.insert(id, m_seat->touchDown(pos));
+                    m_touchIdMapper.insert(id, m_seat->touches().touch_down(pos));
                 });
         connect(device,
                 &FakeInputDevice::touchMotionRequested,
@@ -125,24 +126,24 @@ void TestServer::init()
                     m_seat->setTimestamp(m_timeSinceStart->elapsed());
                     const auto it = m_touchIdMapper.constFind(id);
                     if (it != m_touchIdMapper.constEnd()) {
-                        m_seat->touchMove(it.value(), pos);
+                        m_seat->touches().touch_move(it.value(), pos);
                     }
                 });
         connect(device, &FakeInputDevice::touchUpRequested, this, [this](quint32 id) {
             m_seat->setTimestamp(m_timeSinceStart->elapsed());
             const auto it = m_touchIdMapper.find(id);
             if (it != m_touchIdMapper.end()) {
-                m_seat->touchUp(it.value());
+                m_seat->touches().touch_up(it.value());
                 m_touchIdMapper.erase(it);
             }
         });
         connect(device, &FakeInputDevice::touchCancelRequested, this, [this] {
             m_seat->setTimestamp(m_timeSinceStart->elapsed());
-            m_seat->cancelTouchSequence();
+            m_seat->touches().cancel_sequence();
         });
         connect(device, &FakeInputDevice::touchFrameRequested, this, [this] {
             m_seat->setTimestamp(m_timeSinceStart->elapsed());
-            m_seat->touchFrame();
+            m_seat->touches().touch_frame();
         });
     });
 

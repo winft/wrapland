@@ -41,6 +41,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
+#include "../../server/touch_pool.h"
 
 class TestDragAndDrop : public QObject
 {
@@ -361,9 +362,11 @@ void TestDragAndDrop::test_touch()
     QVERIFY(sequence_started_spy.isValid());
     QSignalSpy point_added_spy(c_1.touch, &Wrapland::Client::Touch::pointAdded);
     QVERIFY(point_added_spy.isValid());
-    m_server_seat->setFocusedTouchSurface(server_surface);
+
+    auto& server_touches = m_server_seat->touches();
+    server_touches.set_focused_surface(server_surface);
     m_server_seat->setTimestamp(2);
-    const qint32 touchId = m_server_seat->touchDown(QPointF(50, 50));
+    auto const touchId = server_touches.touch_down(QPointF(50, 50));
     QVERIFY(sequence_started_spy.wait());
 
     auto tp{sequence_started_spy.first().at(0).value<Wrapland::Client::TouchPoint*>()};
@@ -422,7 +425,7 @@ void TestDragAndDrop::test_touch()
 
     // simulate motion
     m_server_seat->setTimestamp(3);
-    m_server_seat->touchMove(touchId, QPointF(75, 75));
+    server_touches.touch_move(touchId, QPointF(75, 75));
     QVERIFY(drag_motion_spy.wait());
     QCOMPARE(drag_motion_spy.count(), 1);
     QCOMPARE(drag_motion_spy.first().first().toPointF(), QPointF(75, 75));
@@ -434,7 +437,7 @@ void TestDragAndDrop::test_touch()
     QSignalSpy dropped_spy(c_1.device, &Wrapland::Client::DataDevice::dropped);
     QVERIFY(dropped_spy.isValid());
     m_server_seat->setTimestamp(4);
-    m_server_seat->touchUp(touchId);
+    server_touches.touch_up(touchId);
     QVERIFY(source_drop_spy.isEmpty());
     QVERIFY(dropped_spy.wait());
     QCOMPARE(source_drop_spy.count(), 1);

@@ -73,7 +73,8 @@ void drag_pool::set_target(Surface* new_surface,
         seat->pointers().set_position(globalPosition);
     } else if (mode == Mode::Touch
                && seat->d_ptr->touches.value().focus.firstTouchPos != globalPosition) {
-        seat->touchMove(seat->d_ptr->touches.value().ids.cbegin()->first, globalPosition);
+        seat->touches().touch_move(seat->d_ptr->touches.value().ids.cbegin()->first,
+                                   globalPosition);
     }
     if (target) {
         surface = new_surface;
@@ -117,7 +118,7 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
         mode = Mode::Pointer;
         sourcePointer = interfaceForSurface(dragSurface, seat->d_ptr->pointers.value().devices);
         transformation = pointers.focus.transformation;
-    } else if (seat->hasImplicitTouchGrab(dragSerial)) {
+    } else if (seat->touches().has_implicit_grab(dragSerial)) {
         mode = Mode::Touch;
         sourceTouch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().devices);
         // TODO(unknown author): touch transformation

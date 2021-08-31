@@ -119,6 +119,11 @@ keyboard_pool& Seat::keyboards() const
     return *d_ptr->keyboards;
 }
 
+touch_pool& Seat::touches() const
+{
+    return *d_ptr->touches;
+}
+
 void Seat::setName(const std::string& name)
 {
     if (d_ptr->name == name) {
@@ -214,75 +219,6 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
 
     // Focused text input surface follows keyboard.
     setFocusedTextInputSurface(surface);
-}
-
-void Seat::cancelTouchSequence()
-{
-    d_ptr->touches.value().cancel_sequence();
-}
-
-Touch* Seat::focusedTouch() const
-{
-    if (d_ptr->touches.value().focus.devices.empty()) {
-        return nullptr;
-    }
-    return d_ptr->touches.value().focus.devices.front();
-}
-
-Surface* Seat::focusedTouchSurface() const
-{
-    if (!d_ptr->touches) {
-        return nullptr;
-    }
-    return d_ptr->touches.value().focus.surface;
-}
-
-QPointF Seat::focusedTouchSurfacePosition() const
-{
-    return d_ptr->touches.value().focus.offset;
-}
-
-bool Seat::isTouchSequence() const
-{
-    return d_ptr->touches.value().is_in_progress();
-}
-
-void Seat::setFocusedTouchSurface(Surface* surface, const QPointF& surfacePosition)
-{
-    d_ptr->touches.value().set_focused_surface(surface, surfacePosition);
-}
-
-void Seat::setFocusedTouchSurfacePosition(const QPointF& surfacePosition)
-{
-    d_ptr->touches.value().set_focused_surface_position(surfacePosition);
-}
-
-int32_t Seat::touchDown(const QPointF& globalPosition)
-{
-    return d_ptr->touches.value().touch_down(globalPosition);
-}
-
-void Seat::touchMove(int32_t id, const QPointF& globalPosition)
-{
-    d_ptr->touches.value().touch_move(id, globalPosition);
-}
-
-void Seat::touchUp(int32_t id)
-{
-    d_ptr->touches.value().touch_up(id);
-}
-
-void Seat::touchFrame()
-{
-    d_ptr->touches.value().touch_frame();
-}
-
-bool Seat::hasImplicitTouchGrab(uint32_t serial) const
-{
-    if (!d_ptr->touches) {
-        return false;
-    }
-    return d_ptr->touches.value().has_implicit_grab(serial);
 }
 
 input_method_v2* Seat::get_input_method_v2() const

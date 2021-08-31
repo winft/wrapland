@@ -46,6 +46,7 @@ class Surface;
 class TextInputV2;
 class text_input_v3;
 class Touch;
+class touch_pool;
 
 enum class PointerAxisSource {
     Unknown,
@@ -73,6 +74,7 @@ public:
 
     pointer_pool& pointers() const;
     keyboard_pool& keyboards() const;
+    touch_pool& touches() const;
 
     void setTimestamp(uint32_t time);
     uint32_t timestamp() const;
@@ -90,19 +92,6 @@ public:
     void setDragTarget(Surface* surface, const QMatrix4x4& inputTransformation = QMatrix4x4());
 
     void setFocusedKeyboardSurface(Surface* surface);
-
-    void setFocusedTouchSurface(Surface* surface, const QPointF& surfacePosition = QPointF());
-    Surface* focusedTouchSurface() const;
-    Touch* focusedTouch() const;
-    void setFocusedTouchSurfacePosition(const QPointF& surfacePosition);
-    QPointF focusedTouchSurfacePosition() const;
-    int32_t touchDown(const QPointF& globalPosition);
-    void touchUp(int32_t id);
-    void touchMove(int32_t id, const QPointF& globalPosition);
-    void touchFrame();
-    void cancelTouchSequence();
-    bool isTouchSequence() const;
-    bool hasImplicitTouchGrab(uint32_t serial) const;
 
     input_method_v2* get_input_method_v2() const;
 

@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <Wrapland/Server/wraplandserver_export.h>
+
 #include <QObject>
 #include <QPoint>
 
@@ -30,7 +32,7 @@ struct touch_focus {
 /*
  * Handle touch devices associated to a seat.
  */
-class touch_pool
+class WRAPLANDSERVER_EXPORT touch_pool
 {
 public:
     explicit touch_pool(Seat* seat);

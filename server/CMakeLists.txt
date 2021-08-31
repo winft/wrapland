@@ -402,6 +402,7 @@ set(SERVER_LIB_HEADERS
   text_input_v2.h
   text_input_v3.h
   touch.h
+  touch_pool.h
   viewporter.h
   wl_output.h
   xdg_activation_v1.h

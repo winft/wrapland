@@ -51,6 +51,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/subcompositor.h"
 #include "../../server/surface.h"
 #include "../../server/touch.h"
+#include "../../server/touch_pool.h"
 
 #include <QtTest>
 
@@ -2041,19 +2042,21 @@ void TestSeat::testTouch()
     auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(serverSurface);
 
-    m_serverSeat->setFocusedTouchSurface(serverSurface);
+    auto& server_touches = m_serverSeat->touches();
+    server_touches.set_focused_surface(serverSurface);
     // No keyboard yet.
-    QCOMPARE(m_serverSeat->focusedTouchSurface(), serverSurface);
-    QVERIFY(!m_serverSeat->focusedTouch());
+    QCOMPARE(server_touches.focus.surface, serverSurface);
+    QVERIFY(server_touches.focus.devices.empty());
 
     QSignalSpy touchCreatedSpy(m_serverSeat, &Srv::Seat::touchCreated);
     QVERIFY(touchCreatedSpy.isValid());
     auto* touch = m_seat->createTouch(m_seat);
     QVERIFY(touch->isValid());
     QVERIFY(touchCreatedSpy.wait());
-    auto serverTouch = m_serverSeat->focusedTouch();
+    auto serverTouch = server_touches.focus.devices.front();
     QVERIFY(serverTouch);
-    QCOMPARE(touchCreatedSpy.first().first().value<Srv::Touch*>(), m_serverSeat->focusedTouch());
+    QCOMPARE(touchCreatedSpy.first().first().value<Srv::Touch*>(),
+             server_touches.focus.devices.front());
 
     QSignalSpy sequenceStartedSpy(touch, &Clt::Touch::sequenceStarted);
     QVERIFY(sequenceStartedSpy.isValid());
@@ -2071,10 +2074,10 @@ void TestSeat::testTouch()
     QVERIFY(pointRemovedSpy.isValid());
 
     // Try a few things.
-    m_serverSeat->setFocusedTouchSurfacePosition(QPointF(10, 20));
-    QCOMPARE(m_serverSeat->focusedTouchSurfacePosition(), QPointF(10, 20));
+    server_touches.set_focused_surface_position(QPointF(10, 20));
+    QCOMPARE(server_touches.focus.offset, QPointF(10, 20));
     m_serverSeat->setTimestamp(1);
-    QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 0);
+    QCOMPARE(server_touches.touch_down(QPointF(15, 26)), 0);
     QVERIFY(sequenceStartedSpy.wait());
     QCOMPARE(sequenceStartedSpy.count(), 1);
     QCOMPARE(sequenceEndedSpy.count(), 0);
@@ -2098,14 +2101,14 @@ void TestSeat::testTouch()
     QCOMPARE(touch->sequence().first(), tp);
 
     // Let's end the frame.
-    m_serverSeat->touchFrame();
+    server_touches.touch_frame();
     QVERIFY(frameEndedSpy.wait());
     QCOMPARE(frameEndedSpy.count(), 1);
 
     // Move the one point.
     m_serverSeat->setTimestamp(2);
-    m_serverSeat->touchMove(0, QPointF(10, 20));
-    m_serverSeat->touchFrame();
+    server_touches.touch_move(0, QPointF(10, 20));
+    server_touches.touch_frame();
     QVERIFY(frameEndedSpy.wait());
     QCOMPARE(sequenceStartedSpy.count(), 1);
     QCOMPARE(sequenceEndedSpy.count(), 0);
@@ -2127,8 +2130,8 @@ void TestSeat::testTouch()
 
     // Add onther point.
     m_serverSeat->setTimestamp(3);
-    QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 1);
-    m_serverSeat->touchFrame();
+    QCOMPARE(server_touches.touch_down(QPointF(15, 26)), 1);
+    server_touches.touch_frame();
     QVERIFY(frameEndedSpy.wait());
     QCOMPARE(sequenceStartedSpy.count(), 1);
     QCOMPARE(sequenceEndedSpy.count(), 0);
@@ -2154,8 +2157,8 @@ void TestSeat::testTouch()
 
     // Send it an up.
     m_serverSeat->setTimestamp(4);
-    m_serverSeat->touchUp(1);
-    m_serverSeat->touchFrame();
+    server_touches.touch_up(1);
+    server_touches.touch_frame();
     QVERIFY(frameEndedSpy.wait());
     QCOMPARE(sequenceStartedSpy.count(), 1);
     QCOMPARE(sequenceEndedSpy.count(), 0);
@@ -2176,14 +2179,14 @@ void TestSeat::testTouch()
 
     // Send another down and up.
     m_serverSeat->setTimestamp(5);
-    QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 1);
-    m_serverSeat->touchFrame();
+    QCOMPARE(server_touches.touch_down(QPointF(15, 26)), 1);
+    server_touches.touch_frame();
     m_serverSeat->setTimestamp(6);
-    m_serverSeat->touchUp(1);
+    server_touches.touch_up(1);
 
     // And send an up for the first point.
-    m_serverSeat->touchUp(0);
-    m_serverSeat->touchFrame();
+    server_touches.touch_up(0);
+    server_touches.touch_frame();
     QVERIFY(frameEndedSpy.wait());
     QTRY_COMPARE(sequenceStartedSpy.count(), 1);
     QTRY_COMPARE(sequenceEndedSpy.count(), 1);
@@ -2196,14 +2199,14 @@ void TestSeat::testTouch()
     QVERIFY(!touch->sequence().at(0)->isDown());
     QVERIFY(!touch->sequence().at(1)->isDown());
     QVERIFY(!touch->sequence().at(2)->isDown());
-    QVERIFY(!m_serverSeat->isTouchSequence());
+    QVERIFY(!server_touches.is_in_progress());
 
     // Try cancel.
-    m_serverSeat->setFocusedTouchSurface(serverSurface, QPointF(15, 26));
+    server_touches.set_focused_surface(serverSurface, QPointF(15, 26));
     m_serverSeat->setTimestamp(7);
-    QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 0);
-    m_serverSeat->touchFrame();
-    m_serverSeat->cancelTouchSequence();
+    QCOMPARE(server_touches.touch_down(QPointF(15, 26)), 0);
+    server_touches.touch_frame();
+    server_touches.cancel_sequence();
     QVERIFY(sequenceCanceledSpy.wait());
     QTRY_COMPARE(sequenceStartedSpy.count(), 2);
     QCOMPARE(sequenceEndedSpy.count(), 1);
@@ -2223,19 +2226,19 @@ void TestSeat::testTouch()
     QCOMPARE(destroyedSpy.count(), 1);
 
     // Try to call into all the methods of the touch interface, should not crash.
-    QCOMPARE(m_serverSeat->focusedTouch(), nullptr);
+    QVERIFY(server_touches.focus.devices.empty());
     m_serverSeat->setTimestamp(8);
-    QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 0);
-    m_serverSeat->touchFrame();
-    m_serverSeat->touchMove(0, QPointF(0, 0));
-    QCOMPARE(m_serverSeat->touchDown(QPointF(15, 26)), 1);
-    m_serverSeat->cancelTouchSequence();
+    QCOMPARE(server_touches.touch_down(QPointF(15, 26)), 0);
+    server_touches.touch_frame();
+    server_touches.touch_move(0, QPointF(0, 0));
+    QCOMPARE(server_touches.touch_down(QPointF(15, 26)), 1);
+    server_touches.cancel_sequence();
 
     // Should have unset the focused touch.
-    QVERIFY(!m_serverSeat->focusedTouch());
+    QVERIFY(server_touches.focus.devices.empty());
 
     // But not the focused touch surface.
-    QCOMPARE(m_serverSeat->focusedTouchSurface(), serverSurface);
+    QCOMPARE(server_touches.focus.surface, serverSurface);
 }
 
 void TestSeat::testDisconnect()
