@@ -116,7 +116,7 @@ void pointer_pool::update_button_state(uint32_t button, button_state state)
     buttonStates[button] = state;
 }
 
-QPointF pointer_pool::position() const
+QPointF pointer_pool::get_position() const
 {
     return pos;
 }

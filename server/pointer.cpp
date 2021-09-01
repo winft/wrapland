@@ -85,7 +85,7 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
             return;
         }
         auto& pointers = seat->pointers();
-        auto const pos = pointers.get_focus().transformation.map(pointers.pos);
+        auto const pos = pointers.get_focus().transformation.map(pointers.get_position());
         sendMotion(pos);
         sendFrame();
     });
@@ -265,7 +265,7 @@ void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
     });
 
     auto& pointers = seat->pointers();
-    auto const pos = pointers.get_focus().transformation.map(pointers.pos);
+    auto const pos = pointers.get_focus().transformation.map(pointers.get_position());
     sendEnter(serial, focusedSurface, pos);
     client()->flush();
 }

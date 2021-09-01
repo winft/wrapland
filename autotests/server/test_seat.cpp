@@ -124,10 +124,10 @@ void TestWaylandServerSeat::testPointerPos()
     seat->setHasPointer(true);
 
     QVERIFY(seat->pointers().get_focus().devices.empty());
-    QCOMPARE(seat->pointers().pos, QPointF());
+    QCOMPARE(seat->pointers().get_position(), QPointF());
 
     seat->pointers().set_position(QPointF(10, 15));
-    QCOMPARE(seat->pointers().pos, QPointF(10, 15));
+    QCOMPARE(seat->pointers().get_position(), QPointF(10, 15));
     QCOMPARE(seatPosSpy.count(), 1);
     QCOMPARE(seatPosSpy.first().first().toPointF(), QPointF(10, 15));
 
@@ -135,7 +135,7 @@ void TestWaylandServerSeat::testPointerPos()
     QCOMPARE(seatPosSpy.count(), 1);
 
     seat->pointers().set_position(QPointF(5, 7));
-    QCOMPARE(seat->pointers().pos, QPointF(5, 7));
+    QCOMPARE(seat->pointers().get_position(), QPointF(5, 7));
     QCOMPARE(seatPosSpy.count(), 2);
     QCOMPARE(seatPosSpy.first().first().toPointF(), QPointF(10, 15));
     QCOMPARE(seatPosSpy.last().first().toPointF(), QPointF(5, 7));

@@ -50,7 +50,9 @@ public:
 
     pointer_focus const& get_focus() const;
 
+    QPointF get_position() const;
     void set_position(const QPointF& position);
+
     void set_focused_surface(Surface* surface, const QPointF& surfacePosition = QPoint());
     void set_focused_surface(Surface* surface, const QMatrix4x4& transformation);
     void set_focused_surface_position(const QPointF& surfacePosition);
@@ -84,9 +86,6 @@ public:
     uint32_t button_serial(uint32_t button) const;
     uint32_t button_serial(Qt::MouseButton button) const;
 
-    QPointF position() const;
-
-    QPointF pos;
     std::vector<Pointer*> devices;
 
 private:
@@ -100,6 +99,8 @@ private:
     std::unordered_map<uint32_t, button_state> buttonStates;
 
     pointer_focus focus;
+
+    QPointF pos;
     QPointer<Surface> gestureSurface;
 
     Seat* seat;

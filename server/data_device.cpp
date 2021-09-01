@@ -223,7 +223,7 @@ void DataDevice::Private::update_drag_pointer_motion()
 {
     assert(seat->drags().is_pointer_drag());
     drag.posConnection = connect(seat, &Seat::pointerPosChanged, handle(), [this] {
-        auto const pos = seat->drags().transformation.map(seat->pointers().pos);
+        auto const pos = seat->drags().transformation.map(seat->pointers().get_position());
         send<wl_data_device_send_motion>(
             seat->timestamp(), wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
         client()->flush();
@@ -254,7 +254,7 @@ void DataDevice::Private::update_drag_target_offer(Surface* surface, uint32_t se
     auto offer = createDataOffer(source);
 
     // TODO(unknown author): handle touch position
-    auto const pos = seat->drags().transformation.map(seat->pointers().pos);
+    auto const pos = seat->drags().transformation.map(seat->pointers().get_position());
     send<wl_data_device_send_enter>(serial,
                                     surface->d_ptr->resource(),
                                     wl_fixed_from_double(pos.x()),

@@ -41,7 +41,7 @@ void drag_pool::end(uint32_t serial)
 void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransformation)
 {
     if (mode == Mode::Pointer) {
-        set_target(new_surface, seat->pointers().pos, inputTransformation);
+        set_target(new_surface, seat->pointers().get_position(), inputTransformation);
     } else {
         Q_ASSERT(mode == Mode::Touch);
         set_target(
