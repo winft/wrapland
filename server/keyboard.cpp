@@ -83,12 +83,8 @@ void Keyboard::Private::sendModifiers(quint32 serial,
 
 void Keyboard::Private::sendModifiers()
 {
-    auto& pool = seat->keyboards();
-    sendModifiers(pool.modifiers.serial,
-                  pool.modifiers.depressed,
-                  pool.modifiers.latched,
-                  pool.modifiers.locked,
-                  pool.modifiers.group);
+    auto const mods = seat->keyboards().get_modifiers();
+    sendModifiers(mods.serial, mods.depressed, mods.latched, mods.locked, mods.group);
 }
 
 Keyboard::Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat)

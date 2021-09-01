@@ -74,6 +74,9 @@ public:
     ~keyboard_pool();
 
     keyboard_focus const& get_focus() const;
+    keyboard_map const& get_keymap() const;
+    keyboard_modifiers const& get_modifiers() const;
+    keyboard_repeat_info const& get_repeat_info() const;
 
     void key_pressed(uint32_t key);
     void key_released(uint32_t key);
@@ -86,6 +89,11 @@ public:
 
     void create_device(Client* client, uint32_t version, uint32_t id);
 
+    bool update_key(uint32_t key, button_state state);
+    std::vector<Keyboard*> devices;
+
+private:
+    keyboard_focus focus;
     keyboard_map keymap;
     keyboard_modifiers modifiers;
     keyboard_repeat_info keyRepeat;
@@ -93,12 +101,7 @@ public:
     std::unordered_map<uint32_t, button_state> states;
     uint32_t lastStateSerial = 0;
 
-    bool update_key(uint32_t key, button_state state);
     Seat* seat;
-    std::vector<Keyboard*> devices;
-
-private:
-    keyboard_focus focus;
 };
 
 }

@@ -166,16 +166,16 @@ void TestWaylandServerSeat::testRepeatInfo()
     seat->setHasKeyboard(true);
     auto& keyboards = seat->keyboards();
 
-    QCOMPARE(keyboards.keyRepeat.charactersPerSecond, 0);
-    QCOMPARE(keyboards.keyRepeat.delay, 0);
+    QCOMPARE(keyboards.get_repeat_info().charactersPerSecond, 0);
+    QCOMPARE(keyboards.get_repeat_info().delay, 0);
     keyboards.set_repeat_info(25, 660);
-    QCOMPARE(keyboards.keyRepeat.charactersPerSecond, 25);
-    QCOMPARE(keyboards.keyRepeat.delay, 660);
+    QCOMPARE(keyboards.get_repeat_info().charactersPerSecond, 25);
+    QCOMPARE(keyboards.get_repeat_info().delay, 660);
 
     // setting negative values should result in 0
     keyboards.set_repeat_info(-25, -660);
-    QCOMPARE(keyboards.keyRepeat.charactersPerSecond, 0);
-    QCOMPARE(keyboards.keyRepeat.delay, 0);
+    QCOMPARE(keyboards.get_repeat_info().charactersPerSecond, 0);
+    QCOMPARE(keyboards.get_repeat_info().delay, 0);
 }
 
 void TestWaylandServerSeat::testMultiple()

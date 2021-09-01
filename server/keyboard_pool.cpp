@@ -35,6 +35,21 @@ keyboard_focus const& keyboard_pool::get_focus() const
     return focus;
 }
 
+keyboard_map const& keyboard_pool::get_keymap() const
+{
+    return keymap;
+}
+
+keyboard_modifiers const& keyboard_pool::get_modifiers() const
+{
+    return modifiers;
+}
+
+keyboard_repeat_info const& keyboard_pool::get_repeat_info() const
+{
+    return keyRepeat;
+}
+
 void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     auto keyboard = new Keyboard(client, version, id, seat);
