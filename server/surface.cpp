@@ -376,8 +376,6 @@ Surface::Surface(Client* client, uint32_t version, uint32_t id)
 
 void Surface::frameRendered(quint32 msec)
 {
-    // Notify all callbacks.
-    const bool needsFlush = !d_ptr->current.callbacks.empty();
     while (!d_ptr->current.callbacks.empty()) {
         auto resource = d_ptr->current.callbacks.front();
         d_ptr->current.callbacks.pop_front();
@@ -386,9 +384,6 @@ void Surface::frameRendered(quint32 msec)
     }
     for (auto& subsurface : d_ptr->current.children) {
         subsurface->d_ptr->surface->frameRendered(msec);
-    }
-    if (needsFlush) {
-        d_ptr->client()->flush();
     }
 }
 
