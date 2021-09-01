@@ -141,7 +141,7 @@ void touch_pool::touch_up(int32_t id)
     Q_ASSERT(ids.count(id));
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
     if (seat->drags().is_touch_drag()
-        && seat->d_ptr->drags.source->dragImplicitGrabSerial() == ids[id]) {
+        && seat->d_ptr->drags.get_source().dev->dragImplicitGrabSerial() == ids[id]) {
         // the implicitly grabbing touch point has been upped
         seat->d_ptr->drags.end(serial);
     }

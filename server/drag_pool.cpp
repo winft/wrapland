@@ -21,13 +21,18 @@ drag_pool::drag_pool(Seat* seat)
 {
 }
 
+drag_source const& drag_pool::get_source() const
+{
+    return source;
+}
+
 void drag_pool::end(uint32_t serial)
 {
     auto trgt = target;
-    QObject::disconnect(destroyConnection);
-    QObject::disconnect(dragSourceDestroyConnection);
-    if (source && source->dragSource()) {
-        source->dragSource()->dropPerformed();
+    QObject::disconnect(source.device_destroy_notifier);
+    QObject::disconnect(source.destroy_notifier);
+    if (source.dev && source.dev->dragSource()) {
+        source.dev->dragSource()->dropPerformed();
     }
     if (trgt) {
         trgt->drop();
@@ -40,10 +45,10 @@ void drag_pool::end(uint32_t serial)
 
 void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransformation)
 {
-    if (mode == Mode::Pointer) {
+    if (source.mode == drag_mode::pointer) {
         set_target(new_surface, seat->pointers().get_position(), inputTransformation);
     } else {
-        Q_ASSERT(mode == Mode::Touch);
+        assert(source.mode == drag_mode::touch);
         set_target(new_surface,
                    seat->d_ptr->touches.value().get_focus().firstTouchPos,
                    inputTransformation);
@@ -70,9 +75,9 @@ void drag_pool::set_target(Surface* new_surface,
     // for clipboard overriding.
     target = interfaceForSurface(new_surface, seat->d_ptr->data_devices.devices);
 
-    if (mode == Mode::Pointer) {
+    if (source.mode == drag_mode::pointer) {
         seat->pointers().set_position(globalPosition);
-    } else if (mode == Mode::Touch
+    } else if (source.mode == drag_mode::touch
                && seat->d_ptr->touches.value().get_focus().firstTouchPos != globalPosition) {
         // TODO(romangg): instead of moving any touch point could we move with id 0? Probably yes
         //                if we always end a drag once the id 0 touch point has been lifted.
@@ -97,17 +102,17 @@ void drag_pool::set_target(Surface* new_surface,
 
 bool drag_pool::is_in_progress() const
 {
-    return mode != Mode::None;
+    return source.mode != drag_mode::none;
 }
 
 bool drag_pool::is_pointer_drag() const
 {
-    return mode == Mode::Pointer;
+    return source.mode == drag_mode::pointer;
 }
 
 bool drag_pool::is_touch_drag() const
 {
-    return mode == Mode::Touch;
+    return source.mode == drag_mode::touch;
 }
 
 void drag_pool::perform_drag(DataDevice* dataDevice)
@@ -117,13 +122,13 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
     auto& pointers = seat->pointers();
 
     if (pointers.has_implicit_grab(dragSerial)) {
-        mode = Mode::Pointer;
-        sourcePointer
+        source.mode = drag_mode::pointer;
+        source.pointer
             = interfaceForSurface(dragSurface, seat->d_ptr->pointers.value().get_devices());
         transformation = pointers.get_focus().transformation;
     } else if (seat->touches().has_implicit_grab(dragSerial)) {
-        mode = Mode::Touch;
-        sourceTouch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().get_devices());
+        source.mode = drag_mode::touch;
+        source.touch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().get_devices());
         // TODO(unknown author): touch transformation
     } else {
         // no implicit grab, abort drag
@@ -139,13 +144,14 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
         transformation = pointers.get_focus().transformation;
     }
 
-    source = dataDevice;
-    destroyConnection = QObject::connect(dataDevice, &DataDevice::resourceDestroyed, seat, [this] {
-        end(seat->d_ptr->display()->handle()->nextSerial());
-    });
+    source.dev = dataDevice;
+    source.device_destroy_notifier
+        = QObject::connect(dataDevice, &DataDevice::resourceDestroyed, seat, [this] {
+              end(seat->d_ptr->display()->handle()->nextSerial());
+          });
 
     if (dataDevice->dragSource()) {
-        dragSourceDestroyConnection = QObject::connect(
+        source.destroy_notifier = QObject::connect(
             dataDevice->dragSource(), &DataSource::resourceDestroyed, seat, [this] {
                 const auto serial = seat->d_ptr->display()->handle()->nextSerial();
                 if (target) {
@@ -155,7 +161,7 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
                 end(serial);
             });
     } else {
-        dragSourceDestroyConnection = QMetaObject::Connection();
+        source.destroy_notifier = QMetaObject::Connection();
     }
     dataDevice->updateDragTarget(proxied ? nullptr : originSurface,
                                  dataDevice->dragImplicitGrabSerial());

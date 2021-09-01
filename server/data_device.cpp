@@ -250,7 +250,7 @@ void DataDevice::Private::update_drag_touch_motion()
 
 void DataDevice::Private::update_drag_target_offer(Surface* surface, uint32_t serial)
 {
-    auto source = seat->drags().source->dragSource();
+    auto source = seat->drags().get_source().dev->dragSource();
     auto offer = createDataOffer(source);
 
     // TODO(unknown author): handle touch position
@@ -379,7 +379,7 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
     d_ptr->cancel_drag_target();
 
     if (!surface) {
-        if (auto s = d_ptr->seat->drags().source->dragSource()) {
+        if (auto s = d_ptr->seat->drags().get_source().dev->dragSource()) {
             s->dndAction(DataDeviceManager::DnDAction::None);
         }
         return;

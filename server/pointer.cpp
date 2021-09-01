@@ -72,7 +72,7 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
             return;
         }
         if (seat->drags().is_pointer_drag()) {
-            const auto* originSurface = seat->drags().source->origin();
+            const auto* originSurface = seat->drags().get_source().dev->origin();
             const bool proxyRemoteFocused
                 = originSurface->dataProxy() && originSurface == focusedSurface;
             if (!proxyRemoteFocused) {
