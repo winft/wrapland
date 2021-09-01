@@ -178,6 +178,12 @@ void touch_pool::touch_move(int32_t id, const QPointF& globalPosition)
     Q_EMIT seat->touchMoved(id, ids[id], globalPosition);
 }
 
+void touch_pool::touch_move_any(QPointF const& pos)
+{
+    assert(!ids.empty());
+    touch_move(ids.cbegin()->first, pos);
+}
+
 void touch_pool::touch_frame() const
 {
     for (auto touch : focus.devices) {

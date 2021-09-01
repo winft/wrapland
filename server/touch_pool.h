@@ -45,6 +45,7 @@ public:
     int32_t touch_down(const QPointF& globalPosition);
     void touch_up(int32_t id);
     void touch_move(int32_t id, const QPointF& globalPosition);
+    void touch_move_any(QPointF const& pos);
     void touch_frame() const;
     void cancel_sequence();
     bool has_implicit_grab(uint32_t serial) const;
@@ -52,14 +53,15 @@ public:
 
     void create_device(Client* client, uint32_t version, uint32_t id);
 
-    // Key: Distinct id per touch point, Value: Wayland display serial.
-    std::map<int32_t, uint32_t> ids;
-
-    Seat* seat;
     std::vector<Touch*> devices;
 
 private:
     touch_focus focus;
+
+    // Key: Distinct id per touch point, Value: Wayland display serial.
+    std::map<int32_t, uint32_t> ids;
+
+    Seat* seat;
 };
 
 }

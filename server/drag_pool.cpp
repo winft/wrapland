@@ -74,8 +74,9 @@ void drag_pool::set_target(Surface* new_surface,
         seat->pointers().set_position(globalPosition);
     } else if (mode == Mode::Touch
                && seat->d_ptr->touches.value().get_focus().firstTouchPos != globalPosition) {
-        seat->touches().touch_move(seat->d_ptr->touches.value().ids.cbegin()->first,
-                                   globalPosition);
+        // TODO(romangg): instead of moving any touch point could we move with id 0? Probably yes
+        //                if we always end a drag once the id 0 touch point has been lifted.
+        seat->touches().touch_move_any(globalPosition);
     }
     if (target) {
         surface = new_surface;
