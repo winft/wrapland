@@ -27,12 +27,12 @@ class Seat;
 enum class button_state;
 
 struct pointer_focus {
-    Surface* surface = nullptr;
+    Surface* surface{nullptr};
     std::vector<Pointer*> devices;
     QMetaObject::Connection destroyConnection;
-    QPointF offset = QPointF();
+    QPointF offset;
     QMatrix4x4 transformation;
-    uint32_t serial = 0;
+    uint32_t serial{0};
 };
 
 /*

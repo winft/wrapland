@@ -24,24 +24,24 @@ class Seat;
 enum class button_state;
 
 struct keyboard_focus {
-    Surface* surface = nullptr;
+    Surface* surface{nullptr};
     std::vector<Keyboard*> devices;
     QMetaObject::Connection destroyConnection;
-    uint32_t serial = 0;
+    uint32_t serial{0};
 };
 
 struct keyboard_map {
-    int fd = -1;
+    int fd{-1};
     std::string content;
-    bool xkbcommonCompatible = false;
+    bool xkbcommonCompatible{false};
 };
 
 struct keyboard_modifiers {
-    uint32_t depressed = 0;
-    uint32_t latched = 0;
-    uint32_t locked = 0;
-    uint32_t group = 0;
-    uint32_t serial = 0;
+    uint32_t depressed{0};
+    uint32_t latched{0};
+    uint32_t locked{0};
+    uint32_t group{0};
+    uint32_t serial{0};
 
     bool operator==(keyboard_modifiers const& other) const
     {
@@ -55,8 +55,8 @@ struct keyboard_modifiers {
 };
 
 struct keyboard_repeat_info {
-    int32_t charactersPerSecond = 0;
-    int32_t delay = 0;
+    int32_t charactersPerSecond{0};
+    int32_t delay{0};
 };
 
 /*
@@ -98,7 +98,7 @@ private:
     keyboard_repeat_info keyRepeat;
 
     std::unordered_map<uint32_t, button_state> states;
-    uint32_t lastStateSerial = 0;
+    uint32_t lastStateSerial{0};
 
     std::vector<Keyboard*> devices;
     Seat* seat;

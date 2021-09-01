@@ -23,10 +23,10 @@ class Surface;
 class Touch;
 
 struct touch_focus {
-    Surface* surface = nullptr;
+    Surface* surface{nullptr};
     std::vector<Touch*> devices;
     QMetaObject::Connection destroyConnection;
-    QPointF offset = QPointF();
+    QPointF offset;
     QPointF firstTouchPos;
 };
 
