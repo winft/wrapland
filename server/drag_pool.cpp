@@ -69,9 +69,8 @@ void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransfor
         set_target(new_surface, seat->pointers().get_position(), inputTransformation);
     } else {
         assert(source.mode == drag_mode::touch);
-        set_target(new_surface,
-                   seat->d_ptr->touches.value().get_focus().first_touch_position,
-                   inputTransformation);
+        set_target(
+            new_surface, seat->touches().get_focus().first_touch_position, inputTransformation);
     }
 }
 
@@ -98,7 +97,7 @@ void drag_pool::set_target(Surface* new_surface,
     if (source.mode == drag_mode::pointer) {
         seat->pointers().set_position(globalPosition);
     } else if (source.mode == drag_mode::touch
-               && seat->d_ptr->touches.value().get_focus().first_touch_position != globalPosition) {
+               && seat->touches().get_focus().first_touch_position != globalPosition) {
         // TODO(romangg): instead of moving any touch point could we move with id 0? Probably yes
         //                if we always end a drag once the id 0 touch point has been lifted.
         seat->touches().touch_move_any(globalPosition);
@@ -143,12 +142,11 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
 
     if (pointers.has_implicit_grab(dragSerial)) {
         source.mode = drag_mode::pointer;
-        source.pointer
-            = interfaceForSurface(dragSurface, seat->d_ptr->pointers.value().get_devices());
+        source.pointer = interfaceForSurface(dragSurface, seat->pointers().get_devices());
         target.transformation = pointers.get_focus().transformation;
     } else if (seat->touches().has_implicit_grab(dragSerial)) {
         source.mode = drag_mode::touch;
-        source.touch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().get_devices());
+        source.touch = interfaceForSurface(dragSurface, seat->touches().get_devices());
         // TODO(unknown author): touch transformation
     } else {
         // no implicit grab, abort drag
