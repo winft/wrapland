@@ -43,16 +43,22 @@ void drag_pool::cancel()
 void drag_pool::end(uint32_t serial)
 {
     auto trgt = target.dev;
+
     QObject::disconnect(source.device_destroy_notifier);
     QObject::disconnect(source.destroy_notifier);
+
     if (source.dev && source.dev->dragSource()) {
         source.dev->dragSource()->dropPerformed();
     }
+
     if (trgt) {
         trgt->drop();
         trgt->updateDragTarget(nullptr, serial);
     }
-    *this = drag_pool(seat);
+
+    source = {};
+    target = {};
+
     Q_EMIT seat->dragSurfaceChanged();
     Q_EMIT seat->dragEnded();
 }
