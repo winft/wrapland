@@ -26,14 +26,14 @@ enum class button_state;
 struct keyboard_focus {
     Surface* surface{nullptr};
     std::vector<Keyboard*> devices;
-    QMetaObject::Connection destroyConnection;
+    QMetaObject::Connection destroy_connection;
     uint32_t serial{0};
 };
 
 struct keyboard_map {
     int fd{-1};
     std::string content;
-    bool xkbcommonCompatible{false};
+    bool xkbcommon_compatible{false};
 };
 
 struct keyboard_modifiers {
@@ -55,7 +55,9 @@ struct keyboard_modifiers {
 };
 
 struct keyboard_repeat_info {
-    int32_t charactersPerSecond{0};
+    // In chars per second.
+    int32_t rate{0};
+    // In milliseconds.
     int32_t delay{0};
 };
 

@@ -70,7 +70,7 @@ void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransfor
     } else {
         assert(source.mode == drag_mode::touch);
         set_target(new_surface,
-                   seat->d_ptr->touches.value().get_focus().firstTouchPos,
+                   seat->d_ptr->touches.value().get_focus().first_touch_position,
                    inputTransformation);
     }
 }
@@ -98,7 +98,7 @@ void drag_pool::set_target(Surface* new_surface,
     if (source.mode == drag_mode::pointer) {
         seat->pointers().set_position(globalPosition);
     } else if (source.mode == drag_mode::touch
-               && seat->d_ptr->touches.value().get_focus().firstTouchPos != globalPosition) {
+               && seat->d_ptr->touches.value().get_focus().first_touch_position != globalPosition) {
         // TODO(romangg): instead of moving any touch point could we move with id 0? Probably yes
         //                if we always end a drag once the id 0 touch point has been lifted.
         seat->touches().touch_move_any(globalPosition);

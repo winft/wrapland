@@ -30,7 +30,7 @@ touch_pool::touch_pool(Seat* seat)
 
 touch_pool::~touch_pool()
 {
-    QObject::disconnect(focus.destroyConnection);
+    QObject::disconnect(focus.destroy_connection);
     for (auto dev : devices) {
         QObject::disconnect(dev, nullptr, seat, nullptr);
     }
@@ -79,14 +79,14 @@ void touch_pool::set_focused_surface(Surface* surface, const QPointF& surfacePos
     Q_ASSERT(!seat->drags().is_touch_drag());
 
     if (focus.surface) {
-        QObject::disconnect(focus.destroyConnection);
+        QObject::disconnect(focus.destroy_connection);
     }
     focus = touch_focus();
     focus.surface = surface;
     focus.offset = surfacePosition;
     focus.devices = interfacesForSurface(surface, devices);
     if (focus.surface) {
-        focus.destroyConnection
+        focus.destroy_connection
             = QObject::connect(surface, &Surface::resourceDestroyed, seat, [this] {
                   if (is_in_progress()) {
                       // Surface destroyed during touch sequence - send a cancel
@@ -114,7 +114,7 @@ int32_t touch_pool::touch_down(const QPointF& globalPosition)
     }
 
     if (id == 0) {
-        focus.firstTouchPos = globalPosition;
+        focus.first_touch_position = globalPosition;
     }
 
 #if HAVE_LINUX_INPUT_H
@@ -171,7 +171,7 @@ void touch_pool::touch_move(int32_t id, const QPointF& globalPosition)
     }
 
     if (id == 0) {
-        focus.firstTouchPos = globalPosition;
+        focus.first_touch_position = globalPosition;
     }
 
     if (id == 0 && focus.devices.empty() && seat->d_ptr->pointers.has_value()) {
