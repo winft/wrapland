@@ -34,6 +34,13 @@ struct drag_source {
     QMetaObject::Connection device_destroy_notifier;
 };
 
+struct drag_target {
+    DataDevice* dev{nullptr};
+    Surface* surface{nullptr};
+    QMatrix4x4 transformation;
+    QMetaObject::Connection destroy_notifier;
+};
+
 /*
  * Handle drags on behalf of a seat.
  */
@@ -43,6 +50,7 @@ public:
     explicit drag_pool(Seat* seat);
 
     drag_source const& get_source() const;
+    drag_target const& get_target() const;
 
     void set_target(Surface* new_surface,
                     const QPointF& globalPosition,
@@ -53,18 +61,13 @@ public:
     bool is_pointer_drag() const;
     bool is_touch_drag() const;
 
-    DataDevice* target = nullptr;
-    Surface* surface = nullptr;
-    QMatrix4x4 transformation;
-
     void cancel();
     void end(uint32_t serial);
     void perform_drag(DataDevice* dataDevice);
 
 private:
     drag_source source;
-
-    QMetaObject::Connection target_destroy_connection;
+    drag_target target;
 
     Seat* seat;
 };

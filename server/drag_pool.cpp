@@ -26,18 +26,23 @@ drag_source const& drag_pool::get_source() const
     return source;
 }
 
+drag_target const& drag_pool::get_target() const
+{
+    return target;
+}
+
 void drag_pool::cancel()
 {
-    if (target) {
-        target->updateDragTarget(nullptr, 0);
-        target = nullptr;
+    if (target.dev) {
+        target.dev->updateDragTarget(nullptr, 0);
+        target.dev = nullptr;
     }
     end(0);
 }
 
 void drag_pool::end(uint32_t serial)
 {
-    auto trgt = target;
+    auto trgt = target.dev;
     QObject::disconnect(source.device_destroy_notifier);
     QObject::disconnect(source.destroy_notifier);
     if (source.dev && source.dev->dragSource()) {
@@ -68,21 +73,21 @@ void drag_pool::set_target(Surface* new_surface,
                            const QPointF& globalPosition,
                            const QMatrix4x4& inputTransformation)
 {
-    if (new_surface == surface) {
+    if (new_surface == target.surface) {
         // no change
         return;
     }
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
-    if (target) {
-        target->updateDragTarget(nullptr, serial);
-        QObject::disconnect(target_destroy_connection);
-        target_destroy_connection = QMetaObject::Connection();
+    if (target.dev) {
+        target.dev->updateDragTarget(nullptr, serial);
+        QObject::disconnect(target.destroy_notifier);
+        target.destroy_notifier = QMetaObject::Connection();
     }
 
     // In theory we can have multiple data devices and we should send the drag to all of them, but
     // that seems overly complicated. In practice so far the only case for multiple data devices is
     // for clipboard overriding.
-    target = interfaceForSurface(new_surface, seat->d_ptr->data_devices.devices);
+    target.dev = interfaceForSurface(new_surface, seat->d_ptr->data_devices.devices);
 
     if (source.mode == drag_mode::pointer) {
         seat->pointers().set_position(globalPosition);
@@ -92,19 +97,19 @@ void drag_pool::set_target(Surface* new_surface,
         //                if we always end a drag once the id 0 touch point has been lifted.
         seat->touches().touch_move_any(globalPosition);
     }
-    if (target) {
-        surface = new_surface;
-        transformation = inputTransformation;
-        target->updateDragTarget(surface, serial);
-        target_destroy_connection
-            = QObject::connect(target, &DataDevice::resourceDestroyed, seat, [this] {
-                  QObject::disconnect(target_destroy_connection);
-                  target_destroy_connection = QMetaObject::Connection();
-                  target = nullptr;
+    if (target.dev) {
+        target.surface = new_surface;
+        target.transformation = inputTransformation;
+        target.dev->updateDragTarget(target.surface, serial);
+        target.destroy_notifier
+            = QObject::connect(target.dev, &DataDevice::resourceDestroyed, seat, [this] {
+                  QObject::disconnect(target.destroy_notifier);
+                  target.destroy_notifier = QMetaObject::Connection();
+                  target.dev = nullptr;
               });
 
     } else {
-        surface = nullptr;
+        target.surface = nullptr;
     }
     Q_EMIT seat->dragSurfaceChanged();
 }
@@ -134,7 +139,7 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
         source.mode = drag_mode::pointer;
         source.pointer
             = interfaceForSurface(dragSurface, seat->d_ptr->pointers.value().get_devices());
-        transformation = pointers.get_focus().transformation;
+        target.transformation = pointers.get_focus().transformation;
     } else if (seat->touches().has_implicit_grab(dragSerial)) {
         source.mode = drag_mode::touch;
         source.touch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().get_devices());
@@ -147,10 +152,10 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
     const bool proxied = originSurface->dataProxy();
     if (!proxied) {
         // origin surface
-        target = dataDevice;
-        surface = originSurface;
+        target.dev = dataDevice;
+        target.surface = originSurface;
         // TODO(unknown author): transformation needs to be either pointer or touch
-        transformation = pointers.get_focus().transformation;
+        target.transformation = pointers.get_focus().transformation;
     }
 
     source.dev = dataDevice;
@@ -163,9 +168,9 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
         source.destroy_notifier = QObject::connect(
             dataDevice->dragSource(), &DataSource::resourceDestroyed, seat, [this] {
                 const auto serial = seat->d_ptr->display()->handle()->nextSerial();
-                if (target) {
-                    target->updateDragTarget(nullptr, serial);
-                    target = nullptr;
+                if (target.dev) {
+                    target.dev->updateDragTarget(nullptr, serial);
+                    target.dev = nullptr;
                 }
                 end(serial);
             });
