@@ -26,6 +26,15 @@ drag_source const& drag_pool::get_source() const
     return source;
 }
 
+void drag_pool::cancel()
+{
+    if (target) {
+        target->updateDragTarget(nullptr, 0);
+        target = nullptr;
+    }
+    end(0);
+}
+
 void drag_pool::end(uint32_t serial)
 {
     auto trgt = target;

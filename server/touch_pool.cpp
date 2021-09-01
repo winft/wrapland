@@ -203,13 +203,7 @@ void touch_pool::cancel_sequence()
     }
     if (seat->drags().is_touch_drag()) {
         // cancel the drag, don't drop.
-        if (seat->d_ptr->drags.target) {
-            // remove the current target
-            seat->d_ptr->drags.target->updateDragTarget(nullptr, 0);
-            seat->d_ptr->drags.target = nullptr;
-        }
-        // and end the drag for the source, serial does not matter
-        seat->d_ptr->drags.end(0);
+        seat->drags().cancel();
     }
     ids.clear();
 }

@@ -57,6 +57,7 @@ public:
     Surface* surface = nullptr;
     QMatrix4x4 transformation;
 
+    void cancel();
     void end(uint32_t serial);
     void perform_drag(DataDevice* dataDevice);
 
