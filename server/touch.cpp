@@ -93,7 +93,7 @@ void Touch::down(qint32 id, quint32 serial, const QPointF& localPos)
 {
     d_ptr->send<wl_touch_send_down>(serial,
                                     d_ptr->seat->timestamp(),
-                                    d_ptr->seat->touches().focus.surface->resource(),
+                                    d_ptr->seat->touches().get_focus().surface->resource(),
                                     id,
                                     wl_fixed_from_double(localPos.x()),
                                     wl_fixed_from_double(localPos.y()));

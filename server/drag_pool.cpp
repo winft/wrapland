@@ -44,8 +44,9 @@ void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransfor
         set_target(new_surface, seat->pointers().get_position(), inputTransformation);
     } else {
         Q_ASSERT(mode == Mode::Touch);
-        set_target(
-            new_surface, seat->d_ptr->touches.value().focus.firstTouchPos, inputTransformation);
+        set_target(new_surface,
+                   seat->d_ptr->touches.value().get_focus().firstTouchPos,
+                   inputTransformation);
     }
 }
 
@@ -72,7 +73,7 @@ void drag_pool::set_target(Surface* new_surface,
     if (mode == Mode::Pointer) {
         seat->pointers().set_position(globalPosition);
     } else if (mode == Mode::Touch
-               && seat->d_ptr->touches.value().focus.firstTouchPos != globalPosition) {
+               && seat->d_ptr->touches.value().get_focus().firstTouchPos != globalPosition) {
         seat->touches().touch_move(seat->d_ptr->touches.value().ids.cbegin()->first,
                                    globalPosition);
     }

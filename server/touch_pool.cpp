@@ -36,6 +36,11 @@ touch_pool::~touch_pool()
     }
 }
 
+touch_focus const& touch_pool::get_focus() const
+{
+    return focus;
+}
+
 void touch_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     // TODO(unknown author): only create if seat has touch?

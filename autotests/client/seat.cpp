@@ -2045,18 +2045,18 @@ void TestSeat::testTouch()
     auto& server_touches = m_serverSeat->touches();
     server_touches.set_focused_surface(serverSurface);
     // No keyboard yet.
-    QCOMPARE(server_touches.focus.surface, serverSurface);
-    QVERIFY(server_touches.focus.devices.empty());
+    QCOMPARE(server_touches.get_focus().surface, serverSurface);
+    QVERIFY(server_touches.get_focus().devices.empty());
 
     QSignalSpy touchCreatedSpy(m_serverSeat, &Srv::Seat::touchCreated);
     QVERIFY(touchCreatedSpy.isValid());
     auto* touch = m_seat->createTouch(m_seat);
     QVERIFY(touch->isValid());
     QVERIFY(touchCreatedSpy.wait());
-    auto serverTouch = server_touches.focus.devices.front();
+    auto serverTouch = server_touches.get_focus().devices.front();
     QVERIFY(serverTouch);
     QCOMPARE(touchCreatedSpy.first().first().value<Srv::Touch*>(),
-             server_touches.focus.devices.front());
+             server_touches.get_focus().devices.front());
 
     QSignalSpy sequenceStartedSpy(touch, &Clt::Touch::sequenceStarted);
     QVERIFY(sequenceStartedSpy.isValid());
@@ -2075,7 +2075,7 @@ void TestSeat::testTouch()
 
     // Try a few things.
     server_touches.set_focused_surface_position(QPointF(10, 20));
-    QCOMPARE(server_touches.focus.offset, QPointF(10, 20));
+    QCOMPARE(server_touches.get_focus().offset, QPointF(10, 20));
     m_serverSeat->setTimestamp(1);
     QCOMPARE(server_touches.touch_down(QPointF(15, 26)), 0);
     QVERIFY(sequenceStartedSpy.wait());
@@ -2226,7 +2226,7 @@ void TestSeat::testTouch()
     QCOMPARE(destroyedSpy.count(), 1);
 
     // Try to call into all the methods of the touch interface, should not crash.
-    QVERIFY(server_touches.focus.devices.empty());
+    QVERIFY(server_touches.get_focus().devices.empty());
     m_serverSeat->setTimestamp(8);
     QCOMPARE(server_touches.touch_down(QPointF(15, 26)), 0);
     server_touches.touch_frame();
@@ -2235,10 +2235,10 @@ void TestSeat::testTouch()
     server_touches.cancel_sequence();
 
     // Should have unset the focused touch.
-    QVERIFY(server_touches.focus.devices.empty());
+    QVERIFY(server_touches.get_focus().devices.empty());
 
     // But not the focused touch surface.
-    QCOMPARE(server_touches.focus.surface, serverSurface);
+    QCOMPARE(server_touches.get_focus().surface, serverSurface);
 }
 
 void TestSeat::testDisconnect()

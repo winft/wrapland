@@ -38,6 +38,8 @@ public:
     explicit touch_pool(Seat* seat);
     ~touch_pool();
 
+    touch_focus const& get_focus() const;
+
     void set_focused_surface(Surface* surface, const QPointF& surfacePosition = QPointF());
     void set_focused_surface_position(const QPointF& surfacePosition);
     int32_t touch_down(const QPointF& globalPosition);
@@ -50,13 +52,14 @@ public:
 
     void create_device(Client* client, uint32_t version, uint32_t id);
 
-    touch_focus focus;
-
     // Key: Distinct id per touch point, Value: Wayland display serial.
     std::map<int32_t, uint32_t> ids;
 
     Seat* seat;
     std::vector<Touch*> devices;
+
+private:
+    touch_focus focus;
 };
 
 }
