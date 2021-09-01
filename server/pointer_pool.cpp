@@ -74,6 +74,11 @@ pointer_focus const& pointer_pool::get_focus() const
     return focus;
 }
 
+std::vector<Pointer*> const& pointer_pool::get_devices() const
+{
+    return devices;
+}
+
 void pointer_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     auto pointer = new Pointer(client, version, id, seat);

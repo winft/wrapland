@@ -111,13 +111,14 @@ int32_t touch_pool::touch_down(const QPointF& globalPosition)
     if (id == 0 && focus.devices.empty() && seat->d_ptr->pointers.has_value()) {
         // If the client did not bind the touch interface fall back
         // to at least emulating touch through pointer events.
-        forEachInterface(
-            focus.surface, seat->d_ptr->pointers.value().devices, [this, pos, serial](Pointer* p) {
-                p->d_ptr->sendEnter(serial, focus.surface, pos);
-                p->d_ptr->sendMotion(pos);
-                p->buttonPressed(serial, BTN_LEFT);
-                p->d_ptr->sendFrame();
-            });
+        forEachInterface(focus.surface,
+                         seat->d_ptr->pointers.value().get_devices(),
+                         [this, pos, serial](Pointer* p) {
+                             p->d_ptr->sendEnter(serial, focus.surface, pos);
+                             p->d_ptr->sendMotion(pos);
+                             p->buttonPressed(serial, BTN_LEFT);
+                             p->d_ptr->sendFrame();
+                         });
     }
 #endif
 
@@ -143,7 +144,7 @@ void touch_pool::touch_up(int32_t id)
         // Client did not bind touch, fall back to emulating with pointer events.
         const uint32_t serial = seat->d_ptr->display()->handle()->nextSerial();
         forEachInterface(focus.surface,
-                         seat->d_ptr->pointers.value().devices,
+                         seat->d_ptr->pointers.value().get_devices(),
                          [serial](Pointer* p) { p->buttonReleased(serial, BTN_LEFT); });
     }
 #endif
@@ -165,9 +166,9 @@ void touch_pool::touch_move(int32_t id, const QPointF& globalPosition)
 
     if (id == 0 && focus.devices.empty() && seat->d_ptr->pointers.has_value()) {
         // Client did not bind touch, fall back to emulating with pointer events.
-        forEachInterface(focus.surface, seat->d_ptr->pointers.value().devices, [pos](Pointer* p) {
-            p->d_ptr->sendMotion(pos);
-        });
+        forEachInterface(focus.surface,
+                         seat->d_ptr->pointers.value().get_devices(),
+                         [pos](Pointer* p) { p->d_ptr->sendMotion(pos); });
     }
     Q_EMIT seat->touchMoved(id, ids[id], globalPosition);
 }

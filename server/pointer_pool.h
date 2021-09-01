@@ -49,6 +49,7 @@ public:
     ~pointer_pool();
 
     pointer_focus const& get_focus() const;
+    std::vector<Pointer*> const& get_devices() const;
 
     QPointF get_position() const;
     void set_position(const QPointF& position);
@@ -86,8 +87,6 @@ public:
     uint32_t button_serial(uint32_t button) const;
     uint32_t button_serial(Qt::MouseButton button) const;
 
-    std::vector<Pointer*> devices;
-
 private:
     friend class Seat;
 
@@ -103,6 +102,7 @@ private:
     QPointF pos;
     QPointer<Surface> gestureSurface;
 
+    std::vector<Pointer*> devices;
     Seat* seat;
 };
 
