@@ -48,14 +48,16 @@ public:
     Pointer* sourcePointer = nullptr;
     Touch* sourceTouch = nullptr;
     QMatrix4x4 transformation;
+
+    void end(uint32_t serial);
+    void perform_drag(DataDevice* dataDevice);
+
+private:
     QMetaObject::Connection destroyConnection;
     QMetaObject::Connection dragSourceDestroyConnection;
     QMetaObject::Connection target_destroy_connection;
 
     Seat* seat;
-
-    void end(uint32_t serial);
-    void perform_drag(DataDevice* dataDevice);
 };
 
 }
