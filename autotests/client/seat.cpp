@@ -1418,8 +1418,8 @@ void TestSeat::testKeyboard()
 
     // No keyboard yet.
     auto& keyboards = m_serverSeat->keyboards();
-    QCOMPARE(keyboards.focus.surface, serverSurface);
-    QVERIFY(keyboards.focus.devices.empty());
+    QCOMPARE(keyboards.get_focus().surface, serverSurface);
+    QVERIFY(keyboards.get_focus().devices.empty());
 
     auto* keyboard = m_seat->createKeyboard(m_seat);
     QSignalSpy repeatInfoSpy(keyboard, &Clt::Keyboard::keyRepeatChanged);
@@ -1431,7 +1431,7 @@ void TestSeat::testKeyboard()
     QCOMPARE(keyboard->keyRepeatRate(), 0);
     wl_display_flush(m_connection->display());
     QTest::qWait(100);
-    auto serverKeyboard = keyboards.focus.devices.front();
+    auto serverKeyboard = keyboards.get_focus().devices.front();
     QVERIFY(serverKeyboard);
 
     // We should get the repeat info announced.
@@ -1442,7 +1442,7 @@ void TestSeat::testKeyboard()
 
     // Let's change repeat in server.
     keyboards.set_repeat_info(25, 660);
-    keyboards.focus.devices.front()->client()->flush();
+    keyboards.get_focus().devices.front()->client()->flush();
     QVERIFY(repeatInfoSpy.wait());
     QCOMPARE(repeatInfoSpy.count(), 2);
     QCOMPARE(keyboard->isKeyRepeatEnabled(), true);
@@ -1462,8 +1462,8 @@ void TestSeat::testKeyboard()
     QSignalSpy enteredSpy(keyboard, &Clt::Keyboard::entered);
     QVERIFY(enteredSpy.isValid());
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    QCOMPARE(keyboards.focus.surface, serverSurface);
-    QCOMPARE(keyboards.focus.devices.front()->focusedSurface(), serverSurface);
+    QCOMPARE(keyboards.get_focus().surface, serverSurface);
+    QCOMPARE(keyboards.get_focus().devices.front()->focusedSurface(), serverSurface);
 
     // We get the modifiers sent after the enter.
     QVERIFY(modifierSpy.wait());
@@ -1547,8 +1547,8 @@ void TestSeat::testKeyboard()
     QSignalSpy leftSpy(keyboard, &Clt::Keyboard::left);
     QVERIFY(leftSpy.isValid());
     m_serverSeat->setFocusedKeyboardSurface(nullptr);
-    QVERIFY(!keyboards.focus.surface);
-    QVERIFY(keyboards.focus.devices.empty());
+    QVERIFY(!keyboards.get_focus().surface);
+    QVERIFY(keyboards.get_focus().devices.empty());
     QVERIFY(leftSpy.wait());
     QCOMPARE(leftSpy.count(), 1);
 
@@ -1561,8 +1561,8 @@ void TestSeat::testKeyboard()
     // Enter it again.
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
     QVERIFY(modifierSpy.wait());
-    QCOMPARE(keyboards.focus.surface, serverSurface);
-    QCOMPARE(keyboards.focus.devices.front()->focusedSurface(), serverSurface);
+    QCOMPARE(keyboards.get_focus().surface, serverSurface);
+    QCOMPARE(keyboards.get_focus().devices.front()->focusedSurface(), serverSurface);
     QCOMPARE(enteredSpy.count(), 2);
 
     QCOMPARE(keyboard->enteredSurface(), s);
@@ -1576,8 +1576,8 @@ void TestSeat::testKeyboard()
 
     QVERIFY(leftSpy.wait());
     QCOMPARE(serverSurfaceDestroyedSpy.count(), 1);
-    QVERIFY(!keyboards.focus.surface);
-    QVERIFY(keyboards.focus.devices.empty());
+    QVERIFY(!keyboards.get_focus().surface);
+    QVERIFY(keyboards.get_focus().devices.empty());
     QVERIFY(!serverKeyboard->focusedSurface());
 
     // Let's create a Surface again.
@@ -1588,8 +1588,8 @@ void TestSeat::testKeyboard()
     QVERIFY(serverSurface);
 
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    QCOMPARE(keyboards.focus.surface, serverSurface);
-    QCOMPARE(keyboards.focus.devices.front(), serverKeyboard);
+    QCOMPARE(keyboards.get_focus().surface, serverSurface);
+    QCOMPARE(keyboards.get_focus().devices.front(), serverKeyboard);
 
     // Delete the Keyboard.
     QSignalSpy destroyedSpy(serverKeyboard, &Srv::Keyboard::destroyed);
@@ -1609,8 +1609,8 @@ void TestSeat::testKeyboard()
     keyboards.update_modifiers(5, 6, 7, 8);
     m_serverSeat->setFocusedKeyboardSurface(nullptr);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    QCOMPARE(keyboards.focus.surface, serverSurface);
-    QVERIFY(keyboards.focus.devices.empty());
+    QCOMPARE(keyboards.get_focus().surface, serverSurface);
+    QVERIFY(keyboards.get_focus().devices.empty());
 
     // Create a second Keyboard to verify that repeat info is announced properly.
     auto* keyboard2 = m_seat->createKeyboard(m_seat);
@@ -1628,9 +1628,9 @@ void TestSeat::testKeyboard()
     QCOMPARE(keyboard2->isKeyRepeatEnabled(), true);
     QCOMPARE(keyboard2->keyRepeatRate(), 25);
     QCOMPARE(keyboard2->keyRepeatDelay(), 660);
-    QCOMPARE(keyboards.focus.surface, serverSurface);
+    QCOMPARE(keyboards.get_focus().surface, serverSurface);
 
-    serverKeyboard = keyboards.focus.devices.front();
+    serverKeyboard = keyboards.get_focus().devices.front();
 
     QVERIFY(serverKeyboard);
     QSignalSpy keyboard2DestroyedSpy(serverKeyboard, &Srv::Keyboard::destroyed);
@@ -1640,10 +1640,10 @@ void TestSeat::testKeyboard()
     QVERIFY(keyboard2DestroyedSpy.wait());
 
     // This should have unset it on the server.
-    QVERIFY(keyboards.focus.devices.empty());
+    QVERIFY(keyboards.get_focus().devices.empty());
 
     // But not the surface.
-    QCOMPARE(keyboards.focus.surface, serverSurface);
+    QCOMPARE(keyboards.get_focus().surface, serverSurface);
 }
 
 void TestSeat::testCast()
@@ -1779,8 +1779,8 @@ void TestSeat::testSelection()
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
 
     auto& keyboards = m_serverSeat->keyboards();
-    QCOMPARE(keyboards.focus.surface, serverSurface);
-    QVERIFY(keyboards.focus.devices.empty());
+    QCOMPARE(keyboards.get_focus().surface, serverSurface);
+    QVERIFY(keyboards.get_focus().devices.empty());
     QVERIFY(selectionClearedSpy.wait());
     QVERIFY(selectionSpy.isEmpty());
     QVERIFY(!selectionClearedSpy.isEmpty());
@@ -1812,8 +1812,8 @@ void TestSeat::testSelection()
 
     // Unset the keyboard focus.
     m_serverSeat->setFocusedKeyboardSurface(nullptr);
-    QVERIFY(!keyboards.focus.surface);
-    QVERIFY(keyboards.focus.devices.empty());
+    QVERIFY(!keyboards.get_focus().surface);
+    QVERIFY(keyboards.get_focus().devices.empty());
 
     serverSurface->client()->flush();
     QCoreApplication::processEvents();
@@ -1920,7 +1920,7 @@ void TestSeat::testSelectionNoDataSource()
 
     m_serverSeat->setHasKeyboard(true);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    QCOMPARE(m_serverSeat->keyboards().focus.surface, serverSurface);
+    QCOMPARE(m_serverSeat->keyboards().get_focus().surface, serverSurface);
 
     // Now let's set the selection.
     m_serverSeat->setSelection(ddi);
@@ -1990,7 +1990,7 @@ void TestSeat::testDataDeviceForKeyboardSurface()
 
     m_serverSeat->setHasKeyboard(true);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    QCOMPARE(m_serverSeat->keyboards().focus.surface, serverSurface);
+    QCOMPARE(m_serverSeat->keyboards().get_focus().surface, serverSurface);
 
     // Now create a DataDevice.
     Clt::Registry registry2;

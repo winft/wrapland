@@ -30,6 +30,11 @@ keyboard_pool::~keyboard_pool()
     }
 }
 
+keyboard_focus const& keyboard_pool::get_focus() const
+{
+    return focus;
+}
+
 void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     auto keyboard = new Keyboard(client, version, id, seat);

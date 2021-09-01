@@ -12,6 +12,7 @@
 
 #include <cstdint>
 #include <unordered_map>
+#include <vector>
 
 namespace Wrapland::Server
 {
@@ -72,6 +73,8 @@ public:
     explicit keyboard_pool(Seat* seat);
     ~keyboard_pool();
 
+    keyboard_focus const& get_focus() const;
+
     void key_pressed(uint32_t key);
     void key_released(uint32_t key);
     void update_modifiers(uint32_t depressed, uint32_t latched, uint32_t locked, uint32_t group);
@@ -85,7 +88,6 @@ public:
 
     keyboard_map keymap;
     keyboard_modifiers modifiers;
-    keyboard_focus focus;
     keyboard_repeat_info keyRepeat;
 
     std::unordered_map<uint32_t, button_state> states;
@@ -94,6 +96,9 @@ public:
     bool update_key(uint32_t key, button_state state);
     Seat* seat;
     std::vector<Keyboard*> devices;
+
+private:
+    keyboard_focus focus;
 };
 
 }

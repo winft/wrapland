@@ -54,7 +54,7 @@ static void forEachInterface(Surface* surface, Vector const& interfaces, UnaryFu
 template<typename Device, typename Seat>
 bool has_keyboard_focus(Device* device, Seat* seat)
 {
-    auto focused_surface = seat->hasKeyboard() ? seat->keyboards().focus.surface : nullptr;
+    auto focused_surface = seat->hasKeyboard() ? seat->keyboards().get_focus().surface : nullptr;
     return device && focused_surface && (focused_surface->client() == device->client());
 }
 

@@ -192,7 +192,7 @@ void CompositorWindow::keyPressEvent(QKeyEvent* event)
     if (!m_seat) {
         return;
     }
-    if (!m_seat->keyboards().focus.surface) {
+    if (!m_seat->keyboards().get_focus().surface) {
         updateFocus();
     }
     m_seat->setTimestamp(event->timestamp());
