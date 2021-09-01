@@ -13,6 +13,7 @@
 
 #include <cstdint>
 #include <map>
+#include <vector>
 
 namespace Wrapland::Server
 {
@@ -39,6 +40,7 @@ public:
     ~touch_pool();
 
     touch_focus const& get_focus() const;
+    std::vector<Touch*> const& get_devices() const;
 
     void set_focused_surface(Surface* surface, const QPointF& surfacePosition = QPointF());
     void set_focused_surface_position(const QPointF& surfacePosition);
@@ -51,16 +53,16 @@ public:
     bool has_implicit_grab(uint32_t serial) const;
     bool is_in_progress() const;
 
+private:
+    friend class Seat;
     void create_device(Client* client, uint32_t version, uint32_t id);
 
-    std::vector<Touch*> devices;
-
-private:
     touch_focus focus;
 
     // Key: Distinct id per touch point, Value: Wayland display serial.
     std::map<int32_t, uint32_t> ids;
 
+    std::vector<Touch*> devices;
     Seat* seat;
 };
 

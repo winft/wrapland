@@ -123,7 +123,7 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
         transformation = pointers.get_focus().transformation;
     } else if (seat->touches().has_implicit_grab(dragSerial)) {
         mode = Mode::Touch;
-        sourceTouch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().devices);
+        sourceTouch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().get_devices());
         // TODO(unknown author): touch transformation
     } else {
         // no implicit grab, abort drag
