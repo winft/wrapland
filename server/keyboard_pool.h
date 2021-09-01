@@ -86,13 +86,12 @@ public:
     void set_repeat_info(int32_t charactersPerSecond, int32_t delay);
 
     std::vector<uint32_t> pressed_keys() const;
-
-    void create_device(Client* client, uint32_t version, uint32_t id);
-
     bool update_key(uint32_t key, button_state state);
-    std::vector<Keyboard*> devices;
 
 private:
+    friend class Seat;
+    void create_device(Client* client, uint32_t version, uint32_t id);
+
     keyboard_focus focus;
     keyboard_map keymap;
     keyboard_modifiers modifiers;
@@ -101,6 +100,7 @@ private:
     std::unordered_map<uint32_t, button_state> states;
     uint32_t lastStateSerial = 0;
 
+    std::vector<Keyboard*> devices;
     Seat* seat;
 };
 
