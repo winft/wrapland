@@ -86,22 +86,23 @@ public:
 
     QPointF position() const;
 
-    std::unordered_map<uint32_t, uint32_t> buttonSerials;
-    std::unordered_map<uint32_t, button_state> buttonStates;
     QPointF pos;
-    QPointer<Surface> gestureSurface;
-
-    void create_device(Client* client, uint32_t version, uint32_t id);
-
-    // private
-    void update_button_serial(uint32_t button, uint32_t serial);
-    void update_button_state(uint32_t button, button_state state);
-
-    Seat* seat;
     std::vector<Pointer*> devices;
 
 private:
+    friend class Seat;
+
+    void create_device(Client* client, uint32_t version, uint32_t id);
+    void update_button_serial(uint32_t button, uint32_t serial);
+    void update_button_state(uint32_t button, button_state state);
+
+    std::unordered_map<uint32_t, uint32_t> buttonSerials;
+    std::unordered_map<uint32_t, button_state> buttonStates;
+
     pointer_focus focus;
+    QPointer<Surface> gestureSurface;
+
+    Seat* seat;
 };
 
 }
