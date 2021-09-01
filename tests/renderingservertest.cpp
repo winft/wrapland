@@ -212,7 +212,7 @@ void CompositorWindow::keyReleaseEvent(QKeyEvent* event)
 void CompositorWindow::mouseMoveEvent(QMouseEvent* event)
 {
     QWidget::mouseMoveEvent(event);
-    if (!m_seat->pointers().focus.surface) {
+    if (!m_seat->pointers().get_focus().surface) {
         updateFocus();
     }
     m_seat->setTimestamp(event->timestamp());
@@ -222,7 +222,7 @@ void CompositorWindow::mouseMoveEvent(QMouseEvent* event)
 void CompositorWindow::mousePressEvent(QMouseEvent* event)
 {
     QWidget::mousePressEvent(event);
-    if (!m_seat->pointers().focus.surface) {
+    if (!m_seat->pointers().get_focus().surface) {
         if (!m_stackingOrder.isEmpty()) {
             m_seat->pointers().set_focused_surface(m_stackingOrder.last()->surface()->surface());
         }

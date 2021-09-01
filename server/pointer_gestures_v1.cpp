@@ -112,7 +112,10 @@ void PointerSwipeGestureV1::start(quint32 serial, quint32 fingerCount)
     auto seat = d_ptr->pointer->seat();
 
     d_ptr->send<zwp_pointer_gesture_swipe_v1_send_begin>(
-        serial, seat->timestamp(), seat->pointers().focus.surface->d_ptr->resource(), fingerCount);
+        serial,
+        seat->timestamp(),
+        seat->pointers().get_focus().surface->d_ptr->resource(),
+        fingerCount);
 }
 
 void PointerSwipeGestureV1::update(const QSizeF& delta)
@@ -176,7 +179,10 @@ void PointerPinchGestureV1::start(quint32 serial, quint32 fingerCount)
     auto seat = d_ptr->pointer->seat();
 
     d_ptr->send<zwp_pointer_gesture_pinch_v1_send_begin>(
-        serial, seat->timestamp(), seat->pointers().focus.surface->d_ptr->resource(), fingerCount);
+        serial,
+        seat->timestamp(),
+        seat->pointers().get_focus().surface->d_ptr->resource(),
+        fingerCount);
 }
 
 void PointerPinchGestureV1::update(const QSizeF& delta, qreal scale, qreal rotation)

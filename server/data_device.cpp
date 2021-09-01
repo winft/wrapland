@@ -134,7 +134,8 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
     auto pointerGrab = false;
     if (seat->hasPointer()) {
         auto& pointers = seat->pointers();
-        pointerGrab = pointers.has_implicit_grab(serial) && pointers.focus.surface == focusSurface;
+        pointerGrab
+            = pointers.has_implicit_grab(serial) && pointers.get_focus().surface == focusSurface;
     }
 
     if (!pointerGrab) {

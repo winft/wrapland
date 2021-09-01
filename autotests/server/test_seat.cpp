@@ -89,7 +89,7 @@ void TestWaylandServerSeat::testPointerButton()
     std::unique_ptr<Seat> seat{display.createSeat()};
     seat->setHasPointer(true);
 
-    QVERIFY(seat->pointers().focus.devices.empty());
+    QVERIFY(seat->pointers().get_focus().devices.empty());
 
     // no button pressed yet, should be released and no serial
     QVERIFY(!seat->pointers().is_button_pressed(0));
@@ -123,7 +123,7 @@ void TestWaylandServerSeat::testPointerPos()
     QVERIFY(seatPosSpy.isValid());
     seat->setHasPointer(true);
 
-    QVERIFY(seat->pointers().focus.devices.empty());
+    QVERIFY(seat->pointers().get_focus().devices.empty());
     QCOMPARE(seat->pointers().pos, QPointF());
 
     seat->pointers().set_position(QPointF(10, 15));

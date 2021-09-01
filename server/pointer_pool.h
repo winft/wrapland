@@ -48,6 +48,8 @@ public:
     explicit pointer_pool(Seat* seat);
     ~pointer_pool();
 
+    pointer_focus const& get_focus() const;
+
     void set_position(const QPointF& position);
     void set_focused_surface(Surface* surface, const QPointF& surfacePosition = QPoint());
     void set_focused_surface(Surface* surface, const QMatrix4x4& transformation);
@@ -87,7 +89,6 @@ public:
     std::unordered_map<uint32_t, uint32_t> buttonSerials;
     std::unordered_map<uint32_t, button_state> buttonStates;
     QPointF pos;
-    pointer_focus focus;
     QPointer<Surface> gestureSurface;
 
     void create_device(Client* client, uint32_t version, uint32_t id);
@@ -98,6 +99,9 @@ public:
 
     Seat* seat;
     std::vector<Pointer*> devices;
+
+private:
+    pointer_focus focus;
 };
 
 }

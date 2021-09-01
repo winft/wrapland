@@ -117,7 +117,7 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
     if (pointers.has_implicit_grab(dragSerial)) {
         mode = Mode::Pointer;
         sourcePointer = interfaceForSurface(dragSurface, seat->d_ptr->pointers.value().devices);
-        transformation = pointers.focus.transformation;
+        transformation = pointers.get_focus().transformation;
     } else if (seat->touches().has_implicit_grab(dragSerial)) {
         mode = Mode::Touch;
         sourceTouch = interfaceForSurface(dragSurface, seat->d_ptr->touches.value().devices);
@@ -133,7 +133,7 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
         target = dataDevice;
         surface = originSurface;
         // TODO(unknown author): transformation needs to be either pointer or touch
-        transformation = pointers.focus.transformation;
+        transformation = pointers.get_focus().transformation;
     }
 
     source = dataDevice;
