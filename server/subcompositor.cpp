@@ -158,7 +158,7 @@ void Subsurface::Private::applyCached(bool force)
         surface->d_ptr->updateCurrentState(cached, true);
         Q_EMIT surface->committed();
     } else {
-        for (auto child : surface->childSubsurfaces()) {
+        for (auto child : surface->state().children) {
             // Set at least their positions.
             child->d_ptr->applyCached(false);
         }

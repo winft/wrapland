@@ -239,7 +239,7 @@ void TestViewporter::testWithoutBuffer()
     auto serverViewport = serverViewportCreated.first().first().value<Srv::Viewport*>();
     QVERIFY(serverViewport);
 
-    QVERIFY(!serverSurface->buffer());
+    QVERIFY(!serverSurface->state().buffer);
 
     // Change the destination size.
     QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
@@ -358,7 +358,7 @@ void TestViewporter::testSourceRectangle()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 1);
     QCOMPARE(serverSurface->size(), rect.size());
-    QCOMPARE(serverSurface->sourceRectangle(), rect);
+    QCOMPARE(serverSurface->state().source_rectangle, rect);
 
     // Destroy the viewport and check that the size is reset.
     vp.reset();
@@ -419,8 +419,10 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 1);
     QCOMPARE(serverSurface->size(), destinationSize);
-    QVERIFY((serverSurface->sourceRectangle().topLeft() - rect.topLeft()).manhattanLength() < 0.01);
-    QVERIFY((serverSurface->sourceRectangle().bottomRight() - rect.bottomRight()).manhattanLength()
+    QVERIFY((serverSurface->state().source_rectangle.topLeft() - rect.topLeft()).manhattanLength()
+            < 0.01);
+    QVERIFY((serverSurface->state().source_rectangle.bottomRight() - rect.bottomRight())
+                .manhattanLength()
             < 0.01);
 
     // Destroy the viewport and check that the size is reset.
@@ -542,7 +544,7 @@ void TestViewporter::testBufferSizeChange()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 1);
     QCOMPARE(serverSurface->size(), rect.size());
-    QCOMPARE(serverSurface->sourceRectangle(), rect);
+    QCOMPARE(serverSurface->state().source_rectangle, rect);
 
     // Now change the buffer such that the source rectangle would not be contained anymore.
     QImage image2(QSize(599, 399), QImage::Format_ARGB32_Premultiplied);
@@ -563,7 +565,7 @@ void TestViewporter::testBufferSizeChange()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 2);
     QCOMPARE(serverSurface->size(), rect2.size());
-    QCOMPARE(serverSurface->sourceRectangle(), rect2);
+    QCOMPARE(serverSurface->state().source_rectangle, rect2);
 
     // Now change the buffer such that the source rectangle would not be contained anymore.
     QImage image3(QSize(598, 399), QImage::Format_ARGB32_Premultiplied);
@@ -632,8 +634,10 @@ void TestViewporter::testDestinationSizeChange()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 1);
     QCOMPARE(serverSurface->size(), destinationSize);
-    QVERIFY((serverSurface->sourceRectangle().topLeft() - rect.topLeft()).manhattanLength() < 0.01);
-    QVERIFY((serverSurface->sourceRectangle().bottomRight() - rect.bottomRight()).manhattanLength()
+    QVERIFY((serverSurface->state().source_rectangle.topLeft() - rect.topLeft()).manhattanLength()
+            < 0.01);
+    QVERIFY((serverSurface->state().source_rectangle.bottomRight() - rect.bottomRight())
+                .manhattanLength()
             < 0.01);
 
     // Unset the destination size.
@@ -648,8 +652,10 @@ void TestViewporter::testDestinationSizeChange()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 1);
     QCOMPARE(serverSurface->size(), rect.size());
-    QVERIFY((serverSurface->sourceRectangle().topLeft() - rect.topLeft()).manhattanLength() < 0.01);
-    QVERIFY((serverSurface->sourceRectangle().bottomRight() - rect.bottomRight()).manhattanLength()
+    QVERIFY((serverSurface->state().source_rectangle.topLeft() - rect.topLeft()).manhattanLength()
+            < 0.01);
+    QVERIFY((serverSurface->state().source_rectangle.bottomRight() - rect.bottomRight())
+                .manhattanLength()
             < 0.01);
 
     // Set the destination size again.
@@ -668,9 +674,10 @@ void TestViewporter::testDestinationSizeChange()
     }
     QCOMPARE(sourceRectangleChangedSpy.count(), 2);
     QCOMPARE(serverSurface->size(), destinationSize);
-    QVERIFY((serverSurface->sourceRectangle().topLeft() - rect2.topLeft()).manhattanLength()
+    QVERIFY((serverSurface->state().source_rectangle.topLeft() - rect2.topLeft()).manhattanLength()
             < 0.01);
-    QVERIFY((serverSurface->sourceRectangle().bottomRight() - rect2.bottomRight()).manhattanLength()
+    QVERIFY((serverSurface->state().source_rectangle.bottomRight() - rect2.bottomRight())
+                .manhattanLength()
             < 0.01);
 
     // And try to unset the destination size, what leads to an error.

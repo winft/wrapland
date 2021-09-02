@@ -861,56 +861,6 @@ void Surface::Private::bufferScaleCallback([[maybe_unused]] wl_client* wlClient,
     priv->setScale(scale);
 }
 
-QRegion Surface::damage() const
-{
-    return d_ptr->current.pub.damage;
-}
-
-QRegion Surface::opaque() const
-{
-    return d_ptr->current.pub.opaque;
-}
-
-QRegion Surface::input() const
-{
-    return d_ptr->current.pub.input;
-}
-
-bool Surface::inputIsInfinite() const
-{
-    return d_ptr->current.pub.input_is_infinite;
-}
-
-qint32 Surface::scale() const
-{
-    return d_ptr->current.pub.scale;
-}
-
-Output::Transform Surface::transform() const
-{
-    return d_ptr->current.pub.transform;
-}
-
-std::shared_ptr<Buffer> Surface::buffer() const
-{
-    return d_ptr->current.pub.buffer;
-}
-
-QPoint Surface::offset() const
-{
-    return d_ptr->current.pub.offset;
-}
-
-QRectF Surface::sourceRectangle() const
-{
-    return d_ptr->current.pub.source_rectangle;
-}
-
-std::vector<Subsurface*> Surface::childSubsurfaces() const
-{
-    return d_ptr->current.pub.children;
-}
-
 Subsurface* Surface::subsurface() const
 {
     return d_ptr->subsurface;
@@ -928,37 +878,17 @@ QSize Surface::size() const
         return d_ptr->current.pub.source_rectangle.size().toSize();
     }
     // TODO(unknown author): Apply transform to the buffer size.
-    return d_ptr->current.pub.buffer->size() / scale();
+    return d_ptr->current.pub.buffer->size() / d_ptr->current.pub.scale;
 }
 
 QRect Surface::expanse() const
 {
     auto ret = QRect(QPoint(), size());
 
-    for (auto const& sub : childSubsurfaces()) {
+    for (auto const& sub : state().children) {
         ret = ret.united(sub->surface()->expanse().translated(sub->position()));
     }
     return ret;
-}
-
-QPointer<Shadow> Surface::shadow() const
-{
-    return d_ptr->current.pub.shadow;
-}
-
-QPointer<Blur> Surface::blur() const
-{
-    return d_ptr->current.pub.blur;
-}
-
-QPointer<Contrast> Surface::contrast() const
-{
-    return d_ptr->current.pub.contrast;
-}
-
-QPointer<Slide> Surface::slideOnShowHide() const
-{
-    return d_ptr->current.pub.slide;
 }
 
 bool Surface::isMapped() const

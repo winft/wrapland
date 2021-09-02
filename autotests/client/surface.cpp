@@ -282,7 +282,7 @@ void TestSurface::testDamage()
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
-    QCOMPARE(serverSurface->damage(), QRegion());
+    QCOMPARE(serverSurface->state().damage, QRegion());
     QVERIFY(!serverSurface->isMapped());
 
     QSignalSpy committedSpy(serverSurface, SIGNAL(committed()));
@@ -295,7 +295,7 @@ void TestSurface::testDamage()
     QCoreApplication::processEvents();
     QVERIFY(!serverSurface->isMapped());
     QCOMPARE(committedSpy.count(), 1);
-    QVERIFY(serverSurface->damage().isEmpty());
+    QVERIFY(serverSurface->state().damage.isEmpty());
 
     QImage img(QSize(10, 10), QImage::Format_ARGB32_Premultiplied);
     img.fill(Qt::black);
@@ -304,9 +304,9 @@ void TestSurface::testDamage()
     s->damage(QRect(0, 0, 10, 10));
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(committedSpy.wait());
-    QCOMPARE(serverSurface->offset(),
+    QCOMPARE(serverSurface->state().offset,
              QPoint(55, 55)); // offset is surface local so scale doesn't change this
-    QCOMPARE(serverSurface->damage(), QRegion(0, 0, 5, 5)); // scale is 2
+    QCOMPARE(serverSurface->state().damage, QRegion(0, 0, 5, 5)); // scale is 2
     QVERIFY(serverSurface->isMapped());
     QCOMPARE(committedSpy.count(), 2);
 
@@ -320,7 +320,7 @@ void TestSurface::testDamage()
     s->damage(testRegion);
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(committedSpy.wait());
-    QCOMPARE(serverSurface->damage(), testRegion);
+    QCOMPARE(serverSurface->state().damage, testRegion);
     QVERIFY(serverSurface->isMapped());
     QCOMPARE(committedSpy.count(), 3);
 
@@ -334,7 +334,7 @@ void TestSurface::testDamage()
     s->damageBuffer(testRegion2);
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(committedSpy.wait());
-    QCOMPARE(serverSurface->damage(), cmpRegion2);
+    QCOMPARE(serverSurface->state().damage, cmpRegion2);
     QVERIFY(serverSurface->isMapped());
 
     // combined regular damage and damaged buffer
@@ -347,10 +347,10 @@ void TestSurface::testDamage()
     s->damageBuffer(testRegion2);
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(committedSpy.wait());
-    QVERIFY(serverSurface->damage() != testRegion);
-    QVERIFY(serverSurface->damage() != testRegion2);
-    QVERIFY(serverSurface->damage() != cmpRegion2);
-    QCOMPARE(serverSurface->damage(), testRegion3);
+    QVERIFY(serverSurface->state().damage != testRegion);
+    QVERIFY(serverSurface->state().damage != testRegion2);
+    QVERIFY(serverSurface->state().damage != cmpRegion2);
+    QCOMPARE(serverSurface->state().damage, testRegion3);
     QVERIFY(serverSurface->isMapped());
 }
 
@@ -427,7 +427,7 @@ void TestSurface::testAttachBuffer()
     QVERIFY(unmappedSpy.isEmpty());
 
     // now the ServerSurface should have the black image attached as a buffer
-    auto buffer1 = serverSurface->buffer();
+    auto buffer1 = serverSurface->state().buffer;
     QVERIFY(buffer1->shmBuffer());
     QCOMPARE(buffer1->shmImage()->createQImage(), black);
     QCOMPARE(buffer1->shmImage()->format(), Wrapland::Server::ShmImage::Format::xrgb8888);
@@ -442,7 +442,7 @@ void TestSurface::testAttachBuffer()
     QVERIFY(commit_spy.wait());
     QVERIFY(unmappedSpy.isEmpty());
 
-    auto buffer2 = serverSurface->buffer();
+    auto buffer2 = serverSurface->state().buffer;
     QVERIFY(buffer2->shmBuffer());
     QCOMPARE(buffer2->shmImage()->createQImage().format(), QImage::Format_ARGB32_Premultiplied);
     QCOMPARE(buffer2->shmImage()->createQImage().width(), 24);
@@ -476,7 +476,7 @@ void TestSurface::testAttachBuffer()
     }
     QVERIFY(redBuffer->isReleased());
 
-    auto buffer3 = serverSurface->buffer().get();
+    auto buffer3 = serverSurface->state().buffer.get();
     QVERIFY(buffer3->shmBuffer());
     QCOMPARE(buffer3->shmImage()->createQImage().format(), QImage::Format_ARGB32_Premultiplied);
     QCOMPARE(buffer3->shmImage()->createQImage().width(), 24);
@@ -492,16 +492,16 @@ void TestSurface::testAttachBuffer()
     QVERIFY(frameRenderedSpy.wait());
 
     // commit a different value shouldn't change our buffer
-    QCOMPARE(serverSurface->buffer().get(), buffer3);
-    QVERIFY(serverSurface->input().isNull());
+    QCOMPARE(serverSurface->state().buffer.get(), buffer3);
+    QVERIFY(serverSurface->state().input.isNull());
     s->setInputRegion(m_compositor->createRegion(QRegion(0, 0, 24, 24)).get());
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
     QCoreApplication::processEvents();
-    QCOMPARE(serverSurface->input(), QRegion(0, 0, 24, 24));
-    QCOMPARE(serverSurface->buffer().get(), buffer3);
-    QVERIFY(serverSurface->damage().isEmpty());
+    QCOMPARE(serverSurface->state().input, QRegion(0, 0, 24, 24));
+    QCOMPARE(serverSurface->state().buffer.get(), buffer3);
+    QVERIFY(serverSurface->state().damage.isEmpty());
     QVERIFY(unmappedSpy.isEmpty());
     QVERIFY(serverSurface->isMapped());
 
@@ -515,7 +515,7 @@ void TestSurface::testAttachBuffer()
     QVERIFY(unmappedSpy.wait());
     QVERIFY(!unmappedSpy.isEmpty());
     QCOMPARE(unmappedSpy.count(), 1);
-    QVERIFY(serverSurface->damage().isEmpty());
+    QVERIFY(serverSurface->state().damage.isEmpty());
     QVERIFY(!serverSurface->isMapped());
 }
 
@@ -572,7 +572,7 @@ void TestSurface::testMultipleSurfaces()
     QVERIFY(commit_spy1.wait());
 
     // now the ServerSurface should have the black image attached as a buffer
-    auto buffer1 = serverSurface1->buffer();
+    auto buffer1 = serverSurface1->state().buffer;
     QVERIFY(buffer1);
     QImage buffer1Data = buffer1->shmImage()->createQImage();
     QCOMPARE(buffer1Data, black);
@@ -592,7 +592,7 @@ void TestSurface::testMultipleSurfaces()
     QVERIFY(commit_spy2.isValid());
     QVERIFY(commit_spy2.wait());
 
-    auto buffer2 = serverSurface2->buffer();
+    auto buffer2 = serverSurface2->state().buffer;
     QVERIFY(buffer2);
     QImage buffer2Data = buffer2->shmImage()->createQImage();
     QCOMPARE(buffer2Data, red);
@@ -631,14 +631,14 @@ void TestSurface::testOpaque()
     QVERIFY(opaqueRegionChangedSpy.isValid());
 
     // by default there should be an empty opaque region
-    QCOMPARE(serverSurface->opaque(), QRegion());
+    QCOMPARE(serverSurface->state().opaque, QRegion());
 
     // let's install an opaque region
     s->setOpaqueRegion(m_compositor->createRegion(QRegion(0, 10, 20, 30)).get());
     // the region should only be applied after the surface got committed
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
-    QCOMPARE(serverSurface->opaque(), QRegion());
+    QCOMPARE(serverSurface->state().opaque, QRegion());
     QCOMPARE(opaqueRegionChangedSpy.count(), 0);
 
     // so let's commit to get the new region
@@ -646,14 +646,14 @@ void TestSurface::testOpaque()
     QVERIFY(opaqueRegionChangedSpy.wait());
     QCOMPARE(opaqueRegionChangedSpy.count(), 1);
     QCOMPARE(opaqueRegionChangedSpy.last().first().value<QRegion>(), QRegion(0, 10, 20, 30));
-    QCOMPARE(serverSurface->opaque(), QRegion(0, 10, 20, 30));
+    QCOMPARE(serverSurface->state().opaque, QRegion(0, 10, 20, 30));
 
     // committing without setting a new region shouldn't change
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
     QCOMPARE(opaqueRegionChangedSpy.count(), 1);
-    QCOMPARE(serverSurface->opaque(), QRegion(0, 10, 20, 30));
+    QCOMPARE(serverSurface->state().opaque, QRegion(0, 10, 20, 30));
 
     // let's change the opaque region
     s->setOpaqueRegion(m_compositor->createRegion(QRegion(10, 20, 30, 40)).get());
@@ -661,7 +661,7 @@ void TestSurface::testOpaque()
     QVERIFY(opaqueRegionChangedSpy.wait());
     QCOMPARE(opaqueRegionChangedSpy.count(), 2);
     QCOMPARE(opaqueRegionChangedSpy.last().first().value<QRegion>(), QRegion(10, 20, 30, 40));
-    QCOMPARE(serverSurface->opaque(), QRegion(10, 20, 30, 40));
+    QCOMPARE(serverSurface->state().opaque, QRegion(10, 20, 30, 40));
 
     // and let's go back to an empty region
     s->setOpaqueRegion();
@@ -669,7 +669,7 @@ void TestSurface::testOpaque()
     QVERIFY(opaqueRegionChangedSpy.wait());
     QCOMPARE(opaqueRegionChangedSpy.count(), 3);
     QCOMPARE(opaqueRegionChangedSpy.last().first().value<QRegion>(), QRegion());
-    QCOMPARE(serverSurface->opaque(), QRegion());
+    QCOMPARE(serverSurface->state().opaque, QRegion());
 }
 
 void TestSurface::testInput()
@@ -687,16 +687,16 @@ void TestSurface::testInput()
     QVERIFY(inputRegionChangedSpy.isValid());
 
     // by default there should be an empty == infinite input region
-    QCOMPARE(serverSurface->input(), QRegion());
-    QCOMPARE(serverSurface->inputIsInfinite(), true);
+    QCOMPARE(serverSurface->state().input, QRegion());
+    QCOMPARE(serverSurface->state().input_is_infinite, true);
 
     // let's install an input region
     s->setInputRegion(m_compositor->createRegion(QRegion(0, 10, 20, 30)).get());
     // the region should only be applied after the surface got committed
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
-    QCOMPARE(serverSurface->input(), QRegion());
-    QCOMPARE(serverSurface->inputIsInfinite(), true);
+    QCOMPARE(serverSurface->state().input, QRegion());
+    QCOMPARE(serverSurface->state().input_is_infinite, true);
     QCOMPARE(inputRegionChangedSpy.count(), 0);
 
     // so let's commit to get the new region
@@ -704,16 +704,16 @@ void TestSurface::testInput()
     QVERIFY(inputRegionChangedSpy.wait());
     QCOMPARE(inputRegionChangedSpy.count(), 1);
     QCOMPARE(inputRegionChangedSpy.last().first().value<QRegion>(), QRegion(0, 10, 20, 30));
-    QCOMPARE(serverSurface->input(), QRegion(0, 10, 20, 30));
-    QCOMPARE(serverSurface->inputIsInfinite(), false);
+    QCOMPARE(serverSurface->state().input, QRegion(0, 10, 20, 30));
+    QCOMPARE(serverSurface->state().input_is_infinite, false);
 
     // committing without setting a new region shouldn't change
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
     QCOMPARE(inputRegionChangedSpy.count(), 1);
-    QCOMPARE(serverSurface->input(), QRegion(0, 10, 20, 30));
-    QCOMPARE(serverSurface->inputIsInfinite(), false);
+    QCOMPARE(serverSurface->state().input, QRegion(0, 10, 20, 30));
+    QCOMPARE(serverSurface->state().input_is_infinite, false);
 
     // let's change the input region
     s->setInputRegion(m_compositor->createRegion(QRegion(10, 20, 30, 40)).get());
@@ -721,8 +721,8 @@ void TestSurface::testInput()
     QVERIFY(inputRegionChangedSpy.wait());
     QCOMPARE(inputRegionChangedSpy.count(), 2);
     QCOMPARE(inputRegionChangedSpy.last().first().value<QRegion>(), QRegion(10, 20, 30, 40));
-    QCOMPARE(serverSurface->input(), QRegion(10, 20, 30, 40));
-    QCOMPARE(serverSurface->inputIsInfinite(), false);
+    QCOMPARE(serverSurface->state().input, QRegion(10, 20, 30, 40));
+    QCOMPARE(serverSurface->state().input_is_infinite, false);
 
     // and let's go back to an empty region
     s->setInputRegion();
@@ -730,8 +730,8 @@ void TestSurface::testInput()
     QVERIFY(inputRegionChangedSpy.wait());
     QCOMPARE(inputRegionChangedSpy.count(), 3);
     QCOMPARE(inputRegionChangedSpy.last().first().value<QRegion>(), QRegion());
-    QCOMPARE(serverSurface->input(), QRegion());
-    QCOMPARE(serverSurface->inputIsInfinite(), true);
+    QCOMPARE(serverSurface->state().input, QRegion());
+    QCOMPARE(serverSurface->state().input_is_infinite, true);
 }
 
 void TestSurface::testScale()
@@ -748,7 +748,7 @@ void TestSurface::testScale()
     QVERIFY(serverSurfaceCreated.wait());
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
-    QCOMPARE(serverSurface->scale(), 1);
+    QCOMPARE(serverSurface->state().scale, 1);
 
     // let's change the scale factor
     QSignalSpy scaleChangedSpy(serverSurface, &Wrapland::Server::Surface::scaleChanged);
@@ -765,7 +765,7 @@ void TestSurface::testScale()
     QVERIFY(scaleChangedSpy.wait());
     QCOMPARE(scaleChangedSpy.count(), 1);
     QCOMPARE(scaleChangedSpy.first().first().toInt(), 2);
-    QCOMPARE(serverSurface->scale(), 2);
+    QCOMPARE(serverSurface->state().scale, 2);
 
     // even though we've changed the scale, if we don't have a buffer we
     // don't have a size. If we don't have a size it can't have changed
@@ -784,7 +784,7 @@ void TestSurface::testScale()
     QCOMPARE(scaleChangedSpy.count(), 2);
     QCOMPARE(scaleChangedSpy.first().first().toInt(), 2);
     QCOMPARE(scaleChangedSpy.last().first().toInt(), 4);
-    QCOMPARE(serverSurface->scale(), 4);
+    QCOMPARE(serverSurface->state().scale, 4);
     scaleChangedSpy.clear();
 
     // attach a buffer of 100x100, our scale is 4, so this should be a size of 25x25
@@ -807,7 +807,7 @@ void TestSurface::testScale()
     QVERIFY(sizeChangedSpy.wait());
     QCOMPARE(sizeChangedSpy.count(), 1);
     QCOMPARE(scaleChangedSpy.count(), 1);
-    QCOMPARE(serverSurface->scale(), 1);
+    QCOMPARE(serverSurface->state().scale, 1);
     QCOMPARE(serverSurface->size(), QSize(100, 100));
     sizeChangedSpy.clear();
     scaleChangedSpy.clear();
@@ -823,7 +823,7 @@ void TestSurface::testScale()
     QVERIFY(sizeChangedSpy.wait());
     QCOMPARE(sizeChangedSpy.count(), 1);
     QCOMPARE(scaleChangedSpy.count(), 1);
-    QCOMPARE(serverSurface->scale(), 2);
+    QCOMPARE(serverSurface->state().scale, 2);
     QCOMPARE(serverSurface->size(), QSize(25, 25));
 }
 
@@ -909,13 +909,13 @@ void TestSurface::testDamageTracking()
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(commit_spy.wait());
     QCOMPARE(serverSurface->trackedDamage(), QRegion(0, 0, 100, 100));
-    QCOMPARE(serverSurface->damage(), QRegion(0, 0, 100, 100));
+    QCOMPARE(serverSurface->state().damage, QRegion(0, 0, 100, 100));
 
     // resetting the tracked damage should empty it
     serverSurface->resetTrackedDamage();
     QVERIFY(serverSurface->trackedDamage().isEmpty());
     // but not affect the actual damage
-    QCOMPARE(serverSurface->damage(), QRegion(0, 0, 100, 100));
+    QCOMPARE(serverSurface->state().damage, QRegion(0, 0, 100, 100));
 
     // let's damage some parts of the surface
     QPainter p;
@@ -927,7 +927,7 @@ void TestSurface::testDamageTracking()
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(commit_spy.wait());
     QCOMPARE(serverSurface->trackedDamage(), QRegion(0, 0, 10, 10));
-    QCOMPARE(serverSurface->damage(), QRegion(0, 0, 10, 10));
+    QCOMPARE(serverSurface->state().damage, QRegion(0, 0, 10, 10));
 
     // and damage some part completely not bounding to the current damage region
     p.begin(&image);
@@ -939,13 +939,13 @@ void TestSurface::testDamageTracking()
     QVERIFY(commit_spy.wait());
     QCOMPARE(serverSurface->trackedDamage(), QRegion(0, 0, 10, 10).united(QRegion(50, 40, 20, 30)));
     QCOMPARE(serverSurface->trackedDamage().rectCount(), 2);
-    QCOMPARE(serverSurface->damage(), QRegion(50, 40, 20, 30));
+    QCOMPARE(serverSurface->state().damage, QRegion(50, 40, 20, 30));
 
     // now let's reset the tracked damage again
     serverSurface->resetTrackedDamage();
     QVERIFY(serverSurface->trackedDamage().isEmpty());
     // but not affect the actual damage
-    QCOMPARE(serverSurface->damage(), QRegion(50, 40, 20, 30));
+    QCOMPARE(serverSurface->state().damage, QRegion(50, 40, 20, 30));
 }
 
 void TestSurface::testSurfaceAt()
@@ -1006,7 +1006,7 @@ void TestSurface::testDestroyAttachedBuffer()
     s->damage(QRect(0, 0, 100, 100));
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(commit_spy.wait());
-    QVERIFY(serverSurface->buffer());
+    QVERIFY(serverSurface->state().buffer);
 
     // attach another buffer
     image.fill(Qt::blue);
@@ -1014,7 +1014,7 @@ void TestSurface::testDestroyAttachedBuffer()
     m_connection->flush();
 
     // Let's try to destroy it
-    auto currentBuffer = serverSurface->buffer();
+    auto currentBuffer = serverSurface->state().buffer;
     QSignalSpy destroySpy(currentBuffer.get(), &Wrapland::Server::Buffer::resourceDestroyed);
     QVERIFY(destroySpy.isValid());
     delete m_shm;
@@ -1022,7 +1022,7 @@ void TestSurface::testDestroyAttachedBuffer()
     QVERIFY(destroySpy.count() || destroySpy.wait());
 
     // TODO: should this emit unmapped?
-    QVERIFY(!serverSurface->buffer());
+    QVERIFY(!serverSurface->state().buffer);
 }
 
 void TestSurface::testDestroyWithPendingCallback()

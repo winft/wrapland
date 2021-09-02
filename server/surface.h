@@ -92,18 +92,6 @@ public:
 
     void frameRendered(quint32 msec);
 
-    QRegion damage() const;
-    QRegion opaque() const;
-    QRegion input() const;
-
-    bool inputIsInfinite() const;
-
-    qint32 scale() const;
-    Output::Transform transform() const;
-
-    std::shared_ptr<Buffer> buffer() const;
-
-    QPoint offset() const;
     QSize size() const;
 
     /**
@@ -112,13 +100,6 @@ public:
     QRect expanse() const;
 
     Subsurface* subsurface() const;
-    std::vector<Subsurface*> childSubsurfaces() const;
-
-    QPointer<Shadow> shadow() const;
-    QPointer<Blur> blur() const;
-    QPointer<Slide> slideOnShowHide() const;
-    QPointer<Contrast> contrast() const;
-    QPointer<Viewport> viewport() const;
 
     bool isMapped() const;
     QRegion trackedDamage() const;
@@ -138,8 +119,6 @@ public:
 
     void setDataProxy(Surface* surface);
     Surface* dataProxy() const;
-
-    QRectF sourceRectangle() const;
 
     uint32_t lockPresentation(Output* output);
     void presentationFeedback(uint32_t presentationId,

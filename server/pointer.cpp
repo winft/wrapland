@@ -421,7 +421,7 @@ void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const Q
         surface = s;
         if (!surface.isNull()) {
             QObject::connect(surface.data(), &Surface::committed, q_ptr, [this] {
-                if (!surface->damage().isEmpty()) {
+                if (!surface->state().damage.isEmpty()) {
                     Q_EMIT q_ptr->changed();
                 }
             });

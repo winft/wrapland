@@ -1323,7 +1323,7 @@ void TestSeat::testCursor()
     QCOMPARE(changedSpy.count(), 3);
     QCOMPARE(cursorChangedSpy.count(), 4);
     QCOMPARE(surfaceChangedSpy.count(), 1);
-    QCOMPARE(cursor->surface()->buffer()->shmImage()->createQImage(), img);
+    QCOMPARE(cursor->surface()->state().buffer->shmImage()->createQImage(), img);
 
     // And add another image to the surface.
     QImage blue(QSize(10, 20), QImage::Format_ARGB32_Premultiplied);
@@ -1334,7 +1334,7 @@ void TestSeat::testCursor()
     QVERIFY(changedSpy.wait());
     QCOMPARE(changedSpy.count(), 4);
     QCOMPARE(cursorChangedSpy.count(), 5);
-    QCOMPARE(cursor->surface()->buffer()->shmImage()->createQImage(), blue);
+    QCOMPARE(cursor->surface()->state().buffer->shmImage()->createQImage(), blue);
 
     p->hideCursor();
     QVERIFY(surfaceChangedSpy.wait());
@@ -1387,7 +1387,7 @@ void TestSeat::testCursorDamage()
     cursorSurface->commit(Clt::Surface::CommitFlag::None);
     p->setCursor(cursorSurface, QPoint(0, 0));
     QVERIFY(cursorChangedSpy.wait());
-    QCOMPARE(pointer->cursor()->surface()->buffer()->shmImage()->createQImage(), red);
+    QCOMPARE(pointer->cursor()->surface()->state().buffer->shmImage()->createQImage(), red);
 
     // And damage the surface.
     QImage blue(QSize(10, 10), QImage::Format_ARGB32_Premultiplied);
@@ -1396,7 +1396,7 @@ void TestSeat::testCursorDamage()
     cursorSurface->damage(QRect(0, 0, 10, 10));
     cursorSurface->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(cursorChangedSpy.wait());
-    QCOMPARE(pointer->cursor()->surface()->buffer()->shmImage()->createQImage(), blue);
+    QCOMPARE(pointer->cursor()->surface()->state().buffer->shmImage()->createQImage(), blue);
 }
 
 void TestSeat::testKeyboard()

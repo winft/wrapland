@@ -175,16 +175,16 @@ void TestContrast::testCreate()
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
     QVERIFY(contrastChanged.wait());
-    QCOMPARE(serverSurface->contrast()->region(), QRegion(0, 0, 10, 20));
-    QCOMPARE(wl_fixed_from_double(serverSurface->contrast()->contrast()),
+    QCOMPARE(serverSurface->state().contrast->region(), QRegion(0, 0, 10, 20));
+    QCOMPARE(wl_fixed_from_double(serverSurface->state().contrast->contrast()),
              wl_fixed_from_double(0.2));
-    QCOMPARE(wl_fixed_from_double(serverSurface->contrast()->intensity()),
+    QCOMPARE(wl_fixed_from_double(serverSurface->state().contrast->intensity()),
              wl_fixed_from_double(2.0));
-    QCOMPARE(wl_fixed_from_double(serverSurface->contrast()->saturation()),
+    QCOMPARE(wl_fixed_from_double(serverSurface->state().contrast->saturation()),
              wl_fixed_from_double(1.7));
 
     // And destroy.
-    QSignalSpy destroyedSpy(serverSurface->contrast().data(), &QObject::destroyed);
+    QSignalSpy destroyedSpy(serverSurface->state().contrast.data(), &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     delete contrast;
     QVERIFY(destroyedSpy.wait());
@@ -210,12 +210,12 @@ void TestContrast::testSurfaceDestroy()
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
     QVERIFY(contrastChanged.wait());
-    QCOMPARE(serverSurface->contrast()->region(), QRegion(0, 0, 10, 20));
+    QCOMPARE(serverSurface->state().contrast->region(), QRegion(0, 0, 10, 20));
 
     // destroy the parent surface
     QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
     QVERIFY(surfaceDestroyedSpy.isValid());
-    QSignalSpy contrastDestroyedSpy(serverSurface->contrast().data(), &QObject::destroyed);
+    QSignalSpy contrastDestroyedSpy(serverSurface->state().contrast.data(), &QObject::destroyed);
     QVERIFY(contrastDestroyedSpy.isValid());
     surface.reset();
     QVERIFY(surfaceDestroyedSpy.wait());

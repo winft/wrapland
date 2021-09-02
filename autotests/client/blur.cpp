@@ -171,10 +171,10 @@ void TestBlur::testCreate()
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
     QVERIFY(blurChanged.wait());
-    QCOMPARE(serverSurface->blur()->region(), QRegion(0, 0, 10, 20));
+    QCOMPARE(serverSurface->state().blur->region(), QRegion(0, 0, 10, 20));
 
     // and destroy
-    QSignalSpy destroyedSpy(serverSurface->blur().data(), &QObject::destroyed);
+    QSignalSpy destroyedSpy(serverSurface->state().blur.data(), &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     delete blur;
     QVERIFY(destroyedSpy.wait());
@@ -199,12 +199,12 @@ void TestBlur::testSurfaceDestroy()
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
     QVERIFY(blurChanged.wait());
-    QCOMPARE(serverSurface->blur()->region(), QRegion(0, 0, 10, 20));
+    QCOMPARE(serverSurface->state().blur->region(), QRegion(0, 0, 10, 20));
 
     // destroy the parent surface
     QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
     QVERIFY(surfaceDestroyedSpy.isValid());
-    QSignalSpy blurDestroyedSpy(serverSurface->blur().data(), &QObject::destroyed);
+    QSignalSpy blurDestroyedSpy(serverSurface->state().blur.data(), &QObject::destroyed);
     QVERIFY(blurDestroyedSpy.isValid());
     surface.reset();
     QVERIFY(surfaceDestroyedSpy.wait());

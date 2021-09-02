@@ -157,7 +157,7 @@ void ShadowTest::testCreateShadow()
     QVERIFY(serverSurface);
 
     // a surface without anything should not have a Shadow
-    QVERIFY(!serverSurface->shadow());
+    QVERIFY(!serverSurface->state().shadow);
     QSignalSpy shadowChangedSpy(serverSurface, &Wrapland::Server::Surface::shadowChanged);
     QVERIFY(shadowChangedSpy.isValid());
 
@@ -172,7 +172,7 @@ void ShadowTest::testCreateShadow()
     QCOMPARE(shadowChangedSpy.count(), 1);
 
     // we didn't set anything on the shadow, so it should be all default values
-    auto serverShadow = serverSurface->shadow();
+    auto serverShadow = serverSurface->state().shadow;
     QVERIFY(serverShadow);
     QCOMPARE(serverShadow->offset(), QMarginsF());
     QVERIFY(!serverShadow->topLeft());
@@ -191,7 +191,7 @@ void ShadowTest::testCreateShadow()
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(shadowChangedSpy.wait());
     QCOMPARE(shadowChangedSpy.count(), 2);
-    QVERIFY(!serverSurface->shadow());
+    QVERIFY(!serverSurface->state().shadow);
 }
 
 void ShadowTest::testShadowElements()
@@ -241,7 +241,7 @@ void ShadowTest::testShadowElements()
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
     QVERIFY(shadowChangedSpy.wait());
-    auto serverShadow = serverSurface->shadow();
+    auto serverShadow = serverSurface->state().shadow;
     QVERIFY(serverShadow);
     QCOMPARE(serverShadow->offset(), QMarginsF(1, 2, 3, 4));
     QCOMPARE(serverShadow->topLeft()->shmImage()->createQImage(), topLeftImage);
@@ -296,7 +296,7 @@ void ShadowTest::testSurfaceDestroy()
     shadow->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(shadowChangedSpy.wait());
-    auto serverShadow = serverSurface->shadow();
+    auto serverShadow = serverSurface->state().shadow;
     QVERIFY(serverShadow);
 
     // destroy the parent surface
