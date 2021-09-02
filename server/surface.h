@@ -51,6 +51,25 @@ class Subsurface;
 class Viewport;
 class Viewporter;
 
+enum class surface_change {
+    none = 0,
+    mapped = 1 << 0,
+    buffer = 1 << 1,
+    size = 1 << 2,
+    opaque = 1 << 3,
+    scale = 1 << 4,
+    transform = 1 << 5,
+    offset = 1 << 6,
+    source_rectangle = 1 << 7,
+    input = 1 << 8,
+    children = 1 << 9,
+    shadow = 1 << 10,
+    blur = 1 << 11,
+    slide = 1 << 12,
+    contrast = 1 << 13,
+};
+Q_DECLARE_FLAGS(surface_changes, surface_change)
+
 struct surface_state {
     std::shared_ptr<Buffer> buffer;
 
@@ -73,6 +92,8 @@ struct surface_state {
     QPointer<Blur> blur;
     QPointer<Slide> slide;
     QPointer<Contrast> contrast;
+
+    surface_changes updates{surface_change::none};
 };
 
 class WRAPLANDSERVER_EXPORT Surface : public QObject
@@ -187,4 +208,5 @@ private:
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Surface*)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::surface_changes)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::Surface::PresentationKinds)

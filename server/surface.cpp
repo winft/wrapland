@@ -93,7 +93,7 @@ void Surface::Private::addChild(Subsurface* child)
         subsurface->d_ptr->cached.pub.children.push_back(child);
     }
     pending.pub.children.push_back(child);
-    pending.childrenChanged = true;
+    pending.pub.updates |= surface_change::children;
 
     // TODO(romangg): Should all below only be changed on commit?
     QObject::connect(
@@ -150,7 +150,7 @@ bool Surface::Private::raiseChild(Subsurface* subsurface, Surface* sibling)
         // It's sibling to the parent, so needs to become last item.
         pending.pub.children.erase(it);
         pending.pub.children.push_back(subsurface);
-        pending.childrenChanged = true;
+        pending.pub.updates |= surface_change::children;
         return true;
     }
 
@@ -173,7 +173,7 @@ bool Surface::Private::raiseChild(Subsurface* subsurface, Surface* sibling)
     siblingIt = std::find(
         pending.pub.children.begin(), pending.pub.children.end(), sibling->subsurface());
     pending.pub.children.insert(++siblingIt, value);
-    pending.childrenChanged = true;
+    pending.pub.updates |= surface_change::children;
     return true;
 }
 
@@ -192,7 +192,7 @@ bool Surface::Private::lowerChild(Subsurface* subsurface, Surface* sibling)
         auto value = *it;
         pending.pub.children.erase(it);
         pending.pub.children.insert(pending.pub.children.begin(), value);
-        pending.childrenChanged = true;
+        pending.pub.updates |= surface_change::children;
         return true;
     }
     if (!sibling->subsurface()) {
@@ -211,38 +211,38 @@ bool Surface::Private::lowerChild(Subsurface* subsurface, Surface* sibling)
     siblingIt = std::find(
         pending.pub.children.begin(), pending.pub.children.end(), sibling->subsurface());
     pending.pub.children.insert(siblingIt, value);
-    pending.childrenChanged = true;
+    pending.pub.updates |= surface_change::children;
     return true;
 }
 
 void Surface::Private::setShadow(const QPointer<Shadow>& shadow)
 {
     pending.pub.shadow = shadow;
-    pending.shadowIsSet = true;
+    pending.pub.updates |= surface_change::shadow;
 }
 
 void Surface::Private::setBlur(const QPointer<Blur>& blur)
 {
     pending.pub.blur = blur;
-    pending.blurIsSet = true;
+    pending.pub.updates |= surface_change::blur;
 }
 
 void Surface::Private::setSlide(const QPointer<Slide>& slide)
 {
     pending.pub.slide = slide;
-    pending.slideIsSet = true;
+    pending.pub.updates |= surface_change::slide;
 }
 
 void Surface::Private::setContrast(const QPointer<Contrast>& contrast)
 {
     pending.pub.contrast = contrast;
-    pending.contrastIsSet = true;
+    pending.pub.updates |= surface_change::contrast;
 }
 
 void Surface::Private::setSourceRectangle(const QRectF& source)
 {
     pending.pub.source_rectangle = source;
-    pending.sourceRectangleIsSet = true;
+    pending.pub.updates |= surface_change::source_rectangle;
 }
 
 void Surface::Private::setDestinationSize(const QSize& dest)
@@ -445,7 +445,7 @@ void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
 
 void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
 {
-    if (!source.bufferIsSet) {
+    if (!(source.pub.updates & surface_change::buffer)) {
         // TODO(romangg): Should we set the pending damage even when no new buffer got attached?
         current.pub.damage = {};
         current.bufferDamage = {};
@@ -454,8 +454,10 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
 
     QSize oldSize;
 
-    auto const wasMapped = current.pub.buffer != nullptr;
-    if (wasMapped) {
+    auto const was_mapped = current.pub.buffer != nullptr;
+    auto const now_mapped = source.pub.buffer != nullptr;
+
+    if (was_mapped) {
         oldSize = current.pub.buffer->size();
 
         QObject::disconnect(
@@ -464,8 +466,12 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
 
     current.pub.buffer = source.pub.buffer;
 
-    if (!current.pub.buffer) {
-        if (wasMapped) {
+    if (was_mapped != now_mapped) {
+        current.pub.updates |= surface_change::mapped;
+    }
+
+    if (!now_mapped) {
+        if (was_mapped) {
             Q_EMIT handle()->unmapped();
         }
         return;
@@ -532,35 +538,35 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
 
 void Surface::Private::copy_to_current(SurfaceState const& source, bool& resized)
 {
-    if (source.childrenChanged) {
+    if (source.pub.updates & surface_change::children) {
         current.pub.children = source.pub.children;
     }
     current.callbacks.insert(
         current.callbacks.end(), source.callbacks.begin(), source.callbacks.end());
 
-    if (source.shadowIsSet) {
+    if (source.pub.updates & surface_change::shadow) {
         current.pub.shadow = source.pub.shadow;
     }
-    if (source.blurIsSet) {
+    if (source.pub.updates & surface_change::blur) {
         current.pub.blur = source.pub.blur;
     }
-    if (source.contrastIsSet) {
+    if (source.pub.updates & surface_change::contrast) {
         current.pub.contrast = source.pub.contrast;
     }
-    if (source.slideIsSet) {
+    if (source.pub.updates & surface_change::slide) {
         current.pub.slide = source.pub.slide;
     }
-    if (source.inputIsSet) {
+    if (source.pub.updates & surface_change::input) {
         current.pub.input = source.pub.input;
         current.pub.input_is_infinite = source.pub.input_is_infinite;
     }
-    if (source.opaqueIsSet) {
+    if (source.pub.updates & surface_change::opaque) {
         current.pub.opaque = source.pub.opaque;
     }
-    if (source.scaleIsSet) {
+    if (source.pub.updates & surface_change::scale) {
         current.pub.scale = source.pub.scale;
     }
-    if (source.transformIsSet) {
+    if (source.pub.updates & surface_change::transform) {
         current.pub.transform = source.pub.transform;
     }
 
@@ -569,7 +575,7 @@ void Surface::Private::copy_to_current(SurfaceState const& source, bool& resized
         resized = current.pub.buffer != nullptr;
     }
 
-    if (source.sourceRectangleIsSet) {
+    if (source.pub.updates & surface_change::source_rectangle) {
         if (current.pub.buffer && !source.destinationSize.isValid()
             && source.pub.source_rectangle.isValid()) {
             // TODO(unknown author): We should make this dependent on the previous size being
@@ -589,11 +595,13 @@ void Surface::Private::updateCurrentState(bool forceChildren)
 
 void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildren)
 {
-    auto const scaleFactorChanged = source.scaleIsSet && (current.pub.scale != source.pub.scale);
-    auto const transformChanged
-        = source.transformIsSet && (current.pub.transform != source.pub.transform);
+    auto const scaleFactorChanged
+        = (source.pub.updates & surface_change::scale) && (current.pub.scale != source.pub.scale);
+    auto const transformChanged = (source.pub.updates & surface_change::transform)
+        && (current.pub.transform != source.pub.transform);
 
     auto resized = false;
+    current.pub.updates = source.pub.updates;
 
     update_buffer(source, resized);
     copy_to_current(source, resized);
@@ -612,10 +620,10 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
         confinedPointer->d_ptr->commit();
     }
 
-    if (source.opaqueIsSet) {
+    if (source.pub.updates & surface_change::opaque) {
         Q_EMIT handle()->opaqueChanged(current.pub.opaque);
     }
-    if (source.inputIsSet) {
+    if (source.pub.updates & surface_change::input) {
         Q_EMIT handle()->inputChanged(current.pub.input);
     }
 
@@ -627,25 +635,26 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
         Q_EMIT handle()->transformChanged(current.pub.transform);
     }
     if (resized) {
+        current.pub.updates |= surface_change::size;
         Q_EMIT handle()->sizeChanged();
     }
 
-    if (source.shadowIsSet) {
+    if (source.pub.updates & surface_change::shadow) {
         Q_EMIT handle()->shadowChanged();
     }
-    if (source.blurIsSet) {
+    if (source.pub.updates & surface_change::blur) {
         Q_EMIT handle()->blurChanged();
     }
-    if (source.contrastIsSet) {
+    if (source.pub.updates & surface_change::contrast) {
         Q_EMIT handle()->contrastChanged();
     }
-    if (source.slideIsSet) {
+    if (source.pub.updates & surface_change::slide) {
         Q_EMIT handle()->slideOnShowHideChanged();
     }
-    if (source.sourceRectangleIsSet) {
+    if (source.pub.updates & surface_change::source_rectangle) {
         Q_EMIT handle()->sourceRectangleChanged();
     }
-    if (source.childrenChanged) {
+    if (source.pub.updates & surface_change::children) {
         Q_EMIT handle()->subsurfaceTreeChanged();
     }
 
@@ -688,7 +697,8 @@ void Surface::Private::damage(const QRect& rect)
 
 void Surface::Private::damageBuffer(const QRect& rect)
 {
-    if (!pending.bufferIsSet || (pending.bufferIsSet && !pending.pub.buffer)) {
+    auto const has_buffer_update = pending.pub.updates & surface_change::buffer;
+    if (!has_buffer_update || (has_buffer_update && !pending.pub.buffer)) {
         // TODO(unknown author): should we send an error?
         return;
     }
@@ -698,7 +708,7 @@ void Surface::Private::damageBuffer(const QRect& rect)
 void Surface::Private::setScale(qint32 scale)
 {
     pending.pub.scale = scale;
-    pending.scaleIsSet = true;
+    pending.pub.updates |= surface_change::scale;
 }
 
 void Surface::Private::setTransform(Output::Transform transform)
@@ -722,7 +732,7 @@ void Surface::Private::attachBuffer(wl_resource* wlBuffer, const QPoint& offset)
 {
     had_buffer_attached = true;
 
-    pending.bufferIsSet = true;
+    pending.pub.updates |= surface_change::buffer;
     pending.pub.offset = offset;
 
     if (!wlBuffer) {
@@ -819,8 +829,8 @@ void Surface::Private::opaqueRegionCallback([[maybe_unused]] wl_client* wlClient
 
 void Surface::Private::setOpaque(const QRegion& region)
 {
-    pending.opaqueIsSet = true;
     pending.pub.opaque = region;
+    pending.pub.updates |= surface_change::opaque;
 }
 
 void Surface::Private::inputRegionCallback([[maybe_unused]] wl_client* wlClient,
@@ -834,9 +844,9 @@ void Surface::Private::inputRegionCallback([[maybe_unused]] wl_client* wlClient,
 
 void Surface::Private::setInput(const QRegion& region, bool isInfinite)
 {
-    pending.inputIsSet = true;
     pending.pub.input_is_infinite = isInfinite;
     pending.pub.input = region;
+    pending.pub.updates |= surface_change::input;
 }
 
 void Surface::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)

@@ -55,17 +55,6 @@ public:
 
     QRegion bufferDamage = QRegion();
 
-    bool inputIsSet = false;
-    bool opaqueIsSet = false;
-    bool bufferIsSet = false;
-    bool shadowIsSet = false;
-    bool blurIsSet = false;
-    bool contrastIsSet = false;
-    bool slideIsSet = false;
-    bool childrenChanged = false;
-    bool scaleIsSet = false;
-    bool transformIsSet = false;
-    bool sourceRectangleIsSet = false;
     bool destinationSizeIsSet = false;
 
     std::deque<wl_resource*> callbacks;
