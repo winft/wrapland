@@ -67,6 +67,7 @@ enum class surface_change {
     blur = 1 << 11,
     slide = 1 << 12,
     contrast = 1 << 13,
+    frame = 1 << 14,
 };
 Q_DECLARE_FLAGS(surface_changes, surface_change)
 

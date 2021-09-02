@@ -541,6 +541,9 @@ void Surface::Private::copy_to_current(SurfaceState const& source, bool& resized
     }
     current.callbacks.insert(
         current.callbacks.end(), source.callbacks.begin(), source.callbacks.end());
+    if (!current.callbacks.empty()) {
+        current.pub.updates |= surface_change::frame;
+    }
 
     if (source.pub.updates & surface_change::shadow) {
         current.pub.shadow = source.pub.shadow;
