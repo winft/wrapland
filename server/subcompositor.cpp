@@ -157,6 +157,11 @@ void Subsurface::Private::applyCached(bool force)
     if (force || handle()->isSynchronized()) {
         surface->d_ptr->updateCurrentState(cached, true);
         Q_EMIT surface->committed();
+    } else {
+        for (auto child : surface->childSubsurfaces()) {
+            // Set at least their positions.
+            child->d_ptr->applyCached(false);
+        }
     }
 }
 
@@ -193,14 +198,7 @@ void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClie
 
 void Subsurface::Private::setPosition(const QPoint& p)
 {
-    if (!handle()->isSynchronized()) {
-        // Workaround for https://bugreports.qt.io/browse/QTBUG-52118,
-        // apply directly as Qt doesn't commit the parent surface.
-        pos = p;
-        Q_EMIT handle()->positionChanged(pos);
-        return;
-    }
-    if (scheduledPos == p) {
+    if (pos == p) {
         return;
     }
     scheduledPos = p;

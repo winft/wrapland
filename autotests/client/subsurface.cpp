@@ -1165,6 +1165,11 @@ void TestSubsurface::testSurfaceAt()
     QVERIFY(serverGrandchild1->isMapped());
     QVERIFY(serverGrandchild2->isMapped());
 
+    QSignalSpy commit_spy(serverParent, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
+    parent->commit(Wrapland::Client::Surface::CommitFlag::None);
+    QVERIFY(commit_spy.wait());
+
     namespace WST = Wrapland::Server::Test;
 
     // Now test some positions.
