@@ -408,15 +408,6 @@ QSize Buffer::size() const
     return d_ptr->size;
 }
 
-void Buffer::setSize(const QSize& size)
-{
-    if (d_ptr->shmBuffer || d_ptr->size == size) {
-        return;
-    }
-    d_ptr->size = size;
-    emit sizeChanged();
-}
-
 bool Buffer::hasAlphaChannel() const
 {
     return d_ptr->alpha;
