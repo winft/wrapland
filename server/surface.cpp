@@ -96,9 +96,6 @@ void Surface::Private::addChild(Subsurface* child)
     pending.childrenChanged = true;
 
     // TODO(romangg): Should all below only be changed on commit?
-
-    QObject::connect(
-        child, &Subsurface::positionChanged, handle(), &Surface::subsurfaceTreeChanged);
     QObject::connect(
         child->surface(), &Surface::unmapped, handle(), &Surface::subsurfaceTreeChanged);
     QObject::connect(child->surface(),
@@ -122,9 +119,6 @@ void Surface::Private::removeChild(Subsurface* child)
                            current.children.end());
 
     Q_EMIT handle()->subsurfaceTreeChanged();
-
-    QObject::disconnect(
-        child, &Subsurface::positionChanged, handle(), &Surface::subsurfaceTreeChanged);
 
     if (child->surface()) {
         QObject::disconnect(

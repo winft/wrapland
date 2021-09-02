@@ -362,7 +362,7 @@ void TestSubsurface::testPosition()
     QCOMPARE(positionChangedSpy.count(), 1);
     QCOMPARE(positionChangedSpy.first().first().toPoint(), QPoint(20, 30));
     QCOMPARE(serverSubsurface->position(), QPoint(20, 30));
-    QCOMPARE(subsurfaceTreeChanged.count(), 2);
+    QCOMPARE(subsurfaceTreeChanged.count(), 1);
 }
 
 void TestSubsurface::testPlaceAbove()
