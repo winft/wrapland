@@ -51,10 +51,9 @@ public:
 
     ~SurfaceState() = default;
 
-    QRegion damage = QRegion();
+    surface_state pub;
+
     QRegion bufferDamage = QRegion();
-    QRegion opaque = QRegion();
-    QRegion input = QRegion();
 
     bool inputIsSet = false;
     bool opaqueIsSet = false;
@@ -63,31 +62,16 @@ public:
     bool blurIsSet = false;
     bool contrastIsSet = false;
     bool slideIsSet = false;
-    bool inputIsInfinite = true;
     bool childrenChanged = false;
     bool scaleIsSet = false;
     bool transformIsSet = false;
     bool sourceRectangleIsSet = false;
     bool destinationSizeIsSet = false;
 
-    qint32 scale = 1;
-    Output::Transform transform = Output::Transform::Normal;
-
     std::deque<wl_resource*> callbacks;
 
-    QPoint offset = QPoint();
-    std::shared_ptr<Buffer> buffer;
-
-    QRectF sourceRectangle = QRectF();
     QSize destinationSize = QSize();
 
-    // Stacking order: bottom (first) -> top (last).
-    std::vector<Subsurface*> children;
-
-    QPointer<Shadow> shadow;
-    QPointer<Blur> blur;
-    QPointer<Slide> slide;
-    QPointer<Contrast> contrast;
     std::unique_ptr<Feedbacks> feedbacks{std::make_unique<Feedbacks>()};
 };
 

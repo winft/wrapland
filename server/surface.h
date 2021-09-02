@@ -51,6 +51,30 @@ class Subsurface;
 class Viewport;
 class Viewporter;
 
+struct surface_state {
+    std::shared_ptr<Buffer> buffer;
+
+    QRegion damage;
+    QRegion opaque;
+
+    int32_t scale{1};
+    Output::Transform transform{Output::Transform::Normal};
+    QPoint offset;
+
+    QRectF source_rectangle;
+
+    QRegion input;
+    bool input_is_infinite{true};
+
+    // Stacking order: bottom (first) -> top (last).
+    std::vector<Subsurface*> children;
+
+    QPointer<Shadow> shadow;
+    QPointer<Blur> blur;
+    QPointer<Slide> slide;
+    QPointer<Contrast> contrast;
+};
+
 class WRAPLANDSERVER_EXPORT Surface : public QObject
 {
     Q_OBJECT
@@ -63,6 +87,8 @@ public:
         ZeroCopy = 1 << 3
     };
     Q_DECLARE_FLAGS(PresentationKinds, PresentationKind)
+
+    surface_state const& state() const;
 
     void frameRendered(quint32 msec);
 
