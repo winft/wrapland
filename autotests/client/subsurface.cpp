@@ -362,7 +362,7 @@ void TestSubsurface::testPosition()
     QCOMPARE(positionChangedSpy.count(), 1);
     QCOMPARE(positionChangedSpy.first().first().toPoint(), QPoint(20, 30));
     QCOMPARE(serverSubsurface->position(), QPoint(20, 30));
-    QCOMPARE(subsurfaceTreeChanged.count(), 1);
+    QCOMPARE(subsurfaceTreeChanged.count(), 0);
 }
 
 void TestSubsurface::testPlaceAbove()
@@ -675,15 +675,23 @@ void TestSubsurface::testSyncMode()
     QVERIFY(surfaceCreatedSpy.wait());
     auto parentSurface = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(parentSurface);
+
+    QSignalSpy parent_commit_spy(parentSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(parent_commit_spy.isValid());
     QSignalSpy subsurfaceTreeChangedSpy(parentSurface,
                                         &Wrapland::Server::Surface::subsurfaceTreeChanged);
     QVERIFY(subsurfaceTreeChangedSpy.isValid());
+
     // create subsurface for surface of parent
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
         m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
                                           QPointer<Wrapland::Client::Surface>(parent.get())));
-    QVERIFY(subsurfaceTreeChangedSpy.wait());
-    QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
+    QVERIFY(!subsurfaceTreeChangedSpy.wait(100));
+
+    parent->commit(Wrapland::Client::Surface::CommitFlag::None);
+    QVERIFY(parent_commit_spy.wait());
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
+    QVERIFY(parentSurface->state().updates & Wrapland::Server::surface_change::children);
 
     // let's damage the child surface
     QSignalSpy child_commit_spy(childSurface, &Wrapland::Server::Surface::committed);
@@ -710,7 +718,7 @@ void TestSubsurface::testSyncMode()
 
     QVERIFY(child_commit_spy.wait());
     QCOMPARE(child_commit_spy.count(), 1);
-    QCOMPARE(subsurfaceTreeChangedSpy.count(), 2);
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
     QCOMPARE(childSurface->state().buffer->shmImage()->createQImage(), image);
     QCOMPARE(parentSurface->state().buffer->shmImage()->createQImage(), image2);
     QVERIFY(childSurface->isMapped());
@@ -721,6 +729,23 @@ void TestSubsurface::testSyncMode()
     QVERIFY(frameRenderedSpy.isValid());
     parentSurface->frameRendered(100);
     QVERIFY(frameRenderedSpy.wait());
+
+    // Unmapping the child is applied on parent surface commit.
+    surface->attachBuffer(Wrapland::Client::Buffer::Ptr());
+    surface->commit();
+    QVERIFY(!child_commit_spy.wait(100));
+    QVERIFY(childSurface->state().buffer);
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
+
+    parent->commit(Wrapland::Client::Surface::CommitFlag::None);
+    QVERIFY(parent_commit_spy.wait());
+    QVERIFY(parentSurface->state().updates & Wrapland::Server::surface_change::children);
+    QVERIFY(!childSurface->state().buffer);
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
+
+    // Destroying the child on the other side is applied immediately.
+    subsurface.reset();
+    QVERIFY(subsurfaceTreeChangedSpy.wait());
 }
 
 void TestSubsurface::testDeSyncMode()
@@ -739,15 +764,23 @@ void TestSubsurface::testDeSyncMode()
     QVERIFY(surfaceCreatedSpy.wait());
     auto parentSurface = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(parentSurface);
+
+    QSignalSpy parent_commit_spy(parentSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(parent_commit_spy.isValid());
     QSignalSpy subsurfaceTreeChangedSpy(parentSurface,
                                         &Wrapland::Server::Surface::subsurfaceTreeChanged);
     QVERIFY(subsurfaceTreeChangedSpy.isValid());
+
     // create subsurface for surface of parent
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
         m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
                                           QPointer<Wrapland::Client::Surface>(parent.get())));
-    QVERIFY(subsurfaceTreeChangedSpy.wait());
-    QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
+    QVERIFY(!subsurfaceTreeChangedSpy.wait(100));
+
+    parent->commit(Wrapland::Client::Surface::CommitFlag::None);
+    QVERIFY(parent_commit_spy.wait());
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
+    QVERIFY(parentSurface->state().updates & Wrapland::Server::surface_change::children);
 
     // let's damage the child surface
     QSignalSpy child_commit_spy(childSurface, &Wrapland::Server::Surface::committed);
@@ -771,7 +804,7 @@ void TestSubsurface::testDeSyncMode()
 
     QVERIFY(child_commit_spy.count() || child_commit_spy.wait());
     QCOMPARE(child_commit_spy.count(), 1);
-    QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
     QCOMPARE(childSurface->state().buffer->shmImage()->createQImage(), image);
     QVERIFY(!childSurface->isMapped());
     QVERIFY(!parentSurface->isMapped());
@@ -784,8 +817,12 @@ void TestSubsurface::testDeSyncMode()
 
     QVERIFY(child_commit_spy.wait());
     QCOMPARE(child_commit_spy.count(), 2);
-    QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
     QCOMPARE(childSurface->state().buffer->shmImage()->createQImage(), image);
+
+    // Destroying the child is applied immediately.
+    surface.reset();
+    QVERIFY(subsurfaceTreeChangedSpy.wait());
 }
 
 void TestSubsurface::testMainSurfaceFromTree()
@@ -820,6 +857,8 @@ void TestSubsurface::testMainSurfaceFromTree()
         = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(childLevel3ServerSurface);
 
+    QSignalSpy parent_commit_spy(parentServerSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(parent_commit_spy.isValid());
     QSignalSpy subsurfaceTreeChangedSpy(parentServerSurface,
                                         &Wrapland::Server::Surface::subsurfaceTreeChanged);
     QVERIFY(subsurfaceTreeChangedSpy.isValid());
@@ -833,7 +872,10 @@ void TestSubsurface::testMainSurfaceFromTree()
     childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     parentSurface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(subsurfaceTreeChangedSpy.wait());
+
+    QVERIFY(parent_commit_spy.wait());
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
+    QVERIFY(parentServerSurface->state().updates & Wrapland::Server::surface_change::children);
 
     QCOMPARE(parentServerSurface->state().children.size(), 1);
 
@@ -875,15 +917,19 @@ void TestSubsurface::testRemoveSurface()
     auto childServerSurface = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(childServerSurface);
 
+    QSignalSpy parent_commit_spy(parentServerSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(parent_commit_spy.isValid());
     QSignalSpy subsurfaceTreeChangedSpy(parentServerSurface,
                                         &Wrapland::Server::Surface::subsurfaceTreeChanged);
     QVERIFY(subsurfaceTreeChangedSpy.isValid());
 
     std::unique_ptr<Wrapland::Client::SubSurface> sub(
         m_subCompositor->createSubSurface(childSurface.get(), parentSurface.get()));
-    parentSurface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(subsurfaceTreeChangedSpy.wait());
 
+    parentSurface->commit(Wrapland::Client::Surface::CommitFlag::None);
+    QVERIFY(parent_commit_spy.wait());
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
+    QVERIFY(parentServerSurface->state().updates & Wrapland::Server::surface_change::children);
     QCOMPARE(parentServerSurface->state().children.size(), 1);
 
     // destroy surface, takes place immediately
@@ -920,6 +966,8 @@ void TestSubsurface::testMappingOfSurfaceTree()
         = surfaceCreatedSpy.last().first().value<Wrapland::Server::Surface*>();
     QVERIFY(childLevel3ServerSurface);
 
+    QSignalSpy parent_commit_spy(parentServerSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(parent_commit_spy.isValid());
     QSignalSpy subsurfaceTreeChangedSpy(parentServerSurface,
                                         &Wrapland::Server::Surface::subsurfaceTreeChanged);
     QVERIFY(subsurfaceTreeChangedSpy.isValid());
@@ -935,7 +983,11 @@ void TestSubsurface::testMappingOfSurfaceTree()
     childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     parentSurface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(subsurfaceTreeChangedSpy.wait());
+
+    QVERIFY(parent_commit_spy.wait());
+    QCOMPARE(subsurfaceTreeChangedSpy.count(), 0);
+    QVERIFY(parentServerSurface->state().updates & Wrapland::Server::surface_change::children);
+    QCOMPARE(parentServerSurface->state().children.size(), 1);
 
     QCOMPARE(parentServerSurface->state().children.size(), 1);
     auto child = parentServerSurface->state().children.front();
@@ -1011,12 +1063,10 @@ void TestSubsurface::testMappingOfSurfaceTree()
     QVERIFY(child3->surface()->isMapped());
 
     // Unmapping a parent should unmap the complete tree.
-    QSignalSpy unmappedSpy(child2->surface(), &Wrapland::Server::Surface::unmapped);
-    QVERIFY(unmappedSpy.isValid());
     childLevel2Surface->attachBuffer(Wrapland::Client::Buffer::Ptr());
     childLevel2Surface->damage(QRect(0, 0, 200, 200));
     childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(unmappedSpy.wait());
+    QVERIFY(child2_commit_spy.wait());
 
     QVERIFY(parentServerSurface->isMapped());
     QVERIFY(child->surface()->isMapped());
@@ -1151,9 +1201,10 @@ void TestSubsurface::testSurfaceAt()
     grandchild2->damage(QRect(0, 0, 50, 50));
     grandchild2->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QSignalSpy treeChangedSpy(serverParent, &Wrapland::Server::Surface::subsurfaceTreeChanged);
-    QVERIFY(treeChangedSpy.isValid());
-    QVERIFY(treeChangedSpy.wait());
+    QSignalSpy parent_commit_spy(serverParent, &Wrapland::Server::Surface::committed);
+    QVERIFY(parent_commit_spy.isValid());
+    parent->commit(Wrapland::Client::Surface::CommitFlag::None);
+    QVERIFY(parent_commit_spy.wait());
 
     QCOMPARE(serverChild1->subsurface()->parentSurface(), serverParent);
     QCOMPARE(serverChild2->subsurface()->parentSurface(), serverParent);

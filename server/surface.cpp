@@ -95,15 +95,10 @@ void Surface::Private::addChild(Subsurface* child)
     pending.pub.children.push_back(child);
     pending.pub.updates |= surface_change::children;
 
-    // TODO(romangg): Should all below only be changed on commit?
-    QObject::connect(
-        child->surface(), &Surface::unmapped, handle(), &Surface::subsurfaceTreeChanged);
     QObject::connect(child->surface(),
                      &Surface::subsurfaceTreeChanged,
                      handle(),
                      &Surface::subsurfaceTreeChanged);
-
-    Q_EMIT handle()->subsurfaceTreeChanged();
 }
 
 void Surface::Private::removeChild(Subsurface* child)
@@ -121,11 +116,10 @@ void Surface::Private::removeChild(Subsurface* child)
         std::remove(current.pub.children.begin(), current.pub.children.end(), child),
         current.pub.children.end());
 
+    // TODO(romangg): only emit that if the child was mapped.
     Q_EMIT handle()->subsurfaceTreeChanged();
 
     if (child->surface()) {
-        QObject::disconnect(
-            child->surface(), &Surface::unmapped, handle(), &Surface::subsurfaceTreeChanged);
         QObject::disconnect(child->surface(),
                             &Surface::subsurfaceTreeChanged,
                             handle(),
@@ -443,6 +437,15 @@ void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
     }
 }
 
+void Surface::Private::synced_child_update()
+{
+    current.pub.updates |= surface_change::children;
+
+    if (subsurface && subsurface->isSynchronized() && subsurface->parentSurface()) {
+        subsurface->parentSurface()->d_ptr->synced_child_update();
+    }
+}
+
 void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
 {
     if (!(source.pub.updates & surface_change::buffer)) {
@@ -468,8 +471,8 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
     }
 
     if (!now_mapped) {
-        if (was_mapped) {
-            Q_EMIT handle()->unmapped();
+        if (subsurface && subsurface->isSynchronized() && subsurface->parentSurface()) {
+            subsurface->parentSurface()->d_ptr->synced_child_update();
         }
         return;
     }
@@ -618,10 +621,6 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
     }
     if (resized) {
         current.pub.updates |= surface_change::size;
-    }
-
-    if (source.pub.updates & surface_change::children) {
-        Q_EMIT handle()->subsurfaceTreeChanged();
     }
 
     current.feedbacks = std::move(source.feedbacks);

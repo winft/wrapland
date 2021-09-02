@@ -155,7 +155,6 @@ public:
     wl_resource* resource() const;
 
 Q_SIGNALS:
-    void unmapped();
     void subsurfaceTreeChanged();
     void pointerConstraintsChanged();
     void inhibitsIdleChanged();

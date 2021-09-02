@@ -421,10 +421,8 @@ void TestSurface::testAttachBuffer()
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
     QVERIFY(commit_spy.isValid());
-    QSignalSpy unmappedSpy(serverSurface, SIGNAL(unmapped()));
-    QVERIFY(unmappedSpy.isValid());
     QVERIFY(commit_spy.wait());
-    QVERIFY(unmappedSpy.isEmpty());
+    QVERIFY(serverSurface->isMapped());
 
     // now the ServerSurface should have the black image attached as a buffer
     auto buffer1 = serverSurface->state().buffer;
@@ -440,7 +438,7 @@ void TestSurface::testAttachBuffer()
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(!redBuffer->isReleased());
     QVERIFY(commit_spy.wait());
-    QVERIFY(unmappedSpy.isEmpty());
+    QVERIFY(serverSurface->isMapped());
 
     auto buffer2 = serverSurface->state().buffer;
     QVERIFY(buffer2->shmBuffer());
@@ -466,7 +464,7 @@ void TestSurface::testAttachBuffer()
     QVERIFY(frameRenderedSpy.isValid());
     s->commit();
     QVERIFY(commit_spy.wait());
-    QVERIFY(unmappedSpy.isEmpty());
+    QVERIFY(serverSurface->isMapped());
     buffer2.reset();
 
     // TODO: we should have a signal on when the Buffer gets released
@@ -502,7 +500,6 @@ void TestSurface::testAttachBuffer()
     QCOMPARE(serverSurface->state().input, QRegion(0, 0, 24, 24));
     QCOMPARE(serverSurface->state().buffer.get(), buffer3);
     QVERIFY(serverSurface->state().damage.isEmpty());
-    QVERIFY(unmappedSpy.isEmpty());
     QVERIFY(serverSurface->isMapped());
 
     // clear the surface
@@ -512,9 +509,7 @@ void TestSurface::testAttachBuffer()
     s->attachBuffer((wl_buffer*)nullptr);
     s->damage(QRect(0, 0, 10, 10));
     s->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(unmappedSpy.wait());
-    QVERIFY(!unmappedSpy.isEmpty());
-    QCOMPARE(unmappedSpy.count(), 1);
+    QVERIFY(commit_spy.wait());
     QVERIFY(serverSurface->state().damage.isEmpty());
     QVERIFY(!serverSurface->isMapped());
 }
@@ -1023,8 +1018,6 @@ void TestSurface::testDestroyAttachedBuffer()
     delete m_shm;
     m_shm = nullptr;
     QVERIFY(destroySpy.count() || destroySpy.wait());
-
-    // TODO: should this emit unmapped?
     QVERIFY(!serverSurface->state().buffer);
 }
 
