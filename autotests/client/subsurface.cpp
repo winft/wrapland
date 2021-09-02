@@ -686,8 +686,8 @@ void TestSubsurface::testSyncMode()
     QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
 
     // let's damage the child surface
-    QSignalSpy childDamagedSpy(childSurface, &Wrapland::Server::Surface::damaged);
-    QVERIFY(childDamagedSpy.isValid());
+    QSignalSpy child_commit_spy(childSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(child_commit_spy.isValid());
 
     QImage image(QSize(200, 200), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::black);
@@ -696,7 +696,7 @@ void TestSubsurface::testSyncMode()
     surface->commit();
 
     // state should be applied when the parent surface's state gets applied
-    QVERIFY(!childDamagedSpy.wait(100));
+    QVERIFY(!child_commit_spy.wait(100));
     QVERIFY(!childSurface->buffer());
 
     QVERIFY(!childSurface->isMapped());
@@ -708,8 +708,8 @@ void TestSubsurface::testSyncMode()
     parent->damage(QRect(0, 0, 400, 400));
     parent->commit();
 
-    QVERIFY(childDamagedSpy.wait());
-    QCOMPARE(childDamagedSpy.count(), 1);
+    QVERIFY(child_commit_spy.wait());
+    QCOMPARE(child_commit_spy.count(), 1);
     QCOMPARE(subsurfaceTreeChangedSpy.count(), 2);
     QCOMPARE(childSurface->buffer()->shmImage()->createQImage(), image);
     QCOMPARE(parentSurface->buffer()->shmImage()->createQImage(), image2);
@@ -750,8 +750,8 @@ void TestSubsurface::testDeSyncMode()
     QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
 
     // let's damage the child surface
-    QSignalSpy childDamagedSpy(childSurface, &Wrapland::Server::Surface::damaged);
-    QVERIFY(childDamagedSpy.isValid());
+    QSignalSpy child_commit_spy(childSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(child_commit_spy.isValid());
 
     QImage image(QSize(200, 200), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::black);
@@ -761,16 +761,16 @@ void TestSubsurface::testDeSyncMode()
 
     // state should be applied when the parent surface's state gets applied or when the subsurface
     // switches to desync
-    QVERIFY(!childDamagedSpy.wait(100));
+    QVERIFY(!child_commit_spy.wait(100));
     QVERIFY(!childSurface->isMapped());
     QVERIFY(!parentSurface->isMapped());
 
     // setting to desync should apply the state directly
-    QVERIFY(childDamagedSpy.isEmpty());
+    QVERIFY(child_commit_spy.isEmpty());
     subsurface->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
 
-    QVERIFY(childDamagedSpy.count() || childDamagedSpy.wait());
-    QCOMPARE(childDamagedSpy.count(), 1);
+    QVERIFY(child_commit_spy.count() || child_commit_spy.wait());
+    QCOMPARE(child_commit_spy.count(), 1);
     QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
     QCOMPARE(childSurface->buffer()->shmImage()->createQImage(), image);
     QVERIFY(!childSurface->isMapped());
@@ -782,8 +782,8 @@ void TestSubsurface::testDeSyncMode()
     surface->damage(QRect(0, 0, 200, 200));
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(childDamagedSpy.wait());
-    QCOMPARE(childDamagedSpy.count(), 2);
+    QVERIFY(child_commit_spy.wait());
+    QCOMPARE(child_commit_spy.count(), 2);
     QCOMPARE(subsurfaceTreeChangedSpy.count(), 1);
     QCOMPARE(childSurface->buffer()->shmImage()->createQImage(), image);
 }
@@ -962,32 +962,32 @@ void TestSubsurface::testMappingOfSurfaceTree()
     image.fill(Qt::black);
 
     // Attach a buffer to the first child. Should not map.
-    QSignalSpy child1DamageSpy(child->surface(), &Wrapland::Server::Surface::damaged);
-    QVERIFY(child1DamageSpy.isValid());
+    QSignalSpy child1_commit_spy(child->surface(), &Wrapland::Server::Surface::committed);
+    QVERIFY(child1_commit_spy.isValid());
     childLevel1Surface->attachBuffer(m_shm->createBuffer(image));
     childLevel1Surface->damage(QRect(0, 0, 200, 200));
     childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(child1DamageSpy.wait());
+    QVERIFY(child1_commit_spy.wait());
     QVERIFY(child->surface()->buffer());
     QVERIFY(!child->surface()->isMapped());
 
     // Attach a buffer to the third child. Should not map.
-    QSignalSpy child3DamageSpy(child3->surface(), &Wrapland::Server::Surface::damaged);
-    QVERIFY(child3DamageSpy.isValid());
+    QSignalSpy child3_commit_spy(child3->surface(), &Wrapland::Server::Surface::committed);
+    QVERIFY(child3_commit_spy.isValid());
     childLevel3Surface->attachBuffer(m_shm->createBuffer(image));
     childLevel3Surface->damage(QRect(0, 0, 200, 200));
     childLevel3Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(child3DamageSpy.wait());
+    QVERIFY(child3_commit_spy.wait());
     QVERIFY(child3->surface()->buffer());
     QVERIFY(!child3->surface()->isMapped());
 
     // Map the top level.
-    QSignalSpy parentSpy(parentServerSurface, &Wrapland::Server::Surface::damaged);
-    QVERIFY(parentSpy.isValid());
+    QSignalSpy commit_spy(parentServerSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
     parentSurface->attachBuffer(m_shm->createBuffer(image));
     parentSurface->damage(QRect(0, 0, 200, 200));
     parentSurface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(parentSpy.wait());
+    QVERIFY(commit_spy.wait());
     QVERIFY(parentServerSurface->isMapped());
 
     // First child should now be mapped automatically too but not second or third one.
@@ -996,12 +996,12 @@ void TestSubsurface::testMappingOfSurfaceTree()
     QVERIFY(!child3->surface()->isMapped());
 
     // Now map the second level. This should automatically also map the thrid one.
-    QSignalSpy child2DamageSpy(child2->surface(), &Wrapland::Server::Surface::damaged);
-    QVERIFY(child2DamageSpy.isValid());
+    QSignalSpy child2_commit_spy(child2->surface(), &Wrapland::Server::Surface::committed);
+    QVERIFY(child2_commit_spy.isValid());
     childLevel2Surface->attachBuffer(m_shm->createBuffer(image));
     childLevel2Surface->damage(QRect(0, 0, 200, 200));
     childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(child2DamageSpy.wait());
+    QVERIFY(child2_commit_spy.wait());
     QVERIFY(parentServerSurface->isMapped());
 
     // Everything is mapped now.
@@ -1314,9 +1314,9 @@ void TestSubsurface::testDestroyParentSurface()
     grandChild->attachBuffer(m_shm->createBuffer(image));
     grandChild->damage(QRect(0, 0, 100, 100));
     grandChild->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QSignalSpy damagedSpy(serverGrandChildSurface, &Wrapland::Server::Surface::damaged);
-    QVERIFY(damagedSpy.isValid());
-    QVERIFY(damagedSpy.wait());
+    QSignalSpy commit_spy(serverGrandChildSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
+    QVERIFY(commit_spy.wait());
 
     // Let's try to destroy it
     QSignalSpy destroySpy(serverChildSurface, &QObject::destroyed);

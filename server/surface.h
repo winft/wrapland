@@ -129,7 +129,6 @@ public:
     wl_resource* resource() const;
 
 Q_SIGNALS:
-    void damaged(const QRegion&);
     void opaqueChanged(const QRegion&);
     void inputChanged(const QRegion&);
     void scaleChanged(qint32);

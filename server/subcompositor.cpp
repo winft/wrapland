@@ -156,6 +156,7 @@ void Subsurface::Private::applyCached(bool force)
 
     if (force || handle()->isSynchronized()) {
         surface->d_ptr->updateCurrentState(cached, true);
+        Q_EMIT surface->committed();
     }
 }
 
@@ -176,6 +177,7 @@ void Subsurface::Private::commit()
 
     // Desync mode. We commit the surface directly.
     surface->d_ptr->updateCurrentState(false);
+    Q_EMIT surface->committed();
 }
 
 void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClient,
@@ -278,6 +280,7 @@ void Subsurface::Private::setMode(Mode m)
         // No longer synchronized, this is like calling commit.
         assert(surface);
         surface->d_ptr->updateCurrentState(cached, false);
+        Q_EMIT surface->committed();
     }
 }
 

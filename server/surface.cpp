@@ -439,9 +439,12 @@ void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
     }
 }
 
-void Surface::Private::update_buffer(SurfaceState const& source, bool& damaged, bool& resized)
+void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
 {
     if (!source.bufferIsSet) {
+        // TODO(romangg): Should we set the pending damage even when no new buffer got attached?
+        current.damage = {};
+        current.bufferDamage = {};
         return;
     }
 
@@ -520,7 +523,6 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& damaged, 
 
     current.damage = surfaceRegion.intersected(current.damage.united(bufferDamage));
     trackedDamage = trackedDamage.united(current.damage);
-    damaged = true;
 }
 
 void Surface::Private::copy_to_current(SurfaceState const& source, bool& resized)
@@ -585,10 +587,9 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
     auto const scaleFactorChanged = source.scaleIsSet && (current.scale != source.scale);
     auto const transformChanged = source.transformIsSet && (current.transform != source.transform);
 
-    auto damaged = false;
     auto resized = false;
 
-    update_buffer(source, damaged, resized);
+    update_buffer(source, resized);
     copy_to_current(source, resized);
 
     // Now check that source rectangle is (still) well defined.
@@ -642,10 +643,6 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
 
     current.feedbacks = std::move(source.feedbacks);
 
-    if (damaged) {
-        Q_EMIT handle()->damaged(current.damage);
-    }
-
     source = SurfaceState();
     source.children = current.children;
 
@@ -659,7 +656,6 @@ void Surface::Private::commit()
     if (subsurface) {
         // Surface has associated subsurface. We delegate committing to there.
         subsurface->d_ptr->commit();
-        Q_EMIT handle()->committed();
         return;
     }
 

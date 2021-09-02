@@ -141,7 +141,7 @@ void CompositorWindow::surfaceCreated(Wrapland::Server::XdgShellToplevel* surfac
         }
     });
     connect(surface->surface()->surface(),
-            &Wrapland::Server::Surface::damaged,
+            &Wrapland::Server::Surface::committed,
             this,
             static_cast<void (CompositorWindow::*)()>(&CompositorWindow::update));
     connect(surface, &XdgShellToplevel::destroyed, this, [surface, this] {
