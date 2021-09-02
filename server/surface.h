@@ -155,17 +155,7 @@ public:
     wl_resource* resource() const;
 
 Q_SIGNALS:
-    void opaqueChanged(const QRegion&);
-    void inputChanged(const QRegion&);
-    void scaleChanged(qint32);
-    void transformChanged(Output::Transform);
     void unmapped();
-    void sizeChanged();
-    void shadowChanged();
-    void blurChanged();
-    void slideOnShowHideChanged();
-    void contrastChanged();
-    void sourceRectangleChanged();
     void subsurfaceTreeChanged();
     void pointerConstraintsChanged();
     void inhibitsIdleChanged();

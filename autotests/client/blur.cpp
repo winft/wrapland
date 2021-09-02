@@ -163,14 +163,15 @@ void TestBlur::testCreate()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy blurChanged(serverSurface, &Wrapland::Server::Surface::blurChanged);
+    QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
 
     auto* blur = m_blurManager->createBlur(surface.get(), surface.get());
     blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur));
     blur->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(blurChanged.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::blur);
     QCOMPARE(serverSurface->state().blur->region(), QRegion(0, 0, 10, 20));
 
     // and destroy
@@ -190,15 +191,16 @@ void TestBlur::testSurfaceDestroy()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy blurChanged(serverSurface, &Wrapland::Server::Surface::blurChanged);
-    QVERIFY(blurChanged.isValid());
+    QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::Blur> blur(m_blurManager->createBlur(surface.get()));
     blur->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), blur.get()));
     blur->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(blurChanged.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::blur);
     QCOMPARE(serverSurface->state().blur->region(), QRegion(0, 0, 10, 20));
 
     // destroy the parent surface

@@ -242,14 +242,14 @@ void TestViewporter::testWithoutBuffer()
     QVERIFY(!serverSurface->state().buffer);
 
     // Change the destination size.
-    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
+    QSignalSpy commit_spy(serverSurface, &Srv::Surface::committed);
     vp->setDestinationSize(QSize(400, 200));
     s->commit(Clt::Surface::CommitFlag::None);
 
     // Even though a new destination size is set if there is no buffer, the surface size has not
     // changed.
-    QVERIFY(!sizeChangedSpy.wait(100));
-    QCOMPARE(sizeChangedSpy.count(), 0);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(serverSurface->state().updates & Wrapland::Server::surface_change::size, false);
     QVERIFY(!serverSurface->size().isValid());
 
     // Now change the source rectangle.
@@ -258,8 +258,8 @@ void TestViewporter::testWithoutBuffer()
 
     // Even though a new source rectangle is set if there is no buffer, the surface size has not
     // changed.
-    QVERIFY(!sizeChangedSpy.wait(100));
-    QCOMPARE(sizeChangedSpy.count(), 0);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(serverSurface->state().updates & Wrapland::Server::surface_change::size, false);
     QVERIFY(!serverSurface->size().isValid());
 }
 
@@ -286,29 +286,32 @@ void TestViewporter::testDestinationSize()
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
-    QVERIFY(sizeChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Srv::Surface::committed);
+    QVERIFY(commit_spy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
     s->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Change the destination size.
     vp->setDestinationSize(QSize(400, 200));
     s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 2);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 2);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
     QCOMPARE(serverSurface->size(), QSize(400, 200));
 
     // Destroy the viewport and check that the size is reset.
     vp.reset();
     s->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 3);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 3);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
     QCOMPARE(serverSurface->size(), image.size());
 }
 
@@ -335,36 +338,35 @@ void TestViewporter::testSourceRectangle()
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
-    QVERIFY(sizeChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Srv::Surface::committed);
+    QVERIFY(commit_spy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
     s->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Change the source rectangle.
     const QRectF rect(QPointF(100, 50), QSizeF(400, 200));
-    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Srv::Surface::sourceRectangleChanged);
     vp->setSourceRectangle(rect);
     s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 2);
-    if (sourceRectangleChangedSpy.count() == 0) {
-        QVERIFY(sourceRectangleChangedSpy.wait());
-    }
-    QCOMPARE(sourceRectangleChangedSpy.count(), 1);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 2);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::source_rectangle);
     QCOMPARE(serverSurface->size(), rect.size());
     QCOMPARE(serverSurface->state().source_rectangle, rect);
 
     // Destroy the viewport and check that the size is reset.
     vp.reset();
     s->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 3);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 3);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
     QCOMPARE(serverSurface->size(), image.size());
 }
 
@@ -392,14 +394,15 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
-    QVERIFY(sizeChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Srv::Surface::committed);
+    QVERIFY(commit_spy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
     s->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Change the destination size.
     const QSize destinationSize = QSize(100, 50);
@@ -407,17 +410,14 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
 
     // Change the source rectangle.
     const QRectF rect(QPointF(100.1, 50.5), QSizeF(400.9, 200.8));
-    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Srv::Surface::sourceRectangleChanged);
     vp->setSourceRectangle(rect);
     s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 2);
-    if (sourceRectangleChangedSpy.count() == 0) {
-        QVERIFY(sourceRectangleChangedSpy.wait());
-    }
-    QCOMPARE(sourceRectangleChangedSpy.count(), 1);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 2);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::source_rectangle);
     QCOMPARE(serverSurface->size(), destinationSize);
     QVERIFY((serverSurface->state().source_rectangle.topLeft() - rect.topLeft()).manhattanLength()
             < 0.01);
@@ -428,8 +428,9 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     // Destroy the viewport and check that the size is reset.
     vp.reset();
     s->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 3);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 3);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
     QCOMPARE(serverSurface->size(), image.size());
 }
 
@@ -468,14 +469,15 @@ void TestViewporter::testDataError()
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
-    QVERIFY(sizeChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Srv::Surface::committed);
+    QVERIFY(commit_spy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
     s->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     QFETCH(QSize, destinationSize);
     QFETCH(QRectF, sourceRectangle);
@@ -521,28 +523,26 @@ void TestViewporter::testBufferSizeChange()
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
-    QVERIFY(sizeChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Srv::Surface::committed);
+    QVERIFY(commit_spy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
     s->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Change the source rectangle.
     const QRectF rect(QPointF(100, 200), QSizeF(500, 200));
-    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Srv::Surface::sourceRectangleChanged);
     vp->setSourceRectangle(rect);
     s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 2);
-    if (sourceRectangleChangedSpy.count() == 0) {
-        QVERIFY(sourceRectangleChangedSpy.wait());
-    }
-    QCOMPARE(sourceRectangleChangedSpy.count(), 1);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 2);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::source_rectangle);
     QCOMPARE(serverSurface->size(), rect.size());
     QCOMPARE(serverSurface->state().source_rectangle, rect);
 
@@ -558,12 +558,10 @@ void TestViewporter::testBufferSizeChange()
     s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 3);
-    if (sourceRectangleChangedSpy.count() == 1) {
-        QVERIFY(sourceRectangleChangedSpy.wait());
-    }
-    QCOMPARE(sourceRectangleChangedSpy.count(), 2);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 3);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::source_rectangle);
     QCOMPARE(serverSurface->size(), rect2.size());
     QCOMPARE(serverSurface->state().source_rectangle, rect2);
 
@@ -607,14 +605,15 @@ void TestViewporter::testDestinationSizeChange()
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
-    QVERIFY(sizeChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Srv::Surface::committed);
+    QVERIFY(commit_spy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     s->attachBuffer(m_shm->createBuffer(image));
     s->damage(QRect(0, 0, 600, 400));
     s->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Set the destination size.
     const QSize destinationSize = QSize(100, 50);
@@ -622,17 +621,14 @@ void TestViewporter::testDestinationSizeChange()
 
     // Change the source rectangle.
     const QRectF rect(QPointF(100.5, 200.3), QSizeF(200, 100));
-    QSignalSpy sourceRectangleChangedSpy(serverSurface, &Srv::Surface::sourceRectangleChanged);
     vp->setSourceRectangle(rect);
     s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 2);
-    if (sourceRectangleChangedSpy.count() == 0) {
-        QVERIFY(sourceRectangleChangedSpy.wait());
-    }
-    QCOMPARE(sourceRectangleChangedSpy.count(), 1);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 2);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::source_rectangle);
     QCOMPARE(serverSurface->size(), destinationSize);
     QVERIFY((serverSurface->state().source_rectangle.topLeft() - rect.topLeft()).manhattanLength()
             < 0.01);
@@ -645,12 +641,11 @@ void TestViewporter::testDestinationSizeChange()
     s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed to that of the source rectangle.
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 3);
-    if (sourceRectangleChangedSpy.count() == 1) {
-        QVERIFY(!sourceRectangleChangedSpy.wait(100));
-    }
-    QCOMPARE(sourceRectangleChangedSpy.count(), 1);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 3);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
+    QCOMPARE(serverSurface->state().updates & Wrapland::Server::surface_change::source_rectangle,
+             false);
     QCOMPARE(serverSurface->size(), rect.size());
     QVERIFY((serverSurface->state().source_rectangle.topLeft() - rect.topLeft()).manhattanLength()
             < 0.01);
@@ -667,12 +662,10 @@ void TestViewporter::testDestinationSizeChange()
     s->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed back.
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 4);
-    if (sourceRectangleChangedSpy.count() == 1) {
-        QVERIFY(sourceRectangleChangedSpy.wait());
-    }
-    QCOMPARE(sourceRectangleChangedSpy.count(), 2);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 4);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::source_rectangle);
     QCOMPARE(serverSurface->size(), destinationSize);
     QVERIFY((serverSurface->state().source_rectangle.topLeft() - rect2.topLeft()).manhattanLength()
             < 0.01);
@@ -715,22 +708,24 @@ void TestViewporter::testNoSurface()
     QVERIFY(serverViewport);
 
     // Add a buffer.
-    QSignalSpy sizeChangedSpy(serverSurface, &Srv::Surface::sizeChanged);
-    QVERIFY(sizeChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Srv::Surface::committed);
+    QVERIFY(commit_spy.isValid());
     QImage image(QSize(600, 400), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::red);
     surface->attachBuffer(m_shm->createBuffer(image));
     surface->damage(QRect(0, 0, 600, 400));
     surface->commit(Clt::Surface::CommitFlag::None);
-    QVERIFY(sizeChangedSpy.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Change the destination size.
     vp->setDestinationSize(QSize(400, 200));
     surface->commit(Clt::Surface::CommitFlag::None);
 
     // The size of the surface has changed.
-    QVERIFY(sizeChangedSpy.wait());
-    QCOMPARE(sizeChangedSpy.count(), 2);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 2);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
     QCOMPARE(serverSurface->size(), QSize(400, 200));
 
     // Now destroy the surface.

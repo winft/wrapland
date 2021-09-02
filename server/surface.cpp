@@ -459,9 +459,6 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
 
     if (was_mapped) {
         oldSize = current.pub.buffer->size();
-
-        QObject::disconnect(
-            current.pub.buffer.get(), &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
     }
 
     current.pub.buffer = source.pub.buffer;
@@ -478,8 +475,6 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
     }
 
     current.pub.buffer->setCommitted();
-    QObject::connect(
-        current.pub.buffer.get(), &Buffer::sizeChanged, handle(), &Surface::sizeChanged);
 
     current.pub.offset = source.pub.offset;
     current.pub.damage = source.pub.damage;
@@ -597,8 +592,6 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
 {
     auto const scaleFactorChanged
         = (source.pub.updates & surface_change::scale) && (current.pub.scale != source.pub.scale);
-    auto const transformChanged = (source.pub.updates & surface_change::transform)
-        && (current.pub.transform != source.pub.transform);
 
     auto resized = false;
     current.pub.updates = source.pub.updates;
@@ -620,40 +613,13 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
         confinedPointer->d_ptr->commit();
     }
 
-    if (source.pub.updates & surface_change::opaque) {
-        Q_EMIT handle()->opaqueChanged(current.pub.opaque);
-    }
-    if (source.pub.updates & surface_change::input) {
-        Q_EMIT handle()->inputChanged(current.pub.input);
-    }
-
     if (scaleFactorChanged) {
-        Q_EMIT handle()->scaleChanged(current.pub.scale);
         resized = current.pub.buffer != nullptr;
-    }
-    if (transformChanged) {
-        Q_EMIT handle()->transformChanged(current.pub.transform);
     }
     if (resized) {
         current.pub.updates |= surface_change::size;
-        Q_EMIT handle()->sizeChanged();
     }
 
-    if (source.pub.updates & surface_change::shadow) {
-        Q_EMIT handle()->shadowChanged();
-    }
-    if (source.pub.updates & surface_change::blur) {
-        Q_EMIT handle()->blurChanged();
-    }
-    if (source.pub.updates & surface_change::contrast) {
-        Q_EMIT handle()->contrastChanged();
-    }
-    if (source.pub.updates & surface_change::slide) {
-        Q_EMIT handle()->slideOnShowHideChanged();
-    }
-    if (source.pub.updates & surface_change::source_rectangle) {
-        Q_EMIT handle()->sourceRectangleChanged();
-    }
     if (source.pub.updates & surface_change::children) {
         Q_EMIT handle()->subsurfaceTreeChanged();
     }

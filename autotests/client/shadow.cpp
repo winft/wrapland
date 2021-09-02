@@ -158,18 +158,20 @@ void ShadowTest::testCreateShadow()
 
     // a surface without anything should not have a Shadow
     QVERIFY(!serverSurface->state().shadow);
-    QSignalSpy shadowChangedSpy(serverSurface, &Wrapland::Server::Surface::shadowChanged);
-    QVERIFY(shadowChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
 
     // let's create a shadow for the Surface
     std::unique_ptr<Wrapland::Client::Shadow> shadow(m_shadow->createShadow(surface.get()));
-    // that should not have triggered the shadowChangedSpy)
-    QVERIFY(!shadowChangedSpy.wait(100));
+    // that should not have triggered the commit_spy)
+    QVERIFY(!commit_spy.wait(100));
+    QCOMPARE(serverSurface->state().updates, Wrapland::Server::surface_change::none);
 
     // now let's commit the surface, that should trigger the shadow changed
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(shadowChangedSpy.wait());
-    QCOMPARE(shadowChangedSpy.count(), 1);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 1);
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::shadow);
 
     // we didn't set anything on the shadow, so it should be all default values
     auto serverShadow = serverSurface->state().shadow;
@@ -186,11 +188,12 @@ void ShadowTest::testCreateShadow()
 
     // now let's remove the shadow
     m_shadow->removeShadow(surface.get());
+
     // just removing should not remove it yet, surface needs to be committed
-    QVERIFY(!shadowChangedSpy.wait(100));
+    QVERIFY(!commit_spy.wait(100));
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(shadowChangedSpy.wait());
-    QCOMPARE(shadowChangedSpy.count(), 2);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(commit_spy.count(), 2);
     QVERIFY(!serverSurface->state().shadow);
 }
 
@@ -208,8 +211,9 @@ void ShadowTest::testShadowElements()
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
 
-    QSignalSpy shadowChangedSpy(serverSurface, &Wrapland::Server::Surface::shadowChanged);
-    QVERIFY(shadowChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
+
     // now create the shadow
     std::unique_ptr<Wrapland::Client::Shadow> shadow(m_shadow->createShadow(surface.get()));
     QImage topLeftImage(QSize(10, 10), QImage::Format_ARGB32_Premultiplied);
@@ -240,7 +244,7 @@ void ShadowTest::testShadowElements()
     shadow->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(shadowChangedSpy.wait());
+    QVERIFY(commit_spy.wait());
     auto serverShadow = serverSurface->state().shadow;
     QVERIFY(serverShadow);
     QCOMPARE(serverShadow->offset(), QMarginsF(1, 2, 3, 4));
@@ -290,12 +294,12 @@ void ShadowTest::testSurfaceDestroy()
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
 
-    QSignalSpy shadowChangedSpy(serverSurface, &Wrapland::Server::Surface::shadowChanged);
-    QVERIFY(shadowChangedSpy.isValid());
+    QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
     std::unique_ptr<Wrapland::Client::Shadow> shadow(m_shadow->createShadow(surface.get()));
     shadow->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(shadowChangedSpy.wait());
+    QVERIFY(commit_spy.wait());
     auto serverShadow = serverSurface->state().shadow;
     QVERIFY(serverShadow);
 

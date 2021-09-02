@@ -162,7 +162,9 @@ void TestContrast::testCreate()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy contrastChanged(serverSurface, SIGNAL(contrastChanged()));
+
+    QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
 
     auto* contrast = m_contrastManager->createContrast(surface.get(), surface.get());
     contrast->setRegion(m_compositor->createRegion(QRegion(0, 0, 10, 20), contrast));
@@ -174,7 +176,8 @@ void TestContrast::testCreate()
     contrast->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(contrastChanged.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::contrast);
     QCOMPARE(serverSurface->state().contrast->region(), QRegion(0, 0, 10, 20));
     QCOMPARE(wl_fixed_from_double(serverSurface->state().contrast->contrast()),
              wl_fixed_from_double(0.2));
@@ -200,8 +203,8 @@ void TestContrast::testSurfaceDestroy()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy contrastChanged(serverSurface, &Wrapland::Server::Surface::contrastChanged);
-    QVERIFY(contrastChanged.isValid());
+    QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::Contrast> contrast(
         m_contrastManager->createContrast(surface.get()));
@@ -209,7 +212,8 @@ void TestContrast::testSurfaceDestroy()
     contrast->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(contrastChanged.wait());
+    QVERIFY(commit_spy.wait());
+    QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::contrast);
     QCOMPARE(serverSurface->state().contrast->region(), QRegion(0, 0, 10, 20));
 
     // destroy the parent surface
