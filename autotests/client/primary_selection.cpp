@@ -183,8 +183,8 @@ void TestPrimarySelection::testCreate()
     QVERIFY(!serverDevice->selection());
 
     QVERIFY(!m_serverSeat->primarySelection());
-    m_serverSeat->setPrimarySelection(serverDevice);
-    QCOMPARE(m_serverSeat->primarySelection(), serverDevice);
+    m_serverSeat->setPrimarySelection(serverDevice->selection());
+    QCOMPARE(m_serverSeat->primarySelection(), serverDevice->selection());
 
     // and destroy
     QSignalSpy destroyedSpy(serverDevice, &QObject::destroyed);
@@ -247,7 +247,7 @@ void TestPrimarySelection::testSetSelection()
     QSignalSpy selectionOfferedSpy(device.get(),
                                    &Wrapland::Client::PrimarySelectionDevice::selectionOffered);
     QVERIFY(selectionOfferedSpy.isValid());
-    serverDevice->sendSelection(serverDevice);
+    serverDevice->sendSelection(serverDevice->selection());
     QVERIFY(selectionOfferedSpy.wait());
     QCOMPARE(selectionOfferedSpy.count(), 1);
 

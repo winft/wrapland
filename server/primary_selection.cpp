@@ -39,15 +39,14 @@ PrimarySelectionDevice::Private::Private(Client* client,
 
 PrimarySelectionDevice::Private::~Private() = default;
 
-void PrimarySelectionDevice::sendSelection(PrimarySelectionDevice* device)
+void PrimarySelectionDevice::sendSelection(Wrapland::Server::PrimarySelectionSource* source)
 {
-    auto deviceSelection = device->selection();
-    if (!deviceSelection) {
+    if (!source) {
         sendClearSelection();
         return;
     }
 
-    auto offer = d_ptr->sendDataOffer(deviceSelection);
+    auto offer = d_ptr->sendDataOffer(source);
     if (!offer) {
         return;
     }

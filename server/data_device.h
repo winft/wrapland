@@ -50,7 +50,7 @@ public:
 
     DataSource* selection() const;
 
-    void sendSelection(DataDevice* other);
+    void sendSelection(DataSource* source);
     void sendClearSelection();
 
     void drop();

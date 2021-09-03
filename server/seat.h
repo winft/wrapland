@@ -34,7 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class DataDevice;
+class DataSource;
 class Display;
 class drag_pool;
 class input_method_v2;
@@ -42,7 +42,7 @@ class Keyboard;
 class keyboard_pool;
 class Pointer;
 class pointer_pool;
-class PrimarySelectionDevice;
+class PrimarySelectionSource;
 class Surface;
 class text_input_pool;
 class TextInputV2;
@@ -88,10 +88,10 @@ public:
 
     input_method_v2* get_input_method_v2() const;
 
-    DataDevice* selection() const;
-    void setSelection(DataDevice* dataDevice);
-    PrimarySelectionDevice* primarySelection() const;
-    void setPrimarySelection(PrimarySelectionDevice* dataDevice);
+    DataSource* selection() const;
+    void setSelection(DataSource* source);
+    PrimarySelectionSource* primarySelection() const;
+    void setPrimarySelection(PrimarySelectionSource* source);
 
 Q_SIGNALS:
     void pointerPosChanged(const QPointF& pos);
@@ -105,8 +105,8 @@ Q_SIGNALS:
 
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 
-    void selectionChanged(DataDevice*);
-    void primarySelectionChanged(PrimarySelectionDevice*);
+    void selectionChanged(Wrapland::Server::DataSource*);
+    void primarySelectionChanged(Wrapland::Server::PrimarySelectionSource*);
     void dragStarted();
     void dragEnded();
     void dragSurfaceChanged();

@@ -197,8 +197,8 @@ void TestDataDevice::test_create()
     QVERIFY(!server_device->selection());
 
     QVERIFY(!m_server_seat->selection());
-    m_server_seat->setSelection(server_device);
-    QCOMPARE(m_server_seat->selection(), server_device);
+    m_server_seat->setSelection(server_device->selection());
+    QCOMPARE(m_server_seat->selection(), server_device->selection());
 
     // and destroy
     QSignalSpy destroyedSpy(server_device, &QObject::destroyed);
@@ -433,7 +433,7 @@ void TestDataDevice::test_set_selection()
     // Send selection to datadevice.
     QSignalSpy selection_offered_spy(device.get(), &Wrapland::Client::DataDevice::selectionOffered);
     QVERIFY(selection_offered_spy.isValid());
-    server_device->sendSelection(server_device);
+    server_device->sendSelection(server_device->selection());
     QVERIFY(selection_offered_spy.wait());
     QCOMPARE(selection_offered_spy.count(), 1);
 

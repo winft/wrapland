@@ -62,7 +62,7 @@ public:
     Seat* seat() const;
     Client* client() const;
 
-    void sendSelection(PrimarySelectionDevice* device);
+    void sendSelection(PrimarySelectionSource* source);
     void sendClearSelection();
 
 Q_SIGNALS:

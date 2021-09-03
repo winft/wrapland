@@ -43,6 +43,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
+class DataDevice;
+class PrimarySelectionDevice;
 
 constexpr uint32_t SeatVersion = 5;
 using SeatGlobal = Wayland::Global<Seat, SeatVersion>;
@@ -84,8 +86,8 @@ public:
     uint32_t prior_caps{0};
 
     drag_pool drags;
-    selection_pool<DataDevice, &Seat::selectionChanged> data_devices;
-    selection_pool<PrimarySelectionDevice, &Seat::primarySelectionChanged>
+    selection_pool<DataDevice, DataSource, &Seat::selectionChanged> data_devices;
+    selection_pool<PrimarySelectionDevice, PrimarySelectionSource, &Seat::primarySelectionChanged>
         primary_selection_devices;
     input_method_v2* input_method{nullptr};
     text_input_pool text_inputs;

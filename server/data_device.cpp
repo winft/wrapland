@@ -338,15 +338,14 @@ DataSource* DataDevice::selection() const
     return d_ptr->selection;
 }
 
-void DataDevice::sendSelection(DataDevice* other)
+void DataDevice::sendSelection(DataSource* source)
 {
-    auto otherSelection = other->selection();
-    if (!otherSelection) {
+    if (!source) {
         sendClearSelection();
         return;
     }
 
-    auto offer = d_ptr->createDataOffer(otherSelection);
+    auto offer = d_ptr->createDataOffer(source);
     if (!offer) {
         return;
     }
