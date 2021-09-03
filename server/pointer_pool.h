@@ -29,10 +29,10 @@ enum class button_state;
 struct pointer_focus {
     Surface* surface{nullptr};
     std::vector<Pointer*> devices;
-    QMetaObject::Connection destroy_connection;
     QPointF offset;
     QMatrix4x4 transformation;
     uint32_t serial{0};
+    QMetaObject::Connection surface_lost_notifier;
 };
 
 /*

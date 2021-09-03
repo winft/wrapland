@@ -63,7 +63,7 @@ pointer_pool::pointer_pool(Seat* seat)
 
 pointer_pool::~pointer_pool()
 {
-    QObject::disconnect(focus.destroy_connection);
+    QObject::disconnect(focus.surface_lost_notifier);
     for (auto dev : devices) {
         QObject::disconnect(dev, nullptr, seat, nullptr);
     }
@@ -165,7 +165,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& trans
     }
 
     if (focus.surface) {
-        QObject::disconnect(focus.destroy_connection);
+        QObject::disconnect(focus.surface_lost_notifier);
     }
 
     focus = pointer_focus();
@@ -176,7 +176,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& trans
     if (surface) {
         focus.devices = interfacesForSurface(surface, devices);
 
-        focus.destroy_connection
+        focus.surface_lost_notifier
             = QObject::connect(surface, &Surface::resourceDestroyed, seat, [this] {
                   focus = pointer_focus();
                   Q_EMIT seat->focusedPointerChanged(nullptr);

@@ -26,8 +26,8 @@ enum class button_state;
 struct keyboard_focus {
     Surface* surface{nullptr};
     std::vector<Keyboard*> devices;
-    QMetaObject::Connection destroy_connection;
     uint32_t serial{0};
+    QMetaObject::Connection surface_lost_notifier;
 };
 
 struct keyboard_map {

@@ -30,7 +30,7 @@ touch_pool::touch_pool(Seat* seat)
 
 touch_pool::~touch_pool()
 {
-    QObject::disconnect(focus.destroy_connection);
+    QObject::disconnect(focus.surface_lost_notifier);
     for (auto dev : devices) {
         QObject::disconnect(dev, nullptr, seat, nullptr);
     }
@@ -79,14 +79,14 @@ void touch_pool::set_focused_surface(Surface* surface, const QPointF& surfacePos
     Q_ASSERT(!seat->drags().is_touch_drag());
 
     if (focus.surface) {
-        QObject::disconnect(focus.destroy_connection);
+        QObject::disconnect(focus.surface_lost_notifier);
     }
     focus = touch_focus();
     focus.surface = surface;
     focus.offset = surfacePosition;
     focus.devices = interfacesForSurface(surface, devices);
     if (focus.surface) {
-        focus.destroy_connection
+        focus.surface_lost_notifier
             = QObject::connect(surface, &Surface::resourceDestroyed, seat, [this] {
                   if (is_in_progress()) {
                       // Surface destroyed during touch sequence - send a cancel

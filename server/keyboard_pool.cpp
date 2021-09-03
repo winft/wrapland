@@ -24,7 +24,7 @@ keyboard_pool::keyboard_pool(Seat* seat)
 
 keyboard_pool::~keyboard_pool()
 {
-    QObject::disconnect(focus.destroy_connection);
+    QObject::disconnect(focus.surface_lost_notifier);
     for (auto dev : devices) {
         QObject::disconnect(dev, nullptr, seat, nullptr);
     }
@@ -156,7 +156,7 @@ void keyboard_pool::set_focused_surface(Surface* surface)
     }
 
     if (focus.surface) {
-        QObject::disconnect(focus.destroy_connection);
+        QObject::disconnect(focus.surface_lost_notifier);
     }
 
     focus = {};
@@ -165,7 +165,7 @@ void keyboard_pool::set_focused_surface(Surface* surface)
     if (surface) {
         focus.surface = surface;
         focus.serial = serial;
-        focus.destroy_connection
+        focus.surface_lost_notifier
             = QObject::connect(surface, &Surface::resourceDestroyed, seat, [this] { focus = {}; });
     }
 
