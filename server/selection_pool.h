@@ -1,5 +1,5 @@
 /*
-    SPDX-FileCopyrightText: 2020 Roman Gilg <subdiff@gmail.com>
+    SPDX-FileCopyrightText: 2020, 2021 Roman Gilg <subdiff@gmail.com>
     SPDX-FileCopyrightText: 2021 Francesco Sorrentino <francesco.sorr@gmail.com>
 
     SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
@@ -87,20 +87,6 @@ void selection_pool<Device, Source, signal>::set_focused_surface(Surface* surfac
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::transmit(Source* source)
-{
-    if (source) {
-        std::for_each(focus.devices.begin(), focus.devices.end(), [source](Device* dev) {
-            dev->sendSelection(source);
-        });
-    } else {
-        std::for_each(focus.devices.begin(), focus.devices.end(), [](Device* dev) {
-            dev->sendClearSelection();
-        });
-    }
-}
-
-template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::set_selection(Source* source)
 {
     if (focus.source == source) {
@@ -130,6 +116,26 @@ void selection_pool<Device, Source, signal>::set_selection(Source* source)
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
+void selection_pool<Device, Source, signal>::clear_selection(Device* device)
+{
+    update_selection(device, nullptr);
+}
+
+template<typename Device, typename Source, void (Seat::*signal)(Source*)>
+void selection_pool<Device, Source, signal>::transmit(Source* source)
+{
+    if (source) {
+        std::for_each(focus.devices.begin(), focus.devices.end(), [source](Device* dev) {
+            dev->sendSelection(source);
+        });
+    } else {
+        std::for_each(focus.devices.begin(), focus.devices.end(), [](Device* dev) {
+            dev->sendClearSelection();
+        });
+    }
+}
+
+template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::update_selection(Device* device, Source* source)
 {
     if (has_keyboard_focus(device, seat)) {
@@ -143,9 +149,4 @@ void selection_pool<Device, Source, signal>::change_selection(Device* device, So
     update_selection(device, source);
 }
 
-template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::clear_selection(Device* device)
-{
-    update_selection(device, nullptr);
-}
 }
