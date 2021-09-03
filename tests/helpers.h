@@ -31,7 +31,7 @@ Surface* surface_at(Surface* surface, QPointF const& position)
         return nullptr;
     }
 
-    auto const children = surface->childSubsurfaces();
+    auto const children = surface->state().children;
 
     // Go from top to bottom. Top most child is last in the vector.
     auto it = children.end();
@@ -60,7 +60,7 @@ Surface* input_surface_at(Surface* surface, QPointF const& position)
         return nullptr;
     }
 
-    auto const children = surface->childSubsurfaces();
+    auto const children = surface->state().children;
 
     // Go from top to bottom. Top most child is last in list.
     auto it = children.end();
@@ -77,7 +77,8 @@ Surface* input_surface_at(Surface* surface, QPointF const& position)
 
     // Check whether the geometry and input region contain the pos.
     if (!surface->size().isEmpty() && QRectF(QPoint(0, 0), surface->size()).contains(position)
-        && (surface->inputIsInfinite() || surface->input().contains(position.toPoint()))) {
+        && (surface->state().input_is_infinite
+            || surface->state().input.contains(position.toPoint()))) {
         return surface;
     }
     return nullptr;

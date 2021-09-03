@@ -416,11 +416,15 @@ void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const Q
     }
     if (surface != s) {
         if (!surface.isNull()) {
-            QObject::disconnect(surface.data(), &Surface::damaged, q_ptr, &Cursor::changed);
+            QObject::disconnect(surface.data(), &Surface::committed, q_ptr, nullptr);
         }
         surface = s;
         if (!surface.isNull()) {
-            QObject::connect(surface.data(), &Surface::damaged, q_ptr, &Cursor::changed);
+            QObject::connect(surface.data(), &Surface::committed, q_ptr, [this] {
+                if (!surface->state().damage.isEmpty()) {
+                    Q_EMIT q_ptr->changed();
+                }
+            });
         }
         emitChanged = true;
         Q_EMIT q_ptr->surfaceChanged();

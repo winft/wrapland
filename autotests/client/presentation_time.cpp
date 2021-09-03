@@ -234,7 +234,7 @@ void TestPresentationTime::testPresented()
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Server::Surface*>();
     QVERIFY(serverSurface);
-    QCOMPARE(serverSurface->damage(), QRegion());
+    QCOMPARE(serverSurface->state().damage, QRegion());
     QVERIFY(!serverSurface->isMapped());
 
     auto feedback = m_presentation->createFeedback(surface);
@@ -300,7 +300,7 @@ void TestPresentationTime::testDiscarded()
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Server::Surface*>();
     QVERIFY(serverSurface);
-    QCOMPARE(serverSurface->damage(), QRegion());
+    QCOMPARE(serverSurface->state().damage, QRegion());
     QVERIFY(!serverSurface->isMapped());
 
     auto feedback = m_presentation->createFeedback(surface);

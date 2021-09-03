@@ -160,7 +160,7 @@ void TestSlide::testCreate()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy slideChanged(serverSurface, &Wrapland::Server::Surface::slideOnShowHideChanged);
+    QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
 
     auto slide = m_slideManager->createSlide(surface.get(), surface.get());
     slide->setLocation(Wrapland::Client::Slide::Location::Top);
@@ -168,12 +168,12 @@ void TestSlide::testCreate()
     slide->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
 
-    QVERIFY(slideChanged.wait());
-    QCOMPARE(serverSurface->slideOnShowHide()->location(), Wrapland::Server::Slide::Location::Top);
-    QCOMPARE(serverSurface->slideOnShowHide()->offset(), 15);
+    QVERIFY(commit_spy.wait());
+    QCOMPARE(serverSurface->state().slide->location(), Wrapland::Server::Slide::Location::Top);
+    QCOMPARE(serverSurface->state().slide->offset(), 15);
 
     // and destroy
-    QSignalSpy destroyedSpy(serverSurface->slideOnShowHide().data(), &QObject::destroyed);
+    QSignalSpy destroyedSpy(serverSurface->state().slide.data(), &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     delete slide;
     QVERIFY(destroyedSpy.wait());
@@ -189,14 +189,14 @@ void TestSlide::testSurfaceDestroy()
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy slideChanged(serverSurface, &Wrapland::Server::Surface::slideOnShowHideChanged);
-    QVERIFY(slideChanged.isValid());
+    QSignalSpy commit_spy(serverSurface, &Wrapland::Server::Surface::committed);
+    QVERIFY(commit_spy.isValid());
 
     std::unique_ptr<Slide> slide(m_slideManager->createSlide(surface.get()));
     slide->commit();
     surface->commit(Wrapland::Client::Surface::CommitFlag::None);
-    QVERIFY(slideChanged.wait());
-    auto serverSlide = serverSurface->slideOnShowHide();
+    QVERIFY(commit_spy.wait());
+    auto serverSlide = serverSurface->state().slide;
     QVERIFY(!serverSlide.isNull());
 
     // destroy the parent surface

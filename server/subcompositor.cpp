@@ -156,6 +156,12 @@ void Subsurface::Private::applyCached(bool force)
 
     if (force || handle()->isSynchronized()) {
         surface->d_ptr->updateCurrentState(cached, true);
+        Q_EMIT surface->committed();
+    } else {
+        for (auto child : surface->state().children) {
+            // Set at least their positions.
+            child->d_ptr->applyCached(false);
+        }
     }
 }
 
@@ -167,15 +173,16 @@ void Subsurface::Private::commit()
         // Sync mode. We cache the pending state and wait for the parent surface to commit.
         cached = std::move(surface->d_ptr->pending);
         surface->d_ptr->pending = SurfaceState();
-        surface->d_ptr->pending.children = cached.children;
-        if (cached.buffer) {
-            cached.buffer->setCommitted();
+        surface->d_ptr->pending.pub.children = cached.pub.children;
+        if (cached.pub.buffer) {
+            cached.pub.buffer->setCommitted();
         }
         return;
     }
 
     // Desync mode. We commit the surface directly.
     surface->d_ptr->updateCurrentState(false);
+    Q_EMIT surface->committed();
 }
 
 void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClient,
@@ -191,14 +198,7 @@ void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClie
 
 void Subsurface::Private::setPosition(const QPoint& p)
 {
-    if (!handle()->isSynchronized()) {
-        // Workaround for https://bugreports.qt.io/browse/QTBUG-52118,
-        // apply directly as Qt doesn't commit the parent surface.
-        pos = p;
-        Q_EMIT handle()->positionChanged(pos);
-        return;
-    }
-    if (scheduledPos == p) {
+    if (pos == p) {
         return;
     }
     scheduledPos = p;
@@ -270,7 +270,7 @@ void Subsurface::Private::setMode(Mode m)
     if (m == Mode::Desynchronized
         && (!parent->subsurface() || !parent->subsurface()->isSynchronized())) {
         // Parent subsurface list must be updated immediately.
-        auto& cc = parent->d_ptr->current.children;
+        auto& cc = parent->d_ptr->current.pub.children;
         auto subsurface = handle();
         if (std::find(cc.cbegin(), cc.cend(), subsurface) == cc.cend()) {
             cc.push_back(subsurface);
@@ -278,6 +278,7 @@ void Subsurface::Private::setMode(Mode m)
         // No longer synchronized, this is like calling commit.
         assert(surface);
         surface->d_ptr->updateCurrentState(cached, false);
+        Q_EMIT surface->committed();
     }
 }
 
