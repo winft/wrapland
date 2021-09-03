@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <Wrapland/Server/wraplandserver_export.h>
+
 #include <QMatrix4x4>
 #include <QObject>
 
@@ -17,13 +19,38 @@ class Seat;
 class Surface;
 class Touch;
 
+enum class drag_mode {
+    none,
+    pointer,
+    touch,
+};
+
+struct drag_source {
+    DataDevice* dev{nullptr};
+    Pointer* pointer{nullptr};
+    Touch* touch{nullptr};
+    drag_mode mode{drag_mode::none};
+    QMetaObject::Connection destroy_notifier;
+    QMetaObject::Connection device_destroy_notifier;
+};
+
+struct drag_target {
+    DataDevice* dev{nullptr};
+    Surface* surface{nullptr};
+    QMatrix4x4 transformation;
+    QMetaObject::Connection destroy_notifier;
+};
+
 /*
  * Handle drags on behalf of a seat.
  */
-class drag_pool
+class WRAPLANDSERVER_EXPORT drag_pool
 {
 public:
     explicit drag_pool(Seat* seat);
+
+    drag_source const& get_source() const;
+    drag_target const& get_target() const;
 
     void set_target(Surface* new_surface,
                     const QPointF& globalPosition,
@@ -34,26 +61,15 @@ public:
     bool is_pointer_drag() const;
     bool is_touch_drag() const;
 
-    enum class Mode {
-        None,
-        Pointer,
-        Touch,
-    };
-    Mode mode = Mode::None;
-    DataDevice* source = nullptr;
-    DataDevice* target = nullptr;
-    Surface* surface = nullptr;
-    Pointer* sourcePointer = nullptr;
-    Touch* sourceTouch = nullptr;
-    QMatrix4x4 transformation;
-    QMetaObject::Connection destroyConnection;
-    QMetaObject::Connection dragSourceDestroyConnection;
-    QMetaObject::Connection target_destroy_connection;
-
-    Seat* seat;
-
+    void cancel();
     void end(uint32_t serial);
     void perform_drag(DataDevice* dataDevice);
+
+private:
+    drag_source source;
+    drag_target target;
+
+    Seat* seat;
 };
 
 }

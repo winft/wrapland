@@ -363,6 +363,7 @@ set(SERVER_LIB_HEADERS
   data_device_manager.h
   data_offer.h
   data_source.h
+  drag_pool.h
   display.h
   dpms.h
   egl_stream_controller.h
@@ -372,6 +373,7 @@ set(SERVER_LIB_HEADERS
   input_method_v2.h
   kde_idle.h
   keyboard.h
+  keyboard_pool.h
   keystate.h
   keyboard_shortcuts_inhibit.h
   layer_shell_v1.h
@@ -387,6 +389,7 @@ set(SERVER_LIB_HEADERS
   pointer.h
   pointer_constraints_v1.h
   pointer_gestures_v1.h
+  pointer_pool.h
   presentation_time.h
   primary_selection.h
   region.h
@@ -397,9 +400,11 @@ set(SERVER_LIB_HEADERS
   slide.h
   subcompositor.h
   surface.h
+  text_input_pool.h
   text_input_v2.h
   text_input_v3.h
   touch.h
+  touch_pool.h
   viewporter.h
   wl_output.h
   xdg_activation_v1.h

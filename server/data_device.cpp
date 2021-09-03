@@ -131,12 +131,21 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
         focusSurface = proxyRemoteSurface.data();
     }
 
-    const bool pointerGrab
-        = seat->hasImplicitPointerGrab(serial) && seat->focusedPointerSurface() == focusSurface;
+    auto pointerGrab = false;
+    if (seat->hasPointer()) {
+        auto& pointers = seat->pointers();
+        pointerGrab
+            = pointers.has_implicit_grab(serial) && pointers.get_focus().surface == focusSurface;
+    }
 
     if (!pointerGrab) {
         // Client doesn't have pointer grab.
-        if (!seat->hasImplicitTouchGrab(serial) || seat->focusedTouchSurface() != focusSurface) {
+        if (!seat->hasTouch()) {
+            // Client has no pointer grab and no touch capability.
+            return;
+        }
+        auto& touches = seat->touches();
+        if (!touches.has_implicit_grab(serial) || touches.get_focus().surface != focusSurface) {
             // Client neither has pointer nor touch grab. No drag start allowed.
             return;
         }
@@ -203,18 +212,19 @@ void DataDevice::Private::cancel_drag_target()
 
 void DataDevice::Private::update_drag_motion()
 {
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         update_drag_pointer_motion();
-    } else if (seat->isDragTouch()) {
+    } else if (seat->drags().is_touch_drag()) {
         update_drag_touch_motion();
     }
 }
 
 void DataDevice::Private::update_drag_pointer_motion()
 {
-    assert(seat->isDragPointer());
+    assert(seat->drags().is_pointer_drag());
     drag.posConnection = connect(seat, &Seat::pointerPosChanged, handle(), [this] {
-        auto const pos = seat->dragSurfaceTransformation().map(seat->pointerPos());
+        auto const pos
+            = seat->drags().get_target().transformation.map(seat->pointers().get_position());
         send<wl_data_device_send_motion>(
             seat->timestamp(), wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
         client()->flush();
@@ -223,7 +233,8 @@ void DataDevice::Private::update_drag_pointer_motion()
 
 void DataDevice::Private::update_drag_touch_motion()
 {
-    assert(seat->isDragTouch());
+    assert(seat->drags().is_touch_drag());
+
     drag.posConnection = connect(
         seat, &Seat::touchMoved, handle(), [this](auto id, auto serial, auto globalPosition) {
             Q_UNUSED(id);
@@ -231,7 +242,7 @@ void DataDevice::Private::update_drag_touch_motion()
                 // different touch down has been moved
                 return;
             }
-            auto const pos = seat->dragSurfaceTransformation().map(globalPosition);
+            auto const pos = seat->drags().get_target().transformation.map(globalPosition);
             send<wl_data_device_send_motion>(
                 seat->timestamp(), wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
             client()->flush();
@@ -240,11 +251,11 @@ void DataDevice::Private::update_drag_touch_motion()
 
 void DataDevice::Private::update_drag_target_offer(Surface* surface, uint32_t serial)
 {
-    auto source = seat->dragSource()->dragSource();
+    auto source = seat->drags().get_source().dev->dragSource();
     auto offer = createDataOffer(source);
 
     // TODO(unknown author): handle touch position
-    auto const pos = seat->dragSurfaceTransformation().map(seat->pointerPos());
+    auto const pos = seat->drags().get_target().transformation.map(seat->pointers().get_position());
     send<wl_data_device_send_enter>(serial,
                                     surface->d_ptr->resource(),
                                     wl_fixed_from_double(pos.x()),
@@ -369,7 +380,7 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
     d_ptr->cancel_drag_target();
 
     if (!surface) {
-        if (auto s = d_ptr->seat->dragSource()->dragSource()) {
+        if (auto s = d_ptr->seat->drags().get_source().dev->dragSource()) {
             s->dndAction(DataDeviceManager::DnDAction::None);
         }
         return;

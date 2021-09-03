@@ -55,6 +55,8 @@ Q_SIGNALS:
 
 private:
     void setFocusedSurface(quint32 serial, Surface* surface);
+
+    void motion(QPointF const& position);
     void buttonPressed(quint32 serial, quint32 button);
     void buttonReleased(quint32 serial, quint32 button);
     void

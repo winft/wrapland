@@ -9,6 +9,8 @@
 #include "pointer.h"
 #include "surface.h"
 
+#include <Wrapland/Server/wraplandserver_export.h>
+
 #include <QMatrix4x4>
 #include <QObject>
 #include <QPoint>
@@ -25,12 +27,12 @@ class Seat;
 enum class button_state;
 
 struct pointer_focus {
-    Surface* surface = nullptr;
+    Surface* surface{nullptr};
     std::vector<Pointer*> devices;
-    QMetaObject::Connection destroyConnection;
-    QPointF offset = QPointF();
+    QPointF offset;
     QMatrix4x4 transformation;
-    uint32_t serial = 0;
+    uint32_t serial{0};
+    QMetaObject::Connection surface_lost_notifier;
 };
 
 /*
@@ -40,12 +42,18 @@ struct pointer_focus {
  * Clients are allowed to mantain multiple pointers for the same seat,
  * that can receive focus and should be updated together.
  */
-class pointer_pool
+class WRAPLANDSERVER_EXPORT pointer_pool
 {
 public:
     explicit pointer_pool(Seat* seat);
+    ~pointer_pool();
 
+    pointer_focus const& get_focus() const;
+    std::vector<Pointer*> const& get_devices() const;
+
+    QPointF get_position() const;
     void set_position(const QPointF& position);
+
     void set_focused_surface(Surface* surface, const QPointF& surfacePosition = QPoint());
     void set_focused_surface(Surface* surface, const QMatrix4x4& transformation);
     void set_focused_surface_position(const QPointF& surfacePosition);
@@ -79,22 +87,23 @@ public:
     uint32_t button_serial(uint32_t button) const;
     uint32_t button_serial(Qt::MouseButton button) const;
 
-    QPointF position() const;
-
-    std::unordered_map<uint32_t, uint32_t> buttonSerials;
-    std::unordered_map<uint32_t, button_state> buttonStates;
-    QPointF pos;
-    pointer_focus focus;
-    QPointer<Surface> gestureSurface;
+private:
+    friend class Seat;
 
     void create_device(Client* client, uint32_t version, uint32_t id);
-
-    // private
     void update_button_serial(uint32_t button, uint32_t serial);
     void update_button_state(uint32_t button, button_state state);
 
-    Seat* seat;
+    std::unordered_map<uint32_t, uint32_t> buttonSerials;
+    std::unordered_map<uint32_t, button_state> buttonStates;
+
+    pointer_focus focus;
+
+    QPointF pos;
+    QPointer<Surface> gestureSurface;
+
     std::vector<Pointer*> devices;
+    Seat* seat;
 };
 
 }

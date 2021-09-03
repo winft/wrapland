@@ -35,6 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
+#include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
 
@@ -271,19 +272,19 @@ void TestDataDevice::test_drag()
     QFETCH(bool, success);
     if (!hasGrab) {
         // in case we don't have grab, still generate a pointer serial to make it more interesting
-        m_server_seat->pointerButtonPressed(Qt::LeftButton);
+        m_server_seat->pointers().button_pressed(Qt::LeftButton);
     }
     if (hasPointerFocus) {
-        m_server_seat->setFocusedPointerSurface(surfaceInterface);
+        m_server_seat->pointers().set_focused_surface(surfaceInterface);
     }
     if (hasGrab) {
-        m_server_seat->pointerButtonPressed(Qt::LeftButton);
+        m_server_seat->pointers().button_pressed(Qt::LeftButton);
     }
 
     // TODO: This test would be better, if it could also test that a client trying to guess
     //       the last serial of a different client can't start a drag.
-    const quint32 pointerButtonSerial
-        = success ? m_server_seat->pointerButtonSerial(Qt::LeftButton) : 0;
+    auto const pointerButtonSerial
+        = success ? m_server_seat->pointers().button_serial(Qt::LeftButton) : 0;
 
     QCoreApplication::processEvents();
     // finally start the drag
@@ -360,19 +361,19 @@ void TestDataDevice::test_drag_internally()
     QFETCH(bool, success);
     if (!hasGrab) {
         // in case we don't have grab, still generate a pointer serial to make it more interesting
-        m_server_seat->pointerButtonPressed(Qt::LeftButton);
+        m_server_seat->pointers().button_pressed(Qt::LeftButton);
     }
     if (hasPointerFocus) {
-        m_server_seat->setFocusedPointerSurface(surfaceInterface);
+        m_server_seat->pointers().set_focused_surface(surfaceInterface);
     }
     if (hasGrab) {
-        m_server_seat->pointerButtonPressed(Qt::LeftButton);
+        m_server_seat->pointers().button_pressed(Qt::LeftButton);
     }
 
     // TODO: This test would be better, if it could also test that a client trying to guess
     //       the last serial of a different client can't start a drag.
     const quint32 pointerButtonSerial
-        = success ? m_server_seat->pointerButtonSerial(Qt::LeftButton) : 0;
+        = success ? m_server_seat->pointers().button_serial(Qt::LeftButton) : 0;
 
     QCoreApplication::processEvents();
     // finally start the internal drag

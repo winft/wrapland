@@ -18,7 +18,9 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "touch.h"
+#include "touch_pool.h"
 
+#include "drag_pool.h"
 #include "seat.h"
 #include "surface.h"
 
@@ -70,7 +72,7 @@ void Touch::frame()
 
 void Touch::move(qint32 id, const QPointF& localPos)
 {
-    if (d_ptr->seat->isDragTouch()) {
+    if (d_ptr->seat->drags().is_touch_drag()) {
         // handled by DataDevice
         return;
     }
@@ -91,7 +93,7 @@ void Touch::down(qint32 id, quint32 serial, const QPointF& localPos)
 {
     d_ptr->send<wl_touch_send_down>(serial,
                                     d_ptr->seat->timestamp(),
-                                    d_ptr->seat->focusedTouchSurface()->resource(),
+                                    d_ptr->seat->touches().get_focus().surface->resource(),
                                     id,
                                     wl_fixed_from_double(localPos.x()),
                                     wl_fixed_from_double(localPos.y()));

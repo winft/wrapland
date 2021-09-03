@@ -28,6 +28,24 @@ touch_pool::touch_pool(Seat* seat)
 {
 }
 
+touch_pool::~touch_pool()
+{
+    QObject::disconnect(focus.surface_lost_notifier);
+    for (auto dev : devices) {
+        QObject::disconnect(dev, nullptr, seat, nullptr);
+    }
+}
+
+touch_focus const& touch_pool::get_focus() const
+{
+    return focus;
+}
+
+std::vector<Touch*> const& touch_pool::get_devices() const
+{
+    return devices;
+}
+
 void touch_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     // TODO(unknown author): only create if seat has touch?
@@ -58,17 +76,17 @@ void touch_pool::set_focused_surface(Surface* surface, const QPointF& surfacePos
         // changing surface not allowed during a touch sequence
         return;
     }
-    Q_ASSERT(!seat->isDragTouch());
+    Q_ASSERT(!seat->drags().is_touch_drag());
 
     if (focus.surface) {
-        QObject::disconnect(focus.destroyConnection);
+        QObject::disconnect(focus.surface_lost_notifier);
     }
     focus = touch_focus();
     focus.surface = surface;
     focus.offset = surfacePosition;
     focus.devices = interfacesForSurface(surface, devices);
     if (focus.surface) {
-        focus.destroyConnection
+        focus.surface_lost_notifier
             = QObject::connect(surface, &Surface::resourceDestroyed, seat, [this] {
                   if (is_in_progress()) {
                       // Surface destroyed during touch sequence - send a cancel
@@ -96,15 +114,15 @@ int32_t touch_pool::touch_down(const QPointF& globalPosition)
     }
 
     if (id == 0) {
-        focus.firstTouchPos = globalPosition;
+        focus.first_touch_position = globalPosition;
     }
 
 #if HAVE_LINUX_INPUT_H
-    if (id == 0 && focus.devices.empty()) {
+    if (id == 0 && focus.devices.empty() && seat->hasPointer()) {
         // If the client did not bind the touch interface fall back
         // to at least emulating touch through pointer events.
         forEachInterface(
-            focus.surface, seat->d_ptr->pointers.devices, [this, pos, serial](Pointer* p) {
+            focus.surface, seat->pointers().get_devices(), [this, pos, serial](Pointer* p) {
                 p->d_ptr->sendEnter(serial, focus.surface, pos);
                 p->d_ptr->sendMotion(pos);
                 p->buttonPressed(serial, BTN_LEFT);
@@ -121,19 +139,20 @@ void touch_pool::touch_up(int32_t id)
 {
     Q_ASSERT(ids.count(id));
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
-    if (seat->isDragTouch() && seat->d_ptr->drags.source->dragImplicitGrabSerial() == ids[id]) {
+    if (seat->drags().is_touch_drag()
+        && seat->drags().get_source().dev->dragImplicitGrabSerial() == ids[id]) {
         // the implicitly grabbing touch point has been upped
-        seat->d_ptr->drags.end(serial);
+        seat->drags().end(serial);
     }
     for (auto touch : focus.devices) {
         touch->up(id, serial);
     }
 
 #if HAVE_LINUX_INPUT_H
-    if (id == 0 && focus.devices.empty()) {
+    if (id == 0 && focus.devices.empty() && seat->hasPointer()) {
         // Client did not bind touch, fall back to emulating with pointer events.
         const uint32_t serial = seat->d_ptr->display()->handle()->nextSerial();
-        forEachInterface(focus.surface, seat->d_ptr->pointers.devices, [serial](Pointer* p) {
+        forEachInterface(focus.surface, seat->pointers().get_devices(), [serial](Pointer* p) {
             p->buttonReleased(serial, BTN_LEFT);
         });
     }
@@ -151,16 +170,22 @@ void touch_pool::touch_move(int32_t id, const QPointF& globalPosition)
     }
 
     if (id == 0) {
-        focus.firstTouchPos = globalPosition;
+        focus.first_touch_position = globalPosition;
     }
 
-    if (id == 0 && focus.devices.empty()) {
+    if (id == 0 && focus.devices.empty() && seat->hasPointer()) {
         // Client did not bind touch, fall back to emulating with pointer events.
-        forEachInterface(focus.surface, seat->d_ptr->pointers.devices, [pos](Pointer* p) {
+        forEachInterface(focus.surface, seat->pointers().get_devices(), [pos](Pointer* p) {
             p->d_ptr->sendMotion(pos);
         });
     }
     Q_EMIT seat->touchMoved(id, ids[id], globalPosition);
+}
+
+void touch_pool::touch_move_any(QPointF const& pos)
+{
+    assert(!ids.empty());
+    touch_move(ids.cbegin()->first, pos);
 }
 
 void touch_pool::touch_frame() const
@@ -175,15 +200,9 @@ void touch_pool::cancel_sequence()
     for (auto touch : focus.devices) {
         touch->cancel();
     }
-    if (seat->isDragTouch()) {
+    if (seat->drags().is_touch_drag()) {
         // cancel the drag, don't drop.
-        if (seat->d_ptr->drags.target) {
-            // remove the current target
-            seat->d_ptr->drags.target->updateDragTarget(nullptr, 0);
-            seat->d_ptr->drags.target = nullptr;
-        }
-        // and end the drag for the source, serial does not matter
-        seat->d_ptr->drags.end(0);
+        seat->drags().cancel();
     }
     ids.clear();
 }
