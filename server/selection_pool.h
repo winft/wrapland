@@ -39,7 +39,7 @@ private:
 
     void change_selection(Device* device, Source* source);
     void cancel_previous_selection(Source* new_source);
-    bool update_selection(Device* device, Source* source);
+    void update_selection(Device* device, Source* source);
 
     void advertise();
     void transmit(Source* source);
@@ -150,35 +150,22 @@ void selection_pool<Device, Source, signal>::set_selection(Source* source)
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-bool selection_pool<Device, Source, signal>::update_selection(Device* device, Source* source)
+void selection_pool<Device, Source, signal>::update_selection(Device* device, Source* source)
 {
-    if (!has_keyboard_focus(device, seat) || focus.source == source) {
-        return false;
+    if (has_keyboard_focus(device, seat)) {
+        set_selection(source);
     }
-
-    do_set_source(source);
-    return true;
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::change_selection(Device* device, Source* source)
 {
-    if (!update_selection(device, source)) {
-        return;
-    }
-
-    transmit(source);
-    Q_EMIT(seat->*signal)(focus.source);
+    update_selection(device, source);
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::clear_selection(Device* device)
 {
-    if (!update_selection(device, nullptr)) {
-        return;
-    }
-
-    transmit(nullptr);
-    Q_EMIT(seat->*signal)(focus.source);
+    update_selection(device, nullptr);
 }
 }
