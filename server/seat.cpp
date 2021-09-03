@@ -96,17 +96,17 @@ void Seat::Private::sendCapabilities()
 
 void Seat::setHasKeyboard(bool has)
 {
-    d_ptr->set_capability(d_ptr->keyboards, has);
+    d_ptr->set_capability(WL_SEAT_CAPABILITY_KEYBOARD, d_ptr->keyboards, has);
 }
 
 void Seat::setHasPointer(bool has)
 {
-    d_ptr->set_capability(d_ptr->pointers, has);
+    d_ptr->set_capability(WL_SEAT_CAPABILITY_POINTER, d_ptr->pointers, has);
 }
 
 void Seat::setHasTouch(bool has)
 {
-    d_ptr->set_capability(d_ptr->touches, has);
+    d_ptr->set_capability(WL_SEAT_CAPABILITY_TOUCH, d_ptr->touches, has);
 }
 
 pointer_pool& Seat::pointers() const
@@ -145,9 +145,14 @@ void Seat::setName(const std::string& name)
 
 void Seat::Private::getPointerCallback(SeatBind* bind, uint32_t id)
 {
-    auto& manager = bind->global()->handle()->d_ptr->pointers;
+    auto priv = bind->global()->handle()->d_ptr.get();
+    auto& manager = priv->pointers;
     if (!manager) {
         // If we have no pointer capability we ignore the created resource.
+        if (!(priv->prior_caps & WL_SEAT_CAPABILITY_POINTER)) {
+            bind->post_error(WL_SEAT_ERROR_MISSING_CAPABILITY,
+                             "Seat never had the pointer capability");
+        }
         return;
     }
     manager.value().create_device(bind->client()->handle(), bind->version(), id);
@@ -155,9 +160,14 @@ void Seat::Private::getPointerCallback(SeatBind* bind, uint32_t id)
 
 void Seat::Private::getKeyboardCallback(SeatBind* bind, uint32_t id)
 {
-    auto& manager = bind->global()->handle()->d_ptr->keyboards;
+    auto priv = bind->global()->handle()->d_ptr.get();
+    auto& manager = priv->keyboards;
     if (!manager) {
         // If we have no keyboard capability we ignore the created resource.
+        if (!(priv->prior_caps & WL_SEAT_CAPABILITY_KEYBOARD)) {
+            bind->post_error(WL_SEAT_ERROR_MISSING_CAPABILITY,
+                             "Seat never had the keyboard capability");
+        }
         return;
     }
     manager.value().create_device(bind->client()->handle(), bind->version(), id);
@@ -165,9 +175,14 @@ void Seat::Private::getKeyboardCallback(SeatBind* bind, uint32_t id)
 
 void Seat::Private::getTouchCallback(SeatBind* bind, uint32_t id)
 {
-    auto& manager = bind->global()->handle()->d_ptr->touches;
+    auto priv = bind->global()->handle()->d_ptr.get();
+    auto& manager = priv->touches;
     if (!manager) {
         // If we have no touch capability we ignore the created resource.
+        if (!(priv->prior_caps & WL_SEAT_CAPABILITY_TOUCH)) {
+            bind->post_error(WL_SEAT_ERROR_MISSING_CAPABILITY,
+                             "Seat never had the touch capability");
+        }
         return;
     }
     manager.value().create_device(bind->client()->handle(), bind->version(), id);

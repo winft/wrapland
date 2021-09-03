@@ -61,12 +61,13 @@ public:
     uint32_t getCapabilities() const;
 
     template<typename Dev>
-    void set_capability(std::optional<Dev>& dev, bool has)
+    void set_capability(uint32_t cap, std::optional<Dev>& dev, bool has)
     {
         if (static_cast<bool>(dev) == has) {
             return;
         }
         if (has) {
+            prior_caps |= cap;
             dev = Dev(q_ptr);
         } else {
             dev.reset();
@@ -75,11 +76,13 @@ public:
     }
 
     std::string name;
-    QList<wl_resource*> resources;
     uint32_t timestamp = 0;
+
     std::optional<pointer_pool> pointers;
     std::optional<keyboard_pool> keyboards;
     std::optional<touch_pool> touches;
+    uint32_t prior_caps{0};
+
     drag_pool drags;
     selection_pool<DataDevice, &Seat::selectionChanged> data_devices;
     selection_pool<PrimarySelectionDevice, &Seat::primarySelectionChanged>
