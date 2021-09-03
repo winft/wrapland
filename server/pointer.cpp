@@ -66,29 +66,6 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
     : Wayland::Resource<Pointer>(client, version, id, &wl_pointer_interface, &s_interface, q)
     , seat{_seat}
 {
-    // TODO(unknown author): handle touch
-    connect(seat, &Seat::pointerPosChanged, q, [this] {
-        if (!focusedSurface) {
-            return;
-        }
-        if (seat->drags().is_pointer_drag()) {
-            const auto* originSurface = seat->drags().get_source().dev->origin();
-            const bool proxyRemoteFocused
-                = originSurface->dataProxy() && originSurface == focusedSurface;
-            if (!proxyRemoteFocused) {
-                // handled by DataDevice
-                return;
-            }
-        }
-        if (!focusedSurface->lockedPointer().isNull()
-            && focusedSurface->lockedPointer()->isLocked()) {
-            return;
-        }
-        auto& pointers = seat->pointers();
-        auto const pos = pointers.get_focus().transformation.map(pointers.get_position());
-        sendMotion(pos);
-        sendFrame();
-    });
 }
 
 void Pointer::Private::setCursor(quint32 serial, Surface* surface, const QPoint& hotspot)
@@ -375,6 +352,29 @@ Seat* Pointer::seat() const
 Cursor* Pointer::cursor() const
 {
     return d_ptr->cursor.get();
+}
+
+void Pointer::motion(QPointF const& position)
+{
+    assert(d_ptr->focusedSurface);
+
+    if (d_ptr->seat->drags().is_pointer_drag()) {
+        auto const drag_origin = d_ptr->seat->drags().get_source().dev->origin();
+        auto const proxy_surface_focused
+            = drag_origin->dataProxy() && drag_origin == d_ptr->focusedSurface;
+        if (!proxy_surface_focused) {
+            // Handled by DataDevice.
+            return;
+        }
+    }
+
+    if (!d_ptr->focusedSurface->lockedPointer().isNull()
+        && d_ptr->focusedSurface->lockedPointer()->isLocked()) {
+        return;
+    }
+
+    d_ptr->sendMotion(position);
+    d_ptr->sendFrame();
 }
 
 void Pointer::relativeMotion(const QSizeF& delta,

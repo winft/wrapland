@@ -130,6 +130,10 @@ void pointer_pool::set_position(const QPointF& position)
 {
     if (pos != position) {
         pos = position;
+        for (auto pointer : focus.devices) {
+            pointer->motion(focus.transformation.map(position));
+        }
+        // TODO(romangg): should we provide the transformed position here?
         Q_EMIT seat->pointerPosChanged(position);
     }
 }
