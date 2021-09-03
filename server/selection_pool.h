@@ -24,7 +24,6 @@ struct selection_pool {
 
     void set_selection(Source* source);
     void clear_selection(Device* device);
-    void do_set_source(Source* source);
 
     struct {
         std::vector<Device*> devices;
@@ -38,7 +37,6 @@ private:
     void cleanup_device(Device* device);
 
     void change_selection(Device* device, Source* source);
-    void cancel_previous_selection(Source* new_source);
     void update_selection(Device* device, Source* source);
 
     void transmit(Source* source);
@@ -82,17 +80,6 @@ void selection_pool<Device, Source, signal>::cleanup_device(Device* device)
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::cancel_previous_selection(Source* new_source)
-{
-    if (!focus.source || (focus.source == new_source)) {
-        return;
-    }
-    QObject::disconnect(focus.source_destroy_notifier);
-    focus.source_destroy_notifier = QMetaObject::Connection();
-    focus.source->cancel();
-}
-
-template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::set_focused_surface(Surface* surface)
 {
     focus.devices = interfacesForSurface(surface, devices);
@@ -114,11 +101,22 @@ void selection_pool<Device, Source, signal>::transmit(Source* source)
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::do_set_source(Source* source)
+void selection_pool<Device, Source, signal>::set_selection(Source* source)
 {
-    cancel_previous_selection(source);
+    if (focus.source == source) {
+        return;
+    }
 
-    if (source && focus.source != source) {
+    QObject::disconnect(focus.source_destroy_notifier);
+    focus.source_destroy_notifier = QMetaObject::Connection();
+
+    if (focus.source) {
+        focus.source->cancel();
+    }
+
+    focus.source = source;
+
+    if (source) {
         focus.source_destroy_notifier
             = QObject::connect(source, &Source::resourceDestroyed, seat, [this] {
                   focus.source = nullptr;
@@ -126,17 +124,6 @@ void selection_pool<Device, Source, signal>::do_set_source(Source* source)
                   Q_EMIT(seat->*signal)(nullptr);
               });
     }
-    focus.source = source;
-}
-
-template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::set_selection(Source* source)
-{
-    if (focus.source == source) {
-        return;
-    }
-
-    do_set_source(source);
 
     transmit(source);
     Q_EMIT(seat->*signal)(source);
