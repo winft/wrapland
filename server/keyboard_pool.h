@@ -6,10 +6,13 @@
 */
 #pragma once
 
+#include <Wrapland/Server/wraplandserver_export.h>
+
 #include <QObject>
 
 #include <cstdint>
 #include <unordered_map>
+#include <vector>
 
 namespace Wrapland::Server
 {
@@ -21,24 +24,24 @@ class Seat;
 enum class button_state;
 
 struct keyboard_focus {
-    Surface* surface = nullptr;
+    Surface* surface{nullptr};
     std::vector<Keyboard*> devices;
-    QMetaObject::Connection destroyConnection;
-    uint32_t serial = 0;
+    uint32_t serial{0};
+    QMetaObject::Connection surface_lost_notifier;
 };
 
 struct keyboard_map {
-    int fd = -1;
+    int fd{-1};
     std::string content;
-    bool xkbcommonCompatible = false;
+    bool xkbcommon_compatible{false};
 };
 
 struct keyboard_modifiers {
-    uint32_t depressed = 0;
-    uint32_t latched = 0;
-    uint32_t locked = 0;
-    uint32_t group = 0;
-    uint32_t serial = 0;
+    uint32_t depressed{0};
+    uint32_t latched{0};
+    uint32_t locked{0};
+    uint32_t group{0};
+    uint32_t serial{0};
 
     bool operator==(keyboard_modifiers const& other) const
     {
@@ -52,8 +55,10 @@ struct keyboard_modifiers {
 };
 
 struct keyboard_repeat_info {
-    int32_t charactersPerSecond = 0;
-    int32_t delay = 0;
+    // In chars per second.
+    int32_t rate{0};
+    // In milliseconds.
+    int32_t delay{0};
 };
 
 /*
@@ -64,10 +69,16 @@ struct keyboard_repeat_info {
  * On seats with keyboard capability, keyboard focus is relevant for
  * selections and text input.
  */
-class keyboard_pool
+class WRAPLANDSERVER_EXPORT keyboard_pool
 {
 public:
     explicit keyboard_pool(Seat* seat);
+    ~keyboard_pool();
+
+    keyboard_focus const& get_focus() const;
+    keyboard_map const& get_keymap() const;
+    keyboard_modifiers const& get_modifiers() const;
+    keyboard_repeat_info const& get_repeat_info() const;
 
     void key_pressed(uint32_t key);
     void key_released(uint32_t key);
@@ -77,20 +88,22 @@ public:
     void set_repeat_info(int32_t charactersPerSecond, int32_t delay);
 
     std::vector<uint32_t> pressed_keys() const;
+    bool update_key(uint32_t key, button_state state);
 
+private:
+    friend class Seat;
     void create_device(Client* client, uint32_t version, uint32_t id);
 
+    keyboard_focus focus;
     keyboard_map keymap;
     keyboard_modifiers modifiers;
-    keyboard_focus focus;
     keyboard_repeat_info keyRepeat;
 
     std::unordered_map<uint32_t, button_state> states;
-    uint32_t lastStateSerial = 0;
+    uint32_t lastStateSerial{0};
 
-    bool update_key(uint32_t key, button_state state);
-    Seat* seat;
     std::vector<Keyboard*> devices;
+    Seat* seat;
 };
 
 }

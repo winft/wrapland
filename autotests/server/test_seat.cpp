@@ -21,7 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtTest>
 
 #include "../../server/display.h"
-#include "../../server/pointer.h"
+#include "../../server/keyboard_pool.h"
+#include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 
 using namespace Wrapland::Server;
@@ -51,44 +52,20 @@ void TestWaylandServerSeat::testCapabilities()
     QVERIFY(!seat->hasPointer());
     QVERIFY(!seat->hasTouch());
 
-    QSignalSpy keyboardSpy(seat.get(), SIGNAL(hasKeyboardChanged(bool)));
-    QVERIFY(keyboardSpy.isValid());
     seat->setHasKeyboard(true);
-    QCOMPARE(keyboardSpy.count(), 1);
-    QVERIFY(keyboardSpy.last().first().toBool());
     QVERIFY(seat->hasKeyboard());
     seat->setHasKeyboard(false);
-    QCOMPARE(keyboardSpy.count(), 2);
-    QVERIFY(!keyboardSpy.last().first().toBool());
     QVERIFY(!seat->hasKeyboard());
-    seat->setHasKeyboard(false);
-    QCOMPARE(keyboardSpy.count(), 2);
 
-    QSignalSpy pointerSpy(seat.get(), SIGNAL(hasPointerChanged(bool)));
-    QVERIFY(pointerSpy.isValid());
     seat->setHasPointer(true);
-    QCOMPARE(pointerSpy.count(), 1);
-    QVERIFY(pointerSpy.last().first().toBool());
     QVERIFY(seat->hasPointer());
     seat->setHasPointer(false);
-    QCOMPARE(pointerSpy.count(), 2);
-    QVERIFY(!pointerSpy.last().first().toBool());
     QVERIFY(!seat->hasPointer());
-    seat->setHasPointer(false);
-    QCOMPARE(pointerSpy.count(), 2);
 
-    QSignalSpy touchSpy(seat.get(), SIGNAL(hasTouchChanged(bool)));
-    QVERIFY(touchSpy.isValid());
     seat->setHasTouch(true);
-    QCOMPARE(touchSpy.count(), 1);
-    QVERIFY(touchSpy.last().first().toBool());
     QVERIFY(seat->hasTouch());
     seat->setHasTouch(false);
-    QCOMPARE(touchSpy.count(), 2);
-    QVERIFY(!touchSpy.last().first().toBool());
     QVERIFY(!seat->hasTouch());
-    seat->setHasTouch(false);
-    QCOMPARE(touchSpy.count(), 2);
 }
 
 void TestWaylandServerSeat::testName()
@@ -110,28 +87,29 @@ void TestWaylandServerSeat::testPointerButton()
     display.setSocketName(s_socketName);
     display.start();
     std::unique_ptr<Seat> seat{display.createSeat()};
-    auto pointer = seat->focusedPointer();
-    QVERIFY(!pointer);
+    seat->setHasPointer(true);
+
+    QVERIFY(seat->pointers().get_focus().devices.empty());
 
     // no button pressed yet, should be released and no serial
-    QVERIFY(!seat->isPointerButtonPressed(0));
-    QVERIFY(!seat->isPointerButtonPressed(1));
-    QCOMPARE(seat->pointerButtonSerial(0), quint32(0));
-    QCOMPARE(seat->pointerButtonSerial(1), quint32(0));
+    QVERIFY(!seat->pointers().is_button_pressed(0));
+    QVERIFY(!seat->pointers().is_button_pressed(1));
+    QCOMPARE(seat->pointers().button_serial(0), quint32(0));
+    QCOMPARE(seat->pointers().button_serial(1), quint32(0));
 
     // mark the button as pressed
-    seat->pointerButtonPressed(0);
-    QVERIFY(seat->isPointerButtonPressed(0));
-    QCOMPARE(seat->pointerButtonSerial(0), display.serial());
+    seat->pointers().button_pressed(0);
+    QVERIFY(seat->pointers().is_button_pressed(0));
+    QCOMPARE(seat->pointers().button_serial(0), display.serial());
 
     // other button should still be unpressed
-    QVERIFY(!seat->isPointerButtonPressed(1));
-    QCOMPARE(seat->pointerButtonSerial(1), quint32(0));
+    QVERIFY(!seat->pointers().is_button_pressed(1));
+    QCOMPARE(seat->pointers().button_serial(1), quint32(0));
 
     // release it again
-    seat->pointerButtonReleased(0);
-    QVERIFY(!seat->isPointerButtonPressed(0));
-    QCOMPARE(seat->pointerButtonSerial(0), display.serial());
+    seat->pointers().button_released(0);
+    QVERIFY(!seat->pointers().is_button_pressed(0));
+    QCOMPARE(seat->pointers().button_serial(0), display.serial());
 }
 
 void TestWaylandServerSeat::testPointerPos()
@@ -143,21 +121,21 @@ void TestWaylandServerSeat::testPointerPos()
     std::unique_ptr<Seat> seat{display.createSeat()};
     QSignalSpy seatPosSpy(seat.get(), SIGNAL(pointerPosChanged(QPointF)));
     QVERIFY(seatPosSpy.isValid());
-    auto pointer = seat->focusedPointer();
-    QVERIFY(!pointer);
+    seat->setHasPointer(true);
 
-    QCOMPARE(seat->pointerPos(), QPointF());
+    QVERIFY(seat->pointers().get_focus().devices.empty());
+    QCOMPARE(seat->pointers().get_position(), QPointF());
 
-    seat->setPointerPos(QPointF(10, 15));
-    QCOMPARE(seat->pointerPos(), QPointF(10, 15));
+    seat->pointers().set_position(QPointF(10, 15));
+    QCOMPARE(seat->pointers().get_position(), QPointF(10, 15));
     QCOMPARE(seatPosSpy.count(), 1);
     QCOMPARE(seatPosSpy.first().first().toPointF(), QPointF(10, 15));
 
-    seat->setPointerPos(QPointF(10, 15));
+    seat->pointers().set_position(QPointF(10, 15));
     QCOMPARE(seatPosSpy.count(), 1);
 
-    seat->setPointerPos(QPointF(5, 7));
-    QCOMPARE(seat->pointerPos(), QPointF(5, 7));
+    seat->pointers().set_position(QPointF(5, 7));
+    QCOMPARE(seat->pointers().get_position(), QPointF(5, 7));
     QCOMPARE(seatPosSpy.count(), 2);
     QCOMPARE(seatPosSpy.first().first().toPointF(), QPointF(10, 15));
     QCOMPARE(seatPosSpy.last().first().toPointF(), QPointF(5, 7));
@@ -185,15 +163,19 @@ void TestWaylandServerSeat::testRepeatInfo()
     display.start();
 
     std::unique_ptr<Seat> seat{display.createSeat()};
-    QCOMPARE(seat->keyRepeatRate(), 0);
-    QCOMPARE(seat->keyRepeatDelay(), 0);
-    seat->setKeyRepeatInfo(25, 660);
-    QCOMPARE(seat->keyRepeatRate(), 25);
-    QCOMPARE(seat->keyRepeatDelay(), 660);
+    seat->setHasKeyboard(true);
+    auto& keyboards = seat->keyboards();
+
+    QCOMPARE(keyboards.get_repeat_info().rate, 0);
+    QCOMPARE(keyboards.get_repeat_info().delay, 0);
+    keyboards.set_repeat_info(25, 660);
+    QCOMPARE(keyboards.get_repeat_info().rate, 25);
+    QCOMPARE(keyboards.get_repeat_info().delay, 660);
+
     // setting negative values should result in 0
-    seat->setKeyRepeatInfo(-25, -660);
-    QCOMPARE(seat->keyRepeatRate(), 0);
-    QCOMPARE(seat->keyRepeatDelay(), 0);
+    keyboards.set_repeat_info(-25, -660);
+    QCOMPARE(keyboards.get_repeat_info().rate, 0);
+    QCOMPARE(keyboards.get_repeat_info().delay, 0);
 }
 
 void TestWaylandServerSeat::testMultiple()

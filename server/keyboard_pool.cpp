@@ -22,6 +22,34 @@ keyboard_pool::keyboard_pool(Seat* seat)
 {
 }
 
+keyboard_pool::~keyboard_pool()
+{
+    QObject::disconnect(focus.surface_lost_notifier);
+    for (auto dev : devices) {
+        QObject::disconnect(dev, nullptr, seat, nullptr);
+    }
+}
+
+keyboard_focus const& keyboard_pool::get_focus() const
+{
+    return focus;
+}
+
+keyboard_map const& keyboard_pool::get_keymap() const
+{
+    return keymap;
+}
+
+keyboard_modifiers const& keyboard_pool::get_modifiers() const
+{
+    return modifiers;
+}
+
+keyboard_repeat_info const& keyboard_pool::get_repeat_info() const
+{
+    return keyRepeat;
+}
+
 void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     auto keyboard = new Keyboard(client, version, id, seat);
@@ -29,9 +57,9 @@ void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
         return;
     }
 
-    keyboard->repeatInfo(keyRepeat.charactersPerSecond, keyRepeat.delay);
+    keyboard->repeatInfo(keyRepeat.rate, keyRepeat.delay);
 
-    if (keymap.xkbcommonCompatible) {
+    if (keymap.xkbcommon_compatible) {
         keyboard->setKeymap(keymap.content);
     }
 
@@ -128,7 +156,7 @@ void keyboard_pool::set_focused_surface(Surface* surface)
     }
 
     if (focus.surface) {
-        QObject::disconnect(focus.destroyConnection);
+        QObject::disconnect(focus.surface_lost_notifier);
     }
 
     focus = {};
@@ -137,7 +165,7 @@ void keyboard_pool::set_focused_surface(Surface* surface)
     if (surface) {
         focus.surface = surface;
         focus.serial = serial;
-        focus.destroyConnection
+        focus.surface_lost_notifier
             = QObject::connect(surface, &Surface::resourceDestroyed, seat, [this] { focus = {}; });
     }
 
@@ -148,7 +176,7 @@ void keyboard_pool::set_focused_surface(Surface* surface)
 
 void keyboard_pool::set_keymap(std::string const& content)
 {
-    keymap.xkbcommonCompatible = true;
+    keymap.xkbcommon_compatible = true;
     keymap.content = content;
     for (auto device : devices) {
         device->setKeymap(content);
@@ -157,10 +185,10 @@ void keyboard_pool::set_keymap(std::string const& content)
 
 void keyboard_pool::set_repeat_info(int32_t charactersPerSecond, int32_t delay)
 {
-    keyRepeat.charactersPerSecond = qMax(charactersPerSecond, 0);
+    keyRepeat.rate = qMax(charactersPerSecond, 0);
     keyRepeat.delay = qMax(delay, 0);
     for (auto device : devices) {
-        device->repeatInfo(keyRepeat.charactersPerSecond, keyRepeat.delay);
+        device->repeatInfo(keyRepeat.rate, keyRepeat.delay);
     }
 }
 

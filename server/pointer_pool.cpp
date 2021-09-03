@@ -61,6 +61,24 @@ pointer_pool::pointer_pool(Seat* seat)
 {
 }
 
+pointer_pool::~pointer_pool()
+{
+    QObject::disconnect(focus.surface_lost_notifier);
+    for (auto dev : devices) {
+        QObject::disconnect(dev, nullptr, seat, nullptr);
+    }
+}
+
+pointer_focus const& pointer_pool::get_focus() const
+{
+    return focus;
+}
+
+std::vector<Pointer*> const& pointer_pool::get_devices() const
+{
+    return devices;
+}
+
 void pointer_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     auto pointer = new Pointer(client, version, id, seat);
@@ -103,7 +121,7 @@ void pointer_pool::update_button_state(uint32_t button, button_state state)
     buttonStates[button] = state;
 }
 
-QPointF pointer_pool::position() const
+QPointF pointer_pool::get_position() const
 {
     return pos;
 }
@@ -112,6 +130,10 @@ void pointer_pool::set_position(const QPointF& position)
 {
     if (pos != position) {
         pos = position;
+        for (auto pointer : focus.devices) {
+            pointer->motion(focus.transformation.map(position));
+        }
+        // TODO(romangg): should we provide the transformed position here?
         Q_EMIT seat->pointerPosChanged(position);
     }
 }
@@ -129,7 +151,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QPointF& surfaceP
 
 void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& transformation)
 {
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         // ignore
         return;
     }
@@ -143,7 +165,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& trans
     }
 
     if (focus.surface) {
-        QObject::disconnect(focus.destroyConnection);
+        QObject::disconnect(focus.surface_lost_notifier);
     }
 
     focus = pointer_focus();
@@ -154,7 +176,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& trans
     if (surface) {
         focus.devices = interfacesForSurface(surface, devices);
 
-        focus.destroyConnection
+        focus.surface_lost_notifier
             = QObject::connect(surface, &Surface::resourceDestroyed, seat, [this] {
                   focus = pointer_focus();
                   Q_EMIT seat->focusedPointerChanged(nullptr);
@@ -217,7 +239,7 @@ void pointer_pool::button_pressed(uint32_t button)
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
     update_button_serial(button, serial);
     update_button_state(button, button_state::pressed);
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         // ignore
         return;
     }
@@ -243,12 +265,12 @@ void pointer_pool::button_released(uint32_t button)
     const uint32_t currentButtonSerial = button_serial(button);
     update_button_serial(button, serial);
     update_button_state(button, button_state::released);
-    if (seat->isDragPointer()) {
-        if (seat->d_ptr->drags.source->dragImplicitGrabSerial() != currentButtonSerial) {
+    if (seat->drags().is_pointer_drag()) {
+        if (seat->drags().get_source().dev->dragImplicitGrabSerial() != currentButtonSerial) {
             // not our drag button - ignore
             return;
         }
-        seat->d_ptr->drags.end(serial);
+        seat->drags().end(serial);
         return;
     }
     if (focus.surface) {
@@ -291,7 +313,7 @@ void pointer_pool::send_axis(Qt::Orientation orientation,
                              int32_t discreteDelta,
                              PointerAxisSource source) const
 {
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         // ignore
         return;
     }
@@ -304,7 +326,7 @@ void pointer_pool::send_axis(Qt::Orientation orientation,
 
 void pointer_pool::send_axis(Qt::Orientation orientation, uint32_t delta) const
 {
-    if (seat->isDragPointer()) {
+    if (seat->drags().is_pointer_drag()) {
         // ignore
         return;
     }
