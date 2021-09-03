@@ -42,6 +42,7 @@ private:
     bool update_selection(Device* device, Source* source);
 
     void advertise();
+    void transmit(Source* source);
 
     Seat* seat;
 };
@@ -60,6 +61,7 @@ void selection_pool<Device, Source, signal>::register_device(Device* device)
     QObject::connect(
         device, &Device::resourceDestroyed, seat, [this, device] { cleanup_device(device); });
     QObject::connect(device, &Device::selectionChanged, seat, [this, device](Source* source) {
+        assert(source);
         change_selection(device, source);
     });
     QObject::connect(
@@ -99,14 +101,16 @@ void selection_pool<Device, Source, signal>::set_focused_surface(Surface* surfac
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::advertise()
+void selection_pool<Device, Source, signal>::transmit(Source* source)
 {
-    for (auto device : focus.devices) {
-        if (focus.source) {
-            device->sendSelection(focus.source);
-        } else {
-            device->sendClearSelection();
-        }
+    if (source) {
+        std::for_each(focus.devices.begin(), focus.devices.end(), [source](Device* dev) {
+            dev->sendSelection(source);
+        });
+    } else {
+        std::for_each(focus.devices.begin(), focus.devices.end(), [](Device* dev) {
+            dev->sendClearSelection();
+        });
     }
 }
 
@@ -127,6 +131,12 @@ void selection_pool<Device, Source, signal>::do_set_source(Source* source)
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
+void selection_pool<Device, Source, signal>::advertise()
+{
+    transmit(focus.source);
+}
+
+template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::set_selection(Source* source)
 {
     if (focus.source == source) {
@@ -135,14 +145,7 @@ void selection_pool<Device, Source, signal>::set_selection(Source* source)
 
     do_set_source(source);
 
-    for (auto focusedDevice : focus.devices) {
-        if (source) {
-            focusedDevice->sendSelection(source);
-        } else {
-            focusedDevice->sendClearSelection();
-        }
-    }
-
+    transmit(source);
     Q_EMIT(seat->*signal)(source);
 }
 
@@ -164,10 +167,7 @@ void selection_pool<Device, Source, signal>::change_selection(Device* device, So
         return;
     }
 
-    for (auto dev : focus.devices) {
-        dev->sendSelection(source);
-    }
-
+    transmit(source);
     Q_EMIT(seat->*signal)(focus.source);
 }
 
@@ -178,10 +178,7 @@ void selection_pool<Device, Source, signal>::clear_selection(Device* device)
         return;
     }
 
-    for (auto focusedDevice : focus.devices) {
-        focusedDevice->sendClearSelection();
-    }
-
+    transmit(nullptr);
     Q_EMIT(seat->*signal)(focus.source);
 }
 }
