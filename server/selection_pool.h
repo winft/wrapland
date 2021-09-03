@@ -20,16 +20,9 @@ struct selection_pool {
     explicit selection_pool(Seat* seat);
 
     void register_device(Device* device);
-    void cleanup_device(Device* device);
+    void set_focused_surface(Surface* surface);
 
     void set_selection(Source* source);
-
-    void cancel_previous_selection(Source* new_source);
-    void set_focused_surface(Surface* surface);
-    void advertise();
-
-    bool update_selection(Device* device, Source* source);
-    void change_selection(Device* device, Source* source);
     void clear_selection(Device* device);
     void do_set_source(Source* source);
 
@@ -40,6 +33,16 @@ struct selection_pool {
     } focus;
 
     std::vector<Device*> devices;
+
+private:
+    void cleanup_device(Device* device);
+
+    void change_selection(Device* device, Source* source);
+    void cancel_previous_selection(Source* new_source);
+    bool update_selection(Device* device, Source* source);
+
+    void advertise();
+
     Seat* seat;
 };
 
