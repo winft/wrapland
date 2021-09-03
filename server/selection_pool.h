@@ -41,7 +41,6 @@ private:
     void cancel_previous_selection(Source* new_source);
     void update_selection(Device* device, Source* source);
 
-    void advertise();
     void transmit(Source* source);
 
     Seat* seat;
@@ -97,7 +96,7 @@ template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::set_focused_surface(Surface* surface)
 {
     focus.devices = interfacesForSurface(surface, devices);
-    advertise();
+    transmit(focus.source);
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
@@ -123,17 +122,11 @@ void selection_pool<Device, Source, signal>::do_set_source(Source* source)
         focus.source_destroy_notifier
             = QObject::connect(source, &Source::resourceDestroyed, seat, [this] {
                   focus.source = nullptr;
-                  advertise();
+                  transmit(nullptr);
                   Q_EMIT(seat->*signal)(nullptr);
               });
     }
     focus.source = source;
-}
-
-template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::advertise()
-{
-    transmit(focus.source);
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
