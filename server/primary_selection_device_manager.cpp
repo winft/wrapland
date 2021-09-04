@@ -4,13 +4,12 @@
 
     SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
 */
+#include "primary_selection_p.h"
+
 #include "client.h"
 #include "display.h"
-#include "primary_selection.h"
-#include "primary_selection_p.h"
 #include "seat_p.h"
-#include "selection_device_p.h"
-#include "selection_source_p.h"
+#include "selection_p.h"
 #include "wayland/global.h"
 #include "wayland/resource.h"
 

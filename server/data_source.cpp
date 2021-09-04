@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_source_p.h"
 
 #include "data_device_manager.h"
-#include "selection_source_p.h"
+#include "selection_p.h"
 
 #include "wayland/resource.h"
 

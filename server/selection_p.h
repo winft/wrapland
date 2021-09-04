@@ -1,5 +1,5 @@
 /*
-    SPDX-FileCopyrightText: 2020 Roman Gilg <subdiff@gmail.com>
+    SPDX-FileCopyrightText: 2020, 2021 Roman Gilg <subdiff@gmail.com>
     SPDX-FileCopyrightText: 2021 Francesco Sorrentino <francesco.sorr@gmail.com>
 
     SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
@@ -11,9 +11,27 @@
 #include "wayland/global.h"
 #include "wayland/resource.h"
 
+#include <unistd.h>
+
 namespace Wrapland::Server
 {
-class DataSource;
+
+template<typename Handle, typename Priv>
+void offer_mime_type(Handle handle, Priv priv, char const* mimeType)
+{
+    priv->mimeTypes.push_back(mimeType);
+    Q_EMIT handle->mimeTypeOffered(mimeType);
+}
+
+template<typename Source>
+void receive_mime_type_offer(Source source, char const* mimeType, int32_t fd)
+{
+    if (!source) {
+        close(fd);
+        return;
+    }
+    source->requestData(mimeType, fd);
+}
 
 template<typename Handle, typename Priv>
 void set_selection(Handle handle, Priv priv, wl_resource* wlSource)

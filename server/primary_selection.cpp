@@ -4,12 +4,11 @@
 
     SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
 */
-#include "client.h"
 #include "primary_selection_p.h"
+
+#include "client.h"
 #include "seat_p.h"
-#include "selection_device_p.h"
-#include "selection_offer_p.h"
-#include "selection_source_p.h"
+#include "selection_p.h"
 
 #include <unistd.h>
 

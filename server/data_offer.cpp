@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "data_device.h"
 #include "data_source.h"
-#include "selection_offer_p.h"
+#include "selection_p.h"
 
 #include <QStringList>
 

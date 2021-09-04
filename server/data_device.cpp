@@ -24,7 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_source.h"
 #include "data_source_p.h"
 #include "seat.h"
-#include "selection_device_p.h"
+#include "selection_p.h"
 #include "surface.h"
 #include "surface_p.h"
 
