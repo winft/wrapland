@@ -53,7 +53,7 @@ private Q_SLOTS:
 
 private:
     Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::DataDeviceManager* m_server_device_manager = nullptr;
+    Wrapland::Server::data_device_manager* m_server_device_manager = nullptr;
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
     Wrapland::Client::DataDeviceManager* m_device_manager = nullptr;
     Wrapland::Client::EventQueue* m_queue = nullptr;
@@ -132,9 +132,9 @@ void TestDataSource::cleanup()
 
 void TestDataSource::test_offer()
 {
-    qRegisterMetaType<Wrapland::Server::DataSource*>();
+    qRegisterMetaType<Wrapland::Server::data_source*>();
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::source_created);
+                                  &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
@@ -143,12 +143,12 @@ void TestDataSource::test_offer()
     QVERIFY(source_created_spy.wait());
     QCOMPARE(source_created_spy.count(), 1);
 
-    QPointer<Wrapland::Server::DataSource> server_source
-        = source_created_spy.first().first().value<Wrapland::Server::DataSource*>();
+    QPointer<Wrapland::Server::data_source> server_source
+        = source_created_spy.first().first().value<Wrapland::Server::data_source*>();
     QVERIFY(!server_source.isNull());
     QCOMPARE(server_source->mime_types().size(), 0);
 
-    QSignalSpy offered_spy(server_source.data(), &Wrapland::Server::DataSource::mime_type_offered);
+    QSignalSpy offered_spy(server_source.data(), &Wrapland::Server::data_source::mime_type_offered);
     QVERIFY(offered_spy.isValid());
 
     const std::string plain = "text/plain";
@@ -193,7 +193,7 @@ void TestDataSource::test_target_accepts_data()
 void TestDataSource::test_target_accepts()
 {
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::source_created);
+                                  &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
@@ -206,7 +206,7 @@ void TestDataSource::test_target_accepts()
     QCOMPARE(source_created_spy.count(), 1);
 
     QFETCH(QString, mimeType);
-    source_created_spy.first().first().value<Wrapland::Server::DataSource*>()->accept(
+    source_created_spy.first().first().value<Wrapland::Server::data_source*>()->accept(
         mimeType.toUtf8().constData());
 
     QVERIFY(target_accepts_spy.wait());
@@ -217,7 +217,7 @@ void TestDataSource::test_target_accepts()
 void TestDataSource::test_request_send()
 {
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::source_created);
+                                  &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
@@ -231,7 +231,7 @@ void TestDataSource::test_request_send()
     QCOMPARE(source_created_spy.count(), 1);
     QTemporaryFile file;
     QVERIFY(file.open());
-    source_created_spy.first().first().value<Wrapland::Server::DataSource*>()->request_data(
+    source_created_spy.first().first().value<Wrapland::Server::data_source*>()->request_data(
         plain, file.handle());
 
     QVERIFY(send_requested_spy.wait());
@@ -253,17 +253,17 @@ void TestDataSource::test_request_send_on_unbound()
 {
     // This test verifies that the server doesn't crash when requesting a send on an unbound
     // DataSource.
-    QSignalSpy source_created_spy(m_server_device_manager, &Wrapland::Server::DataDeviceManager::sourceCreated);
+    QSignalSpy source_created_spy(m_server_device_manager, &Wrapland::Server::data_device_manager::sourceCreated);
     QVERIFY(source_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
     QVERIFY(source->isValid());
     QVERIFY(source_created_spy.wait());
     QCOMPARE(source_created_spy.count(), 1);
-    auto sds = source_created_spy.first().first().value<Wrapland::Server::DataSource*>();
+    auto sds = source_created_spy.first().first().value<Wrapland::Server::data_source*>();
     QVERIFY(sds);
 
-    QSignalSpy destroyedSpy(sds, &Wrapland::Server::DataSource::resourceDestroyed);
+    QSignalSpy destroyedSpy(sds, &Wrapland::Server::data_source::resourceDestroyed);
     QVERIFY(destroyedSpy.isValid());
     source.reset();
     QVERIFY(destroyedSpy.wait());
@@ -274,7 +274,7 @@ void TestDataSource::test_request_send_on_unbound()
 void TestDataSource::test_cancel()
 {
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::source_created);
+                                  &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
@@ -285,7 +285,7 @@ void TestDataSource::test_cancel()
     QVERIFY(source_created_spy.wait());
 
     QCOMPARE(cancelled_spy.count(), 0);
-    source_created_spy.first().first().value<Wrapland::Server::DataSource*>()->cancel();
+    source_created_spy.first().first().value<Wrapland::Server::data_source*>()->cancel();
 
     QVERIFY(cancelled_spy.wait());
     QCOMPARE(cancelled_spy.count(), 1);
@@ -294,14 +294,14 @@ void TestDataSource::test_cancel()
 void TestDataSource::test_server_get()
 {
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::source_created);
+                                  &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
     QVERIFY(source->isValid());
 
     QVERIFY(source_created_spy.wait());
-    auto server_source = source_created_spy.first().first().value<Wrapland::Server::DataSource*>();
+    auto server_source = source_created_spy.first().first().value<Wrapland::Server::data_source*>();
     QVERIFY(server_source);
 }
 

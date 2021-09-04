@@ -167,7 +167,7 @@ private:
     friend class BlurManager;
     friend class ContrastManager;
     friend class Compositor;
-    friend class DataDevice;
+    friend class data_device;
     friend class Keyboard;
     friend class IdleInhibitManagerV1;
     friend class input_method_v2;

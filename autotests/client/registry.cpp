@@ -134,7 +134,7 @@ private:
     std::unique_ptr<Wrapland::Server::Output> m_output;
     std::unique_ptr<Wrapland::Server::Seat> m_seat;
     std::unique_ptr<Wrapland::Server::Subcompositor> m_subcompositor;
-    std::unique_ptr<Wrapland::Server::DataDeviceManager> m_dataDeviceManager;
+    std::unique_ptr<Wrapland::Server::data_device_manager> m_dataDeviceManager;
     std::unique_ptr<Wrapland::Server::drm_lease_device_v1> m_drmLeaseDeviceV1;
     std::unique_ptr<Wrapland::Server::input_method_manager_v2> m_inputMethodManagerV2;
     std::unique_ptr<Wrapland::Server::OutputManagementV1> m_outputManagement;
@@ -146,7 +146,7 @@ private:
     std::unique_ptr<Wrapland::Server::PointerGesturesV1> m_pointerGesturesV1;
     std::unique_ptr<Wrapland::Server::PointerConstraintsV1> m_pointerConstraintsV1;
     std::unique_ptr<Wrapland::Server::PresentationManager> m_presentation;
-    std::unique_ptr<Wrapland::Server::PrimarySelectionDeviceManager> m_primarySelection;
+    std::unique_ptr<Wrapland::Server::primary_selection_device_manager> m_primarySelection;
     std::unique_ptr<Wrapland::Server::ContrastManager> m_contrast;
     std::unique_ptr<Wrapland::Server::BlurManager> m_blur;
     std::unique_ptr<Wrapland::Server::IdleInhibitManagerV1> m_idleInhibit;

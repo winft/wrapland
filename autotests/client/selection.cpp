@@ -49,7 +49,7 @@ private:
     Wrapland::Server::Display* m_display = nullptr;
     Wrapland::Server::Compositor* m_serverCompositor = nullptr;
     Wrapland::Server::Seat* m_serverSeat = nullptr;
-    Wrapland::Server::DataDeviceManager* m_serverDdm = nullptr;
+    Wrapland::Server::data_device_manager* m_serverDdm = nullptr;
 
     struct Connection {
         Wrapland::Client::ConnectionThread* connection = nullptr;

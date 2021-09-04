@@ -26,29 +26,29 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class DataDeviceManager;
-class DataSource;
+class data_device_manager;
+class data_source;
 class Seat;
 class Surface;
 
-class WRAPLANDSERVER_EXPORT DataDevice : public QObject
+class WRAPLANDSERVER_EXPORT data_device : public QObject
 {
     Q_OBJECT
 public:
-    using source_t = Wrapland::Server::DataSource;
+    using source_t = Wrapland::Server::data_source;
 
     Seat* seat() const;
     Client* client() const;
 
-    DataSource* drag_source() const;
+    data_source* drag_source() const;
     Surface* origin() const;
     Surface* icon() const;
 
     quint32 drag_implicit_grab_serial() const;
 
-    DataSource* selection() const;
+    data_source* selection() const;
 
-    void send_selection(DataSource* source);
+    void send_selection(data_source* source);
     void send_clear_selection();
 
     void drop();
@@ -58,13 +58,13 @@ public:
 
 Q_SIGNALS:
     void drag_started();
-    void selection_changed(Wrapland::Server::DataSource*);
+    void selection_changed(Wrapland::Server::data_source*);
     void selection_cleared();
     void resourceDestroyed();
 
 private:
-    friend class DataDeviceManager;
-    DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
+    friend class data_device_manager;
+    data_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
     class Private;
     Private* d_ptr;
@@ -72,4 +72,4 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::DataDevice*)
+Q_DECLARE_METATYPE(Wrapland::Server::data_device*)

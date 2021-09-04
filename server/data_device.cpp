@@ -35,13 +35,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class DataDevice::Private : public Wayland::Resource<DataDevice>
+class data_device::Private : public Wayland::Resource<data_device>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Seat* seat, DataDevice* q);
+    Private(Client* client, uint32_t version, uint32_t id, Seat* seat, data_device* q);
     ~Private() override;
 
-    DataOffer* createDataOffer(DataSource* source);
+    data_offer* createDataOffer(data_source* source);
     void cancel_drag_target();
     void update_drag_motion();
     void update_drag_pointer_motion();
@@ -49,11 +49,11 @@ public:
     void update_drag_target_offer(Surface* surface, uint32_t serial);
 
     Seat* seat;
-    DataSource* source = nullptr;
+    data_source* source = nullptr;
     Surface* surface = nullptr;
     Surface* icon = nullptr;
 
-    DataSource* selection = nullptr;
+    data_source* selection = nullptr;
     QMetaObject::Connection selectionDestroyedConnection;
 
     struct Drag {
@@ -80,51 +80,56 @@ private:
                                        wl_resource* wlSource,
                                        uint32_t id);
 
-    void startDrag(DataSource* dataSource, Surface* origin, Surface* icon, quint32 serial);
+    void startDrag(data_source* dataSource, Surface* origin, Surface* icon, quint32 serial);
 
     static const struct wl_data_device_interface s_interface;
 
-    DataDevice* q_ptr;
+    data_device* q_ptr;
 };
 
-const struct wl_data_device_interface DataDevice::Private::s_interface = {
+const struct wl_data_device_interface data_device::Private::s_interface = {
     startDragCallback,
     set_selection_callback,
     destroyCallback,
 };
 
-DataDevice::Private::Private(Client* client,
-                             uint32_t version,
-                             uint32_t id,
-                             Seat* seat,
-                             DataDevice* q)
-    : Wayland::Resource<DataDevice>(client, version, id, &wl_data_device_interface, &s_interface, q)
+data_device::Private::Private(Client* client,
+                              uint32_t version,
+                              uint32_t id,
+                              Seat* seat,
+                              data_device* q)
+    : Wayland::Resource<data_device>(client,
+                                     version,
+                                     id,
+                                     &wl_data_device_interface,
+                                     &s_interface,
+                                     q)
     , seat(seat)
     , q_ptr{q}
 {
 }
 
-DataDevice::Private::~Private() = default;
+data_device::Private::~Private() = default;
 
-void DataDevice::Private::startDragCallback([[maybe_unused]] wl_client* wlClient,
-                                            wl_resource* wlResource,
-                                            wl_resource* wlSource,
-                                            wl_resource* wlOrigin,
-                                            wl_resource* wlIcon,
-                                            uint32_t serial)
+void data_device::Private::startDragCallback([[maybe_unused]] wl_client* wlClient,
+                                             wl_resource* wlResource,
+                                             wl_resource* wlSource,
+                                             wl_resource* wlOrigin,
+                                             wl_resource* wlIcon,
+                                             uint32_t serial)
 {
     auto priv = handle(wlResource)->d_ptr;
-    auto source = wlSource ? Resource<DataSource>::handle(wlSource) : nullptr;
+    auto source = wlSource ? Resource<data_source>::handle(wlSource) : nullptr;
     auto origin = Resource<Surface>::handle(wlOrigin);
     auto icon = wlIcon ? Resource<Surface>::handle(wlIcon) : nullptr;
 
     priv->startDrag(source, origin, icon, serial);
 }
 
-void DataDevice::Private::startDrag(DataSource* dataSource,
-                                    Surface* origin,
-                                    Surface* _icon,
-                                    quint32 serial)
+void data_device::Private::startDrag(data_source* dataSource,
+                                     Surface* origin,
+                                     Surface* _icon,
+                                     quint32 serial)
 {
     // TODO(unknown author): verify serial
 
@@ -159,7 +164,7 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
     source = dataSource;
     if (dataSource) {
         QObject::connect(
-            dataSource, &DataSource::resourceDestroyed, q_ptr, [this] { source = nullptr; });
+            dataSource, &data_source::resourceDestroyed, q_ptr, [this] { source = nullptr; });
     }
 
     surface = origin;
@@ -168,24 +173,24 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
     Q_EMIT q_ptr->drag_started();
 }
 
-void DataDevice::Private::set_selection_callback(wl_client* /*wlClient*/,
-                                                 wl_resource* wlResource,
-                                                 wl_resource* wlSource,
-                                                 uint32_t /*id*/)
+void data_device::Private::set_selection_callback(wl_client* /*wlClient*/,
+                                                  wl_resource* wlResource,
+                                                  wl_resource* wlSource,
+                                                  uint32_t /*id*/)
 {
     // TODO(unknown author): verify serial
     auto handle = Resource::handle(wlResource);
     set_selection(handle, handle->d_ptr, wlSource);
 }
 
-DataOffer* DataDevice::Private::createDataOffer(DataSource* source)
+data_offer* data_device::Private::createDataOffer(data_source* source)
 {
     if (!source) {
         // A data offer can only exist together with a source.
         return nullptr;
     }
 
-    auto offer = new DataOffer(client()->handle(), version(), source);
+    auto offer = new data_offer(client()->handle(), version(), source);
 
     if (!offer->d_ptr->resource()) {
         // TODO(unknown author): send error?
@@ -198,7 +203,7 @@ DataOffer* DataDevice::Private::createDataOffer(DataSource* source)
     return offer;
 }
 
-void DataDevice::Private::cancel_drag_target()
+void data_device::Private::cancel_drag_target()
 {
     if (!drag.surface) {
         return;
@@ -224,7 +229,7 @@ void DataDevice::Private::cancel_drag_target()
     // don't update serial, we need it
 }
 
-void DataDevice::Private::update_drag_motion()
+void data_device::Private::update_drag_motion()
 {
     if (seat->drags().is_pointer_drag()) {
         update_drag_pointer_motion();
@@ -233,7 +238,7 @@ void DataDevice::Private::update_drag_motion()
     }
 }
 
-void DataDevice::Private::update_drag_pointer_motion()
+void data_device::Private::update_drag_pointer_motion()
 {
     assert(seat->drags().is_pointer_drag());
     drag.posConnection = connect(seat, &Seat::pointerPosChanged, handle(), [this] {
@@ -245,7 +250,7 @@ void DataDevice::Private::update_drag_pointer_motion()
     });
 }
 
-void DataDevice::Private::update_drag_touch_motion()
+void data_device::Private::update_drag_touch_motion()
 {
     assert(seat->drags().is_touch_drag());
 
@@ -263,7 +268,7 @@ void DataDevice::Private::update_drag_touch_motion()
         });
 }
 
-void DataDevice::Private::update_drag_target_offer(Surface* surface, uint32_t serial)
+void data_device::Private::update_drag_target_offer(Surface* surface, uint32_t serial)
 {
     auto source = seat->drags().get_source().dev->drag_source();
     auto offer = createDataOffer(source);
@@ -309,43 +314,43 @@ void DataDevice::Private::update_drag_target_offer(Surface* surface, uint32_t se
         source->send_action(action);
     };
     drag.targetActionConnection
-        = connect(offer, &DataOffer::dnd_actions_changed, offer, matchOffers);
+        = connect(offer, &data_offer::dnd_actions_changed, offer, matchOffers);
     drag.sourceActionConnection
-        = connect(source, &DataSource::supported_dnd_actions_changed, source, matchOffers);
+        = connect(source, &data_source::supported_dnd_actions_changed, source, matchOffers);
 }
 
-DataDevice::DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat)
+data_device::data_device(Client* client, uint32_t version, uint32_t id, Seat* seat)
     : d_ptr(new Private(client, version, id, seat, this))
 {
 }
 
-Seat* DataDevice::seat() const
+Seat* data_device::seat() const
 {
     return d_ptr->seat;
 }
 
-DataSource* DataDevice::drag_source() const
+data_source* data_device::drag_source() const
 {
 
     return d_ptr->source;
 }
 
-Surface* DataDevice::icon() const
+Surface* data_device::icon() const
 {
     return d_ptr->icon;
 }
 
-Surface* DataDevice::origin() const
+Surface* data_device::origin() const
 {
     return d_ptr->proxyRemoteSurface ? d_ptr->proxyRemoteSurface.data() : d_ptr->surface;
 }
 
-DataSource* DataDevice::selection() const
+data_source* data_device::selection() const
 {
     return d_ptr->selection;
 }
 
-void DataDevice::send_selection(DataSource* source)
+void data_device::send_selection(data_source* source)
 {
     if (!source) {
         send_clear_selection();
@@ -360,12 +365,12 @@ void DataDevice::send_selection(DataSource* source)
     d_ptr->send<wl_data_device_send_selection>(offer->d_ptr->resource());
 }
 
-void DataDevice::send_clear_selection()
+void data_device::send_clear_selection()
 {
     d_ptr->send<wl_data_device_send_selection>(nullptr);
 }
 
-void DataDevice::drop()
+void data_device::drop()
 {
     d_ptr->send<wl_data_device_send_drop>();
 
@@ -381,7 +386,7 @@ void DataDevice::drop()
     // TODO(romangg): do we need to flush the client here?
 }
 
-void DataDevice::update_drag_target(Surface* surface, quint32 serial)
+void data_device::update_drag_target(Surface* surface, quint32 serial)
 {
     d_ptr->cancel_drag_target();
 
@@ -414,18 +419,18 @@ void DataDevice::update_drag_target(Surface* surface, quint32 serial)
     d_ptr->client()->flush();
 }
 
-quint32 DataDevice::drag_implicit_grab_serial() const
+quint32 data_device::drag_implicit_grab_serial() const
 {
     return d_ptr->drag.serial;
 }
 
-void DataDevice::update_proxy(Surface* remote)
+void data_device::update_proxy(Surface* remote)
 {
     // TODO(romangg): connect destroy signal?
     d_ptr->proxyRemoteSurface = remote;
 }
 
-Client* DataDevice::client() const
+Client* data_device::client() const
 {
     return d_ptr->client()->handle();
 }

@@ -239,22 +239,22 @@ input_method_v2* Seat::get_input_method_v2() const
     return d_ptr->input_method;
 }
 
-DataSource* Seat::selection() const
+data_source* Seat::selection() const
 {
     return d_ptr->data_devices.focus.source;
 }
 
-void Seat::setSelection(DataSource* source)
+void Seat::setSelection(data_source* source)
 {
     d_ptr->data_devices.set_selection(source);
 }
 
-PrimarySelectionSource* Seat::primarySelection() const
+primary_selection_source* Seat::primarySelection() const
 {
     return d_ptr->primary_selection_devices.focus.source;
 }
 
-void Seat::setPrimarySelection(PrimarySelectionSource* source)
+void Seat::setPrimarySelection(primary_selection_source* source)
 {
     d_ptr->primary_selection_devices.set_selection(source);
 }

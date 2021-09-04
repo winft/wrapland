@@ -29,10 +29,10 @@ namespace Wrapland::Server
 {
 
 class Client;
-class DataDevice;
-class DataSource;
+class data_device;
+class data_source;
 
-class WRAPLANDSERVER_EXPORT DataOffer : public QObject
+class WRAPLANDSERVER_EXPORT data_offer : public QObject
 {
     Q_OBJECT
 public:
@@ -47,8 +47,8 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    friend class DataDevice;
-    explicit DataOffer(Client* client, uint32_t version, DataSource* source);
+    friend class data_device;
+    explicit data_offer(Client* client, uint32_t version, data_source* source);
 
     class Private;
     Private* d_ptr;
@@ -56,4 +56,4 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::DataOffer*)
+Q_DECLARE_METATYPE(Wrapland::Server::data_offer*)

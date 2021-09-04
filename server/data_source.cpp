@@ -30,8 +30,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-DataSource::Private::Private(Client* client, uint32_t version, uint32_t id, DataSource* q)
-    : Wayland::Resource<DataSource>(client, version, id, &wl_data_source_interface, &s_interface, q)
+data_source::Private::Private(Client* client, uint32_t version, uint32_t id, data_source* q)
+    : Wayland::Resource<data_source>(client,
+                                     version,
+                                     id,
+                                     &wl_data_source_interface,
+                                     &s_interface,
+                                     q)
     , q_ptr{q}
 {
     if (version < WL_DATA_SOURCE_ACTION_SINCE_VERSION) {
@@ -39,23 +44,23 @@ DataSource::Private::Private(Client* client, uint32_t version, uint32_t id, Data
     }
 }
 
-const struct wl_data_source_interface DataSource::Private::s_interface = {
+const struct wl_data_source_interface data_source::Private::s_interface = {
     offer_callback,
     destroyCallback,
     setActionsCallback,
 };
 
-void DataSource::Private::offer_callback(wl_client* /*wlClient*/,
-                                         wl_resource* wlResource,
-                                         char const* mimeType)
+void data_source::Private::offer_callback(wl_client* /*wlClient*/,
+                                          wl_resource* wlResource,
+                                          char const* mimeType)
 {
     auto handle = Resource::handle(wlResource);
     offer_mime_type(handle, handle->d_ptr, mimeType);
 }
 
-void DataSource::Private::setActionsCallback([[maybe_unused]] wl_client* wlClient,
-                                             wl_resource* wlResource,
-                                             uint32_t dnd_actions)
+void data_source::Private::setActionsCallback([[maybe_unused]] wl_client* wlClient,
+                                              wl_resource* wlResource,
+                                              uint32_t dnd_actions)
 {
     Server::dnd_actions supportedActions;
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
@@ -83,52 +88,52 @@ void DataSource::Private::setActionsCallback([[maybe_unused]] wl_client* wlClien
     }
 }
 
-DataSource::DataSource(Client* client, uint32_t version, uint32_t id)
+data_source::data_source(Client* client, uint32_t version, uint32_t id)
     : d_ptr(new Private(client, version, id, this))
 {
 }
 
-void DataSource::accept(std::string const& mimeType)
+void data_source::accept(std::string const& mimeType)
 {
     // TODO(unknown author): does this require a sanity check on the possible mimeType?
     d_ptr->send<wl_data_source_send_target>(mimeType.empty() ? nullptr : mimeType.c_str());
 }
 
-void DataSource::request_data(std::string const& mimeType, int32_t fd)
+void data_source::request_data(std::string const& mimeType, int32_t fd)
 {
     // TODO(unknown author): does this require a sanity check on the possible mimeType?
     d_ptr->send<wl_data_source_send_send>(mimeType.c_str(), fd);
     close(fd);
 }
 
-void DataSource::cancel()
+void data_source::cancel()
 {
     d_ptr->send<wl_data_source_send_cancelled>();
     d_ptr->client()->flush();
 }
 
-std::vector<std::string> DataSource::mime_types() const
+std::vector<std::string> data_source::mime_types() const
 {
     return d_ptr->mimeTypes;
 }
 
-dnd_actions DataSource::supported_dnd_actions() const
+dnd_actions data_source::supported_dnd_actions() const
 {
     return d_ptr->supportedDnDActions;
 }
 
-void DataSource::send_dnd_drop_performed()
+void data_source::send_dnd_drop_performed()
 {
     d_ptr->send<wl_data_source_send_dnd_drop_performed,
                 WL_DATA_SOURCE_DND_DROP_PERFORMED_SINCE_VERSION>();
 }
 
-void DataSource::send_dnd_finished()
+void data_source::send_dnd_finished()
 {
     d_ptr->send<wl_data_source_send_dnd_finished, WL_DATA_SOURCE_DND_FINISHED_SINCE_VERSION>();
 }
 
-void DataSource::send_action(dnd_action action)
+void data_source::send_action(dnd_action action)
 {
     uint32_t wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
 
@@ -143,7 +148,7 @@ void DataSource::send_action(dnd_action action)
     d_ptr->send<wl_data_source_send_action, WL_DATA_SOURCE_ACTION_SINCE_VERSION>(wlAction);
 }
 
-Client* DataSource::client() const
+Client* data_source::client() const
 {
     return d_ptr->client()->handle();
 }

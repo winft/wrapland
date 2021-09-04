@@ -29,7 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-const struct wl_data_offer_interface DataOffer::Private::s_interface = {
+const struct wl_data_offer_interface data_offer::Private::s_interface = {
     acceptCallback,
     receive_callback,
     destroyCallback,
@@ -37,18 +37,18 @@ const struct wl_data_offer_interface DataOffer::Private::s_interface = {
     setActionsCallback,
 };
 
-DataOffer::Private::Private(Client* client, uint32_t version, DataSource* source, DataOffer* q)
-    : Wayland::Resource<DataOffer>(client, version, 0, &wl_data_offer_interface, &s_interface, q)
+data_offer::Private::Private(Client* client, uint32_t version, data_source* source, data_offer* q)
+    : Wayland::Resource<data_offer>(client, version, 0, &wl_data_offer_interface, &s_interface, q)
     , source(source)
     , q_ptr{q}
 {
     // TODO(unknown author): connect to new selections.
 }
 
-void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
-                                        wl_resource* wlResource,
-                                        [[maybe_unused]] uint32_t serial,
-                                        char const* mimeType)
+void data_offer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
+                                         wl_resource* wlResource,
+                                         [[maybe_unused]] uint32_t serial,
+                                         char const* mimeType)
 {
     // TODO(unknown author): verify serial?
     auto priv = handle(wlResource)->d_ptr;
@@ -58,17 +58,17 @@ void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
     priv->source->accept(mimeType ? mimeType : std::string());
 }
 
-void DataOffer::Private::receive_callback(wl_client* /*wlClient*/,
-                                          wl_resource* wlResource,
-                                          char const* mimeType,
-                                          int32_t fd)
+void data_offer::Private::receive_callback(wl_client* /*wlClient*/,
+                                           wl_resource* wlResource,
+                                           char const* mimeType,
+                                           int32_t fd)
 {
     auto handle = Resource::handle(wlResource);
     receive_mime_type_offer(handle->d_ptr->source, mimeType, fd);
 }
 
-void DataOffer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
-                                        wl_resource* wlResource)
+void data_offer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
+                                         wl_resource* wlResource)
 {
     auto priv = handle(wlResource)->d_ptr;
     priv->source->send_dnd_finished();
@@ -76,10 +76,10 @@ void DataOffer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
     //                       wl_data_offer.destroy after this one.
 }
 
-void DataOffer::Private::setActionsCallback(wl_client* wlClient,
-                                            wl_resource* wlResource,
-                                            uint32_t dnd_actions,
-                                            uint32_t preferred_action)
+void data_offer::Private::setActionsCallback(wl_client* wlClient,
+                                             wl_resource* wlResource,
+                                             uint32_t dnd_actions,
+                                             uint32_t preferred_action)
 {
     // TODO(unknown author): check it's drag and drop, otherwise send error
     Q_UNUSED(wlClient)
@@ -125,7 +125,7 @@ void DataOffer::Private::setActionsCallback(wl_client* wlClient,
     Q_EMIT priv->q_ptr->dnd_actions_changed();
 }
 
-void DataOffer::Private::sendSourceActions()
+void data_offer::Private::sendSourceActions()
 {
     if (!source) {
         return;
@@ -145,35 +145,35 @@ void DataOffer::Private::sendSourceActions()
     send<wl_data_offer_send_source_actions, WL_DATA_OFFER_SOURCE_ACTIONS_SINCE_VERSION>(wlActions);
 }
 
-DataOffer::DataOffer(Client* client, uint32_t version, DataSource* source)
+data_offer::data_offer(Client* client, uint32_t version, data_source* source)
     : d_ptr(new Private(client, version, source, this))
 {
     assert(source);
-    connect(source, &DataSource::mime_type_offered, this, [this](std::string const& mimeType) {
+    connect(source, &data_source::mime_type_offered, this, [this](std::string const& mimeType) {
         d_ptr->send<wl_data_offer_send_offer>(mimeType.c_str());
     });
     QObject::connect(
-        source, &DataSource::resourceDestroyed, this, [this] { d_ptr->source = nullptr; });
+        source, &data_source::resourceDestroyed, this, [this] { d_ptr->source = nullptr; });
 }
 
-void DataOffer::send_all_offers()
+void data_offer::send_all_offers()
 {
     for (auto const& mimeType : d_ptr->source->mime_types()) {
         d_ptr->send<wl_data_offer_send_offer>(mimeType.c_str());
     }
 }
 
-dnd_actions DataOffer::supported_dnd_actions() const
+dnd_actions data_offer::supported_dnd_actions() const
 {
     return d_ptr->supportedDnDActions;
 }
 
-dnd_action DataOffer::preferred_dnd_action() const
+dnd_action data_offer::preferred_dnd_action() const
 {
     return d_ptr->preferredDnDAction;
 }
 
-void DataOffer::send_action(dnd_action action)
+void data_offer::send_action(dnd_action action)
 {
     uint32_t wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
     if (action == dnd_action::copy) {

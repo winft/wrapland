@@ -142,7 +142,7 @@ TestSeat::TestSeat(QObject* parent)
     , m_queue(nullptr)
     , m_thread(nullptr)
 {
-    qRegisterMetaType<Wrapland::Server::DataDevice*>();
+    qRegisterMetaType<Wrapland::Server::data_device*>();
     qRegisterMetaType<Wrapland::Server::Keyboard*>();
     qRegisterMetaType<Wrapland::Server::Pointer*>();
     qRegisterMetaType<Wrapland::Server::Touch*>();
@@ -1744,9 +1744,9 @@ void TestSeat::testDestroy()
 
 void TestSeat::testSelection()
 {
-    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
+    QScopedPointer<Srv::data_device_manager> ddmi(m_display->createDataDeviceManager());
 
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::device_created);
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::data_device_manager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 
     Clt::Registry registry;
@@ -1768,7 +1768,7 @@ void TestSeat::testSelection()
     QVERIFY(ddiCreatedSpy.wait());
     QCOMPARE(ddiCreatedSpy.count(), 1);
 
-    auto ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
+    auto ddi = ddiCreatedSpy.first().first().value<Srv::data_device*>();
     QVERIFY(ddi);
 
     QVERIFY(dd1->isValid());
@@ -1892,8 +1892,8 @@ void TestSeat::testSelectionNoDataSource()
     // a DataDevice which doesn't have a DataSource yet.
 
     // First create the DataDevice.
-    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::device_created);
+    QScopedPointer<Srv::data_device_manager> ddmi(m_display->createDataDeviceManager());
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::data_device_manager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 
     Clt::Registry registry;
@@ -1916,7 +1916,7 @@ void TestSeat::testSelectionNoDataSource()
     QVERIFY(ddiCreatedSpy.wait());
     QCOMPARE(ddiCreatedSpy.count(), 1);
 
-    auto ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
+    auto ddi = ddiCreatedSpy.first().first().value<Srv::data_device*>();
     QVERIFY(ddi);
 
     // Now create a surface and pass it keyboard focus.
@@ -1944,8 +1944,8 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     // To properly test the functionality this test requires a second client.
 
     // Create the DataDeviceManager.
-    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::device_created);
+    QScopedPointer<Srv::data_device_manager> ddmi(m_display->createDataDeviceManager());
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::data_device_manager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 
     // Create a second Wayland client connection to use it for setSelection.
@@ -1986,7 +1986,7 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     // Now create our first datadevice.
     QScopedPointer<Clt::DataDevice> dd1(ddm1->getDevice(seat.data()));
     QVERIFY(ddiCreatedSpy.wait());
-    auto* ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
+    auto* ddi = ddiCreatedSpy.first().first().value<Srv::data_device*>();
     QVERIFY(ddi);
     m_serverSeat->setSelection(ddi->selection());
 

@@ -27,8 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class DataDevice;
-class DataSource;
+class data_device;
+class data_source;
 class Display;
 class Seat;
 
@@ -40,25 +40,25 @@ enum class dnd_action {
 };
 Q_DECLARE_FLAGS(dnd_actions, dnd_action)
 
-class WRAPLANDSERVER_EXPORT DataDeviceManager : public QObject
+class WRAPLANDSERVER_EXPORT data_device_manager : public QObject
 {
     Q_OBJECT
 public:
-    using device_t = Wrapland::Server::DataDevice;
-    using source_t = Wrapland::Server::DataSource;
+    using device_t = Wrapland::Server::data_device;
+    using source_t = Wrapland::Server::data_source;
 
-    ~DataDeviceManager() override;
+    ~data_device_manager() override;
 
     void create_source(Client* client, uint32_t version, uint32_t id);
     void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
 Q_SIGNALS:
-    void source_created(Wrapland::Server::DataSource* source);
-    void device_created(Wrapland::Server::DataDevice* device);
+    void source_created(Wrapland::Server::data_source* source);
+    void device_created(Wrapland::Server::data_device* device);
 
 private:
     friend class Display;
-    explicit DataDeviceManager(Display* display, QObject* parent = nullptr);
+    explicit data_device_manager(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

@@ -33,43 +33,44 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-constexpr uint32_t DataDeviceManagerVersion = 3;
-using DataDeviceManagerGlobal = Wayland::Global<DataDeviceManager, DataDeviceManagerVersion>;
+constexpr uint32_t data_device_manager_version = 3;
+using data_device_manager_global
+    = Wayland::Global<data_device_manager, data_device_manager_version>;
 
-class DataDeviceManager::Private : public device_manager<DataDeviceManagerGlobal>
+class data_device_manager::Private : public device_manager<data_device_manager_global>
 {
 public:
-    Private(DataDeviceManager* q, Display* display);
+    Private(data_device_manager* q, Display* display);
 
 private:
     static const struct wl_data_device_manager_interface s_interface;
 };
 
-const struct wl_data_device_manager_interface DataDeviceManager::Private::s_interface = {
+const struct wl_data_device_manager_interface data_device_manager::Private::s_interface = {
     cb<create_source>,
     cb<get_device>,
 };
 
-DataDeviceManager::Private::Private(DataDeviceManager* q, Display* display)
-    : device_manager<DataDeviceManagerGlobal>(q,
-                                              display,
-                                              &wl_data_device_manager_interface,
-                                              &s_interface)
+data_device_manager::Private::Private(data_device_manager* q, Display* display)
+    : device_manager<data_device_manager_global>(q,
+                                                 display,
+                                                 &wl_data_device_manager_interface,
+                                                 &s_interface)
 {
 }
 
-DataDeviceManager::DataDeviceManager(Display* display, [[maybe_unused]] QObject* parent)
+data_device_manager::data_device_manager(Display* display, [[maybe_unused]] QObject* parent)
     : QObject(parent)
     , d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }
 
-DataDeviceManager::~DataDeviceManager() = default;
+data_device_manager::~data_device_manager() = default;
 
-void DataDeviceManager::create_source(Client* client, uint32_t version, uint32_t id)
+void data_device_manager::create_source(Client* client, uint32_t version, uint32_t id)
 {
-    auto source = new DataSource(client, version, id);
+    auto source = new data_source(client, version, id);
     if (!source) {
         return;
     }
@@ -77,14 +78,14 @@ void DataDeviceManager::create_source(Client* client, uint32_t version, uint32_t
     Q_EMIT source_created(source);
 }
 
-void DataDeviceManager::get_device(Client* client, uint32_t version, uint32_t id, Seat* seat)
+void data_device_manager::get_device(Client* client, uint32_t version, uint32_t id, Seat* seat)
 {
-    auto device = new DataDevice(client, version, id, seat);
+    auto device = new data_device(client, version, id, seat);
     if (!device) {
         return;
     }
 
-    QObject::connect(device, &DataDevice::drag_started, seat, [seat, device] {
+    QObject::connect(device, &data_device::drag_started, seat, [seat, device] {
         seat->d_ptr->drags.perform_drag(device);
     });
 

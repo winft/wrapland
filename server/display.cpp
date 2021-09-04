@@ -226,14 +226,14 @@ Subcompositor* Display::createSubCompositor(QObject* parent)
     return new Subcompositor(this, parent);
 }
 
-DataDeviceManager* Display::createDataDeviceManager(QObject* parent)
+data_device_manager* Display::createDataDeviceManager(QObject* parent)
 {
-    return new DataDeviceManager(this, parent);
+    return new data_device_manager(this, parent);
 }
 
-PrimarySelectionDeviceManager* Display::createPrimarySelectionDeviceManager(QObject* parent)
+primary_selection_device_manager* Display::createPrimarySelectionDeviceManager(QObject* parent)
 {
-    return new PrimarySelectionDeviceManager(this, parent);
+    return new primary_selection_device_manager(this, parent);
 }
 
 PlasmaShell* Display::createPlasmaShell(QObject* parent)

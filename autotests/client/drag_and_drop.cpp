@@ -65,7 +65,7 @@ private:
 
     Wrapland::Server::Display* m_display = nullptr;
     Wrapland::Server::Compositor* m_server_compositor = nullptr;
-    Wrapland::Server::DataDeviceManager* m_server_device_manager = nullptr;
+    Wrapland::Server::data_device_manager* m_server_device_manager = nullptr;
     Wrapland::Server::Seat* m_server_seat = nullptr;
 
     struct Client {
@@ -75,7 +75,7 @@ private:
         Wrapland::Client::Compositor* compositor = nullptr;
         Wrapland::Client::Registry* registry = nullptr;
         Wrapland::Client::DataDevice* device = nullptr;
-        Wrapland::Server::DataDevice* server_device{nullptr};
+        Wrapland::Server::data_device* server_device{nullptr};
         Wrapland::Client::DataSource* source = nullptr;
         Wrapland::Client::Seat* seat = nullptr;
         Wrapland::Client::Pointer* pointer = nullptr;
@@ -90,7 +90,7 @@ static const QString s_socketName = QStringLiteral("wrapland-test-wayland-drag-n
 
 void TestDragAndDrop::init()
 {
-    qRegisterMetaType<Wrapland::Server::DataDevice*>();
+    qRegisterMetaType<Wrapland::Server::data_device*>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::Display(this);
@@ -162,7 +162,7 @@ void TestDragAndDrop::init()
         QVERIFY(client->touch->isValid());
 
         QSignalSpy device_created_spy(m_server_device_manager,
-                                      &Wrapland::Server::DataDeviceManager::device_created);
+                                      &Wrapland::Server::data_device_manager::device_created);
         QVERIFY(device_created_spy.isValid());
         client->device = client->ddm->getDevice(client->seat, this);
         QVERIFY(client->device->isValid());
@@ -170,7 +170,7 @@ void TestDragAndDrop::init()
         QVERIFY(device_created_spy.wait());
         QCOMPARE(device_created_spy.count(), 1);
         client->server_device
-            = device_created_spy.first().first().value<Wrapland::Server::DataDevice*>();
+            = device_created_spy.first().first().value<Wrapland::Server::data_device*>();
         QVERIFY(client->server_device);
 
         client->source = client->ddm->createSource(this);
@@ -653,7 +653,7 @@ void TestDragAndDrop::test_target_removed()
 
     // Now delete the second client's data device.
     QSignalSpy device_destroyed_spy(c_2.server_device,
-                                    &Wrapland::Server::DataDevice::resourceDestroyed);
+                                    &Wrapland::Server::data_device::resourceDestroyed);
     QVERIFY(device_destroyed_spy.isValid());
     delete c_2.device;
     c_2.device = nullptr;

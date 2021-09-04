@@ -26,15 +26,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class DataSource::Private : public Wayland::Resource<DataSource>
+class data_source::Private : public Wayland::Resource<data_source>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, DataSource* q);
+    Private(Client* client, uint32_t version, uint32_t id, data_source* q);
 
     std::vector<std::string> mimeTypes;
     dnd_actions supportedDnDActions = dnd_action::none;
 
-    DataSource* q_ptr;
+    data_source* q_ptr;
 
 private:
     static void offer_callback(wl_client* wlClient, wl_resource* wlResource, char const* mimeType);

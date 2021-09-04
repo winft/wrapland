@@ -39,7 +39,7 @@ void set_selection(Handle handle, Priv priv, wl_resource* wlSource)
     using source_type = typename std::remove_pointer_t<decltype(handle)>::source_t;
     auto source = wlSource ? Wayland::Resource<source_type>::handle(wlSource) : nullptr;
 
-    if constexpr (std::is_same<source_type, DataSource>::value) {
+    if constexpr (std::is_same<source_type, data_source>::value) {
         // TODO(romangg): move errors into Wayland namespace.
         if (source && source->supported_dnd_actions()
             && wl_resource_get_version(wlSource) >= WL_DATA_SOURCE_ACTION_SINCE_VERSION) {

@@ -28,7 +28,7 @@ namespace Wrapland::Server
 {
 class Client;
 
-class WRAPLANDSERVER_EXPORT DataSource : public QObject
+class WRAPLANDSERVER_EXPORT data_source : public QObject
 {
     Q_OBJECT
 public:
@@ -52,9 +52,9 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    friend class DataDeviceManager;
-    friend class DataDevice;
-    explicit DataSource(Client* client, uint32_t version, uint32_t id);
+    friend class data_device_manager;
+    friend class data_device;
+    explicit data_source(Client* client, uint32_t version, uint32_t id);
 
     class Private;
     Private* d_ptr;
@@ -62,4 +62,4 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::DataSource*)
+Q_DECLARE_METATYPE(Wrapland::Server::data_source*)

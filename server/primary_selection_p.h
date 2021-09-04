@@ -18,37 +18,37 @@
 namespace Wrapland::Server
 {
 
-constexpr uint32_t PrimarySelectionDeviceManagerVersion = 1;
-using PrimarySelectionDeviceManagerGlobal
-    = Wayland::Global<PrimarySelectionDeviceManager, PrimarySelectionDeviceManagerVersion>;
+constexpr uint32_t primary_selection_device_manager_version = 1;
+using primary_selection_device_manager_global
+    = Wayland::Global<primary_selection_device_manager, primary_selection_device_manager_version>;
 
-class PrimarySelectionDeviceManager::Private
-    : public device_manager<PrimarySelectionDeviceManagerGlobal>
+class primary_selection_device_manager::Private
+    : public device_manager<primary_selection_device_manager_global>
 {
 public:
-    Private(Display* display, PrimarySelectionDeviceManager* q);
+    Private(Display* display, primary_selection_device_manager* q);
     ~Private() override;
 
 private:
     static const struct zwp_primary_selection_device_manager_v1_interface s_interface;
 };
 
-class PrimarySelectionDevice::Private : public Wayland::Resource<PrimarySelectionDevice>
+class primary_selection_device::Private : public Wayland::Resource<primary_selection_device>
 {
 public:
     Private(Client* client,
             uint32_t version,
             uint32_t id,
             Seat* seat,
-            PrimarySelectionDevice* qptr);
+            primary_selection_device* qptr);
     ~Private() override;
 
     Seat* m_seat;
 
-    PrimarySelectionSource* selection = nullptr;
+    primary_selection_source* selection = nullptr;
     QMetaObject::Connection selectionDestroyedConnection;
 
-    PrimarySelectionOffer* sendDataOffer(PrimarySelectionSource* source);
+    primary_selection_offer* sendDataOffer(primary_selection_source* source);
 
 private:
     static void set_selection_callback(wl_client* wlClient,
@@ -58,16 +58,16 @@ private:
     static const struct zwp_primary_selection_device_v1_interface s_interface;
 };
 
-class PrimarySelectionOffer::Private : public Wayland::Resource<PrimarySelectionOffer>
+class primary_selection_offer::Private : public Wayland::Resource<primary_selection_offer>
 {
 public:
     Private(Client* client,
             uint32_t version,
-            PrimarySelectionSource* source,
-            PrimarySelectionOffer* qptr);
+            primary_selection_source* source,
+            primary_selection_offer* qptr);
     ~Private() override;
 
-    PrimarySelectionSource* source;
+    primary_selection_source* source;
 
 private:
     static void receive_callback(wl_client* wlClient,
@@ -77,10 +77,10 @@ private:
     static const struct zwp_primary_selection_offer_v1_interface s_interface;
 };
 
-class PrimarySelectionSource::Private : public Wayland::Resource<PrimarySelectionSource>
+class primary_selection_source::Private : public Wayland::Resource<primary_selection_source>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, PrimarySelectionSource* qptr);
+    Private(Client* client, uint32_t version, uint32_t id, primary_selection_source* qptr);
     ~Private() override;
 
     std::vector<std::string> mimeTypes;

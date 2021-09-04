@@ -38,7 +38,7 @@ namespace Wrapland::Server
 class Client;
 class Private;
 
-class DataDeviceManager;
+class data_device_manager;
 class DpmsManager;
 class drm_lease_device_v1;
 class WlOutput;
@@ -68,7 +68,7 @@ class text_input_manager_v3;
 class RelativePointerManagerV1;
 class PointerGesturesV1;
 class PointerConstraintsV1;
-class PrimarySelectionDeviceManager;
+class primary_selection_device_manager;
 class XdgForeign;
 class AppmenuManager;
 class ServerSideDecorationPaletteManager;
@@ -128,11 +128,12 @@ public:
     void createShm();
 
     Subcompositor* createSubCompositor(QObject* parent = nullptr);
-    DataDeviceManager* createDataDeviceManager(QObject* parent = nullptr);
+    data_device_manager* createDataDeviceManager(QObject* parent = nullptr);
     OutputManagementV1* createOutputManagementV1(QObject* parent = nullptr);
     PlasmaShell* createPlasmaShell(QObject* parent = nullptr);
     PlasmaWindowManager* createPlasmaWindowManager(QObject* parent = nullptr);
-    PrimarySelectionDeviceManager* createPrimarySelectionDeviceManager(QObject* parent = nullptr);
+    primary_selection_device_manager* createPrimarySelectionDeviceManager(QObject* parent
+                                                                          = nullptr);
     KdeIdle* createIdle(QObject* parent = nullptr);
     FakeInput* createFakeInput(QObject* parent = nullptr);
     LayerShellV1* createLayerShellV1(QObject* parent = nullptr);

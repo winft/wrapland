@@ -17,66 +17,66 @@ namespace Wrapland::Server
 class Client;
 class Display;
 class Seat;
-class PrimarySelectionSource;
-class PrimarySelectionDevice;
+class primary_selection_source;
+class primary_selection_device;
 
-class WRAPLANDSERVER_EXPORT PrimarySelectionDeviceManager : public QObject
+class WRAPLANDSERVER_EXPORT primary_selection_device_manager : public QObject
 {
     Q_OBJECT
 public:
-    using device_t = Wrapland::Server::PrimarySelectionDevice;
-    using source_t = Wrapland::Server::PrimarySelectionSource;
+    using device_t = Wrapland::Server::primary_selection_device;
+    using source_t = Wrapland::Server::primary_selection_source;
 
-    ~PrimarySelectionDeviceManager() override;
+    ~primary_selection_device_manager() override;
 
     void create_source(Client* client, uint32_t version, uint32_t id);
     void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
 Q_SIGNALS:
-    void source_created(Wrapland::Server::PrimarySelectionSource* source);
-    void device_created(Wrapland::Server::PrimarySelectionDevice* device);
+    void source_created(Wrapland::Server::primary_selection_source* source);
+    void device_created(Wrapland::Server::primary_selection_device* device);
 
 private:
     friend class Display;
-    explicit PrimarySelectionDeviceManager(Display* display, QObject* parent = nullptr);
+    explicit primary_selection_device_manager(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT PrimarySelectionDevice : public QObject
+class WRAPLANDSERVER_EXPORT primary_selection_device : public QObject
 {
     Q_OBJECT
 public:
-    using source_t = Wrapland::Server::PrimarySelectionSource;
+    using source_t = Wrapland::Server::primary_selection_source;
 
-    ~PrimarySelectionDevice() override;
+    ~primary_selection_device() override;
 
-    PrimarySelectionSource* selection();
+    primary_selection_source* selection();
     Seat* seat() const;
     Client* client() const;
 
-    void send_selection(PrimarySelectionSource* source);
+    void send_selection(primary_selection_source* source);
     void send_clear_selection();
 
 Q_SIGNALS:
-    void selection_changed(PrimarySelectionSource* source);
+    void selection_changed(primary_selection_source* source);
     void selection_cleared();
     void resourceDestroyed();
 
 private:
-    PrimarySelectionDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
-    friend class PrimarySelectionDeviceManager;
+    primary_selection_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
+    friend class primary_selection_device_manager;
 
     class Private;
     Private* d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT PrimarySelectionOffer : public QObject
+class WRAPLANDSERVER_EXPORT primary_selection_offer : public QObject
 {
     Q_OBJECT
 public:
-    ~PrimarySelectionOffer() override;
+    ~primary_selection_offer() override;
 
     void send_offer();
 
@@ -84,20 +84,20 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    friend class PrimarySelectionDevice;
-    explicit PrimarySelectionOffer(Client* client,
-                                   uint32_t version,
-                                   PrimarySelectionSource* source);
+    friend class primary_selection_device;
+    explicit primary_selection_offer(Client* client,
+                                     uint32_t version,
+                                     primary_selection_source* source);
 
     class Private;
     Private* d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT PrimarySelectionSource : public QObject
+class WRAPLANDSERVER_EXPORT primary_selection_source : public QObject
 {
     Q_OBJECT
 public:
-    ~PrimarySelectionSource() override;
+    ~primary_selection_source() override;
 
     void cancel();
     void request_data(std::string const& mimeType, qint32 fd);
@@ -111,9 +111,9 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    PrimarySelectionSource(Client* client, uint32_t version, uint32_t id);
-    friend class PrimarySelectionDeviceManager;
-    friend class PrimarySelectionDevice;
+    primary_selection_source(Client* client, uint32_t version, uint32_t id);
+    friend class primary_selection_device_manager;
+    friend class primary_selection_device;
 
     class Private;
     Private* d_ptr;

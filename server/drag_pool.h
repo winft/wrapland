@@ -13,7 +13,7 @@
 
 namespace Wrapland::Server
 {
-class DataDevice;
+class data_device;
 class Pointer;
 class Seat;
 class Surface;
@@ -26,7 +26,7 @@ enum class drag_mode {
 };
 
 struct drag_source {
-    DataDevice* dev{nullptr};
+    data_device* dev{nullptr};
     Pointer* pointer{nullptr};
     Touch* touch{nullptr};
     drag_mode mode{drag_mode::none};
@@ -35,7 +35,7 @@ struct drag_source {
 };
 
 struct drag_target {
-    DataDevice* dev{nullptr};
+    data_device* dev{nullptr};
     Surface* surface{nullptr};
     QMatrix4x4 transformation;
     QMetaObject::Connection destroy_notifier;
@@ -63,7 +63,7 @@ public:
 
     void cancel();
     void end(uint32_t serial);
-    void perform_drag(DataDevice* dataDevice);
+    void perform_drag(data_device* dataDevice);
 
 private:
     drag_source source;

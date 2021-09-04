@@ -363,7 +363,7 @@ void Pointer::motion(QPointF const& position)
         auto const proxy_surface_focused
             = drag_origin->dataProxy() && drag_origin == d_ptr->focusedSurface;
         if (!proxy_surface_focused) {
-            // Handled by DataDevice.
+            // Handled by data_device.
             return;
         }
     }
