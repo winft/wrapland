@@ -38,6 +38,8 @@ namespace Wrapland::Server
 class data_device::Private : public Wayland::Resource<data_device>
 {
 public:
+    using source_res_t = Wrapland::Server::data_source_res;
+
     Private(Client* client, uint32_t version, uint32_t id, Seat* seat, data_device* q);
     ~Private() override;
 
@@ -119,7 +121,7 @@ void data_device::Private::startDragCallback([[maybe_unused]] wl_client* wlClien
                                              uint32_t serial)
 {
     auto priv = handle(wlResource)->d_ptr;
-    auto source = wlSource ? Resource<data_source>::handle(wlSource) : nullptr;
+    auto source = wlSource ? Resource<data_source_res>::handle(wlSource)->src() : nullptr;
     auto origin = Resource<Surface>::handle(wlOrigin);
     auto icon = wlIcon ? Resource<Surface>::handle(wlIcon) : nullptr;
 
@@ -180,10 +182,10 @@ void data_device::Private::set_selection_callback(wl_client* /*wlClient*/,
 {
     // TODO(unknown author): verify serial
     auto handle = Resource::handle(wlResource);
-    auto source = wlSource ? Wayland::Resource<data_source>::handle(wlSource) : nullptr;
+    auto source_res = wlSource ? Wayland::Resource<data_source_res>::handle(wlSource) : nullptr;
 
     // TODO(romangg): move errors into Wayland namespace.
-    if (source && source->supported_dnd_actions()
+    if (source_res && source_res->src()->supported_dnd_actions()
         && wl_resource_get_version(wlSource) >= WL_DATA_SOURCE_ACTION_SINCE_VERSION) {
         wl_resource_post_error(
             wlSource, WL_DATA_SOURCE_ERROR_INVALID_SOURCE, "Data source is for drag and drop");

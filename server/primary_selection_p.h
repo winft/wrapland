@@ -33,9 +33,13 @@ private:
     static const struct zwp_primary_selection_device_manager_v1_interface s_interface;
 };
 
+class primary_selection_source_res;
+
 class primary_selection_device::Private : public Wayland::Resource<primary_selection_device>
 {
 public:
+    using source_res_t = Wrapland::Server::primary_selection_source_res;
+
     Private(Client* client,
             uint32_t version,
             uint32_t id,
@@ -77,18 +81,50 @@ private:
     static const struct zwp_primary_selection_offer_v1_interface s_interface;
 };
 
-class primary_selection_source::Private : public Wayland::Resource<primary_selection_source>
+class primary_selection_source::Private
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, primary_selection_source* qptr);
-    ~Private() override;
+    explicit Private(primary_selection_source* q);
 
     std::vector<std::string> mimeTypes;
+
+    primary_selection_source_res* res{nullptr};
+    primary_selection_source* q_ptr;
+};
+
+class primary_selection_source_res_impl : public Wayland::Resource<primary_selection_source_res>
+{
+public:
+    primary_selection_source_res_impl(Client* client,
+                                      uint32_t version,
+                                      uint32_t id,
+                                      primary_selection_source_res* q_ptr);
+
+    primary_selection_source_res* q_ptr;
 
 private:
     static void offer_callback(wl_client* wlClient, wl_resource* wlResource, char const* mimeType);
 
-    static const struct zwp_primary_selection_source_v1_interface s_interface;
+    static struct zwp_primary_selection_source_v1_interface const s_interface;
+};
+
+class primary_selection_source_res : public QObject
+{
+    Q_OBJECT
+public:
+    primary_selection_source_res(Client* client, uint32_t version, uint32_t id);
+
+    void cancel() const;
+    void request_data(std::string const& mimeType, qint32 fd) const;
+
+    primary_selection_source* src() const;
+    primary_selection_source::Private* src_priv() const;
+
+    std::unique_ptr<primary_selection_source> pub_src;
+    primary_selection_source_res_impl* impl;
+
+Q_SIGNALS:
+    void resourceDestroyed();
 };
 
 }

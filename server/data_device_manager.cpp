@@ -21,7 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "client.h"
 #include "data_device.h"
-#include "data_source.h"
+#include "data_source_p.h"
 #include "display.h"
 #include "selection_device_manager_p.h"
 
@@ -70,12 +70,13 @@ data_device_manager::~data_device_manager() = default;
 
 void data_device_manager::create_source(Client* client, uint32_t version, uint32_t id)
 {
-    auto source = new data_source(client, version, id);
-    if (!source) {
-        return;
-    }
+    auto src_res = new data_source_res(client, version, id);
+    // TODO(romangg): Catch oom.
 
-    Q_EMIT source_created(source);
+    // The resource is cleaned up through the Wayland connection as usual. For unknown reason
+    // clang-tidy complains here - and only here - about that.
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
+    Q_EMIT source_created(src_res->src());
 }
 
 void data_device_manager::get_device(Client* client, uint32_t version, uint32_t id, Seat* seat)

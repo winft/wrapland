@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright © 2020 Roman Gilg <subdiff@gmail.com>
+Copyright © 2020, 2021 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -18,11 +18,13 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
-#include <QObject>
+
+#include "data_device_manager.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include "data_device_manager.h"
+#include <QObject>
+#include <memory>
 
 namespace Wrapland::Server
 {
@@ -32,17 +34,16 @@ class WRAPLANDSERVER_EXPORT data_source : public QObject
 {
     Q_OBJECT
 public:
-    void accept(std::string const& mimeType);
-    void request_data(std::string const& mimeType, qint32 fd);
-    void cancel();
+    void accept(std::string const& mimeType) const;
+    void request_data(std::string const& mimeType, qint32 fd) const;
+    void cancel() const;
 
     std::vector<std::string> mime_types() const;
-
     dnd_actions supported_dnd_actions() const;
 
-    void send_dnd_drop_performed();
-    void send_dnd_finished();
-    void send_action(dnd_action action);
+    void send_dnd_drop_performed() const;
+    void send_dnd_finished() const;
+    void send_action(dnd_action action) const;
 
     Client* client() const;
 
@@ -52,12 +53,11 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    friend class data_device_manager;
-    friend class data_device;
-    explicit data_source(Client* client, uint32_t version, uint32_t id);
+    friend class data_source_res;
+    data_source();
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

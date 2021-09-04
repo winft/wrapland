@@ -46,12 +46,10 @@ primary_selection_device_manager::~primary_selection_device_manager() = default;
 
 void primary_selection_device_manager::create_source(Client* client, uint32_t version, uint32_t id)
 {
-    auto source = new source_t(client, version, id);
-    if (!source) {
-        return;
-    }
+    auto src_res = new primary_selection_source_res(client, version, id);
+    // TODO(romangg): Catch oom.
 
-    Q_EMIT source_created(source);
+    Q_EMIT source_created(src_res->src());
 }
 
 void primary_selection_device_manager::get_device(Client* client,
@@ -224,61 +222,99 @@ void primary_selection_offer::send_offer()
     }
 }
 
+primary_selection_source::Private::Private(primary_selection_source* q_ptr)
+    : q_ptr{q_ptr}
+{
+}
+
+primary_selection_source::primary_selection_source()
+    : d_ptr(new primary_selection_source::Private(this))
+{
+}
+
+primary_selection_source_res_impl::primary_selection_source_res_impl(
+    Client* client,
+    uint32_t version,
+    uint32_t id,
+    primary_selection_source_res* q_ptr)
+    : Wayland::Resource<primary_selection_source_res>(client,
+                                                      version,
+                                                      id,
+                                                      &zwp_primary_selection_source_v1_interface,
+                                                      &s_interface,
+                                                      q_ptr)
+    , q_ptr{q_ptr}
+{
+}
+
 const struct zwp_primary_selection_source_v1_interface
-    primary_selection_source::Private::s_interface
+    primary_selection_source_res_impl::s_interface
     = {
         offer_callback,
         destroyCallback,
 };
 
-primary_selection_source::Private::Private(Client* client,
-                                           uint32_t version,
-                                           uint32_t id,
-                                           primary_selection_source* qptr)
-    : Wayland::Resource<primary_selection_source>(client,
-                                                  version,
-                                                  id,
-                                                  &zwp_primary_selection_source_v1_interface,
-                                                  &s_interface,
-                                                  qptr)
-{
-}
-
-primary_selection_source::Private::~Private() = default;
-
-void primary_selection_source::Private::offer_callback(wl_client* /*wlClient*/,
+void primary_selection_source_res_impl::offer_callback(wl_client* /*wlClient*/,
                                                        wl_resource* wlResource,
                                                        char const* mimeType)
 {
     auto handle = Resource::handle(wlResource);
-    offer_mime_type(handle, handle->d_ptr, mimeType);
+    offer_mime_type(handle->src_priv(), mimeType);
 }
 
-primary_selection_source::primary_selection_source(Client* client, uint32_t version, uint32_t id)
-    : d_ptr(new Private(client, version, id, this))
+primary_selection_source_res::primary_selection_source_res(Client* client,
+                                                           uint32_t version,
+                                                           uint32_t id)
+    : pub_src{new primary_selection_source}
+    , impl{new primary_selection_source_res_impl(client, version, id, this)}
 {
+    QObject::connect(this,
+                     &primary_selection_source_res::resourceDestroyed,
+                     src(),
+                     &primary_selection_source::resourceDestroyed);
+    src_priv()->res = this;
 }
 
-primary_selection_source::~primary_selection_source() = default;
+void primary_selection_source_res::cancel() const
+{
+    impl->send<zwp_primary_selection_source_v1_send_cancelled>();
+    impl->client()->flush();
+}
 
-std::vector<std::string> primary_selection_source::mime_types()
+void primary_selection_source_res::request_data(std::string const& mimeType, qint32 fd) const
+{
+    impl->send<zwp_primary_selection_source_v1_send_send>(mimeType.c_str(), fd);
+    close(fd);
+}
+
+primary_selection_source* primary_selection_source_res::src() const
+{
+    return src_priv()->q_ptr;
+}
+
+primary_selection_source::Private* primary_selection_source_res::src_priv() const
+{
+    return pub_src->d_ptr.get();
+}
+
+std::vector<std::string> primary_selection_source::mime_types() const
 {
     return d_ptr->mimeTypes;
 }
 
-void primary_selection_source::cancel()
+void primary_selection_source::cancel() const
 {
-    d_ptr->send<zwp_primary_selection_source_v1_send_cancelled>();
-    d_ptr->client()->flush();
+    d_ptr->res->cancel();
 }
-void primary_selection_source::request_data(std::string const& mimeType, qint32 fd)
+
+void primary_selection_source::request_data(std::string const& mimeType, qint32 fd) const
 {
-    d_ptr->send<zwp_primary_selection_source_v1_send_send>(mimeType.c_str(), fd);
-    close(fd);
+    d_ptr->res->request_data(mimeType, fd);
 }
+
 Client* primary_selection_source::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->res->impl->client()->handle();
 }
 
 }

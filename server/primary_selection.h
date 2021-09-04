@@ -97,12 +97,10 @@ class WRAPLANDSERVER_EXPORT primary_selection_source : public QObject
 {
     Q_OBJECT
 public:
-    ~primary_selection_source() override;
+    std::vector<std::string> mime_types() const;
 
-    void cancel();
-    void request_data(std::string const& mimeType, qint32 fd);
-
-    std::vector<std::string> mime_types();
+    void cancel() const;
+    void request_data(std::string const& mimeType, qint32 fd) const;
 
     Client* client() const;
 
@@ -111,12 +109,11 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    primary_selection_source(Client* client, uint32_t version, uint32_t id);
-    friend class primary_selection_device_manager;
-    friend class primary_selection_device;
+    friend class primary_selection_source_res;
+    primary_selection_source();
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

@@ -16,11 +16,11 @@
 namespace Wrapland::Server
 {
 
-template<typename Handle, typename Priv>
-void offer_mime_type(Handle handle, Priv priv, char const* mimeType)
+template<typename Source>
+void offer_mime_type(Source src_priv, char const* mimeType)
 {
-    priv->mimeTypes.push_back(mimeType);
-    Q_EMIT handle->mime_type_offered(mimeType);
+    src_priv->mimeTypes.push_back(mimeType);
+    Q_EMIT src_priv->q_ptr->mime_type_offered(mimeType);
 }
 
 template<typename Source>
@@ -36,8 +36,9 @@ void receive_mime_type_offer(Source source, char const* mimeType, int32_t fd)
 template<typename Handle, typename Priv>
 void set_selection(Handle handle, Priv priv, wl_resource* wlSource)
 {
-    using source_type = typename std::remove_pointer_t<decltype(handle)>::source_t;
-    auto source = wlSource ? Wayland::Resource<source_type>::handle(wlSource) : nullptr;
+    using source_res_type = typename std::remove_pointer_t<decltype(priv)>::source_res_t;
+    auto source_res = wlSource ? Wayland::Resource<source_res_type>::handle(wlSource) : nullptr;
+    auto source = source_res ? source_res->src() : nullptr;
 
     if (priv->selection == source) {
         return;
@@ -51,10 +52,10 @@ void set_selection(Handle handle, Priv priv, wl_resource* wlSource)
 
     priv->selection = source;
 
-    if (priv->selection) {
+    if (source) {
         auto clearSelection = [handle, priv] { set_selection(handle, priv, nullptr); };
         priv->selectionDestroyedConnection = QObject::connect(
-            priv->selection, &source_type::resourceDestroyed, handle, clearSelection);
+            source_res, &source_res_type::resourceDestroyed, handle, clearSelection);
         Q_EMIT handle->selection_changed(priv->selection);
     } else {
         priv->selectionDestroyedConnection = QMetaObject::Connection();
