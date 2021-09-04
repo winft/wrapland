@@ -106,7 +106,7 @@ Seat* PrimarySelectionDevice::seat() const
 
 const struct zwp_primary_selection_offer_v1_interface PrimarySelectionOffer::Private::s_interface
     = {
-        receive_selection_offer<Wayland::Resource<PrimarySelectionOffer>>,
+        receive_callback,
         destroyCallback,
 };
 
@@ -125,6 +125,15 @@ PrimarySelectionOffer::Private::Private(Client* client,
 }
 
 PrimarySelectionOffer::Private::~Private() = default;
+
+void PrimarySelectionOffer::Private::receive_callback(wl_client* /*wlClient*/,
+                                                      wl_resource* wlResource,
+                                                      char const* mimeType,
+                                                      int32_t fd)
+{
+    auto handle = Resource::handle(wlResource);
+    receive_mime_type_offer(handle->d_ptr->source, mimeType, fd);
+}
 
 PrimarySelectionOffer::PrimarySelectionOffer(Client* client,
                                              uint32_t version,
@@ -158,14 +167,6 @@ const struct zwp_primary_selection_source_v1_interface PrimarySelectionSource::P
         destroyCallback,
 };
 
-void PrimarySelectionSource::Private::offer_callback(wl_client* /*wlClient*/,
-                                                     wl_resource* wlResource,
-                                                     char const* mimeType)
-{
-    auto handle = Resource::handle(wlResource);
-    offer_mime_type(handle, handle->d_ptr, mimeType);
-}
-
 PrimarySelectionSource::Private::Private(Client* client,
                                          uint32_t version,
                                          uint32_t id,
@@ -180,6 +181,14 @@ PrimarySelectionSource::Private::Private(Client* client,
 }
 
 PrimarySelectionSource::Private::~Private() = default;
+
+void PrimarySelectionSource::Private::offer_callback(wl_client* /*wlClient*/,
+                                                     wl_resource* wlResource,
+                                                     char const* mimeType)
+{
+    auto handle = Resource::handle(wlResource);
+    offer_mime_type(handle, handle->d_ptr, mimeType);
+}
 
 PrimarySelectionSource::PrimarySelectionSource(Client* client, uint32_t version, uint32_t id)
     : d_ptr(new Private(client, version, id, this))

@@ -16,18 +16,14 @@
 namespace Wrapland::Server
 {
 
-template<typename Resource>
-void receive_selection_offer([[maybe_unused]] wl_client* wlClient,
-                             wl_resource* wlResource,
-                             char const* mimeType,
-                             int32_t fd)
+template<typename Source>
+void receive_mime_type_offer(Source source, char const* mimeType, int32_t fd)
 {
-    auto handle = Resource::handle(wlResource);
-    if (auto source = handle->d_ptr->source) {
-        source->requestData(mimeType, fd);
-    } else {
+    if (!source) {
         close(fd);
+        return;
     }
+    source->requestData(mimeType, fd);
 }
 
 }

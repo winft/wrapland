@@ -99,13 +99,6 @@ private:
                                    uint32_t version,
                                    PrimarySelectionSource* source);
 
-    template<typename Resource>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void receive_selection_offer(wl_client* wlClient,
-                                        wl_resource* wlResource,
-                                        char const* mimeType,
-                                        int32_t fd);
-
     class Private;
     Private* d_ptr;
 };

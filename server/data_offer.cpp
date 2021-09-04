@@ -35,7 +35,7 @@ namespace Wrapland::Server
 
 const struct wl_data_offer_interface DataOffer::Private::s_interface = {
     acceptCallback,
-    receive_selection_offer<Wayland::Resource<DataOffer>>,
+    receive_callback,
     destroyCallback,
     finishCallback,
     setActionsCallback,
@@ -60,6 +60,15 @@ void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
         return;
     }
     priv->source->accept(mimeType ? mimeType : std::string());
+}
+
+void DataOffer::Private::receive_callback(wl_client* /*wlClient*/,
+                                          wl_resource* wlResource,
+                                          char const* mimeType,
+                                          int32_t fd)
+{
+    auto handle = Resource::handle(wlResource);
+    receive_mime_type_offer(handle->d_ptr->source, mimeType, fd);
 }
 
 void DataOffer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,

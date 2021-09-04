@@ -66,6 +66,10 @@ public:
     PrimarySelectionSource* source;
 
 private:
+    static void receive_callback(wl_client* wlClient,
+                                 wl_resource* wlResource,
+                                 char const* mimeType,
+                                 int32_t fd);
     static const struct zwp_primary_selection_offer_v1_interface s_interface;
 };
 
