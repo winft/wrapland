@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/display.h"
 
 #include "../../server/compositor.h"
+#include "../../server/data_control_v1.h"
 #include "../../server/data_device_manager.h"
 #include "../../server/dpms.h"
 #include "../../server/output.h"
@@ -36,6 +37,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/contrast.h"
+#include "../../src/client/data_control_v1.h"
 #include "../../src/client/dpms.h"
 #include "../../src/client/drm_lease_v1.h"
 #include "../../src/client/event_queue.h"
@@ -84,6 +86,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-slide-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-text-input-v3-client-protocol.h>
+#include <wayland-wlr-data-control-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-xdg-shell-client-protocol.h>
 
@@ -104,6 +107,7 @@ private Q_SLOTS:
     void testBindSeat();
     void testBindSubCompositor();
     void testBindDataDeviceManager();
+    void testBindDataControlManager();
     void testBindDrmLeaseDeviceV1();
     void testBindBlurManager();
     void testBindContrastManager();
@@ -135,6 +139,7 @@ private:
     std::unique_ptr<Wrapland::Server::Seat> m_seat;
     std::unique_ptr<Wrapland::Server::Subcompositor> m_subcompositor;
     std::unique_ptr<Wrapland::Server::data_device_manager> m_dataDeviceManager;
+    std::unique_ptr<Wrapland::Server::data_control_manager_v1> m_dataControlManager;
     std::unique_ptr<Wrapland::Server::drm_lease_device_v1> m_drmLeaseDeviceV1;
     std::unique_ptr<Wrapland::Server::input_method_manager_v2> m_inputMethodManagerV2;
     std::unique_ptr<Wrapland::Server::OutputManagementV1> m_outputManagement;
@@ -172,6 +177,7 @@ void TestWaylandRegistry::init()
     m_seat.reset(m_display->createSeat());
     m_subcompositor.reset(m_display->createSubCompositor());
     m_dataDeviceManager.reset(m_display->createDataDeviceManager());
+    m_dataControlManager.reset(m_display->create_data_control_manager_v1());
     m_drmLeaseDeviceV1.reset(m_display->createDrmLeaseDeviceV1());
     m_outputManagement.reset(m_display->createOutputManagementV1());
     m_blur.reset(m_display->createBlurManager());
@@ -316,6 +322,14 @@ void TestWaylandRegistry::testBindDataDeviceManager()
               SIGNAL(dataDeviceManagerAnnounced(quint32, quint32)),
               bindDataDeviceManager,
               wl_data_device_manager_destroy)
+}
+
+void TestWaylandRegistry::testBindDataControlManager()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::DataControlManagerV1,
+              SIGNAL(dataControlManagerV1Announced(quint32, quint32)),
+              bindDataControlManagerV1,
+              zwlr_data_control_manager_v1_destroy)
 }
 
 void TestWaylandRegistry::testBindDrmLeaseDeviceV1()

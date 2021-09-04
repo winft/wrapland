@@ -24,6 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "compositor.h"
 #include "connection_thread.h"
 #include "contrast.h"
+#include "data_control_v1.h"
 #include "datadevicemanager.h"
 #include "dpms.h"
 #include "drm_lease_v1_p.h"
@@ -100,6 +101,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-text-input-v3-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
+#include <wayland-wlr-data-control-v1-client-protocol.h>
 #include <wayland-wlr-layer-shell-client-protocol.h>
 #include <wayland-wlr-output-management-v1-client-protocol.h>
 #include <wayland-xdg-activation-v1-client-protocol.h>
@@ -145,6 +147,16 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &wl_compositor_interface,
             &Registry::compositorAnnounced,
             &Registry::compositorRemoved,
+        },
+    },
+    {
+        Registry::Interface::DataControlManagerV1,
+        {
+            2,
+            QByteArrayLiteral("zwlr_data_control_manager_v1"),
+            &zwlr_data_control_manager_v1_interface,
+            &Registry::dataControlManagerV1Announced,
+            &Registry::dataControlManagerV1Removed,
         },
     },
     {
@@ -866,6 +878,7 @@ BIND(Shell, wl_shell)
 BIND(Shm, wl_shm)
 BIND(SubCompositor, wl_subcompositor)
 BIND(FullscreenShell, _wl_fullscreen_shell)
+BIND(DataControlManagerV1, zwlr_data_control_manager_v1)
 BIND(DataDeviceManager, wl_data_device_manager)
 BIND(DrmLeaseDeviceV1, wp_drm_lease_device_v1)
 BIND(PlasmaShell, org_kde_plasma_shell)
@@ -1016,6 +1029,13 @@ TextInputManagerV2*
 Registry::createTextInputManagerV2(quint32 name, quint32 version, QObject* parent)
 {
     return d->create<TextInputManagerV2>(name, version, parent, &Registry::bindTextInputManagerV2);
+}
+
+data_control_manager_v1*
+Registry::createDataControlManagerV1(quint32 name, quint32 version, QObject* parent)
+{
+    return d->create<data_control_manager_v1>(
+        name, version, parent, &Registry::bindDataControlManagerV1);
 }
 
 text_input_manager_v3*

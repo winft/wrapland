@@ -366,6 +366,21 @@ add_test(NAME wrapland-testDataDevice COMMAND testDataDevice)
 ecm_mark_as_test(testDataDevice)
 
 # ##################################################################################################
+# Test data-control
+# ##################################################################################################
+set(test_data_control_SRCS data_control.cpp)
+add_executable(test-data-control ${test_data_control_SRCS})
+target_link_libraries(test-data-control
+  Qt5::Test
+  Qt5::Gui
+  Wrapland::Client
+  Wrapland::Server
+  Wayland::Client
+)
+add_test(NAME wrapland-test-data-control COMMAND test-data-control)
+ecm_mark_as_test(test-data-control)
+
+# ##################################################################################################
 # Test Drag'N'Drop
 # ##################################################################################################
 set(testDragAndDrop_SRCS drag_and_drop.cpp)

@@ -14,6 +14,7 @@ set(CLIENT_LIB_SRCS
     contrast.cpp
     slide.cpp
     event_queue.cpp
+    data_control_v1.cpp
     datadevice.cpp
     datadevicemanager.cpp
     dataoffer.cpp
@@ -96,6 +97,10 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
   PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-device-unstable-v1.xml
   BASENAME output-device-v1
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-data-control-unstable-v1.xml
+  BASENAME wlr-data-control-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
@@ -250,6 +255,7 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-fullscreen-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-data-control-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-output-management-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
@@ -324,6 +330,7 @@ set(CLIENT_LIB_HEADERS
     connection_thread.h
     contrast.h
     event_queue.h
+    data_control_v1.h
     datadevice.h
     datadevicemanager.h
     dataoffer.h
