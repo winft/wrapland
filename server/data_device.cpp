@@ -165,7 +165,7 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
     surface = origin;
     icon = _icon;
     drag.serial = serial;
-    Q_EMIT q_ptr->dragStarted();
+    Q_EMIT q_ptr->drag_started();
 }
 
 void DataDevice::Private::set_selection_callback(wl_client* /*wlClient*/,
@@ -194,7 +194,7 @@ DataOffer* DataDevice::Private::createDataOffer(DataSource* source)
     }
 
     send<wl_data_device_send_data_offer>(offer->d_ptr->resource());
-    offer->sendAllOffers();
+    offer->send_all_offers();
     return offer;
 }
 
@@ -265,7 +265,7 @@ void DataDevice::Private::update_drag_touch_motion()
 
 void DataDevice::Private::update_drag_target_offer(Surface* surface, uint32_t serial)
 {
-    auto source = seat->drags().get_source().dev->dragSource();
+    auto source = seat->drags().get_source().dev->drag_source();
     auto offer = createDataOffer(source);
 
     // TODO(unknown author): handle touch position
@@ -284,41 +284,34 @@ void DataDevice::Private::update_drag_target_offer(Surface* surface, uint32_t se
     offer->d_ptr->sendSourceActions();
 
     auto matchOffers = [source, offer] {
-        DataDeviceManager::DnDAction action{DataDeviceManager::DnDAction::None};
+        dnd_action action{dnd_action::none};
 
-        if (source->supportedDragAndDropActions().testFlag(offer->preferredDragAndDropAction())) {
-            action = offer->preferredDragAndDropAction();
+        if (source->supported_dnd_actions().testFlag(offer->preferred_dnd_action())) {
+            action = offer->preferred_dnd_action();
 
         } else {
+            auto const source_actions = source->supported_dnd_actions();
+            auto const offer_actions = offer->supported_dnd_actions();
 
-            if (source->supportedDragAndDropActions().testFlag(DataDeviceManager::DnDAction::Copy)
-                && offer->supportedDragAndDropActions().testFlag(
-                    DataDeviceManager::DnDAction::Copy)) {
-                action = DataDeviceManager::DnDAction::Copy;
-            }
-
-            else if (source->supportedDragAndDropActions().testFlag(
-                         DataDeviceManager::DnDAction::Move)
-                     && offer->supportedDragAndDropActions().testFlag(
-                         DataDeviceManager::DnDAction::Move)) {
-                action = DataDeviceManager::DnDAction::Move;
-            }
-
-            else if (source->supportedDragAndDropActions().testFlag(
-                         DataDeviceManager::DnDAction::Ask)
-                     && offer->supportedDragAndDropActions().testFlag(
-                         DataDeviceManager::DnDAction::Ask)) {
-                action = DataDeviceManager::DnDAction::Ask;
+            if (source_actions.testFlag(dnd_action::copy)
+                && offer_actions.testFlag(dnd_action::copy)) {
+                action = dnd_action::copy;
+            } else if (source_actions.testFlag(dnd_action::move)
+                       && offer_actions.testFlag(dnd_action::move)) {
+                action = dnd_action::move;
+            } else if (source_actions.testFlag(dnd_action::ask)
+                       && offer_actions.testFlag(dnd_action::ask)) {
+                action = dnd_action::ask;
             }
         }
 
-        offer->dndAction(action);
-        source->dndAction(action);
+        offer->send_action(action);
+        source->send_action(action);
     };
     drag.targetActionConnection
-        = connect(offer, &DataOffer::dragAndDropActionsChanged, offer, matchOffers);
+        = connect(offer, &DataOffer::dnd_actions_changed, offer, matchOffers);
     drag.sourceActionConnection
-        = connect(source, &DataSource::supportedDragAndDropActionsChanged, source, matchOffers);
+        = connect(source, &DataSource::supported_dnd_actions_changed, source, matchOffers);
 }
 
 DataDevice::DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat)
@@ -331,7 +324,7 @@ Seat* DataDevice::seat() const
     return d_ptr->seat;
 }
 
-DataSource* DataDevice::dragSource() const
+DataSource* DataDevice::drag_source() const
 {
 
     return d_ptr->source;
@@ -352,10 +345,10 @@ DataSource* DataDevice::selection() const
     return d_ptr->selection;
 }
 
-void DataDevice::sendSelection(DataSource* source)
+void DataDevice::send_selection(DataSource* source)
 {
     if (!source) {
-        sendClearSelection();
+        send_clear_selection();
         return;
     }
 
@@ -367,7 +360,7 @@ void DataDevice::sendSelection(DataSource* source)
     d_ptr->send<wl_data_device_send_selection>(offer->d_ptr->resource());
 }
 
-void DataDevice::sendClearSelection()
+void DataDevice::send_clear_selection()
 {
     d_ptr->send<wl_data_device_send_selection>(nullptr);
 }
@@ -388,13 +381,13 @@ void DataDevice::drop()
     // TODO(romangg): do we need to flush the client here?
 }
 
-void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
+void DataDevice::update_drag_target(Surface* surface, quint32 serial)
 {
     d_ptr->cancel_drag_target();
 
     if (!surface) {
-        if (auto s = d_ptr->seat->drags().get_source().dev->dragSource()) {
-            s->dndAction(DataDeviceManager::DnDAction::None);
+        if (auto s = d_ptr->seat->drags().get_source().dev->drag_source()) {
+            s->send_action(dnd_action::none);
         }
         return;
     }
@@ -421,12 +414,12 @@ void DataDevice::updateDragTarget(Surface* surface, quint32 serial)
     d_ptr->client()->flush();
 }
 
-quint32 DataDevice::dragImplicitGrabSerial() const
+quint32 DataDevice::drag_implicit_grab_serial() const
 {
     return d_ptr->drag.serial;
 }
 
-void DataDevice::updateProxy(Surface* remote)
+void DataDevice::update_proxy(Surface* remote)
 {
     // TODO(romangg): connect destroy signal?
     d_ptr->proxyRemoteSurface = remote;

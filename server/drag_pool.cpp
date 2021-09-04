@@ -34,7 +34,7 @@ drag_target const& drag_pool::get_target() const
 void drag_pool::cancel()
 {
     if (target.dev) {
-        target.dev->updateDragTarget(nullptr, 0);
+        target.dev->update_drag_target(nullptr, 0);
         target.dev = nullptr;
     }
     end(0);
@@ -47,13 +47,13 @@ void drag_pool::end(uint32_t serial)
     QObject::disconnect(source.device_destroy_notifier);
     QObject::disconnect(source.destroy_notifier);
 
-    if (source.dev && source.dev->dragSource()) {
-        source.dev->dragSource()->dropPerformed();
+    if (source.dev && source.dev->drag_source()) {
+        source.dev->drag_source()->send_dnd_drop_performed();
     }
 
     if (trgt) {
         trgt->drop();
-        trgt->updateDragTarget(nullptr, serial);
+        trgt->update_drag_target(nullptr, serial);
     }
 
     source = {};
@@ -84,7 +84,7 @@ void drag_pool::set_target(Surface* new_surface,
     }
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
     if (target.dev) {
-        target.dev->updateDragTarget(nullptr, serial);
+        target.dev->update_drag_target(nullptr, serial);
         QObject::disconnect(target.destroy_notifier);
         target.destroy_notifier = QMetaObject::Connection();
     }
@@ -105,7 +105,7 @@ void drag_pool::set_target(Surface* new_surface,
     if (target.dev) {
         target.surface = new_surface;
         target.transformation = inputTransformation;
-        target.dev->updateDragTarget(target.surface, serial);
+        target.dev->update_drag_target(target.surface, serial);
         target.destroy_notifier
             = QObject::connect(target.dev, &DataDevice::resourceDestroyed, seat, [this] {
                   QObject::disconnect(target.destroy_notifier);
@@ -136,7 +136,7 @@ bool drag_pool::is_touch_drag() const
 
 void drag_pool::perform_drag(DataDevice* dataDevice)
 {
-    const auto dragSerial = dataDevice->dragImplicitGrabSerial();
+    const auto dragSerial = dataDevice->drag_implicit_grab_serial();
     auto* dragSurface = dataDevice->origin();
     auto& pointers = seat->pointers();
 
@@ -168,12 +168,12 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
               end(seat->d_ptr->display()->handle()->nextSerial());
           });
 
-    if (dataDevice->dragSource()) {
+    if (dataDevice->drag_source()) {
         source.destroy_notifier = QObject::connect(
-            dataDevice->dragSource(), &DataSource::resourceDestroyed, seat, [this] {
+            dataDevice->drag_source(), &DataSource::resourceDestroyed, seat, [this] {
                 const auto serial = seat->d_ptr->display()->handle()->nextSerial();
                 if (target.dev) {
-                    target.dev->updateDragTarget(nullptr, serial);
+                    target.dev->update_drag_target(nullptr, serial);
                     target.dev = nullptr;
                 }
                 end(serial);
@@ -181,8 +181,8 @@ void drag_pool::perform_drag(DataDevice* dataDevice)
     } else {
         source.destroy_notifier = QMetaObject::Connection();
     }
-    dataDevice->updateDragTarget(proxied ? nullptr : originSurface,
-                                 dataDevice->dragImplicitGrabSerial());
+    dataDevice->update_drag_target(proxied ? nullptr : originSurface,
+                                   dataDevice->drag_implicit_grab_serial());
     Q_EMIT seat->dragStarted();
     Q_EMIT seat->dragSurfaceChanged();
 }

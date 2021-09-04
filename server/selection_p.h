@@ -20,7 +20,7 @@ template<typename Handle, typename Priv>
 void offer_mime_type(Handle handle, Priv priv, char const* mimeType)
 {
     priv->mimeTypes.push_back(mimeType);
-    Q_EMIT handle->mimeTypeOffered(mimeType);
+    Q_EMIT handle->mime_type_offered(mimeType);
 }
 
 template<typename Source>
@@ -30,7 +30,7 @@ void receive_mime_type_offer(Source source, char const* mimeType, int32_t fd)
         close(fd);
         return;
     }
-    source->requestData(mimeType, fd);
+    source->request_data(mimeType, fd);
 }
 
 template<typename Handle, typename Priv>
@@ -41,7 +41,7 @@ void set_selection(Handle handle, Priv priv, wl_resource* wlSource)
 
     if constexpr (std::is_same<source_type, DataSource>::value) {
         // TODO(romangg): move errors into Wayland namespace.
-        if (source && source->supportedDragAndDropActions()
+        if (source && source->supported_dnd_actions()
             && wl_resource_get_version(wlSource) >= WL_DATA_SOURCE_ACTION_SINCE_VERSION) {
             wl_resource_post_error(
                 wlSource, WL_DATA_SOURCE_ERROR_INVALID_SOURCE, "Data source is for drag and drop");
@@ -65,10 +65,10 @@ void set_selection(Handle handle, Priv priv, wl_resource* wlSource)
         auto clearSelection = [handle, priv] { set_selection(handle, priv, nullptr); };
         priv->selectionDestroyedConnection = QObject::connect(
             priv->selection, &source_type::resourceDestroyed, handle, clearSelection);
-        Q_EMIT handle->selectionChanged(priv->selection);
+        Q_EMIT handle->selection_changed(priv->selection);
     } else {
         priv->selectionDestroyedConnection = QMetaObject::Connection();
-        Q_EMIT handle->selectionCleared();
+        Q_EMIT handle->selection_cleared();
     }
 }
 

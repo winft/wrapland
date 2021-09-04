@@ -29,12 +29,12 @@ public:
 
     ~PrimarySelectionDeviceManager() override;
 
-    void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
     void create_source(Client* client, uint32_t version, uint32_t id);
+    void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
 Q_SIGNALS:
-    void deviceCreated(Wrapland::Server::PrimarySelectionDevice* device);
-    void sourceCreated(Wrapland::Server::PrimarySelectionSource* source);
+    void source_created(Wrapland::Server::PrimarySelectionSource* source);
+    void device_created(Wrapland::Server::PrimarySelectionDevice* device);
 
 private:
     friend class Display;
@@ -56,12 +56,12 @@ public:
     Seat* seat() const;
     Client* client() const;
 
-    void sendSelection(PrimarySelectionSource* source);
-    void sendClearSelection();
+    void send_selection(PrimarySelectionSource* source);
+    void send_clear_selection();
 
 Q_SIGNALS:
-    void selectionChanged(PrimarySelectionSource* source);
-    void selectionCleared();
+    void selection_changed(PrimarySelectionSource* source);
+    void selection_cleared();
     void resourceDestroyed();
 
 private:
@@ -78,7 +78,7 @@ class WRAPLANDSERVER_EXPORT PrimarySelectionOffer : public QObject
 public:
     ~PrimarySelectionOffer() override;
 
-    void sendOffer();
+    void send_offer();
 
 Q_SIGNALS:
     void resourceDestroyed();
@@ -100,14 +100,14 @@ public:
     ~PrimarySelectionSource() override;
 
     void cancel();
-    void requestData(std::string const& mimeType, qint32 fd);
+    void request_data(std::string const& mimeType, qint32 fd);
 
-    std::vector<std::string> mimeTypes();
+    std::vector<std::string> mime_types();
 
     Client* client() const;
 
 Q_SIGNALS:
-    void mimeTypeOffered(std::string);
+    void mime_type_offered(std::string);
     void resourceDestroyed();
 
 private:

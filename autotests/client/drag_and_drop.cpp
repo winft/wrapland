@@ -162,7 +162,7 @@ void TestDragAndDrop::init()
         QVERIFY(client->touch->isValid());
 
         QSignalSpy device_created_spy(m_server_device_manager,
-                                      &Wrapland::Server::DataDeviceManager::deviceCreated);
+                                      &Wrapland::Server::DataDeviceManager::device_created);
         QVERIFY(device_created_spy.isValid());
         client->device = client->ddm->getDevice(client->seat, this);
         QVERIFY(client->device->isValid());
@@ -281,7 +281,7 @@ void TestDragAndDrop::test_pointer()
     QCOMPARE(server_drags.get_target().surface, server_surface);
     QCOMPARE(server_drags.get_target().transformation, QMatrix4x4());
     QVERIFY(!server_drags.get_source().dev->icon());
-    QCOMPARE(server_drags.get_source().dev->dragImplicitGrabSerial(),
+    QCOMPARE(server_drags.get_source().dev->drag_implicit_grab_serial(),
              button_press_spy.first().first().value<quint32>());
     QVERIFY(drag_entered_spy.wait());
     QCOMPARE(drag_entered_spy.count(), 1);
@@ -398,7 +398,7 @@ void TestDragAndDrop::test_touch()
     QCOMPARE(server_drags.get_target().surface, server_surface);
     QCOMPARE(server_drags.get_target().transformation, QMatrix4x4());
     QVERIFY(!server_drags.get_source().dev->icon());
-    QCOMPARE(server_drags.get_source().dev->dragImplicitGrabSerial(), tp->downSerial());
+    QCOMPARE(server_drags.get_source().dev->drag_implicit_grab_serial(), tp->downSerial());
     QVERIFY(drag_entered_spy.wait());
     QCOMPARE(drag_entered_spy.count(), 1);
     QCOMPARE(drag_entered_spy.first().first().value<quint32>(), m_display->serial());
@@ -505,7 +505,7 @@ void TestDragAndDrop::test_cancel_by_destroyed_data_source()
     QCOMPARE(server_drags.get_target().surface, server_surface);
     QCOMPARE(server_drags.get_target().transformation, QMatrix4x4());
     QVERIFY(!server_drags.get_source().dev->icon());
-    QCOMPARE(server_drags.get_source().dev->dragImplicitGrabSerial(),
+    QCOMPARE(server_drags.get_source().dev->drag_implicit_grab_serial(),
              button_press_spy.first().first().value<quint32>());
 
     QVERIFY(drag_entered_spy.wait());
@@ -608,7 +608,7 @@ void TestDragAndDrop::test_target_removed()
     QCOMPARE(server_drags.get_target().surface, server_surface_1);
     QCOMPARE(server_drags.get_target().transformation, QMatrix4x4());
     QVERIFY(!server_drags.get_source().dev->icon());
-    QCOMPARE(server_drags.get_source().dev->dragImplicitGrabSerial(),
+    QCOMPARE(server_drags.get_source().dev->drag_implicit_grab_serial(),
              button_press_spy.first().first().value<quint32>());
 
     QSignalSpy drag_entered_spy(c_2.device, &Wrapland::Client::DataDevice::dragEntered);

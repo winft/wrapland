@@ -35,7 +35,7 @@ DataSource::Private::Private(Client* client, uint32_t version, uint32_t id, Data
     , q_ptr{q}
 {
     if (version < WL_DATA_SOURCE_ACTION_SINCE_VERSION) {
-        supportedDnDActions = DataDeviceManager::DnDAction::Copy;
+        supportedDnDActions = dnd_action::copy;
     }
 }
 
@@ -57,15 +57,15 @@ void DataSource::Private::setActionsCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlResource,
                                              uint32_t dnd_actions)
 {
-    DataDeviceManager::DnDActions supportedActions;
+    Server::dnd_actions supportedActions;
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
-        supportedActions |= DataDeviceManager::DnDAction::Copy;
+        supportedActions |= dnd_action::copy;
     }
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE) {
-        supportedActions |= DataDeviceManager::DnDAction::Move;
+        supportedActions |= dnd_action::move;
     }
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK) {
-        supportedActions |= DataDeviceManager::DnDAction::Ask;
+        supportedActions |= dnd_action::ask;
     }
     // verify that the no other actions are sent
     if (dnd_actions
@@ -79,7 +79,7 @@ void DataSource::Private::setActionsCallback([[maybe_unused]] wl_client* wlClien
     auto priv = handle(wlResource)->d_ptr;
     if (priv->supportedDnDActions != supportedActions) {
         priv->supportedDnDActions = supportedActions;
-        Q_EMIT priv->q_ptr->supportedDragAndDropActionsChanged();
+        Q_EMIT priv->q_ptr->supported_dnd_actions_changed();
     }
 }
 
@@ -94,7 +94,7 @@ void DataSource::accept(std::string const& mimeType)
     d_ptr->send<wl_data_source_send_target>(mimeType.empty() ? nullptr : mimeType.c_str());
 }
 
-void DataSource::requestData(std::string const& mimeType, int32_t fd)
+void DataSource::request_data(std::string const& mimeType, int32_t fd)
 {
     // TODO(unknown author): does this require a sanity check on the possible mimeType?
     d_ptr->send<wl_data_source_send_send>(mimeType.c_str(), fd);
@@ -107,36 +107,36 @@ void DataSource::cancel()
     d_ptr->client()->flush();
 }
 
-std::vector<std::string> DataSource::mimeTypes() const
+std::vector<std::string> DataSource::mime_types() const
 {
     return d_ptr->mimeTypes;
 }
 
-DataDeviceManager::DnDActions DataSource::supportedDragAndDropActions() const
+dnd_actions DataSource::supported_dnd_actions() const
 {
     return d_ptr->supportedDnDActions;
 }
 
-void DataSource::dropPerformed()
+void DataSource::send_dnd_drop_performed()
 {
     d_ptr->send<wl_data_source_send_dnd_drop_performed,
                 WL_DATA_SOURCE_DND_DROP_PERFORMED_SINCE_VERSION>();
 }
 
-void DataSource::dndFinished()
+void DataSource::send_dnd_finished()
 {
     d_ptr->send<wl_data_source_send_dnd_finished, WL_DATA_SOURCE_DND_FINISHED_SINCE_VERSION>();
 }
 
-void DataSource::dndAction(DataDeviceManager::DnDAction action)
+void DataSource::send_action(dnd_action action)
 {
     uint32_t wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
 
-    if (action == DataDeviceManager::DnDAction::Copy) {
+    if (action == dnd_action::copy) {
         wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY;
-    } else if (action == DataDeviceManager::DnDAction::Move) {
+    } else if (action == dnd_action::move) {
         wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE;
-    } else if (action == DataDeviceManager::DnDAction::Ask) {
+    } else if (action == dnd_action::ask) {
         wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK;
     }
 

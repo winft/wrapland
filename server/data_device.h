@@ -40,26 +40,26 @@ public:
     Seat* seat() const;
     Client* client() const;
 
-    DataSource* dragSource() const;
+    DataSource* drag_source() const;
     Surface* origin() const;
     Surface* icon() const;
 
-    quint32 dragImplicitGrabSerial() const;
+    quint32 drag_implicit_grab_serial() const;
 
     DataSource* selection() const;
 
-    void sendSelection(DataSource* source);
-    void sendClearSelection();
+    void send_selection(DataSource* source);
+    void send_clear_selection();
 
     void drop();
 
-    void updateDragTarget(Surface* surface, quint32 serial);
-    void updateProxy(Surface* remote);
+    void update_drag_target(Surface* surface, quint32 serial);
+    void update_proxy(Surface* remote);
 
 Q_SIGNALS:
-    void dragStarted();
-    void selectionChanged(Wrapland::Server::DataSource*);
-    void selectionCleared();
+    void drag_started();
+    void selection_changed(Wrapland::Server::DataSource*);
+    void selection_cleared();
     void resourceDestroyed();
 
 private:

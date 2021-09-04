@@ -266,7 +266,7 @@ void pointer_pool::button_released(uint32_t button)
     update_button_serial(button, serial);
     update_button_state(button, button_state::released);
     if (seat->drags().is_pointer_drag()) {
-        if (seat->drags().get_source().dev->dragImplicitGrabSerial() != currentButtonSerial) {
+        if (seat->drags().get_source().dev->drag_implicit_grab_serial() != currentButtonSerial) {
             // not our drag button - ignore
             return;
         }

@@ -32,6 +32,14 @@ class DataSource;
 class Display;
 class Seat;
 
+enum class dnd_action {
+    none = 0,
+    copy = 1 << 0,
+    move = 1 << 1,
+    ask = 1 << 2,
+};
+Q_DECLARE_FLAGS(dnd_actions, dnd_action)
+
 class WRAPLANDSERVER_EXPORT DataDeviceManager : public QObject
 {
     Q_OBJECT
@@ -41,20 +49,12 @@ public:
 
     ~DataDeviceManager() override;
 
-    enum class DnDAction {
-        None = 0,
-        Copy = 1 << 0,
-        Move = 1 << 1,
-        Ask = 1 << 2,
-    };
-    Q_DECLARE_FLAGS(DnDActions, DnDAction)
-
     void create_source(Client* client, uint32_t version, uint32_t id);
     void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
 Q_SIGNALS:
-    void sourceCreated(Wrapland::Server::DataSource* source);
-    void deviceCreated(Wrapland::Server::DataDevice* device);
+    void source_created(Wrapland::Server::DataSource* source);
+    void device_created(Wrapland::Server::DataDevice* device);
 
 private:
     friend class Display;
@@ -66,4 +66,4 @@ private:
 
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::DataDeviceManager::DnDActions)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::dnd_actions)

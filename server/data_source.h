@@ -33,22 +33,22 @@ class WRAPLANDSERVER_EXPORT DataSource : public QObject
     Q_OBJECT
 public:
     void accept(std::string const& mimeType);
-    void requestData(std::string const& mimeType, qint32 fd);
+    void request_data(std::string const& mimeType, qint32 fd);
     void cancel();
 
-    std::vector<std::string> mimeTypes() const;
+    std::vector<std::string> mime_types() const;
 
-    DataDeviceManager::DnDActions supportedDragAndDropActions() const;
+    dnd_actions supported_dnd_actions() const;
 
-    void dropPerformed();
-    void dndFinished();
-    void dndAction(DataDeviceManager::DnDAction action);
+    void send_dnd_drop_performed();
+    void send_dnd_finished();
+    void send_action(dnd_action action);
 
     Client* client() const;
 
 Q_SIGNALS:
-    void mimeTypeOffered(std::string);
-    void supportedDragAndDropActionsChanged();
+    void mime_type_offered(std::string);
+    void supported_dnd_actions_changed();
     void resourceDestroyed();
 
 private:

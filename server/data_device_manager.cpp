@@ -74,7 +74,7 @@ void DataDeviceManager::create_source(Client* client, uint32_t version, uint32_t
         return;
     }
 
-    Q_EMIT sourceCreated(source);
+    Q_EMIT source_created(source);
 }
 
 void DataDeviceManager::get_device(Client* client, uint32_t version, uint32_t id, Seat* seat)
@@ -84,12 +84,12 @@ void DataDeviceManager::get_device(Client* client, uint32_t version, uint32_t id
         return;
     }
 
-    QObject::connect(device, &DataDevice::dragStarted, seat, [seat, device] {
+    QObject::connect(device, &DataDevice::drag_started, seat, [seat, device] {
         seat->d_ptr->drags.perform_drag(device);
     });
 
     seat->d_ptr->data_devices.register_device(device);
-    Q_EMIT deviceCreated(device);
+    Q_EMIT device_created(device);
 }
 
 }

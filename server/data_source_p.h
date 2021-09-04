@@ -32,7 +32,7 @@ public:
     Private(Client* client, uint32_t version, uint32_t id, DataSource* q);
 
     std::vector<std::string> mimeTypes;
-    DataDeviceManager::DnDActions supportedDnDActions = DataDeviceManager::DnDAction::None;
+    dnd_actions supportedDnDActions = dnd_action::none;
 
     DataSource* q_ptr;
 

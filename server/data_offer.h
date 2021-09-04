@@ -36,14 +36,14 @@ class WRAPLANDSERVER_EXPORT DataOffer : public QObject
 {
     Q_OBJECT
 public:
-    void sendAllOffers();
+    void send_all_offers();
 
-    DataDeviceManager::DnDActions supportedDragAndDropActions() const;
-    DataDeviceManager::DnDAction preferredDragAndDropAction() const;
-    void dndAction(DataDeviceManager::DnDAction action);
+    dnd_actions supported_dnd_actions() const;
+    dnd_action preferred_dnd_action() const;
+    void send_action(dnd_action action);
 
 Q_SIGNALS:
-    void dragAndDropActionsChanged();
+    void dnd_actions_changed();
     void resourceDestroyed();
 
 private:

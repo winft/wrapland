@@ -54,13 +54,13 @@ void selection_pool<Device, Source, signal>::register_device(Device* device)
         remove_one(focus.devices, device);
     });
 
-    QObject::connect(device, &Device::selectionChanged, seat, [this, device](Source* source) {
+    QObject::connect(device, &Device::selection_changed, seat, [this, device](Source* source) {
         assert(source);
         if (has_keyboard_focus(device, seat)) {
             set_selection(source);
         }
     });
-    QObject::connect(device, &Device::selectionCleared, seat, [this, device] {
+    QObject::connect(device, &Device::selection_cleared, seat, [this, device] {
         if (has_keyboard_focus(device, seat)) {
             set_selection(nullptr);
         }
@@ -69,7 +69,7 @@ void selection_pool<Device, Source, signal>::register_device(Device* device)
     if (has_keyboard_focus(device, seat)) {
         focus.devices.push_back(device);
         if (focus.source) {
-            device->sendSelection(focus.source);
+            device->send_selection(focus.source);
         }
     }
 }
@@ -114,7 +114,7 @@ template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::transmit(Source* source)
 {
     std::for_each(focus.devices.begin(), focus.devices.end(), [source](Device* dev) {
-        dev->sendSelection(source);
+        dev->send_selection(source);
     });
 }
 

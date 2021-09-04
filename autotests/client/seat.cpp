@@ -1746,7 +1746,7 @@ void TestSeat::testSelection()
 {
     QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
 
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::deviceCreated);
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 
     Clt::Registry registry;
@@ -1883,7 +1883,7 @@ void TestSeat::testSelection()
     QCOMPARE(selectionSpy.count(), 4);
 
     // Copy already cleared selection, BUG 383054.
-    ddi->sendSelection(ddi->selection());
+    ddi->send_selection(ddi->selection());
 }
 
 void TestSeat::testSelectionNoDataSource()
@@ -1893,7 +1893,7 @@ void TestSeat::testSelectionNoDataSource()
 
     // First create the DataDevice.
     QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::deviceCreated);
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 
     Clt::Registry registry;
@@ -1945,7 +1945,7 @@ void TestSeat::testDataDeviceForKeyboardSurface()
 
     // Create the DataDeviceManager.
     QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::deviceCreated);
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 
     // Create a second Wayland client connection to use it for setSelection.

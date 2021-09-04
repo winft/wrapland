@@ -49,7 +49,7 @@ void PrimarySelectionDeviceManager::create_source(Client* client, uint32_t versi
         return;
     }
 
-    Q_EMIT sourceCreated(source);
+    Q_EMIT source_created(source);
 }
 
 void PrimarySelectionDeviceManager::get_device(Client* client,
@@ -63,7 +63,7 @@ void PrimarySelectionDeviceManager::get_device(Client* client,
     }
 
     seat->d_ptr->primary_selection_devices.register_device(device);
-    Q_EMIT deviceCreated(device);
+    Q_EMIT device_created(device);
 }
 
 const struct zwp_primary_selection_device_v1_interface PrimarySelectionDevice::Private::s_interface
@@ -99,10 +99,10 @@ void PrimarySelectionDevice::Private::set_selection_callback(wl_client* /*wlClie
     set_selection(handle, handle->d_ptr, wlSource);
 }
 
-void PrimarySelectionDevice::sendSelection(Wrapland::Server::PrimarySelectionSource* source)
+void PrimarySelectionDevice::send_selection(Wrapland::Server::PrimarySelectionSource* source)
 {
     if (!source) {
-        sendClearSelection();
+        send_clear_selection();
         return;
     }
 
@@ -114,7 +114,7 @@ void PrimarySelectionDevice::sendSelection(Wrapland::Server::PrimarySelectionSou
     d_ptr->send<zwp_primary_selection_device_v1_send_selection>(offer->d_ptr->resource());
 }
 
-void PrimarySelectionDevice::sendClearSelection()
+void PrimarySelectionDevice::send_clear_selection()
 {
     d_ptr->send<zwp_primary_selection_device_v1_send_selection>(nullptr);
 }
@@ -135,7 +135,7 @@ PrimarySelectionDevice::Private::sendDataOffer(PrimarySelectionSource* source)
     }
 
     send<zwp_primary_selection_device_v1_send_data_offer>(offer->d_ptr->resource());
-    offer->sendOffer();
+    offer->send_offer();
     return offer;
 }
 
@@ -202,7 +202,7 @@ PrimarySelectionOffer::PrimarySelectionOffer(Client* client,
 {
     assert(source);
     QObject::connect(source,
-                     &PrimarySelectionSource::mimeTypeOffered,
+                     &PrimarySelectionSource::mime_type_offered,
                      this,
                      [this](std::string const& mimeType) {
                          d_ptr->send<zwp_primary_selection_offer_v1_send_offer>(mimeType.c_str());
@@ -214,9 +214,9 @@ PrimarySelectionOffer::PrimarySelectionOffer(Client* client,
 
 PrimarySelectionOffer::~PrimarySelectionOffer() = default;
 
-void PrimarySelectionOffer::sendOffer()
+void PrimarySelectionOffer::send_offer()
 {
-    for (auto const& mimeType : d_ptr->source->mimeTypes()) {
+    for (auto const& mimeType : d_ptr->source->mime_types()) {
         d_ptr->send<zwp_primary_selection_offer_v1_send_offer>(mimeType.c_str());
     }
 }
@@ -257,7 +257,7 @@ PrimarySelectionSource::PrimarySelectionSource(Client* client, uint32_t version,
 
 PrimarySelectionSource::~PrimarySelectionSource() = default;
 
-std::vector<std::string> PrimarySelectionSource::mimeTypes()
+std::vector<std::string> PrimarySelectionSource::mime_types()
 {
     return d_ptr->mimeTypes;
 }
@@ -267,7 +267,7 @@ void PrimarySelectionSource::cancel()
     d_ptr->send<zwp_primary_selection_source_v1_send_cancelled>();
     d_ptr->client()->flush();
 }
-void PrimarySelectionSource::requestData(std::string const& mimeType, qint32 fd)
+void PrimarySelectionSource::request_data(std::string const& mimeType, qint32 fd)
 {
     d_ptr->send<zwp_primary_selection_source_v1_send_send>(mimeType.c_str(), fd);
     close(fd);

@@ -37,9 +37,8 @@ public:
     DataSource* source;
 
     // Defaults are set to sensible values for < version 3 interfaces.
-    DataDeviceManager::DnDActions supportedDnDActions
-        = DataDeviceManager::DnDAction::Copy | DataDeviceManager::DnDAction::Move;
-    DataDeviceManager::DnDAction preferredDnDAction = DataDeviceManager::DnDAction::Copy;
+    dnd_actions supportedDnDActions = dnd_action::copy | dnd_action::move;
+    dnd_action preferredDnDAction = dnd_action::copy;
 
     void sendSourceActions();
 
