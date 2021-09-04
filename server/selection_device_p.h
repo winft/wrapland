@@ -15,22 +15,9 @@ namespace Wrapland::Server
 {
 class DataSource;
 
-template<typename Resource>
-void set_selection_callback([[maybe_unused]] wl_client* wlClient,
-                            wl_resource* wlResource,
-                            wl_resource* wlSource,
-                            [[maybe_unused]] uint32_t id)
+template<typename Handle, typename Priv>
+void set_selection(Handle handle, Priv priv, wl_resource* wlSource)
 {
-    if (auto handle = Resource::handle(wlResource)) {
-        set_selection(handle, wlSource);
-    }
-}
-
-template<typename Handle>
-void set_selection(Handle* handle, wl_resource* wlSource)
-{
-    // TODO(unknown author): verify serial
-
     using source_type = typename std::remove_pointer_t<decltype(handle)>::source_t;
     auto source = wlSource ? Wayland::Resource<source_type>::handle(wlSource) : nullptr;
 
@@ -43,8 +30,6 @@ void set_selection(Handle* handle, wl_resource* wlSource)
             return;
         }
     }
-
-    auto priv = handle->d_ptr;
 
     if (priv->selection == source) {
         return;
@@ -59,7 +44,7 @@ void set_selection(Handle* handle, wl_resource* wlSource)
     priv->selection = source;
 
     if (priv->selection) {
-        auto clearSelection = [handle] { set_selection(handle, nullptr); };
+        auto clearSelection = [handle, priv] { set_selection(handle, priv, nullptr); };
         priv->selectionDestroyedConnection = QObject::connect(
             priv->selection, &source_type::resourceDestroyed, handle, clearSelection);
         Q_EMIT handle->selectionChanged(priv->selection);

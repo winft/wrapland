@@ -18,7 +18,7 @@ namespace Wrapland::Server
 
 const struct zwp_primary_selection_device_v1_interface PrimarySelectionDevice::Private::s_interface
     = {
-        set_selection_callback<Wayland::Resource<PrimarySelectionDevice>>,
+        set_selection_callback,
         destroyCallback,
 };
 
@@ -38,6 +38,16 @@ PrimarySelectionDevice::Private::Private(Client* client,
 }
 
 PrimarySelectionDevice::Private::~Private() = default;
+
+void PrimarySelectionDevice::Private::set_selection_callback(wl_client* /*wlClient*/,
+                                                             wl_resource* wlResource,
+                                                             wl_resource* wlSource,
+                                                             uint32_t /*id*/)
+{
+    // TODO(unknown author): verify serial
+    auto handle = Resource::handle(wlResource);
+    set_selection(handle, handle->d_ptr, wlSource);
+}
 
 void PrimarySelectionDevice::sendSelection(Wrapland::Server::PrimarySelectionSource* source)
 {

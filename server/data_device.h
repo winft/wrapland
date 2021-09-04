@@ -70,10 +70,6 @@ private:
 
     class Private;
     Private* d_ptr;
-
-    template<typename Handle>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void set_selection(Handle* handle, wl_resource* wlSource);
 };
 
 }

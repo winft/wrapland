@@ -51,6 +51,10 @@ public:
     PrimarySelectionOffer* sendDataOffer(PrimarySelectionSource* source);
 
 private:
+    static void set_selection_callback(wl_client* wlClient,
+                                       wl_resource* wlResource,
+                                       wl_resource* wlSource,
+                                       uint32_t id);
     static const struct zwp_primary_selection_device_v1_interface s_interface;
 };
 

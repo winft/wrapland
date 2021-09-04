@@ -75,6 +75,10 @@ private:
                                   wl_resource* wlOrigin,
                                   wl_resource* wlIcon,
                                   uint32_t serial);
+    static void set_selection_callback(wl_client* wlClient,
+                                       wl_resource* wlResource,
+                                       wl_resource* wlSource,
+                                       uint32_t id);
 
     void startDrag(DataSource* dataSource, Surface* origin, Surface* icon, quint32 serial);
 
@@ -85,7 +89,7 @@ private:
 
 const struct wl_data_device_interface DataDevice::Private::s_interface = {
     startDragCallback,
-    set_selection_callback<Wayland::Resource<DataDevice>>,
+    set_selection_callback,
     destroyCallback,
 };
 
@@ -162,6 +166,16 @@ void DataDevice::Private::startDrag(DataSource* dataSource,
     icon = _icon;
     drag.serial = serial;
     Q_EMIT q_ptr->dragStarted();
+}
+
+void DataDevice::Private::set_selection_callback(wl_client* /*wlClient*/,
+                                                 wl_resource* wlResource,
+                                                 wl_resource* wlSource,
+                                                 uint32_t /*id*/)
+{
+    // TODO(unknown author): verify serial
+    auto handle = Resource::handle(wlResource);
+    set_selection(handle, handle->d_ptr, wlSource);
 }
 
 DataOffer* DataDevice::Private::createDataOffer(DataSource* source)

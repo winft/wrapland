@@ -74,10 +74,6 @@ private:
     PrimarySelectionDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
     friend class PrimarySelectionDeviceManager;
 
-    template<typename Resource>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void set_selection(Resource* handle, wl_resource* wlSource);
-
     class Private;
     Private* d_ptr;
 };
