@@ -29,6 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "blur.h"
 #include "compositor.h"
 #include "contrast.h"
+#include "data_control_v1.h"
 #include "data_device_manager.h"
 #include "dpms.h"
 #include "drm_lease_v1.h"
@@ -224,6 +225,11 @@ Seat* Display::createSeat(QObject* parent)
 Subcompositor* Display::createSubCompositor(QObject* parent)
 {
     return new Subcompositor(this, parent);
+}
+
+data_control_manager_v1* Display::create_data_control_manager_v1(QObject* parent)
+{
+    return new data_control_manager_v1(this, parent);
 }
 
 data_device_manager* Display::createDataDeviceManager(QObject* parent)

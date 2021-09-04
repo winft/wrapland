@@ -109,6 +109,8 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
+    friend class data_control_device_v1;
+    friend class data_control_source_v1_res;
     friend class primary_selection_source_res;
     primary_selection_source();
 

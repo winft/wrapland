@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_source.h"
 #include "data_source_p.h"
 
+#include "data_control_v1_p.h"
 #include "data_device_manager.h"
 #include "selection_p.h"
 
@@ -168,17 +169,17 @@ data_source::Private* data_source_res::src_priv() const
 
 void data_source::accept(std::string const& mimeType) const
 {
-    d_ptr->res->accept(mimeType);
+    std::get<data_source_res*>(d_ptr->res)->accept(mimeType);
 }
 
 void data_source::request_data(std::string const& mimeType, int32_t fd) const
 {
-    d_ptr->res->request_data(mimeType, fd);
+    std::visit([&](auto&& res) { res->request_data(mimeType, fd); }, d_ptr->res);
 }
 
 void data_source::cancel() const
 {
-    d_ptr->res->cancel();
+    std::visit([](auto&& res) { res->cancel(); }, d_ptr->res);
 }
 
 dnd_actions data_source::supported_dnd_actions() const
@@ -188,17 +189,17 @@ dnd_actions data_source::supported_dnd_actions() const
 
 void data_source::send_dnd_drop_performed() const
 {
-    d_ptr->res->send_dnd_drop_performed();
+    std::get<data_source_res*>(d_ptr->res)->send_dnd_drop_performed();
 }
 
 void data_source::send_dnd_finished() const
 {
-    d_ptr->res->send_dnd_finished();
+    std::get<data_source_res*>(d_ptr->res)->send_dnd_finished();
 }
 
 void data_source::send_action(dnd_action action) const
 {
-    d_ptr->res->send_action(action);
+    std::get<data_source_res*>(d_ptr->res)->send_action(action);
 }
 
 std::vector<std::string> data_source::mime_types() const
@@ -208,7 +209,9 @@ std::vector<std::string> data_source::mime_types() const
 
 Client* data_source::client() const
 {
-    return d_ptr->res->impl->client()->handle();
+    Client* cl{nullptr};
+    std::visit([&](auto&& res) { cl = res->impl->client()->handle(); }, d_ptr->res);
+    return cl;
 }
 
 }

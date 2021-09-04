@@ -17,6 +17,7 @@
 
 namespace Wrapland::Server
 {
+class data_control_source_v1_res;
 
 constexpr uint32_t primary_selection_device_manager_version = 1;
 using primary_selection_device_manager_global
@@ -88,7 +89,7 @@ public:
 
     std::vector<std::string> mimeTypes;
 
-    primary_selection_source_res* res{nullptr};
+    std::variant<primary_selection_source_res*, data_control_source_v1_res*> res;
     primary_selection_source* q_ptr;
 };
 

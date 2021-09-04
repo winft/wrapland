@@ -17,14 +17,18 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
+#pragma once
+
 #include "data_source.h"
 
 #include "wayland/resource.h"
 
+#include <variant>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
 {
+class data_control_source_v1_res;
 class data_source_res;
 
 class data_source::Private
@@ -35,7 +39,8 @@ public:
     std::vector<std::string> mimeTypes;
     dnd_actions supportedDnDActions{dnd_action::none};
 
-    data_source_res* res{nullptr};
+    std::variant<data_source_res*, data_control_source_v1_res*> res;
+
     data_source* q_ptr;
 };
 

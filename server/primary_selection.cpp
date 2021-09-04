@@ -7,6 +7,7 @@
 #include "primary_selection_p.h"
 
 #include "client.h"
+#include "data_control_v1_p.h"
 #include "display.h"
 #include "seat_p.h"
 #include "selection_p.h"
@@ -304,17 +305,19 @@ std::vector<std::string> primary_selection_source::mime_types() const
 
 void primary_selection_source::cancel() const
 {
-    d_ptr->res->cancel();
+    std::visit([](auto&& res) { res->cancel(); }, d_ptr->res);
 }
 
 void primary_selection_source::request_data(std::string const& mimeType, qint32 fd) const
 {
-    d_ptr->res->request_data(mimeType, fd);
+    std::visit([&](auto&& res) { res->request_data(mimeType, fd); }, d_ptr->res);
 }
 
 Client* primary_selection_source::client() const
 {
-    return d_ptr->res->impl->client()->handle();
+    Client* cl{nullptr};
+    std::visit([&](auto&& res) { cl = res->impl->client()->handle(); }, d_ptr->res);
+    return cl;
 }
 
 }

@@ -114,6 +114,8 @@ Q_SIGNALS:
 
 private:
     friend class Display;
+    friend class data_control_device_v1;
+    friend class data_control_manager_v1;
     friend class data_device_manager;
     friend class drag_pool;
     friend class keyboard_pool;

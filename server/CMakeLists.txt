@@ -5,6 +5,7 @@ set(SERVER_LIB_SRCS
   client.cpp
   compositor.cpp
   contrast.cpp
+  data_control_v1.cpp
   data_device.cpp
   data_device_manager.cpp
   data_offer.cpp
@@ -211,6 +212,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-data-control-unstable-v1.xml
+  BASENAME wlr-data-control-v1
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
   PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-layer-shell-unstable-v1.xml
   BASENAME wlr-layer-shell
 )
@@ -366,6 +372,7 @@ set(SERVER_LIB_HEADERS
   client.h
   compositor.h
   contrast.h
+  data_control_v1.h
   data_device.h
   data_device_manager.h
   data_offer.h

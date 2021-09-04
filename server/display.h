@@ -38,6 +38,7 @@ namespace Wrapland::Server
 class Client;
 class Private;
 
+class data_control_manager_v1;
 class data_device_manager;
 class DpmsManager;
 class drm_lease_device_v1;
@@ -128,7 +129,10 @@ public:
     void createShm();
 
     Subcompositor* createSubCompositor(QObject* parent = nullptr);
+
+    data_control_manager_v1* create_data_control_manager_v1(QObject* parent = nullptr);
     data_device_manager* createDataDeviceManager(QObject* parent = nullptr);
+
     OutputManagementV1* createOutputManagementV1(QObject* parent = nullptr);
     PlasmaShell* createPlasmaShell(QObject* parent = nullptr);
     PlasmaWindowManager* createPlasmaWindowManager(QObject* parent = nullptr);
