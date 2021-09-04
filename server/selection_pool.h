@@ -23,7 +23,6 @@ struct selection_pool {
     void set_focused_surface(Surface* surface);
 
     void set_selection(Source* source);
-    void clear_selection(Device* device);
 
     struct {
         std::vector<Device*> devices;
@@ -34,11 +33,6 @@ struct selection_pool {
     std::vector<Device*> devices;
 
 private:
-    void cleanup_device(Device* device);
-
-    void change_selection(Device* device, Source* source);
-    void update_selection(Device* device, Source* source);
-
     void transmit(Source* source);
 
     Seat* seat;
@@ -55,14 +49,22 @@ void selection_pool<Device, Source, signal>::register_device(Device* device)
 {
     devices.push_back(device);
 
-    QObject::connect(
-        device, &Device::resourceDestroyed, seat, [this, device] { cleanup_device(device); });
+    QObject::connect(device, &Device::resourceDestroyed, seat, [this, device] {
+        remove_one(devices, device);
+        remove_one(focus.devices, device);
+    });
+
     QObject::connect(device, &Device::selectionChanged, seat, [this, device](Source* source) {
         assert(source);
-        change_selection(device, source);
+        if (has_keyboard_focus(device, seat)) {
+            set_selection(source);
+        }
     });
-    QObject::connect(
-        device, &Device::selectionCleared, seat, [this, device] { clear_selection(device); });
+    QObject::connect(device, &Device::selectionCleared, seat, [this, device] {
+        if (has_keyboard_focus(device, seat)) {
+            set_selection(nullptr);
+        }
+    });
 
     if (has_keyboard_focus(device, seat)) {
         focus.devices.push_back(device);
@@ -70,13 +72,6 @@ void selection_pool<Device, Source, signal>::register_device(Device* device)
             device->sendSelection(focus.source);
         }
     }
-}
-
-template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::cleanup_device(Device* device)
-{
-    remove_one(devices, device);
-    remove_one(focus.devices, device);
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
@@ -116,12 +111,6 @@ void selection_pool<Device, Source, signal>::set_selection(Source* source)
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::clear_selection(Device* device)
-{
-    update_selection(device, nullptr);
-}
-
-template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::transmit(Source* source)
 {
     if (source) {
@@ -133,20 +122,6 @@ void selection_pool<Device, Source, signal>::transmit(Source* source)
             dev->sendClearSelection();
         });
     }
-}
-
-template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::update_selection(Device* device, Source* source)
-{
-    if (has_keyboard_focus(device, seat)) {
-        set_selection(source);
-    }
-}
-
-template<typename Device, typename Source, void (Seat::*signal)(Source*)>
-void selection_pool<Device, Source, signal>::change_selection(Device* device, Source* source)
-{
-    update_selection(device, source);
 }
 
 }
