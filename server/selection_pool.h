@@ -113,15 +113,9 @@ void selection_pool<Device, Source, signal>::set_selection(Source* source)
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::transmit(Source* source)
 {
-    if (source) {
-        std::for_each(focus.devices.begin(), focus.devices.end(), [source](Device* dev) {
-            dev->sendSelection(source);
-        });
-    } else {
-        std::for_each(focus.devices.begin(), focus.devices.end(), [](Device* dev) {
-            dev->sendClearSelection();
-        });
-    }
+    std::for_each(focus.devices.begin(), focus.devices.end(), [source](Device* dev) {
+        dev->sendSelection(source);
+    });
 }
 
 }
