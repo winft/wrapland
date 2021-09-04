@@ -6,20 +6,13 @@
 */
 #pragma once
 
-#include "wayland/resource.h"
-
-#include <QObject>
-
 namespace Wrapland::Server
 {
 
-template<typename Resource>
-void add_offered_mime_type([[maybe_unused]] wl_client* wlClient,
-                           wl_resource* wlResource,
-                           char const* mimeType)
+template<typename Handle, typename Priv>
+void offer_mime_type(Handle handle, Priv priv, char const* mimeType)
 {
-    auto handle = Resource::handle(wlResource);
-    handle->d_ptr->mimeTypes.push_back(mimeType);
+    priv->mimeTypes.push_back(mimeType);
     Q_EMIT handle->mimeTypeOffered(mimeType);
 }
 

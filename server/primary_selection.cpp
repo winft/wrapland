@@ -154,9 +154,17 @@ void PrimarySelectionOffer::sendOffer()
 
 const struct zwp_primary_selection_source_v1_interface PrimarySelectionSource::Private::s_interface
     = {
-        add_offered_mime_type<Wayland::Resource<PrimarySelectionSource>>,
+        offer_callback,
         destroyCallback,
 };
+
+void PrimarySelectionSource::Private::offer_callback(wl_client* /*wlClient*/,
+                                                     wl_resource* wlResource,
+                                                     char const* mimeType)
+{
+    auto handle = Resource::handle(wlResource);
+    offer_mime_type(handle, handle->d_ptr, mimeType);
+}
 
 PrimarySelectionSource::Private::Private(Client* client,
                                          uint32_t version,

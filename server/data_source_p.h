@@ -37,6 +37,7 @@ public:
     DataSource* q_ptr;
 
 private:
+    static void offer_callback(wl_client* wlClient, wl_resource* wlResource, char const* mimeType);
     static void
     setActionsCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t dnd_actions);
 

@@ -78,6 +78,8 @@ public:
     std::vector<std::string> mimeTypes;
 
 private:
+    static void offer_callback(wl_client* wlClient, wl_resource* wlResource, char const* mimeType);
+
     static const struct zwp_primary_selection_source_v1_interface s_interface;
 };
 

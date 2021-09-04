@@ -40,10 +40,18 @@ DataSource::Private::Private(Client* client, uint32_t version, uint32_t id, Data
 }
 
 const struct wl_data_source_interface DataSource::Private::s_interface = {
-    add_offered_mime_type<Wayland::Resource<DataSource>>,
+    offer_callback,
     destroyCallback,
     setActionsCallback,
 };
+
+void DataSource::Private::offer_callback(wl_client* /*wlClient*/,
+                                         wl_resource* wlResource,
+                                         char const* mimeType)
+{
+    auto handle = Resource::handle(wlResource);
+    offer_mime_type(handle, handle->d_ptr, mimeType);
+}
 
 void DataSource::Private::setActionsCallback([[maybe_unused]] wl_client* wlClient,
                                              wl_resource* wlResource,

@@ -132,12 +132,6 @@ private:
     friend class PrimarySelectionDeviceManager;
     friend class PrimarySelectionDevice;
 
-    template<typename Resource>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    add_offered_mime_type(wl_client* wlClient, wl_resource* wlResource, char const* mimeType);
-
     class Private;
     Private* d_ptr;
 };
