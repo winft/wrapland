@@ -6,15 +6,10 @@
 */
 #pragma once
 
-#include <QObject>
-
-#include <memory>
-
-#include <wayland-server.h>
-
 #include <Wrapland/Server/wraplandserver_export.h>
 
-class QMimeType;
+#include <QObject>
+#include <memory>
 
 namespace Wrapland::Server
 {
@@ -24,7 +19,6 @@ class Display;
 class Seat;
 class PrimarySelectionSource;
 class PrimarySelectionDevice;
-class PrimarySelectionOffer;
 
 class WRAPLANDSERVER_EXPORT PrimarySelectionDeviceManager : public QObject
 {

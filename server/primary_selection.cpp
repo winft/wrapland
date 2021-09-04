@@ -11,8 +11,6 @@
 #include "seat_p.h"
 #include "selection_p.h"
 
-#include <unistd.h>
-
 namespace Wrapland::Server
 {
 

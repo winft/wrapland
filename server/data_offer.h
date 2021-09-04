@@ -19,11 +19,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QObject>
+#include "data_device_manager.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include "data_device_manager.h"
+#include <QObject>
 
 namespace Wrapland::Server
 {
