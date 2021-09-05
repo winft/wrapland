@@ -312,6 +312,9 @@ void text_input_v3::Private::set_commit_callback([[maybe_unused]] wl_client* wlC
 
     priv->serial++;
 
+    if (auto pool = priv->seat->text_inputs(); pool.v3.text_input == priv->q_ptr) {
+        pool.sync_to_input_method(priv->current, priv->pending);
+    }
     priv->current = priv->pending;
     priv->pending.surrounding_text.update = false;
 

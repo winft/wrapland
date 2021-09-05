@@ -179,4 +179,50 @@ void text_input_pool::sync_to_text_input(input_method_v2_state const& prev,
     sync_to_text_input_v3(v3.text_input, prev, next);
 }
 
+void sync_to_input_method_v2(input_method_v2* im,
+                             text_input_v3_state const& prev,
+                             text_input_v3_state const& next)
+{
+    if (!im) {
+        return;
+    }
+
+    auto has_update{false};
+
+    if (prev.enabled != next.enabled) {
+        im->set_active(next.enabled);
+        has_update = true;
+    }
+    if (next.surrounding_text.update) {
+        auto const& text = next.surrounding_text;
+        im->set_surrounding_text(
+            text.data, text.cursor_position, text.selection_anchor, text.change_cause);
+        has_update = true;
+    }
+    if (prev.content.hints != next.content.hints || prev.content.purpose != next.content.purpose) {
+        im->set_content_type(next.content.hints, next.content.purpose);
+        has_update = true;
+    }
+
+    if (has_update) {
+        im->done();
+    }
+
+    if (prev.cursor_rectangle != next.cursor_rectangle) {
+        for (auto popup : im->get_popups()) {
+            popup->set_text_input_rectangle(next.cursor_rectangle);
+        }
+    }
+}
+
+void text_input_pool::sync_to_input_method(text_input_v3_state const& prev,
+                                           text_input_v3_state const& next) const
+{
+    if (prev.enabled != next.enabled) {
+        Q_EMIT seat->text_input_v3_enabled_changed(next.enabled);
+    }
+
+    sync_to_input_method_v2(seat->get_input_method_v2(), prev, next);
+}
+
 }

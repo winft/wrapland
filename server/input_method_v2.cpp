@@ -146,6 +146,10 @@ void input_method_v2::Private::get_input_popup_surface_callback(
                      priv->q_ptr,
                      [priv, popup] { remove_one(priv->popups, popup); });
 
+    if (auto ti = priv->seat->text_inputs().v3.text_input) {
+        popup->set_text_input_rectangle(ti->state().cursor_rectangle);
+    }
+
     Q_EMIT priv->q_ptr->popup_surface_created(popup);
 }
 

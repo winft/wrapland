@@ -17,6 +17,7 @@ class Seat;
 class Surface;
 class TextInputV2;
 class text_input_v3;
+struct text_input_v3_state;
 
 class WRAPLANDSERVER_EXPORT text_input_pool
 {
@@ -32,6 +33,8 @@ public:
 
     void sync_to_text_input(input_method_v2_state const& prev,
                             input_method_v2_state const& next) const;
+    void sync_to_input_method(text_input_v3_state const& prev,
+                              text_input_v3_state const& next) const;
 
     struct {
         Surface* surface = nullptr;

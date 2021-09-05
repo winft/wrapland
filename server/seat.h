@@ -111,6 +111,7 @@ Q_SIGNALS:
     void dragStarted();
     void dragEnded(bool dropped);
     void focusedTextInputChanged();
+    void text_input_v3_enabled_changed(bool enabled);
 
 private:
     friend class data_control_device_v1;
