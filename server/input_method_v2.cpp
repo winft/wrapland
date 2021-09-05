@@ -110,13 +110,16 @@ void input_method_v2::Private::commit_callback([[maybe_unused]] wl_client* wlCli
                                                uint32_t serial)
 {
     auto priv = handle(wlResource)->d_ptr;
+
     if (priv->serial != serial) {
         // Not on latest done event. Reset pending to current state and wait for next commit.
         priv->pending = priv->current;
         return;
     }
 
+    priv->seat->text_inputs().sync_to_text_input(priv->current, priv->pending);
     priv->current = priv->pending;
+
     priv->pending.preedit_string.update = false;
     priv->pending.commit_string.update = false;
     priv->pending.delete_surrounding_text.update = false;

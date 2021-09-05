@@ -12,7 +12,7 @@
 
 namespace Wrapland::Server
 {
-
+struct input_method_v2_state;
 class Seat;
 class Surface;
 class TextInputV2;
@@ -29,6 +29,9 @@ public:
     void set_focused_surface(Surface* surface);
     bool set_v2_focused_surface(Surface* surface);
     bool set_v3_focused_surface(Surface* surface);
+
+    void sync_to_text_input(input_method_v2_state const& prev,
+                            input_method_v2_state const& next) const;
 
     struct {
         Surface* surface = nullptr;

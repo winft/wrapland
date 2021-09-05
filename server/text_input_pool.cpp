@@ -1,5 +1,6 @@
 #include "text_input_pool.h"
 #include "display.h"
+#include "input_method_v2.h"
 #include "seat.h"
 #include "seat_p.h"
 #include "surface.h"
@@ -138,6 +139,44 @@ void text_input_pool::set_focused_surface(Surface* surface)
     if (changed) {
         Q_EMIT seat->focusedTextInputChanged();
     }
+}
+
+// TODO(romangg): With C++20's default comparision operator compare prev members with next members
+// and maybe remove the "update" members in the state. Or are the string comparisons to expensive?
+void sync_to_text_input_v3(text_input_v3* ti,
+                           input_method_v2_state const& /*prev*/,
+                           input_method_v2_state const& next)
+{
+    if (!ti) {
+        return;
+    }
+
+    auto has_update{false};
+
+    if (next.delete_surrounding_text.update) {
+        auto const& text = next.delete_surrounding_text;
+        ti->delete_surrounding_text(text.before_length, text.after_length);
+        has_update = true;
+    }
+    if (next.preedit_string.update) {
+        auto const& preedit = next.preedit_string;
+        ti->set_preedit_string(preedit.data, preedit.cursor_begin, preedit.cursor_end);
+        has_update = true;
+    }
+    if (next.commit_string.update) {
+        ti->commit_string(next.commit_string.data);
+        has_update = true;
+    }
+
+    if (has_update) {
+        ti->done();
+    }
+}
+
+void text_input_pool::sync_to_text_input(input_method_v2_state const& prev,
+                                         input_method_v2_state const& next) const
+{
+    sync_to_text_input_v3(v3.text_input, prev, next);
 }
 
 }
