@@ -427,8 +427,6 @@ void TestDataDevice::test_set_selection()
     QVERIFY(selectionChangedSpy.wait());
     QCOMPARE(selectionChangedSpy.count(), 1);
     QCOMPARE(selectionClearedSpy.count(), 0);
-    QCOMPARE(selectionChangedSpy.first().first().value<Wrapland::Server::data_source*>(),
-             serverSource);
     QCOMPARE(server_device->selection(), serverSource);
 
     // Send selection to datadevice.

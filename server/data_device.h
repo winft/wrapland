@@ -58,7 +58,7 @@ public:
 
 Q_SIGNALS:
     void drag_started();
-    void selection_changed(Wrapland::Server::data_source*);
+    void selection_changed();
     void selection_cleared();
     void resourceDestroyed();
 

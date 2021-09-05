@@ -56,7 +56,7 @@ void set_selection(Handle handle, Priv priv, wl_resource* wlSource)
         auto clearSelection = [handle, priv] { set_selection(handle, priv, nullptr); };
         priv->selectionDestroyedConnection = QObject::connect(
             source_res, &source_res_type::resourceDestroyed, handle, clearSelection);
-        Q_EMIT handle->selection_changed(priv->selection);
+        Q_EMIT handle->selection_changed();
     } else {
         priv->selectionDestroyedConnection = QMetaObject::Connection();
         Q_EMIT handle->selection_cleared();

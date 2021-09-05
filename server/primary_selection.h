@@ -60,7 +60,7 @@ public:
     void send_clear_selection();
 
 Q_SIGNALS:
-    void selection_changed(primary_selection_source* source);
+    void selection_changed();
     void selection_cleared();
     void resourceDestroyed();
 

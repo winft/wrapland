@@ -243,9 +243,6 @@ void TestPrimarySelection::testSetSelection()
     QVERIFY(selectionChangedSpy.wait());
     QCOMPARE(selectionChangedSpy.count(), 1);
     QCOMPARE(selectionClearedSpy.count(), 0);
-    QCOMPARE(
-        selectionChangedSpy.first().first().value<Wrapland::Server::primary_selection_source*>(),
-        serverSource);
     QCOMPARE(serverDevice->selection(), serverSource);
 
     // Send selection to device.
