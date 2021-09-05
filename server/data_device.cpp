@@ -180,6 +180,16 @@ void data_device::Private::set_selection_callback(wl_client* /*wlClient*/,
 {
     // TODO(unknown author): verify serial
     auto handle = Resource::handle(wlResource);
+    auto source = wlSource ? Wayland::Resource<data_source>::handle(wlSource) : nullptr;
+
+    // TODO(romangg): move errors into Wayland namespace.
+    if (source && source->supported_dnd_actions()
+        && wl_resource_get_version(wlSource) >= WL_DATA_SOURCE_ACTION_SINCE_VERSION) {
+        wl_resource_post_error(
+            wlSource, WL_DATA_SOURCE_ERROR_INVALID_SOURCE, "Data source is for drag and drop");
+        return;
+    }
+
     set_selection(handle, handle->d_ptr, wlSource);
 }
 
