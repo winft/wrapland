@@ -55,15 +55,8 @@ void selection_pool<Device, Source, signal>::register_device(Device* device)
     });
 
     QObject::connect(device, &Device::selection_changed, seat, [this, device] {
-        auto source = device->selection();
-        assert(source);
         if (has_keyboard_focus(device, seat)) {
-            set_selection(source);
-        }
-    });
-    QObject::connect(device, &Device::selection_cleared, seat, [this, device] {
-        if (has_keyboard_focus(device, seat)) {
-            set_selection(nullptr);
+            set_selection(device->selection());
         }
     });
 

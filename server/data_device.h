@@ -59,7 +59,6 @@ public:
 Q_SIGNALS:
     void drag_started();
     void selection_changed();
-    void selection_cleared();
     void resourceDestroyed();
 
 private:

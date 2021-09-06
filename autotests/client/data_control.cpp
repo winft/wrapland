@@ -345,9 +345,6 @@ void data_control_test::test_set_selection()
     QSignalSpy server_sel_changed_spy(data_devices.server,
                                       &Wrapland::Server::data_device::selection_changed);
     QVERIFY(server_sel_changed_spy.isValid());
-    QSignalSpy server_sel_cleared_spy(data_devices.server,
-                                      &Wrapland::Server::data_device::selection_cleared);
-    QVERIFY(server_sel_cleared_spy.isValid());
 
     QSignalSpy client_ctrl_sel_offered_spy(
         ctrl_devices.client.get(), &Wrapland::Client::data_control_device_v1::selectionOffered);
@@ -428,9 +425,6 @@ void data_control_test::test_set_primary_selection()
     QSignalSpy server_sel_changed_spy(
         prim_sel_devices.server, &Wrapland::Server::primary_selection_device::selection_changed);
     QVERIFY(server_sel_changed_spy.isValid());
-    QSignalSpy server_sel_cleared_spy(
-        prim_sel_devices.server, &Wrapland::Server::primary_selection_device::selection_cleared);
-    QVERIFY(server_sel_cleared_spy.isValid());
 
     QSignalSpy client_ctrl_sel_offered_spy(
         ctrl_devices.client.get(),

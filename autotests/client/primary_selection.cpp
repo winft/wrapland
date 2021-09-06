@@ -234,15 +234,11 @@ void TestPrimarySelection::testSetSelection()
     QSignalSpy selectionChangedSpy(serverDevice,
                                    &Wrapland::Server::primary_selection_device::selection_changed);
     QVERIFY(selectionChangedSpy.isValid());
-    QSignalSpy selectionClearedSpy(serverDevice,
-                                   &Wrapland::Server::primary_selection_device::selection_cleared);
-    QVERIFY(selectionClearedSpy.isValid());
 
     QVERIFY(!serverDevice->selection());
     device->setSelection(1, source.get());
     QVERIFY(selectionChangedSpy.wait());
     QCOMPARE(selectionChangedSpy.count(), 1);
-    QCOMPARE(selectionClearedSpy.count(), 0);
     QCOMPARE(serverDevice->selection(), serverSource);
 
     // Send selection to device.
@@ -272,9 +268,8 @@ void TestPrimarySelection::testSetSelection()
 
     // now clear the selection
     device->clearSelection(1);
-    QVERIFY(selectionClearedSpy.wait());
-    QCOMPARE(selectionChangedSpy.count(), 1);
-    QCOMPARE(selectionClearedSpy.count(), 1);
+    QVERIFY(selectionChangedSpy.wait());
+    QCOMPARE(selectionChangedSpy.count(), 2);
     QVERIFY(!serverDevice->selection());
 
     // set another selection
