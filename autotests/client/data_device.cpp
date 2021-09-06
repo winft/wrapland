@@ -449,7 +449,7 @@ void TestDataDevice::test_set_selection()
     QCOMPARE(dataOffer->offeredMimeTypes().last().name(), QStringLiteral("text/html"));
 
     // now clear the selection
-    device->clearSelection(1);
+    device->setSelection(1, nullptr);
     QVERIFY(selectionChangedSpy.wait());
     QCOMPARE(selectionChangedSpy.count(), 2);
     QVERIFY(!server_device->selection());

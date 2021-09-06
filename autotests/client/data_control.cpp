@@ -349,9 +349,6 @@ void data_control_test::test_set_selection()
     QSignalSpy client_ctrl_sel_offered_spy(
         ctrl_devices.client.get(), &Wrapland::Client::data_control_device_v1::selectionOffered);
     QVERIFY(client_ctrl_sel_offered_spy.isValid());
-    QSignalSpy client_ctrl_sel_cleared_spy(
-        ctrl_devices.client.get(), &Wrapland::Client::data_control_device_v1::selectionCleared);
-    QVERIFY(client_ctrl_sel_cleared_spy.isValid());
 
     QVERIFY(!ctrl_devices.client->offered_selection());
 
@@ -366,8 +363,8 @@ void data_control_test::test_set_selection()
     QVERIFY(!ctrl_devices.server->selection());
     QCOMPARE(data_devices.server->selection(), data_sources.server);
 
-    data_devices.client->clearSelection(2);
-    QVERIFY(client_ctrl_sel_cleared_spy.wait());
+    data_devices.client->setSelection(2, nullptr);
+    QVERIFY(client_ctrl_sel_offered_spy.wait());
     QVERIFY(!ctrl_devices.client->offered_selection());
     QVERIFY(!ctrl_devices.server->selection());
     QVERIFY(!data_devices.server->selection());
@@ -376,9 +373,6 @@ void data_control_test::test_set_selection()
     QSignalSpy client_sel_offered_spy(data_devices.client.get(),
                                       &Wrapland::Client::DataDevice::selectionOffered);
     QVERIFY(client_sel_offered_spy.isValid());
-    QSignalSpy client_sel_cleared_spy(data_devices.client.get(),
-                                      &Wrapland::Client::DataDevice::selectionCleared);
-    QVERIFY(client_sel_cleared_spy.isValid());
 
     ctrl_source_t ctrl_source;
     create_ctrl_source(ctrl_source);
@@ -390,7 +384,7 @@ void data_control_test::test_set_selection()
     QVERIFY(!data_devices.server->selection());
 
     ctrl_devices.client->set_selection(nullptr);
-    QVERIFY(client_sel_cleared_spy.wait());
+    QVERIFY(client_sel_offered_spy.wait());
     QVERIFY(!data_devices.client->offeredSelection());
     QVERIFY(!ctrl_devices.server->selection());
     QVERIFY(!data_devices.server->selection());
@@ -430,10 +424,6 @@ void data_control_test::test_set_primary_selection()
         ctrl_devices.client.get(),
         &Wrapland::Client::data_control_device_v1::primary_selection_offered);
     QVERIFY(client_ctrl_sel_offered_spy.isValid());
-    QSignalSpy client_ctrl_sel_cleared_spy(
-        ctrl_devices.client.get(),
-        &Wrapland::Client::data_control_device_v1::primary_selection_cleared);
-    QVERIFY(client_ctrl_sel_cleared_spy.isValid());
 
     QVERIFY(!ctrl_devices.client->offered_primary_selection());
 
@@ -448,8 +438,8 @@ void data_control_test::test_set_primary_selection()
     QVERIFY(!ctrl_devices.server->selection());
     QCOMPARE(prim_sel_devices.server->selection(), prim_sel_sources.server);
 
-    prim_sel_devices.client->clearSelection(2);
-    QVERIFY(client_ctrl_sel_cleared_spy.wait());
+    prim_sel_devices.client->setSelection(2, nullptr);
+    QVERIFY(client_ctrl_sel_offered_spy.wait());
     QVERIFY(!ctrl_devices.client->offered_primary_selection());
     QVERIFY(!ctrl_devices.server->selection());
     QVERIFY(!prim_sel_devices.server->selection());
@@ -458,9 +448,6 @@ void data_control_test::test_set_primary_selection()
     QSignalSpy client_sel_offered_spy(prim_sel_devices.client.get(),
                                       &Wrapland::Client::PrimarySelectionDevice::selectionOffered);
     QVERIFY(client_sel_offered_spy.isValid());
-    QSignalSpy client_sel_cleared_spy(prim_sel_devices.client.get(),
-                                      &Wrapland::Client::PrimarySelectionDevice::selectionCleared);
-    QVERIFY(client_sel_cleared_spy.isValid());
 
     ctrl_source_t ctrl_source;
     create_ctrl_source(ctrl_source);
@@ -472,7 +459,7 @@ void data_control_test::test_set_primary_selection()
     QVERIFY(!prim_sel_devices.server->selection());
 
     ctrl_devices.client->set_primary_selection(nullptr);
-    QVERIFY(client_sel_cleared_spy.wait());
+    QVERIFY(client_sel_offered_spy.wait());
     QVERIFY(!prim_sel_devices.client->offeredSelection());
     QVERIFY(!ctrl_devices.server->primary_selection());
     QVERIFY(!prim_sel_devices.server->selection());

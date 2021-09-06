@@ -1780,8 +1780,6 @@ void TestSeat::testSelection()
     QVERIFY(dd1->isValid());
     QSignalSpy selectionSpy(dd1.data(), &Clt::DataDevice::selectionOffered);
     QVERIFY(selectionSpy.isValid());
-    QSignalSpy selectionClearedSpy(dd1.data(), &Clt::DataDevice::selectionCleared);
-    QVERIFY(selectionClearedSpy.isValid());
 
     QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
@@ -1804,9 +1802,8 @@ void TestSeat::testSelection()
     QVERIFY(keyboards.get_focus().devices.empty());
     QVERIFY(entered_spy.wait());
     QVERIFY(selectionSpy.isEmpty());
-    QVERIFY(selectionClearedSpy.isEmpty());
 
-    selectionClearedSpy.clear();
+    selectionSpy.clear();
     QVERIFY(!m_serverSeat->selection());
 
     // Now let's try to set a selection - we have keyboard focus, so it should be sent to us.
@@ -1826,10 +1823,9 @@ void TestSeat::testSelection()
     QCOMPARE(df->offeredMimeTypes().first().name(), QStringLiteral("text/plain"));
 
     // Try to clear.
-    dd1->setSelection(0);
-    QVERIFY(selectionClearedSpy.wait());
-    QCOMPARE(selectionClearedSpy.count(), 1);
-    QCOMPARE(selectionSpy.count(), 1);
+    dd1->setSelection(0, nullptr);
+    QVERIFY(selectionSpy.wait());
+    QCOMPARE(selectionSpy.count(), 2);
 
     // Unset the keyboard focus.
     m_serverSeat->setFocusedKeyboardSurface(nullptr);
@@ -1845,7 +1841,8 @@ void TestSeat::testSelection()
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
     QCoreApplication::processEvents();
-    QCOMPARE(selectionSpy.count(), 1);
+    QCOMPARE(selectionSpy.count(), 2);
+    QVERIFY(!dd1->offeredSelection());
 
     // Let's unset the selection on the seat.
     m_serverSeat->setSelection(nullptr);
@@ -1860,7 +1857,7 @@ void TestSeat::testSelection()
     m_serverSeat->setSelection(server_data_source);
     QCOMPARE(m_serverSeat->selection(), ddi->selection());
     QVERIFY(selectionSpy.wait());
-    QCOMPARE(selectionSpy.count(), 2);
+    QCOMPARE(selectionSpy.count(), 3);
 
     // Setting the same again should not change.
     m_serverSeat->setSelection(server_data_source);
@@ -1868,8 +1865,8 @@ void TestSeat::testSelection()
 
     // Now clear it manually.
     m_serverSeat->setSelection(nullptr);
-    QVERIFY(selectionClearedSpy.wait());
-    QCOMPARE(selectionSpy.count(), 2);
+    QVERIFY(selectionSpy.wait());
+    QCOMPARE(selectionSpy.count(), 4);
 
     // Create a second ddi and a data source.
     QScopedPointer<Clt::DataDevice> dd2(ddm->getDevice(m_seat));
@@ -1879,7 +1876,7 @@ void TestSeat::testSelection()
     ds2->offer(QStringLiteral("text/plain"));
     dd2->setSelection(0, ds2.data());
     QVERIFY(selectionSpy.wait());
-    QCOMPARE(selectionSpy.count(), 3);
+    QCOMPARE(selectionSpy.count(), 5);
     QSignalSpy cancelledSpy(ds2.data(), &Clt::DataSource::cancelled);
     QVERIFY(cancelledSpy.isValid());
     m_serverSeat->setSelection(server_data_source);
@@ -1889,8 +1886,8 @@ void TestSeat::testSelection()
     // leak memory from the offer not being processed completely in the client and the lastOffer
     // member variable not being cleaned up.
     // TODO(romangg): Fix leak in client library when selection is not updated in time.
-    QVERIFY(selectionSpy.count() == 4 || selectionSpy.wait());
-    QCOMPARE(selectionSpy.count(), 4);
+    QVERIFY(selectionSpy.count() == 6 || selectionSpy.wait());
+    QCOMPARE(selectionSpy.count(), 6);
 
     // Copy already cleared selection, BUG 383054.
     ddi->send_selection(ddi->selection());

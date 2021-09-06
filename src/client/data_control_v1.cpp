@@ -151,7 +151,7 @@ void data_control_device_v1::Private::primary_selection_callback(
 
     if (!id) {
         priv->primary_selection_offer.reset();
-        Q_EMIT priv->q->primary_selection_cleared();
+        Q_EMIT priv->q->primary_selection_offered(nullptr);
         return;
     }
 

@@ -73,11 +73,6 @@ void PrimarySelectionDevice::setSelection(quint32 serial, PrimarySelectionSource
     zwp_primary_selection_device_v1_set_selection(d_ptr->device, dataSource(source), serial);
 }
 
-void PrimarySelectionDevice::clearSelection(quint32 serial)
-{
-    setSelection(serial);
-}
-
 PrimarySelectionOffer* PrimarySelectionDevice::offeredSelection() const
 {
     return d_ptr->selectionOffer.get();

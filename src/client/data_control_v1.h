@@ -161,9 +161,7 @@ public:
 
 Q_SIGNALS:
     void selectionOffered(Wrapland::Client::data_control_offer_v1*);
-    void selectionCleared();
     void primary_selection_offered(Wrapland::Client::data_control_offer_v1*);
-    void primary_selection_cleared();
     void finished();
 
 private:
