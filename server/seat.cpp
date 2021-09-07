@@ -226,6 +226,10 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
 {
     assert(hasKeyboard());
 
+    if (surface == d_ptr->keyboards.value().get_focus().surface) {
+        return;
+    }
+
     // Data sharing devices receive a potential selection directly before keyboard enter.
     d_ptr->data_devices.set_focused_surface(surface);
     d_ptr->primary_selection_devices.set_focused_surface(surface);

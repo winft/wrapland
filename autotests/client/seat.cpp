@@ -1457,6 +1457,11 @@ void TestSeat::testKeyboard()
     m_serverSeat->setTimestamp(3);
     keyboards.key_pressed(KEY_E);
 
+    QSignalSpy leftSpy(keyboard, &Clt::Keyboard::left);
+    QVERIFY(leftSpy.isValid());
+    m_serverSeat->setFocusedKeyboardSurface(nullptr);
+    QVERIFY(leftSpy.wait());
+
     QSignalSpy modifierSpy(keyboard, &Clt::Keyboard::modifiersChanged);
     QVERIFY(modifierSpy.isValid());
 
@@ -1545,8 +1550,7 @@ void TestSeat::testKeyboard()
     QCOMPARE(modifierSpy.last().at(2).value<quint32>(), quint32(3));
     QCOMPARE(modifierSpy.last().at(3).value<quint32>(), quint32(4));
 
-    QSignalSpy leftSpy(keyboard, &Clt::Keyboard::left);
-    QVERIFY(leftSpy.isValid());
+    leftSpy.clear();
     m_serverSeat->setFocusedKeyboardSurface(nullptr);
     QVERIFY(!keyboards.get_focus().surface);
     QVERIFY(keyboards.get_focus().devices.empty());
