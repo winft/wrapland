@@ -1744,6 +1744,8 @@ void TestSeat::testDestroy()
 
 void TestSeat::testSelection()
 {
+    m_serverSeat->setHasKeyboard(true);
+
     QScopedPointer<Srv::data_device_manager> ddmi(m_display->createDataDeviceManager());
 
     QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::data_device_manager::device_created);
@@ -1786,15 +1788,19 @@ void TestSeat::testSelection()
     auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(!m_serverSeat->selection());
 
+    auto keyboard = m_seat->createKeyboard(m_seat);
+    QSignalSpy entered_spy(keyboard, &Clt::Keyboard::entered);
+    QVERIFY(entered_spy.isValid());
+
     m_serverSeat->setHasKeyboard(true);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
 
     auto& keyboards = m_serverSeat->keyboards();
     QCOMPARE(keyboards.get_focus().surface, serverSurface);
     QVERIFY(keyboards.get_focus().devices.empty());
-    QVERIFY(selectionClearedSpy.wait());
+    QVERIFY(entered_spy.wait());
     QVERIFY(selectionSpy.isEmpty());
-    QVERIFY(!selectionClearedSpy.isEmpty());
+    QVERIFY(selectionClearedSpy.isEmpty());
 
     selectionClearedSpy.clear();
     QVERIFY(!m_serverSeat->selection());

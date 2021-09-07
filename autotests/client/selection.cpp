@@ -214,6 +214,7 @@ void SelectionTest::testClearOnEnter()
 {
     // This test verifies that the selection is cleared prior to keyboard enter if there is no
     // current selection.
+    m_serverSeat->setHasKeyboard(true);
 
     QSignalSpy selectionClearedClient1Spy(m_client1.dataDevice,
                                           &Wrapland::Client::DataDevice::selectionCleared);
@@ -230,10 +231,18 @@ void SelectionTest::testClearOnEnter()
     auto serverSurface1 = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface1);
 
+    auto keyboard = m_client1.seat->createKeyboard(m_client1.seat);
+    QSignalSpy enter1_spy(keyboard, &Wrapland::Client::Keyboard::entered);
+    QVERIFY(enter1_spy.isValid());
+    QSignalSpy left1_spy(keyboard, &Wrapland::Client::Keyboard::left);
+    QVERIFY(left1_spy.isValid());
+
     // Pass this surface keyboard focus.
     m_serverSeat->setFocusedKeyboardSurface(serverSurface1);
-    // should get a clear
-    QVERIFY(selectionClearedClient1Spy.wait());
+
+    // should get no clear but left event.
+    QVERIFY(enter1_spy.wait());
+    QVERIFY(selectionClearedClient1Spy.empty());
 
     // Let's set a selection.
     std::unique_ptr<Wrapland::Client::DataSource> dataSource(m_client1.ddm->createSource());
@@ -272,9 +281,12 @@ void SelectionTest::testClearOnEnter()
 
     // Now pass focus to first surface.
     m_serverSeat->setFocusedKeyboardSurface(serverSurface1);
+    selectionClearedClient2Spy.clear();
 
-    // We should get a clear.
-    QVERIFY(selectionClearedClient1Spy.wait());
+    // We should only get an enter event.
+    QVERIFY(enter1_spy.wait());
+    QVERIFY(selectionClearedClient1Spy.empty());
+    QVERIFY(selectionClearedClient2Spy.empty());
 }
 
 QTEST_GUILESS_MAIN(SelectionTest)

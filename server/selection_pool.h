@@ -71,8 +71,21 @@ void selection_pool<Device, Source, signal>::register_device(Device* device)
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 void selection_pool<Device, Source, signal>::set_focused_surface(Surface* surface)
 {
+    if (!surface) {
+        // No surface set. Per protocol we just won't send future selection events to the client.
+        focus.devices = {};
+        return;
+    }
+
+    if (focus.devices.size() && focus.devices.front()->client() == surface->client()) {
+        // No client change. Selection must not be resent.
+        return;
+    }
+
     focus.devices = interfacesForSurface(surface, devices);
-    transmit(focus.source);
+    if (focus.source) {
+        transmit(focus.source);
+    }
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
