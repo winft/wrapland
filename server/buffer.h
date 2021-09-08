@@ -84,7 +84,6 @@ public:
     std::optional<ShmImage> shmImage();
 
     QSize size() const;
-    void setSize(const QSize& size);
     void setCommitted();
 
     bool hasAlphaChannel() const;
@@ -92,7 +91,6 @@ public:
     static std::shared_ptr<Buffer> get(Display* display, wl_resource* resource);
 
 Q_SIGNALS:
-    void sizeChanged();
     void resourceDestroyed();
 
 private:

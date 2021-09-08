@@ -51,6 +51,52 @@ class Subsurface;
 class Viewport;
 class Viewporter;
 
+enum class surface_change {
+    none = 0,
+    mapped = 1 << 0,
+    buffer = 1 << 1,
+    size = 1 << 2,
+    opaque = 1 << 3,
+    scale = 1 << 4,
+    transform = 1 << 5,
+    offset = 1 << 6,
+    source_rectangle = 1 << 7,
+    input = 1 << 8,
+    children = 1 << 9,
+    shadow = 1 << 10,
+    blur = 1 << 11,
+    slide = 1 << 12,
+    contrast = 1 << 13,
+    frame = 1 << 14,
+};
+Q_DECLARE_FLAGS(surface_changes, surface_change)
+
+struct surface_state {
+    std::shared_ptr<Buffer> buffer;
+
+    QRegion damage;
+    QRegion opaque;
+
+    int32_t scale{1};
+    Output::Transform transform{Output::Transform::Normal};
+    QPoint offset;
+
+    QRectF source_rectangle;
+
+    QRegion input;
+    bool input_is_infinite{true};
+
+    // Stacking order: bottom (first) -> top (last).
+    std::vector<Subsurface*> children;
+
+    QPointer<Shadow> shadow;
+    QPointer<Blur> blur;
+    QPointer<Slide> slide;
+    QPointer<Contrast> contrast;
+
+    surface_changes updates{surface_change::none};
+};
+
 class WRAPLANDSERVER_EXPORT Surface : public QObject
 {
     Q_OBJECT
@@ -64,20 +110,10 @@ public:
     };
     Q_DECLARE_FLAGS(PresentationKinds, PresentationKind)
 
+    surface_state const& state() const;
+
     void frameRendered(quint32 msec);
 
-    QRegion damage() const;
-    QRegion opaque() const;
-    QRegion input() const;
-
-    bool inputIsInfinite() const;
-
-    qint32 scale() const;
-    Output::Transform transform() const;
-
-    std::shared_ptr<Buffer> buffer() const;
-
-    QPoint offset() const;
     QSize size() const;
 
     /**
@@ -86,13 +122,6 @@ public:
     QRect expanse() const;
 
     Subsurface* subsurface() const;
-    std::vector<Subsurface*> childSubsurfaces() const;
-
-    QPointer<Shadow> shadow() const;
-    QPointer<Blur> blur() const;
-    QPointer<Slide> slideOnShowHide() const;
-    QPointer<Contrast> contrast() const;
-    QPointer<Viewport> viewport() const;
 
     bool isMapped() const;
     QRegion trackedDamage() const;
@@ -113,8 +142,6 @@ public:
     void setDataProxy(Surface* surface);
     Surface* dataProxy() const;
 
-    QRectF sourceRectangle() const;
-
     uint32_t lockPresentation(Output* output);
     void presentationFeedback(uint32_t presentationId,
                               uint32_t tvSecHi,
@@ -129,18 +156,6 @@ public:
     wl_resource* resource() const;
 
 Q_SIGNALS:
-    void damaged(const QRegion&);
-    void opaqueChanged(const QRegion&);
-    void inputChanged(const QRegion&);
-    void scaleChanged(qint32);
-    void transformChanged(Output::Transform);
-    void unmapped();
-    void sizeChanged();
-    void shadowChanged();
-    void blurChanged();
-    void slideOnShowHideChanged();
-    void contrastChanged();
-    void sourceRectangleChanged();
     void subsurfaceTreeChanged();
     void pointerConstraintsChanged();
     void inhibitsIdleChanged();
@@ -183,4 +198,5 @@ private:
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::Surface*)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::surface_changes)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::Surface::PresentationKinds)

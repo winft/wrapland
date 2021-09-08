@@ -141,7 +141,7 @@ void CompositorWindow::surfaceCreated(Wrapland::Server::XdgShellToplevel* surfac
         }
     });
     connect(surface->surface()->surface(),
-            &Wrapland::Server::Surface::damaged,
+            &Wrapland::Server::Surface::committed,
             this,
             static_cast<void (CompositorWindow::*)()>(&CompositorWindow::update));
     connect(surface, &XdgShellToplevel::destroyed, this, [surface, this] {
@@ -160,7 +160,7 @@ void CompositorWindow::updateFocus()
     }
     auto it = std::find_if(
         m_stackingOrder.constBegin(), m_stackingOrder.constEnd(), [](XdgShellToplevel* s) {
-            return s->surface()->surface()->buffer() != nullptr;
+            return s->surface()->surface()->state().buffer != nullptr;
         });
     if (it == m_stackingOrder.constEnd()) {
         return;
@@ -179,7 +179,7 @@ void CompositorWindow::paintEvent(QPaintEvent* event)
     QWidget::paintEvent(event);
     QPainter p(this);
     for (auto s : m_stackingOrder) {
-        if (auto b = s->surface()->surface()->buffer()) {
+        if (auto b = s->surface()->surface()->state().buffer) {
             p.drawImage(QPoint(0, 0), b->shmImage()->createQImage());
             s->surface()->surface()->frameRendered(QDateTime::currentMSecsSinceEpoch());
         }
