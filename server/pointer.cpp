@@ -244,7 +244,6 @@ void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
     auto& pointers = seat->pointers();
     auto const pos = pointers.get_focus().transformation.map(pointers.get_position());
     sendEnter(serial, focusedSurface, pos);
-    client()->flush();
 }
 
 Pointer::Pointer(Client* client, uint32_t version, uint32_t id, Seat* seat)
