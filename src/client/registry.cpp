@@ -155,12 +155,14 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &Registry::dataDeviceManagerRemoved,
         },
     },
-    {Registry::Interface::PrimarySelectionDeviceManager,
-     {1,
-      QByteArrayLiteral("zwp_primary_selection_device_manager_v1"),
-      &zwp_primary_selection_device_manager_v1_interface,
-      &Registry::primarySelectionDeviceManagerAnnounced,
-      &Registry::primarySelectionDeviceManagerRemoved}},
+    {
+        Registry::Interface::PrimarySelectionDeviceManager,
+        {1,
+         QByteArrayLiteral("zwp_primary_selection_device_manager_v1"),
+         &zwp_primary_selection_device_manager_v1_interface,
+         &Registry::primarySelectionDeviceManagerAnnounced,
+         &Registry::primarySelectionDeviceManagerRemoved},
+    },
     {
         Registry::Interface::Output,
         {
