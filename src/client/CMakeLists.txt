@@ -19,6 +19,7 @@ set(CLIENT_LIB_SRCS
     dataoffer.cpp
     datasource.cpp
     dpms.cpp
+    drm_lease_v1.cpp
     fakeinput.cpp
     fullscreen_shell.cpp
     idle.cpp
@@ -75,6 +76,11 @@ ecm_qt_declare_logging_category(CLIENT_LIB_SRCS
   IDENTIFIER WRAPLAND_CLIENT
   CATEGORY_NAME wrapland-client
   DEFAULT_SEVERITY Critical
+)
+
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/staging/drm-lease/drm-lease-v1.xml
+  BASENAME drm-lease-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
@@ -240,6 +246,7 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 )
 
 set(CLIENT_GENERATED_FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-drm-lease-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-fullscreen-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-client-protocol.h
@@ -322,6 +329,7 @@ set(CLIENT_LIB_HEADERS
     dataoffer.h
     datasource.h
     dpms.h
+    drm_lease_v1.h
     fakeinput.h
     fullscreen_shell.h
     idle.h
