@@ -40,6 +40,7 @@ class Private;
 
 class DataDeviceManager;
 class DpmsManager;
+class drm_lease_device_v1;
 class WlOutput;
 class OutputConfigurationV1;
 class OutputDeviceV1;
@@ -140,6 +141,7 @@ public:
     SlideManager* createSlideManager(QObject* parent = nullptr);
     ContrastManager* createContrastManager(QObject* parent = nullptr);
     DpmsManager* createDpmsManager(QObject* parent = nullptr);
+    drm_lease_device_v1* createDrmLeaseDeviceV1(QObject* parent = nullptr);
 
     KeyState* createKeyState(QObject* parent = nullptr);
     PresentationManager* createPresentationManager(QObject* parent = nullptr);

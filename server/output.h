@@ -93,6 +93,7 @@ public:
     std::string model() const;
     std::string serial_mumber() const;
     QSize physical_size() const;
+    int connector_id() const;
 
     void set_name(std::string const& name);
     void set_description(std::string const& description);
@@ -100,6 +101,7 @@ public:
     void set_model(std::string const& model);
     void set_serial_number(std::string const& serial_number);
     void set_physical_size(QSize const& size);
+    void set_connector_id(int id);
 
     /**
      * Produces a description from available data. The pattern will be:

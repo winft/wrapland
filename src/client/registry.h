@@ -55,6 +55,7 @@ struct org_kde_plasma_shell;
 struct org_kde_plasma_virtual_desktop_management;
 struct org_kde_plasma_window_management;
 struct org_kde_kwin_server_decoration_palette_manager;
+struct wp_drm_lease_device_v1;
 struct wp_viewporter;
 struct xdg_activation_v1;
 struct xdg_shell;
@@ -86,6 +87,7 @@ class Compositor;
 class ConnectionThread;
 class DataDeviceManager;
 class DpmsManager;
+class drm_lease_device_v1;
 class EventQueue;
 class FakeInput;
 class FullscreenShell;
@@ -215,6 +217,7 @@ public:
         KeyboardShortcutsInhibitManagerV1,
         LinuxDmabufV1,
         PrimarySelectionDeviceManager,
+        DrmLeaseDeviceV1, ///< Refers to wp_drm_lease_device_v1, @since 0.523.0
     };
     explicit Registry(QObject* parent = nullptr);
     virtual ~Registry();
@@ -412,6 +415,15 @@ public:
      * @see createDataDeviceManager
      **/
     wl_data_device_manager* bindDataDeviceManager(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the wp_drm_lease_device_v1 with @p name and @p version.
+     * If the @p name does not exists or is not for the device extension in version 1,
+     * @c null will be returned.
+     *
+     * Prefer using createDrmLeaseDeviceV1
+     * @since 0.0.540
+     */
+    wp_drm_lease_device_v1* bindDrmLeaseDeviceV1(uint32_t name, uint32_t version) const;
     /**
      * Binds the zwp_input_method_manager_v2 with @p name and @p version.
      * If the @p name does not exist or is not for the input method interface in unstable version 2,
@@ -940,6 +952,25 @@ public:
      **/
     DataDeviceManager*
     createDataDeviceManager(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
+     * Creates a drm_lease_device_v1 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * This factory method supports the following interfaces:
+     * @li wp_drm_lease_device_v1
+     *
+     * If @p name is for one of the supported interfaces the corresponding manager will be created,
+     * otherwise @c null will be returned.
+     *
+     * @param name The name of the interface to bind
+     * @param version The version of the interface to use
+     * @param parent The parent for the drm_lease_device_v1
+     *
+     * @returns The created drm_lease_device_v1
+     * @since 0.0.523
+     **/
+    drm_lease_device_v1*
+    createDrmLeaseDeviceV1(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a PlasmaShell and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1581,6 +1612,13 @@ Q_SIGNALS:
      **/
     void dataDeviceManagerAnnounced(quint32 name, quint32 version);
     /**
+     * Emitted whenever a wp_drm_lease_device_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.0.523
+     **/
+    void drmLeaseDeviceV1Announced(quint32 name, quint32 version);
+    /**
      * Emitted whenever a zwlr_layer_shell_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1880,6 +1918,12 @@ Q_SIGNALS:
      * @param name The name for the removed interface
      **/
     void dataDeviceManagerRemoved(quint32 name);
+    /**
+     * Emitted whenever a wp_drm_lease_device_v1 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.523.0
+     **/
+    void drmLeaseDeviceV1Removed(quint32 name);
     /**
      * Emitted whenever a zkwinft_output_management_v1 interface gets removed.
      * @param name The name for the removed interface
