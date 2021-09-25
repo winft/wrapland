@@ -37,6 +37,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/contrast.h"
 #include "../../src/client/dpms.h"
+#include "../../src/client/drm_lease_v1.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/idleinhibit.h"
 #include "../../src/client/output.h"
@@ -54,6 +55,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/blur.h"
 #include "../../server/contrast.h"
+#include "../../server/drm_lease_v1.h"
 #include "../../server/idle_inhibit_v1.h"
 #include "../../server/input_method_v2.h"
 #include "../../server/linux_dmabuf_v1.h"
@@ -70,6 +72,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-client-protocol.h>
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
+#include <wayland-drm-lease-v1-client-protocol.h>
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
 #include <wayland-input-method-v2-client-protocol.h>
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
@@ -101,6 +104,7 @@ private Q_SLOTS:
     void testBindSeat();
     void testBindSubCompositor();
     void testBindDataDeviceManager();
+    void testBindDrmLeaseDeviceV1();
     void testBindBlurManager();
     void testBindContrastManager();
     void testBindSlideManager();
@@ -131,6 +135,7 @@ private:
     std::unique_ptr<Wrapland::Server::Seat> m_seat;
     std::unique_ptr<Wrapland::Server::Subcompositor> m_subcompositor;
     std::unique_ptr<Wrapland::Server::DataDeviceManager> m_dataDeviceManager;
+    std::unique_ptr<Wrapland::Server::drm_lease_device_v1> m_drmLeaseDeviceV1;
     std::unique_ptr<Wrapland::Server::input_method_manager_v2> m_inputMethodManagerV2;
     std::unique_ptr<Wrapland::Server::OutputManagementV1> m_outputManagement;
     std::unique_ptr<Wrapland::Server::XdgDecorationManager> m_xdgDecorationManager;
@@ -167,6 +172,7 @@ void TestWaylandRegistry::init()
     m_seat.reset(m_display->createSeat());
     m_subcompositor.reset(m_display->createSubCompositor());
     m_dataDeviceManager.reset(m_display->createDataDeviceManager());
+    m_drmLeaseDeviceV1.reset(m_display->createDrmLeaseDeviceV1());
     m_outputManagement.reset(m_display->createOutputManagementV1());
     m_blur.reset(m_display->createBlurManager());
     m_contrast.reset(m_display->createContrastManager());
@@ -310,6 +316,14 @@ void TestWaylandRegistry::testBindDataDeviceManager()
               SIGNAL(dataDeviceManagerAnnounced(quint32, quint32)),
               bindDataDeviceManager,
               wl_data_device_manager_destroy)
+}
+
+void TestWaylandRegistry::testBindDrmLeaseDeviceV1()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::DrmLeaseDeviceV1,
+              SIGNAL(drmLeaseDeviceV1Announced(quint32, quint32)),
+              bindDrmLeaseDeviceV1,
+              wp_drm_lease_device_v1_destroy)
 }
 
 void TestWaylandRegistry::testBindBlurManager()

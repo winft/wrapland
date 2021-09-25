@@ -70,6 +70,7 @@ public:
 
     Display* display_handle;
 
+    int connector_id{0};
     std::vector<Mode> modes;
 
     struct {

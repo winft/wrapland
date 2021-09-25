@@ -1,3 +1,17 @@
+# ##################################################################################################
+# Test drm_lease_v1
+# ##################################################################################################
+set(test_drm_lease_v1_SRCS drm_lease_v1.cpp)
+add_executable(test_drm_lease_v1 ${test_drm_lease_v1_SRCS})
+target_link_libraries(test_drm_lease_v1
+  Qt5::Test
+  Qt5::Gui
+  Wrapland::Client
+  Wrapland::Server
+)
+add_test(NAME wrapland-test_drm_lease_v1 COMMAND test_drm_lease_v1)
+ecm_mark_as_test(test_drm_lease_v1)
+
 ########################################################
 # Test Viewporter
 ########################################################

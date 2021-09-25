@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "contrast.h"
 #include "datadevicemanager.h"
 #include "dpms.h"
+#include "drm_lease_v1_p.h"
 #include "event_queue.h"
 #include "fakeinput.h"
 #include "fullscreen_shell.h"
@@ -74,6 +75,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-client-protocol.h>
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
+#include <wayland-drm-lease-v1-client-protocol.h>
 #include <wayland-fake-input-client-protocol.h>
 #include <wayland-fullscreen-shell-client-protocol.h>
 #include <wayland-idle-client-protocol.h>
@@ -155,12 +157,24 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &Registry::dataDeviceManagerRemoved,
         },
     },
-    {Registry::Interface::PrimarySelectionDeviceManager,
-     {1,
-      QByteArrayLiteral("zwp_primary_selection_device_manager_v1"),
-      &zwp_primary_selection_device_manager_v1_interface,
-      &Registry::primarySelectionDeviceManagerAnnounced,
-      &Registry::primarySelectionDeviceManagerRemoved}},
+    {
+        Registry::Interface::DrmLeaseDeviceV1,
+        {
+            1,
+            QByteArrayLiteral("wp_drm_lease_device_v1"),
+            &wp_drm_lease_device_v1_interface,
+            &Registry::drmLeaseDeviceV1Announced,
+            &Registry::drmLeaseDeviceV1Removed,
+        },
+    },
+    {
+        Registry::Interface::PrimarySelectionDeviceManager,
+        {1,
+         QByteArrayLiteral("zwp_primary_selection_device_manager_v1"),
+         &zwp_primary_selection_device_manager_v1_interface,
+         &Registry::primarySelectionDeviceManagerAnnounced,
+         &Registry::primarySelectionDeviceManagerRemoved},
+    },
     {
         Registry::Interface::Output,
         {
@@ -853,6 +867,7 @@ BIND(Shm, wl_shm)
 BIND(SubCompositor, wl_subcompositor)
 BIND(FullscreenShell, _wl_fullscreen_shell)
 BIND(DataDeviceManager, wl_data_device_manager)
+BIND(DrmLeaseDeviceV1, wp_drm_lease_device_v1)
 BIND(PlasmaShell, org_kde_plasma_shell)
 BIND(PlasmaVirtualDesktopManagement, org_kde_plasma_virtual_desktop_management)
 BIND(PlasmaWindowManagement, org_kde_plasma_window_management)
@@ -953,6 +968,28 @@ CREATE(XdgShell)
 
 #undef CREATE
 #undef CREATE2
+
+drm_lease_device_v1*
+Registry::createDrmLeaseDeviceV1(quint32 name, quint32 version, QObject* parent)
+{
+    auto dev
+        = d->create<drm_lease_device_v1>(name, version, parent, &Registry::bindDrmLeaseDeviceV1);
+    auto priv_dev = dev->d_ptr;
+
+    // Cleanup private when no handshake is possible anymore (global removal, registry destroyed).
+    QObject::connect(
+        this, &Registry::interfaceRemoved, priv_dev, [priv_dev, name](quint32 removed) {
+            if (name == removed) {
+                priv_dev->q_ptr = nullptr;
+                delete priv_dev;
+            }
+        });
+    QObject::connect(this, &Registry::destroyed, priv_dev, [priv_dev, name] {
+        priv_dev->q_ptr = nullptr;
+        delete priv_dev;
+    });
+    return dev;
+}
 
 XdgExporter* Registry::createXdgExporter(quint32 name, quint32 version, QObject* parent)
 {
