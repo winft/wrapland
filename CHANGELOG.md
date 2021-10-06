@@ -1,5 +1,148 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.523.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.522.0-beta.0...wrapland@0.523.0-beta.0) (2021-10-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **server:** surface unmapped signal removed
+* **server:** surface property signals are removed
+* **server:** individual Surface state getters are removed
+* **server:** Surface::damaged signal is removed
+* **server:** drag functions are moved from Seat to drag_pool
+* **server:** text-input functions are moved from Seat to text_input_pool
+* **server:** touch functions are moved from Seat to touch_pool
+* **server:** keyboard functions are moved from Seat to keyboard_pool
+* **server:** pointer functions are moved from Seat to pointer_pool
+* **server:** seat name signal is removed
+* **server:** seat capabilities signals are removed
+* **server:** signature changes in Server::Seat
+* **server:** PlasmaWindow API changes
+* **client:** text-input classes are V2 suffixed
+* **client:** text-input header file name changes
+* **client:** legacy wl_text_input API removed
+* DataDeviceManager API changed.
+* **server:** Server Slide API changes.
+
+### Features
+
+* **client:** add support for input-method-unstable-v2 ([52899d3](https://gitlab.com/kwinft/wrapland/commit/52899d371a27bba619cf2240dbcbc20405e7084d))
+* **client:** add support for text-input-unstable-v3 ([ec9988f](https://gitlab.com/kwinft/wrapland/commit/ec9988fb876fd26e885de447b7203dc8211ff854))
+* **client:** add support for the drm_lease_v1 protocol ([2c7d8f0](https://gitlab.com/kwinft/wrapland/commit/2c7d8f03e8d560cbd9ebd48ba392e28354deaa8a))
+* **client:** drop support for legacy wl_text_input protocol ([79dc20f](https://gitlab.com/kwinft/wrapland/commit/79dc20fe9a75ba102e9f5e9de5e9d7b001d6f935))
+* **client:** provide xdg-activation v1 interface ([045aefd](https://gitlab.com/kwinft/wrapland/commit/045aefdc5d63c241a2faac3e1249dac645a0c634))
+* implement wp_primary_selection_unstable_v1 ([2bd7d3f](https://gitlab.com/kwinft/wrapland/commit/2bd7d3fc21070d7279999a17c4d77fdd533a8bc4))
+* **server:** add Pointer motion function ([04275a6](https://gitlab.com/kwinft/wrapland/commit/04275a601404c1f870348d58ac1de2443935a810))
+* **server:** add support for input-method-unstable-v2 ([3168b4a](https://gitlab.com/kwinft/wrapland/commit/3168b4a8deac3d47ba17f1764bb4a8a0301ed1d9))
+* **server:** add support for text-input-unstable-v3 ([b7dcc36](https://gitlab.com/kwinft/wrapland/commit/b7dcc36e040abbe3c2c634a257cc9e23c949ee55))
+* **server:** add support for the drm_lease_v1 protocol ([9dda0c7](https://gitlab.com/kwinft/wrapland/commit/9dda0c7683aba632083ce50f8cbd895dec5e2d80))
+* **server:** add surface changes bit field ([5d81fae](https://gitlab.com/kwinft/wrapland/commit/5d81faed732051f5b377bd3f2d44b3dd9d3d45b8))
+* **server:** expose drag pool ([67dd587](https://gitlab.com/kwinft/wrapland/commit/67dd58709d54b46fa61813648e48aa1727ffbdda))
+* **server:** expose keyboard pool ([76e3044](https://gitlab.com/kwinft/wrapland/commit/76e3044d4a584fb3fff87fd0204f27c33f658e74))
+* **server:** expose pointer pool ([ee57e5a](https://gitlab.com/kwinft/wrapland/commit/ee57e5a77596f9f059ed8338e450a3ad373afad6))
+* **server:** expose text-input pool ([4bad5e6](https://gitlab.com/kwinft/wrapland/commit/4bad5e68db35ee2de8c0eb2f887bc2bb2924c75e))
+* **server:** expose touch pool ([9f11178](https://gitlab.com/kwinft/wrapland/commit/9f1117844a56422f8289acd2ef7aed08a1fa7c6a))
+* **server:** indicate waiting surface callbacks ([ec42e7d](https://gitlab.com/kwinft/wrapland/commit/ec42e7d303d2cab2d31731d4f49bb7d4c3e57795))
+* **server:** introduce public surface state struct ([b49fb33](https://gitlab.com/kwinft/wrapland/commit/b49fb33d6c0bc3d3de0ce50533a106de095af43d))
+* **server:** provide xdg-activation v1 interface ([85793a6](https://gitlab.com/kwinft/wrapland/commit/85793a6a0d9d18c060488c519a8875e27183df7e))
+* **server:** remove buffer set size function ([ef3de83](https://gitlab.com/kwinft/wrapland/commit/ef3de83e132b3885800fe7fb5c16293b769ffe19))
+* **server:** remove capabilities signals ([97e1be7](https://gitlab.com/kwinft/wrapland/commit/97e1be7d349617e2973d6d81e301c653ec6f413e))
+* **server:** remove seat name signal ([0a3e695](https://gitlab.com/kwinft/wrapland/commit/0a3e69557662ef9ec3f408d1d77b5360d574ba24))
+* **server:** remove surface damaged signal ([02db3bc](https://gitlab.com/kwinft/wrapland/commit/02db3bc29253c45b867e626894c26fcc4d86763c))
+* **server:** remove surface property signals ([65faa26](https://gitlab.com/kwinft/wrapland/commit/65faa26f4a81997f7ef3746601339638d972dbc9))
+* **server:** send error on Seat capability mismatch ([c31daec](https://gitlab.com/kwinft/wrapland/commit/c31daecbdc8a6c973918c363fefd9bc73423e144))
+
+
+### Bug Fixes
+
+* **server:** explicitly cast from unsinged to int ([f0dd0a5](https://gitlab.com/kwinft/wrapland/commit/f0dd0a5a0f6a0dec1a9f846a334df5a76cdc5a8b))
+* **server:** hold onto appmenus in order to send them to new resources in PlasmaWindow ([39236ff](https://gitlab.com/kwinft/wrapland/commit/39236ff169372473229520a0177b193ff5a9cadc))
+* **server:** implement text input entered surface method ([87e87de](https://gitlab.com/kwinft/wrapland/commit/87e87de6c6d92e54230f2e4eb09974fe259f1bfe))
+* **server:** indicate seat capabilities through device pool lifetimes ([eeb2c1e](https://gitlab.com/kwinft/wrapland/commit/eeb2c1e3e6861445fa5fe0bae5efdff4c7b885af))
+* **server:** omit lint of missing pointer gestures callbacks ([aff4450](https://gitlab.com/kwinft/wrapland/commit/aff4450964a4d63de34201db22adb570f50533ed))
+* **server:** provide unsinged slide offset ([48e80fe](https://gitlab.com/kwinft/wrapland/commit/48e80fe020a936ecad22a262c605b765d7a51517))
+* **server:** provide updated modifiers serial at right argument position ([b41b274](https://gitlab.com/kwinft/wrapland/commit/b41b274de3e41a68cbd99ebf4fb67f7ad891c226))
+* **server:** remove implicit casts ([93fd844](https://gitlab.com/kwinft/wrapland/commit/93fd84498215f3cb1399e6010c5185713a52ad3d))
+* **server:** synchronize child surface changes ([84d933d](https://gitlab.com/kwinft/wrapland/commit/84d933d8774529afd1a1b946482d651b1b4a4549))
+* **server:** touch move when setting drag target with first key ([23f5b3e](https://gitlab.com/kwinft/wrapland/commit/23f5b3e8a5facb9e6503d2b5d1986ff5bbd3becc))
+* set keymap file per wl_keyboard resource ([7abe2a8](https://gitlab.com/kwinft/wrapland/commit/7abe2a8888e6e677bda3628c3bb5c2f9103955b8))
+
+
+### Refactors
+
+* **client:** abolish private namespace in data private classes ([489e83d](https://gitlab.com/kwinft/wrapland/commit/489e83d3d69c5ca81fd7c63674bbc8f72d49d2e3))
+* **client:** bind text-input manager v2 without interface check ([9a0cf23](https://gitlab.com/kwinft/wrapland/commit/9a0cf232ff270fbf56a437366da702ab88801a78))
+* **client:** clean up text input code ([c3533da](https://gitlab.com/kwinft/wrapland/commit/c3533da6e51e3a9b49d7ede2a9a4de8fb833c9b8))
+* **client:** make DataDevice callbacks free functions ([83f72b6](https://gitlab.com/kwinft/wrapland/commit/83f72b6ea39d1a627cb4f60c2a93adcd397c376d))
+* **client:** make DataOffer ctor public ([fc92370](https://gitlab.com/kwinft/wrapland/commit/fc92370b0727114c32a45bb13a43e7938ea79a09))
+* **client:** merge text input classes ([73b04ea](https://gitlab.com/kwinft/wrapland/commit/73b04ea3bc978ba76e487c0d7d4a09bbc07e7c7f))
+* **client:** merge text input files ([6c0ac94](https://gitlab.com/kwinft/wrapland/commit/6c0ac94b24ac66af161ef79d077e3cd80854ccd7))
+* **client:** merge text input manager classes ([df998cd](https://gitlab.com/kwinft/wrapland/commit/df998cd19bd03ede270386cc2fe993496c19354c))
+* **client:** move DataOffer callbacks to free functions ([05f6ff8](https://gitlab.com/kwinft/wrapland/commit/05f6ff81a8071809d4c5f9a50e496727c4db8f6c))
+* **client:** move some DataSource callbacks to free functions ([794fea7](https://gitlab.com/kwinft/wrapland/commit/794fea72bc2a46d132d62c98248bc4bd71050856))
+* **client:** rename text-input files ([ed7ad42](https://gitlab.com/kwinft/wrapland/commit/ed7ad42f91fdf76d6a556371ee83ebf43aee21c8))
+* **client:** rename text-input v2 classes ([2bb62ed](https://gitlab.com/kwinft/wrapland/commit/2bb62edd3f80d1bfa414187baa25bcec1afb8aa8))
+* rename some DataDeviceManager members ([5c277d9](https://gitlab.com/kwinft/wrapland/commit/5c277d9ed2dbbc24c9a21e7cb495995e788b6d6c))
+* **server:** add function to cancel drags ([20ecc14](https://gitlab.com/kwinft/wrapland/commit/20ecc14cd0750cdec34598ce76cb61b11b10f1be))
+* **server:** add internal text-input struct depending on version ([82bc29c](https://gitlab.com/kwinft/wrapland/commit/82bc29c458cf1c2e41984e1ce977842fd694bcf8))
+* **server:** add Seat friend function ([255db62](https://gitlab.com/kwinft/wrapland/commit/255db6282cb9664ba30c66ed0459008b9d9c18a6))
+* **server:** add Seat::Private::register_device template method ([da02ccc](https://gitlab.com/kwinft/wrapland/commit/da02ccc859af904077109d4bda3a4854f4c9afdb))
+* **server:** compare keyboard modifiers with operator ([fae4c6d](https://gitlab.com/kwinft/wrapland/commit/fae4c6d76f8e21550ba114a18baa41f687bf98a2))
+* **server:** copy current buffer state in separate function ([8bffe27](https://gitlab.com/kwinft/wrapland/commit/8bffe27812fb321176ff9c0c0e6411437c4c9ea7))
+* **server:** explicitly cast resource version to integer ([3661b18](https://gitlab.com/kwinft/wrapland/commit/3661b18cc5d7c23b8f3e2de70adca2e5df7792d9))
+* **server:** explicitly cast size to unsigned ([0b5a22d](https://gitlab.com/kwinft/wrapland/commit/0b5a22d7f30f186b52a8ce3b33255c357e2c2766))
+* **server:** get drag source and offer late ([ac74098](https://gitlab.com/kwinft/wrapland/commit/ac74098c98d2127d82bae139d01032346b1cd2ee))
+* **server:** handle seat drags in a new class ([b09a001](https://gitlab.com/kwinft/wrapland/commit/b09a0017966f67fe31e21fac243024c26c2dbc2f))
+* **server:** handle seat keyboards in a new class ([7715cbb](https://gitlab.com/kwinft/wrapland/commit/7715cbba1398e27250608f744f80e96e6407343f))
+* **server:** handle seat pointers in a new class ([9ddf6ab](https://gitlab.com/kwinft/wrapland/commit/9ddf6abcb807ef3a41827690b5d8823b2a21add4))
+* **server:** handle seat touches in a new class ([a1431d3](https://gitlab.com/kwinft/wrapland/commit/a1431d3eba038d946232198ff7e36464afd0e1cd))
+* **server:** handle text input in a new class ([43f6325](https://gitlab.com/kwinft/wrapland/commit/43f632587480c634c3a8ca9fd0883eacdae18b9d))
+* **server:** improve code quality slightly ([fbcc340](https://gitlab.com/kwinft/wrapland/commit/fbcc34098bbf3b9e0d69351bdf553e9d0c1f69ed))
+* **server:** introduce device_manager class template ([7c823c7](https://gitlab.com/kwinft/wrapland/commit/7c823c78ecc9c93b9090b8163112e92a3e0349fc))
+* **server:** introduce drag source struct ([26c0260](https://gitlab.com/kwinft/wrapland/commit/26c0260cb672c23cc04f137b4f997894f2094fec))
+* **server:** introduce drag target struct ([3852b0b](https://gitlab.com/kwinft/wrapland/commit/3852b0bb49b346d8bd7d49ff8201ba0fc9025658))
+* **server:** make DataOffer receive callback a free function ([f9ae510](https://gitlab.com/kwinft/wrapland/commit/f9ae5109dca1073c123cd463013258ec800cbfd4))
+* **server:** make input device pools optional ([9a7fdd4](https://gitlab.com/kwinft/wrapland/commit/9a7fdd4d48115765fe048b5c725fe2b6e8c95923))
+* **server:** make keyboard focus private with const reference getter ([8266217](https://gitlab.com/kwinft/wrapland/commit/8266217af320104b117e702f83a2db72a909e61d))
+* **server:** make pointer focus private with const reference getter ([93a0f78](https://gitlab.com/kwinft/wrapland/commit/93a0f78cd92de984c15102f1bd2d65212a9aa230))
+* **server:** make text input struct unnamed ([34fc1f9](https://gitlab.com/kwinft/wrapland/commit/34fc1f9abd22de46dfd4cf4a215af450cb147ca7))
+* **server:** make touch focus private with const reference getter ([d14ed3f](https://gitlab.com/kwinft/wrapland/commit/d14ed3f6af1d2cff77c0d8cf32d6c807ed7f2a9a))
+* **server:** move DataDevice, DataSource ctors to public ([9d1e464](https://gitlab.com/kwinft/wrapland/commit/9d1e46487c121d589194fdf514682e29128b42cc))
+* **server:** move DataDevice::Private selection methods to free functions ([cfa140c](https://gitlab.com/kwinft/wrapland/commit/cfa140cdb18e539f3825f5e0e13c6d40de70b197))
+* **server:** move DataDeviceManager callbacks to free function templates ([7402914](https://gitlab.com/kwinft/wrapland/commit/7402914f3fe80a8551670accf7cef633a28cbb4a))
+* **server:** move DataSource callback to free function ([0d27dd0](https://gitlab.com/kwinft/wrapland/commit/0d27dd02ce8c8efa60caafa1de221ebb8f75c72b))
+* **server:** move some utils to a separate header ([2a3d665](https://gitlab.com/kwinft/wrapland/commit/2a3d66526bc4b4c94f9af7d9f2ad7101ab89eb9c))
+* **server:** only set source pointer on drags with pointer ([8b19499](https://gitlab.com/kwinft/wrapland/commit/8b1949981efecd793a03bc9c426391d0738ad501))
+* **server:** provide function to move any touch point ([b1a7377](https://gitlab.com/kwinft/wrapland/commit/b1a73779f89d7ea5d040a8e05de50d0e672d9ae8))
+* **server:** remove partial Surface state getters ([b90f648](https://gitlab.com/kwinft/wrapland/commit/b90f648f18b14e32339c030489d22c42bed47360))
+* **server:** remove sendAxis function ([12e9c94](https://gitlab.com/kwinft/wrapland/commit/12e9c940c6b581f20bdc117962612c61c4314879))
+* **server:** remove subsurface check when looping children ([1f5ebcc](https://gitlab.com/kwinft/wrapland/commit/1f5ebcc1b122c658cca4a6b7fbea54feb752c2e4))
+* **server:** remove subsurface position workaround ([e265339](https://gitlab.com/kwinft/wrapland/commit/e2653396a7fb7b536fdd47ac5b561a6b46b737be))
+* **server:** rename text input manager factory ([fd57ea5](https://gitlab.com/kwinft/wrapland/commit/fd57ea5cf0834e792e5f7d9010dbb6e73b898951))
+* **server:** restrict access to drag pool member variables ([01c8476](https://gitlab.com/kwinft/wrapland/commit/01c8476846b3c00bd15d1d86012cfa94c458b7c9))
+* **server:** restrict access to keyboard devices variable ([52d140b](https://gitlab.com/kwinft/wrapland/commit/52d140b0406b7c66f60c0de5cc40b595588773ee))
+* **server:** restrict access to keyboard pool member variables ([50e5804](https://gitlab.com/kwinft/wrapland/commit/50e5804e9a002b498c8fe1261e3436b4c158b1b5))
+* **server:** restrict access to pointer pool devices variable ([5b46494](https://gitlab.com/kwinft/wrapland/commit/5b46494c070481ad65794dbe961d7c0bc7c4fe75))
+* **server:** restrict access to pointer pool member variables ([3c9c359](https://gitlab.com/kwinft/wrapland/commit/3c9c35950bdd24ad30d068eec0130f8055eccb5c))
+* **server:** restrict access to position variable ([1d96e22](https://gitlab.com/kwinft/wrapland/commit/1d96e223983955c6a28d1bf9a88313eb246fa104))
+* **server:** restrict access to touch pool devices variable ([f5bd1c1](https://gitlab.com/kwinft/wrapland/commit/f5bd1c1c5c468d1c8f70b3accf9868bc6ce7c2b8))
+* **server:** set capabilities in helper function ([63192ab](https://gitlab.com/kwinft/wrapland/commit/63192ab2ce2768ff05a767058de23f159e9d3b76))
+* **server:** set geometry rectangle with static cast ([e3fdc62](https://gitlab.com/kwinft/wrapland/commit/e3fdc625a8845453a5a80404e06ad6927a094ae4))
+* **server:** set seat input method from input method manager ([8438638](https://gitlab.com/kwinft/wrapland/commit/84386384ba069bfcc2e41b4669d74e753c704b8c))
+* **server:** split out cancelling drag target from update ([90b70de](https://gitlab.com/kwinft/wrapland/commit/90b70de2d40c3a8f14a0034bfeaaf2063275fd8b))
+* **server:** split out udpate drag motion ([3ba39c9](https://gitlab.com/kwinft/wrapland/commit/3ba39c90bec6e3883020e4130dd82f3f63e96116))
+* **server:** split out updating target offer ([332772e](https://gitlab.com/kwinft/wrapland/commit/332772ea186afd142dfc4f7ddfe3adb1d0ac385e))
+* **server:** split selection management to template class ([3873172](https://gitlab.com/kwinft/wrapland/commit/387317217b0c624d15b2b093c659f5455b82e9f0))
+* **server:** split up text-input surface setter on version ([27c3157](https://gitlab.com/kwinft/wrapland/commit/27c315739e19030510458a7c916765cc1131ece0))
+* **server:** unset source and target drag structs ([f8e2aad](https://gitlab.com/kwinft/wrapland/commit/f8e2aade61cf270dc71c6f92e7bd8df20b569153))
+* **server:** update drag motion before setting surface ([29db209](https://gitlab.com/kwinft/wrapland/commit/29db209a0f7d06028c6a46a1f64f21f17d5fbb1f))
+* **server:** use range-based for loop ([ae45c83](https://gitlab.com/kwinft/wrapland/commit/ae45c8383e8b8eb0f6d240307311f43f89cd017b))
+* **server:** use seat pool getters internally ([4baf4cf](https://gitlab.com/kwinft/wrapland/commit/4baf4cfdd931d8e58c2c420a7ce445d225901212))
+* **server:** use std types in Seat ([5841883](https://gitlab.com/kwinft/wrapland/commit/5841883d50f2c0a890f9b3fc2125621df46c7174))
+* **server:** use STL min/max on uint32_t types ([f16182e](https://gitlab.com/kwinft/wrapland/commit/f16182ec69332e966c7adb18b8591161227ec178))
+* **server:** use surface argument in connect statement ([0db0dcf](https://gitlab.com/kwinft/wrapland/commit/0db0dcf45e34cc9aabb9b896c46132f6ebf8f688))
+* **server:** validate dmabuf params in separate function ([6c61ae8](https://gitlab.com/kwinft/wrapland/commit/6c61ae8881af6fd56864007b8bd9a15db88e0ea2))
+
 ## [0.522.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.522.0-beta.0...wrapland@0.522.0) (2021-06-08)
 
 
