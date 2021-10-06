@@ -48,6 +48,8 @@ const struct zwp_pointer_gestures_v1_interface PointerGesturesV1::Private::s_int
     cb<swipeGestureCallback>,
     cb<pinchGestureCallback>,
     resourceDestroyCallback,
+    // TODO(romangg): Add get_hold_gesture field (version 3).
+    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
 };
 
 void PointerGesturesV1::Private::swipeGestureCallback(PointerGesturesV1Bind* bind,
