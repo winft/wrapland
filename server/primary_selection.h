@@ -110,9 +110,28 @@ Q_SIGNALS:
 private:
     friend class data_control_device_v1;
     friend class data_control_source_v1_res;
+    friend class primary_selection_source_ext;
     friend class primary_selection_source_res;
     primary_selection_source();
 
+    class Private;
+    std::unique_ptr<Private> d_ptr;
+};
+
+class WRAPLANDSERVER_EXPORT primary_selection_source_ext : public QObject
+{
+public:
+    primary_selection_source_ext();
+    ~primary_selection_source_ext() override;
+
+    void offer(std::string const& mime_type);
+
+    virtual void request_data(std::string const& mime_type, qint32 fd) = 0;
+    virtual void cancel() = 0;
+
+    primary_selection_source* src() const;
+
+private:
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

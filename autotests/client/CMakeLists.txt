@@ -396,6 +396,21 @@ add_test(NAME wrapland-testDragAndDrop COMMAND testDragAndDrop)
 ecm_mark_as_test(testDragAndDrop)
 
 # ##################################################################################################
+# Test external sources
+# ##################################################################################################
+set(test_external_sources_SRCS external_sources.cpp)
+add_executable(test-external-sources ${test_external_sources_SRCS})
+target_link_libraries(test-external-sources
+  Qt5::Test
+  Qt5::Gui
+  Wrapland::Client
+  Wrapland::Server
+  Wayland::Client
+)
+add_test(NAME wrapland-test-external-sources COMMAND test-external-sources)
+ecm_mark_as_test(test-external-sources)
+
+# ##################################################################################################
 # Test KWin Primary Selection
 # ##################################################################################################
 set(testPrimarySelection_SRCS primary_selection.cpp)

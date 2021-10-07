@@ -173,9 +173,20 @@ data_source::Private* data_source_res::src_priv() const
     return pub_src->d_ptr.get();
 }
 
+template<class... Ts>
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+struct overload : Ts... {
+    using Ts::operator()...;
+};
+template<class... Ts>
+overload(Ts...) -> overload<Ts...>;
+
 void data_source::accept(std::string const& mimeType) const
 {
-    std::get<data_source_res*>(d_ptr->res)->accept(mimeType);
+    std::visit(overload{[&](data_source_res* res) { res->accept(mimeType); },
+                        [&](data_control_source_v1_res* /*unused*/) { assert(false); },
+                        [&](data_source_ext* res) { res->accept(mimeType); }},
+               d_ptr->res);
 }
 
 void data_source::request_data(std::string const& mimeType, int32_t fd) const
@@ -195,17 +206,26 @@ dnd_actions data_source::supported_dnd_actions() const
 
 void data_source::send_dnd_drop_performed() const
 {
-    std::get<data_source_res*>(d_ptr->res)->send_dnd_drop_performed();
+    std::visit(overload{[&](data_source_res* res) { res->send_dnd_drop_performed(); },
+                        [&](data_control_source_v1_res* /*unused*/) { assert(false); },
+                        [&](data_source_ext* res) { res->send_dnd_drop_performed(); }},
+               d_ptr->res);
 }
 
 void data_source::send_dnd_finished() const
 {
-    std::get<data_source_res*>(d_ptr->res)->send_dnd_finished();
+    std::visit(overload{[&](data_source_res* res) { res->send_dnd_finished(); },
+                        [&](data_control_source_v1_res* /*unused*/) { assert(false); },
+                        [&](data_source_ext* res) { res->send_dnd_finished(); }},
+               d_ptr->res);
 }
 
 void data_source::send_action(dnd_action action) const
 {
-    std::get<data_source_res*>(d_ptr->res)->send_action(action);
+    std::visit(overload{[&](data_source_res* res) { res->send_action(action); },
+                        [&](data_control_source_v1_res* /*unused*/) { assert(false); },
+                        [&](data_source_ext* res) { res->send_action(action); }},
+               d_ptr->res);
 }
 
 std::vector<std::string> data_source::mime_types() const
@@ -216,8 +236,46 @@ std::vector<std::string> data_source::mime_types() const
 Client* data_source::client() const
 {
     Client* cl{nullptr};
-    std::visit([&](auto&& res) { cl = res->impl->client()->handle(); }, d_ptr->res);
+
+    std::visit(
+        overload{[&](data_source_res* res) { cl = res->impl->client()->handle(); },
+                 [&](data_control_source_v1_res* res) { cl = res->impl->client()->handle(); },
+                 [&](data_source_ext* /*unused*/) {}},
+        d_ptr->res);
+
     return cl;
+}
+
+data_source_ext::Private::Private(data_source_ext* q_ptr)
+    : pub_src{new data_source}
+    , q_ptr{q_ptr}
+{
+    pub_src->d_ptr->res = q_ptr;
+}
+
+data_source_ext::data_source_ext()
+    : d_ptr{new Private(this)}
+{
+}
+
+data_source_ext::~data_source_ext()
+{
+    Q_EMIT d_ptr->pub_src->resourceDestroyed();
+}
+
+void data_source_ext::offer(std::string const& mime_typ)
+{
+    offer_mime_type(d_ptr->pub_src->d_ptr.get(), mime_typ.c_str());
+}
+
+void data_source_ext::set_actions(dnd_actions actions) const
+{
+    src()->d_ptr->set_actions(actions);
+}
+
+data_source* data_source_ext::src() const
+{
+    return d_ptr->pub_src.get();
 }
 
 }

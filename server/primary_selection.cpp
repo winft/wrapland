@@ -313,11 +313,52 @@ void primary_selection_source::request_data(std::string const& mimeType, qint32 
     std::visit([&](auto&& res) { res->request_data(mimeType, fd); }, d_ptr->res);
 }
 
+template<class... Ts>
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+struct overload : Ts... {
+    using Ts::operator()...;
+};
+template<class... Ts>
+overload(Ts...) -> overload<Ts...>;
+
 Client* primary_selection_source::client() const
 {
     Client* cl{nullptr};
-    std::visit([&](auto&& res) { cl = res->impl->client()->handle(); }, d_ptr->res);
+
+    std::visit(
+        overload{[&](primary_selection_source_res* res) { cl = res->impl->client()->handle(); },
+                 [&](data_control_source_v1_res* res) { cl = res->impl->client()->handle(); },
+                 [&](primary_selection_source_ext* /*unused*/) {}},
+        d_ptr->res);
+
     return cl;
+}
+
+primary_selection_source_ext::Private::Private(primary_selection_source_ext* q_ptr)
+    : pub_src{new primary_selection_source}
+    , q_ptr{q_ptr}
+{
+    pub_src->d_ptr->res = q_ptr;
+}
+
+primary_selection_source_ext::primary_selection_source_ext()
+    : d_ptr{new Private(this)}
+{
+}
+
+primary_selection_source_ext::~primary_selection_source_ext()
+{
+    Q_EMIT d_ptr->pub_src->resourceDestroyed();
+}
+
+void primary_selection_source_ext::offer(std::string const& mime_typ)
+{
+    offer_mime_type(d_ptr->pub_src->d_ptr.get(), mime_typ.c_str());
+}
+
+primary_selection_source* primary_selection_source_ext::src() const
+{
+    return d_ptr->pub_src.get();
 }
 
 }

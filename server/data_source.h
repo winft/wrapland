@@ -55,6 +55,7 @@ Q_SIGNALS:
 private:
     friend class data_control_device_v1;
     friend class data_control_source_v1_res;
+    friend class data_source_ext;
     friend class data_source_res;
     data_source();
 
@@ -62,6 +63,32 @@ private:
     std::unique_ptr<Private> d_ptr;
 };
 
+class WRAPLANDSERVER_EXPORT data_source_ext : public QObject
+{
+    Q_OBJECT
+public:
+    data_source_ext();
+    ~data_source_ext() override;
+
+    void offer(std::string const& mime_type);
+    void set_actions(dnd_actions actions) const;
+
+    virtual void accept(std::string const& mime_type) = 0;
+    virtual void request_data(std::string const& mime_type, qint32 fd) = 0;
+    virtual void cancel() = 0;
+
+    virtual void send_dnd_drop_performed() = 0;
+    virtual void send_dnd_finished() = 0;
+    virtual void send_action(dnd_action action) = 0;
+
+    data_source* src() const;
+
+private:
+    class Private;
+    std::unique_ptr<Private> d_ptr;
+};
+
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::data_source*)
+Q_DECLARE_METATYPE(Wrapland::Server::data_source_ext*)

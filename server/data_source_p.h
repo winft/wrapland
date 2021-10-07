@@ -29,6 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class data_control_source_v1_res;
+class data_source_ext;
 class data_source_res;
 
 class data_source::Private
@@ -40,7 +41,7 @@ public:
     std::vector<std::string> mimeTypes;
     dnd_actions supportedDnDActions{dnd_action::none};
 
-    std::variant<data_source_res*, data_control_source_v1_res*> res;
+    std::variant<data_source_res*, data_control_source_v1_res*, data_source_ext*> res;
 
     data_source* q_ptr;
 };
@@ -82,6 +83,16 @@ public:
 
 Q_SIGNALS:
     void resourceDestroyed();
+};
+
+class data_source_ext::Private
+{
+public:
+    explicit Private(data_source_ext* q_ptr);
+
+    std::unique_ptr<data_source> pub_src;
+
+    data_source_ext* q_ptr;
 };
 
 }

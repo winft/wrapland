@@ -89,7 +89,10 @@ public:
 
     std::vector<std::string> mimeTypes;
 
-    std::variant<primary_selection_source_res*, data_control_source_v1_res*> res;
+    std::variant<primary_selection_source_res*,
+                 data_control_source_v1_res*,
+                 primary_selection_source_ext*>
+        res;
     primary_selection_source* q_ptr;
 };
 
@@ -126,6 +129,16 @@ public:
 
 Q_SIGNALS:
     void resourceDestroyed();
+};
+
+class primary_selection_source_ext::Private
+{
+public:
+    explicit Private(primary_selection_source_ext* q_ptr);
+
+    std::unique_ptr<primary_selection_source> pub_src;
+
+    primary_selection_source_ext* q_ptr;
 };
 
 }
