@@ -44,11 +44,6 @@ public:
     ~Private() override;
 
     data_offer* createDataOffer(data_source* source);
-    void cancel_drag_target();
-    void update_drag_motion();
-    void update_drag_pointer_motion();
-    void update_drag_touch_motion();
-    void update_drag_target_offer(Surface* surface, uint32_t serial);
 
     Seat* seat;
     data_source* source = nullptr;
@@ -57,16 +52,6 @@ public:
 
     data_source* selection = nullptr;
     QMetaObject::Connection selectionDestroyedConnection;
-
-    struct Drag {
-        Surface* surface = nullptr;
-        QMetaObject::Connection destroyConnection;
-        QMetaObject::Connection posConnection;
-        QMetaObject::Connection sourceActionConnection;
-        QMetaObject::Connection targetActionConnection;
-        quint32 serial = 0;
-    };
-    Drag drag;
 
 private:
     static void startDragCallback(wl_client* wlClient,
@@ -80,11 +65,9 @@ private:
                                        wl_resource* wlSource,
                                        uint32_t id);
 
-    void startDrag(data_source* dataSource, Surface* origin, Surface* icon, quint32 serial);
+    void startDrag(data_source* dataSource, Surface* origin, Surface* icon, quint32 serial) const;
 
     static const struct wl_data_device_interface s_interface;
-
-    data_device* q_ptr;
 };
 
 const struct wl_data_device_interface data_device::Private::s_interface = {
@@ -105,7 +88,6 @@ data_device::Private::Private(Client* client,
                                      &s_interface,
                                      q)
     , seat(seat)
-    , q_ptr{q}
 {
 }
 
@@ -129,17 +111,14 @@ void data_device::Private::startDragCallback([[maybe_unused]] wl_client* wlClien
 void data_device::Private::startDrag(data_source* dataSource,
                                      Surface* origin,
                                      Surface* _icon,
-                                     quint32 serial)
+                                     quint32 serial) const
 {
     // TODO(unknown author): verify serial
-
-    auto focusSurface = origin;
 
     auto pointerGrab = false;
     if (seat->hasPointer()) {
         auto& pointers = seat->pointers();
-        pointerGrab
-            = pointers.has_implicit_grab(serial) && pointers.get_focus().surface == focusSurface;
+        pointerGrab = pointers.has_implicit_grab(serial) && pointers.get_focus().surface == origin;
     }
 
     if (!pointerGrab) {
@@ -149,23 +128,13 @@ void data_device::Private::startDrag(data_source* dataSource,
             return;
         }
         auto& touches = seat->touches();
-        if (!touches.has_implicit_grab(serial) || touches.get_focus().surface != focusSurface) {
+        if (!touches.has_implicit_grab(serial) || touches.get_focus().surface != origin) {
             // Client neither has pointer nor touch grab. No drag start allowed.
             return;
         }
     }
 
-    // Source is allowed to be null, handled client internally.
-    source = dataSource;
-    if (dataSource) {
-        QObject::connect(
-            dataSource, &data_source::resourceDestroyed, q_ptr, [this] { source = nullptr; });
-    }
-
-    surface = origin;
-    icon = _icon;
-    drag.serial = serial;
-    Q_EMIT q_ptr->drag_started();
+    seat->drags().start(dataSource, origin, _icon, serial);
 }
 
 void data_device::Private::set_selection_callback(wl_client* /*wlClient*/,
@@ -208,120 +177,6 @@ data_offer* data_device::Private::createDataOffer(data_source* source)
     return offer;
 }
 
-void data_device::Private::cancel_drag_target()
-{
-    if (!drag.surface) {
-        return;
-    }
-    if (resource() && drag.surface->resource()) {
-        q_ptr->leave();
-    }
-    if (drag.posConnection) {
-        disconnect(drag.posConnection);
-        drag.posConnection = QMetaObject::Connection();
-    }
-    disconnect(drag.destroyConnection);
-    drag.destroyConnection = QMetaObject::Connection();
-    drag.surface = nullptr;
-    if (drag.sourceActionConnection) {
-        disconnect(drag.sourceActionConnection);
-        drag.sourceActionConnection = QMetaObject::Connection();
-    }
-    if (drag.targetActionConnection) {
-        disconnect(drag.targetActionConnection);
-        drag.targetActionConnection = QMetaObject::Connection();
-    }
-    // don't update serial, we need it
-}
-
-void data_device::Private::update_drag_motion()
-{
-    if (seat->drags().is_pointer_drag()) {
-        update_drag_pointer_motion();
-    } else if (seat->drags().is_touch_drag()) {
-        update_drag_touch_motion();
-    }
-}
-
-void data_device::Private::update_drag_pointer_motion()
-{
-    assert(seat->drags().is_pointer_drag());
-    drag.posConnection = connect(seat, &Seat::pointerPosChanged, handle(), [this] {
-        auto const pos
-            = seat->drags().get_target().transformation.map(seat->pointers().get_position());
-        q_ptr->motion(seat->timestamp(), pos);
-        client()->flush();
-    });
-}
-
-void data_device::Private::update_drag_touch_motion()
-{
-    assert(seat->drags().is_touch_drag());
-
-    drag.posConnection = connect(
-        seat, &Seat::touchMoved, handle(), [this](auto id, auto serial, auto globalPosition) {
-            Q_UNUSED(id);
-            if (serial != drag.serial) {
-                // different touch down has been moved
-                return;
-            }
-            auto const pos = seat->drags().get_target().transformation.map(globalPosition);
-            q_ptr->motion(seat->timestamp(), pos);
-            client()->flush();
-        });
-}
-
-void data_device::Private::update_drag_target_offer(Surface* surface, uint32_t serial)
-{
-    auto source = seat->drags().get_source().dev->drag_source();
-    auto offer = createDataOffer(source);
-
-    // TODO(unknown author): handle touch position
-    auto const pos = seat->drags().get_target().transformation.map(seat->pointers().get_position());
-    send<wl_data_device_send_enter>(serial,
-                                    surface->d_ptr->resource(),
-                                    wl_fixed_from_double(pos.x()),
-                                    wl_fixed_from_double(pos.y()),
-                                    offer ? offer->d_ptr->resource() : nullptr);
-
-    if (!offer) {
-        // No new offer.
-        return;
-    }
-
-    offer->send_source_actions();
-
-    auto matchOffers = [source, offer] {
-        dnd_action action{dnd_action::none};
-
-        if (source->supported_dnd_actions().testFlag(offer->preferred_dnd_action())) {
-            action = offer->preferred_dnd_action();
-
-        } else {
-            auto const source_actions = source->supported_dnd_actions();
-            auto const offer_actions = offer->supported_dnd_actions();
-
-            if (source_actions.testFlag(dnd_action::copy)
-                && offer_actions.testFlag(dnd_action::copy)) {
-                action = dnd_action::copy;
-            } else if (source_actions.testFlag(dnd_action::move)
-                       && offer_actions.testFlag(dnd_action::move)) {
-                action = dnd_action::move;
-            } else if (source_actions.testFlag(dnd_action::ask)
-                       && offer_actions.testFlag(dnd_action::ask)) {
-                action = dnd_action::ask;
-            }
-        }
-
-        offer->send_action(action);
-        source->send_action(action);
-    };
-    drag.targetActionConnection
-        = connect(offer, &data_offer::dnd_actions_changed, offer, matchOffers);
-    drag.sourceActionConnection
-        = connect(source, &data_source::supported_dnd_actions_changed, source, matchOffers);
-}
-
 data_device::data_device(Client* client, uint32_t version, uint32_t id, Seat* seat)
     : d_ptr(new Private(client, version, id, seat, this))
 {
@@ -330,22 +185,6 @@ data_device::data_device(Client* client, uint32_t version, uint32_t id, Seat* se
 Seat* data_device::seat() const
 {
     return d_ptr->seat;
-}
-
-data_source* data_device::drag_source() const
-{
-
-    return d_ptr->source;
-}
-
-Surface* data_device::icon() const
-{
-    return d_ptr->icon;
-}
-
-Surface* data_device::origin() const
-{
-    return d_ptr->surface;
 }
 
 data_source* data_device::selection() const
@@ -402,50 +241,6 @@ void data_device::leave()
 void data_device::drop()
 {
     d_ptr->send<wl_data_device_send_drop>();
-
-    if (d_ptr->drag.posConnection) {
-        disconnect(d_ptr->drag.posConnection);
-        d_ptr->drag.posConnection = QMetaObject::Connection();
-    }
-
-    disconnect(d_ptr->drag.destroyConnection);
-    d_ptr->drag.destroyConnection = QMetaObject::Connection();
-    d_ptr->drag.surface = nullptr;
-
-    // TODO(romangg): do we need to flush the client here?
-}
-
-void data_device::update_drag_target(Surface* surface, quint32 serial)
-{
-    d_ptr->cancel_drag_target();
-
-    if (!surface) {
-        if (auto s = d_ptr->seat->drags().get_source().dev->drag_source()) {
-            s->send_action(dnd_action::none);
-        }
-        return;
-    }
-
-    d_ptr->update_drag_motion();
-
-    d_ptr->drag.surface = surface;
-    d_ptr->drag.destroyConnection = connect(surface, &Surface::resourceDestroyed, this, [this] {
-        if (d_ptr->resource()) {
-            leave();
-        }
-        if (d_ptr->drag.posConnection) {
-            disconnect(d_ptr->drag.posConnection);
-        }
-        d_ptr->drag = Private::Drag();
-    });
-
-    d_ptr->update_drag_target_offer(surface, serial);
-    d_ptr->client()->flush();
-}
-
-quint32 data_device::drag_implicit_grab_serial() const
-{
-    return d_ptr->drag.serial;
 }
 
 Client* data_device::client() const

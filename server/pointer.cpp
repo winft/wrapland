@@ -361,7 +361,7 @@ void Pointer::motion(QPointF const& position)
     if (auto const& drag = d_ptr->seat->drags(); drag.is_pointer_drag()) {
         auto const& drag_src = drag.get_source();
         auto const block_movement = drag_src.movement_blocked
-            || drag_src.dev->origin()->client() != d_ptr->focusedSurface->client();
+            || drag_src.surfaces.origin->client() != d_ptr->focusedSurface->client();
         if (block_movement) {
             // Handled by data_device.
             return;

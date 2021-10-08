@@ -35,6 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
+#include "../../server/drag_pool.h"
 #include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
@@ -191,9 +192,6 @@ void TestDataDevice::test_create()
     auto server_device = device_created_spy.first().first().value<Wrapland::Server::data_device*>();
     QVERIFY(server_device);
     QCOMPARE(server_device->seat(), m_server_seat);
-    QVERIFY(!server_device->drag_source());
-    QVERIFY(!server_device->origin());
-    QVERIFY(!server_device->icon());
     QVERIFY(!server_device->selection());
 
     QVERIFY(!m_server_seat->selection());
@@ -261,7 +259,7 @@ void TestDataDevice::test_drag()
     auto surfaceInterface = surface_created_spy.first().first().value<Wrapland::Server::Surface*>();
 
     // now we have all we need to start a drag operation
-    QSignalSpy drag_started_spy(server_device, &Wrapland::Server::data_device::drag_started);
+    QSignalSpy drag_started_spy(m_server_seat, &Wrapland::Server::Seat::dragStarted);
     QVERIFY(drag_started_spy.isValid());
     QSignalSpy drag_entered_spy(device.get(), &Wrapland::Client::DataDevice::dragEntered);
     QVERIFY(drag_entered_spy.isValid());
@@ -287,13 +285,15 @@ void TestDataDevice::test_drag()
         = success ? m_server_seat->pointers().button_serial(Qt::LeftButton) : 0;
 
     QCoreApplication::processEvents();
+
     // finally start the drag
     device->startDrag(pointerButtonSerial, source.get(), surface.get());
     QCOMPARE(drag_started_spy.wait(500), success);
     QCOMPARE(!drag_started_spy.isEmpty(), success);
-    QCOMPARE(server_device->drag_source(), success ? sourceInterface : nullptr);
-    QCOMPARE(server_device->origin(), success ? surfaceInterface : nullptr);
-    QVERIFY(!server_device->icon());
+    QCOMPARE(m_server_seat->drags().get_source().src, success ? sourceInterface : nullptr);
+    QCOMPARE(m_server_seat->drags().get_source().surfaces.origin,
+             success ? surfaceInterface : nullptr);
+    QVERIFY(!m_server_seat->drags().get_source().surfaces.icon);
 
     if (success) {
         // Wait for the drag-enter on itself, otherwise we leak the data offer.
@@ -352,7 +352,7 @@ void TestDataDevice::test_drag_internally()
         = surface_created_spy.last().first().value<Wrapland::Server::Surface*>();
 
     // now we have all we need to start a drag operation
-    QSignalSpy drag_started_spy(server_device, &Wrapland::Server::data_device::drag_started);
+    QSignalSpy drag_started_spy(m_server_seat, &Wrapland::Server::Seat::dragStarted);
     QVERIFY(drag_started_spy.isValid());
 
     // first we need to fake the pointer enter
@@ -380,9 +380,11 @@ void TestDataDevice::test_drag_internally()
     device->startDragInternally(pointerButtonSerial, surface.get(), iconSurface.get());
     QCOMPARE(drag_started_spy.wait(500), success);
     QCOMPARE(!drag_started_spy.isEmpty(), success);
-    QVERIFY(!server_device->drag_source());
-    QCOMPARE(server_device->origin(), success ? surfaceInterface : nullptr);
-    QCOMPARE(server_device->icon(), success ? iconSurfaceInterface : nullptr);
+    QVERIFY(!m_server_seat->drags().get_source().src);
+    QCOMPARE(m_server_seat->drags().get_source().surfaces.origin,
+             success ? surfaceInterface : nullptr);
+    QCOMPARE(m_server_seat->drags().get_source().surfaces.icon,
+             success ? iconSurfaceInterface : nullptr);
 }
 
 void TestDataDevice::test_set_selection()

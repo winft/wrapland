@@ -41,12 +41,6 @@ public:
     Seat* seat() const;
     Client* client() const;
 
-    data_source* drag_source() const;
-    Surface* origin() const;
-    Surface* icon() const;
-
-    quint32 drag_implicit_grab_serial() const;
-
     data_source* selection() const;
 
     void send_selection(data_source* source);
@@ -60,10 +54,7 @@ public:
     void leave();
     void drop();
 
-    void update_drag_target(Surface* surface, quint32 serial);
-
 Q_SIGNALS:
-    void drag_started();
     void selection_changed();
     void resourceDestroyed();
 

@@ -86,10 +86,6 @@ void data_device_manager::get_device(Client* client, uint32_t version, uint32_t 
         return;
     }
 
-    QObject::connect(device, &data_device::drag_started, seat, [seat, device] {
-        seat->d_ptr->drags.perform_drag(device);
-    });
-
     seat->d_ptr->data_devices.register_device(device);
     Q_EMIT device_created(device);
 }
