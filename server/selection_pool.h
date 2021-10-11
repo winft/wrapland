@@ -89,14 +89,11 @@ void selection_pool<Device, Source, signal>::set_selection(Source* source)
         return;
     }
 
+    auto old_source = focus.source;
+    focus.source = source;
+
     QObject::disconnect(focus.source_destroy_notifier);
     focus.source_destroy_notifier = QMetaObject::Connection();
-
-    if (focus.source) {
-        focus.source->cancel();
-    }
-
-    focus.source = source;
 
     if (source) {
         focus.source_destroy_notifier
@@ -109,6 +106,10 @@ void selection_pool<Device, Source, signal>::set_selection(Source* source)
 
     transmit(source);
     Q_EMIT(seat->*signal)(source);
+
+    if (old_source) {
+        old_source->cancel();
+    }
 }
 
 template<typename Device, typename Source, void (Seat::*signal)(Source*)>
