@@ -59,7 +59,6 @@ void drag_pool::end(uint32_t serial)
     source = {};
     target = {};
 
-    Q_EMIT seat->dragSurfaceChanged();
     Q_EMIT seat->dragEnded(trgt);
 }
 
@@ -116,7 +115,6 @@ void drag_pool::set_target(Surface* new_surface,
     } else {
         target.surface = nullptr;
     }
-    Q_EMIT seat->dragSurfaceChanged();
 }
 
 bool drag_pool::is_in_progress() const
@@ -184,7 +182,6 @@ void drag_pool::perform_drag(data_device* dataDevice)
     dataDevice->update_drag_target(proxied ? nullptr : originSurface,
                                    dataDevice->drag_implicit_grab_serial());
     Q_EMIT seat->dragStarted();
-    Q_EMIT seat->dragSurfaceChanged();
 }
 
 }
