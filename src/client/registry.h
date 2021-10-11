@@ -63,6 +63,7 @@ struct xdg_wm_base;
 struct zwp_input_method_manager_v2;
 struct zkwinft_output_management_v1;
 struct zkwinft_output_device_v1;
+struct zwlr_data_control_manager_v1;
 struct zwlr_layer_shell_v1;
 struct zwlr_output_manager_v1;
 struct zwp_relative_pointer_manager_v1;
@@ -85,6 +86,7 @@ namespace Client
 class AppMenuManager;
 class Compositor;
 class ConnectionThread;
+class data_control_manager_v1;
 class DataDeviceManager;
 class DpmsManager;
 class drm_lease_device_v1;
@@ -217,7 +219,8 @@ public:
         KeyboardShortcutsInhibitManagerV1,
         LinuxDmabufV1,
         PrimarySelectionDeviceManager,
-        DrmLeaseDeviceV1, ///< Refers to wp_drm_lease_device_v1, @since 0.523.0
+        DrmLeaseDeviceV1,     ///< Refers to wp_drm_lease_device_v1, @since 0.523.0
+        DataControlManagerV1, ///< Refers to zwlr_data_control_manager_v1 interface, @since 0.523.0
     };
     explicit Registry(QObject* parent = nullptr);
     virtual ~Registry();
@@ -537,6 +540,16 @@ public:
      * @since 5.5
      **/
     org_kde_kwin_contrast_manager* bindContrastManager(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the zwlr_data_control_manager_v1 with @p name and @p version.
+     * If the @p name does not exist or is not for the data control manager interface,
+     * @c null will be returned.
+     *
+     * Prefer using createDataControlManagerV1 instead.
+     * @see createDataControlManagerV1
+     * @since 0.523.0
+     **/
+    zwlr_data_control_manager_v1* bindDataControlManagerV1(uint32_t name, uint32_t version) const;
     /**
      * Binds the zwlr_layer_shell_v1 with @p name and @p version.
      * If the @p name does not exist or is not for the layer shell interface,
@@ -936,6 +949,23 @@ public:
      **/
     FullscreenShell*
     createFullscreenShell(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
+     * Creates a data_control_manager_v1 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the zwlr_data_control_manager_v1 interface,
+     * the returned data_control_manager_v1 will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the zwlr_data_control_manager_v1 interface to bind
+     * @param version The version or the zwlr_data_control_manager_v1 interface to use
+     * @param parent The parent for data_control_manager_v1
+     *
+     * @returns The created data_control_manager_v1.
+     * @since 0.523.0
+     **/
+    data_control_manager_v1*
+    createDataControlManagerV1(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a DataDeviceManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1606,6 +1636,13 @@ Q_SIGNALS:
      **/
     void fullscreenShellAnnounced(quint32 name, quint32 version);
     /**
+     * Emitted whenever a zwlr_data_control_manager_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.523.0
+     **/
+    void dataControlManagerV1Announced(quint32 name, quint32 version);
+    /**
      * Emitted whenever a wl_data_device_manager interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1913,6 +1950,12 @@ Q_SIGNALS:
      * @param name The name for the removed interface
      **/
     void fullscreenShellRemoved(quint32 name);
+    /**
+     * Emitted whenever a zwlr_data_control_manager_v1 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.523.0
+     **/
+    void dataControlManagerV1Removed(quint32 name);
     /**
      * Emitted whenever a wl_data_device_manager interface gets removed.
      * @param name The name for the removed interface

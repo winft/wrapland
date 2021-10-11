@@ -19,55 +19,41 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QObject>
-
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include <wayland-server.h>
-
-#include <cstdint>
+#include <QObject>
 #include <memory>
 
 namespace Wrapland::Server
 {
 class Client;
-class DataDevice;
-class DataSource;
+class data_device;
+class data_source;
 class Display;
 class Seat;
 
-class WRAPLANDSERVER_EXPORT DataDeviceManager : public QObject
+class WRAPLANDSERVER_EXPORT data_device_manager : public QObject
 {
     Q_OBJECT
 public:
-    using device_t = Wrapland::Server::DataDevice;
-    using source_t = Wrapland::Server::DataSource;
+    using device_t = Wrapland::Server::data_device;
+    using source_t = Wrapland::Server::data_source;
 
-    ~DataDeviceManager() override;
-
-    enum class DnDAction {
-        None = 0,
-        Copy = 1 << 0,
-        Move = 1 << 1,
-        Ask = 1 << 2,
-    };
-    Q_DECLARE_FLAGS(DnDActions, DnDAction)
+    ~data_device_manager() override;
 
     void create_source(Client* client, uint32_t version, uint32_t id);
     void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
 Q_SIGNALS:
-    void sourceCreated(Wrapland::Server::DataSource* source);
-    void deviceCreated(Wrapland::Server::DataDevice* device);
+    void source_created(Wrapland::Server::data_source* source);
+    void device_created(Wrapland::Server::data_device* device);
 
 private:
     friend class Display;
-    explicit DataDeviceManager(Display* display, QObject* parent = nullptr);
+    explicit data_device_manager(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
 
 }
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::DataDeviceManager::DnDActions)

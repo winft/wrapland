@@ -49,7 +49,7 @@ private:
     Wrapland::Server::Display* m_display = nullptr;
     Wrapland::Server::Compositor* m_serverCompositor = nullptr;
     Wrapland::Server::Seat* m_serverSeat = nullptr;
-    Wrapland::Server::DataDeviceManager* m_serverDdm = nullptr;
+    Wrapland::Server::data_device_manager* m_serverDdm = nullptr;
 
     struct Connection {
         Wrapland::Client::ConnectionThread* connection = nullptr;
@@ -214,10 +214,12 @@ void SelectionTest::testClearOnEnter()
 {
     // This test verifies that the selection is cleared prior to keyboard enter if there is no
     // current selection.
+    m_serverSeat->setHasKeyboard(true);
 
-    QSignalSpy selectionClearedClient1Spy(m_client1.dataDevice,
-                                          &Wrapland::Client::DataDevice::selectionCleared);
-    QVERIFY(selectionClearedClient1Spy.isValid());
+    QSignalSpy selection_offered_client1_spy(m_client1.dataDevice,
+                                             &Wrapland::Client::DataDevice::selectionOffered);
+    QVERIFY(selection_offered_client1_spy.isValid());
+
     QSignalSpy keyboardEnteredClient1Spy(m_client1.keyboard, &Wrapland::Client::Keyboard::entered);
     QVERIFY(keyboardEnteredClient1Spy.isValid());
 
@@ -230,10 +232,18 @@ void SelectionTest::testClearOnEnter()
     auto serverSurface1 = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface1);
 
+    auto keyboard = m_client1.seat->createKeyboard(m_client1.seat);
+    QSignalSpy enter1_spy(keyboard, &Wrapland::Client::Keyboard::entered);
+    QVERIFY(enter1_spy.isValid());
+    QSignalSpy left1_spy(keyboard, &Wrapland::Client::Keyboard::left);
+    QVERIFY(left1_spy.isValid());
+
     // Pass this surface keyboard focus.
     m_serverSeat->setFocusedKeyboardSurface(serverSurface1);
-    // should get a clear
-    QVERIFY(selectionClearedClient1Spy.wait());
+
+    // should get no clear but left event.
+    QVERIFY(enter1_spy.wait());
+    QVERIFY(selection_offered_client1_spy.empty());
 
     // Let's set a selection.
     std::unique_ptr<Wrapland::Client::DataSource> dataSource(m_client1.ddm->createSource());
@@ -241,13 +251,13 @@ void SelectionTest::testClearOnEnter()
     m_client1.dataDevice->setSelection(keyboardEnteredClient1Spy.first().first().value<quint32>(),
                                        dataSource.get());
 
+    QVERIFY(selection_offered_client1_spy.wait());
+    QVERIFY(m_client1.dataDevice->offeredSelection());
+
     // Now let's bring in client 2.
     QSignalSpy selectionOfferedClient2Spy(m_client2.dataDevice,
                                           &Wrapland::Client::DataDevice::selectionOffered);
     QVERIFY(selectionOfferedClient2Spy.isValid());
-    QSignalSpy selectionClearedClient2Spy(m_client2.dataDevice,
-                                          &Wrapland::Client::DataDevice::selectionCleared);
-    QVERIFY(selectionClearedClient2Spy.isValid());
     QSignalSpy keyboardEnteredClient2Spy(m_client2.keyboard, &Wrapland::Client::Keyboard::entered);
     QVERIFY(keyboardEnteredClient2Spy.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s2(m_client2.compositor->createSurface());
@@ -258,23 +268,29 @@ void SelectionTest::testClearOnEnter()
     // Entering that surface should give a selection offer.
     m_serverSeat->setFocusedKeyboardSurface(serverSurface2);
     QVERIFY(selectionOfferedClient2Spy.wait());
-    QVERIFY(selectionClearedClient2Spy.isEmpty());
 
     // Set a data source but without offers.
     std::unique_ptr<Wrapland::Client::DataSource> dataSource2(m_client2.ddm->createSource());
     m_client2.dataDevice->setSelection(keyboardEnteredClient2Spy.first().first().value<quint32>(),
                                        dataSource2.get());
     QVERIFY(selectionOfferedClient2Spy.wait());
+    QVERIFY(m_client2.dataDevice->offeredSelection());
+
     // and clear
-    m_client2.dataDevice->clearSelection(
-        keyboardEnteredClient2Spy.first().first().value<quint32>());
-    QVERIFY(selectionClearedClient2Spy.wait());
+    m_client2.dataDevice->setSelection(keyboardEnteredClient2Spy.first().first().value<quint32>(),
+                                       nullptr);
+    QVERIFY(selectionOfferedClient2Spy.wait());
+    QVERIFY(!m_client2.dataDevice->offeredSelection());
 
     // Now pass focus to first surface.
     m_serverSeat->setFocusedKeyboardSurface(serverSurface1);
+    selection_offered_client1_spy.clear();
+    selectionOfferedClient2Spy.clear();
 
-    // We should get a clear.
-    QVERIFY(selectionClearedClient1Spy.wait());
+    // We should only get an enter event.
+    QVERIFY(enter1_spy.wait());
+    QVERIFY(selection_offered_client1_spy.empty());
+    QVERIFY(selectionOfferedClient2Spy.empty());
 }
 
 QTEST_GUILESS_MAIN(SelectionTest)

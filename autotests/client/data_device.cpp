@@ -35,6 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
+#include "../../server/drag_pool.h"
 #include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
@@ -62,7 +63,7 @@ private Q_SLOTS:
 
 private:
     Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::DataDeviceManager* m_server_device_manager = nullptr;
+    Wrapland::Server::data_device_manager* m_server_device_manager = nullptr;
     Wrapland::Server::Compositor* m_server_compositor = nullptr;
     Wrapland::Server::Seat* m_server_seat = nullptr;
 
@@ -78,8 +79,8 @@ static const QString s_socketName = QStringLiteral("wrapland-test-wayland-datade
 
 void TestDataDevice::init()
 {
-    qRegisterMetaType<Wrapland::Server::DataDevice*>();
-    qRegisterMetaType<Wrapland::Server::DataSource*>();
+    qRegisterMetaType<Wrapland::Server::data_device*>();
+    qRegisterMetaType<Wrapland::Server::data_source*>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::Display(this);
@@ -179,7 +180,7 @@ void TestDataDevice::cleanup()
 void TestDataDevice::test_create()
 {
     QSignalSpy device_created_spy(m_server_device_manager,
-                                  SIGNAL(deviceCreated(Wrapland::Server::DataDevice*)));
+                                  &Wrapland::Server::data_device_manager::device_created);
     QVERIFY(device_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataDevice> device(m_device_manager->getDevice(m_seat));
@@ -188,17 +189,14 @@ void TestDataDevice::test_create()
     QVERIFY(device_created_spy.wait());
     QCOMPARE(device_created_spy.count(), 1);
 
-    auto server_device = device_created_spy.first().first().value<Wrapland::Server::DataDevice*>();
+    auto server_device = device_created_spy.first().first().value<Wrapland::Server::data_device*>();
     QVERIFY(server_device);
     QCOMPARE(server_device->seat(), m_server_seat);
-    QVERIFY(!server_device->dragSource());
-    QVERIFY(!server_device->origin());
-    QVERIFY(!server_device->icon());
     QVERIFY(!server_device->selection());
 
     QVERIFY(!m_server_seat->selection());
-    m_server_seat->setSelection(server_device);
-    QCOMPARE(m_server_seat->selection(), server_device);
+    m_server_seat->setSelection(server_device->selection());
+    QCOMPARE(m_server_seat->selection(), server_device->selection());
 
     // and destroy
     QSignalSpy destroyedSpy(server_device, &QObject::destroyed);
@@ -225,7 +223,7 @@ void TestDataDevice::test_drag()
     std::unique_ptr<Wrapland::Client::Pointer> pointer(m_seat->createPointer());
 
     QSignalSpy device_created_spy(m_server_device_manager,
-                                  SIGNAL(deviceCreated(Wrapland::Server::DataDevice*)));
+                                  &Wrapland::Server::data_device_manager::device_created);
     QVERIFY(device_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataDevice> device(m_device_manager->getDevice(m_seat));
@@ -233,11 +231,11 @@ void TestDataDevice::test_drag()
 
     QVERIFY(device_created_spy.wait());
     QCOMPARE(device_created_spy.count(), 1);
-    auto server_device = device_created_spy.first().first().value<Wrapland::Server::DataDevice*>();
+    auto server_device = device_created_spy.first().first().value<Wrapland::Server::data_device*>();
     QVERIFY(server_device);
 
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::sourceCreated);
+                                  &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(device_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
@@ -246,7 +244,7 @@ void TestDataDevice::test_drag()
     QVERIFY(source_created_spy.wait());
     QCOMPARE(source_created_spy.count(), 1);
     auto sourceInterface
-        = source_created_spy.first().first().value<Wrapland::Server::DataSource*>();
+        = source_created_spy.first().first().value<Wrapland::Server::data_source*>();
     QVERIFY(sourceInterface);
 
     QSignalSpy surface_created_spy(m_server_compositor,
@@ -261,7 +259,7 @@ void TestDataDevice::test_drag()
     auto surfaceInterface = surface_created_spy.first().first().value<Wrapland::Server::Surface*>();
 
     // now we have all we need to start a drag operation
-    QSignalSpy drag_started_spy(server_device, SIGNAL(dragStarted()));
+    QSignalSpy drag_started_spy(m_server_seat, &Wrapland::Server::Seat::dragStarted);
     QVERIFY(drag_started_spy.isValid());
     QSignalSpy drag_entered_spy(device.get(), &Wrapland::Client::DataDevice::dragEntered);
     QVERIFY(drag_entered_spy.isValid());
@@ -287,13 +285,15 @@ void TestDataDevice::test_drag()
         = success ? m_server_seat->pointers().button_serial(Qt::LeftButton) : 0;
 
     QCoreApplication::processEvents();
+
     // finally start the drag
     device->startDrag(pointerButtonSerial, source.get(), surface.get());
     QCOMPARE(drag_started_spy.wait(500), success);
     QCOMPARE(!drag_started_spy.isEmpty(), success);
-    QCOMPARE(server_device->dragSource(), success ? sourceInterface : nullptr);
-    QCOMPARE(server_device->origin(), success ? surfaceInterface : nullptr);
-    QVERIFY(!server_device->icon());
+    QCOMPARE(m_server_seat->drags().get_source().src, success ? sourceInterface : nullptr);
+    QCOMPARE(m_server_seat->drags().get_source().surfaces.origin,
+             success ? surfaceInterface : nullptr);
+    QVERIFY(!m_server_seat->drags().get_source().surfaces.icon);
 
     if (success) {
         // Wait for the drag-enter on itself, otherwise we leak the data offer.
@@ -321,7 +321,7 @@ void TestDataDevice::test_drag_internally()
     std::unique_ptr<Wrapland::Client::Pointer> pointer(m_seat->createPointer());
 
     QSignalSpy device_created_spy(m_server_device_manager,
-                                  SIGNAL(deviceCreated(Wrapland::Server::DataDevice*)));
+                                  &Wrapland::Server::data_device_manager::device_created);
     QVERIFY(device_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataDevice> device(m_device_manager->getDevice(m_seat));
@@ -329,7 +329,7 @@ void TestDataDevice::test_drag_internally()
 
     QVERIFY(device_created_spy.wait());
     QCOMPARE(device_created_spy.count(), 1);
-    auto server_device = device_created_spy.first().first().value<Wrapland::Server::DataDevice*>();
+    auto server_device = device_created_spy.first().first().value<Wrapland::Server::data_device*>();
     QVERIFY(server_device);
 
     QSignalSpy surface_created_spy(m_server_compositor,
@@ -352,7 +352,7 @@ void TestDataDevice::test_drag_internally()
         = surface_created_spy.last().first().value<Wrapland::Server::Surface*>();
 
     // now we have all we need to start a drag operation
-    QSignalSpy drag_started_spy(server_device, &Wrapland::Server::DataDevice::dragStarted);
+    QSignalSpy drag_started_spy(m_server_seat, &Wrapland::Server::Seat::dragStarted);
     QVERIFY(drag_started_spy.isValid());
 
     // first we need to fake the pointer enter
@@ -380,9 +380,11 @@ void TestDataDevice::test_drag_internally()
     device->startDragInternally(pointerButtonSerial, surface.get(), iconSurface.get());
     QCOMPARE(drag_started_spy.wait(500), success);
     QCOMPARE(!drag_started_spy.isEmpty(), success);
-    QVERIFY(!server_device->dragSource());
-    QCOMPARE(server_device->origin(), success ? surfaceInterface : nullptr);
-    QCOMPARE(server_device->icon(), success ? iconSurfaceInterface : nullptr);
+    QVERIFY(!m_server_seat->drags().get_source().src);
+    QCOMPARE(m_server_seat->drags().get_source().surfaces.origin,
+             success ? surfaceInterface : nullptr);
+    QCOMPARE(m_server_seat->drags().get_source().surfaces.icon,
+             success ? iconSurfaceInterface : nullptr);
 }
 
 void TestDataDevice::test_set_selection()
@@ -390,7 +392,7 @@ void TestDataDevice::test_set_selection()
     std::unique_ptr<Wrapland::Client::Pointer> pointer(m_seat->createPointer());
 
     QSignalSpy device_created_spy(m_server_device_manager,
-                                  SIGNAL(deviceCreated(Wrapland::Server::DataDevice*)));
+                                  &Wrapland::Server::data_device_manager::device_created);
     QVERIFY(device_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataDevice> device(m_device_manager->getDevice(m_seat));
@@ -398,11 +400,11 @@ void TestDataDevice::test_set_selection()
 
     QVERIFY(device_created_spy.wait());
     QCOMPARE(device_created_spy.count(), 1);
-    auto server_device = device_created_spy.first().first().value<Wrapland::Server::DataDevice*>();
+    auto server_device = device_created_spy.first().first().value<Wrapland::Server::data_device*>();
     QVERIFY(server_device);
 
     QSignalSpy source_created_spy(m_server_device_manager,
-                                  SIGNAL(sourceCreated(Wrapland::Server::DataSource*)));
+                                  &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(device_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
@@ -411,29 +413,24 @@ void TestDataDevice::test_set_selection()
 
     QVERIFY(source_created_spy.wait());
     QCOMPARE(source_created_spy.count(), 1);
-    auto serverSource = source_created_spy.first().first().value<Wrapland::Server::DataSource*>();
+    auto serverSource = source_created_spy.first().first().value<Wrapland::Server::data_source*>();
     QVERIFY(serverSource);
 
     // everything setup, now we can test setting the selection
     QSignalSpy selectionChangedSpy(server_device,
-                                   SIGNAL(selectionChanged(Wrapland::Server::DataSource*)));
+                                   &Wrapland::Server::data_device::selection_changed);
     QVERIFY(selectionChangedSpy.isValid());
-    QSignalSpy selectionClearedSpy(server_device, SIGNAL(selectionCleared()));
-    QVERIFY(selectionClearedSpy.isValid());
 
     QVERIFY(!server_device->selection());
     device->setSelection(1, source.get());
     QVERIFY(selectionChangedSpy.wait());
     QCOMPARE(selectionChangedSpy.count(), 1);
-    QCOMPARE(selectionClearedSpy.count(), 0);
-    QCOMPARE(selectionChangedSpy.first().first().value<Wrapland::Server::DataSource*>(),
-             serverSource);
     QCOMPARE(server_device->selection(), serverSource);
 
     // Send selection to datadevice.
     QSignalSpy selection_offered_spy(device.get(), &Wrapland::Client::DataDevice::selectionOffered);
     QVERIFY(selection_offered_spy.isValid());
-    server_device->sendSelection(server_device);
+    server_device->send_selection(server_device->selection());
     QVERIFY(selection_offered_spy.wait());
     QCOMPARE(selection_offered_spy.count(), 1);
 
@@ -454,10 +451,9 @@ void TestDataDevice::test_set_selection()
     QCOMPARE(dataOffer->offeredMimeTypes().last().name(), QStringLiteral("text/html"));
 
     // now clear the selection
-    device->clearSelection(1);
-    QVERIFY(selectionClearedSpy.wait());
-    QCOMPARE(selectionChangedSpy.count(), 1);
-    QCOMPARE(selectionClearedSpy.count(), 1);
+    device->setSelection(1, nullptr);
+    QVERIFY(selectionChangedSpy.wait());
+    QCOMPARE(selectionChangedSpy.count(), 2);
     QVERIFY(!server_device->selection());
 
     // set another selection
@@ -465,7 +461,7 @@ void TestDataDevice::test_set_selection()
     QVERIFY(selectionChangedSpy.wait());
 
     // Now unbind the data device.
-    QSignalSpy unboundSpy(server_device, &Wrapland::Server::DataDevice::resourceDestroyed);
+    QSignalSpy unboundSpy(server_device, &Wrapland::Server::data_device::resourceDestroyed);
     QVERIFY(unboundSpy.isValid());
     device.reset();
     QVERIFY(unboundSpy.wait());
@@ -473,7 +469,7 @@ void TestDataDevice::test_set_selection()
     // TODO: This should be impossible to happen in the first place, correct?
 #if 0
     // send a selection to the unbound data device
-    server_device->sendSelection(server_device);
+    server_device->send_selection(server_device);
 #endif
 }
 
@@ -489,12 +485,12 @@ void TestDataDevice::test_send_selection_on_seat()
 
     // Now create DataDevice, Keyboard and a Surface.
     QSignalSpy device_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::deviceCreated);
+                                  &Wrapland::Server::data_device_manager::device_created);
     QVERIFY(device_created_spy.isValid());
     std::unique_ptr<Wrapland::Client::DataDevice> device(m_device_manager->getDevice(m_seat));
     QVERIFY(device->isValid());
     QVERIFY(device_created_spy.wait());
-    auto server_device = device_created_spy.first().first().value<Wrapland::Server::DataDevice*>();
+    auto server_device = device_created_spy.first().first().value<Wrapland::Server::data_device*>();
     QVERIFY(server_device);
     std::unique_ptr<Wrapland::Client::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(keyboard->isValid());
@@ -532,7 +528,7 @@ void TestDataDevice::test_send_selection_on_seat()
     // Now let's try to destroy the data device and set a focused keyboard just while the data
     // device is being destroyed.
     m_server_seat->setFocusedKeyboardSurface(nullptr);
-    QSignalSpy unboundSpy(server_device, &Wrapland::Server::DataDevice::resourceDestroyed);
+    QSignalSpy unboundSpy(server_device, &Wrapland::Server::data_device::resourceDestroyed);
     QVERIFY(unboundSpy.isValid());
     device.reset();
     QVERIFY(unboundSpy.wait());
@@ -551,13 +547,13 @@ void TestDataDevice::test_replace_source()
 
     // Now create DataDevice, Keyboard and a Surface.
     QSignalSpy device_created_spy(m_server_device_manager,
-                                  &Wrapland::Server::DataDeviceManager::deviceCreated);
+                                  &Wrapland::Server::data_device_manager::device_created);
     QVERIFY(device_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataDevice> device(m_device_manager->getDevice(m_seat));
     QVERIFY(device->isValid());
     QVERIFY(device_created_spy.wait());
-    auto server_device = device_created_spy.first().first().value<Wrapland::Server::DataDevice*>();
+    auto server_device = device_created_spy.first().first().value<Wrapland::Server::data_device*>();
     QVERIFY(server_device);
     std::unique_ptr<Wrapland::Client::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(keyboard->isValid());

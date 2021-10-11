@@ -73,7 +73,7 @@ void Touch::frame()
 void Touch::move(qint32 id, const QPointF& localPos)
 {
     if (d_ptr->seat->drags().is_touch_drag()) {
-        // handled by DataDevice
+        // Handled by data_device.
         return;
     }
     d_ptr->send<wl_touch_send_motion>(d_ptr->seat->timestamp(),

@@ -31,7 +31,7 @@ void selection_callback(void* data, WlDevice* device, WlOffer* id)
 
     if (!id) {
         priv->selectionOffer.reset();
-        Q_EMIT priv->q->selectionCleared();
+        Q_EMIT priv->q->selectionOffered(nullptr);
         return;
     }
     Q_ASSERT(*priv->lastOffer == id);

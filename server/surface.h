@@ -139,9 +139,6 @@ public:
     uint32_t id() const;
     Client* client() const;
 
-    void setDataProxy(Surface* surface);
-    Surface* dataProxy() const;
-
     uint32_t lockPresentation(Output* output);
     void presentationFeedback(uint32_t presentationId,
                               uint32_t tvSecHi,
@@ -167,7 +164,7 @@ private:
     friend class BlurManager;
     friend class ContrastManager;
     friend class Compositor;
-    friend class DataDevice;
+    friend class data_device;
     friend class Keyboard;
     friend class IdleInhibitManagerV1;
     friend class input_method_v2;

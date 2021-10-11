@@ -975,16 +975,6 @@ bool Surface::inhibitsIdle() const
     return !d_ptr->idleInhibitors.isEmpty();
 }
 
-void Surface::setDataProxy(Surface* surface)
-{
-    d_ptr->dataProxy = surface;
-}
-
-Surface* Surface::dataProxy() const
-{
-    return d_ptr->dataProxy;
-}
-
 Client* Surface::client() const
 {
     return d_ptr->client()->handle();

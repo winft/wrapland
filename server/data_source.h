@@ -1,5 +1,5 @@
 /********************************************************************
-Copyright © 2020 Roman Gilg <subdiff@gmail.com>
+Copyright © 2020, 2021 Roman Gilg <subdiff@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -18,54 +18,77 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
-#include <QObject>
+
+#include "drag_pool.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include "data_device_manager.h"
+#include <QObject>
+#include <memory>
 
 namespace Wrapland::Server
 {
 class Client;
 
-class WRAPLANDSERVER_EXPORT DataSource : public QObject
+class WRAPLANDSERVER_EXPORT data_source : public QObject
 {
     Q_OBJECT
 public:
-    void accept(std::string const& mimeType);
-    void requestData(std::string const& mimeType, qint32 fd);
-    void cancel();
+    void accept(std::string const& mimeType) const;
+    void request_data(std::string const& mimeType, qint32 fd) const;
+    void cancel() const;
 
-    std::vector<std::string> mimeTypes() const;
+    std::vector<std::string> mime_types() const;
+    dnd_actions supported_dnd_actions() const;
 
-    DataDeviceManager::DnDActions supportedDragAndDropActions() const;
-
-    void dropPerformed();
-    void dndFinished();
-    void dndAction(DataDeviceManager::DnDAction action);
+    void send_dnd_drop_performed() const;
+    void send_dnd_finished() const;
+    void send_action(dnd_action action) const;
 
     Client* client() const;
 
 Q_SIGNALS:
-    void mimeTypeOffered(std::string);
-    void supportedDragAndDropActionsChanged();
+    void mime_type_offered(std::string);
+    void supported_dnd_actions_changed();
     void resourceDestroyed();
 
 private:
-    friend class DataDeviceManager;
-    friend class DataDevice;
-    explicit DataSource(Client* client, uint32_t version, uint32_t id);
+    friend class data_control_device_v1;
+    friend class data_control_source_v1_res;
+    friend class data_source_ext;
+    friend class data_source_res;
+    data_source();
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
+};
 
-    template<typename Resource>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    add_offered_mime_type(wl_client* wlClient, wl_resource* wlResource, char const* mimeType);
+class WRAPLANDSERVER_EXPORT data_source_ext : public QObject
+{
+    Q_OBJECT
+public:
+    data_source_ext();
+    ~data_source_ext() override;
+
+    void offer(std::string const& mime_type);
+    void set_actions(dnd_actions actions) const;
+
+    virtual void accept(std::string const& mime_type) = 0;
+    virtual void request_data(std::string const& mime_type, qint32 fd) = 0;
+    virtual void cancel() = 0;
+
+    virtual void send_dnd_drop_performed() = 0;
+    virtual void send_dnd_finished() = 0;
+    virtual void send_action(dnd_action action) = 0;
+
+    data_source* src() const;
+
+private:
+    class Private;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::DataSource*)
+Q_DECLARE_METATYPE(Wrapland::Server::data_source*)
+Q_DECLARE_METATYPE(Wrapland::Server::data_source_ext*)

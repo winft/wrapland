@@ -154,8 +154,7 @@ public:
     void startDrag(quint32 serial, source_t* source, Surface* origin, Surface* icon = nullptr);
     void startDragInternally(quint32 serial, Surface* origin, Surface* icon = nullptr);
 
-    void setSelection(quint32 serial, source_t* source = nullptr);
-    void clearSelection(quint32 serial);
+    void setSelection(quint32 serial, source_t* source);
 
     PrimarySelectionOffer* offeredSelection() const;
 
@@ -164,7 +163,6 @@ public:
 
 Q_SIGNALS:
     void selectionOffered(Wrapland::Client::PrimarySelectionOffer*);
-    void selectionCleared();
 
 private:
     class Private;

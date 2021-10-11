@@ -22,37 +22,33 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "data_device.h"
 #include "data_source.h"
-#include "selection_offer_p.h"
-
-#include <QStringList>
+#include "selection_p.h"
 
 #include <wayland-server.h>
-
-#include <unistd.h>
 
 namespace Wrapland::Server
 {
 
-const struct wl_data_offer_interface DataOffer::Private::s_interface = {
+const struct wl_data_offer_interface data_offer::Private::s_interface = {
     acceptCallback,
-    receive_selection_offer<Wayland::Resource<DataOffer>>,
+    receive_callback,
     destroyCallback,
     finishCallback,
     setActionsCallback,
 };
 
-DataOffer::Private::Private(Client* client, uint32_t version, DataSource* source, DataOffer* q)
-    : Wayland::Resource<DataOffer>(client, version, 0, &wl_data_offer_interface, &s_interface, q)
+data_offer::Private::Private(Client* client, uint32_t version, data_source* source, data_offer* q)
+    : Wayland::Resource<data_offer>(client, version, 0, &wl_data_offer_interface, &s_interface, q)
     , source(source)
     , q_ptr{q}
 {
     // TODO(unknown author): connect to new selections.
 }
 
-void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
-                                        wl_resource* wlResource,
-                                        [[maybe_unused]] uint32_t serial,
-                                        char const* mimeType)
+void data_offer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
+                                         wl_resource* wlResource,
+                                         [[maybe_unused]] uint32_t serial,
+                                         char const* mimeType)
 {
     // TODO(unknown author): verify serial?
     auto priv = handle(wlResource)->d_ptr;
@@ -62,31 +58,40 @@ void DataOffer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
     priv->source->accept(mimeType ? mimeType : std::string());
 }
 
-void DataOffer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
-                                        wl_resource* wlResource)
+void data_offer::Private::receive_callback(wl_client* /*wlClient*/,
+                                           wl_resource* wlResource,
+                                           char const* mimeType,
+                                           int32_t fd)
+{
+    auto handle = Resource::handle(wlResource);
+    receive_mime_type_offer(handle->d_ptr->source, mimeType, fd);
+}
+
+void data_offer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
+                                         wl_resource* wlResource)
 {
     auto priv = handle(wlResource)->d_ptr;
-    priv->source->dndFinished();
+    priv->source->send_dnd_finished();
     // TODO(unknown author): It is a client error to perform other requests than
     //                       wl_data_offer.destroy after this one.
 }
 
-void DataOffer::Private::setActionsCallback(wl_client* wlClient,
-                                            wl_resource* wlResource,
-                                            uint32_t dnd_actions,
-                                            uint32_t preferred_action)
+void data_offer::Private::setActionsCallback(wl_client* wlClient,
+                                             wl_resource* wlResource,
+                                             uint32_t dnd_actions,
+                                             uint32_t preferred_action)
 {
     // TODO(unknown author): check it's drag and drop, otherwise send error
     Q_UNUSED(wlClient)
-    DataDeviceManager::DnDActions supportedActions;
+    Server::dnd_actions supportedActions;
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
-        supportedActions |= DataDeviceManager::DnDAction::Copy;
+        supportedActions |= dnd_action::copy;
     }
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE) {
-        supportedActions |= DataDeviceManager::DnDAction::Move;
+        supportedActions |= dnd_action::move;
     }
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK) {
-        supportedActions |= DataDeviceManager::DnDAction::Ask;
+        supportedActions |= dnd_action::ask;
     }
     // verify that the no other actions are sent
     if (dnd_actions
@@ -105,77 +110,80 @@ void DataOffer::Private::setActionsCallback(wl_client* wlClient,
         return;
     }
 
-    DataDeviceManager::DnDAction preferredAction = DataDeviceManager::DnDAction::None;
+    dnd_action preferredAction = dnd_action::none;
     if (preferred_action == WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
-        preferredAction = DataDeviceManager::DnDAction::Copy;
+        preferredAction = dnd_action::copy;
     } else if (preferred_action == WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE) {
-        preferredAction = DataDeviceManager::DnDAction::Move;
+        preferredAction = dnd_action::move;
     } else if (preferred_action == WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK) {
-        preferredAction = DataDeviceManager::DnDAction::Ask;
+        preferredAction = dnd_action::ask;
     }
 
     auto priv = handle(wlResource)->d_ptr;
     priv->supportedDnDActions = supportedActions;
     priv->preferredDnDAction = preferredAction;
-    Q_EMIT priv->q_ptr->dragAndDropActionsChanged();
+    Q_EMIT priv->q_ptr->dnd_actions_changed();
 }
 
-void DataOffer::Private::sendSourceActions()
+void data_offer::Private::send_source_actions()
 {
-    if (!source) {
-        return;
-    }
+    assert(source);
 
     uint32_t wlActions = WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
-    auto const actions = source->supportedDragAndDropActions();
-    if (actions.testFlag(DataDeviceManager::DnDAction::Copy)) {
+    auto const actions = source->supported_dnd_actions();
+    if (actions.testFlag(dnd_action::copy)) {
         wlActions |= WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY;
     }
-    if (actions.testFlag(DataDeviceManager::DnDAction::Move)) {
+    if (actions.testFlag(dnd_action::move)) {
         wlActions |= WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE;
     }
-    if (actions.testFlag(DataDeviceManager::DnDAction::Ask)) {
+    if (actions.testFlag(dnd_action::ask)) {
         wlActions |= WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK;
     }
     send<wl_data_offer_send_source_actions, WL_DATA_OFFER_SOURCE_ACTIONS_SINCE_VERSION>(wlActions);
 }
 
-DataOffer::DataOffer(Client* client, uint32_t version, DataSource* source)
+data_offer::data_offer(Client* client, uint32_t version, data_source* source)
     : d_ptr(new Private(client, version, source, this))
 {
     assert(source);
-    connect(source, &DataSource::mimeTypeOffered, this, [this](std::string const& mimeType) {
+    connect(source, &data_source::mime_type_offered, this, [this](std::string const& mimeType) {
         d_ptr->send<wl_data_offer_send_offer>(mimeType.c_str());
     });
     QObject::connect(
-        source, &DataSource::resourceDestroyed, this, [this] { d_ptr->source = nullptr; });
+        source, &data_source::resourceDestroyed, this, [this] { d_ptr->source = nullptr; });
 }
 
-void DataOffer::sendAllOffers()
+void data_offer::send_all_offers()
 {
-    for (auto const& mimeType : d_ptr->source->mimeTypes()) {
+    for (auto const& mimeType : d_ptr->source->mime_types()) {
         d_ptr->send<wl_data_offer_send_offer>(mimeType.c_str());
     }
 }
 
-DataDeviceManager::DnDActions DataOffer::supportedDragAndDropActions() const
+dnd_actions data_offer::supported_dnd_actions() const
 {
     return d_ptr->supportedDnDActions;
 }
 
-DataDeviceManager::DnDAction DataOffer::preferredDragAndDropAction() const
+dnd_action data_offer::preferred_dnd_action() const
 {
     return d_ptr->preferredDnDAction;
 }
 
-void DataOffer::dndAction(DataDeviceManager::DnDAction action)
+void data_offer::send_source_actions()
+{
+    d_ptr->send_source_actions();
+}
+
+void data_offer::send_action(dnd_action action)
 {
     uint32_t wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
-    if (action == DataDeviceManager::DnDAction::Copy) {
+    if (action == dnd_action::copy) {
         wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY;
-    } else if (action == DataDeviceManager::DnDAction::Move) {
+    } else if (action == dnd_action::move) {
         wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE;
-    } else if (action == DataDeviceManager::DnDAction::Ask) {
+    } else if (action == dnd_action::ask) {
         wlAction = WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK;
     }
     d_ptr->send<wl_data_offer_send_action, WL_DATA_OFFER_ACTION_SINCE_VERSION>(wlAction);
