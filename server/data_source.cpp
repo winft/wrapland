@@ -36,6 +36,16 @@ data_source::Private::Private(data_source* q_ptr)
 {
 }
 
+void data_source::Private::set_actions(dnd_actions actions)
+{
+    if (supportedDnDActions == actions) {
+        return;
+    }
+
+    supportedDnDActions = actions;
+    Q_EMIT q_ptr->supported_dnd_actions_changed();
+}
+
 data_source::data_source()
     : d_ptr(new data_source::Private(this))
 {
@@ -92,11 +102,7 @@ void data_source_res_impl::setActionsCallback([[maybe_unused]] wl_client* wlClie
         return;
     }
 
-    auto src_priv = handle(wlResource)->src_priv();
-    if (src_priv->supportedDnDActions != supportedActions) {
-        src_priv->supportedDnDActions = supportedActions;
-        Q_EMIT src_priv->q_ptr->supported_dnd_actions_changed();
-    }
+    handle(wlResource)->src_priv()->set_actions(supportedActions);
 }
 
 data_source_res::data_source_res(Client* client, uint32_t version, uint32_t id)

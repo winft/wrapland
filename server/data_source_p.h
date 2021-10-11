@@ -35,6 +35,7 @@ class data_source::Private
 {
 public:
     explicit Private(data_source* q_ptr);
+    void set_actions(dnd_actions actions);
 
     std::vector<std::string> mimeTypes;
     dnd_actions supportedDnDActions{dnd_action::none};
