@@ -296,7 +296,7 @@ void data_device::Private::update_drag_target_offer(Surface* surface, uint32_t s
         return;
     }
 
-    offer->d_ptr->sendSourceActions();
+    offer->send_source_actions();
 
     auto matchOffers = [source, offer] {
         dnd_action action{dnd_action::none};

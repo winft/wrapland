@@ -40,7 +40,7 @@ public:
     dnd_actions supportedDnDActions = dnd_action::copy | dnd_action::move;
     dnd_action preferredDnDAction = dnd_action::copy;
 
-    void sendSourceActions();
+    void send_source_actions();
 
 private:
     static void acceptCallback(wl_client* wlClient,

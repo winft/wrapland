@@ -125,11 +125,9 @@ void data_offer::Private::setActionsCallback(wl_client* wlClient,
     Q_EMIT priv->q_ptr->dnd_actions_changed();
 }
 
-void data_offer::Private::sendSourceActions()
+void data_offer::Private::send_source_actions()
 {
-    if (!source) {
-        return;
-    }
+    assert(source);
 
     uint32_t wlActions = WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
     auto const actions = source->supported_dnd_actions();
@@ -171,6 +169,11 @@ dnd_actions data_offer::supported_dnd_actions() const
 dnd_action data_offer::preferred_dnd_action() const
 {
     return d_ptr->preferredDnDAction;
+}
+
+void data_offer::send_source_actions()
+{
+    d_ptr->send_source_actions();
 }
 
 void data_offer::send_action(dnd_action action)

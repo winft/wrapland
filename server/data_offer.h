@@ -40,6 +40,8 @@ public:
 
     dnd_actions supported_dnd_actions() const;
     dnd_action preferred_dnd_action() const;
+
+    void send_source_actions();
     void send_action(dnd_action action);
 
 Q_SIGNALS:
