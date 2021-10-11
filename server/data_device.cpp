@@ -221,7 +221,7 @@ void data_device::Private::cancel_drag_target()
         return;
     }
     if (resource() && drag.surface->resource()) {
-        send<wl_data_device_send_leave>();
+        q_ptr->leave();
     }
     if (drag.posConnection) {
         disconnect(drag.posConnection);
@@ -256,8 +256,7 @@ void data_device::Private::update_drag_pointer_motion()
     drag.posConnection = connect(seat, &Seat::pointerPosChanged, handle(), [this] {
         auto const pos
             = seat->drags().get_target().transformation.map(seat->pointers().get_position());
-        send<wl_data_device_send_motion>(
-            seat->timestamp(), wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
+        q_ptr->motion(seat->timestamp(), pos);
         client()->flush();
     });
 }
@@ -274,8 +273,7 @@ void data_device::Private::update_drag_touch_motion()
                 return;
             }
             auto const pos = seat->drags().get_target().transformation.map(globalPosition);
-            send<wl_data_device_send_motion>(
-                seat->timestamp(), wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
+            q_ptr->motion(seat->timestamp(), pos);
             client()->flush();
         });
 }
@@ -382,6 +380,32 @@ void data_device::send_clear_selection()
     d_ptr->send<wl_data_device_send_selection>(nullptr);
 }
 
+data_offer* data_device::create_offer(data_source* source)
+{
+    return d_ptr->createDataOffer(source);
+}
+
+void data_device::enter(uint32_t serial, Surface* surface, QPointF const& pos, data_offer* offer)
+{
+    assert(surface);
+    d_ptr->send<wl_data_device_send_enter>(serial,
+                                           surface->d_ptr->resource(),
+                                           wl_fixed_from_double(pos.x()),
+                                           wl_fixed_from_double(pos.y()),
+                                           offer ? offer->d_ptr->resource() : nullptr);
+}
+
+void data_device::motion(uint32_t time, QPointF const& pos)
+{
+    d_ptr->send<wl_data_device_send_motion>(
+        time, wl_fixed_from_double(pos.x()), wl_fixed_from_double(pos.y()));
+}
+
+void data_device::leave()
+{
+    d_ptr->send<wl_data_device_send_leave>();
+}
+
 void data_device::drop()
 {
     d_ptr->send<wl_data_device_send_drop>();
@@ -419,7 +443,7 @@ void data_device::update_drag_target(Surface* surface, quint32 serial)
     d_ptr->drag.surface = surface;
     d_ptr->drag.destroyConnection = connect(surface, &Surface::resourceDestroyed, this, [this] {
         if (d_ptr->resource()) {
-            d_ptr->send<wl_data_device_send_leave>();
+            leave();
         }
         if (d_ptr->drag.posConnection) {
             disconnect(d_ptr->drag.posConnection);

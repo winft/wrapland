@@ -27,6 +27,7 @@ namespace Wrapland::Server
 {
 class Client;
 class data_device_manager;
+class data_offer;
 class data_source;
 class Seat;
 class Surface;
@@ -51,6 +52,12 @@ public:
     void send_selection(data_source* source);
     void send_clear_selection();
 
+    data_offer* create_offer(data_source* source);
+
+    void enter(uint32_t serial, Surface* surface, QPointF const& pos, data_offer* offer);
+    void motion(uint32_t time, QPointF const& pos);
+
+    void leave();
     void drop();
 
     void update_drag_target(Surface* surface, quint32 serial);
