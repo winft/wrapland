@@ -19,6 +19,14 @@ class Seat;
 class Surface;
 class Touch;
 
+enum class dnd_action {
+    none = 0,
+    copy = 1 << 0,
+    move = 1 << 1,
+    ask = 1 << 2,
+};
+Q_DECLARE_FLAGS(dnd_actions, dnd_action)
+
 enum class drag_mode {
     none,
     pointer,
@@ -77,3 +85,5 @@ private:
 };
 
 }
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::dnd_actions)

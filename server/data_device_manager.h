@@ -32,14 +32,6 @@ class data_source;
 class Display;
 class Seat;
 
-enum class dnd_action {
-    none = 0,
-    copy = 1 << 0,
-    move = 1 << 1,
-    ask = 1 << 2,
-};
-Q_DECLARE_FLAGS(dnd_actions, dnd_action)
-
 class WRAPLANDSERVER_EXPORT data_device_manager : public QObject
 {
     Q_OBJECT
@@ -65,5 +57,3 @@ private:
 };
 
 }
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::dnd_actions)
