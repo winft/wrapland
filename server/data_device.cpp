@@ -68,8 +68,6 @@ public:
     };
     Drag drag;
 
-    QPointer<Surface> proxyRemoteSurface;
-
 private:
     static void startDragCallback(wl_client* wlClient,
                                   wl_resource* wlResource,
@@ -136,11 +134,6 @@ void data_device::Private::startDrag(data_source* dataSource,
     // TODO(unknown author): verify serial
 
     auto focusSurface = origin;
-
-    if (proxyRemoteSurface) {
-        // origin is a proxy surface
-        focusSurface = proxyRemoteSurface.data();
-    }
 
     auto pointerGrab = false;
     if (seat->hasPointer()) {
@@ -352,7 +345,7 @@ Surface* data_device::icon() const
 
 Surface* data_device::origin() const
 {
-    return d_ptr->proxyRemoteSurface ? d_ptr->proxyRemoteSurface.data() : d_ptr->surface;
+    return d_ptr->surface;
 }
 
 data_source* data_device::selection() const
@@ -432,11 +425,6 @@ void data_device::update_drag_target(Surface* surface, quint32 serial)
         }
         return;
     }
-    if (d_ptr->proxyRemoteSurface && d_ptr->proxyRemoteSurface == surface) {
-        // A proxy can not have the remote surface as target. All other surfaces even of itself
-        // are fine. Such surfaces get data offers from themselves while a drag is ongoing.
-        return;
-    }
 
     d_ptr->update_drag_motion();
 
@@ -458,12 +446,6 @@ void data_device::update_drag_target(Surface* surface, quint32 serial)
 quint32 data_device::drag_implicit_grab_serial() const
 {
     return d_ptr->drag.serial;
-}
-
-void data_device::update_proxy(Surface* remote)
-{
-    // TODO(romangg): connect destroy signal?
-    d_ptr->proxyRemoteSurface = remote;
 }
 
 Client* data_device::client() const

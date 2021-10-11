@@ -61,7 +61,6 @@ public:
     void drop();
 
     void update_drag_target(Surface* surface, quint32 serial);
-    void update_proxy(Surface* remote);
 
 Q_SIGNALS:
     void drag_started();

@@ -30,6 +30,9 @@ struct drag_source {
     Pointer* pointer{nullptr};
     Touch* touch{nullptr};
     drag_mode mode{drag_mode::none};
+
+    bool movement_blocked{true};
+
     QMetaObject::Connection destroy_notifier;
     QMetaObject::Connection device_destroy_notifier;
 };
@@ -56,6 +59,7 @@ public:
                     const QPointF& globalPosition,
                     const QMatrix4x4& inputTransformation);
     void set_target(Surface* new_surface, const QMatrix4x4& inputTransformation = QMatrix4x4());
+    void set_source_client_movement_blocked(bool block);
 
     bool is_in_progress() const;
     bool is_pointer_drag() const;

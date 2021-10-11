@@ -117,6 +117,11 @@ void drag_pool::set_target(Surface* new_surface,
     }
 }
 
+void drag_pool::set_source_client_movement_blocked(bool block)
+{
+    source.movement_blocked = block;
+}
+
 bool drag_pool::is_in_progress() const
 {
     return source.mode != drag_mode::none;
@@ -151,8 +156,7 @@ void drag_pool::perform_drag(data_device* dataDevice)
         return;
     }
     auto* originSurface = dataDevice->origin();
-    const bool proxied = originSurface->dataProxy();
-    if (!proxied) {
+    if (source.movement_blocked) {
         // origin surface
         target.dev = dataDevice;
         target.surface = originSurface;
@@ -179,7 +183,7 @@ void drag_pool::perform_drag(data_device* dataDevice)
     } else {
         source.destroy_notifier = QMetaObject::Connection();
     }
-    dataDevice->update_drag_target(proxied ? nullptr : originSurface,
+    dataDevice->update_drag_target(source.movement_blocked ? originSurface : nullptr,
                                    dataDevice->drag_implicit_grab_serial());
     Q_EMIT seat->dragStarted();
 }

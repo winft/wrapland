@@ -139,9 +139,6 @@ public:
     uint32_t id() const;
     Client* client() const;
 
-    void setDataProxy(Surface* surface);
-    Surface* dataProxy() const;
-
     uint32_t lockPresentation(Output* output);
     void presentationFeedback(uint32_t presentationId,
                               uint32_t tvSecHi,
