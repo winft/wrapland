@@ -108,7 +108,7 @@ Q_SIGNALS:
     void selectionChanged(Wrapland::Server::data_source*);
     void primarySelectionChanged(Wrapland::Server::primary_selection_source*);
     void dragStarted();
-    void dragEnded();
+    void dragEnded(bool dropped);
     void dragSurfaceChanged();
     void focusedTextInputChanged();
 

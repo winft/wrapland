@@ -60,7 +60,7 @@ void drag_pool::end(uint32_t serial)
     target = {};
 
     Q_EMIT seat->dragSurfaceChanged();
-    Q_EMIT seat->dragEnded();
+    Q_EMIT seat->dragEnded(trgt);
 }
 
 void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransformation)
