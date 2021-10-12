@@ -226,9 +226,15 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
 {
     assert(hasKeyboard());
 
-    d_ptr->keyboards.value().set_focused_surface(surface);
+    if (surface == d_ptr->keyboards.value().get_focus().surface) {
+        return;
+    }
+
+    // Data sharing devices receive a potential selection directly before keyboard enter.
     d_ptr->data_devices.set_focused_surface(surface);
     d_ptr->primary_selection_devices.set_focused_surface(surface);
+
+    d_ptr->keyboards.value().set_focused_surface(surface);
 
     // Focused text input surface follows keyboard.
     d_ptr->text_inputs.set_focused_surface(surface);
@@ -239,24 +245,24 @@ input_method_v2* Seat::get_input_method_v2() const
     return d_ptr->input_method;
 }
 
-DataDevice* Seat::selection() const
+data_source* Seat::selection() const
 {
-    return d_ptr->data_devices.current_selection;
+    return d_ptr->data_devices.focus.source;
 }
 
-void Seat::setSelection(DataDevice* dataDevice)
+void Seat::setSelection(data_source* source)
 {
-    d_ptr->data_devices.set_selection(dataDevice);
+    d_ptr->data_devices.set_selection(source);
 }
 
-PrimarySelectionDevice* Seat::primarySelection() const
+primary_selection_source* Seat::primarySelection() const
 {
-    return d_ptr->primary_selection_devices.current_selection;
+    return d_ptr->primary_selection_devices.focus.source;
 }
 
-void Seat::setPrimarySelection(PrimarySelectionDevice* dataDevice)
+void Seat::setPrimarySelection(primary_selection_source* source)
 {
-    d_ptr->primary_selection_devices.set_selection(dataDevice);
+    d_ptr->primary_selection_devices.set_selection(source);
 }
 
 }

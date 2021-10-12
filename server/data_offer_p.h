@@ -29,25 +29,28 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class DataOffer::Private : public Wayland::Resource<DataOffer>
+class data_offer::Private : public Wayland::Resource<data_offer>
 {
 public:
-    Private(Client* client, uint32_t version, DataSource* source, DataOffer* q);
+    Private(Client* client, uint32_t version, data_source* source, data_offer* q);
 
-    DataSource* source;
+    data_source* source;
 
     // Defaults are set to sensible values for < version 3 interfaces.
-    DataDeviceManager::DnDActions supportedDnDActions
-        = DataDeviceManager::DnDAction::Copy | DataDeviceManager::DnDAction::Move;
-    DataDeviceManager::DnDAction preferredDnDAction = DataDeviceManager::DnDAction::Copy;
+    dnd_actions supportedDnDActions = dnd_action::copy | dnd_action::move;
+    dnd_action preferredDnDAction = dnd_action::copy;
 
-    void sendSourceActions();
+    void send_source_actions();
 
 private:
     static void acceptCallback(wl_client* wlClient,
                                wl_resource* wlResource,
                                uint32_t serial,
                                char const* mimeType);
+    static void receive_callback(wl_client* wlClient,
+                                 wl_resource* wlResource,
+                                 char const* mimeType,
+                                 int32_t fd);
     static void finishCallback(wl_client* wlClient, wl_resource* wlResource);
     static void setActionsCallback(wl_client* wlClient,
                                    wl_resource* wlResource,
@@ -56,7 +59,7 @@ private:
 
     static const struct wl_data_offer_interface s_interface;
 
-    DataOffer* q_ptr;
+    data_offer* q_ptr;
 };
 
 }

@@ -19,43 +19,38 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QObject>
+#include "drag_pool.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include "data_device_manager.h"
+#include <QObject>
 
 namespace Wrapland::Server
 {
 
 class Client;
-class DataDevice;
-class DataSource;
+class data_device;
+class data_source;
 
-class WRAPLANDSERVER_EXPORT DataOffer : public QObject
+class WRAPLANDSERVER_EXPORT data_offer : public QObject
 {
     Q_OBJECT
 public:
-    void sendAllOffers();
+    void send_all_offers();
 
-    DataDeviceManager::DnDActions supportedDragAndDropActions() const;
-    DataDeviceManager::DnDAction preferredDragAndDropAction() const;
-    void dndAction(DataDeviceManager::DnDAction action);
+    dnd_actions supported_dnd_actions() const;
+    dnd_action preferred_dnd_action() const;
+
+    void send_source_actions();
+    void send_action(dnd_action action);
 
 Q_SIGNALS:
-    void dragAndDropActionsChanged();
+    void dnd_actions_changed();
     void resourceDestroyed();
 
 private:
-    friend class DataDevice;
-    explicit DataOffer(Client* client, uint32_t version, DataSource* source);
-
-    template<typename Resource>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void receive_selection_offer(wl_client* wlClient,
-                                        wl_resource* wlResource,
-                                        char const* mimeType,
-                                        int32_t fd);
+    friend class data_device;
+    explicit data_offer(Client* client, uint32_t version, data_source* source);
 
     class Private;
     Private* d_ptr;
@@ -63,4 +58,4 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::DataOffer*)
+Q_DECLARE_METATYPE(Wrapland::Server::data_offer*)

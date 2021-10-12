@@ -6,15 +6,10 @@
 */
 #pragma once
 
-#include <QObject>
-
-#include <memory>
-
-#include <wayland-server.h>
-
 #include <Wrapland/Server/wraplandserver_export.h>
 
-class QMimeType;
+#include <QObject>
+#include <memory>
 
 namespace Wrapland::Server
 {
@@ -22,124 +17,123 @@ namespace Wrapland::Server
 class Client;
 class Display;
 class Seat;
-class PrimarySelectionSource;
-class PrimarySelectionDevice;
-class PrimarySelectionOffer;
+class primary_selection_source;
+class primary_selection_device;
 
-class WRAPLANDSERVER_EXPORT PrimarySelectionDeviceManager : public QObject
+class WRAPLANDSERVER_EXPORT primary_selection_device_manager : public QObject
 {
     Q_OBJECT
 public:
-    using device_t = Wrapland::Server::PrimarySelectionDevice;
-    using source_t = Wrapland::Server::PrimarySelectionSource;
+    using device_t = Wrapland::Server::primary_selection_device;
+    using source_t = Wrapland::Server::primary_selection_source;
 
-    ~PrimarySelectionDeviceManager() override;
+    ~primary_selection_device_manager() override;
 
-    void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
     void create_source(Client* client, uint32_t version, uint32_t id);
+    void get_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
 Q_SIGNALS:
-    void deviceCreated(Wrapland::Server::PrimarySelectionDevice* device);
-    void sourceCreated(Wrapland::Server::PrimarySelectionSource* source);
+    void source_created(Wrapland::Server::primary_selection_source* source);
+    void device_created(Wrapland::Server::primary_selection_device* device);
 
 private:
     friend class Display;
-    explicit PrimarySelectionDeviceManager(Display* display, QObject* parent = nullptr);
+    explicit primary_selection_device_manager(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT PrimarySelectionDevice : public QObject
+class WRAPLANDSERVER_EXPORT primary_selection_device : public QObject
 {
     Q_OBJECT
 public:
-    using source_t = Wrapland::Server::PrimarySelectionSource;
+    using source_t = Wrapland::Server::primary_selection_source;
 
-    ~PrimarySelectionDevice() override;
+    ~primary_selection_device() override;
 
-    PrimarySelectionSource* selection();
+    primary_selection_source* selection();
     Seat* seat() const;
     Client* client() const;
 
-    void sendSelection(PrimarySelectionDevice* device);
-    void sendClearSelection();
+    void send_selection(primary_selection_source* source);
+    void send_clear_selection();
 
 Q_SIGNALS:
-    void selectionChanged(PrimarySelectionSource* source);
-    void selectionCleared();
+    void selection_changed();
     void resourceDestroyed();
 
 private:
-    PrimarySelectionDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
-    friend class PrimarySelectionDeviceManager;
-
-    template<typename Resource>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void set_selection(Resource* handle, wl_resource* wlSource);
+    primary_selection_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
+    friend class primary_selection_device_manager;
 
     class Private;
     Private* d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT PrimarySelectionOffer : public QObject
+class WRAPLANDSERVER_EXPORT primary_selection_offer : public QObject
 {
     Q_OBJECT
 public:
-    ~PrimarySelectionOffer() override;
+    ~primary_selection_offer() override;
 
-    void sendOffer();
+    void send_offer();
 
 Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    friend class PrimarySelectionDevice;
-    explicit PrimarySelectionOffer(Client* client,
-                                   uint32_t version,
-                                   PrimarySelectionSource* source);
-
-    template<typename Resource>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void receive_selection_offer(wl_client* wlClient,
-                                        wl_resource* wlResource,
-                                        char const* mimeType,
-                                        int32_t fd);
+    friend class primary_selection_device;
+    explicit primary_selection_offer(Client* client,
+                                     uint32_t version,
+                                     primary_selection_source* source);
 
     class Private;
     Private* d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT PrimarySelectionSource : public QObject
+class WRAPLANDSERVER_EXPORT primary_selection_source : public QObject
 {
     Q_OBJECT
 public:
-    ~PrimarySelectionSource() override;
+    std::vector<std::string> mime_types() const;
 
-    void cancel();
-    void requestData(std::string const& mimeType, qint32 fd);
-
-    std::vector<std::string> mimeTypes();
+    void cancel() const;
+    void request_data(std::string const& mimeType, qint32 fd) const;
 
     Client* client() const;
 
 Q_SIGNALS:
-    void mimeTypeOffered(std::string);
+    void mime_type_offered(std::string);
     void resourceDestroyed();
 
 private:
-    PrimarySelectionSource(Client* client, uint32_t version, uint32_t id);
-    friend class PrimarySelectionDeviceManager;
-    friend class PrimarySelectionDevice;
-
-    template<typename Resource>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    add_offered_mime_type(wl_client* wlClient, wl_resource* wlResource, char const* mimeType);
+    friend class data_control_device_v1;
+    friend class data_control_source_v1_res;
+    friend class primary_selection_source_ext;
+    friend class primary_selection_source_res;
+    primary_selection_source();
 
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
+};
+
+class WRAPLANDSERVER_EXPORT primary_selection_source_ext : public QObject
+{
+public:
+    primary_selection_source_ext();
+    ~primary_selection_source_ext() override;
+
+    void offer(std::string const& mime_type);
+
+    virtual void request_data(std::string const& mime_type, qint32 fd) = 0;
+    virtual void cancel() = 0;
+
+    primary_selection_source* src() const;
+
+private:
+    class Private;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

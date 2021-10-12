@@ -213,11 +213,6 @@ void DataDevice::setSelection(quint32 serial, DataSource* source)
     wl_data_device_set_selection(d->device, dataSource(source), serial);
 }
 
-void DataDevice::clearSelection(quint32 serial)
-{
-    setSelection(serial);
-}
-
 DataOffer* DataDevice::offeredSelection() const
 {
     return d->selectionOffer.get();

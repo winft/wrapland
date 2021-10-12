@@ -76,8 +76,7 @@ public:
     void startDrag(quint32 serial, DataSource* source, Surface* origin, Surface* icon = nullptr);
     void startDragInternally(quint32 serial, Surface* origin, Surface* icon = nullptr);
 
-    void setSelection(quint32 serial, DataSource* source = nullptr);
-    void clearSelection(quint32 serial);
+    void setSelection(quint32 serial, DataSource* source);
 
     DataOffer* offeredSelection() const;
 
@@ -97,7 +96,6 @@ public:
 
 Q_SIGNALS:
     void selectionOffered(Wrapland::Client::DataOffer*);
-    void selectionCleared();
     /**
      * Notification that a drag'n'drop operation entered a Surface on this DataDevice.
      *

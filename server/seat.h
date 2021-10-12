@@ -34,7 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class DataDevice;
+class data_source;
 class Display;
 class drag_pool;
 class input_method_v2;
@@ -42,7 +42,7 @@ class Keyboard;
 class keyboard_pool;
 class Pointer;
 class pointer_pool;
-class PrimarySelectionDevice;
+class primary_selection_source;
 class Surface;
 class text_input_pool;
 class TextInputV2;
@@ -88,10 +88,10 @@ public:
 
     input_method_v2* get_input_method_v2() const;
 
-    DataDevice* selection() const;
-    void setSelection(DataDevice* dataDevice);
-    PrimarySelectionDevice* primarySelection() const;
-    void setPrimarySelection(PrimarySelectionDevice* dataDevice);
+    data_source* selection() const;
+    void setSelection(data_source* source);
+    primary_selection_source* primarySelection() const;
+    void setPrimarySelection(primary_selection_source* source);
 
 Q_SIGNALS:
     void pointerPosChanged(const QPointF& pos);
@@ -105,20 +105,21 @@ Q_SIGNALS:
 
     void focusedPointerChanged(Wrapland::Server::Pointer*);
 
-    void selectionChanged(DataDevice*);
-    void primarySelectionChanged(PrimarySelectionDevice*);
+    void selectionChanged(Wrapland::Server::data_source*);
+    void primarySelectionChanged(Wrapland::Server::primary_selection_source*);
     void dragStarted();
-    void dragEnded();
-    void dragSurfaceChanged();
+    void dragEnded(bool dropped);
     void focusedTextInputChanged();
 
 private:
     friend class Display;
-    friend class DataDeviceManager;
+    friend class data_control_device_v1;
+    friend class data_control_manager_v1;
+    friend class data_device_manager;
     friend class drag_pool;
     friend class keyboard_pool;
     friend class pointer_pool;
-    friend class PrimarySelectionDeviceManager;
+    friend class primary_selection_device_manager;
     friend class input_method_manager_v2;
     friend class TextInputManagerV2;
     friend class text_input_manager_v3;

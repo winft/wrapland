@@ -19,63 +19,53 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QObject>
-
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include <wayland-server.h>
+#include <QObject>
 
 namespace Wrapland::Server
 {
 class Client;
-class DataDeviceManager;
-class DataSource;
+class data_device_manager;
+class data_offer;
+class data_source;
 class Seat;
 class Surface;
 
-class WRAPLANDSERVER_EXPORT DataDevice : public QObject
+class WRAPLANDSERVER_EXPORT data_device : public QObject
 {
     Q_OBJECT
 public:
-    using source_t = Wrapland::Server::DataSource;
+    using source_t = Wrapland::Server::data_source;
 
     Seat* seat() const;
     Client* client() const;
 
-    DataSource* dragSource() const;
-    Surface* origin() const;
-    Surface* icon() const;
+    data_source* selection() const;
 
-    quint32 dragImplicitGrabSerial() const;
+    void send_selection(data_source* source);
+    void send_clear_selection();
 
-    DataSource* selection() const;
+    data_offer* create_offer(data_source* source);
 
-    void sendSelection(DataDevice* other);
-    void sendClearSelection();
+    void enter(uint32_t serial, Surface* surface, QPointF const& pos, data_offer* offer);
+    void motion(uint32_t time, QPointF const& pos);
 
+    void leave();
     void drop();
 
-    void updateDragTarget(Surface* surface, quint32 serial);
-    void updateProxy(Surface* remote);
-
 Q_SIGNALS:
-    void dragStarted();
-    void selectionChanged(Wrapland::Server::DataSource*);
-    void selectionCleared();
+    void selection_changed();
     void resourceDestroyed();
 
 private:
-    friend class DataDeviceManager;
-    DataDevice(Client* client, uint32_t version, uint32_t id, Seat* seat);
+    friend class data_device_manager;
+    data_device(Client* client, uint32_t version, uint32_t id, Seat* seat);
 
     class Private;
     Private* d_ptr;
-
-    template<typename Handle>
-    // NOLINTNEXTLINE(readability-redundant-declaration)
-    friend void set_selection(Handle* handle, wl_resource* wlSource);
 };
 
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::DataDevice*)
+Q_DECLARE_METATYPE(Wrapland::Server::data_device*)

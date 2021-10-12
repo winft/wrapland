@@ -1,5 +1,5 @@
 /*
-    SPDX-FileCopyrightText: 2020 Roman Gilg <subdiff@gmail.com>
+    SPDX-FileCopyrightText: 2020, 2021 Roman Gilg <subdiff@gmail.com>
     SPDX-FileCopyrightText: 2021 Francesco Sorrentino <francesco.sorr@gmail.com>
 
     SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
@@ -15,157 +15,115 @@
 namespace Wrapland::Server
 {
 
-template<typename Device, void (Seat::*signal)(Device*)>
+template<typename Device, typename Source, void (Seat::*signal)(Source*)>
 struct selection_pool {
     explicit selection_pool(Seat* seat);
 
     void register_device(Device* device);
-    void cleanup_device(Device* device);
-
-    void set_selection(Device* device);
-
-    void cancel_previous_selection(Device* new_device) const;
     void set_focused_surface(Surface* surface);
-    void advertise();
 
-    bool update_selection(Device* new_device);
-    void change_selection(Device* device);
-    void clear_selection(Device* device);
+    void set_selection(Source* source);
+
+    struct {
+        std::vector<Device*> devices;
+        Source* source{nullptr};
+        QMetaObject::Connection source_destroy_notifier;
+    } focus;
 
     std::vector<Device*> devices;
 
-    std::vector<Device*> selections;
-    Device* current_selection = nullptr;
+private:
+    void transmit(Source* source);
 
     Seat* seat;
 };
 
-template<typename Device, void (Seat::*signal)(Device*)>
-selection_pool<Device, signal>::selection_pool(Seat* seat)
+template<typename Device, typename Source, void (Seat::*signal)(Source*)>
+selection_pool<Device, Source, signal>::selection_pool(Seat* seat)
     : seat{seat}
 {
 }
 
-template<typename Device, void (Seat::*signal)(Device*)>
-void selection_pool<Device, signal>::register_device(Device* device)
+template<typename Device, typename Source, void (Seat::*signal)(Source*)>
+void selection_pool<Device, Source, signal>::register_device(Device* device)
 {
     devices.push_back(device);
 
-    QObject::connect(
-        device, &Device::resourceDestroyed, seat, [this, device] { cleanup_device(device); });
-    QObject::connect(
-        device, &Device::selectionChanged, seat, [this, device] { change_selection(device); });
-    QObject::connect(
-        device, &Device::selectionCleared, seat, [this, device] { clear_selection(device); });
+    QObject::connect(device, &Device::resourceDestroyed, seat, [this, device] {
+        remove_one(devices, device);
+        remove_one(focus.devices, device);
+    });
+
+    QObject::connect(device, &Device::selection_changed, seat, [this, device] {
+        if (has_keyboard_focus(device, seat)) {
+            set_selection(device->selection());
+        }
+    });
 
     if (has_keyboard_focus(device, seat)) {
-        selections.push_back(device);
-        if (current_selection && current_selection->selection()) {
-            device->sendSelection(current_selection);
+        focus.devices.push_back(device);
+        if (focus.source) {
+            device->send_selection(focus.source);
         }
     }
 }
 
-template<typename Device, void (Seat::*signal)(Device*)>
-void selection_pool<Device, signal>::cleanup_device(Device* device)
+template<typename Device, typename Source, void (Seat::*signal)(Source*)>
+void selection_pool<Device, Source, signal>::set_focused_surface(Surface* surface)
 {
-    remove_one(devices, device);
-    remove_one(selections, device);
-    if (current_selection == device) {
-        current_selection = nullptr;
-        Q_EMIT(seat->*signal)(nullptr);
-        advertise();
-    }
-}
-
-template<typename Device, void (Seat::*signal)(Device*)>
-void selection_pool<Device, signal>::cancel_previous_selection(Device* new_device) const
-{
-    if (!current_selection || (current_selection == new_device)) {
+    if (!surface) {
+        // No surface set. Per protocol we just won't send future selection events to the client.
+        focus.devices = {};
         return;
     }
-    if (auto s = current_selection->selection()) {
-        s->cancel();
-    }
-}
 
-template<typename Device, void (Seat::*signal)(Device*)>
-void selection_pool<Device, signal>::set_focused_surface(Surface* surface)
-{
-    selections = interfacesForSurface(surface, devices);
-    advertise();
-}
-
-template<typename Device, void (Seat::*signal)(Device*)>
-void selection_pool<Device, signal>::advertise()
-{
-    for (auto device : selections) {
-        if (current_selection) {
-            device->sendSelection(current_selection);
-        } else {
-            device->sendClearSelection();
-        }
-    }
-}
-
-template<typename Device, void (Seat::*signal)(Device*)>
-void selection_pool<Device, signal>::set_selection(Device* device)
-{
-    if (current_selection == device) {
+    if (focus.devices.size() && focus.devices.front()->client() == surface->client()) {
+        // No client change. Selection must not be resent.
         return;
     }
-    cancel_previous_selection(device);
-    current_selection = device;
 
-    for (auto focusedDevice : selections) {
-        if (device && device->selection()) {
-            focusedDevice->sendSelection(device);
-        } else {
-            focusedDevice->sendClearSelection();
-        }
-    }
-    Q_EMIT(seat->*signal)(device);
-}
-
-template<typename Device, void (Seat::*signal)(Device*)>
-bool selection_pool<Device, signal>::update_selection(Device* device)
-{
-    bool selChanged = current_selection != device;
-    if (has_keyboard_focus(device, seat)) {
-        cancel_previous_selection(device);
-        current_selection = device;
-    }
-    return selChanged;
-}
-
-template<typename Device, void (Seat::*signal)(Device*)>
-void selection_pool<Device, signal>::change_selection(Device* device)
-{
-    bool selChanged = update_selection(device);
-    if (device == current_selection) {
-        for (auto focusedDevice : selections) {
-            focusedDevice->sendSelection(device);
-        }
-    }
-    if (selChanged) {
-        Q_EMIT(seat->*signal)(current_selection);
+    focus.devices = interfacesForSurface(surface, devices);
+    if (focus.source) {
+        transmit(focus.source);
     }
 }
 
-template<typename Device, void (Seat::*signal)(Device*)>
-void selection_pool<Device, signal>::clear_selection(Device* device)
+template<typename Device, typename Source, void (Seat::*signal)(Source*)>
+void selection_pool<Device, Source, signal>::set_selection(Source* source)
 {
-    bool selChanged = update_selection(device);
-    if (device == current_selection) {
-        for (auto focusedDevice : selections) {
-            focusedDevice->sendClearSelection();
-            current_selection = nullptr;
-            selChanged = true;
-        }
+    if (focus.source == source) {
+        return;
     }
-    if (selChanged) {
-        Q_EMIT(seat->*signal)(current_selection);
+
+    auto old_source = focus.source;
+    focus.source = source;
+
+    QObject::disconnect(focus.source_destroy_notifier);
+    focus.source_destroy_notifier = QMetaObject::Connection();
+
+    if (source) {
+        focus.source_destroy_notifier
+            = QObject::connect(source, &Source::resourceDestroyed, seat, [this] {
+                  focus.source = nullptr;
+                  transmit(nullptr);
+                  Q_EMIT(seat->*signal)(nullptr);
+              });
     }
+
+    transmit(source);
+    Q_EMIT(seat->*signal)(source);
+
+    if (old_source) {
+        old_source->cancel();
+    }
+}
+
+template<typename Device, typename Source, void (Seat::*signal)(Source*)>
+void selection_pool<Device, Source, signal>::transmit(Source* source)
+{
+    std::for_each(focus.devices.begin(), focus.devices.end(), [source](Device* dev) {
+        dev->send_selection(source);
+    });
 }
 
 }

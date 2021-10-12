@@ -358,12 +358,12 @@ void Pointer::motion(QPointF const& position)
 {
     assert(d_ptr->focusedSurface);
 
-    if (d_ptr->seat->drags().is_pointer_drag()) {
-        auto const drag_origin = d_ptr->seat->drags().get_source().dev->origin();
-        auto const proxy_surface_focused
-            = drag_origin->dataProxy() && drag_origin == d_ptr->focusedSurface;
-        if (!proxy_surface_focused) {
-            // Handled by DataDevice.
+    if (auto const& drag = d_ptr->seat->drags(); drag.is_pointer_drag()) {
+        auto const& drag_src = drag.get_source();
+        auto const block_movement = drag_src.movement_blocked
+            || drag_src.surfaces.origin->client() != d_ptr->focusedSurface->client();
+        if (block_movement) {
+            // Handled by data_device.
             return;
         }
     }

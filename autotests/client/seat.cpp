@@ -41,6 +41,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/data_device.h"
 #include "../../server/data_device_manager.h"
+#include "../../server/data_source.h"
 #include "../../server/display.h"
 #include "../../server/keyboard.h"
 #include "../../server/keyboard_pool.h"
@@ -141,7 +142,7 @@ TestSeat::TestSeat(QObject* parent)
     , m_queue(nullptr)
     , m_thread(nullptr)
 {
-    qRegisterMetaType<Wrapland::Server::DataDevice*>();
+    qRegisterMetaType<Wrapland::Server::data_device*>();
     qRegisterMetaType<Wrapland::Server::Keyboard*>();
     qRegisterMetaType<Wrapland::Server::Pointer*>();
     qRegisterMetaType<Wrapland::Server::Touch*>();
@@ -1456,6 +1457,11 @@ void TestSeat::testKeyboard()
     m_serverSeat->setTimestamp(3);
     keyboards.key_pressed(KEY_E);
 
+    QSignalSpy leftSpy(keyboard, &Clt::Keyboard::left);
+    QVERIFY(leftSpy.isValid());
+    m_serverSeat->setFocusedKeyboardSurface(nullptr);
+    QVERIFY(leftSpy.wait());
+
     QSignalSpy modifierSpy(keyboard, &Clt::Keyboard::modifiersChanged);
     QVERIFY(modifierSpy.isValid());
 
@@ -1544,8 +1550,7 @@ void TestSeat::testKeyboard()
     QCOMPARE(modifierSpy.last().at(2).value<quint32>(), quint32(3));
     QCOMPARE(modifierSpy.last().at(3).value<quint32>(), quint32(4));
 
-    QSignalSpy leftSpy(keyboard, &Clt::Keyboard::left);
-    QVERIFY(leftSpy.isValid());
+    leftSpy.clear();
     m_serverSeat->setFocusedKeyboardSurface(nullptr);
     QVERIFY(!keyboards.get_focus().surface);
     QVERIFY(keyboards.get_focus().devices.empty());
@@ -1743,7 +1748,12 @@ void TestSeat::testDestroy()
 
 void TestSeat::testSelection()
 {
-    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
+    m_serverSeat->setHasKeyboard(true);
+
+    QScopedPointer<Srv::data_device_manager> ddmi(m_display->createDataDeviceManager());
+
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::data_device_manager::device_created);
+    QVERIFY(ddiCreatedSpy.isValid());
 
     Clt::Registry registry;
     QSignalSpy dataDeviceManagerSpy(&registry, &Clt::Registry::dataDeviceManagerAnnounced);
@@ -1760,11 +1770,16 @@ void TestSeat::testSelection()
     QVERIFY(ddm->isValid());
 
     QScopedPointer<Clt::DataDevice> dd1(ddm->getDevice(m_seat));
+
+    QVERIFY(ddiCreatedSpy.wait());
+    QCOMPARE(ddiCreatedSpy.count(), 1);
+
+    auto ddi = ddiCreatedSpy.first().first().value<Srv::data_device*>();
+    QVERIFY(ddi);
+
     QVERIFY(dd1->isValid());
     QSignalSpy selectionSpy(dd1.data(), &Clt::DataDevice::selectionOffered);
     QVERIFY(selectionSpy.isValid());
-    QSignalSpy selectionClearedSpy(dd1.data(), &Clt::DataDevice::selectionCleared);
-    QVERIFY(selectionClearedSpy.isValid());
 
     QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
@@ -1775,17 +1790,20 @@ void TestSeat::testSelection()
     auto* serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
     QVERIFY(!m_serverSeat->selection());
 
+    auto keyboard = m_seat->createKeyboard(m_seat);
+    QSignalSpy entered_spy(keyboard, &Clt::Keyboard::entered);
+    QVERIFY(entered_spy.isValid());
+
     m_serverSeat->setHasKeyboard(true);
     m_serverSeat->setFocusedKeyboardSurface(serverSurface);
 
     auto& keyboards = m_serverSeat->keyboards();
     QCOMPARE(keyboards.get_focus().surface, serverSurface);
     QVERIFY(keyboards.get_focus().devices.empty());
-    QVERIFY(selectionClearedSpy.wait());
+    QVERIFY(entered_spy.wait());
     QVERIFY(selectionSpy.isEmpty());
-    QVERIFY(!selectionClearedSpy.isEmpty());
 
-    selectionClearedSpy.clear();
+    selectionSpy.clear();
     QVERIFY(!m_serverSeat->selection());
 
     // Now let's try to set a selection - we have keyboard focus, so it should be sent to us.
@@ -1797,18 +1815,17 @@ void TestSeat::testSelection()
 
     QVERIFY(selectionSpy.wait());
     QCOMPARE(selectionSpy.count(), 1);
-    auto ddi = m_serverSeat->selection();
-    QVERIFY(ddi);
+    auto server_data_source = m_serverSeat->selection();
+    QVERIFY(server_data_source);
 
     auto df = selectionSpy.first().first().value<Clt::DataOffer*>();
     QCOMPARE(df->offeredMimeTypes().count(), 1);
     QCOMPARE(df->offeredMimeTypes().first().name(), QStringLiteral("text/plain"));
 
     // Try to clear.
-    dd1->setSelection(0);
-    QVERIFY(selectionClearedSpy.wait());
-    QCOMPARE(selectionClearedSpy.count(), 1);
-    QCOMPARE(selectionSpy.count(), 1);
+    dd1->setSelection(0, nullptr);
+    QVERIFY(selectionSpy.wait());
+    QCOMPARE(selectionSpy.count(), 2);
 
     // Unset the keyboard focus.
     m_serverSeat->setFocusedKeyboardSurface(nullptr);
@@ -1824,7 +1841,8 @@ void TestSeat::testSelection()
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
     QCoreApplication::processEvents();
-    QCOMPARE(selectionSpy.count(), 1);
+    QCOMPARE(selectionSpy.count(), 2);
+    QVERIFY(!dd1->offeredSelection());
 
     // Let's unset the selection on the seat.
     m_serverSeat->setSelection(nullptr);
@@ -1836,19 +1854,19 @@ void TestSeat::testSelection()
     QVERIFY(!selectionSpy.wait(100));
 
     // Now let's set it manually.
-    m_serverSeat->setSelection(ddi);
-    QCOMPARE(m_serverSeat->selection(), ddi);
+    m_serverSeat->setSelection(server_data_source);
+    QCOMPARE(m_serverSeat->selection(), ddi->selection());
     QVERIFY(selectionSpy.wait());
-    QCOMPARE(selectionSpy.count(), 2);
+    QCOMPARE(selectionSpy.count(), 3);
 
     // Setting the same again should not change.
-    m_serverSeat->setSelection(ddi);
+    m_serverSeat->setSelection(server_data_source);
     QVERIFY(!selectionSpy.wait(100));
 
     // Now clear it manually.
     m_serverSeat->setSelection(nullptr);
-    QVERIFY(selectionClearedSpy.wait());
-    QCOMPARE(selectionSpy.count(), 2);
+    QVERIFY(selectionSpy.wait());
+    QCOMPARE(selectionSpy.count(), 4);
 
     // Create a second ddi and a data source.
     QScopedPointer<Clt::DataDevice> dd2(ddm->getDevice(m_seat));
@@ -1858,21 +1876,21 @@ void TestSeat::testSelection()
     ds2->offer(QStringLiteral("text/plain"));
     dd2->setSelection(0, ds2.data());
     QVERIFY(selectionSpy.wait());
-    QCOMPARE(selectionSpy.count(), 3);
+    QCOMPARE(selectionSpy.count(), 5);
     QSignalSpy cancelledSpy(ds2.data(), &Clt::DataSource::cancelled);
     QVERIFY(cancelledSpy.isValid());
-    m_serverSeat->setSelection(ddi);
+    m_serverSeat->setSelection(server_data_source);
     QVERIFY(cancelledSpy.wait());
 
     // If we don't wait for the selection signal as well the test still works but we sporadically
     // leak memory from the offer not being processed completely in the client and the lastOffer
     // member variable not being cleaned up.
     // TODO(romangg): Fix leak in client library when selection is not updated in time.
-    QVERIFY(selectionSpy.count() == 4 || selectionSpy.wait());
-    QCOMPARE(selectionSpy.count(), 4);
+    QVERIFY(selectionSpy.count() == 6 || selectionSpy.wait());
+    QCOMPARE(selectionSpy.count(), 6);
 
     // Copy already cleared selection, BUG 383054.
-    ddi->sendSelection(ddi);
+    ddi->send_selection(ddi->selection());
 }
 
 void TestSeat::testSelectionNoDataSource()
@@ -1881,8 +1899,8 @@ void TestSeat::testSelectionNoDataSource()
     // a DataDevice which doesn't have a DataSource yet.
 
     // First create the DataDevice.
-    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::deviceCreated);
+    QScopedPointer<Srv::data_device_manager> ddmi(m_display->createDataDeviceManager());
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::data_device_manager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 
     Clt::Registry registry;
@@ -1905,7 +1923,7 @@ void TestSeat::testSelectionNoDataSource()
     QVERIFY(ddiCreatedSpy.wait());
     QCOMPARE(ddiCreatedSpy.count(), 1);
 
-    auto ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
+    auto ddi = ddiCreatedSpy.first().first().value<Srv::data_device*>();
     QVERIFY(ddi);
 
     // Now create a surface and pass it keyboard focus.
@@ -1923,7 +1941,7 @@ void TestSeat::testSelectionNoDataSource()
     QCOMPARE(m_serverSeat->keyboards().get_focus().surface, serverSurface);
 
     // Now let's set the selection.
-    m_serverSeat->setSelection(ddi);
+    m_serverSeat->setSelection(ddi->selection());
 }
 
 void TestSeat::testDataDeviceForKeyboardSurface()
@@ -1933,8 +1951,8 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     // To properly test the functionality this test requires a second client.
 
     // Create the DataDeviceManager.
-    QScopedPointer<Srv::DataDeviceManager> ddmi(m_display->createDataDeviceManager());
-    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::DataDeviceManager::deviceCreated);
+    QScopedPointer<Srv::data_device_manager> ddmi(m_display->createDataDeviceManager());
+    QSignalSpy ddiCreatedSpy(ddmi.data(), &Srv::data_device_manager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 
     // Create a second Wayland client connection to use it for setSelection.
@@ -1975,9 +1993,9 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     // Now create our first datadevice.
     QScopedPointer<Clt::DataDevice> dd1(ddm1->getDevice(seat.data()));
     QVERIFY(ddiCreatedSpy.wait());
-    auto* ddi = ddiCreatedSpy.first().first().value<Srv::DataDevice*>();
+    auto* ddi = ddiCreatedSpy.first().first().value<Srv::data_device*>();
     QVERIFY(ddi);
-    m_serverSeat->setSelection(ddi);
+    m_serverSeat->setSelection(ddi->selection());
 
     // Switch to other client.
     // Create a surface and pass it keyboard focus.
