@@ -139,7 +139,7 @@ public:
         int32_t delay{0};
     } repeat_info;
 
-    WaylandPointer<zwp_input_method_keyboard_grab_v2, zwp_input_method_keyboard_grab_v2_destroy>
+    WaylandPointer<zwp_input_method_keyboard_grab_v2, zwp_input_method_keyboard_grab_v2_release>
         keyboard_grab_ptr;
 
     EventQueue* queue{nullptr};
