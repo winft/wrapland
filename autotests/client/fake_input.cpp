@@ -66,13 +66,13 @@ private:
     Clt::FakeInput* m_fakeInput = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-fake-input-0");
+constexpr auto socket_name{"wrapland-test-fake-input-0"};
 
 void FakeInputTest::init()
 {
     delete m_display;
     m_display = new Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
     QVERIFY(m_display->running());
     m_display->createShm();
@@ -84,7 +84,7 @@ void FakeInputTest::init()
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

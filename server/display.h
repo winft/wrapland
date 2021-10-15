@@ -90,8 +90,8 @@ public:
 
     ~Display() override;
 
-    void setSocketName(const std::string& name);
-    std::string socketName() const;
+    void set_socket_name(std::string const& name);
+    std::string socket_name() const;
 
     uint32_t serial();
     uint32_t nextSerial();
@@ -118,7 +118,6 @@ public:
     Seat* createSeat(QObject* parent = nullptr);
     std::vector<Seat*>& seats() const;
 
-    void setSocketName(const QString& name);
     void add_socket_fd(int fd);
 
     void add_output_device_v1(OutputDeviceV1* output);

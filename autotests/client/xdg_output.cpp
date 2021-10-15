@@ -55,7 +55,7 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-xdg-output-0");
+constexpr auto socket_name{"wrapland-test-xdg-output-0"};
 
 TestXdgOutput::TestXdgOutput(QObject* parent)
     : QObject(parent)
@@ -71,7 +71,7 @@ void TestXdgOutput::init()
     using namespace Wrapland::Server;
     delete m_display;
     m_display = new Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     m_serverOutput = new Output(m_display);
@@ -93,7 +93,7 @@ void TestXdgOutput::init()
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

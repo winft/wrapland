@@ -76,7 +76,7 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-subsurface-0");
+constexpr auto socket_name{"wrapland-test-wayland-subsurface-0"};
 
 TestSubsurface::TestSubsurface(QObject* parent)
     : QObject(parent)
@@ -97,7 +97,7 @@ void TestSubsurface::init()
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     m_display->createShm();
@@ -105,7 +105,7 @@ void TestSubsurface::init()
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

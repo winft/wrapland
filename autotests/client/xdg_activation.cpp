@@ -55,7 +55,7 @@ private:
     void cleanup_client(client& client_ref);
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-xdg-activation-0");
+constexpr auto socket_name{"wrapland-test-xdg-activation-0"};
 
 TestXdgActivation::TestXdgActivation(QObject* parent)
     : QObject(parent)
@@ -68,7 +68,7 @@ void TestXdgActivation::init()
     qRegisterMetaType<Server::Surface*>();
 
     server.display = new Server::Display(this);
-    server.display->setSocketName(s_socketName);
+    server.display->set_socket_name(socket_name);
     server.display->start();
     QVERIFY(server.display->running());
 
@@ -97,7 +97,7 @@ void TestXdgActivation::create_client(client& client_ref)
 {
     client_ref.connection = new Client::ConnectionThread;
     QSignalSpy establishedSpy(client_ref.connection, &Client::ConnectionThread::establishedChanged);
-    client_ref.connection->setSocketName(s_socketName);
+    client_ref.connection->setSocketName(socket_name);
 
     client_ref.thread = new QThread(this);
     client_ref.connection->moveToThread(client_ref.thread);

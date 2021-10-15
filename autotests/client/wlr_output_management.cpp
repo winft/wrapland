@@ -67,7 +67,7 @@ private:
     QSignalSpy* m_configSpy;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-output-0");
+constexpr auto socket_name{"wrapland-test-output-0"};
 
 TestWlrOutputManagement::TestWlrOutputManagement(QObject* parent)
     : QObject(parent)
@@ -84,7 +84,7 @@ TestWlrOutputManagement::TestWlrOutputManagement(QObject* parent)
 void TestWlrOutputManagement::init()
 {
     m_display = new Srv::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->createCompositor(this);
 
     auto server_output = new Srv::Output(m_display, this);
@@ -123,7 +123,7 @@ void TestWlrOutputManagement::init()
     // setup connection
     m_connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

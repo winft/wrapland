@@ -76,14 +76,14 @@ private:
     Wrapland::Client::TextInputManagerV2* m_textInputManagerV2 = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-text-input-0");
+constexpr auto socket_name{"wrapland-test-text-input-0"};
 
 void TextInputTest::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
     delete m_display;
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     m_display->createShm();
@@ -99,7 +99,7 @@ void TextInputTest::init()
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

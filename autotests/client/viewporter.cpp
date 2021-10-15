@@ -75,7 +75,7 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("kwin-test-viewporter-0");
+constexpr auto socket_name{"kwin-test-viewporter-0"};
 
 TestViewporter::TestViewporter(QObject* parent)
     : QObject(parent)
@@ -92,7 +92,7 @@ void TestViewporter::init()
     qRegisterMetaType<Srv::Surface*>();
 
     m_display = new Srv::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
     m_display->createShm();
 
@@ -105,7 +105,7 @@ void TestViewporter::init()
     // setup connection
     m_connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, SIGNAL(establishedChanged(bool)));
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

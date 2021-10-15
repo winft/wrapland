@@ -123,17 +123,12 @@ Display::~Display()
     }
 }
 
-void Display::setSocketName(const std::string& name)
+void Display::set_socket_name(std::string const& name)
 {
     d_ptr->setSocketName(name);
 }
 
-void Display::setSocketName(const QString& name)
-{
-    d_ptr->setSocketName(name.toUtf8().constData());
-}
-
-std::string Display::socketName() const
+std::string Display::socket_name() const
 {
     return d_ptr->socketName();
 }

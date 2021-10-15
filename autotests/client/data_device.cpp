@@ -75,7 +75,7 @@ private:
     QThread* m_thread = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-datadevice-0");
+constexpr auto socket_name{"wrapland-test-wayland-datadevice-0"};
 
 void TestDataDevice::init()
 {
@@ -84,14 +84,14 @@ void TestDataDevice::init()
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy established_spy(m_connection,
                                &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

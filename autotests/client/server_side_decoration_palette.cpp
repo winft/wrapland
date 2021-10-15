@@ -59,7 +59,7 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-decopalette-0");
+constexpr auto socket_name{"wrapland-test-wayland-decopalette-0"};
 
 TestServerSideDecorationPalette::TestServerSideDecorationPalette(QObject* parent)
     : QObject(parent)
@@ -77,14 +77,14 @@ void TestServerSideDecorationPalette::init()
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

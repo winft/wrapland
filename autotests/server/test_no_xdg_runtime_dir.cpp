@@ -36,14 +36,15 @@ void NoXdgRuntimeDirTest::initTestCase()
     qunsetenv("XDG_RUNTIME_DIR");
 }
 
+constexpr auto socket_name{"wrapland-test-no-xdg-runtime-dir-0"};
+
 void NoXdgRuntimeDirTest::testCreate()
 {
     // this test verifies that not having an XDG_RUNTIME_DIR is handled gracefully
     // the server cannot start, but should not crash
-    const QString testSocketName = QStringLiteral("wrapland-test-no-xdg-runtime-dir-0");
     Display display;
 
-    display.setSocketName(testSocketName);
+    display.set_socket_name(socket_name);
     QVERIFY(!display.running());
     display.start();
     QVERIFY(!display.running());

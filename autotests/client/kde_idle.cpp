@@ -59,13 +59,13 @@ private:
     Idle* m_idle = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-idle-0");
+constexpr auto socket_name{"wrapland-test-idle-0"};
 
 void IdleTest::init()
 {
     delete m_display;
     m_display = new Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
     QVERIFY(m_display->running());
     m_display->createShm();
@@ -77,7 +77,7 @@ void IdleTest::init()
     m_connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

@@ -65,7 +65,7 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-compositor-0");
+constexpr auto socket_name{"wrapland-test-wayland-compositor-0"};
 
 TestPresentationTime::TestPresentationTime(QObject* parent)
     : QObject(parent)
@@ -84,7 +84,7 @@ void TestPresentationTime::init()
     qRegisterMetaType<Server::Surface*>();
 
     m_display = new Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
     QVERIFY(m_display->running());
 
@@ -103,7 +103,7 @@ void TestPresentationTime::init()
     // Setup connection.
     m_connection = new Client::ConnectionThread;
     QSignalSpy establishedSpy(m_connection, &Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

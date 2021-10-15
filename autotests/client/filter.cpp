@@ -57,7 +57,7 @@ private:
     Wrapland::Server::BlurManager* m_blurManagerInterface;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-blur-0");
+constexpr auto socket_name{"wrapland-test-wayland-blur-0"};
 
 // The following non-realistic class allows only clients in the m_allowedClients list to access the
 // blur interface all other interfaces are allowed
@@ -94,7 +94,7 @@ void TestFilter::init()
     using namespace Wrapland::Server;
     delete m_display;
     m_display = new TestDisplay(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
     QVERIFY(m_display->running());
 
@@ -122,7 +122,7 @@ void TestFilter::testFilter()
         new Wrapland::Client::ConnectionThread());
     QSignalSpy connectedSpy(connection.get(), &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    connection->setSocketName(s_socketName);
+    connection->setSocketName(socket_name);
 
     std::unique_ptr<QThread> thread(new QThread(this));
     connection->moveToThread(thread.get());

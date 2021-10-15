@@ -71,14 +71,14 @@ private:
     Wrapland::Client::PointerConstraints* m_pointerConstraints = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-pointer_constraint-0");
+constexpr auto socket_name{"wrapland-test-pointer_constraint-0"};
 
 void TestPointerConstraints::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     m_display->createShm();
@@ -91,7 +91,7 @@ void TestPointerConstraints::init()
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

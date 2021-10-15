@@ -94,7 +94,7 @@ private:
     DmabufImpl* m_bufferImpl;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-dmabuf-0");
+constexpr auto socket_name{"wrapland-test-wayland-dmabuf-0"};
 
 TestLinuxDmabuf::TestLinuxDmabuf(QObject* parent)
     : QObject(parent)
@@ -109,13 +109,13 @@ TestLinuxDmabuf::TestLinuxDmabuf(QObject* parent)
 void TestLinuxDmabuf::init()
 {
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     // Setup connection.
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

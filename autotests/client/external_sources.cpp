@@ -61,7 +61,7 @@ private:
     } client1;
 };
 
-constexpr auto socket_name = "wrapland-test-external-sources-0";
+constexpr auto socket_name{"wrapland-test-external-sources-0"};
 
 void external_sources_test::init()
 {
@@ -72,7 +72,7 @@ void external_sources_test::init()
 
     delete server.display;
     server.display = new Wrapland::Server::Display(this);
-    server.display->setSocketName(std::string(socket_name));
+    server.display->set_socket_name(socket_name);
     server.display->start();
 
     server.display->createShm();

@@ -68,14 +68,14 @@ private:
     Connection m_client2;
 };
 
-static const std::string s_socketName{"wrapland-test-selection-0"};
+constexpr auto socket_name{"wrapland-test-selection-0"};
 
 void SelectionTest::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     m_display->createShm();
@@ -97,7 +97,7 @@ bool SelectionTest::setupConnection(Connection* c)
     if (!connectedSpy.isValid()) {
         return false;
     }
-    c->connection->setSocketName(QString::fromStdString(s_socketName));
+    c->connection->setSocketName(QString::fromStdString(socket_name));
 
     c->thread = new QThread(this);
     c->connection->moveToThread(c->thread);

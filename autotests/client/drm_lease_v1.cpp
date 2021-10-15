@@ -41,7 +41,7 @@ private:
     } client1;
 };
 
-constexpr auto socket_name = "wrapland-test-drm-lease-v1-0";
+constexpr auto socket_name{"wrapland-test-drm-lease-v1-0"};
 
 struct client_connector {
     std::unique_ptr<Wrapland::Client::drm_lease_connector_v1> client;
@@ -64,7 +64,7 @@ void drm_lease_v1_test::init()
 {
     delete server.display;
     server.display = new Wrapland::Server::Display(this);
-    server.display->setSocketName(std::string(socket_name));
+    server.display->set_socket_name(socket_name);
     server.display->start();
 
     server.display->createShm();

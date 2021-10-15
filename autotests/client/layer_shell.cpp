@@ -60,14 +60,14 @@ private:
     Clt::Output* output{nullptr};
 };
 
-static QString const s_socket_name = QStringLiteral("wrapland-test-layer-shell-0");
+constexpr auto socket_name{"wrapland-test-layer-shell-0"};
 
 void layer_shell_test::init()
 {
     qRegisterMetaType<Srv::Surface*>();
 
     display = new Srv::Display(this);
-    display->setSocketName(s_socket_name);
+    display->set_socket_name(socket_name);
     display->start();
 
     display->createShm();
@@ -83,7 +83,7 @@ void layer_shell_test::init()
     connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(connection, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    connection->setSocketName(s_socket_name);
+    connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     connection->moveToThread(m_thread);

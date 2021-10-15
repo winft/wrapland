@@ -86,7 +86,7 @@ private:
     Client* clients[2] = {&c_1, &c_2};
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-drag-n-drop-0");
+constexpr auto socket_name{"wrapland-test-wayland-drag-n-drop-0"};
 
 void TestDragAndDrop::init()
 {
@@ -94,7 +94,7 @@ void TestDragAndDrop::init()
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     m_server_compositor = m_display->createCompositor(m_display);
@@ -111,7 +111,7 @@ void TestDragAndDrop::init()
         QSignalSpy connected_spy(client->connection,
                                  &Wrapland::Client::ConnectionThread::establishedChanged);
         QVERIFY(connected_spy.isValid());
-        client->connection->setSocketName(s_socketName);
+        client->connection->setSocketName(socket_name);
 
         client->thread = new QThread(this);
         client->connection->moveToThread(client->thread);

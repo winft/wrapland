@@ -40,12 +40,12 @@ private Q_SLOTS:
     void testMultiple();
 };
 
-static const QString s_socketName = QStringLiteral("kwin-wayland-server-seat-test-0");
+constexpr auto socket_name{"kwin-wayland-server-seat-test-0"};
 
 void TestWaylandServerSeat::testCapabilities()
 {
     Display display;
-    display.setSocketName(s_socketName);
+    display.set_socket_name(socket_name);
     display.start();
     std::unique_ptr<Seat> seat{display.createSeat()};
     QVERIFY(!seat->hasKeyboard());
@@ -71,7 +71,7 @@ void TestWaylandServerSeat::testCapabilities()
 void TestWaylandServerSeat::testName()
 {
     Display display;
-    display.setSocketName(s_socketName);
+    display.set_socket_name(socket_name);
     display.start();
     std::unique_ptr<Seat> seat{display.createSeat()};
     QCOMPARE(seat->name().size(), 0);
@@ -84,7 +84,7 @@ void TestWaylandServerSeat::testName()
 void TestWaylandServerSeat::testPointerButton()
 {
     Display display;
-    display.setSocketName(s_socketName);
+    display.set_socket_name(socket_name);
     display.start();
     std::unique_ptr<Seat> seat{display.createSeat()};
     seat->setHasPointer(true);
@@ -115,7 +115,7 @@ void TestWaylandServerSeat::testPointerButton()
 void TestWaylandServerSeat::testPointerPos()
 {
     Display display;
-    display.setSocketName(s_socketName);
+    display.set_socket_name(socket_name);
     display.start();
 
     std::unique_ptr<Seat> seat{display.createSeat()};
@@ -144,7 +144,7 @@ void TestWaylandServerSeat::testPointerPos()
 void TestWaylandServerSeat::testDestroyThroughTerminate()
 {
     Display display;
-    display.setSocketName(s_socketName);
+    display.set_socket_name(socket_name);
     display.start();
 
     std::unique_ptr<Seat> seat{display.createSeat()};
@@ -159,7 +159,7 @@ void TestWaylandServerSeat::testDestroyThroughTerminate()
 void TestWaylandServerSeat::testRepeatInfo()
 {
     Display display;
-    display.setSocketName(s_socketName);
+    display.set_socket_name(socket_name);
     display.start();
 
     std::unique_ptr<Seat> seat{display.createSeat()};
@@ -181,7 +181,7 @@ void TestWaylandServerSeat::testRepeatInfo()
 void TestWaylandServerSeat::testMultiple()
 {
     Display display;
-    display.setSocketName(s_socketName);
+    display.set_socket_name(socket_name);
     display.start();
     QVERIFY(display.seats().empty());
 

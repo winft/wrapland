@@ -102,7 +102,7 @@ private:
     Clt::Registry* m_registry;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-windowmanagement-0");
+constexpr auto socket_name{"wrapland-test-wayland-windowmanagement-0"};
 
 TestWindowManagement::TestWindowManagement(QObject* parent)
     : QObject(parent)
@@ -121,13 +121,13 @@ void TestWindowManagement::init()
     qRegisterMetaType<Srv::PlasmaWindowManager::ShowingDesktopState>("ShowingDesktopState");
 
     m_display = new Srv::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     // Setup connection.
     m_connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

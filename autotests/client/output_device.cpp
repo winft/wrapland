@@ -68,7 +68,7 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-output-0");
+constexpr auto socket_name{"wrapland-test-wayland-output-0"};
 
 TestOutputDevice::TestOutputDevice(QObject* parent)
     : QObject(parent)
@@ -83,7 +83,7 @@ TestOutputDevice::TestOutputDevice(QObject* parent)
 void TestOutputDevice::init()
 {
     m_display = new Srv::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
     QVERIFY(m_display->running());
 
@@ -125,7 +125,7 @@ void TestOutputDevice::init()
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

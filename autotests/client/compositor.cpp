@@ -52,7 +52,7 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-compositor-0");
+constexpr auto socket_name = "wrapland-test-wayland-compositor-0";
 
 TestCompositor::TestCompositor(QObject* parent)
     : QObject(parent)
@@ -67,14 +67,14 @@ TestCompositor::TestCompositor(QObject* parent)
 void TestCompositor::init()
 {
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy establishedSpy(m_connection,
                               &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

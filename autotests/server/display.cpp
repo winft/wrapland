@@ -54,10 +54,10 @@ void TestServerDisplay::init()
 void TestServerDisplay::testSocketName()
 {
     Display display;
-    QVERIFY(display.socketName().empty());
-    const std::string testSName = "fooBar";
-    display.setSocketName(testSName);
-    QCOMPARE(display.socketName(), testSName);
+    QVERIFY(display.socket_name().empty());
+    std::string const testSName = "fooBar";
+    display.set_socket_name(testSName);
+    QCOMPARE(display.socket_name(), testSName);
 }
 
 void TestServerDisplay::testStartStop()
@@ -70,7 +70,7 @@ void TestServerDisplay::testStartStop()
     Display display;
     QSignalSpy runningSpy(&display, &Display::started);
     QVERIFY(runningSpy.isValid());
-    display.setSocketName(testSocketName);
+    display.set_socket_name(testSocketName);
     QVERIFY(!display.running());
     display.start();
 
@@ -86,7 +86,7 @@ void TestServerDisplay::testStartStop()
 void TestServerDisplay::testAddRemoveOutput()
 {
     Display display;
-    display.setSocketName(std::string("kwin-wayland-server-display-test-output-0"));
+    display.set_socket_name(std::string("kwin-wayland-server-display-test-output-0"));
     display.start();
 
     std::unique_ptr<Output> output1{new Wrapland::Server::Output(&display)};
@@ -118,7 +118,7 @@ void TestServerDisplay::testAddRemoveOutput()
 void TestServerDisplay::testClientConnection()
 {
     Display display;
-    display.setSocketName(std::string("kwin-wayland-server-display-test-client-connection"));
+    display.set_socket_name(std::string("kwin-wayland-server-display-test-client-connection"));
     display.start();
 
     QSignalSpy connectedSpy(&display, &Display::clientConnected);
@@ -220,7 +220,7 @@ void TestServerDisplay::testConnectNoSocket()
 void TestServerDisplay::testOutputManagement()
 {
     Display display;
-    display.setSocketName(std::string("wrapland-test-0"));
+    display.set_socket_name(std::string("wrapland-test-0"));
     display.start();
     display.createOutputManagementV1(this);
 }
@@ -234,12 +234,12 @@ void TestServerDisplay::testAutoSocketName()
     Display display0;
     display0.start();
     QVERIFY(display0.running());
-    QCOMPARE(display0.socketName(), std::string("wayland-0"));
+    QCOMPARE(display0.socket_name(), std::string("wayland-0"));
 
     Display display1;
     display1.start();
     QVERIFY(display1.running());
-    QCOMPARE(display1.socketName(), std::string("wayland-1"));
+    QCOMPARE(display1.socket_name(), std::string("wayland-1"));
 }
 
 QTEST_GUILESS_MAIN(TestServerDisplay)

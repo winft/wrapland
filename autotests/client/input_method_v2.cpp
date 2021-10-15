@@ -61,7 +61,7 @@ private:
     } client1;
 };
 
-constexpr auto socket_name = "wrapland-test-input-method-v2-0";
+constexpr auto socket_name{"wrapland-test-input-method-v2-0"};
 
 void input_method_v2_test::init()
 {
@@ -69,7 +69,7 @@ void input_method_v2_test::init()
 
     delete server.display;
     server.display = new Wrapland::Server::Display(this);
-    server.display->setSocketName(std::string(socket_name));
+    server.display->set_socket_name(socket_name);
     server.display->start();
 
     server.display->createShm();

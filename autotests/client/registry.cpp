@@ -158,7 +158,7 @@ private:
     std::unique_ptr<Wrapland::Server::LinuxDmabufV1> m_dmabuf;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-registry-0");
+constexpr auto socket_name{"wrapland-test-wayland-registry-0"};
 
 TestWaylandRegistry::TestWaylandRegistry(QObject* parent)
     : QObject(parent)
@@ -168,7 +168,7 @@ TestWaylandRegistry::TestWaylandRegistry(QObject* parent)
 void TestWaylandRegistry::init()
 {
     m_display.reset(new Wrapland::Server::Display());
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     m_display->createShm();
@@ -209,7 +209,7 @@ void TestWaylandRegistry::testCreate()
 {
     Wrapland::Client::ConnectionThread connection;
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     connection.establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
@@ -225,7 +225,7 @@ void TestWaylandRegistry::testCreate()
 #define TEST_BIND(iface, signalName, bindMethod, destroyFunction)                                  \
     Wrapland::Client::ConnectionThread connection;                                                 \
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged); \
-    connection.setSocketName(s_socketName);                                                        \
+    connection.setSocketName(socket_name);                                                         \
     connection.establishConnection();                                                              \
     QVERIFY(connectedSpy.count() || connectedSpy.wait());                                          \
     QCOMPARE(connectedSpy.count(), 1);                                                             \
@@ -468,7 +468,7 @@ void TestWaylandRegistry::testRemoval()
     using namespace Wrapland::Client;
     Wrapland::Client::ConnectionThread connection;
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     connection.establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
@@ -767,7 +767,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     using namespace Wrapland::Client;
     Wrapland::Client::ConnectionThread connection;
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     connection.establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
@@ -850,7 +850,7 @@ void TestWaylandRegistry::testDestroy()
     using namespace Wrapland::Client;
     Wrapland::Client::ConnectionThread connection;
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     connection.establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
@@ -890,7 +890,7 @@ void TestWaylandRegistry::testGlobalSync()
 {
     using namespace Wrapland::Client;
     ConnectionThread connection;
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     connection.establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
@@ -913,7 +913,7 @@ void TestWaylandRegistry::testGlobalSyncThreaded()
     // and our own EventQueue
     using namespace Wrapland::Client;
     ConnectionThread connection;
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     QThread thread;
     connection.moveToThread(&thread);
     thread.start();
@@ -948,7 +948,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
 {
     using namespace Wrapland::Client;
     ConnectionThread connection;
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     QSignalSpy connectedSpy(&connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection.establishConnection();
@@ -1030,7 +1030,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
 {
     using namespace Wrapland::Client;
     ConnectionThread connection;
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     QSignalSpy connectedSpy(&connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
     connection.establishConnection();

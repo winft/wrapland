@@ -60,19 +60,19 @@ private:
     QThread* m_thread = nullptr;
 };
 
-static const std::string s_socketName = "kwayland-test-wayland-datasource-0";
+constexpr auto socket_name{"kwayland-test-wayland-datasource-0"};
 
 void TestDataSource::init()
 {
     qRegisterMetaType<std::string>();
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connected_spy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(QString::fromStdString(s_socketName));
+    m_connection->setSocketName(QString::fromStdString(socket_name));
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);

@@ -60,12 +60,12 @@ private:
     Wrapland::Client::PlasmaShell* m_plasmaShell = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-error-0");
+constexpr auto socket_name{"wrapland-test-error-0"};
 
 void ErrorTest::init()
 {
     m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display->set_socket_name(socket_name);
     m_display->start();
 
     m_display->createShm();
@@ -78,7 +78,7 @@ void ErrorTest::init()
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
