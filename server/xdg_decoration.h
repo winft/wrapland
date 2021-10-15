@@ -36,15 +36,13 @@ class WRAPLANDSERVER_EXPORT XdgDecorationManager : public QObject
 {
     Q_OBJECT
 public:
+    XdgDecorationManager(Display* display, XdgShell* shell);
     ~XdgDecorationManager() override;
 
 Q_SIGNALS:
     void decorationCreated(XdgDecoration* decoration);
 
 private:
-    friend class Display;
-    XdgDecorationManager(Display* display, XdgShell* shell, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

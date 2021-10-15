@@ -142,9 +142,8 @@ bool Output::Mode::operator!=(Mode const& mode) const
     return !(*this == mode);
 }
 
-Output::Output(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+Output::Output(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

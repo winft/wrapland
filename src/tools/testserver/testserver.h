@@ -20,6 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TESTSERVER_H
 #define TESTSERVER_H
 
+#include "../../../server/globals.h"
+
 #include <QHash>
 #include <QObject>
 #include <QPointF>
@@ -36,8 +38,6 @@ namespace Wrapland
 namespace Server
 {
 class Display;
-class Seat;
-class XdgShell;
 class XdgShellToplevel;
 }
 }
@@ -55,10 +55,11 @@ public:
 private:
     void repaint();
 
-    Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::XdgShell* m_shell = nullptr;
-    Wrapland::Server::Seat* m_seat = nullptr;
+    std::unique_ptr<Wrapland::Server::Display> m_display;
+    Wrapland::Server::globals globals;
+
     QVector<Wrapland::Server::XdgShellToplevel*> m_shellSurfaces;
+
     QTimer* m_repaintTimer;
     std::unique_ptr<QElapsedTimer> m_timeSinceStart;
     QPointF m_cursorPos;

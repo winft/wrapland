@@ -37,6 +37,7 @@ class WRAPLANDSERVER_EXPORT KeyboardShortcutsInhibitManagerV1 : public QObject
     Q_OBJECT
 
 public:
+    explicit KeyboardShortcutsInhibitManagerV1(Display* display);
     ~KeyboardShortcutsInhibitManagerV1() override;
 
     KeyboardShortcutsInhibitorV1* findInhibitor(Surface* surface, Seat* seat) const;
@@ -45,9 +46,7 @@ Q_SIGNALS:
     void inhibitorCreated(KeyboardShortcutsInhibitorV1* inhibitor);
 
 private:
-    friend class Display;
     friend class KeyboardShortcutsInhibitorV1;
-    explicit KeyboardShortcutsInhibitManagerV1(Display* display, QObject* parent = nullptr);
 
     void removeInhibitor(Surface* surface, Seat* seat);
 

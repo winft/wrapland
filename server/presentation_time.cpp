@@ -83,9 +83,8 @@ void PresentationManager::Private::feedbackCallback(PresentationManagerBind* bin
     surface->d_ptr->addPresentationFeedback(feedback);
 }
 
-PresentationManager::PresentationManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+PresentationManager::PresentationManager(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

@@ -32,12 +32,10 @@ class WRAPLANDSERVER_EXPORT PointerGesturesV1 : public QObject
 {
     Q_OBJECT
 public:
+    explicit PointerGesturesV1(Display* display);
     ~PointerGesturesV1() override;
 
 private:
-    friend class Display;
-    explicit PointerGesturesV1(Display* display, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

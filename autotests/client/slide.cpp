@@ -27,8 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/slide.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/region.h"
 #include "../../server/slide.h"
 #include "../../server/surface.h"
@@ -48,9 +48,11 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Compositor* m_serverCompositor;
-    Wrapland::Server::SlideManager* m_slideManagerInterface;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::SlideManager* m_slideManager;
@@ -62,8 +64,6 @@ constexpr auto socket_name{"wrapland-test-wayland-slide-0"};
 
 TestSlide::TestSlide(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_queue(nullptr)
@@ -74,9 +74,11 @@ TestSlide::TestSlide(QObject* parent)
 void TestSlide::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // Setup connection.
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -110,14 +112,14 @@ void TestSlide::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_serverCompositor = m_display->createCompositor(m_display);
+    server.globals.compositor = server.display->createCompositor();
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
                                              compositorSpy.first().last().value<quint32>(),
                                              this);
 
-    m_slideManagerInterface = m_display->createSlideManager(m_display);
+    server.globals.slide_manager = server.display->createSlideManager();
 
     QVERIFY(slideSpy.wait());
     m_slideManager = registry.createSlideManager(
@@ -144,15 +146,14 @@ void TestSlide::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_slideManagerInterface)
-    CLEANUP(m_display)
 #undef CLEANUP
+
+    server = {};
 }
 
 void TestSlide::testCreate()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
@@ -181,7 +182,7 @@ void TestSlide::testCreate()
 
 void TestSlide::testSurfaceDestroy()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 

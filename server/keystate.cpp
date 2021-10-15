@@ -42,9 +42,8 @@ void KeyState::Private::fetchStatesCallback(KeyStateBind* bind)
     }
 }
 
-KeyState::KeyState(Display* d, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(d, this))
+KeyState::KeyState(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 KeyState::~KeyState() = default;

@@ -99,9 +99,8 @@ void XdgExporterV2::Private::exportToplevelCallback(XdgExporterV2Bind* bind,
     priv->exportedSurfaces[protocolHandle] = exported;
 }
 
-XdgExporterV2::XdgExporterV2(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+XdgExporterV2::XdgExporterV2(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }
@@ -189,8 +188,7 @@ XdgImporterV2::Private::Private(XdgImporterV2* q, Display* display)
 void XdgImporterV2::Private::childChange(Surface* parent, Surface* prevChild, Surface* nextChild)
 {
     if (prevChild) {
-        int removed = parents.remove(prevChild);
-        Q_ASSERT(removed);
+        parents.remove(prevChild);
     }
     if (nextChild && parent) {
         parents[nextChild] = parent;
@@ -199,9 +197,8 @@ void XdgImporterV2::Private::childChange(Surface* parent, Surface* prevChild, Su
     Q_EMIT handle()->parentChanged(parent, nextChild);
 }
 
-XdgImporterV2::XdgImporterV2(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+XdgImporterV2::XdgImporterV2(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

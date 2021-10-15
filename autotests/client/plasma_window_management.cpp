@@ -27,8 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/plasma_window.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
@@ -86,11 +86,13 @@ private Q_SLOTS:
     void testApplicationMenu();
 
 private:
-    Srv::Display* m_display;
-    Srv::Compositor* m_serverCompositor;
-    Srv::PlasmaWindowManager* m_windowManagementInterface;
-    Srv::PlasmaWindow* m_windowInterface;
-    Srv::Surface* m_serverSurface = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+
+        Srv::PlasmaWindow* plasma_window{nullptr};
+        Srv::Surface* surface{nullptr};
+    } server;
 
     Clt::Surface* m_surface = nullptr;
     Clt::ConnectionThread* m_connection;
@@ -106,8 +108,6 @@ constexpr auto socket_name{"wrapland-test-wayland-windowmanagement-0"};
 
 TestWindowManagement::TestWindowManagement(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_queue(nullptr)
@@ -120,9 +120,10 @@ void TestWindowManagement::init()
     qRegisterMetaType<Wrapland::Server::Surface*>();
     qRegisterMetaType<Srv::PlasmaWindowManager::ShowingDesktopState>("ShowingDesktopState");
 
-    m_display = new Srv::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // Setup connection.
     m_connection = new Clt::ConnectionThread;
@@ -156,14 +157,14 @@ void TestWindowManagement::init()
     QVERIFY(m_registry->isValid());
     m_registry->setup();
 
-    m_serverCompositor = m_display->createCompositor(m_display);
+    server.globals.compositor = server.display->createCompositor();
 
     QVERIFY(compositorSpy.wait());
     m_compositor = m_registry->createCompositor(compositorSpy.first().first().value<quint32>(),
                                                 compositorSpy.first().last().value<quint32>(),
                                                 this);
 
-    m_windowManagementInterface = m_display->createPlasmaWindowManager(m_display);
+    server.globals.plasma_window_manager = server.display->createPlasmaWindowManager();
 
     QVERIFY(windowManagementSpy.wait());
     m_windowManagement = m_registry->createPlasmaWindowManagement(
@@ -173,21 +174,22 @@ void TestWindowManagement::init()
 
     QSignalSpy windowSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowSpy.isValid());
-    m_windowInterface = m_windowManagementInterface->createWindow(this);
-    m_windowInterface->setPid(1337);
+    server.plasma_window = server.globals.plasma_window_manager->createWindow(this);
+    server.plasma_window->setPid(1337);
 
     QVERIFY(windowSpy.wait());
     m_window = windowSpy.first().first().value<Clt::PlasmaWindow*>();
 
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     m_surface = m_compositor->createSurface(this);
     QVERIFY(m_surface);
 
     QVERIFY(serverSurfaceCreated.wait());
-    m_serverSurface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
-    QVERIFY(m_serverSurface);
+    server.surface = serverSurfaceCreated.first().first().value<Srv::Surface*>();
+    QVERIFY(server.surface);
 }
 
 void TestWindowManagement::cleanup()
@@ -225,20 +227,12 @@ void TestWindowManagement::cleanup()
     }
     m_connection = nullptr;
 
-    m_display->dispatchEvents();
-    delete m_windowManagementInterface;
-    m_windowManagementInterface = nullptr;
-
-    delete m_windowInterface;
-    m_windowInterface = nullptr;
-
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestWindowManagement::testWindowTitle()
 {
-    m_windowInterface->setTitle(QStringLiteral("Test Title"));
+    server.plasma_window->setTitle(QStringLiteral("Test Title"));
 
     QSignalSpy titleSpy(m_window, &Clt::PlasmaWindow::titleChanged);
     QVERIFY(titleSpy.isValid());
@@ -252,15 +246,15 @@ void TestWindowManagement::testMinimizedGeometry()
 {
     m_window->setMinimizedGeometry(m_surface, QRect(5, 10, 100, 200));
 
-    QSignalSpy geometrySpy(m_windowInterface, &Srv::PlasmaWindow::minimizedGeometriesChanged);
+    QSignalSpy geometrySpy(server.plasma_window, &Srv::PlasmaWindow::minimizedGeometriesChanged);
     QVERIFY(geometrySpy.isValid());
 
     QVERIFY(geometrySpy.wait());
-    QCOMPARE(m_windowInterface->minimizedGeometries().values().first(), QRect(5, 10, 100, 200));
+    QCOMPARE(server.plasma_window->minimizedGeometries().values().first(), QRect(5, 10, 100, 200));
 
     m_window->unsetMinimizedGeometry(m_surface);
     QVERIFY(geometrySpy.wait());
-    QVERIFY(m_windowInterface->minimizedGeometries().isEmpty());
+    QVERIFY(server.plasma_window->minimizedGeometries().isEmpty());
 }
 
 void TestWindowManagement::testUseAfterUnmap()
@@ -270,11 +264,11 @@ void TestWindowManagement::testUseAfterUnmap()
     QVERIFY(unmappedSpy.isValid());
     QSignalSpy destroyedSpy(m_window, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
-    QSignalSpy serverDestroyedSpy(m_windowInterface, &QObject::destroyed);
+    QSignalSpy serverDestroyedSpy(server.plasma_window, &QObject::destroyed);
     QVERIFY(serverDestroyedSpy.isValid());
 
-    m_windowInterface->unmap();
-    m_windowInterface = nullptr;
+    server.plasma_window->unmap();
+    server.plasma_window = nullptr;
     QCOMPARE(serverDestroyedSpy.count(), 1);
     m_window->requestClose();
     QVERIFY(unmappedSpy.wait());
@@ -290,10 +284,10 @@ void TestWindowManagement::testCreateAfterUnmap()
 
     // Create and unmap in one go.
     // Client will first handle the create, the unmap will be sent once the server side is bound.
-    auto serverWindow = m_windowManagementInterface->createWindow(this);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(this);
     serverWindow->unmap();
 
-    QCOMPARE(m_windowManagementInterface->children().count(), 0);
+    QCOMPARE(server.globals.plasma_window_manager->children().count(), 0);
     QCoreApplication::instance()->processEvents();
     QCoreApplication::instance()->processEvents(QEventLoop::WaitForMoreEvents);
     QTRY_COMPARE(m_windowManagement->children().count(), 2);
@@ -323,7 +317,7 @@ void TestWindowManagement::testActiveWindowOnUnmapped()
                                       &Clt::PlasmaWindowManagement::activeWindowChanged);
     QVERIFY(activeWindowChangedSpy.isValid());
 
-    m_windowInterface->setActive(true);
+    server.plasma_window->setActive(true);
     QVERIFY(activeWindowChangedSpy.wait());
     QCOMPARE(m_windowManagement->activeWindow(), m_window);
     QVERIFY(m_window->isActive());
@@ -331,11 +325,11 @@ void TestWindowManagement::testActiveWindowOnUnmapped()
     // Now unmap should change the active window.
     QSignalSpy destroyedSpy(m_window, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
-    QSignalSpy serverDestroyedSpy(m_windowInterface, &QObject::destroyed);
+    QSignalSpy serverDestroyedSpy(server.plasma_window, &QObject::destroyed);
     QVERIFY(serverDestroyedSpy.isValid());
 
-    m_windowManagementInterface->unmapWindow(m_windowInterface);
-    m_windowInterface = nullptr;
+    server.globals.plasma_window_manager->unmapWindow(server.plasma_window);
+    server.plasma_window = nullptr;
     QCOMPARE(serverDestroyedSpy.count(), 1);
     QVERIFY(activeWindowChangedSpy.wait());
     QVERIFY(!m_windowManagement->activeWindow());
@@ -352,8 +346,8 @@ void TestWindowManagement::testServerDelete()
     QSignalSpy destroyedSpy(m_window, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
 
-    delete m_windowInterface;
-    m_windowInterface = nullptr;
+    delete server.plasma_window;
+    server.plasma_window = nullptr;
 
     QVERIFY(unmappedSpy.wait());
     QVERIFY(destroyedSpy.wait());
@@ -370,7 +364,7 @@ void TestWindowManagement::testDeleteActiveWindow()
                                       &Clt::PlasmaWindowManagement::activeWindowChanged);
     QVERIFY(activeWindowChangedSpy.isValid());
 
-    m_windowInterface->setActive(true);
+    server.plasma_window->setActive(true);
     QVERIFY(activeWindowChangedSpy.wait());
     QCOMPARE(activeWindowChangedSpy.count(), 1);
     QCOMPARE(m_windowManagement->activeWindow(), m_window);
@@ -400,7 +394,7 @@ void TestWindowManagement::testRequests()
 {
     // This test case verifies all the different requests on a PlasmaWindow
     QFETCH(ServerWindowSignal, changedSignal);
-    QSignalSpy requestSpy(m_windowInterface, changedSignal);
+    QSignalSpy requestSpy(server.plasma_window, changedSignal);
     QVERIFY(requestSpy.isValid());
 
     QFETCH(ClientWindowVoidSetter, requester);
@@ -457,7 +451,7 @@ void TestWindowManagement::testRequestsBoolean()
 {
     // This test case verifies all the different requests on a PlasmaWindow.
     QFETCH(ServerWindowBooleanSignal, changedSignal);
-    QSignalSpy requestSpy(m_windowInterface, changedSignal);
+    QSignalSpy requestSpy(server.plasma_window, changedSignal);
     QVERIFY(requestSpy.isValid());
     QFETCH(int, flag);
 
@@ -479,7 +473,7 @@ void TestWindowManagement::testShowingDesktop()
     QSignalSpy showingDesktopChangedSpy(m_windowManagement,
                                         &Clt::PlasmaWindowManagement::showingDesktopChanged);
     QVERIFY(showingDesktopChangedSpy.isValid());
-    m_windowManagementInterface->setShowingDesktopState(
+    server.globals.plasma_window_manager->setShowingDesktopState(
         Srv::PlasmaWindowManager::ShowingDesktopState::Enabled);
     QVERIFY(showingDesktopChangedSpy.wait());
     QCOMPARE(showingDesktopChangedSpy.count(), 1);
@@ -487,13 +481,13 @@ void TestWindowManagement::testShowingDesktop()
     QVERIFY(m_windowManagement->isShowingDesktop());
 
     // Setting to same should not change.
-    m_windowManagementInterface->setShowingDesktopState(
+    server.globals.plasma_window_manager->setShowingDesktopState(
         Srv::PlasmaWindowManager::ShowingDesktopState::Enabled);
     QVERIFY(!showingDesktopChangedSpy.wait(100));
     QCOMPARE(showingDesktopChangedSpy.count(), 1);
 
     // Setting to other state should change.
-    m_windowManagementInterface->setShowingDesktopState(
+    server.globals.plasma_window_manager->setShowingDesktopState(
         Srv::PlasmaWindowManager::ShowingDesktopState::Disabled);
     QVERIFY(showingDesktopChangedSpy.wait());
     QCOMPARE(showingDesktopChangedSpy.count(), 2);
@@ -514,7 +508,7 @@ void TestWindowManagement::testRequestShowingDesktop_data()
 void TestWindowManagement::testRequestShowingDesktop()
 {
     // This test verifies requesting show desktop state.
-    QSignalSpy requestSpy(m_windowManagementInterface,
+    QSignalSpy requestSpy(server.globals.plasma_window_manager.get(),
                           &Srv::PlasmaWindowManager::requestChangeShowingDesktop);
     QVERIFY(requestSpy.isValid());
     QFETCH(bool, value);
@@ -532,18 +526,18 @@ void TestWindowManagement::testKeepAbove()
     QVERIFY(!m_window->isKeepAbove());
     QSignalSpy keepAboveChangedSpy(m_window, &Clt::PlasmaWindow::keepAboveChanged);
     QVERIFY(keepAboveChangedSpy.isValid());
-    m_windowInterface->setKeepAbove(true);
+    server.plasma_window->setKeepAbove(true);
     QVERIFY(keepAboveChangedSpy.wait());
     QCOMPARE(keepAboveChangedSpy.count(), 1);
     QVERIFY(m_window->isKeepAbove());
 
     // Setting to same should not change.
-    m_windowInterface->setKeepAbove(true);
+    server.plasma_window->setKeepAbove(true);
     QVERIFY(!keepAboveChangedSpy.wait(100));
     QCOMPARE(keepAboveChangedSpy.count(), 1);
 
     // Setting to other state should change.
-    m_windowInterface->setKeepAbove(false);
+    server.plasma_window->setKeepAbove(false);
     QVERIFY(keepAboveChangedSpy.wait());
     QCOMPARE(keepAboveChangedSpy.count(), 2);
     QVERIFY(!m_window->isKeepAbove());
@@ -556,18 +550,18 @@ void TestWindowManagement::testKeepBelow()
     QSignalSpy keepBelowChangedSpy(m_window, &Clt::PlasmaWindow::keepBelowChanged);
     QVERIFY(keepBelowChangedSpy.isValid());
 
-    m_windowInterface->setKeepBelow(true);
+    server.plasma_window->setKeepBelow(true);
     QVERIFY(keepBelowChangedSpy.wait());
     QCOMPARE(keepBelowChangedSpy.count(), 1);
     QVERIFY(m_window->isKeepBelow());
 
     // Setting to same should not change.
-    m_windowInterface->setKeepBelow(true);
+    server.plasma_window->setKeepBelow(true);
     QVERIFY(!keepBelowChangedSpy.wait(100));
     QCOMPARE(keepBelowChangedSpy.count(), 1);
 
     // Setting to other state should change.
-    m_windowInterface->setKeepBelow(false);
+    server.plasma_window->setKeepBelow(false);
     QVERIFY(keepBelowChangedSpy.wait());
     QCOMPARE(keepBelowChangedSpy.count(), 2);
     QVERIFY(!m_window->isKeepBelow());
@@ -584,8 +578,8 @@ void TestWindowManagement::testParentWindow()
     // Now let's create a second window.
     QSignalSpy windowAddedSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowAddedSpy.isValid());
-    auto serverTransient = m_windowManagementInterface->createWindow(this);
-    serverTransient->setParentWindow(m_windowInterface);
+    auto serverTransient = server.globals.plasma_window_manager->createWindow(this);
+    serverTransient->setParentWindow(server.plasma_window);
     QVERIFY(windowAddedSpy.wait());
     auto transient = windowAddedSpy.first().first().value<Clt::PlasmaWindow*>();
     QCOMPARE(transient->parentWindow().data(), parentWindow);
@@ -598,14 +592,14 @@ void TestWindowManagement::testParentWindow()
     QVERIFY(transient->parentWindow().isNull());
 
     // And set it again.
-    serverTransient->setParentWindow(m_windowInterface);
+    serverTransient->setParentWindow(server.plasma_window);
     QVERIFY(parentWindowChangedSpy.wait());
     QCOMPARE(transient->parentWindow().data(), parentWindow);
 
     // Now let's try to unmap the parent.
-    m_windowInterface->unmap();
+    server.plasma_window->unmap();
     m_window = nullptr;
-    m_windowInterface = nullptr;
+    server.plasma_window = nullptr;
     QVERIFY(parentWindowChangedSpy.wait());
     QVERIFY(transient->parentWindow().isNull());
 }
@@ -617,20 +611,20 @@ void TestWindowManagement::testGeometry()
     QSignalSpy windowGeometryChangedSpy(m_window, &Clt::PlasmaWindow::geometryChanged);
     QVERIFY(windowGeometryChangedSpy.isValid());
 
-    m_windowInterface->setGeometry(QRect(20, -10, 30, 40));
+    server.plasma_window->setGeometry(QRect(20, -10, 30, 40));
     QVERIFY(windowGeometryChangedSpy.wait());
     QCOMPARE(m_window->geometry(), QRect(20, -10, 30, 40));
 
     // Setting an empty geometry should not be sent to the client.
-    m_windowInterface->setGeometry(QRect());
+    server.plasma_window->setGeometry(QRect());
     QVERIFY(!windowGeometryChangedSpy.wait(10));
 
     // Setting to the geometry which the client still has should not trigger signal.
-    m_windowInterface->setGeometry(QRect(20, -10, 30, 40));
+    server.plasma_window->setGeometry(QRect(20, -10, 30, 40));
     QVERIFY(!windowGeometryChangedSpy.wait(10));
 
     // Setting another geometry should work though.
-    m_windowInterface->setGeometry(QRect(0, 0, 35, 45));
+    server.plasma_window->setGeometry(QRect(0, 0, 35, 45));
     QVERIFY(windowGeometryChangedSpy.wait());
     QCOMPARE(windowGeometryChangedSpy.count(), 2);
     QCOMPARE(m_window->geometry(), QRect(0, 0, 35, 45));
@@ -668,7 +662,7 @@ void TestWindowManagement::testIcon()
     QCOMPARE(m_window->icon().name(), QStringLiteral("wayland"));
 
     // First goes from themed name to empty.
-    m_windowInterface->setIcon(QIcon());
+    server.plasma_window->setIcon(QIcon());
     QVERIFY(iconChangedSpy.wait());
     QCOMPARE(iconChangedSpy.count(), 2);
     if (!QIcon::hasThemeIcon(QStringLiteral("wayland"))) {
@@ -687,7 +681,7 @@ void TestWindowManagement::testIcon()
     pixmap.fill(Qt::red);
     QImage image = pixmap.toImage();
 
-    m_windowInterface->setIcon(pixmap);
+    server.plasma_window->setIcon(pixmap);
     QVERIFY(iconChangedSpy.wait());
     QCOMPARE(iconChangedSpy.count(), 3);
 
@@ -703,7 +697,7 @@ void TestWindowManagement::testIcon()
     }
 
     // Let's set a themed icon.
-    m_windowInterface->setIcon(QIcon::fromTheme(QStringLiteral("xorg")));
+    server.plasma_window->setIcon(QIcon::fromTheme(QStringLiteral("xorg")));
     QVERIFY(iconChangedSpy.wait());
     QCOMPARE(iconChangedSpy.count(), 3);
 
@@ -721,7 +715,7 @@ void TestWindowManagement::testPid()
 
     // Test server not setting a PID for whatever reason.
     std::unique_ptr<Srv::PlasmaWindow> newWindowInterface(
-        m_windowManagementInterface->createWindow(this));
+        server.globals.plasma_window_manager->createWindow(this));
 
     QSignalSpy windowSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowSpy.wait());
@@ -740,7 +734,7 @@ void TestWindowManagement::testApplicationMenu()
     QSignalSpy applicationMenuChangedSpy(m_window, &Clt::PlasmaWindow::applicationMenuChanged);
     QVERIFY(applicationMenuChangedSpy.isValid());
 
-    m_windowInterface->setApplicationMenuPaths(serviceName, objectPath);
+    server.plasma_window->setApplicationMenuPaths(serviceName, objectPath);
 
     QVERIFY(applicationMenuChangedSpy.wait());
 

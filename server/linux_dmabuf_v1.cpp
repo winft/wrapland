@@ -88,9 +88,8 @@ void LinuxDmabufV1::Private::createParamsCallback(LinuxDmabufV1Bind* bind, uint3
         = new ParamsWrapperV1(bind->client()->handle(), bind->version(), id, priv);
 }
 
-LinuxDmabufV1::LinuxDmabufV1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+LinuxDmabufV1::LinuxDmabufV1(Display* display)
+    : d_ptr(new Private(this, display))
 {
 }
 

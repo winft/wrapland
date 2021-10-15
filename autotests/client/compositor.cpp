@@ -27,8 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/surface.h"
 
 class TestCompositor : public QObject
@@ -44,8 +44,11 @@ private Q_SLOTS:
     void testCast();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Compositor* m_serverCompositor;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::EventQueue* m_queue;
@@ -56,8 +59,6 @@ constexpr auto socket_name = "wrapland-test-wayland-compositor-0";
 
 TestCompositor::TestCompositor(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_thread(nullptr)
@@ -66,9 +67,10 @@ TestCompositor::TestCompositor(QObject* parent)
 
 void TestCompositor::init()
 {
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -86,7 +88,8 @@ void TestCompositor::init()
     m_queue = new Wrapland::Client::EventQueue(this);
     m_queue->setup(m_connection);
 
-    QSignalSpy clientConnectedSpy(m_display, &Wrapland::Server::Display::clientConnected);
+    QSignalSpy clientConnectedSpy(server.display.get(),
+                                  &Wrapland::Server::Display::clientConnected);
     QVERIFY(clientConnectedSpy.isValid());
 
     Wrapland::Client::Registry registry;
@@ -97,8 +100,7 @@ void TestCompositor::init()
     registry.setup();
 
     // here we need a shm pool
-    m_serverCompositor = m_display->createCompositor(m_display);
-    QVERIFY(m_serverCompositor);
+    server.globals.compositor = server.display->createCompositor();
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
@@ -122,8 +124,7 @@ void TestCompositor::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestCompositor::testConnectionLoss()
@@ -133,8 +134,7 @@ void TestCompositor::testConnectionLoss()
 
     QSignalSpy connectionSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(connectionSpy.isValid());
-    delete m_display;
-    m_display = nullptr;
+    server = {};
     QTRY_COMPARE(connectionSpy.count(), 1);
 
     // The compositor pointer should still exist.

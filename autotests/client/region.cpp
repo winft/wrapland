@@ -27,8 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 
 #include "../../server/client.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/region.h"
 
 class TestRegion : public QObject
@@ -50,8 +50,11 @@ private Q_SLOTS:
     void testDisconnect();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Compositor* m_serverCompositor;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::EventQueue* m_queue;
@@ -62,8 +65,6 @@ constexpr auto socket_name{"wrapland-test-wayland-region-0"};
 
 TestRegion::TestRegion(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_queue(nullptr)
@@ -75,9 +76,10 @@ void TestRegion::init()
 {
     qRegisterMetaType<Wrapland::Server::Region*>();
 
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // Setup connection.
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -107,7 +109,7 @@ void TestRegion::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_serverCompositor = m_display->createCompositor(m_display);
+    server.globals.compositor = server.display->createCompositor();
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
@@ -134,13 +136,12 @@ void TestRegion::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestRegion::testCreate()
 {
-    QSignalSpy regionCreatedSpy(m_serverCompositor,
+    QSignalSpy regionCreatedSpy(server.globals.compositor.get(),
                                 SIGNAL(regionCreated(Wrapland::Server::Region*)));
     QVERIFY(regionCreatedSpy.isValid());
 
@@ -156,7 +157,8 @@ void TestRegion::testCreate()
 
 void TestRegion::testCreateWithRegion()
 {
-    QSignalSpy regionCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::regionCreated);
+    QSignalSpy regionCreatedSpy(server.globals.compositor.get(),
+                                &Wrapland::Server::Compositor::regionCreated);
     QVERIFY(regionCreatedSpy.isValid());
 
     std::unique_ptr<Wrapland::Client::Region> region(
@@ -172,7 +174,7 @@ void TestRegion::testCreateWithRegion()
 
 void TestRegion::testCreateUniquePtr()
 {
-    QSignalSpy regionCreatedSpy(m_serverCompositor,
+    QSignalSpy regionCreatedSpy(server.globals.compositor.get(),
                                 SIGNAL(regionCreated(Wrapland::Server::Region*)));
     QVERIFY(regionCreatedSpy.isValid());
 
@@ -189,7 +191,7 @@ void TestRegion::testCreateUniquePtr()
 
 void TestRegion::testAdd()
 {
-    QSignalSpy regionCreatedSpy(m_serverCompositor,
+    QSignalSpy regionCreatedSpy(server.globals.compositor.get(),
                                 SIGNAL(regionCreated(Wrapland::Server::Region*)));
     QVERIFY(regionCreatedSpy.isValid());
 
@@ -223,7 +225,7 @@ void TestRegion::testAdd()
 
 void TestRegion::testRemove()
 {
-    QSignalSpy regionCreatedSpy(m_serverCompositor,
+    QSignalSpy regionCreatedSpy(server.globals.compositor.get(),
                                 SIGNAL(regionCreated(Wrapland::Server::Region*)));
     QVERIFY(regionCreatedSpy.isValid());
 
@@ -275,8 +277,7 @@ void TestRegion::testDestroy()
             &Wrapland::Client::EventQueue::release);
     QVERIFY(region->isValid());
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
     QTRY_VERIFY(!m_connection->established());
 
     // Now the region should be destroyed.
@@ -293,7 +294,8 @@ void TestRegion::testDisconnect()
     std::unique_ptr<Wrapland::Client::Region> r(m_compositor->createRegion());
     QVERIFY(r != nullptr);
     QVERIFY(r->isValid());
-    QSignalSpy regionCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::regionCreated);
+    QSignalSpy regionCreatedSpy(server.globals.compositor.get(),
+                                &Wrapland::Server::Compositor::regionCreated);
     QVERIFY(regionCreatedSpy.isValid());
     QVERIFY(regionCreatedSpy.wait());
     auto serverRegion = regionCreatedSpy.first().first().value<Wrapland::Server::Region*>();

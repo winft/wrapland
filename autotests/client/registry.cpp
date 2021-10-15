@@ -21,17 +21,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/display.h"
 
-#include "../../server/compositor.h"
 #include "../../server/data_control_v1.h"
-#include "../../server/data_device_manager.h"
 #include "../../server/dpms.h"
-#include "../../server/output.h"
 #include "../../server/pointer_constraints_v1.h"
 #include "../../server/pointer_gestures_v1.h"
 #include "../../server/relative_pointer_v1.h"
-#include "../../server/seat.h"
 #include "../../server/subcompositor.h"
-#include "../../server/xdg_shell.h"
 
 #include "../../src/client/blur.h"
 #include "../../src/client/compositor.h"
@@ -58,6 +53,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/blur.h"
 #include "../../server/contrast.h"
 #include "../../server/drm_lease_v1.h"
+#include "../../server/globals.h"
 #include "../../server/idle_inhibit_v1.h"
 #include "../../server/input_method_v2.h"
 #include "../../server/linux_dmabuf_v1.h"
@@ -133,29 +129,10 @@ private Q_SLOTS:
     void testAnnounceMultipleOutputDeviceV1s();
 
 private:
-    std::unique_ptr<Wrapland::Server::Display> m_display;
-    std::unique_ptr<Wrapland::Server::Compositor> m_compositor;
-    std::unique_ptr<Wrapland::Server::Output> m_output;
-    std::unique_ptr<Wrapland::Server::Seat> m_seat;
-    std::unique_ptr<Wrapland::Server::Subcompositor> m_subcompositor;
-    std::unique_ptr<Wrapland::Server::data_device_manager> m_dataDeviceManager;
-    std::unique_ptr<Wrapland::Server::data_control_manager_v1> m_dataControlManager;
-    std::unique_ptr<Wrapland::Server::drm_lease_device_v1> m_drmLeaseDeviceV1;
-    std::unique_ptr<Wrapland::Server::input_method_manager_v2> m_inputMethodManagerV2;
-    std::unique_ptr<Wrapland::Server::OutputManagementV1> m_outputManagement;
-    std::unique_ptr<Wrapland::Server::XdgDecorationManager> m_xdgDecorationManager;
-    std::unique_ptr<Wrapland::Server::TextInputManagerV2> m_textInputManagerV2;
-    std::unique_ptr<Wrapland::Server::text_input_manager_v3> m_textInputManagerV3;
-    std::unique_ptr<Wrapland::Server::XdgShell> m_serverXdgShell;
-    std::unique_ptr<Wrapland::Server::RelativePointerManagerV1> m_relativePointerV1;
-    std::unique_ptr<Wrapland::Server::PointerGesturesV1> m_pointerGesturesV1;
-    std::unique_ptr<Wrapland::Server::PointerConstraintsV1> m_pointerConstraintsV1;
-    std::unique_ptr<Wrapland::Server::PresentationManager> m_presentation;
-    std::unique_ptr<Wrapland::Server::primary_selection_device_manager> m_primarySelection;
-    std::unique_ptr<Wrapland::Server::ContrastManager> m_contrast;
-    std::unique_ptr<Wrapland::Server::BlurManager> m_blur;
-    std::unique_ptr<Wrapland::Server::IdleInhibitManagerV1> m_idleInhibit;
-    std::unique_ptr<Wrapland::Server::LinuxDmabufV1> m_dmabuf;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
 };
 
 constexpr auto socket_name{"wrapland-test-wayland-registry-0"};
@@ -167,38 +144,63 @@ TestWaylandRegistry::TestWaylandRegistry(QObject* parent)
 
 void TestWaylandRegistry::init()
 {
-    m_display.reset(new Wrapland::Server::Display());
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
 
-    m_display->createShm();
-    m_compositor.reset(m_display->createCompositor());
-    m_output.reset(new Wrapland::Server::Output(m_display.get()));
-    m_seat.reset(m_display->createSeat());
-    m_subcompositor.reset(m_display->createSubCompositor());
-    m_dataDeviceManager.reset(m_display->createDataDeviceManager());
-    m_dataControlManager.reset(m_display->create_data_control_manager_v1());
-    m_drmLeaseDeviceV1.reset(m_display->createDrmLeaseDeviceV1());
-    m_outputManagement.reset(m_display->createOutputManagementV1());
-    m_blur.reset(m_display->createBlurManager());
-    m_contrast.reset(m_display->createContrastManager());
-    m_display->createSlideManager(this);
-    m_display->createDpmsManager(this);
-    m_inputMethodManagerV2.reset(m_display->createInputMethodManagerV2());
-    m_serverXdgShell.reset(m_display->createXdgShell());
-    m_xdgDecorationManager.reset(m_display->createXdgDecorationManager(m_serverXdgShell.get()));
-    m_textInputManagerV2.reset(m_display->createTextInputManagerV2());
-    m_textInputManagerV3.reset(m_display->createTextInputManagerV3());
-    m_relativePointerV1.reset(m_display->createRelativePointerManager());
-    m_pointerGesturesV1.reset(m_display->createPointerGestures());
-    m_pointerConstraintsV1.reset(m_display->createPointerConstraints());
-    m_presentation.reset(m_display->createPresentationManager());
-    m_primarySelection.reset(m_display->createPrimarySelectionDeviceManager());
-    m_idleInhibit.reset(m_display->createIdleInhibitManager());
-    m_dmabuf.reset(m_display->createLinuxDmabuf());
+    server.display->createShm();
 
-    m_output->set_enabled(true);
-    m_output->done();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.outputs.push_back(
+        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.subcompositor
+        = std::make_unique<Wrapland::Server::Subcompositor>(server.display.get());
+    server.globals.data_device_manager
+        = std::make_unique<Wrapland::Server::data_device_manager>(server.display.get());
+    server.globals.data_control_manager_v1
+        = std::make_unique<Wrapland::Server::data_control_manager_v1>(server.display.get());
+    server.globals.drm_lease_device_v1
+        = std::make_unique<Wrapland::Server::drm_lease_device_v1>(server.display.get());
+    server.globals.output_management_v1
+        = std::make_unique<Wrapland::Server::OutputManagementV1>(server.display.get());
+    server.globals.blur_manager
+        = std::make_unique<Wrapland::Server::BlurManager>(server.display.get());
+    server.globals.contrast_manager
+        = std::make_unique<Wrapland::Server::ContrastManager>(server.display.get());
+    server.globals.slide_manager
+        = std::make_unique<Wrapland::Server::SlideManager>(server.display.get());
+    server.globals.dpms_manager
+        = std::make_unique<Wrapland::Server::DpmsManager>(server.display.get());
+    server.globals.input_method_manager_v2
+        = std::make_unique<Wrapland::Server::input_method_manager_v2>(server.display.get());
+    server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
+    server.globals.xdg_decoration_manager
+        = std::make_unique<Wrapland::Server::XdgDecorationManager>(server.display.get(),
+                                                                   server.globals.xdg_shell.get());
+    server.globals.text_input_manager_v2
+        = std::make_unique<Wrapland::Server::TextInputManagerV2>(server.display.get());
+    server.globals.text_input_v3
+        = std::make_unique<Wrapland::Server::text_input_manager_v3>(server.display.get());
+    server.globals.relative_pointer_manager_v1
+        = std::make_unique<Wrapland::Server::RelativePointerManagerV1>(server.display.get());
+    server.globals.pointer_gestures_v1
+        = std::make_unique<Wrapland::Server::PointerGesturesV1>(server.display.get());
+    server.globals.pointer_constraints_v1
+        = std::make_unique<Wrapland::Server::PointerConstraintsV1>(server.display.get());
+    server.globals.presentation_manager
+        = std::make_unique<Wrapland::Server::PresentationManager>(server.display.get());
+    server.globals.primary_selection_device_manager
+        = std::make_unique<Wrapland::Server::primary_selection_device_manager>(
+            server.display.get());
+    server.globals.idle_inhibit_manager_v1
+        = std::make_unique<Wrapland::Server::IdleInhibitManagerV1>(server.display.get());
+    server.globals.linux_dmabuf_v1
+        = std::make_unique<Wrapland::Server::LinuxDmabufV1>(server.display.get());
+
+    server.globals.outputs.back()->set_enabled(true);
+    server.globals.outputs.back()->done();
 }
 
 void TestWaylandRegistry::cleanup()
@@ -598,7 +600,7 @@ void TestWaylandRegistry::testRemoval()
         &registry);
 
     connection.flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
     QSignalSpy seatObjectRemovedSpy(seat, &Seat::removed);
     QVERIFY(seatObjectRemovedSpy.isValid());
     QSignalSpy shellObjectRemovedSpy(shell, &XdgShell::removed);
@@ -614,7 +616,7 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy xdgDecorationManagerObjectRemovedSpy(xdgDecoManager, &XdgDecorationManager::removed);
     QVERIFY(xdgDecorationManagerObjectRemovedSpy.isValid());
 
-    m_seat.reset();
+    server.globals.seats.clear();
     QVERIFY(seatRemovedSpy.wait());
     QCOMPARE(seatRemovedSpy.first().first(), seatAnnouncedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::Seat));
@@ -624,7 +626,7 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy shellRemovedSpy(&registry, SIGNAL(xdgShellRemoved(quint32)));
     QVERIFY(shellRemovedSpy.isValid());
 
-    m_serverXdgShell.reset();
+    server.globals.xdg_shell.reset();
     QVERIFY(shellRemovedSpy.wait());
     QCOMPARE(shellRemovedSpy.first().first(), shellAnnouncedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::XdgShell));
@@ -637,14 +639,13 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy outputDeviceRemovedSpy(&registry, SIGNAL(outputDeviceV1Removed(quint32)));
     QVERIFY(outputDeviceRemovedSpy.isValid());
 
-    m_output.reset();
+    server.globals.outputs.clear();
     QVERIFY(outputRemovedSpy.wait());
     QCOMPARE(outputRemovedSpy.first().first(), outputAnnouncedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::Output));
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::Output).isEmpty());
     QCOMPARE(outputObjectRemovedSpy.count(), 1);
 
-    m_output.reset();
     if (!outputDeviceRemovedSpy.size()) {
         QVERIFY(outputDeviceRemovedSpy.wait());
     }
@@ -655,7 +656,7 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy compositorRemovedSpy(&registry, SIGNAL(compositorRemoved(quint32)));
     QVERIFY(compositorRemovedSpy.isValid());
 
-    m_compositor.reset();
+    server.globals.compositor.reset();
     QVERIFY(compositorRemovedSpy.wait());
     QCOMPARE(compositorRemovedSpy.first().first(), compositorAnnouncedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::Compositor));
@@ -665,7 +666,7 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy subCompositorRemovedSpy(&registry, SIGNAL(subCompositorRemoved(quint32)));
     QVERIFY(subCompositorRemovedSpy.isValid());
 
-    m_subcompositor.reset();
+    server.globals.subcompositor.reset();
     QVERIFY(subCompositorRemovedSpy.wait());
     QCOMPARE(subCompositorRemovedSpy.first().first(), subCompositorAnnouncedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::SubCompositor));
@@ -675,7 +676,7 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy outputManagementRemovedSpy(&registry, SIGNAL(outputManagementV1Removed(quint32)));
     QVERIFY(outputManagementRemovedSpy.isValid());
 
-    m_outputManagement.reset();
+    server.globals.output_management_v1.reset();
     QVERIFY(outputManagementRemovedSpy.wait());
     QCOMPARE(outputManagementRemovedSpy.first().first(),
              outputManagementAnnouncedSpy.first().first());
@@ -691,7 +692,7 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy presentationObjectRemovedSpy(presentationManager, &PresentationManager::removed);
     QVERIFY(presentationObjectRemovedSpy.isValid());
 
-    m_presentation.reset();
+    server.globals.presentation_manager.reset();
     QVERIFY(presentationRemovedSpy.wait());
     QCOMPARE(presentationRemovedSpy.first().first(), presentationRemovedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::PresentationManager));
@@ -699,7 +700,7 @@ void TestWaylandRegistry::testRemoval()
         registry.interfaces(Wrapland::Client::Registry::Interface::PresentationManager).isEmpty());
     QCOMPARE(presentationObjectRemovedSpy.count(), 1);
 
-    m_xdgDecorationManager.reset();
+    server.globals.xdg_decoration_manager.reset();
     QVERIFY(xdgDecorationRemovedSpy.wait());
     QCOMPARE(xdgDecorationRemovedSpy.first().first(), xdgDecorationAnnouncedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::XdgDecorationUnstableV1));
@@ -712,7 +713,7 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy blurObjectRemovedSpy(blurManager, &BlurManager::removed);
     QVERIFY(blurObjectRemovedSpy.isValid());
 
-    m_blur.reset();
+    server.globals.blur_manager.reset();
     QVERIFY(blurRemovedSpy.wait());
     QCOMPARE(blurRemovedSpy.first().first(), blurRemovedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::Blur));
@@ -722,7 +723,8 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy idleInhibitManagerUnstableV1RemovedSpy(
         &registry, &Registry::idleInhibitManagerUnstableV1Removed);
     QVERIFY(idleInhibitManagerUnstableV1RemovedSpy.isValid());
-    m_idleInhibit.reset();
+
+    server.globals.idle_inhibit_manager_v1.reset();
     QVERIFY(idleInhibitManagerUnstableV1RemovedSpy.wait());
     QCOMPARE(idleInhibitManagerUnstableV1RemovedSpy.first().first(),
              idleInhibitManagerUnstableV1AnnouncedSpy.first().first());
@@ -794,7 +796,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
                                      &registry);
 
     connection.flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
     std::unique_ptr<Compositor> compositor(
         registry.createCompositor(registry.interface(Registry::Interface::Compositor).name,
@@ -805,7 +807,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     // remove blur
     QSignalSpy blurRemovedSpy(&registry, &Registry::blurRemoved);
 
-    m_blur.reset();
+    server.globals.blur_manager.reset();
 
     // client hasn't processed the event yet
     QVERIFY(blurRemovedSpy.count() == 0);
@@ -820,7 +822,7 @@ void TestWaylandRegistry::testOutOfSyncRemoval()
     // Remove contrast global.
     QSignalSpy contrastRemovedSpy(&registry, &Registry::contrastRemoved);
 
-    m_contrast.reset();
+    server.globals.contrast_manager.reset();
 
     // Client hasn't processed the event yet.
     QVERIFY(contrastRemovedSpy.count() == 0);
@@ -873,7 +875,7 @@ void TestWaylandRegistry::testDestroy()
     QSignalSpy registryDiedSpy(&registry, &Registry::registryReleased);
     QVERIFY(registryDiedSpy.isValid());
 
-    m_display.reset();
+    server.display.reset();
     QTRY_VERIFY(!connection.established());
 
     QTRY_VERIFY(registryDiedSpy.count() == 1);
@@ -977,7 +979,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QVERIFY(outputAnnouncedSpy.isValid());
 
     std::unique_ptr<Wrapland::Server::Output> output1{
-        new Wrapland::Server::Output(m_display.get())};
+        new Wrapland::Server::Output(server.display.get())};
     output1->set_enabled(true);
     output1->done();
     QVERIFY(outputAnnouncedSpy.wait());
@@ -992,7 +994,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
              outputAnnouncedSpy.first().last().value<quint32>());
 
     std::unique_ptr<Wrapland::Server::Output> output2{
-        new Wrapland::Server::Output(m_display.get())};
+        new Wrapland::Server::Output(server.display.get())};
     output2->set_enabled(true);
     output2->done();
     QVERIFY(outputAnnouncedSpy.wait());
@@ -1060,7 +1062,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QVERIFY(outputDeviceAnnouncedSpy.isValid());
 
     std::unique_ptr<Wrapland::Server::Output> device1{
-        new Wrapland::Server::Output(m_display.get())};
+        new Wrapland::Server::Output(server.display.get())};
     QVERIFY(outputDeviceAnnouncedSpy.wait());
 
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 2);
@@ -1074,7 +1076,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
              outputDeviceAnnouncedSpy.first().last().value<quint32>());
 
     std::unique_ptr<Wrapland::Server::Output> device2{
-        new Wrapland::Server::Output(m_display.get())};
+        new Wrapland::Server::Output(server.display.get())};
     QVERIFY(outputDeviceAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 3);
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().name,

@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/subcompositor.h"
 
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/subcompositor.h"
 
 class TestSubCompositor : public QObject
@@ -41,8 +42,11 @@ private Q_SLOTS:
     void testCast();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Subcompositor* m_serverSubcompositor;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::SubCompositor* m_subCompositor;
     Wrapland::Client::EventQueue* m_queue;
@@ -53,8 +57,6 @@ constexpr auto socket_name{"wrapland-test-wayland-subcompositor-0"};
 
 TestSubCompositor::TestSubCompositor(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverSubcompositor(nullptr)
     , m_connection(nullptr)
     , m_subCompositor(nullptr)
     , m_queue(nullptr)
@@ -64,9 +66,10 @@ TestSubCompositor::TestSubCompositor(QObject* parent)
 
 void TestSubCompositor::init()
 {
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -96,9 +99,7 @@ void TestSubCompositor::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_serverSubcompositor = m_display->createSubCompositor(m_display);
-    QVERIFY(m_serverSubcompositor);
-
+    server.globals.subcompositor = server.display->createSubCompositor();
     QVERIFY(subCompositorSpy.wait());
     m_subCompositor
         = registry.createSubCompositor(subCompositorSpy.first().first().value<quint32>(),
@@ -125,8 +126,7 @@ void TestSubCompositor::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestSubCompositor::testDestroy()
@@ -139,8 +139,7 @@ void TestSubCompositor::testDestroy()
     connect(m_connection, &ConnectionThread::establishedChanged, m_queue, &EventQueue::release);
     QVERIFY(m_subCompositor->isValid());
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
     QTRY_VERIFY(!m_connection->established());
 
     // Now the pool should be destroyed.

@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/plasma_virtual_desktop.h"
 #include "../../server/plasma_window.h"
 
@@ -111,13 +112,12 @@ private:
     bool testBooleanData(Clt::PlasmaWindowModel::AdditionalRoles role,
                          void (Srv::PlasmaWindow::*function)(bool));
 
-    Srv::Display* m_display = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
 
-    Srv::PlasmaWindowManager* m_serverWindowManager = nullptr;
     Clt::PlasmaWindowManagement* m_pw = nullptr;
-
-    Srv::PlasmaVirtualDesktopManager* m_serverPlasmaVirtualDesktopManager = nullptr;
-
     Clt::ConnectionThread* m_connection = nullptr;
     QThread* m_thread = nullptr;
     Clt::EventQueue* m_queue = nullptr;
@@ -127,20 +127,20 @@ constexpr auto socket_name{"wrapland-test-fake-input-0"};
 
 void PlasmaWindowModelTest::init()
 {
-    delete m_display;
-    m_display = new Srv::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
-    QVERIFY(m_display->running());
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_display->createShm();
-    m_serverWindowManager = m_display->createPlasmaWindowManager();
+    server.display->createShm();
+    server.globals.plasma_window_manager = server.display->createPlasmaWindowManager();
+    server.globals.plasma_virtual_desktop_manager
+        = server.display->createPlasmaVirtualDesktopManager();
 
-    m_serverPlasmaVirtualDesktopManager = m_display->createPlasmaVirtualDesktopManager(m_display);
-
-    m_serverPlasmaVirtualDesktopManager->createDesktop("desktop1");
-    m_serverPlasmaVirtualDesktopManager->createDesktop("desktop2");
-    m_serverWindowManager->setVirtualDesktopManager(m_serverPlasmaVirtualDesktopManager);
+    server.globals.plasma_virtual_desktop_manager->createDesktop("desktop1");
+    server.globals.plasma_virtual_desktop_manager->createDesktop("desktop2");
+    server.globals.plasma_window_manager->setVirtualDesktopManager(
+        server.globals.plasma_virtual_desktop_manager.get());
 
     // Setup connection.
     m_connection = new Clt::ConnectionThread;
@@ -185,7 +185,6 @@ void PlasmaWindowModelTest::cleanup()
         variable = nullptr;                                                                        \
     }
     CLEANUP(m_pw)
-    CLEANUP(m_serverPlasmaVirtualDesktopManager)
     CLEANUP(m_queue)
     if (m_connection) {
         m_connection->deleteLater();
@@ -197,10 +196,9 @@ void PlasmaWindowModelTest::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-
-    CLEANUP(m_serverWindowManager)
-    CLEANUP(m_display)
 #undef CLEANUP
+
+    server = {};
 }
 
 bool PlasmaWindowModelTest::testBooleanData(Clt::PlasmaWindowModel::AdditionalRoles role,
@@ -224,7 +222,8 @@ bool PlasmaWindowModelTest::testBooleanData(Clt::PlasmaWindowModel::AdditionalRo
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     VERIFY(dataChangedSpy.isValid());
 
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     VERIFY(serverWindow);
 
     COMPARE(dataChangedSpy.count(), 0);
@@ -351,7 +350,8 @@ void PlasmaWindowModelTest::testAddRemoveRows()
     QVERIFY(rowInsertedSpy.isValid());
 
     // This happens by creating a PlasmaWindow on server side.
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     QVERIFY(serverWindow);
 
     QVERIFY(rowInsertedSpy.wait());
@@ -436,7 +436,8 @@ void PlasmaWindowModelTest::testDefaultData()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
@@ -551,7 +552,8 @@ void PlasmaWindowModelTest::testGeometry()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
@@ -590,12 +592,13 @@ void PlasmaWindowModelTest::testTitle()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     QVERIFY(dataChangedSpy.isValid());
@@ -628,12 +631,13 @@ void PlasmaWindowModelTest::testAppId()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     QVERIFY(dataChangedSpy.isValid());
@@ -667,12 +671,13 @@ void PlasmaWindowModelTest::testPid()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     serverWindow->setPid(1337);
     QVERIFY(serverWindow);
 
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
     QVERIFY(rowInsertedSpy.wait());
 
     // pid should be set as soon as the new row appears
@@ -687,12 +692,13 @@ void PlasmaWindowModelTest::testVirtualDesktops()
 
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     QVERIFY(dataChangedSpy.isValid());
 
@@ -760,7 +766,8 @@ void PlasmaWindowModelTest::testRequests()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
@@ -965,7 +972,8 @@ void PlasmaWindowModelTest::testCreateWithUnmappedWindow()
     QSignalSpy windowCreatedSpy(m_pw, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowCreatedSpy.isValid());
 
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     QVERIFY(serverWindow);
     QVERIFY(windowCreatedSpy.wait());
 
@@ -1085,7 +1093,8 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy()
     QSignalSpy windowCreatedSpy(m_pw, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowCreatedSpy.isValid());
 
-    auto* serverWindow = m_serverWindowManager->createWindow(m_serverWindowManager);
+    auto serverWindow = server.globals.plasma_window_manager->createWindow(
+        server.globals.plasma_window_manager.get());
     QVERIFY(windowCreatedSpy.wait());
     Clt::PlasmaWindow* window = windowCreatedSpy.first().first().value<Clt::PlasmaWindow*>();
 
@@ -1126,7 +1135,7 @@ void PlasmaWindowModelTest::testCreateWindowAfterModelDestroy()
     QSignalSpy windowCreatedSpy(m_pw, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowCreatedSpy.isValid());
 
-    m_serverWindowManager->createWindow(m_serverWindowManager);
+    server.globals.plasma_window_manager->createWindow(server.globals.plasma_window_manager.get());
     QVERIFY(windowCreatedSpy.wait());
 }
 

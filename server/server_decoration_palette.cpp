@@ -69,10 +69,8 @@ void ServerSideDecorationPaletteManager::Private::createCallback(
     Q_EMIT priv->handle()->paletteCreated(palette);
 }
 
-ServerSideDecorationPaletteManager::ServerSideDecorationPaletteManager(Display* display,
-                                                                       QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+ServerSideDecorationPaletteManager::ServerSideDecorationPaletteManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

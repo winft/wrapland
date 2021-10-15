@@ -28,8 +28,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/surface.h"
 
 class TestShmPool : public QObject
@@ -51,8 +51,11 @@ private Q_SLOTS:
     void testDestroy();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Compositor* m_serverCompositor;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::ShmPool* m_shmPool;
@@ -64,8 +67,6 @@ constexpr auto socket_name{"wrapland-test-wayland-surface-0"};
 
 TestShmPool::TestShmPool(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_shmPool(nullptr)
@@ -75,9 +76,10 @@ TestShmPool::TestShmPool(QObject* parent)
 
 void TestShmPool::init()
 {
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -104,7 +106,7 @@ void TestShmPool::init()
     registry.setup();
 
     // here we need a shm pool
-    m_display->createShm();
+    server.display->createShm();
 
     QVERIFY(shmSpy.wait());
     m_shmPool = registry.createShmPool(
@@ -131,8 +133,7 @@ void TestShmPool::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestShmPool::testCreateBufferNullImage()
@@ -238,8 +239,7 @@ void TestShmPool::testDestroy()
     // let's create one Buffer
     m_shmPool->getBuffer(QSize(10, 10), 8);
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
     QTRY_VERIFY(!m_connection->established());
 
     // Now the pool should be destroyed.

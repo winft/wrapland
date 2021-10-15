@@ -28,9 +28,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/text_input_v2.h"
 
-#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/seat.h"
+#include "../../server/globals.h"
 #include "../../server/surface.h"
 #include "../../server/text_input_pool.h"
 #include "../../server/text_input_v2.h"
@@ -63,10 +62,13 @@ private Q_SLOTS:
 private:
     Wrapland::Server::Surface* waitForSurface();
     Wrapland::Client::TextInputV2* createTextInput();
-    Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::Seat* m_serverSeat = nullptr;
-    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
-    Wrapland::Server::TextInputManagerV2* m_textInputManagerV2Interface = nullptr;
+
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+        Wrapland::Server::Seat* seat{nullptr};
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
     QThread* m_thread = nullptr;
     Wrapland::Client::EventQueue* m_queue = nullptr;
@@ -81,19 +83,21 @@ constexpr auto socket_name{"wrapland-test-text-input-0"};
 void TextInputTest::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    delete m_display;
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
 
-    m_display->createShm();
-    m_serverSeat = m_display->createSeat();
-    m_serverSeat->setHasKeyboard(true);
-    m_serverSeat->setHasTouch(true);
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_serverCompositor = m_display->createCompositor();
+    server.display->createShm();
+    server.globals.compositor = server.display->createCompositor();
 
-    m_textInputManagerV2Interface = m_display->createTextInputManagerV2();
+    server.globals.seats.push_back(server.display->createSeat());
+    server.seat = server.globals.seats.back().get();
+    server.seat->setHasKeyboard(true);
+    server.seat->setHasTouch(true);
+
+    server.globals.text_input_manager_v2 = server.display->createTextInputManagerV2();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -167,17 +171,15 @@ void TextInputTest::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-
-    CLEANUP(m_textInputManagerV2Interface)
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_serverSeat)
-    CLEANUP(m_display)
 #undef CLEANUP
+
+    server = {};
 }
 
 Wrapland::Server::Surface* TextInputTest::waitForSurface()
 {
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     if (!surfaceCreatedSpy.isValid()) {
         return nullptr;
     }
@@ -213,14 +215,14 @@ void TextInputTest::testEnterLeave()
     QVERIFY(enteredSpy.isValid());
     QSignalSpy leftSpy(textInput.get(), &Wrapland::Client::TextInputV2::left);
     QVERIFY(leftSpy.isValid());
-    QSignalSpy textInputChangedSpy(m_serverSeat, &Wrapland::Server::Seat::focusedTextInputChanged);
+    QSignalSpy textInputChangedSpy(server.seat, &Wrapland::Server::Seat::focusedTextInputChanged);
     QVERIFY(textInputChangedSpy.isValid());
 
     // now let's try to enter it
-    auto& server_text_inputs = m_serverSeat->text_inputs();
+    auto& server_text_inputs = server.seat->text_inputs();
     QVERIFY(!server_text_inputs.v2.text_input);
     QVERIFY(!server_text_inputs.focus.surface);
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    server.seat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(server_text_inputs.focus.surface, serverSurface);
 
     // text input not yet set for the surface
@@ -254,7 +256,7 @@ void TextInputTest::testEnterLeave()
     QCOMPARE(textInput->enteredSurface(), surface.get());
 
     // now trigger a leave
-    m_serverSeat->setFocusedKeyboardSurface(nullptr);
+    server.seat->setFocusedKeyboardSurface(nullptr);
     QCOMPARE(textInputChangedSpy.count(), 2);
     QVERIFY(!server_text_inputs.v2.text_input);
     QVERIFY(leftSpy.wait());
@@ -262,7 +264,7 @@ void TextInputTest::testEnterLeave()
     QVERIFY(serverTextInput->isEnabled());
 
     // if we enter again we should directly get the text input as it's still activated
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    server.seat->setFocusedKeyboardSurface(serverSurface);
     QCOMPARE(textInputChangedSpy.count(), 3);
     QVERIFY(server_text_inputs.v2.text_input);
     QVERIFY(enteredSpy.wait());
@@ -288,7 +290,7 @@ void TextInputTest::testEnterLeave()
     // but not yet destroyed. It should work without errors
     QCOMPARE(textInput->enteredSurface(), surface.get());
     connect(serverSurface, &Wrapland::Server::Surface::resourceDestroyed, [=]() {
-        m_serverSeat->setFocusedKeyboardSurface(nullptr);
+        server.seat->setFocusedKeyboardSurface(nullptr);
     });
 
     // delete the client and wait for the server to catch up
@@ -310,10 +312,10 @@ void TextInputTest::testShowHidePanel()
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
 
     QSignalSpy showPanelRequestedSpy(ti, &Wrapland::Server::TextInputV2::requestShowInputPanel);
@@ -349,10 +351,10 @@ void TextInputTest::testCursorRectangle()
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
     QCOMPARE(ti->cursorRectangle(), QRect());
     QSignalSpy cursorRectangleChangedSpy(ti,
@@ -374,10 +376,10 @@ void TextInputTest::testPreferredLanguage()
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
     QVERIFY(ti->preferredLanguage().isEmpty());
 
@@ -399,10 +401,10 @@ void TextInputTest::testReset()
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
 
     QSignalSpy resetRequestedSpy(ti, &Wrapland::Server::TextInputV2::requestReset);
@@ -422,10 +424,10 @@ void TextInputTest::testSurroundingText()
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
     QVERIFY(ti->surroundingText().isEmpty());
     QCOMPARE(ti->surroundingTextCursorPosition(), 0);
@@ -537,10 +539,10 @@ void TextInputTest::testContentHints()
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
     QCOMPARE(ti->contentHints(), Wrapland::Server::TextInputV2::ContentHints());
 
@@ -603,10 +605,10 @@ void TextInputTest::testContentPurpose()
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
     QCOMPARE(ti->contentPurpose(), Wrapland::Server::TextInputV2::ContentPurpose::Normal);
 
@@ -648,10 +650,10 @@ void TextInputTest::testTextDirection()
     QCOMPARE(textInput->textDirection(), Qt::LayoutDirectionAuto);
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
 
     // let's send the new text direction
@@ -684,10 +686,10 @@ void TextInputTest::testLanguage()
     QVERIFY(textInput->language().isEmpty());
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
 
     // let's send the new language
@@ -718,16 +720,16 @@ void TextInputTest::testKeyEvent()
     QVERIFY(textInput != nullptr);
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
 
     // TODO: test modifiers
     QSignalSpy keyEventSpy(textInput.get(), &Wrapland::Client::TextInputV2::keyEvent);
     QVERIFY(keyEventSpy.isValid());
-    m_serverSeat->setTimestamp(100);
+    server.seat->setTimestamp(100);
     ti->keysymPressed(2);
     QVERIFY(keyEventSpy.wait());
     QCOMPARE(keyEventSpy.count(), 1);
@@ -736,7 +738,7 @@ void TextInputTest::testKeyEvent()
              Wrapland::Client::TextInputV2::KeyState::Pressed);
     QCOMPARE(keyEventSpy.last().at(2).value<Qt::KeyboardModifiers>(), Qt::KeyboardModifiers());
     QCOMPARE(keyEventSpy.last().at(3).value<quint32>(), 100u);
-    m_serverSeat->setTimestamp(101);
+    server.seat->setTimestamp(101);
     ti->keysymReleased(2);
     QVERIFY(keyEventSpy.wait());
     QCOMPARE(keyEventSpy.count(), 2);
@@ -762,10 +764,10 @@ void TextInputTest::testPreEdit()
 
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
 
     // now let's pass through some pre-edit events
@@ -806,10 +808,10 @@ void TextInputTest::testCommit()
 
     textInput->enable(surface.get());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
-    auto ti = m_serverSeat->text_inputs().v2.text_input;
+    server.seat->setFocusedKeyboardSurface(serverSurface);
+    auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
 
     // now let's commit

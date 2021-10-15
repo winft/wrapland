@@ -41,6 +41,7 @@ class WRAPLANDSERVER_EXPORT XdgShell : public QObject
 {
     Q_OBJECT
 public:
+    explicit XdgShell(Display* display);
     ~XdgShell() override;
 
     uint32_t ping(Client* client);
@@ -54,10 +55,8 @@ Q_SIGNALS:
     void pingTimeout(uint32_t serial);
 
 private:
-    friend class Display;
     friend class XdgShellSurface;
     friend class XdgDecorationManager;
-    explicit XdgShell(Display* display, QObject* parent = nullptr);
 
     class Private;
     std::unique_ptr<Private> d_ptr;

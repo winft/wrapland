@@ -71,9 +71,8 @@ void drm_lease_device_v1::Private::send_connector(drm_lease_device_v1_bind* bind
     connector->d_ptr->add_resource(con_res);
 }
 
-drm_lease_device_v1::drm_lease_device_v1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+drm_lease_device_v1::drm_lease_device_v1(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

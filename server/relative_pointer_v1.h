@@ -33,12 +33,10 @@ class WRAPLANDSERVER_EXPORT RelativePointerManagerV1 : public QObject
 {
     Q_OBJECT
 public:
+    explicit RelativePointerManagerV1(Display* display);
     ~RelativePointerManagerV1() override;
 
 private:
-    friend class Display;
-    explicit RelativePointerManagerV1(Display* display, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

@@ -222,7 +222,7 @@ void TestServerDisplay::testOutputManagement()
     Display display;
     display.set_socket_name(std::string("wrapland-test-0"));
     display.start();
-    display.createOutputManagementV1(this);
+    auto output_management = display.createOutputManagementV1();
 }
 
 void TestServerDisplay::testAutoSocketName()

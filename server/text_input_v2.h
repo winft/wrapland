@@ -115,7 +115,7 @@ class WRAPLANDSERVER_EXPORT TextInputManagerV2 : public QObject
 {
     Q_OBJECT
 public:
-    explicit TextInputManagerV2(Display* display, QObject* parent = nullptr);
+    explicit TextInputManagerV2(Display* display);
     ~TextInputManagerV2() override;
 
 private:

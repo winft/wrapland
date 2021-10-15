@@ -92,6 +92,7 @@ public:
             = 0;
     };
 
+    explicit LinuxDmabufV1(Display* display);
     ~LinuxDmabufV1() override;
 
     /**
@@ -104,9 +105,6 @@ public:
     void setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> const& set);
 
 private:
-    explicit LinuxDmabufV1(Display* display, QObject* parent = nullptr);
-
-    friend class Display;
     friend class Buffer;
     friend class ParamsWrapperV1;
     friend class ParamsV1;

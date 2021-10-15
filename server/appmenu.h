@@ -36,6 +36,7 @@ class WRAPLANDSERVER_EXPORT AppmenuManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit AppmenuManager(Display* display);
     ~AppmenuManager() override;
 
     Appmenu* appmenuForSurface(Surface* surface);
@@ -44,8 +45,6 @@ Q_SIGNALS:
     void appmenuCreated(Wrapland::Server::Appmenu*);
 
 private:
-    explicit AppmenuManager(Display* display, QObject* parent = nullptr);
-    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

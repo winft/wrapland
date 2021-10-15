@@ -36,14 +36,13 @@ class WRAPLANDSERVER_EXPORT FakeInput : public QObject
 {
     Q_OBJECT
 public:
+    explicit FakeInput(Display* display);
     ~FakeInput() override;
 
 Q_SIGNALS:
     void deviceCreated(Wrapland::Server::FakeInputDevice* device);
 
 private:
-    explicit FakeInput(Display* display, QObject* parent = nullptr);
-    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

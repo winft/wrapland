@@ -35,9 +35,8 @@ XdgOutputManager::Private::Private(Display* display, XdgOutputManager* qptr)
     create();
 }
 
-XdgOutputManager::XdgOutputManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+XdgOutputManager::XdgOutputManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

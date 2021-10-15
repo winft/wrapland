@@ -37,7 +37,7 @@ class WRAPLANDSERVER_EXPORT FilteredDisplay : public Display
 {
     Q_OBJECT
 public:
-    explicit FilteredDisplay(QObject* parent);
+    FilteredDisplay();
     ~FilteredDisplay() override;
 
     /**

@@ -26,11 +26,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/kde_idle.h"
 #include "../../server/seat.h"
 
 using namespace Wrapland::Client;
-using namespace Wrapland::Server;
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -49,9 +49,12 @@ private Q_SLOTS:
     void testIdleInhibitBlocksTimeout();
 
 private:
-    Display* m_display = nullptr;
-    Srv::Seat* m_seatInterface = nullptr;
-    KdeIdle* m_kdeIdle = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+        Wrapland::Server::Seat* seat{nullptr};
+    } server;
+
     ConnectionThread* m_connection = nullptr;
     QThread* m_thread = nullptr;
     EventQueue* m_queue = nullptr;
@@ -63,15 +66,15 @@ constexpr auto socket_name{"wrapland-test-idle-0"};
 
 void IdleTest::init()
 {
-    delete m_display;
-    m_display = new Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
-    QVERIFY(m_display->running());
-    m_display->createShm();
-    m_seatInterface = m_display->createSeat();
-    m_seatInterface->setName("seat0");
-    m_kdeIdle = m_display->createIdle();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
+
+    server.display->createShm();
+    server.seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
+    server.seat->setName("seat0");
+    server.globals.kde_idle = server.display->createIdle();
 
     // setup connection
     m_connection = new Clt::ConnectionThread;
@@ -129,11 +132,9 @@ void IdleTest::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-
-    CLEANUP(m_kdeIdle)
-    CLEANUP(m_seatInterface)
-    CLEANUP(m_display)
 #undef CLEANUP
+
+    server = {};
 }
 
 void IdleTest::testTimeout()
@@ -155,12 +156,12 @@ void IdleTest::testTimeout()
 
     // simulate some activity
     QVERIFY(resumedFormIdleSpy.isEmpty());
-    m_seatInterface->setTimestamp(1);
+    server.seat->setTimestamp(1);
     QVERIFY(resumedFormIdleSpy.wait());
 
     timeout.reset();
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 }
 
 void IdleTest::testSimulateUserActivity()
@@ -188,7 +189,7 @@ void IdleTest::testSimulateUserActivity()
 
     timeout.reset();
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 }
 
 void IdleTest::testServerSimulateUserActivity()
@@ -203,7 +204,7 @@ void IdleTest::testServerSimulateUserActivity()
     m_connection->flush();
 
     QTest::qWait(4000);
-    m_kdeIdle->simulateUserActivity();
+    server.globals.kde_idle->simulateUserActivity();
     // waiting default five sec should fail
     QVERIFY(!idleSpy.wait());
     // another 2 sec should fire
@@ -211,30 +212,31 @@ void IdleTest::testServerSimulateUserActivity()
 
     // now simulating user activity should emit a resumedFromIdle
     QVERIFY(resumedFormIdleSpy.isEmpty());
-    m_kdeIdle->simulateUserActivity();
+    server.globals.kde_idle->simulateUserActivity();
     QVERIFY(resumedFormIdleSpy.wait());
 
     timeout.reset();
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 }
 
 void IdleTest::testIdleInhibit()
 {
-    QCOMPARE(m_kdeIdle->isInhibited(), false);
-    QSignalSpy idleInhibitedSpy(m_kdeIdle, &KdeIdle::inhibitedChanged);
+    QCOMPARE(server.globals.kde_idle->isInhibited(), false);
+    QSignalSpy idleInhibitedSpy(server.globals.kde_idle.get(),
+                                &Wrapland::Server::KdeIdle::inhibitedChanged);
     QVERIFY(idleInhibitedSpy.isValid());
-    m_kdeIdle->inhibit();
-    QCOMPARE(m_kdeIdle->isInhibited(), true);
+    server.globals.kde_idle->inhibit();
+    QCOMPARE(server.globals.kde_idle->isInhibited(), true);
     QCOMPARE(idleInhibitedSpy.count(), 1);
-    m_kdeIdle->inhibit();
-    QCOMPARE(m_kdeIdle->isInhibited(), true);
+    server.globals.kde_idle->inhibit();
+    QCOMPARE(server.globals.kde_idle->isInhibited(), true);
     QCOMPARE(idleInhibitedSpy.count(), 1);
-    m_kdeIdle->uninhibit();
-    QCOMPARE(m_kdeIdle->isInhibited(), true);
+    server.globals.kde_idle->uninhibit();
+    QCOMPARE(server.globals.kde_idle->isInhibited(), true);
     QCOMPARE(idleInhibitedSpy.count(), 1);
-    m_kdeIdle->uninhibit();
-    QCOMPARE(m_kdeIdle->isInhibited(), false);
+    server.globals.kde_idle->uninhibit();
+    QCOMPARE(server.globals.kde_idle->isInhibited(), false);
     QCOMPARE(idleInhibitedSpy.count(), 2);
 }
 
@@ -243,8 +245,8 @@ void IdleTest::testIdleInhibitBlocksTimeout()
     // this test verifies that a timeout does not fire when the system is inhibited
 
     // so first inhibit
-    QCOMPARE(m_kdeIdle->isInhibited(), false);
-    m_kdeIdle->inhibit();
+    QCOMPARE(server.globals.kde_idle->isInhibited(), false);
+    server.globals.kde_idle->inhibit();
 
     std::unique_ptr<Clt::IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
     QVERIFY(timeout->isValid());
@@ -260,13 +262,13 @@ void IdleTest::testIdleInhibitBlocksTimeout()
 
     // simulate some activity
     QVERIFY(resumedFormIdleSpy.isEmpty());
-    m_seatInterface->setTimestamp(1);
+    server.seat->setTimestamp(1);
     // resume from idle should not fire
     QVERIFY(!resumedFormIdleSpy.wait());
 
     // let's uninhibit
-    m_kdeIdle->uninhibit();
-    QCOMPARE(m_kdeIdle->isInhibited(), false);
+    server.globals.kde_idle->uninhibit();
+    QCOMPARE(server.globals.kde_idle->isInhibited(), false);
     // we requested a timeout of 1 msec, but the minimum the server sets is 5 sec
     QVERIFY(!idleSpy.wait(500));
     // the default of 5 sec will now pass
@@ -274,7 +276,7 @@ void IdleTest::testIdleInhibitBlocksTimeout()
 
     // if we inhibit now it will trigger a resume from idle
     QVERIFY(resumedFormIdleSpy.isEmpty());
-    m_kdeIdle->inhibit();
+    server.globals.kde_idle->inhibit();
     QVERIFY(resumedFormIdleSpy.wait());
 
     // let's wait again just to verify that also inhibit for already existing IdleTimeout works
@@ -284,7 +286,7 @@ void IdleTest::testIdleInhibitBlocksTimeout()
 
     timeout.reset();
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 }
 
 QTEST_GUILESS_MAIN(IdleTest)

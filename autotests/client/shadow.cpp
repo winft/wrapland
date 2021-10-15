@@ -29,8 +29,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/buffer.h"
 #include "../../server/client.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/shadow.h"
 #include "../../server/surface.h"
 
@@ -46,11 +46,12 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    Wrapland::Server::Display* m_display = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
 
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
-    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
-    Wrapland::Server::ShadowManager* m_shadowInterface = nullptr;
     QThread* m_thread = nullptr;
     Wrapland::Client::EventQueue* m_queue = nullptr;
     Wrapland::Client::ShmPool* m_shm = nullptr;
@@ -64,13 +65,14 @@ void ShadowTest::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_display->createShm();
-    m_serverCompositor = m_display->createCompositor(m_display);
-    m_shadowInterface = m_display->createShadowManager(m_display);
+    server.display->createShm();
+    server.globals.compositor = server.display->createCompositor();
+    server.globals.shadow_manager = server.display->createShadowManager();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -136,19 +138,16 @@ void ShadowTest::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_shadowInterface)
-    CLEANUP(m_display)
-
 #undef CLEANUP
+
+    server = {};
 }
 
 void ShadowTest::testCreateShadow()
 {
     // this test verifies the basic shadow behavior, create for surface, commit it, etc.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
-                                    SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface{m_compositor->createSurface()};
@@ -202,8 +201,8 @@ void ShadowTest::testShadowElements()
 
     // this test verifies that all shadow elements are correctly passed to the server
     // first create surface
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
-                                    SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface{m_compositor->createSurface()};
@@ -285,8 +284,8 @@ void ShadowTest::testShadowElements()
 
 void ShadowTest::testSurfaceDestroy()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
-                                    SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface{m_compositor->createSurface()};

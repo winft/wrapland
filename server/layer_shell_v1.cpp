@@ -80,9 +80,8 @@ void LayerShellV1::Private::destroyCallback([[maybe_unused]] LayerShellV1Bind* b
     // TODO(romangg): unregister the client?
 }
 
-LayerShellV1::LayerShellV1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+LayerShellV1::LayerShellV1(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

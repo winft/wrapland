@@ -37,14 +37,13 @@ class WRAPLANDSERVER_EXPORT Viewporter : public QObject
 {
     Q_OBJECT
 public:
+    explicit Viewporter(Display* display);
     ~Viewporter() override;
 
 Q_SIGNALS:
     void viewportCreated(Viewport*);
 
 private:
-    explicit Viewporter(Display* display, QObject* parent = nullptr);
-    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

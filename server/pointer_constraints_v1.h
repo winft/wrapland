@@ -35,12 +35,10 @@ class WRAPLANDSERVER_EXPORT PointerConstraintsV1 : public QObject
 {
     Q_OBJECT
 public:
+    explicit PointerConstraintsV1(Display* display);
     ~PointerConstraintsV1() override;
 
 private:
-    friend class Display;
-    explicit PointerConstraintsV1(Display* display, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

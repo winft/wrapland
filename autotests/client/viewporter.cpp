@@ -27,8 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/surface.h"
 #include "../../server/viewporter.h"
 #include "../../server/wayland/client.h"
@@ -64,9 +64,11 @@ private Q_SLOTS:
     void testNoSurface();
 
 private:
-    Srv::Display* m_display;
-    Srv::Compositor* m_serverCompositor;
-    Srv::Viewporter* m_viewporterInterface;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Clt::ConnectionThread* m_connection;
     Clt::Compositor* m_compositor;
     Clt::ShmPool* m_shm;
@@ -79,8 +81,6 @@ constexpr auto socket_name{"kwin-test-viewporter-0"};
 
 TestViewporter::TestViewporter(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_thread(nullptr)
@@ -91,16 +91,14 @@ void TestViewporter::init()
 {
     qRegisterMetaType<Srv::Surface*>();
 
-    m_display = new Srv::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
-    m_display->createShm();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_serverCompositor = m_display->createCompositor(m_display);
-    QVERIFY(m_serverCompositor);
-
-    m_viewporterInterface = m_display->createViewporter(m_display);
-    QVERIFY(m_viewporterInterface);
+    server.display->createShm();
+    server.globals.compositor = server.display->createCompositor();
+    server.globals.viewporter = server.display->createViewporter();
 
     // setup connection
     m_connection = new Clt::ConnectionThread;
@@ -178,14 +176,7 @@ void TestViewporter::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_serverCompositor;
-    m_serverCompositor = nullptr;
-
-    delete m_viewporterInterface;
-    m_viewporterInterface = nullptr;
-
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestViewporter::testViewportExists()
@@ -193,7 +184,8 @@ void TestViewporter::testViewportExists()
     // This test verifies that setting the viewport for a surface twice results in a protocol error.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
@@ -202,7 +194,8 @@ void TestViewporter::testViewportExists()
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
+    QSignalSpy serverViewportCreated(server.globals.viewporter.get(),
+                                     &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
     std::unique_ptr<Clt::Viewport> vp1(m_viewporter->createViewport(s.get(), this));
 
@@ -222,7 +215,8 @@ void TestViewporter::testWithoutBuffer()
     // This test verifies that setting the viewport while buffer is zero does not change the size.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
@@ -231,7 +225,8 @@ void TestViewporter::testWithoutBuffer()
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
+    QSignalSpy serverViewportCreated(server.globals.viewporter.get(),
+                                     &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
@@ -268,7 +263,8 @@ void TestViewporter::testDestinationSize()
     // This test verifies setting the destination size is received by the server.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
@@ -277,7 +273,8 @@ void TestViewporter::testDestinationSize()
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
+    QSignalSpy serverViewportCreated(server.globals.viewporter.get(),
+                                     &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
@@ -320,7 +317,8 @@ void TestViewporter::testSourceRectangle()
     // This test verifies setting the source rectangle is received by the server.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
@@ -329,7 +327,8 @@ void TestViewporter::testSourceRectangle()
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
+    QSignalSpy serverViewportCreated(server.globals.viewporter.get(),
+                                     &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
@@ -376,7 +375,8 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     // server.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
@@ -385,7 +385,8 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
+    QSignalSpy serverViewportCreated(server.globals.viewporter.get(),
+                                     &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
@@ -451,7 +452,8 @@ void TestViewporter::testDataError()
     // This test verifies setting the source rectangle is received by the server.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
@@ -460,7 +462,8 @@ void TestViewporter::testDataError()
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
+    QSignalSpy serverViewportCreated(server.globals.viewporter.get(),
+                                     &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
@@ -505,7 +508,8 @@ void TestViewporter::testBufferSizeChange()
     // condition correctly.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
@@ -514,7 +518,8 @@ void TestViewporter::testBufferSizeChange()
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
+    QSignalSpy serverViewportCreated(server.globals.viewporter.get(),
+                                     &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
@@ -587,7 +592,8 @@ void TestViewporter::testDestinationSizeChange()
     // its integer condition correctly.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Clt::Surface> s(m_compositor->createSurface());
 
@@ -596,7 +602,8 @@ void TestViewporter::testDestinationSizeChange()
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
+    QSignalSpy serverViewportCreated(server.globals.viewporter.get(),
+                                     &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(s.get(), this));
 
@@ -690,7 +697,8 @@ void TestViewporter::testNoSurface()
     // This test verifies that setting the viewport for a surface twice results in a protocol error.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Srv::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Clt::Surface> surface(m_compositor->createSurface());
 
@@ -699,7 +707,8 @@ void TestViewporter::testNoSurface()
     QVERIFY(serverSurface);
 
     // Create viewport.
-    QSignalSpy serverViewportCreated(m_viewporterInterface, &Srv::Viewporter::viewportCreated);
+    QSignalSpy serverViewportCreated(server.globals.viewporter.get(),
+                                     &Srv::Viewporter::viewportCreated);
     QVERIFY(serverViewportCreated.isValid());
     std::unique_ptr<Clt::Viewport> vp(m_viewporter->createViewport(surface.get(), this));
 

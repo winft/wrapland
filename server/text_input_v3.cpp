@@ -204,9 +204,8 @@ void text_input_manager_v3::Private::get_text_input_callback(text_input_manager_
     seat->d_ptr->text_inputs.register_device(textInput);
 }
 
-text_input_manager_v3::text_input_manager_v3(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+text_input_manager_v3::text_input_manager_v3(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

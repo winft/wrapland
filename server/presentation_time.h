@@ -37,15 +37,13 @@ class WRAPLANDSERVER_EXPORT PresentationManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit PresentationManager(Display* display);
     ~PresentationManager() override;
 
     clockid_t clockId() const;
     void setClockId(clockid_t clockId);
 
 private:
-    friend class Display;
-    explicit PresentationManager(Display* display, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

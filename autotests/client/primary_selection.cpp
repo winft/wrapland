@@ -14,10 +14,9 @@
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/primary_selection.h"
-#include "../../server/seat.h"
 #include "../../server/surface.h"
 
 #include <wayland-client.h>
@@ -44,11 +43,12 @@ private Q_SLOTS:
     void testDestroy();
 
 private:
-    Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::primary_selection_device_manager* m_serverPrimarySelectionDeviceManager
-        = nullptr;
-    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
-    Wrapland::Server::Seat* m_serverSeat = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+        Wrapland::Server::Seat* seat{nullptr};
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
     Wrapland::Client::PrimarySelectionDeviceManager* m_deviceManager = nullptr;
     Wrapland::Client::Compositor* m_compositor = nullptr;
@@ -66,9 +66,10 @@ void TestPrimarySelection::init()
     qRegisterMetaType<Wrapland::Server::Surface*>();
     qRegisterMetaType<std::string>();
 
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -104,8 +105,8 @@ void TestPrimarySelection::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_serverPrimarySelectionDeviceManager
-        = m_display->createPrimarySelectionDeviceManager(m_display);
+    server.globals.primary_selection_device_manager
+        = server.display->createPrimarySelectionDeviceManager();
 
     QVERIFY(deviceManagerSpy.wait());
     m_deviceManager = registry.createPrimarySelectionDeviceManager(
@@ -113,8 +114,9 @@ void TestPrimarySelection::init()
         deviceManagerSpy.first().last().value<quint32>(),
         this);
 
-    m_serverSeat = m_display->createSeat(m_display);
-    m_serverSeat->setHasPointer(true);
+    server.globals.seats.push_back(server.display->createSeat());
+    server.seat = server.globals.seats.back().get();
+    server.seat->setHasPointer(true);
 
     QVERIFY(seatSpy.wait());
     m_seat = registry.createSeat(
@@ -124,7 +126,7 @@ void TestPrimarySelection::init()
     QVERIFY(pointerChangedSpy.isValid());
     QVERIFY(pointerChangedSpy.wait());
 
-    m_serverCompositor = m_display->createCompositor(m_display);
+    server.globals.compositor = server.display->createCompositor();
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
@@ -159,14 +161,13 @@ void TestPrimarySelection::cleanup()
     m_thread = nullptr;
     m_connection = nullptr;
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestPrimarySelection::testCreate()
 {
     QSignalSpy deviceCreatedSpy(
-        m_serverPrimarySelectionDeviceManager,
+        server.globals.primary_selection_device_manager.get(),
         &Wrapland::Server::primary_selection_device_manager::device_created);
     QVERIFY(deviceCreatedSpy.isValid());
 
@@ -180,19 +181,19 @@ void TestPrimarySelection::testCreate()
     auto serverDevice
         = deviceCreatedSpy.first().first().value<Wrapland::Server::primary_selection_device*>();
     QVERIFY(serverDevice);
-    QCOMPARE(serverDevice->seat(), m_serverSeat);
+    QCOMPARE(serverDevice->seat(), server.seat);
     QVERIFY(!serverDevice->selection());
 
-    QVERIFY(!m_serverSeat->primarySelection());
-    m_serverSeat->setPrimarySelection(serverDevice->selection());
-    QCOMPARE(m_serverSeat->primarySelection(), serverDevice->selection());
+    QVERIFY(!server.seat->primarySelection());
+    server.seat->setPrimarySelection(serverDevice->selection());
+    QCOMPARE(server.seat->primarySelection(), serverDevice->selection());
 
     // and destroy
     QSignalSpy destroyedSpy(serverDevice, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     device.reset();
     QVERIFY(destroyedSpy.wait());
-    QVERIFY(!m_serverSeat->primarySelection());
+    QVERIFY(!server.seat->primarySelection());
 }
 
 void TestPrimarySelection::testSetSelection()
@@ -200,7 +201,7 @@ void TestPrimarySelection::testSetSelection()
     std::unique_ptr<Wrapland::Client::Pointer> pointer(m_seat->createPointer());
 
     QSignalSpy deviceCreatedSpy(
-        m_serverPrimarySelectionDeviceManager,
+        server.globals.primary_selection_device_manager.get(),
         &Wrapland::Server::primary_selection_device_manager::device_created);
     QVERIFY(deviceCreatedSpy.isValid());
 
@@ -215,7 +216,7 @@ void TestPrimarySelection::testSetSelection()
     QVERIFY(serverDevice);
 
     QSignalSpy sourceCreatedSpy(
-        m_serverPrimarySelectionDeviceManager,
+        server.globals.primary_selection_device_manager.get(),
         &Wrapland::Server::primary_selection_device_manager::source_created);
     QVERIFY(deviceCreatedSpy.isValid());
 
@@ -290,12 +291,12 @@ void TestPrimarySelection::testSendSelectionOnSeat()
     // First add keyboard support to Seat.
     QSignalSpy keyboardChangedSpy(m_seat, &Wrapland::Client::Seat::hasKeyboardChanged);
     QVERIFY(keyboardChangedSpy.isValid());
-    m_serverSeat->setHasKeyboard(true);
+    server.seat->setHasKeyboard(true);
     QVERIFY(keyboardChangedSpy.wait());
 
     // Now create device, Keyboard and a Surface.
     QSignalSpy deviceCreatedSpy(
-        m_serverPrimarySelectionDeviceManager,
+        server.globals.primary_selection_device_manager.get(),
         &Wrapland::Server::primary_selection_device_manager::device_created);
     QVERIFY(deviceCreatedSpy.isValid());
     std::unique_ptr<Wrapland::Client::PrimarySelectionDevice> device(
@@ -307,7 +308,8 @@ void TestPrimarySelection::testSendSelectionOnSeat()
     QVERIFY(serverDevice);
     std::unique_ptr<Wrapland::Client::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(keyboard->isValid());
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -316,7 +318,7 @@ void TestPrimarySelection::testSendSelectionOnSeat()
 
     auto serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    server.seat->setFocusedKeyboardSurface(serverSurface);
 
     // Now set the selection.
     std::unique_ptr<Wrapland::Client::PrimarySelectionSource> source(
@@ -333,21 +335,21 @@ void TestPrimarySelection::testSendSelectionOnSeat()
     QCOMPARE(selectionOfferedSpy.count(), 1);
 
     // Now unfocus the keyboard.
-    m_serverSeat->setFocusedKeyboardSurface(nullptr);
+    server.seat->setFocusedKeyboardSurface(nullptr);
     // if setting the same surface again, we should get another offer
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    server.seat->setFocusedKeyboardSurface(serverSurface);
     QVERIFY(selectionOfferedSpy.wait());
     QCOMPARE(selectionOfferedSpy.count(), 2);
 
     // Now let's try to destroy the device and set a focused keyboard just while the
     // device is being destroyed.
-    m_serverSeat->setFocusedKeyboardSurface(nullptr);
+    server.seat->setFocusedKeyboardSurface(nullptr);
     QSignalSpy unboundSpy(serverDevice,
                           &Wrapland::Server::primary_selection_device::resourceDestroyed);
     QVERIFY(unboundSpy.isValid());
     device.reset();
     QVERIFY(unboundSpy.wait());
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    server.seat->setFocusedKeyboardSurface(serverSurface);
 }
 
 void TestPrimarySelection::testReplaceSource()
@@ -357,11 +359,11 @@ void TestPrimarySelection::testReplaceSource()
     // First add keyboard support to Seat.
     QSignalSpy keyboardChangedSpy(m_seat, &Wrapland::Client::Seat::hasKeyboardChanged);
     QVERIFY(keyboardChangedSpy.isValid());
-    m_serverSeat->setHasKeyboard(true);
+    server.seat->setHasKeyboard(true);
     QVERIFY(keyboardChangedSpy.wait());
     // now create device, Keyboard and a Surface
     QSignalSpy deviceCreatedSpy(
-        m_serverPrimarySelectionDeviceManager,
+        server.globals.primary_selection_device_manager.get(),
         &Wrapland::Server::primary_selection_device_manager::device_created);
     QVERIFY(deviceCreatedSpy.isValid());
 
@@ -374,7 +376,8 @@ void TestPrimarySelection::testReplaceSource()
     QVERIFY(serverDevice);
     std::unique_ptr<Wrapland::Client::Keyboard> keyboard(m_seat->createKeyboard());
     QVERIFY(keyboard->isValid());
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
@@ -382,7 +385,7 @@ void TestPrimarySelection::testReplaceSource()
 
     auto serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(serverSurface);
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface);
+    server.seat->setFocusedKeyboardSurface(serverSurface);
 
     // now set the selection
     std::unique_ptr<Wrapland::Client::PrimarySelectionSource> source(
@@ -449,7 +452,7 @@ void TestPrimarySelection::testOffer()
 {
     qRegisterMetaType<Wrapland::Server::primary_selection_source*>();
     QSignalSpy sourceCreatedSpy(
-        m_serverPrimarySelectionDeviceManager,
+        server.globals.primary_selection_device_manager.get(),
         &Wrapland::Server::primary_selection_device_manager::source_created);
     QVERIFY(sourceCreatedSpy.isValid());
 
@@ -503,7 +506,7 @@ void TestPrimarySelection::testOffer()
 void TestPrimarySelection::testRequestSend()
 {
     QSignalSpy sourceCreatedSpy(
-        m_serverPrimarySelectionDeviceManager,
+        server.globals.primary_selection_device_manager.get(),
         &Wrapland::Server::primary_selection_device_manager::source_created);
     QVERIFY(sourceCreatedSpy.isValid());
 
@@ -541,7 +544,7 @@ void TestPrimarySelection::testRequestSend()
 void TestPrimarySelection::testCancel()
 {
     QSignalSpy sourceCreatedSpy(
-        m_serverPrimarySelectionDeviceManager,
+        server.globals.primary_selection_device_manager.get(),
         &Wrapland::Server::primary_selection_device_manager::source_created);
     QVERIFY(sourceCreatedSpy.isValid());
 
@@ -563,7 +566,7 @@ void TestPrimarySelection::testCancel()
 void TestPrimarySelection::testServerGet()
 {
     QSignalSpy sourceCreatedSpy(
-        m_serverPrimarySelectionDeviceManager,
+        server.globals.primary_selection_device_manager.get(),
         &Wrapland::Server::primary_selection_device_manager::source_created);
     QVERIFY(sourceCreatedSpy.isValid());
 
@@ -604,8 +607,7 @@ void TestPrimarySelection::testDestroy()
             m_queue,
             &Wrapland::Client::EventQueue::release);
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
     QTRY_VERIFY(!m_connection->established());
 
     // Now the device should be destroyed.

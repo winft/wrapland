@@ -27,8 +27,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/client.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/plasma_shell_p.h"
 #include "../../server/surface.h"
 
@@ -52,9 +52,10 @@ private Q_SLOTS:
     void testWhileDestroying();
 
 private:
-    Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
-    Wrapland::Server::PlasmaShell* m_plasmaShellInterface = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
 
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
     Wrapland::Client::Compositor* m_compositor = nullptr;
@@ -69,14 +70,15 @@ constexpr auto socket_name{"wrapland-test-wayland-plasma-shell-0"};
 void TestPlasmaShell::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
 
-    m_serverCompositor = m_display->createCompositor(m_display);
-    m_display->createShm();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_plasmaShellInterface = m_display->createPlasmaShell(m_display);
+    server.display->createShm();
+    server.globals.compositor = server.display->createCompositor();
+    server.globals.plasma_shell = server.display->createPlasmaShell();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -143,8 +145,7 @@ void TestPlasmaShell::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestPlasmaShell::testRole_data()
@@ -172,9 +173,10 @@ void TestPlasmaShell::testRole()
     // this test verifies that setting the role on a plasma shell surface works
 
     // first create signal spies
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
-    QSignalSpy plasmaSurfaceCreatedSpy(m_plasmaShellInterface,
+    QSignalSpy plasmaSurfaceCreatedSpy(server.globals.plasma_shell.get(),
                                        &Wrapland::Server::PlasmaShell::surfaceCreated);
     QVERIFY(plasmaSurfaceCreatedSpy.isValid());
 
@@ -201,7 +203,7 @@ void TestPlasmaShell::testRole()
     QVERIFY(sps);
     QVERIFY(sps->surface());
     QCOMPARE(sps->surface(), surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>());
-    QCOMPARE(sps->shell(), m_plasmaShellInterface);
+    QCOMPARE(sps->shell(), server.globals.plasma_shell.get());
     QCOMPARE(Wrapland::Server::PlasmaShellSurface::get(sps->resource()), sps);
     QVERIFY(!Wrapland::Server::PlasmaShellSurface::get(nullptr));
 
@@ -234,7 +236,7 @@ void TestPlasmaShell::testPosition()
 {
     // this test verifies that updating the position of a PlasmaShellSurface is properly passed to
     // the server
-    QSignalSpy plasmaSurfaceCreatedSpy(m_plasmaShellInterface,
+    QSignalSpy plasmaSurfaceCreatedSpy(server.globals.plasma_shell.get(),
                                        &Wrapland::Server::PlasmaShell::surfaceCreated);
     QVERIFY(plasmaSurfaceCreatedSpy.isValid());
 
@@ -275,7 +277,7 @@ void TestPlasmaShell::testPosition()
 void TestPlasmaShell::testSkipTaskbar()
 {
     // this test verifies that sip taskbar is properly passed to server
-    QSignalSpy plasmaSurfaceCreatedSpy(m_plasmaShellInterface,
+    QSignalSpy plasmaSurfaceCreatedSpy(server.globals.plasma_shell.get(),
                                        &Wrapland::Server::PlasmaShell::surfaceCreated);
     QVERIFY(plasmaSurfaceCreatedSpy.isValid());
 
@@ -313,7 +315,7 @@ void TestPlasmaShell::testSkipTaskbar()
 void TestPlasmaShell::testSkipSwitcher()
 {
     // this test verifies that Skip Switcher is properly passed to server
-    QSignalSpy plasmaSurfaceCreatedSpy(m_plasmaShellInterface,
+    QSignalSpy plasmaSurfaceCreatedSpy(server.globals.plasma_shell.get(),
                                        &Wrapland::Server::PlasmaShell::surfaceCreated);
     QVERIFY(plasmaSurfaceCreatedSpy.isValid());
 
@@ -366,7 +368,7 @@ void TestPlasmaShell::testPanelBehavior_data()
 void TestPlasmaShell::testPanelBehavior()
 {
     // this test verifies that the panel behavior is properly passed to the server
-    QSignalSpy plasmaSurfaceCreatedSpy(m_plasmaShellInterface,
+    QSignalSpy plasmaSurfaceCreatedSpy(server.globals.plasma_shell.get(),
                                        &Wrapland::Server::PlasmaShell::surfaceCreated);
     QVERIFY(plasmaSurfaceCreatedSpy.isValid());
 
@@ -406,7 +408,7 @@ void TestPlasmaShell::testPanelBehavior()
 void TestPlasmaShell::testAutoHidePanel()
 {
     // this test verifies that auto-hiding panels work correctly
-    QSignalSpy plasmaSurfaceCreatedSpy(m_plasmaShellInterface,
+    QSignalSpy plasmaSurfaceCreatedSpy(server.globals.plasma_shell.get(),
                                        &Wrapland::Server::PlasmaShell::surfaceCreated);
     QVERIFY(plasmaSurfaceCreatedSpy.isValid());
 
@@ -464,7 +466,7 @@ void TestPlasmaShell::testAutoHidePanel()
 void TestPlasmaShell::testPanelTakesFocus()
 {
     // this test verifies that whether a panel wants to take focus is passed through correctly
-    QSignalSpy plasmaSurfaceCreatedSpy(m_plasmaShellInterface,
+    QSignalSpy plasmaSurfaceCreatedSpy(server.globals.plasma_shell.get(),
                                        &Wrapland::Server::PlasmaShell::surfaceCreated);
 
     QVERIFY(plasmaSurfaceCreatedSpy.isValid());
@@ -497,7 +499,7 @@ void TestPlasmaShell::testPanelTakesFocus()
 void TestPlasmaShell::testDisconnect()
 {
     // this test verifies that a disconnect cleans up
-    QSignalSpy plasmaSurfaceCreatedSpy(m_plasmaShellInterface,
+    QSignalSpy plasmaSurfaceCreatedSpy(server.globals.plasma_shell.get(),
                                        &Wrapland::Server::PlasmaShell::surfaceCreated);
     QVERIFY(plasmaSurfaceCreatedSpy.isValid());
     // create the surface
@@ -541,7 +543,8 @@ void TestPlasmaShell::testWhileDestroying()
     // used for a previous Surface. For each Surface we try to create a PlasmaShellSurface.
     // Even if there was a Surface in the past with the same ID, it should create the
     // PlasmaShellSurface
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
@@ -549,7 +552,7 @@ void TestPlasmaShell::testWhileDestroying()
     QVERIFY(serverSurface);
 
     // create ShellSurface
-    QSignalSpy shellSurfaceCreatedSpy(m_plasmaShellInterface,
+    QSignalSpy shellSurfaceCreatedSpy(server.globals.plasma_shell.get(),
                                       &Wrapland::Server::PlasmaShell::surfaceCreated);
     QVERIFY(shellSurfaceCreatedSpy.isValid());
     std::unique_ptr<Wrapland::Client::PlasmaShellSurface> ps(m_plasmaShell->createSurface(s.get()));

@@ -107,9 +107,8 @@ Client* Private::createClientHandle(wl_client* wlClient)
     return clientHandle;
 }
 
-Display::Display(QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this))
+Display::Display()
+    : d_ptr(new Private(this))
 {
 }
 
@@ -172,7 +171,7 @@ void Display::terminate()
 void Display::add_output_device_v1(OutputDeviceV1* output)
 {
     if (!d_ptr->xdg_output_manager) {
-        d_ptr->xdg_output_manager.reset(new XdgOutputManager(this));
+        d_ptr->xdg_output_manager = std::make_unique<XdgOutputManager>(this);
     }
 
     d_ptr->outputDevices.push_back(output);
@@ -196,176 +195,176 @@ void Display::removeOutputDevice(OutputDeviceV1* outputDevice)
         d_ptr->outputDevices.end());
 }
 
-Compositor* Display::createCompositor(QObject* parent)
+std::unique_ptr<Compositor> Display::createCompositor()
 {
-    return new Compositor(this, parent);
+    return std::make_unique<Compositor>(this);
 }
 
-OutputManagementV1* Display::createOutputManagementV1(QObject* parent)
+std::unique_ptr<OutputManagementV1> Display::createOutputManagementV1()
 {
-    return new OutputManagementV1(this, parent);
+    return std::make_unique<OutputManagementV1>(this);
 }
 
-Seat* Display::createSeat(QObject* parent)
+std::unique_ptr<Seat> Display::createSeat()
 {
-    auto seat = new Seat(this, parent);
-    d_ptr->seats.push_back(seat);
-    connect(seat, &QObject::destroyed, this, [this, seat] {
-        d_ptr->seats.erase(std::remove(d_ptr->seats.begin(), d_ptr->seats.end(), seat),
+    auto seat = std::make_unique<Seat>(this);
+    d_ptr->seats.push_back(seat.get());
+    connect(seat.get(), &QObject::destroyed, this, [this, seat_ptr = seat.get()] {
+        d_ptr->seats.erase(std::remove(d_ptr->seats.begin(), d_ptr->seats.end(), seat_ptr),
                            d_ptr->seats.end());
     });
     return seat;
 }
 
-Subcompositor* Display::createSubCompositor(QObject* parent)
+std::unique_ptr<Subcompositor> Display::createSubCompositor()
 {
-    return new Subcompositor(this, parent);
+    return std::make_unique<Subcompositor>(this);
 }
 
-data_control_manager_v1* Display::create_data_control_manager_v1(QObject* parent)
+std::unique_ptr<data_control_manager_v1> Display::create_data_control_manager_v1()
 {
-    return new data_control_manager_v1(this, parent);
+    return std::make_unique<data_control_manager_v1>(this);
 }
 
-data_device_manager* Display::createDataDeviceManager(QObject* parent)
+std::unique_ptr<data_device_manager> Display::createDataDeviceManager()
 {
-    return new data_device_manager(this, parent);
+    return std::make_unique<data_device_manager>(this);
 }
 
-primary_selection_device_manager* Display::createPrimarySelectionDeviceManager(QObject* parent)
+std::unique_ptr<primary_selection_device_manager> Display::createPrimarySelectionDeviceManager()
 {
-    return new primary_selection_device_manager(this, parent);
+    return std::make_unique<primary_selection_device_manager>(this);
 }
 
-PlasmaShell* Display::createPlasmaShell(QObject* parent)
+std::unique_ptr<PlasmaShell> Display::createPlasmaShell()
 {
-    return new PlasmaShell(this, parent);
+    return std::make_unique<PlasmaShell>(this);
 }
 
-PlasmaWindowManager* Display::createPlasmaWindowManager(QObject* parent)
+std::unique_ptr<PlasmaWindowManager> Display::createPlasmaWindowManager()
 {
-    return new PlasmaWindowManager(this, parent);
+    return std::make_unique<PlasmaWindowManager>(this);
 }
 
-KdeIdle* Display::createIdle(QObject* parent)
+std::unique_ptr<KdeIdle> Display::createIdle()
 {
-    return new KdeIdle(this, parent);
+    return std::make_unique<KdeIdle>(this);
 }
 
-KeyboardShortcutsInhibitManagerV1* Display::createKeyboardShortcutsInhibitManager(QObject* parent)
+std::unique_ptr<KeyboardShortcutsInhibitManagerV1> Display::createKeyboardShortcutsInhibitManager()
 {
-    return new KeyboardShortcutsInhibitManagerV1(this, parent);
+    return std::make_unique<KeyboardShortcutsInhibitManagerV1>(this);
 }
 
-FakeInput* Display::createFakeInput(QObject* parent)
+std::unique_ptr<FakeInput> Display::createFakeInput()
 {
-    return new FakeInput(this, parent);
+    return std::make_unique<FakeInput>(this);
 }
 
-LayerShellV1* Display::createLayerShellV1(QObject* parent)
+std::unique_ptr<LayerShellV1> Display::createLayerShellV1()
 {
-    return new LayerShellV1(this, parent);
+    return std::make_unique<LayerShellV1>(this);
 }
 
-ShadowManager* Display::createShadowManager(QObject* parent)
+std::unique_ptr<ShadowManager> Display::createShadowManager()
 {
-    return new ShadowManager(this, parent);
+    return std::make_unique<ShadowManager>(this);
 }
 
-BlurManager* Display::createBlurManager(QObject* parent)
+std::unique_ptr<BlurManager> Display::createBlurManager()
 {
-    return new BlurManager(this, parent);
+    return std::make_unique<BlurManager>(this);
 }
 
-ContrastManager* Display::createContrastManager(QObject* parent)
+std::unique_ptr<ContrastManager> Display::createContrastManager()
 {
-    return new ContrastManager(this, parent);
+    return std::make_unique<ContrastManager>(this);
 }
 
-SlideManager* Display::createSlideManager(QObject* parent)
+std::unique_ptr<SlideManager> Display::createSlideManager()
 {
-    return new SlideManager(this, parent);
+    return std::make_unique<SlideManager>(this);
 }
 
-DpmsManager* Display::createDpmsManager(QObject* parent)
+std::unique_ptr<DpmsManager> Display::createDpmsManager()
 {
-    return new DpmsManager(this, parent);
+    return std::make_unique<DpmsManager>(this);
 }
 
-drm_lease_device_v1* Display::createDrmLeaseDeviceV1(QObject* parent)
+std::unique_ptr<drm_lease_device_v1> Display::createDrmLeaseDeviceV1()
 {
-    return new drm_lease_device_v1(this, parent);
+    return std::make_unique<drm_lease_device_v1>(this);
 }
 
-TextInputManagerV2* Display::createTextInputManagerV2(QObject* parent)
+std::unique_ptr<TextInputManagerV2> Display::createTextInputManagerV2()
 {
-    return new TextInputManagerV2(this, parent);
+    return std::make_unique<TextInputManagerV2>(this);
 }
 
-text_input_manager_v3* Display::createTextInputManagerV3(QObject* parent)
+std::unique_ptr<text_input_manager_v3> Display::createTextInputManagerV3()
 {
-    return new text_input_manager_v3(this, parent);
+    return std::make_unique<text_input_manager_v3>(this);
 }
 
-XdgShell* Display::createXdgShell(QObject* parent)
+std::unique_ptr<XdgShell> Display::createXdgShell()
 {
-    return new XdgShell(this, parent);
+    return std::make_unique<XdgShell>(this);
 }
 
-RelativePointerManagerV1* Display::createRelativePointerManager(QObject* parent)
+std::unique_ptr<RelativePointerManagerV1> Display::createRelativePointerManager()
 {
-    return new RelativePointerManagerV1(this, parent);
+    return std::make_unique<RelativePointerManagerV1>(this);
 }
 
-PointerGesturesV1* Display::createPointerGestures(QObject* parent)
+std::unique_ptr<PointerGesturesV1> Display::createPointerGestures()
 {
-    return new PointerGesturesV1(this, parent);
+    return std::make_unique<PointerGesturesV1>(this);
 }
 
-PointerConstraintsV1* Display::createPointerConstraints(QObject* parent)
+std::unique_ptr<PointerConstraintsV1> Display::createPointerConstraints()
 {
-    return new PointerConstraintsV1(this, parent);
+    return std::make_unique<PointerConstraintsV1>(this);
 }
 
-XdgForeign* Display::createXdgForeign(QObject* parent)
+std::unique_ptr<XdgForeign> Display::createXdgForeign()
 {
-    return new XdgForeign(this, parent);
+    return std::make_unique<XdgForeign>(this);
 }
 
-IdleInhibitManagerV1* Display::createIdleInhibitManager(QObject* parent)
+std::unique_ptr<IdleInhibitManagerV1> Display::createIdleInhibitManager()
 {
-    return new IdleInhibitManagerV1(this, parent);
+    return std::make_unique<IdleInhibitManagerV1>(this);
 }
 
-input_method_manager_v2* Display::createInputMethodManagerV2(QObject* parent)
+std::unique_ptr<input_method_manager_v2> Display::createInputMethodManagerV2()
 {
-    return new input_method_manager_v2(this, parent);
+    return std::make_unique<input_method_manager_v2>(this);
 }
 
-AppmenuManager* Display::createAppmenuManager(QObject* parent)
+std::unique_ptr<AppmenuManager> Display::createAppmenuManager()
 {
-    return new AppmenuManager(this, parent);
+    return std::make_unique<AppmenuManager>(this);
 }
 
-ServerSideDecorationPaletteManager*
-Display::createServerSideDecorationPaletteManager(QObject* parent)
+std::unique_ptr<ServerSideDecorationPaletteManager>
+Display::createServerSideDecorationPaletteManager()
 {
-    return new ServerSideDecorationPaletteManager(this, parent);
+    return std::make_unique<ServerSideDecorationPaletteManager>(this);
 }
 
-LinuxDmabufV1* Display::createLinuxDmabuf(QObject* parent)
+std::unique_ptr<LinuxDmabufV1> Display::createLinuxDmabuf()
 {
-    return new LinuxDmabufV1(this, parent);
+    return std::make_unique<LinuxDmabufV1>(this);
 }
 
-PlasmaVirtualDesktopManager* Display::createPlasmaVirtualDesktopManager(QObject* parent)
+std::unique_ptr<PlasmaVirtualDesktopManager> Display::createPlasmaVirtualDesktopManager()
 {
-    return new PlasmaVirtualDesktopManager(this, parent);
+    return std::make_unique<PlasmaVirtualDesktopManager>(this);
 }
 
-Viewporter* Display::createViewporter(QObject* parent)
+std::unique_ptr<Viewporter> Display::createViewporter()
 {
-    return new Viewporter(this, parent);
+    return std::make_unique<Viewporter>(this);
 }
 
 XdgOutputManager* Display::xdgOutputManager() const
@@ -373,29 +372,29 @@ XdgOutputManager* Display::xdgOutputManager() const
     return d_ptr->xdg_output_manager.get();
 }
 
-XdgActivationV1* Display::createXdgActivationV1(QObject* parent)
+std::unique_ptr<XdgActivationV1> Display::createXdgActivationV1()
 {
-    return new XdgActivationV1(this, parent);
+    return std::make_unique<XdgActivationV1>(this);
 }
 
-XdgDecorationManager* Display::createXdgDecorationManager(XdgShell* shell, QObject* parent)
+std::unique_ptr<XdgDecorationManager> Display::createXdgDecorationManager(XdgShell* shell)
 {
-    return new XdgDecorationManager(this, shell, parent);
+    return std::make_unique<XdgDecorationManager>(this, shell);
 }
 
-EglStreamController* Display::createEglStreamController(QObject* parent)
+std::unique_ptr<EglStreamController> Display::createEglStreamController()
 {
-    return new EglStreamController(this, parent);
+    return std::make_unique<EglStreamController>(this);
 }
 
-KeyState* Display::createKeyState(QObject* parent)
+std::unique_ptr<KeyState> Display::createKeyState()
 {
-    return new KeyState(this, parent);
+    return std::make_unique<KeyState>(this);
 }
 
-PresentationManager* Display::createPresentationManager(QObject* parent)
+std::unique_ptr<PresentationManager> Display::createPresentationManager()
 {
-    return new PresentationManager(this, parent);
+    return std::make_unique<PresentationManager>(this);
 }
 
 void Display::createShm()

@@ -72,9 +72,8 @@ void ContrastManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClien
     surface->d_ptr->setContrast(QPointer<Contrast>());
 }
 
-ContrastManager::ContrastManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+ContrastManager::ContrastManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

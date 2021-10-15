@@ -29,11 +29,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/pointer_constraints_v1.h"
 #include "../../server/pointer_pool.h"
-#include "../../server/seat.h"
 #include "../../server/surface.h"
 
 using namespace Wrapland::Client;
@@ -58,10 +57,12 @@ private Q_SLOTS:
     void testAlreadyConstrained();
 
 private:
-    Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
-    Wrapland::Server::Seat* m_serverSeat = nullptr;
-    Wrapland::Server::PointerConstraintsV1* m_pointerConstraintsServer = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+        Wrapland::Server::Seat* seat{nullptr};
+    } server;
+
     ConnectionThread* m_connection = nullptr;
     QThread* m_thread = nullptr;
     EventQueue* m_queue = nullptr;
@@ -77,15 +78,18 @@ void TestPointerConstraints::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_display->createShm();
-    m_serverSeat = m_display->createSeat(m_display);
-    m_serverSeat->setHasPointer(true);
-    m_serverCompositor = m_display->createCompositor(m_display);
-    m_pointerConstraintsServer = m_display->createPointerConstraints(m_display);
+    server.display->createShm();
+    server.globals.compositor = server.display->createCompositor();
+
+    server.globals.seats.push_back(server.display->createSeat());
+    server.seat = server.globals.seats.back().get();
+    server.seat->setHasPointer(true);
+    server.globals.pointer_constraints_v1 = server.display->createPointerConstraints();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -163,12 +167,9 @@ void TestPointerConstraints::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_serverSeat);
-    CLEANUP(m_pointerConstraintsServer)
-    CLEANUP(m_display)
 #undef CLEANUP
+
+    server = {};
 }
 
 void TestPointerConstraints::testLockPointer_data()
@@ -190,7 +191,8 @@ void TestPointerConstraints::testLockPointer()
     // This test verifies the basic interaction for lock pointer.
 
     // First create a surface.
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     std::unique_ptr<Surface> surface(m_compositor->createSurface());
     QVERIFY(surface->isValid());
@@ -251,16 +253,16 @@ void TestPointerConstraints::testLockPointer()
     QSignalSpy lockedChangedSpy(serverLockedPointer.data(),
                                 &Wrapland::Server::LockedPointerV1::lockedChanged);
     QVERIFY(lockedChangedSpy.isValid());
-    m_serverSeat->pointers().set_focused_surface(serverSurface);
+    server.seat->pointers().set_focused_surface(serverSurface);
 
     QSignalSpy pointerMotionSpy(m_pointer, &Wrapland::Client::Pointer::motion);
     QVERIFY(pointerMotionSpy.isValid());
-    m_serverSeat->pointers().set_position(QPoint(0, 1));
+    server.seat->pointers().set_position(QPoint(0, 1));
     QVERIFY(pointerMotionSpy.wait());
 
     serverLockedPointer->setLocked(true);
     QCOMPARE(serverLockedPointer->isLocked(), true);
-    m_serverSeat->pointers().set_position(QPoint(1, 1));
+    server.seat->pointers().set_position(QPoint(1, 1));
     QCOMPARE(lockedChangedSpy.count(), 1);
     QCOMPARE(pointerMotionSpy.count(), 1);
     QVERIFY(lockedSpy.isEmpty());
@@ -288,7 +290,7 @@ void TestPointerConstraints::testLockPointer()
     QCOMPARE(lockedSpy.count(), 1);
 
     // Now motion should work again.
-    m_serverSeat->pointers().set_position(QPoint(0, 1));
+    server.seat->pointers().set_position(QPoint(0, 1));
     QVERIFY(pointerMotionSpy.wait());
     QCOMPARE(pointerMotionSpy.count(), 2);
 
@@ -320,7 +322,8 @@ void TestPointerConstraints::testConfinePointer()
     // This test verifies the basic interaction for confined pointer.
 
     // First create a surface.
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
 
     std::unique_ptr<Surface> surface(m_compositor->createSurface());
@@ -385,7 +388,7 @@ void TestPointerConstraints::testConfinePointer()
     QSignalSpy confinedChangedSpy(serverConfinedPointer.data(),
                                   &Wrapland::Server::ConfinedPointerV1::confinedChanged);
     QVERIFY(confinedChangedSpy.isValid());
-    m_serverSeat->pointers().set_focused_surface(serverSurface);
+    server.seat->pointers().set_focused_surface(serverSurface);
     serverConfinedPointer->setConfined(true);
     QCOMPARE(serverConfinedPointer->isConfined(), true);
     QCOMPARE(confinedChangedSpy.count(), 1);

@@ -144,8 +144,7 @@ void OutputDeviceV1::Private::done()
 }
 
 OutputDeviceV1::OutputDeviceV1(Output* output, Display* display)
-    : QObject(nullptr)
-    , d_ptr(new Private(output, display, this))
+    : d_ptr(new Private(output, display, this))
 {
 }
 

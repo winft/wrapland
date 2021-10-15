@@ -84,7 +84,7 @@ public:
         int id{-1};
     };
 
-    explicit Output(Display* display, QObject* parent = nullptr);
+    explicit Output(Display* display);
     ~Output() override;
 
     std::string name() const;
@@ -157,7 +157,6 @@ Q_SIGNALS:
     void dpms_mode_requested(Wrapland::Server::Output::DpmsMode mode);
 
 private:
-    friend class Display;
     friend class OutputDeviceV1;
     friend class WlOutput;
     friend class XdgOutput;

@@ -60,9 +60,8 @@ void RelativePointerManagerV1::Private::relativePointerCallback(RelativePointerM
     pointer->d_ptr->registerRelativePointer(relative);
 }
 
-RelativePointerManagerV1::RelativePointerManagerV1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+RelativePointerManagerV1::RelativePointerManagerV1(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

@@ -31,23 +31,20 @@ namespace Wrapland::Server
 
 XdgForeign::Private::Private(Display* display, XdgForeign* q)
 {
-    exporter = new XdgExporterV2(display, q);
-    importer = new XdgImporterV2(display, q);
-    importer->setExporter(exporter);
+    exporter = std::make_unique<XdgExporterV2>(display);
+    importer = std::make_unique<XdgImporterV2>(display);
+    importer->setExporter(exporter.get());
 
-    connect(importer, &XdgImporterV2::parentChanged, q, &XdgForeign::parentChanged);
+    connect(importer.get(), &XdgImporterV2::parentChanged, q, &XdgForeign::parentChanged);
 }
 
-XdgForeign::XdgForeign(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+XdgForeign::XdgForeign(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 
 XdgForeign::~XdgForeign()
 {
-    delete d_ptr->exporter;
-    delete d_ptr->importer;
     delete d_ptr;
 }
 

@@ -26,15 +26,13 @@ class WRAPLANDSERVER_EXPORT LayerShellV1 : public QObject
 {
     Q_OBJECT
 public:
+    explicit LayerShellV1(Display* display);
     ~LayerShellV1() override;
 
 Q_SIGNALS:
     void surface_created(LayerSurfaceV1* surface);
 
 private:
-    explicit LayerShellV1(Display* display, QObject* parent = nullptr);
-    friend class Display;
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

@@ -29,8 +29,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/appmenu.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
@@ -48,9 +48,11 @@ private Q_SLOTS:
     void testCreateAndSet();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Compositor* m_serverCompositor;
-    Wrapland::Server::AppmenuManager* m_appmenuManagerInterface;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::AppMenuManager* m_appmenuManager;
@@ -62,8 +64,6 @@ constexpr auto socket_name{"wrapland-test-wayland-appmenu-0"};
 
 TestAppmenu::TestAppmenu(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_queue(nullptr)
@@ -76,9 +76,10 @@ void TestAppmenu::init()
     qRegisterMetaType<Wrapland::Server::Appmenu::InterfaceAddress>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -113,14 +114,14 @@ void TestAppmenu::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_serverCompositor = m_display->createCompositor(m_display);
+    server.globals.compositor = server.display->createCompositor();
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
                                              compositorSpy.first().last().value<quint32>(),
                                              this);
 
-    m_appmenuManagerInterface = m_display->createAppmenuManager(m_display);
+    server.globals.appmenu_manager = server.display->createAppmenuManager();
 
     QVERIFY(appmenuSpy.wait());
     m_appmenuManager = registry.createAppMenuManager(appmenuSpy.first().first().value<quint32>(),
@@ -148,31 +149,29 @@ void TestAppmenu::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_appmenuManagerInterface)
-    CLEANUP(m_display)
 #undef CLEANUP
+    server = {};
 }
 
 void TestAppmenu::testCreateAndSet()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
-                                    SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
     QVERIFY(serverSurfaceCreated.wait());
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
-    QSignalSpy appmenuCreated(m_appmenuManagerInterface,
+    QSignalSpy appmenuCreated(server.globals.appmenu_manager.get(),
                               &Wrapland::Server::AppmenuManager::appmenuCreated);
 
-    QVERIFY(!m_appmenuManagerInterface->appmenuForSurface(serverSurface));
+    QVERIFY(!server.globals.appmenu_manager->appmenuForSurface(serverSurface));
 
     auto appmenu = m_appmenuManager->create(surface.get(), surface.get());
     QVERIFY(appmenuCreated.wait());
     auto serverAppmenu = appmenuCreated.first().first().value<Wrapland::Server::Appmenu*>();
-    QCOMPARE(m_appmenuManagerInterface->appmenuForSurface(serverSurface), serverAppmenu);
+    QCOMPARE(server.globals.appmenu_manager->appmenuForSurface(serverSurface), serverAppmenu);
 
     QCOMPARE(serverAppmenu->address().serviceName, QString());
     QCOMPARE(serverAppmenu->address().objectPath, QString());
@@ -190,7 +189,7 @@ void TestAppmenu::testCreateAndSet()
     QVERIFY(destroyedSpy.isValid());
     delete appmenu;
     QVERIFY(destroyedSpy.wait());
-    QVERIFY(!m_appmenuManagerInterface->appmenuForSurface(serverSurface));
+    QVERIFY(!server.globals.appmenu_manager->appmenuForSurface(serverSurface));
 }
 
 QTEST_GUILESS_MAIN(TestAppmenu)

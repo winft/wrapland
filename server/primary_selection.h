@@ -27,6 +27,7 @@ public:
     using device_t = Wrapland::Server::primary_selection_device;
     using source_t = Wrapland::Server::primary_selection_source;
 
+    explicit primary_selection_device_manager(Display* display);
     ~primary_selection_device_manager() override;
 
     void create_source(Client* client, uint32_t version, uint32_t id);
@@ -37,9 +38,6 @@ Q_SIGNALS:
     void device_created(Wrapland::Server::primary_selection_device* device);
 
 private:
-    friend class Display;
-    explicit primary_selection_device_manager(Display* display, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

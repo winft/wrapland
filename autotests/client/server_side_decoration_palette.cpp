@@ -30,10 +30,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/region.h"
-#include "../../server/surface.h"
-
 #include "../../server/server_decoration_palette.h"
+#include "../../server/surface.h"
 
 using namespace Wrapland::Client;
 
@@ -49,9 +49,11 @@ private Q_SLOTS:
     void testCreateAndSet();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Compositor* m_serverCompositor;
-    Wrapland::Server::ServerSideDecorationPaletteManager* m_paletteManagerInterface;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::ServerSideDecorationPaletteManager* m_paletteManager;
@@ -63,8 +65,6 @@ constexpr auto socket_name{"wrapland-test-wayland-decopalette-0"};
 
 TestServerSideDecorationPalette::TestServerSideDecorationPalette(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_queue(nullptr)
@@ -76,9 +76,9 @@ void TestServerSideDecorationPalette::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::Display(this);
-    m_display->set_socket_name(socket_name);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -113,14 +113,15 @@ void TestServerSideDecorationPalette::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_serverCompositor = m_display->createCompositor(m_display);
+    server.globals.compositor = server.display->createCompositor();
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
                                              compositorSpy.first().last().value<quint32>(),
                                              this);
 
-    m_paletteManagerInterface = m_display->createServerSideDecorationPaletteManager(m_display);
+    server.globals.server_side_decoration_palette_manager
+        = server.display->createServerSideDecorationPaletteManager();
 
     QVERIFY(registrySpy.wait());
     m_paletteManager = registry.createServerSideDecorationPaletteManager(
@@ -149,16 +150,14 @@ void TestServerSideDecorationPalette::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_paletteManagerInterface)
-    CLEANUP(m_display)
 #undef CLEANUP
+    server = {};
 }
 
 void TestServerSideDecorationPalette::testCreateAndSet()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
-                                    SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -166,17 +165,20 @@ void TestServerSideDecorationPalette::testCreateAndSet()
 
     auto serverSurface = serverSurfaceCreated.first().first().value<Wrapland::Server::Surface*>();
     QSignalSpy paletteCreatedSpy(
-        m_paletteManagerInterface,
+        server.globals.server_side_decoration_palette_manager.get(),
         &Wrapland::Server::ServerSideDecorationPaletteManager::paletteCreated);
 
-    QVERIFY(!m_paletteManagerInterface->paletteForSurface(serverSurface));
+    QVERIFY(
+        !server.globals.server_side_decoration_palette_manager->paletteForSurface(serverSurface));
 
     auto palette = m_paletteManager->create(surface.get(), surface.get());
     QVERIFY(paletteCreatedSpy.wait());
     auto paletteInterface
         = paletteCreatedSpy.first().first().value<Wrapland::Server::ServerSideDecorationPalette*>();
 
-    QCOMPARE(m_paletteManagerInterface->paletteForSurface(serverSurface), paletteInterface);
+    QCOMPARE(
+        server.globals.server_side_decoration_palette_manager->paletteForSurface(serverSurface),
+        paletteInterface);
 
     QCOMPARE(paletteInterface->palette(), QString());
 
@@ -194,7 +196,8 @@ void TestServerSideDecorationPalette::testCreateAndSet()
     delete palette;
     QVERIFY(destroyedSpy.wait());
 
-    QVERIFY(!m_paletteManagerInterface->paletteForSurface(serverSurface));
+    QVERIFY(
+        !server.globals.server_side_decoration_palette_manager->paletteForSurface(serverSurface));
 }
 
 QTEST_GUILESS_MAIN(TestServerSideDecorationPalette)

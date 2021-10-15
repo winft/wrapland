@@ -47,9 +47,8 @@ void IdleInhibitManagerV1::Private::createInhibitorCallback(IdleInhibitManagerV1
     surface->d_ptr->installIdleInhibitor(inhibitor);
 }
 
-IdleInhibitManagerV1::IdleInhibitManagerV1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+IdleInhibitManagerV1::IdleInhibitManagerV1(Display* display)
+    : d_ptr(new Private(display, this))
 
 {
 }

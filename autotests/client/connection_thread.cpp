@@ -66,7 +66,7 @@ TestWaylandConnectionThread::TestWaylandConnectionThread(QObject* parent)
 
 void TestWaylandConnectionThread::init()
 {
-    m_display = new Srv::Display(this);
+    m_display = new Srv::Display;
     m_display->set_socket_name(socket_name);
     m_display->start();
     QVERIFY(m_display->running());

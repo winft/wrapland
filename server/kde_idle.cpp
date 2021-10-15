@@ -66,9 +66,8 @@ void KdeIdle::Private::getIdleTimeoutCallback(KdeIdleBind* bind,
     idleTimeout->d_ptr->setup(timeout);
 }
 
-KdeIdle::KdeIdle(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+KdeIdle::KdeIdle(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

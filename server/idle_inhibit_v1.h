@@ -32,11 +32,10 @@ class WRAPLANDSERVER_EXPORT IdleInhibitManagerV1 : public QObject
 {
     Q_OBJECT
 public:
-    explicit IdleInhibitManagerV1(Display* Display, QObject* parent = nullptr);
+    explicit IdleInhibitManagerV1(Display* Display);
     ~IdleInhibitManagerV1() override;
 
 private:
-    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

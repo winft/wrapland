@@ -15,6 +15,7 @@
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
 #include "../../server/text_input_pool.h"
@@ -42,10 +43,9 @@ private:
     Wrapland::Client::text_input_v3* create_text_input();
 
     struct {
-        Wrapland::Server::Display* display{nullptr};
-        Wrapland::Server::Compositor* compositor{nullptr};
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
         Wrapland::Server::Seat* seat{nullptr};
-        Wrapland::Server::text_input_manager_v3* text_input{nullptr};
     } server;
 
     struct client {
@@ -65,18 +65,18 @@ void text_input_v3_test::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    delete server.display;
-    server.display = new Wrapland::Server::Display(this);
+    server.display = std::make_unique<Wrapland::Server::Display>();
     server.display->set_socket_name(socket_name);
     server.display->start();
+    QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.seat = server.display->createSeat();
+    server.globals.compositor = server.display->createCompositor();
+
+    server.seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
     server.seat->setHasKeyboard(true);
 
-    server.compositor = server.display->createCompositor();
-
-    server.text_input = server.display->createTextInputManagerV3();
+    server.globals.text_input_v3 = server.display->createTextInputManagerV3();
 
     // setup connection
     client1.connection = new Wrapland::Client::ConnectionThread;
@@ -146,16 +146,14 @@ void text_input_v3_test::cleanup()
         client1.thread = nullptr;
     }
 
-    CLEANUP(server.text_input)
-    CLEANUP(server.compositor)
-    CLEANUP(server.seat)
-    CLEANUP(server.display)
+    server = {};
 #undef CLEANUP
 }
 
 Wrapland::Server::Surface* text_input_v3_test::wait_for_surface()
 {
-    auto surface_spy = QSignalSpy(server.compositor, &Wrapland::Server::Compositor::surfaceCreated);
+    auto surface_spy = QSignalSpy(server.globals.compositor.get(),
+                                  &Wrapland::Server::Compositor::surfaceCreated);
     if (!surface_spy.isValid()) {
         return nullptr;
     }

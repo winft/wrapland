@@ -79,7 +79,7 @@ class WRAPLANDSERVER_EXPORT text_input_manager_v3 : public QObject
 {
     Q_OBJECT
 public:
-    explicit text_input_manager_v3(Display* display, QObject* parent = nullptr);
+    explicit text_input_manager_v3(Display* display);
     ~text_input_manager_v3() override;
 
 private:

@@ -35,6 +35,7 @@ class WRAPLANDSERVER_EXPORT Compositor : public QObject
 {
     Q_OBJECT
 public:
+    explicit Compositor(Display* display);
     ~Compositor() override;
 
     Surface* getSurface(uint32_t id, Client* client);
@@ -44,9 +45,6 @@ Q_SIGNALS:
     void regionCreated(Wrapland::Server::Region*);
 
 private:
-    friend class Display;
-    explicit Compositor(Display* display, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
