@@ -36,15 +36,15 @@ class WRAPLANDSERVER_EXPORT ServerSideDecorationPaletteManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit ServerSideDecorationPaletteManager(Display* display);
     ~ServerSideDecorationPaletteManager() override;
+
     ServerSideDecorationPalette* paletteForSurface(Surface* surface);
 
 Q_SIGNALS:
     void paletteCreated(Wrapland::Server::ServerSideDecorationPalette*);
 
 private:
-    explicit ServerSideDecorationPaletteManager(Display* display, QObject* parent = nullptr);
-    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

@@ -29,8 +29,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/presentation_time.h"
 #include "../../server/surface.h"
 
@@ -50,10 +50,10 @@ private Q_SLOTS:
     void testDiscarded();
 
 private:
-    Server::Display* m_display;
-    Server::Compositor* m_serverCompositor;
-    Server::PresentationManager* m_serverPresentation;
-    Server::Output* m_serverOutput;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
 
     Client::ConnectionThread* m_connection;
     Client::EventQueue* m_queue;
@@ -65,14 +65,10 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-compositor-0");
+constexpr auto socket_name{"wrapland-test-wayland-compositor-0"};
 
 TestPresentationTime::TestPresentationTime(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
-    , m_serverPresentation(nullptr)
-    , m_serverOutput(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_thread(nullptr)
@@ -83,27 +79,24 @@ void TestPresentationTime::init()
 {
     qRegisterMetaType<Server::Surface*>();
 
-    m_display = new Server::Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
-    QVERIFY(m_display->running());
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_display->createShm();
+    server.display->createShm();
 
-    m_serverCompositor = m_display->createCompositor(m_display);
-    QVERIFY(m_serverCompositor);
+    server.globals.compositor = server.display->createCompositor();
+    server.globals.presentation_manager = server.display->createPresentationManager();
 
-    m_serverPresentation = m_display->createPresentationManager(m_display);
-    QVERIFY(m_serverPresentation);
-
-    m_serverOutput = new Server::Output(m_display, m_display);
-    m_serverOutput->set_enabled(true);
-    m_serverOutput->done();
+    server.globals.outputs.push_back(std::make_unique<Server::Output>(server.display.get()));
+    server.globals.outputs.back()->set_enabled(true);
+    server.globals.outputs.back()->done();
 
     // Setup connection.
     m_connection = new Client::ConnectionThread;
     QSignalSpy establishedSpy(m_connection, &Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -116,7 +109,7 @@ void TestPresentationTime::init()
     m_queue->setup(m_connection);
     QVERIFY(m_queue->isValid());
 
-    QSignalSpy clientConnectedSpy(m_display, &Server::Display::clientConnected);
+    QSignalSpy clientConnectedSpy(server.display.get(), &Server::Display::clientConnected);
     QVERIFY(clientConnectedSpy.isValid());
 
     Client::Registry registry;
@@ -182,8 +175,7 @@ void TestPresentationTime::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestPresentationTime::testClockId()
@@ -200,8 +192,8 @@ void TestPresentationTime::testClockId()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_serverPresentation->setClockId(2);
-    QCOMPARE(m_serverPresentation->clockId(), 2);
+    server.globals.presentation_manager->setClockId(2);
+    QCOMPARE(server.globals.presentation_manager->clockId(), 2);
 
     QVERIFY(presentationSpy.wait());
     std::unique_ptr<Client::PresentationManager> presentation{
@@ -214,19 +206,20 @@ void TestPresentationTime::testClockId()
 
     QVERIFY(clockSpy.wait());
     QCOMPARE(clockSpy.count(), 1);
-    QCOMPARE(presentation->clockId(), m_serverPresentation->clockId());
+    QCOMPARE(presentation->clockId(), server.globals.presentation_manager->clockId());
 
-    m_serverPresentation->setClockId(3);
-    QCOMPARE(m_serverPresentation->clockId(), 3);
+    server.globals.presentation_manager->setClockId(3);
+    QCOMPARE(server.globals.presentation_manager->clockId(), 3);
 
     QVERIFY(clockSpy.wait());
     QCOMPARE(clockSpy.count(), 2);
-    QCOMPARE(presentation->clockId(), m_serverPresentation->clockId());
+    QCOMPARE(presentation->clockId(), server.globals.presentation_manager->clockId());
 }
 
 void TestPresentationTime::testPresented()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     auto surface = m_compositor->createSurface();
@@ -253,8 +246,8 @@ void TestPresentationTime::testPresented()
     QVERIFY(committedSpy.wait());
     QCOMPARE(committedSpy.count(), 1);
 
-    serverSurface->setOutputs({m_serverOutput});
-    auto id = serverSurface->lockPresentation(m_serverOutput);
+    serverSurface->setOutputs({server.globals.outputs.back().get()});
+    auto id = serverSurface->lockPresentation(server.globals.outputs.back().get());
     QVERIFY(id);
 
     QSignalSpy presentedSpy(feedback, &Client::PresentationFeedback::presented);
@@ -292,7 +285,8 @@ void TestPresentationTime::testPresented()
 
 void TestPresentationTime::testDiscarded()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor, &Server::Compositor::surfaceCreated);
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
+                                    &Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
     auto surface = m_compositor->createSurface();
@@ -319,8 +313,8 @@ void TestPresentationTime::testDiscarded()
     QVERIFY(committedSpy.wait());
     QCOMPARE(committedSpy.count(), 1);
 
-    serverSurface->setOutputs({m_serverOutput});
-    auto id = serverSurface->lockPresentation(m_serverOutput);
+    serverSurface->setOutputs({server.globals.outputs.back().get()});
+    auto id = serverSurface->lockPresentation(server.globals.outputs.back().get());
     QVERIFY(id);
 
     QSignalSpy presentedSpy(feedback, &Client::PresentationFeedback::presented);

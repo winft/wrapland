@@ -39,7 +39,9 @@ class WRAPLANDSERVER_EXPORT PlasmaWindowManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit PlasmaWindowManager(Display* display);
     ~PlasmaWindowManager() override;
+
     enum class ShowingDesktopState { Disabled, Enabled };
     void setShowingDesktopState(ShowingDesktopState state);
 
@@ -56,9 +58,6 @@ Q_SIGNALS:
     void requestChangeShowingDesktop(ShowingDesktopState requestedState);
 
 private:
-    friend class Display;
-    explicit PlasmaWindowManager(Display* display, QObject* parent);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/output.h"
 #include "../../server/output_configuration_v1.h"
 #include "../../server/output_management_v1.h"
@@ -47,9 +48,10 @@ private Q_SLOTS:
     void cleanup();
 
 private:
-    Srv::Display* m_display;
-    Srv::OutputManagementV1* m_outputManagementInterface;
-    QList<Srv::Output*> m_serverOutputs;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
 
     Clt::Registry* m_registry = nullptr;
     Clt::WlrOutputHeadV1* m_outputHead = nullptr;
@@ -67,12 +69,10 @@ private:
     QSignalSpy* m_configSpy;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-output-0");
+constexpr auto socket_name{"wrapland-test-output-0"};
 
 TestWlrOutputManagement::TestWlrOutputManagement(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_outputManagementInterface(nullptr)
     , m_connection(nullptr)
     , m_queue(nullptr)
     , m_thread(nullptr)
@@ -83,11 +83,13 @@ TestWlrOutputManagement::TestWlrOutputManagement(QObject* parent)
 
 void TestWlrOutputManagement::init()
 {
-    m_display = new Srv::Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->createCompositor(this);
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    auto server_output = new Srv::Output(m_display, this);
+    server.globals.outputs.push_back(std::make_unique<Srv::Output>(server.display.get()));
+    auto server_output = server.globals.outputs.back().get();
 
     Srv::Output::Mode m0;
     m0.id = 0;
@@ -116,14 +118,13 @@ void TestWlrOutputManagement::init()
 
     server_output->set_mode(1);
     server_output->set_geometry(QRectF(QPointF(0, 1920), QSizeF(1024, 768)));
-    m_serverOutputs << server_output;
 
-    m_outputManagementInterface = m_display->createOutputManagementV1(this);
+    server.globals.output_management_v1 = server.display->createOutputManagementV1();
 
     // setup connection
     m_connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Clt::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -193,13 +194,7 @@ void TestWlrOutputManagement::cleanup()
         m_thread = nullptr;
     }
 
-    if (m_outputManagementInterface) {
-        delete m_outputManagementInterface;
-        m_outputManagementInterface = nullptr;
-    }
-    delete m_display;
-    m_display = nullptr;
-    m_serverOutputs.clear();
+    server = {};
 }
 
 QTEST_GUILESS_MAIN(TestWlrOutputManagement)

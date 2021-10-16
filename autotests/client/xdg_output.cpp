@@ -20,7 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtTest>
 
 #include "../../server/display.h"
-#include "../../server/output.h"
+#include "../../server/globals.h"
 
 #include "../../server/xdg_output.h"
 #include "../../src/client/connection_thread.h"
@@ -42,8 +42,10 @@ private Q_SLOTS:
     void testChanges();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Output* m_serverOutput;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
 
     std::string m_name = "HDMI-A";
     std::string m_make = "Foocorp";
@@ -55,12 +57,10 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-xdg-output-0");
+constexpr auto socket_name{"wrapland-test-xdg-output-0"};
 
 TestXdgOutput::TestXdgOutput(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverOutput(nullptr)
     , m_connection(nullptr)
     , m_thread(nullptr)
 {
@@ -68,32 +68,33 @@ TestXdgOutput::TestXdgOutput(QObject* parent)
 
 void TestXdgOutput::init()
 {
-    using namespace Wrapland::Server;
-    delete m_display;
-    m_display = new Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_serverOutput = new Output(m_display);
-    m_serverOutput->add_mode(Output::Mode{QSize(1920, 1080), 60000, true, 1});
-    m_serverOutput->set_mode(1);
-    m_serverOutput->set_enabled(true);
+    server.globals.outputs.push_back(
+        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+    auto&& server_output = server.globals.outputs.back();
+    server_output->add_mode(Wrapland::Server::Output::Mode{QSize(1920, 1080), 60000, true, 1});
+    server_output->set_mode(1);
+    server_output->set_enabled(true);
 
-    m_serverOutput->set_name(m_name);
-    m_serverOutput->set_make(m_make);
-    m_serverOutput->set_model(m_model);
+    server_output->set_name(m_name);
+    server_output->set_make(m_make);
+    server_output->set_model(m_model);
 
-    m_serverOutput->generate_description();
-    m_description = m_serverOutput->description();
+    server_output->generate_description();
+    m_description = server_output->description();
 
     // Not a sensible position for one monitor but works for this test. And a 1.5 scale factor.
-    m_serverOutput->set_geometry(QRectF(QPoint(11, 12), QSize(1280, 720)));
-    m_serverOutput->done();
+    server_output->set_geometry(QRectF(QPoint(11, 12), QSize(1280, 720)));
+    server_output->done();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -124,11 +125,7 @@ void TestXdgOutput::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_serverOutput;
-    m_serverOutput = nullptr;
-
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestXdgOutput::testChanges_data()
@@ -192,11 +189,11 @@ void TestXdgOutput::testChanges()
     }
 
     // dynamic updates
-    m_serverOutput->set_geometry(QRectF(QPoint(1000, 2000), QSize(100, 200)));
+    server.globals.outputs.back()->set_geometry(QRectF(QPoint(1000, 2000), QSize(100, 200)));
 
     std::string updated_description = "Updated xdg-output description";
-    m_serverOutput->set_description(updated_description);
-    m_serverOutput->done();
+    server.globals.outputs.back()->set_description(updated_description);
+    server.globals.outputs.back()->done();
 
     QVERIFY(xdgOutputChanged.wait());
     QCOMPARE(xdgOutputChanged.count(), 1);

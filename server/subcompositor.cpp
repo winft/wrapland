@@ -93,9 +93,8 @@ void Subcompositor::Private::subsurfaceCallback(SubcompositorBind* bind,
     Q_EMIT priv->handle()->subsurfaceCreated(subsurface);
 }
 
-Subcompositor::Subcompositor(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+Subcompositor::Subcompositor(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

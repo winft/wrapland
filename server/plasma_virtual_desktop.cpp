@@ -113,9 +113,8 @@ void PlasmaVirtualDesktopManager::Private::bindInit(PlasmaVirtualDesktopManagerB
     bind->send<org_kde_plasma_virtual_desktop_management_send_done>();
 }
 
-PlasmaVirtualDesktopManager::PlasmaVirtualDesktopManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+PlasmaVirtualDesktopManager::PlasmaVirtualDesktopManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

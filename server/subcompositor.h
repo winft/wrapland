@@ -36,15 +36,13 @@ class WRAPLANDSERVER_EXPORT Subcompositor : public QObject
 {
     Q_OBJECT
 public:
+    explicit Subcompositor(Display* display);
     ~Subcompositor() override;
 
 Q_SIGNALS:
     void subsurfaceCreated(Wrapland::Server::Subsurface*);
 
 private:
-    friend class Display;
-    explicit Subcompositor(Display* display, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

@@ -63,9 +63,8 @@ const struct wl_compositor_interface Compositor::Private::s_interface = {
     cb<createRegionCallback>,
 };
 
-Compositor::Compositor(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+Compositor::Compositor(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

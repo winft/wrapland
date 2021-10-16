@@ -56,7 +56,7 @@ private:
     Srv::Display* m_display;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-connection-0");
+constexpr auto socket_name{"wrapland-test-wayland-connection-0"};
 
 TestWaylandConnectionThread::TestWaylandConnectionThread(QObject* parent)
     : QObject(parent)
@@ -66,8 +66,8 @@ TestWaylandConnectionThread::TestWaylandConnectionThread(QObject* parent)
 
 void TestWaylandConnectionThread::init()
 {
-    m_display = new Srv::Display(this);
-    m_display->setSocketName(s_socketName);
+    m_display = new Srv::Display;
+    m_display->set_socket_name(socket_name);
     m_display->start();
     QVERIFY(m_display->running());
     m_display->createShm();
@@ -86,8 +86,8 @@ void TestWaylandConnectionThread::testInitConnectionNoThread()
     QVERIFY(Cnt::ConnectionThread::connections().contains(connection.get()));
 
     QCOMPARE(connection->socketName(), QStringLiteral("wayland-0"));
-    connection->setSocketName(s_socketName);
-    QCOMPARE(connection->socketName(), s_socketName);
+    connection->setSocketName(socket_name);
+    QCOMPARE(connection->socketName(), socket_name);
 
     QSignalSpy connectedSpy(connection.get(), &Cnt::ConnectionThread::establishedChanged);
     QSignalSpy failedSpy(connection.get(), &Cnt::ConnectionThread::failed);
@@ -141,7 +141,7 @@ static const struct wl_registry_listener s_registryListener
 void TestWaylandConnectionThread::testConnectionThread()
 {
     auto* connection = new Cnt::ConnectionThread;
-    connection->setSocketName(s_socketName);
+    connection->setSocketName(socket_name);
 
     QThread* connectionThread = new QThread(this);
     connection->moveToThread(connectionThread);
@@ -199,7 +199,7 @@ void TestWaylandConnectionThread::testConnectionDying()
     QSignalSpy connectedSpy(connection.get(), &Cnt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
 
-    connection->setSocketName(s_socketName);
+    connection->setSocketName(socket_name);
     connection->establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);

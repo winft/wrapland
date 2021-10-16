@@ -33,6 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/linux_dmabuf_v1.h"
 
 class DmabufImpl : public Wrapland::Server::LinuxDmabufV1::Impl
@@ -83,8 +84,11 @@ private Q_SLOTS:
     void testCreateBufferSucess();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::LinuxDmabufV1* m_serverDmabuf;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::LinuxDmabufV1* m_dmabuf;
@@ -94,11 +98,10 @@ private:
     DmabufImpl* m_bufferImpl;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-dmabuf-0");
+constexpr auto socket_name{"wrapland-test-wayland-dmabuf-0"};
 
 TestLinuxDmabuf::TestLinuxDmabuf(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_dmabuf(nullptr)
@@ -108,14 +111,15 @@ TestLinuxDmabuf::TestLinuxDmabuf(QObject* parent)
 
 void TestLinuxDmabuf::init()
 {
-    m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // Setup connection.
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -139,10 +143,10 @@ void TestLinuxDmabuf::init()
 
     modifiers[1212].insert(12);
 
-    m_serverDmabuf = m_display->createLinuxDmabuf();
+    server.globals.linux_dmabuf_v1 = server.display->createLinuxDmabuf();
 
     m_bufferImpl = new DmabufImpl();
-    m_serverDmabuf->setImpl(m_bufferImpl);
+    server.globals.linux_dmabuf_v1->setImpl(m_bufferImpl);
     QVERIFY(dmabufSpy.wait());
 
     m_dmabuf = registry.createLinuxDmabufV1(dmabufSpy.first().first().value<quint32>(),
@@ -164,9 +168,6 @@ void TestLinuxDmabuf::cleanup()
     delete m_bufferImpl;
     m_bufferImpl = nullptr;
 
-    delete m_serverDmabuf;
-    m_serverDmabuf = nullptr;
-
     if (m_connection) {
         m_connection->deleteLater();
         m_connection = nullptr;
@@ -179,14 +180,13 @@ void TestLinuxDmabuf::cleanup()
         m_thread = nullptr;
     }
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestLinuxDmabuf::testModifier()
 {
     QSignalSpy ModifierSpy(m_dmabuf, &Wrapland::Client::LinuxDmabufV1::supportedFormatsChanged);
-    m_serverDmabuf->setSupportedFormatsWithModifiers(modifiers);
+    server.globals.linux_dmabuf_v1->setSupportedFormatsWithModifiers(modifiers);
     auto paramV1 = m_dmabuf->createParamsV1();
     QVERIFY(paramV1->isValid());
     QVERIFY(ModifierSpy.wait());
@@ -219,7 +219,7 @@ void TestLinuxDmabuf::testCreateBufferFail()
 
 void TestLinuxDmabuf::testCreateBufferSucess()
 {
-    m_serverDmabuf->setSupportedFormatsWithModifiers(modifiers);
+    server.globals.linux_dmabuf_v1->setSupportedFormatsWithModifiers(modifiers);
     auto paramV1 = m_dmabuf->createParamsV1();
     QVERIFY(paramV1->isValid());
 

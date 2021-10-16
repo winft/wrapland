@@ -39,6 +39,7 @@ public:
     using device_t = Wrapland::Server::data_device;
     using source_t = Wrapland::Server::data_source;
 
+    explicit data_device_manager(Display* display);
     ~data_device_manager() override;
 
     void create_source(Client* client, uint32_t version, uint32_t id);
@@ -49,9 +50,6 @@ Q_SIGNALS:
     void device_created(Wrapland::Server::data_device* device);
 
 private:
-    friend class Display;
-    explicit data_device_manager(Display* display, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

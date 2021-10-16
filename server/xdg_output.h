@@ -33,12 +33,10 @@ class WRAPLANDSERVER_EXPORT XdgOutputManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit XdgOutputManager(Display* display);
     ~XdgOutputManager() override;
 
 private:
-    explicit XdgOutputManager(Display* display, QObject* parent = nullptr);
-
-    friend class Display;
     friend class XdgOutput;
 
     class Private;

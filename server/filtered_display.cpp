@@ -60,9 +60,8 @@ bool FilteredDisplay::Private::filterCallback(const wl_client* wlClient,
     return priv->q_ptr->allowInterface(client, name);
 }
 
-FilteredDisplay::FilteredDisplay(QObject* parent)
-    : Display(parent)
-    , d_ptr{new Private(this)}
+FilteredDisplay::FilteredDisplay()
+    : d_ptr{new Private(this)}
 {
     connect(this, &Display::started, [this]() {
         wl_display_set_global_filter(native(), Private::filterCallback, d_ptr.get());

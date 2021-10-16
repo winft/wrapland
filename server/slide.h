@@ -32,11 +32,10 @@ class WRAPLANDSERVER_EXPORT SlideManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit SlideManager(Display* display);
     ~SlideManager() override;
 
 private:
-    explicit SlideManager(Display* display, QObject* parent = nullptr);
-    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

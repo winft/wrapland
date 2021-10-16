@@ -35,12 +35,10 @@ class WRAPLANDSERVER_EXPORT DpmsManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit DpmsManager(Display* display);
     ~DpmsManager() override;
 
 private:
-    explicit DpmsManager(Display* display, QObject* parent = nullptr);
-    friend class Display;
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

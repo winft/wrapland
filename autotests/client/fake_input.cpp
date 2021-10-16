@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/display.h"
 #include "../../server/fake_input.h"
+#include "../../server/globals.h"
 
 #include <linux/input.h>
 
@@ -57,34 +58,38 @@ private Q_SLOTS:
     void testKeyboardKeyLinux();
 
 private:
-    Srv::Display* m_display = nullptr;
-    Srv::FakeInput* m_fakeInputInterface = nullptr;
-    Srv::FakeInputDevice* m_device = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+        Wrapland::Server::FakeInputDevice* device{nullptr};
+    } server;
+
     ConnectionThread* m_connection = nullptr;
     QThread* m_thread = nullptr;
     EventQueue* m_queue = nullptr;
     Clt::FakeInput* m_fakeInput = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-fake-input-0");
+constexpr auto socket_name{"wrapland-test-fake-input-0"};
 
 void FakeInputTest::init()
 {
-    delete m_display;
-    m_display = new Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
-    QVERIFY(m_display->running());
-    m_display->createShm();
-    m_fakeInputInterface = m_display->createFakeInput();
-    QSignalSpy deviceCreatedSpy(m_fakeInputInterface, &Srv::FakeInput::deviceCreated);
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
+    server.display->start();
+    QVERIFY(server.display->running());
+
+    server.display->createShm();
+    server.globals.fake_input = server.display->createFakeInput();
+
+    QSignalSpy deviceCreatedSpy(server.globals.fake_input.get(), &Srv::FakeInput::deviceCreated);
     QVERIFY(deviceCreatedSpy.isValid());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -113,8 +118,8 @@ void FakeInputTest::init()
     QVERIFY(m_fakeInput->isValid());
 
     QVERIFY(deviceCreatedSpy.wait());
-    m_device = deviceCreatedSpy.first().first().value<FakeInputDevice*>();
-    QVERIFY(m_device);
+    server.device = deviceCreatedSpy.first().first().value<FakeInputDevice*>();
+    QVERIFY(server.device);
 }
 
 void FakeInputTest::cleanup()
@@ -136,17 +141,16 @@ void FakeInputTest::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-
-    CLEANUP(m_fakeInputInterface)
-    CLEANUP(m_display)
 #undef CLEANUP
+
+    server = {};
 }
 
 void FakeInputTest::testAuthenticate()
 {
     // this test verifies that an authenticate request is passed to the Server
-    QVERIFY(!m_device->isAuthenticated());
-    QSignalSpy authenticationRequestedSpy(m_device, &FakeInputDevice::authenticationRequested);
+    QVERIFY(!server.device->isAuthenticated());
+    QSignalSpy authenticationRequestedSpy(server.device, &FakeInputDevice::authenticationRequested);
     QVERIFY(authenticationRequestedSpy.isValid());
 
     m_fakeInput->authenticate(QStringLiteral("test-case"), QStringLiteral("to test"));
@@ -154,15 +158,15 @@ void FakeInputTest::testAuthenticate()
     QCOMPARE(authenticationRequestedSpy.count(), 1);
     QCOMPARE(authenticationRequestedSpy.first().at(0).toString(), QStringLiteral("test-case"));
     QCOMPARE(authenticationRequestedSpy.first().at(1).toString(), QStringLiteral("to test"));
-    m_device->setAuthentication(true);
-    QVERIFY(m_device->isAuthenticated());
+    server.device->setAuthentication(true);
+    QVERIFY(server.device->isAuthenticated());
 }
 
 void FakeInputTest::testMotion()
 {
     // this test verifies that motion is properly passed to the server
-    QVERIFY(!m_device->isAuthenticated());
-    QSignalSpy motionSpy(m_device, &FakeInputDevice::pointerMotionRequested);
+    QVERIFY(!server.device->isAuthenticated());
+    QSignalSpy motionSpy(server.device, &FakeInputDevice::pointerMotionRequested);
     QVERIFY(motionSpy.isValid());
 
     // without an authentication we shouldn't get the signals
@@ -170,7 +174,7 @@ void FakeInputTest::testMotion()
     QVERIFY(!motionSpy.wait(100));
 
     // now let's authenticate the interface
-    m_device->setAuthentication(true);
+    server.device->setAuthentication(true);
     m_fakeInput->requestPointerMove(QSizeF(1, 2));
     QVERIFY(motionSpy.wait());
     QCOMPARE(motionSpy.count(), 1);
@@ -186,8 +190,8 @@ void FakeInputTest::testMotion()
 void FakeInputTest::testMotionAbsolute()
 {
     // this test verifies that motion is properly passed to the server
-    QVERIFY(!m_device->isAuthenticated());
-    QSignalSpy motionSpy(m_device, &FakeInputDevice::pointerMotionAbsoluteRequested);
+    QVERIFY(!server.device->isAuthenticated());
+    QSignalSpy motionSpy(server.device, &FakeInputDevice::pointerMotionAbsoluteRequested);
     QVERIFY(motionSpy.isValid());
 
     // without an authentication we shouldn't get the signals
@@ -195,7 +199,7 @@ void FakeInputTest::testMotionAbsolute()
     QVERIFY(!motionSpy.wait(100));
 
     // now let's authenticate the interface
-    m_device->setAuthentication(true);
+    server.device->setAuthentication(true);
     m_fakeInput->requestPointerMoveAbsolute(QPointF(1, 2));
     QVERIFY(motionSpy.wait());
     QCOMPARE(motionSpy.count(), 1);
@@ -222,10 +226,10 @@ void FakeInputTest::testPointerButtonQt()
 {
     // this test verifies that pointer button events are properly passed to the server with Qt
     // button codes
-    QVERIFY(!m_device->isAuthenticated());
-    QSignalSpy pressedSpy(m_device, &FakeInputDevice::pointerButtonPressRequested);
+    QVERIFY(!server.device->isAuthenticated());
+    QSignalSpy pressedSpy(server.device, &FakeInputDevice::pointerButtonPressRequested);
     QVERIFY(pressedSpy.isValid());
-    QSignalSpy releasedSpy(m_device, &FakeInputDevice::pointerButtonReleaseRequested);
+    QSignalSpy releasedSpy(server.device, &FakeInputDevice::pointerButtonReleaseRequested);
     QVERIFY(releasedSpy.isValid());
 
     // without an authentication we shouldn't get the signals
@@ -236,7 +240,7 @@ void FakeInputTest::testPointerButtonQt()
     QVERIFY(releasedSpy.isEmpty());
 
     // now authenticate
-    m_device->setAuthentication(true);
+    server.device->setAuthentication(true);
     // now our click should work
     m_fakeInput->requestPointerButtonClick(qtButton);
     QVERIFY(releasedSpy.wait());
@@ -277,10 +281,10 @@ void FakeInputTest::testPointerButtonLinux()
 {
     // this test verifies that pointer button events are properly passed to the server with Qt
     // button codes
-    QVERIFY(!m_device->isAuthenticated());
-    QSignalSpy pressedSpy(m_device, &FakeInputDevice::pointerButtonPressRequested);
+    QVERIFY(!server.device->isAuthenticated());
+    QSignalSpy pressedSpy(server.device, &FakeInputDevice::pointerButtonPressRequested);
     QVERIFY(pressedSpy.isValid());
-    QSignalSpy releasedSpy(m_device, &FakeInputDevice::pointerButtonReleaseRequested);
+    QSignalSpy releasedSpy(server.device, &FakeInputDevice::pointerButtonReleaseRequested);
     QVERIFY(releasedSpy.isValid());
 
     // without an authentication we shouldn't get the signals
@@ -291,7 +295,7 @@ void FakeInputTest::testPointerButtonLinux()
     QVERIFY(releasedSpy.isEmpty());
 
     // now authenticate
-    m_device->setAuthentication(true);
+    server.device->setAuthentication(true);
     // now our click should work
     m_fakeInput->requestPointerButtonClick(linuxButton);
     QVERIFY(releasedSpy.wait());
@@ -328,8 +332,8 @@ void FakeInputTest::testAxis_data()
 void FakeInputTest::testAxis()
 {
     // this test verifies that pointer axis events are properly passed to the server
-    QVERIFY(!m_device->isAuthenticated());
-    QSignalSpy axisSpy(m_device, &FakeInputDevice::pointerAxisRequested);
+    QVERIFY(!server.device->isAuthenticated());
+    QSignalSpy axisSpy(server.device, &FakeInputDevice::pointerAxisRequested);
     QVERIFY(axisSpy.isValid());
 
     QFETCH(Qt::Orientation, orientation);
@@ -339,7 +343,7 @@ void FakeInputTest::testAxis()
     QVERIFY(!axisSpy.wait(100));
 
     // now authenticate
-    m_device->setAuthentication(true);
+    server.device->setAuthentication(true);
 
     // now we can properly test
     m_fakeInput->requestPointerAxis(orientation, delta);
@@ -351,16 +355,16 @@ void FakeInputTest::testAxis()
 
 void FakeInputTest::testTouch()
 {
-    QVERIFY(!m_device->isAuthenticated());
-    QSignalSpy touchDownSpy(m_device, &FakeInputDevice::touchDownRequested);
+    QVERIFY(!server.device->isAuthenticated());
+    QSignalSpy touchDownSpy(server.device, &FakeInputDevice::touchDownRequested);
     QVERIFY(touchDownSpy.isValid());
-    QSignalSpy touchMotionSpy(m_device, &FakeInputDevice::touchMotionRequested);
+    QSignalSpy touchMotionSpy(server.device, &FakeInputDevice::touchMotionRequested);
     QVERIFY(touchMotionSpy.isValid());
-    QSignalSpy touchUpSpy(m_device, &FakeInputDevice::touchUpRequested);
+    QSignalSpy touchUpSpy(server.device, &FakeInputDevice::touchUpRequested);
     QVERIFY(touchUpSpy.isValid());
-    QSignalSpy touchFrameSpy(m_device, &FakeInputDevice::touchFrameRequested);
+    QSignalSpy touchFrameSpy(server.device, &FakeInputDevice::touchFrameRequested);
     QVERIFY(touchFrameSpy.isValid());
-    QSignalSpy touchCancelSpy(m_device, &FakeInputDevice::touchCancelRequested);
+    QSignalSpy touchCancelSpy(server.device, &FakeInputDevice::touchCancelRequested);
     QVERIFY(touchCancelSpy.isValid());
 
     // without an authentication we shouldn't get the signals
@@ -383,7 +387,7 @@ void FakeInputTest::testTouch()
     QVERIFY(!touchCancelSpy.wait(100));
 
     // now let's authenticate the interface
-    m_device->setAuthentication(true);
+    server.device->setAuthentication(true);
     m_fakeInput->requestTouchDown(0, QPointF(1, 2));
     QVERIFY(touchDownSpy.wait());
     QCOMPARE(touchDownSpy.count(), 1);
@@ -442,10 +446,10 @@ void FakeInputTest::testKeyboardKeyLinux()
 {
     // this test verifies that keyboard key events are properly passed to the server with Qt button
     // codes
-    QVERIFY(!m_device->isAuthenticated());
-    QSignalSpy pressedSpy(m_device, &FakeInputDevice::keyboardKeyPressRequested);
+    QVERIFY(!server.device->isAuthenticated());
+    QSignalSpy pressedSpy(server.device, &FakeInputDevice::keyboardKeyPressRequested);
     QVERIFY(pressedSpy.isValid());
-    QSignalSpy releasedSpy(m_device, &FakeInputDevice::keyboardKeyReleaseRequested);
+    QSignalSpy releasedSpy(server.device, &FakeInputDevice::keyboardKeyReleaseRequested);
     QVERIFY(releasedSpy.isValid());
 
     // without an authentication we shouldn't get the signals
@@ -457,7 +461,7 @@ void FakeInputTest::testKeyboardKeyLinux()
     QVERIFY(releasedSpy.isEmpty());
 
     // now authenticate
-    m_device->setAuthentication(true);
+    server.device->setAuthentication(true);
     // now our click should work
     m_fakeInput->requestKeyboardKeyPress(linuxKey);
     m_fakeInput->requestKeyboardKeyRelease(linuxKey);

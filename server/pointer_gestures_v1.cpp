@@ -81,9 +81,8 @@ void PointerGesturesV1::Private::pinchGestureCallback(PointerGesturesV1Bind* bin
     pointer->d_ptr->registerPinchGesture(pincher);
 }
 
-PointerGesturesV1::PointerGesturesV1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+PointerGesturesV1::PointerGesturesV1(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

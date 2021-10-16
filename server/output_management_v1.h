@@ -37,15 +37,13 @@ class WRAPLANDSERVER_EXPORT OutputManagementV1 : public QObject
 {
     Q_OBJECT
 public:
+    explicit OutputManagementV1(Display* display);
     ~OutputManagementV1() override;
 
 Q_SIGNALS:
     void configurationChangeRequested(OutputConfigurationV1* configuration);
 
 private:
-    explicit OutputManagementV1(Display* display, QObject* parent = nullptr);
-    friend class Display;
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

@@ -55,9 +55,8 @@ void TextInputManagerV2::Private::getTextInputCallback(TextInputManagerV2Bind* b
     seat->d_ptr->text_inputs.register_device(textInput);
 }
 
-TextInputManagerV2::TextInputManagerV2(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+TextInputManagerV2::TextInputManagerV2(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

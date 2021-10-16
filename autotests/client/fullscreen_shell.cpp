@@ -43,7 +43,7 @@ private:
     QProcess* m_westonProcess;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-fullscreen-shell-0");
+constexpr auto socket_name{"wrapland-test-wayland-fullscreen-shell-0"};
 
 TestWaylandFullscreenShell::TestWaylandFullscreenShell(QObject* parent)
     : QObject(parent)
@@ -58,7 +58,7 @@ void TestWaylandFullscreenShell::init()
     m_westonProcess = new QProcess(this);
     m_westonProcess->setProgram(QStringLiteral("weston"));
 
-    m_westonProcess->setArguments(QStringList({QStringLiteral("--socket=%1").arg(s_socketName),
+    m_westonProcess->setArguments(QStringList({QStringLiteral("--socket=%1").arg(socket_name),
                                                QStringLiteral("--backend=headless-backend.so"),
                                                QStringLiteral("--shell=fullscreen-shell.so")}));
     m_westonProcess->start();
@@ -67,7 +67,7 @@ void TestWaylandFullscreenShell::init()
 
     // wait for the socket to appear
     QDir runtimeDir(qgetenv("XDG_RUNTIME_DIR"));
-    if (runtimeDir.exists(s_socketName)) {
+    if (runtimeDir.exists(socket_name)) {
         return;
     }
     QFileSystemWatcher* socketWatcher
@@ -77,7 +77,7 @@ void TestWaylandFullscreenShell::init()
     // limit to maximum of 10 waits
     for (int i = 0; i < 10; ++i) {
         QVERIFY(socketSpy.wait());
-        if (runtimeDir.exists(s_socketName)) {
+        if (runtimeDir.exists(socket_name)) {
             delete socketWatcher;
             return;
         }
@@ -100,7 +100,7 @@ void TestWaylandFullscreenShell::testRegistry()
     }
     Wrapland::Client::ConnectionThread connection;
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     connection.establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);
@@ -137,7 +137,7 @@ void TestWaylandFullscreenShell::testRegistryCreate()
     }
     Wrapland::Client::ConnectionThread connection;
     QSignalSpy connectedSpy(&connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    connection.setSocketName(s_socketName);
+    connection.setSocketName(socket_name);
     connection.establishConnection();
     QVERIFY(connectedSpy.count() || connectedSpy.wait());
     QCOMPARE(connectedSpy.count(), 1);

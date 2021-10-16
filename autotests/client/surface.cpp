@@ -33,10 +33,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/buffer.h"
 #include "../../server/client.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/idle_inhibit_v1.h"
-#include "../../server/output.h"
 #include "../../server/surface.h"
 
 #include "../../tests/helpers.h"
@@ -71,9 +70,11 @@ private Q_SLOTS:
     void testInhibit();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Compositor* m_serverCompositor;
-    Wrapland::Server::IdleInhibitManagerV1* m_idleInhibitInterface;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::ShmPool* m_shm;
@@ -82,12 +83,10 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-surface-0");
+constexpr auto socket_name{"wrapland-test-wayland-surface-0"};
 
 TestSurface::TestSurface(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_thread(nullptr)
@@ -98,22 +97,19 @@ void TestSurface::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
-    QVERIFY(m_display->running());
-    m_display->createShm();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_serverCompositor = m_display->createCompositor(m_display);
-    QVERIFY(m_serverCompositor);
-
-    m_idleInhibitInterface = m_display->createIdleInhibitManager(m_display);
-    QVERIFY(m_idleInhibitInterface);
+    server.display->createShm();
+    server.globals.compositor = server.display->createCompositor();
+    server.globals.idle_inhibit_manager_v1 = server.display->createIdleInhibitManager();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -193,21 +189,14 @@ void TestSurface::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_serverCompositor;
-    m_serverCompositor = nullptr;
-
-    delete m_idleInhibitInterface;
-    m_idleInhibitInterface = nullptr;
-
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestSurface::testStaticAccessor()
 {
     // TODO: Does this test still make sense with the remodel? If yes, needs porting.
 #if 0
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
 
@@ -274,7 +263,7 @@ void TestSurface::testStaticAccessor()
 
 void TestSurface::testDamage()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
@@ -356,7 +345,7 @@ void TestSurface::testDamage()
 
 void TestSurface::testFrameCallback()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
@@ -385,7 +374,7 @@ void TestSurface::testFrameCallback()
 void TestSurface::testAttachBuffer()
 {
     // create the surface
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
@@ -536,7 +525,7 @@ void TestSurface::testMultipleSurfaces()
     QVERIFY(pool2.isValid());
 
     // create the surfaces
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s1(m_compositor->createSurface());
@@ -615,7 +604,7 @@ void TestSurface::testOpaque()
 {
     using namespace Wrapland::Client;
     using namespace Wrapland::Server;
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
@@ -672,7 +661,7 @@ void TestSurface::testInput()
 {
     using namespace Wrapland::Client;
     using namespace Wrapland::Server;
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s{m_compositor->createSurface()};
@@ -736,7 +725,7 @@ void TestSurface::testScale()
     // This test verifies that updating the scale factor is correctly passed to the Wayland server.
 
     // Create surface.
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
@@ -842,12 +831,7 @@ void TestSurface::testDestroy()
             &IdleInhibitManager::release);
     QVERIFY(s->isValid());
 
-    delete m_serverCompositor;
-    m_serverCompositor = nullptr;
-    delete m_idleInhibitInterface;
-    m_idleInhibitInterface = nullptr;
-    delete m_display;
-    m_display = nullptr;
+    server = {};
     QTRY_VERIFY(!m_connection->established());
 
     // Now the Surface should be destroyed.
@@ -863,7 +847,7 @@ void TestSurface::testUnmapOfNotMappedSurface()
     // unmapped signal
 
     // create surface
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
@@ -888,7 +872,7 @@ void TestSurface::testDamageTracking()
     using namespace Wrapland::Client;
     using namespace Wrapland::Server;
     // create surface
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
@@ -953,7 +937,7 @@ void TestSurface::testSurfaceAt()
     using namespace Wrapland::Client;
     using namespace Wrapland::Server;
     // create surface
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
@@ -988,7 +972,7 @@ void TestSurface::testDestroyAttachedBuffer()
     // this test verifies that destroying of a buffer attached to a surface works
 
     // create surface
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
@@ -1030,7 +1014,8 @@ void TestSurface::testDestroyWithPendingCallback()
     std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(s != nullptr);
     QVERIFY(s->isValid());
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QVERIFY(surfaceCreatedSpy.wait());
     auto serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
@@ -1072,7 +1057,8 @@ void TestSurface::testDisconnect()
     std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
     QVERIFY(s != nullptr);
     QVERIFY(s->isValid());
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QVERIFY(surfaceCreatedSpy.wait());
     auto serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
@@ -1116,7 +1102,8 @@ void TestSurface::testOutput()
     QSignalSpy leftSpy(s.get(), &Wrapland::Client::Surface::outputLeft);
     QVERIFY(leftSpy.isValid());
     // wait for the surface on the Server side
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QVERIFY(surfaceCreatedSpy.wait());
     auto serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
@@ -1135,7 +1122,7 @@ void TestSurface::testOutput()
     QSignalSpy outputAnnouncedSpy(&registry, &Wrapland::Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto serverOutput = new Wrapland::Server::Output(m_display, m_display);
+    auto serverOutput = new Wrapland::Server::Output(server.display.get());
     serverOutput->set_enabled(true);
     serverOutput->done();
 
@@ -1145,7 +1132,7 @@ void TestSurface::testOutput()
                               outputAnnouncedSpy.first().last().value<quint32>()));
     QVERIFY(clientOutput->isValid());
     m_connection->flush();
-    m_display->dispatchEvents();
+    server.display->dispatchEvents();
 
     // Now enter it.
     std::vector<Wrapland::Server::WlOutput*> outputs;
@@ -1190,7 +1177,8 @@ void TestSurface::testInhibit()
 {
     std::unique_ptr<Wrapland::Client::Surface> s(m_compositor->createSurface());
     // wait for the surface on the Server side
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     QVERIFY(surfaceCreatedSpy.wait());
     auto serverSurface = surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();

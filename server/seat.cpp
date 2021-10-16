@@ -54,9 +54,8 @@ const struct wl_seat_interface Seat::Private::s_interface = {
     resourceDestroyCallback,
 };
 
-Seat::Seat(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+Seat::Seat(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

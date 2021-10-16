@@ -32,6 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/filtered_display.h"
+#include "../../server/globals.h"
 #include "../../server/region.h"
 
 #include <wayland-server.h>
@@ -52,25 +53,24 @@ private Q_SLOTS:
     void testFilter();
 
 private:
-    TestDisplay* m_display;
-    Wrapland::Server::Compositor* m_serverCompositor;
-    Wrapland::Server::BlurManager* m_blurManagerInterface;
+    std::unique_ptr<TestDisplay> m_display;
+    Wrapland::Server::globals globals;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-blur-0");
+constexpr auto socket_name{"wrapland-test-wayland-blur-0"};
 
 // The following non-realistic class allows only clients in the m_allowedClients list to access the
 // blur interface all other interfaces are allowed
 class TestDisplay : public Wrapland::Server::FilteredDisplay
 {
 public:
-    TestDisplay(QObject* parent);
+    TestDisplay();
     bool allowInterface(Wrapland::Server::Client* client, const QByteArray& interfaceName) override;
     QList<wl_client*> m_allowedClients;
 };
 
-TestDisplay::TestDisplay(QObject* parent)
-    : Wrapland::Server::FilteredDisplay(parent)
+TestDisplay::TestDisplay()
+    : Wrapland::Server::FilteredDisplay()
 {
 }
 
@@ -84,22 +84,19 @@ bool TestDisplay::allowInterface(Wrapland::Server::Client* client, const QByteAr
 
 TestFilter::TestFilter(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
 {
 }
 
 void TestFilter::init()
 {
     using namespace Wrapland::Server;
-    delete m_display;
-    m_display = new TestDisplay(this);
-    m_display->setSocketName(s_socketName);
+    m_display = std::make_unique<TestDisplay>();
+    m_display->set_socket_name(socket_name);
     m_display->start();
     QVERIFY(m_display->running());
 
-    m_serverCompositor = m_display->createCompositor(m_display);
-    m_blurManagerInterface = m_display->createBlurManager(m_display);
+    globals.compositor = m_display->createCompositor();
+    globals.blur_manager = m_display->createBlurManager();
 }
 
 void TestFilter::cleanup()
@@ -122,7 +119,7 @@ void TestFilter::testFilter()
         new Wrapland::Client::ConnectionThread());
     QSignalSpy connectedSpy(connection.get(), &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    connection->setSocketName(s_socketName);
+    connection->setSocketName(socket_name);
 
     std::unique_ptr<QThread> thread(new QThread(this));
     connection->moveToThread(thread.get());

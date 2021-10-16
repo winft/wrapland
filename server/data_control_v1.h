@@ -23,6 +23,7 @@ class WRAPLANDSERVER_EXPORT data_control_manager_v1 : public QObject
 {
     Q_OBJECT
 public:
+    explicit data_control_manager_v1(Display* display);
     ~data_control_manager_v1() override;
 
     void create_source(Client* client, uint32_t version, uint32_t id);
@@ -33,9 +34,6 @@ Q_SIGNALS:
     void device_created(Wrapland::Server::data_control_device_v1* device);
 
 private:
-    friend class Display;
-    explicit data_control_manager_v1(Display* display, QObject* parent = nullptr);
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

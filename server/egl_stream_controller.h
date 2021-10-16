@@ -33,16 +33,14 @@ class WRAPLANDSERVER_EXPORT EglStreamController : public QObject
 {
     Q_OBJECT
 public:
+    explicit EglStreamController(Display* display);
     ~EglStreamController() override;
 
 Q_SIGNALS:
     void streamConsumerAttached(Surface* surface, void* eglStream, wl_array* attribs);
 
 private:
-    explicit EglStreamController(Display* display, QObject* parent = nullptr);
-
     class Private;
-    friend class Display;
     std::unique_ptr<Private> d_ptr;
 };
 

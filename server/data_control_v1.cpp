@@ -37,9 +37,8 @@ data_control_manager_v1::Private::Private(data_control_manager_v1* q, Display* d
 {
 }
 
-data_control_manager_v1::data_control_manager_v1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+data_control_manager_v1::data_control_manager_v1(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

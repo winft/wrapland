@@ -37,15 +37,13 @@ class WRAPLANDSERVER_EXPORT PlasmaShell : public QObject
 {
     Q_OBJECT
 public:
+    explicit PlasmaShell(Display* display);
     ~PlasmaShell() override;
 
 Q_SIGNALS:
     void surfaceCreated(Wrapland::Server::PlasmaShellSurface*);
 
 private:
-    friend class Display;
-
-    explicit PlasmaShell(Display* display, QObject* parent);
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

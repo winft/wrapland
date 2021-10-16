@@ -38,6 +38,7 @@ class WRAPLANDSERVER_EXPORT PlasmaVirtualDesktopManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit PlasmaVirtualDesktopManager(Display* display);
     ~PlasmaVirtualDesktopManager() override;
 
     void setRows(uint32_t rows);
@@ -56,9 +57,6 @@ Q_SIGNALS:
     void desktopRemoveRequested(const QString& id);
 
 private:
-    explicit PlasmaVirtualDesktopManager(Display* display, QObject* parent = nullptr);
-    friend class Display;
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

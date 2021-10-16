@@ -28,9 +28,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
 #include "../../server/contrast.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
@@ -49,9 +49,11 @@ private Q_SLOTS:
     void testSurfaceDestroy();
 
 private:
-    Wrapland::Server::Display* m_display;
-    Wrapland::Server::Compositor* m_serverCompositor;
-    Wrapland::Server::ContrastManager* m_contrastManagerInterface;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::ContrastManager* m_contrastManager;
@@ -59,12 +61,10 @@ private:
     QThread* m_thread;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-wayland-contrast-0");
+constexpr auto socket_name{"wrapland-test-wayland-contrast-0"};
 
 TestContrast::TestContrast(QObject* parent)
     : QObject(parent)
-    , m_display(nullptr)
-    , m_serverCompositor(nullptr)
     , m_connection(nullptr)
     , m_compositor(nullptr)
     , m_queue(nullptr)
@@ -75,14 +75,16 @@ TestContrast::TestContrast(QObject* parent)
 void TestContrast::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
+
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -111,14 +113,14 @@ void TestContrast::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_serverCompositor = m_display->createCompositor(m_display);
+    server.globals.compositor = server.display->createCompositor();
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
                                              compositorSpy.first().last().value<quint32>(),
                                              this);
 
-    m_contrastManagerInterface = m_display->createContrastManager(m_display);
+    server.globals.contrast_manager = server.display->createContrastManager();
 
     QVERIFY(contrastSpy.wait());
     m_contrastManager = registry.createContrastManager(contrastSpy.first().first().value<quint32>(),
@@ -146,15 +148,14 @@ void TestContrast::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_contrastManagerInterface)
-    CLEANUP(m_display)
 #undef CLEANUP
+
+    server = {};
 }
 
 void TestContrast::testCreate()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 
@@ -195,7 +196,7 @@ void TestContrast::testCreate()
 
 void TestContrast::testSurfaceDestroy()
 {
-    QSignalSpy serverSurfaceCreated(m_serverCompositor,
+    QSignalSpy serverSurfaceCreated(server.globals.compositor.get(),
                                     &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(serverSurfaceCreated.isValid());
 

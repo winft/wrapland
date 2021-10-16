@@ -26,6 +26,7 @@ class WRAPLANDSERVER_EXPORT drm_lease_device_v1 : public QObject
 {
     Q_OBJECT
 public:
+    explicit drm_lease_device_v1(Display* display);
     ~drm_lease_device_v1() override;
 
     void update_fd(int fd);
@@ -36,8 +37,6 @@ Q_SIGNALS:
     void leased(drm_lease_v1* lease);
 
 private:
-    explicit drm_lease_device_v1(Display* display, QObject* parent = nullptr);
-    friend class Display;
     friend class drm_lease_connector_v1;
 
     class Private;

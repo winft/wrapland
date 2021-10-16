@@ -86,11 +86,11 @@ int main(int argc, char** argv)
     Wrapland::Server::Display display;
     display.start();
     display.createShm();
-    display.createCompositor(&display);
+    auto compositor = display.createCompositor();
 
-    [[maybe_unused]] Wrapland::Server::XdgShell* shell = display.createXdgShell();
+    auto xdg_shell = display.createXdgShell();
 
-    auto output = new Wrapland::Server::Output(&display, &display);
+    auto output = std::make_unique<Wrapland::Server::Output>(&display);
     output->set_physical_size(QSize(10, 10));
     output->add_mode(Wrapland::Server::Output::Mode{QSize(1024, 768)});
 

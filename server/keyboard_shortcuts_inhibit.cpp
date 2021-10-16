@@ -87,10 +87,8 @@ void KeyboardShortcutsInhibitManagerV1::Private::removeInhibitor(Surface* surfac
     m_inhibitors.remove({surface, seat});
 }
 
-KeyboardShortcutsInhibitManagerV1::KeyboardShortcutsInhibitManagerV1(Display* display,
-                                                                     QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+KeyboardShortcutsInhibitManagerV1::KeyboardShortcutsInhibitManagerV1(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

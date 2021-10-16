@@ -16,6 +16,7 @@
 #include "../../server/buffer.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/surface.h"
 #include "../../server/xdg_activation_v1.h"
 
@@ -35,10 +36,8 @@ private Q_SLOTS:
 
 private:
     struct {
-        Server::Display* display{nullptr};
-        Server::Compositor* compositor{nullptr};
-        Server::Seat* seat{nullptr};
-        Server::XdgActivationV1* activation{nullptr};
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
     } server;
 
     struct client {
@@ -55,7 +54,7 @@ private:
     void cleanup_client(client& client_ref);
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-xdg-activation-0");
+constexpr auto socket_name{"wrapland-test-xdg-activation-0"};
 
 TestXdgActivation::TestXdgActivation(QObject* parent)
     : QObject(parent)
@@ -67,19 +66,16 @@ void TestXdgActivation::init()
 {
     qRegisterMetaType<Server::Surface*>();
 
-    server.display = new Server::Display(this);
-    server.display->setSocketName(s_socketName);
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.compositor = server.display->createCompositor(server.display);
-    QVERIFY(server.compositor);
+    server.globals.compositor = server.display->createCompositor();
 
-    server.seat = server.display->createSeat(server.display);
-    QVERIFY(server.seat);
+    server.globals.seats.emplace_back(server.display->createSeat());
 
-    server.activation = server.display->createXdgActivationV1(server.display);
-    QVERIFY(server.activation);
+    server.globals.xdg_activation_v1 = server.display->createXdgActivationV1();
 
     create_client(client1);
 }
@@ -89,15 +85,14 @@ void TestXdgActivation::cleanup()
     cleanup_client(client1);
     cleanup_client(client2);
 
-    delete server.display;
-    server.display = nullptr;
+    server = {};
 }
 
 void TestXdgActivation::create_client(client& client_ref)
 {
     client_ref.connection = new Client::ConnectionThread;
     QSignalSpy establishedSpy(client_ref.connection, &Client::ConnectionThread::establishedChanged);
-    client_ref.connection->setSocketName(s_socketName);
+    client_ref.connection->setSocketName(socket_name);
 
     client_ref.thread = new QThread(this);
     client_ref.connection->moveToThread(client_ref.thread);
@@ -110,7 +105,7 @@ void TestXdgActivation::create_client(client& client_ref)
     client_ref.queue->setup(client_ref.connection);
     QVERIFY(client_ref.queue->isValid());
 
-    QSignalSpy clientConnectedSpy(server.display, &Server::Display::clientConnected);
+    QSignalSpy clientConnectedSpy(server.display.get(), &Server::Display::clientConnected);
     QVERIFY(clientConnectedSpy.isValid());
 
     client_ref.registry = new Client::Registry();
@@ -175,7 +170,7 @@ void TestXdgActivation::test_single_client()
 {
     auto token = std::unique_ptr<Client::XdgActivationTokenV1>(client1.activation->create_token());
 
-    QSignalSpy surface_spy(server.compositor, &Server::Compositor::surfaceCreated);
+    QSignalSpy surface_spy(server.globals.compositor.get(), &Server::Compositor::surfaceCreated);
     QVERIFY(surface_spy.isValid());
     auto surface = std::unique_ptr<Client::Surface>(client1.compositor->createSurface());
     QVERIFY(surface_spy.wait());
@@ -183,7 +178,8 @@ void TestXdgActivation::test_single_client()
     auto server_surface = surface_spy.first().first().value<Server::Surface*>();
     QVERIFY(server_surface);
 
-    QSignalSpy token_spy(server.activation, &Server::XdgActivationV1::token_requested);
+    QSignalSpy token_spy(server.globals.xdg_activation_v1.get(),
+                         &Server::XdgActivationV1::token_requested);
     QVERIFY(token_spy.isValid());
 
     auto const app_id = "app-id-1";
@@ -208,7 +204,8 @@ void TestXdgActivation::test_single_client()
 
     QVERIFY(done_spy.wait());
 
-    QSignalSpy activate_spy(server.activation, &Server::XdgActivationV1::activate);
+    QSignalSpy activate_spy(server.globals.xdg_activation_v1.get(),
+                            &Server::XdgActivationV1::activate);
     QVERIFY(activate_spy.isValid());
 
     client1.activation->activate(token_string, surface.get());
@@ -224,7 +221,8 @@ void TestXdgActivation::test_multi_client()
 
     auto token = std::unique_ptr<Client::XdgActivationTokenV1>(client1.activation->create_token());
 
-    QSignalSpy token_spy(server.activation, &Server::XdgActivationV1::token_requested);
+    QSignalSpy token_spy(server.globals.xdg_activation_v1.get(),
+                         &Server::XdgActivationV1::token_requested);
     QVERIFY(token_spy.isValid());
 
     auto const app_id = "app-id-1";
@@ -248,10 +246,11 @@ void TestXdgActivation::test_multi_client()
 
     QVERIFY(done_spy.wait());
 
-    QSignalSpy activate_spy(server.activation, &Server::XdgActivationV1::activate);
+    QSignalSpy activate_spy(server.globals.xdg_activation_v1.get(),
+                            &Server::XdgActivationV1::activate);
     QVERIFY(activate_spy.isValid());
 
-    QSignalSpy surface_spy(server.compositor, &Server::Compositor::surfaceCreated);
+    QSignalSpy surface_spy(server.globals.compositor.get(), &Server::Compositor::surfaceCreated);
     QVERIFY(surface_spy.isValid());
     auto surface = std::unique_ptr<Client::Surface>(client2.compositor->createSurface());
     QVERIFY(surface_spy.wait());

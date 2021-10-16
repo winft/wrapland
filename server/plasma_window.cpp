@@ -52,9 +52,8 @@ PlasmaWindowManager::Private::Private(Display* display, PlasmaWindowManager* qpt
     create();
 }
 
-PlasmaWindowManager::PlasmaWindowManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+PlasmaWindowManager::PlasmaWindowManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
     // Needed because the icon is sent via a pipe and when it closes while being written to would
     // kill off the compositor.

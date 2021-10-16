@@ -384,6 +384,7 @@ set(SERVER_LIB_HEADERS
   egl_stream_controller.h
   fake_input.h
   filtered_display.h
+  globals.h
   idle_inhibit_v1.h
   input_method_v2.h
   kde_idle.h
