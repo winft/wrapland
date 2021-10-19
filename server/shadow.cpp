@@ -65,9 +65,8 @@ void ShadowManager::Private::unsetCallback([[maybe_unused]] ShadowManagerBind* b
     surface->d_ptr->setShadow(QPointer<Shadow>());
 }
 
-ShadowManager::ShadowManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+ShadowManager::ShadowManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

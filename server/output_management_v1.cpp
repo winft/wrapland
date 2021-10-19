@@ -80,9 +80,8 @@ void OutputManagementV1::Private::createConfigurationCallback(OutputManagementV1
     });
 }
 
-OutputManagementV1::OutputManagementV1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+OutputManagementV1::OutputManagementV1(Display* display)
+    : d_ptr(new Private(this, display))
 {
 }
 

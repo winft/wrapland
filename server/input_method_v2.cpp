@@ -54,9 +54,8 @@ input_method_manager_v2::Private::Private(Display* display, input_method_manager
     create();
 }
 
-input_method_manager_v2::input_method_manager_v2(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+input_method_manager_v2::input_method_manager_v2(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

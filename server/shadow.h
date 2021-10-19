@@ -35,11 +35,10 @@ class WRAPLANDSERVER_EXPORT ShadowManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit ShadowManager(Display* display);
     ~ShadowManager() override;
 
 private:
-    explicit ShadowManager(Display* display, QObject* parent = nullptr);
-    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

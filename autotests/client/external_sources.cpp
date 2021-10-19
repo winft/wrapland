@@ -15,14 +15,12 @@
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
 #include "../../server/data_device.h"
-#include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
 #include "../../server/drag_pool.h"
+#include "../../server/globals.h"
 #include "../../server/primary_selection.h"
-#include "../../server/seat.h"
 #include "../../server/surface.h"
 
 #include <unistd.h>
@@ -42,11 +40,9 @@ private Q_SLOTS:
 
 private:
     struct {
-        Wrapland::Server::Display* display{nullptr};
-        Wrapland::Server::Compositor* compositor{nullptr};
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
         Wrapland::Server::Seat* seat{nullptr};
-        Wrapland::Server::data_device_manager* data{nullptr};
-        Wrapland::Server::primary_selection_device_manager* prim_sel{nullptr};
     } server;
 
     struct client {
@@ -61,7 +57,7 @@ private:
     } client1;
 };
 
-constexpr auto socket_name = "wrapland-test-external-sources-0";
+constexpr auto socket_name{"wrapland-test-external-sources-0"};
 
 void external_sources_test::init()
 {
@@ -70,19 +66,21 @@ void external_sources_test::init()
     qRegisterMetaType<Wrapland::Server::primary_selection_source*>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    delete server.display;
-    server.display = new Wrapland::Server::Display(this);
-    server.display->setSocketName(std::string(socket_name));
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
     server.display->start();
+    QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.seat = server.display->createSeat();
+    server.globals.compositor = server.display->createCompositor();
+
+    server.globals.seats.push_back(server.display->createSeat());
+    server.seat = server.globals.seats.back().get();
     server.seat->setHasKeyboard(true);
 
-    server.compositor = server.display->createCompositor();
-
-    server.data = server.display->createDataDeviceManager();
-    server.prim_sel = server.display->createPrimarySelectionDeviceManager();
+    server.globals.data_device_manager = server.display->createDataDeviceManager();
+    server.globals.primary_selection_device_manager
+        = server.display->createPrimarySelectionDeviceManager();
 
     client1.connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(client1.connection,
@@ -160,12 +158,9 @@ void external_sources_test::cleanup()
         delete client1.thread;
         client1.thread = nullptr;
     }
-    CLEANUP(server.prim_sel)
-    CLEANUP(server.data)
-    CLEANUP(server.compositor)
-    CLEANUP(server.seat)
-    CLEANUP(server.display)
 #undef CLEANUP
+
+    server = {};
 }
 
 class data_source_ext : public Wrapland::Server::data_source_ext
@@ -232,7 +227,7 @@ Q_SIGNALS:
 
 void external_sources_test::test_selection()
 {
-    QSignalSpy device_created_spy(server.data,
+    QSignalSpy device_created_spy(server.globals.data_device_manager.get(),
                                   &Wrapland::Server::data_device_manager::device_created);
     QVERIFY(device_created_spy.isValid());
 
@@ -244,7 +239,8 @@ void external_sources_test::test_selection()
     auto server_device = device_created_spy.first().first().value<Wrapland::Server::data_device*>();
     QVERIFY(server_device);
 
-    QSignalSpy server_surface_spy(server.compositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy server_surface_spy(server.globals.compositor.get(),
+                                  &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(server_surface_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(client1.compositor->createSurface());
@@ -295,7 +291,8 @@ void external_sources_test::test_selection()
 void external_sources_test::test_primary_selection()
 {
     QSignalSpy device_created_spy(
-        server.prim_sel, &Wrapland::Server::primary_selection_device_manager::device_created);
+        server.globals.primary_selection_device_manager.get(),
+        &Wrapland::Server::primary_selection_device_manager::device_created);
     QVERIFY(device_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::PrimarySelectionDevice> device(
@@ -308,7 +305,8 @@ void external_sources_test::test_primary_selection()
         = device_created_spy.first().first().value<Wrapland::Server::primary_selection_device*>();
     QVERIFY(server_device);
 
-    QSignalSpy server_surface_spy(server.compositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy server_surface_spy(server.globals.compositor.get(),
+                                  &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(server_surface_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::Surface> surface(client1.compositor->createSurface());

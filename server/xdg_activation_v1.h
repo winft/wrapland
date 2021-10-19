@@ -25,6 +25,7 @@ class WRAPLANDSERVER_EXPORT XdgActivationV1 : public QObject
 {
     Q_OBJECT
 public:
+    explicit XdgActivationV1(Display* display);
     ~XdgActivationV1() override;
 
 Q_SIGNALS:
@@ -32,9 +33,6 @@ Q_SIGNALS:
     void activate(std::string token, Wrapland::Server::Surface* surface);
 
 private:
-    explicit XdgActivationV1(Display* display, QObject* parent = nullptr);
-    friend class Display;
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

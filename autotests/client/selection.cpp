@@ -31,10 +31,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
-#include "../../server/data_device_manager.h"
 #include "../../server/display.h"
-#include "../../server/seat.h"
+#include "../../server/globals.h"
 #include "../../server/surface.h"
 
 class SelectionTest : public QObject
@@ -46,10 +44,11 @@ private Q_SLOTS:
     void testClearOnEnter();
 
 private:
-    Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
-    Wrapland::Server::Seat* m_serverSeat = nullptr;
-    Wrapland::Server::data_device_manager* m_serverDdm = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+        Wrapland::Server::Seat* seat{nullptr};
+    } server;
 
     struct Connection {
         Wrapland::Client::ConnectionThread* connection = nullptr;
@@ -68,22 +67,24 @@ private:
     Connection m_client2;
 };
 
-static const std::string s_socketName{"wrapland-test-selection-0"};
+constexpr auto socket_name{"wrapland-test-selection-0"};
 
 void SelectionTest::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_display->createShm();
-    m_serverCompositor = m_display->createCompositor(m_display);
+    server.display->createShm();
+    server.globals.compositor = server.display->createCompositor();
 
-    m_serverSeat = m_display->createSeat(m_display);
-    m_serverSeat->setHasKeyboard(true);
-    m_serverDdm = m_display->createDataDeviceManager(m_display);
+    server.globals.seats.push_back(server.display->createSeat());
+    server.seat = server.globals.seats.back().get();
+    server.seat->setHasKeyboard(true);
+    server.globals.data_device_manager = server.display->createDataDeviceManager();
 
     // setup connection
     setupConnection(&m_client1);
@@ -97,7 +98,7 @@ bool SelectionTest::setupConnection(Connection* c)
     if (!connectedSpy.isValid()) {
         return false;
     }
-    c->connection->setSocketName(QString::fromStdString(s_socketName));
+    c->connection->setSocketName(QString::fromStdString(socket_name));
 
     c->thread = new QThread(this);
     c->connection->moveToThread(c->thread);
@@ -173,15 +174,7 @@ void SelectionTest::cleanup()
 {
     cleanupConnection(&m_client1);
     cleanupConnection(&m_client2);
-#define CLEANUP(variable)                                                                          \
-    delete variable;                                                                               \
-    variable = nullptr;
-
-    CLEANUP(m_serverDdm)
-    CLEANUP(m_serverSeat)
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_display)
-#undef CLEANUP
+    server = {};
 }
 
 void SelectionTest::cleanupConnection(Connection* c)
@@ -214,7 +207,7 @@ void SelectionTest::testClearOnEnter()
 {
     // This test verifies that the selection is cleared prior to keyboard enter if there is no
     // current selection.
-    m_serverSeat->setHasKeyboard(true);
+    server.seat->setHasKeyboard(true);
 
     QSignalSpy selection_offered_client1_spy(m_client1.dataDevice,
                                              &Wrapland::Client::DataDevice::selectionOffered);
@@ -224,7 +217,8 @@ void SelectionTest::testClearOnEnter()
     QVERIFY(keyboardEnteredClient1Spy.isValid());
 
     // Now create a Surface.
-    QSignalSpy surfaceCreatedSpy(m_serverCompositor, &Wrapland::Server::Compositor::surfaceCreated);
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
     std::unique_ptr<Wrapland::Client::Surface> s1(m_client1.compositor->createSurface());
     QVERIFY(surfaceCreatedSpy.wait());
@@ -239,7 +233,7 @@ void SelectionTest::testClearOnEnter()
     QVERIFY(left1_spy.isValid());
 
     // Pass this surface keyboard focus.
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface1);
+    server.seat->setFocusedKeyboardSurface(serverSurface1);
 
     // should get no clear but left event.
     QVERIFY(enter1_spy.wait());
@@ -266,7 +260,7 @@ void SelectionTest::testClearOnEnter()
     QVERIFY(serverSurface2);
 
     // Entering that surface should give a selection offer.
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface2);
+    server.seat->setFocusedKeyboardSurface(serverSurface2);
     QVERIFY(selectionOfferedClient2Spy.wait());
 
     // Set a data source but without offers.
@@ -283,7 +277,7 @@ void SelectionTest::testClearOnEnter()
     QVERIFY(!m_client2.dataDevice->offeredSelection());
 
     // Now pass focus to first surface.
-    m_serverSeat->setFocusedKeyboardSurface(serverSurface1);
+    server.seat->setFocusedKeyboardSurface(serverSurface1);
     selection_offered_client1_spy.clear();
     selectionOfferedClient2Spy.clear();
 

@@ -33,6 +33,7 @@ class WRAPLANDSERVER_EXPORT KeyState : public QObject
 {
     Q_OBJECT
 public:
+    explicit KeyState(Display* display);
     ~KeyState() override;
 
     enum class Key {
@@ -51,10 +52,6 @@ public:
     void setState(Key k, State s);
 
 private:
-    explicit KeyState(Display* display, QObject* parent = nullptr);
-
-    friend class Display;
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

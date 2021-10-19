@@ -57,95 +57,106 @@ TestServer::~TestServer() = default;
 void TestServer::init()
 {
     Q_ASSERT(!m_display);
-    m_display = new Display(this);
+    m_display.reset(new Display);
     m_display->start(Display::StartMode::ConnectClientsOnly);
     m_display->createShm();
     m_display->createCompositor();
-    m_shell = m_display->createXdgShell(m_display);
+    globals.xdg_shell = m_display->createXdgShell();
 
-    connect(m_shell, &XdgShell::toplevelCreated, this, [this](XdgShellToplevel* surface) {
-        m_shellSurfaces << surface;
-        // TODO: pass keyboard/pointer/touch focus on mapped
-        connect(surface, &XdgShellToplevel::resourceDestroyed, this, [this, surface] {
-            m_shellSurfaces.removeOne(surface);
-        });
-    });
+    connect(globals.xdg_shell.get(),
+            &XdgShell::toplevelCreated,
+            this,
+            [this](XdgShellToplevel* surface) {
+                m_shellSurfaces << surface;
+                // TODO: pass keyboard/pointer/touch focus on mapped
+                connect(surface, &XdgShellToplevel::resourceDestroyed, this, [this, surface] {
+                    m_shellSurfaces.removeOne(surface);
+                });
+            });
 
-    m_seat = m_display->createSeat(m_display);
-    m_seat->setHasKeyboard(true);
-    m_seat->setHasPointer(true);
-    m_seat->setHasTouch(true);
+    globals.seats.emplace_back(m_display->createSeat());
+    globals.seats.front()->setHasKeyboard(true);
+    globals.seats.front()->setHasPointer(true);
+    globals.seats.front()->setHasTouch(true);
 
-    m_display->createDataDeviceManager(m_display);
-    m_display->createIdle(m_display);
-    m_display->createSubCompositor(m_display);
+    m_display->createDataDeviceManager();
+    m_display->createIdle();
+    m_display->createSubCompositor();
 
-    auto output = new Output(m_display, m_display);
+    globals.outputs.push_back(std::make_unique<Wrapland::Server::Output>(m_display.get()));
     const QSize size(1280, 1024);
-    output->set_geometry(QRectF(QPoint(0, 0), size));
-    output->set_physical_size(size / 3.8);
-    output->add_mode(Output::Mode{size});
+    globals.outputs.back()->set_geometry(QRectF(QPoint(0, 0), size));
+    globals.outputs.back()->set_physical_size(size / 3.8);
+    globals.outputs.back()->add_mode(Output::Mode{size});
 
-    auto fakeInput = m_display->createFakeInput(m_display);
-    connect(fakeInput, &FakeInput::deviceCreated, this, [this](FakeInputDevice* device) {
-        device->setAuthentication(true);
-        connect(
-            device, &FakeInputDevice::pointerMotionRequested, this, [this](const QSizeF& delta) {
-                m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                m_cursorPos = m_cursorPos + QPointF(delta.width(), delta.height());
-                m_seat->pointers().set_position(m_cursorPos);
+    globals.fake_input = m_display->createFakeInput();
+    connect(
+        globals.fake_input.get(), &FakeInput::deviceCreated, this, [this](FakeInputDevice* device) {
+            device->setAuthentication(true);
+            connect(device,
+                    &FakeInputDevice::pointerMotionRequested,
+                    this,
+                    [this](const QSizeF& delta) {
+                        globals.seats.front()->setTimestamp(m_timeSinceStart->elapsed());
+                        m_cursorPos = m_cursorPos + QPointF(delta.width(), delta.height());
+                        globals.seats.front()->pointers().set_position(m_cursorPos);
+                    });
+            connect(device,
+                    &FakeInputDevice::pointerButtonPressRequested,
+                    this,
+                    [this](quint32 button) {
+                        globals.seats.front()->setTimestamp(m_timeSinceStart->elapsed());
+                        globals.seats.front()->pointers().button_pressed(button);
+                    });
+            connect(device,
+                    &FakeInputDevice::pointerButtonReleaseRequested,
+                    this,
+                    [this](quint32 button) {
+                        globals.seats.front()->setTimestamp(m_timeSinceStart->elapsed());
+                        globals.seats.front()->pointers().button_released(button);
+                    });
+            connect(device,
+                    &FakeInputDevice::pointerAxisRequested,
+                    this,
+                    [this](Qt::Orientation orientation, qreal delta) {
+                        globals.seats.front()->setTimestamp(m_timeSinceStart->elapsed());
+                        globals.seats.front()->pointers().send_axis(orientation, delta);
+                    });
+            connect(device,
+                    &FakeInputDevice::touchDownRequested,
+                    this,
+                    [this](quint32 id, const QPointF& pos) {
+                        globals.seats.front()->setTimestamp(m_timeSinceStart->elapsed());
+                        m_touchIdMapper.insert(id,
+                                               globals.seats.front()->touches().touch_down(pos));
+                    });
+            connect(device,
+                    &FakeInputDevice::touchMotionRequested,
+                    this,
+                    [this](quint32 id, const QPointF& pos) {
+                        globals.seats.front()->setTimestamp(m_timeSinceStart->elapsed());
+                        const auto it = m_touchIdMapper.constFind(id);
+                        if (it != m_touchIdMapper.constEnd()) {
+                            globals.seats.front()->touches().touch_move(it.value(), pos);
+                        }
+                    });
+            connect(device, &FakeInputDevice::touchUpRequested, this, [this](quint32 id) {
+                globals.seats.front()->setTimestamp(m_timeSinceStart->elapsed());
+                const auto it = m_touchIdMapper.find(id);
+                if (it != m_touchIdMapper.end()) {
+                    globals.seats.front()->touches().touch_up(it.value());
+                    m_touchIdMapper.erase(it);
+                }
             });
-        connect(
-            device, &FakeInputDevice::pointerButtonPressRequested, this, [this](quint32 button) {
-                m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                m_seat->pointers().button_pressed(button);
+            connect(device, &FakeInputDevice::touchCancelRequested, this, [this] {
+                globals.seats.front()->setTimestamp(m_timeSinceStart->elapsed());
+                globals.seats.front()->touches().cancel_sequence();
             });
-        connect(
-            device, &FakeInputDevice::pointerButtonReleaseRequested, this, [this](quint32 button) {
-                m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                m_seat->pointers().button_released(button);
+            connect(device, &FakeInputDevice::touchFrameRequested, this, [this] {
+                globals.seats.front()->setTimestamp(m_timeSinceStart->elapsed());
+                globals.seats.front()->touches().touch_frame();
             });
-        connect(device,
-                &FakeInputDevice::pointerAxisRequested,
-                this,
-                [this](Qt::Orientation orientation, qreal delta) {
-                    m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                    m_seat->pointers().send_axis(orientation, delta);
-                });
-        connect(device,
-                &FakeInputDevice::touchDownRequested,
-                this,
-                [this](quint32 id, const QPointF& pos) {
-                    m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                    m_touchIdMapper.insert(id, m_seat->touches().touch_down(pos));
-                });
-        connect(device,
-                &FakeInputDevice::touchMotionRequested,
-                this,
-                [this](quint32 id, const QPointF& pos) {
-                    m_seat->setTimestamp(m_timeSinceStart->elapsed());
-                    const auto it = m_touchIdMapper.constFind(id);
-                    if (it != m_touchIdMapper.constEnd()) {
-                        m_seat->touches().touch_move(it.value(), pos);
-                    }
-                });
-        connect(device, &FakeInputDevice::touchUpRequested, this, [this](quint32 id) {
-            m_seat->setTimestamp(m_timeSinceStart->elapsed());
-            const auto it = m_touchIdMapper.find(id);
-            if (it != m_touchIdMapper.end()) {
-                m_seat->touches().touch_up(it.value());
-                m_touchIdMapper.erase(it);
-            }
         });
-        connect(device, &FakeInputDevice::touchCancelRequested, this, [this] {
-            m_seat->setTimestamp(m_timeSinceStart->elapsed());
-            m_seat->touches().cancel_sequence();
-        });
-        connect(device, &FakeInputDevice::touchFrameRequested, this, [this] {
-            m_seat->setTimestamp(m_timeSinceStart->elapsed());
-            m_seat->touches().touch_frame();
-        });
-    });
 
     m_repaintTimer->setInterval(1000 / 60);
     connect(m_repaintTimer, &QTimer::timeout, this, &TestServer::repaint);

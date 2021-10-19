@@ -266,11 +266,12 @@ int main(int argc, char** argv)
     Display display;
     display.start();
 
-    display.createDataDeviceManager();
-    display.createCompositor(&display);
+    auto data_device_manager = display.createDataDeviceManager();
+    auto compositor = display.createCompositor();
     auto shell = display.createXdgShell();
     display.createShm();
-    auto output = new Output(&display, &display);
+
+    auto output = std::make_unique<Wrapland::Server::Output>(&display);
     output->set_physical_size(QSize(269, 202));
     const QSize windowSize(1024, 768);
     output->add_mode(Output::Mode{windowSize});
@@ -281,13 +282,15 @@ int main(int argc, char** argv)
     seat->setName("testSeat0");
 
     CompositorWindow compositorWindow;
-    compositorWindow.setSeat(seat);
+    compositorWindow.setSeat(seat.get());
     compositorWindow.setMinimumSize(windowSize);
     compositorWindow.setMaximumSize(windowSize);
     compositorWindow.setGeometry(QRect(QPoint(0, 0), windowSize));
     compositorWindow.show();
-    QObject::connect(
-        shell, &XdgShell::toplevelCreated, &compositorWindow, &CompositorWindow::surfaceCreated);
+    QObject::connect(shell.get(),
+                     &XdgShell::toplevelCreated,
+                     &compositorWindow,
+                     &CompositorWindow::surfaceCreated);
 
     // start XWayland
     if (parser.isSet(xwaylandOption)) {

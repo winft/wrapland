@@ -34,10 +34,10 @@ class WRAPLANDSERVER_EXPORT ContrastManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit ContrastManager(Display* display);
     ~ContrastManager() override;
 
 private:
-    explicit ContrastManager(Display* display, QObject* parent = nullptr);
     friend class Display;
 
     class Private;

@@ -36,10 +36,8 @@ primary_selection_device_manager::Private::Private(Display* display,
 
 primary_selection_device_manager::Private::~Private() = default;
 
-primary_selection_device_manager::primary_selection_device_manager(Display* display,
-                                                                   QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+primary_selection_device_manager::primary_selection_device_manager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

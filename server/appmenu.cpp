@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 Copyright 2020  Faveraux Adrien <ad1rie3@hotmail.fr>
 
 This library is free software; you can redistribute it and/or
@@ -45,9 +45,8 @@ AppmenuManager::Private::Private(Display* display, AppmenuManager* qptr)
 
 AppmenuManager::Private::~Private() = default;
 
-AppmenuManager::AppmenuManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+AppmenuManager::AppmenuManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

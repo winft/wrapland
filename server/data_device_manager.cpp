@@ -59,9 +59,8 @@ data_device_manager::Private::Private(data_device_manager* q, Display* display)
 {
 }
 
-data_device_manager::data_device_manager(Display* display, [[maybe_unused]] QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+data_device_manager::data_device_manager(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

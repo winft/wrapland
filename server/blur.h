@@ -34,12 +34,10 @@ class WRAPLANDSERVER_EXPORT BlurManager : public QObject
 {
     Q_OBJECT
 public:
+    explicit BlurManager(Display* display);
     ~BlurManager() override;
 
 private:
-    explicit BlurManager(Display* display, QObject* parent = nullptr);
-    friend class Display;
-
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

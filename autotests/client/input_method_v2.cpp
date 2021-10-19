@@ -13,10 +13,9 @@
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/input_method_v2.h"
-#include "../../server/seat.h"
 #include "../../server/surface.h"
 
 #include <linux/input.h>
@@ -42,11 +41,9 @@ private:
     Wrapland::Client::input_method_v2* get_input_method();
 
     struct {
-        Wrapland::Server::Display* display{nullptr};
-        Wrapland::Server::Compositor* compositor{nullptr};
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
         Wrapland::Server::Seat* seat{nullptr};
-        Wrapland::Server::text_input_manager_v3* text_input{nullptr};
-        Wrapland::Server::input_method_manager_v2* input_method{nullptr};
     } server;
 
     struct client {
@@ -61,24 +58,26 @@ private:
     } client1;
 };
 
-constexpr auto socket_name = "wrapland-test-input-method-v2-0";
+constexpr auto socket_name{"wrapland-test-input-method-v2-0"};
 
 void input_method_v2_test::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    delete server.display;
-    server.display = new Wrapland::Server::Display(this);
-    server.display->setSocketName(std::string(socket_name));
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
     server.display->start();
+    QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.seat = server.display->createSeat();
+
+    server.globals.seats.push_back(server.display->createSeat());
+    server.seat = server.globals.seats.back().get();
     server.seat->setHasKeyboard(true);
 
-    server.compositor = server.display->createCompositor();
-    server.text_input = server.display->createTextInputManagerV3();
-    server.input_method = server.display->createInputMethodManagerV2();
+    server.globals.compositor = server.display->createCompositor();
+    server.globals.text_input_v3 = server.display->createTextInputManagerV3();
+    server.globals.input_method_manager_v2 = server.display->createInputMethodManagerV2();
 
     // setup connection
     client1.connection = new Wrapland::Client::ConnectionThread;
@@ -154,13 +153,9 @@ void input_method_v2_test::cleanup()
         delete client1.thread;
         client1.thread = nullptr;
     }
-
-    CLEANUP(server.input_method)
-    CLEANUP(server.text_input)
-    CLEANUP(server.compositor)
-    CLEANUP(server.seat)
-    CLEANUP(server.display)
 #undef CLEANUP
+
+    server = {};
 }
 
 Wrapland::Client::input_method_v2* input_method_v2_test::get_input_method()

@@ -12,7 +12,7 @@
 
 #include "../../server/display.h"
 #include "../../server/drm_lease_v1.h"
-#include "../../server/output.h"
+#include "../../server/globals.h"
 
 #include <deque>
 
@@ -28,7 +28,8 @@ private Q_SLOTS:
 
 private:
     struct {
-        Wrapland::Server::Display* display{nullptr};
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
         Wrapland::Server::drm_lease_device_v1* lease_device{nullptr};
     } server;
 
@@ -41,7 +42,7 @@ private:
     } client1;
 };
 
-constexpr auto socket_name = "wrapland-test-drm-lease-v1-0";
+constexpr auto socket_name{"wrapland-test-drm-lease-v1-0"};
 
 struct client_connector {
     std::unique_ptr<Wrapland::Client::drm_lease_connector_v1> client;
@@ -62,13 +63,14 @@ struct client_connector {
 
 void drm_lease_v1_test::init()
 {
-    delete server.display;
-    server.display = new Wrapland::Server::Display(this);
-    server.display->setSocketName(std::string(socket_name));
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
     server.display->start();
+    QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.lease_device = server.display->createDrmLeaseDeviceV1();
+    server.globals.drm_lease_device_v1 = server.display->createDrmLeaseDeviceV1();
+    server.lease_device = server.globals.drm_lease_device_v1.get();
 
     // setup connection
     client1.connection = new Wrapland::Client::ConnectionThread;
@@ -121,10 +123,9 @@ void drm_lease_v1_test::cleanup()
         delete client1.thread;
         client1.thread = nullptr;
     }
-
-    CLEANUP(server.lease_device)
-    CLEANUP(server.display)
 #undef CLEANUP
+
+    server = {};
 }
 
 void drm_lease_v1_test::test_connectors()
@@ -133,7 +134,8 @@ void drm_lease_v1_test::test_connectors()
 
     std::vector<std::unique_ptr<Wrapland::Server::Output>> server_outputs;
     auto add_output = [&server_outputs, this] {
-        server_outputs.emplace_back(std::make_unique<Wrapland::Server::Output>(server.display));
+        server_outputs.emplace_back(
+            std::make_unique<Wrapland::Server::Output>(server.display.get()));
     };
 
     add_output();
@@ -204,7 +206,8 @@ void drm_lease_v1_test::test_lease()
 
     std::vector<std::unique_ptr<Wrapland::Server::Output>> server_outputs;
     auto add_output = [&server_outputs, this] {
-        server_outputs.emplace_back(std::make_unique<Wrapland::Server::Output>(server.display));
+        server_outputs.emplace_back(
+            std::make_unique<Wrapland::Server::Output>(server.display.get()));
     };
 
     add_output();

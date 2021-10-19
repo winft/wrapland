@@ -27,10 +27,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/keyboard_shortcuts_inhibit.h"
-#include "../../server/seat.h"
 #include "../../server/surface.h"
 
 #include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
@@ -51,12 +50,13 @@ private Q_SLOTS:
     void testKeyboardShortcuts();
 
 private:
-    Display* m_display = nullptr;
-    Srv::Seat* m_serverSeat = nullptr;
-    Srv::KeyboardShortcutsInhibitManagerV1* m_serverKeyboardShortcutsInhibitor = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     QVector<Srv::Surface*> m_serverSurfaces;
     QVector<Clt::Surface*> m_clientSurfaces;
-    Srv::Compositor* m_serverCompositor;
 
     ConnectionThread* m_connection = nullptr;
     QThread* m_thread = nullptr;
@@ -66,25 +66,28 @@ private:
     Clt::KeyboardShortcutsInhibitManagerV1* m_keyboard_shortcuts_inhibitor = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-keyboard-shortcuts-inhibitor-test-0");
+constexpr auto socket_name{"wrapland-keyboard-shortcuts-inhibitor-test-0"};
 
 void TestKeyboardShortcutsInhibitor::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
-    m_display = new Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
-    QVERIFY(m_display->running());
-    m_display->createShm();
-    m_serverSeat = m_display->createSeat();
-    m_serverSeat->setName("seat0");
-    m_serverKeyboardShortcutsInhibitor = m_display->createKeyboardShortcutsInhibitManager();
+
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
+
+    server.display->createShm();
+    auto server_seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
+    server_seat->setName("seat0");
+    server.globals.keyboard_shortcuts_inhibit_manager_v1
+        = server.display->createKeyboardShortcutsInhibitManager();
 
     // setup connection
     m_connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -108,9 +111,9 @@ void TestKeyboardShortcutsInhibitor::init()
     registry.setup();
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    m_serverCompositor = m_display->createCompositor(this);
+    server.globals.compositor = server.display->createCompositor();
 
-    connect(m_serverCompositor,
+    connect(server.globals.compositor.get(),
             &Srv::Compositor::surfaceCreated,
             this,
             [this](Srv::Surface* surface) { m_serverSurfaces += surface; });
@@ -132,7 +135,7 @@ void TestKeyboardShortcutsInhibitor::init()
         this);
     QVERIFY(m_keyboard_shortcuts_inhibitor->isValid());
 
-    QSignalSpy surfaceSpy(m_serverCompositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy surfaceSpy(server.globals.compositor.get(), &Srv::Compositor::surfaceCreated);
     for (int i = 0; i < 3; ++i) {
         m_clientSurfaces += m_clientCompositor->createSurface(this);
     }
@@ -168,12 +171,9 @@ void TestKeyboardShortcutsInhibitor::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-
-    CLEANUP(m_serverKeyboardShortcutsInhibitor)
-    CLEANUP(m_serverSeat)
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_display)
 #undef CLEANUP
+
+    server = {};
 }
 
 void TestKeyboardShortcutsInhibitor::testKeyboardShortcuts()
@@ -191,8 +191,8 @@ void TestKeyboardShortcutsInhibitor::testKeyboardShortcuts()
                                     &Clt::KeyboardShortcutsInhibitorV1::inhibitorInactive);
 
     QVERIFY(inhibitorCreatedSpy.wait() || inhibitorCreatedSpy.count() == 1);
-    auto inhibitorServer
-        = m_serverKeyboardShortcutsInhibitor->findInhibitor(m_serverSurfaces[0], m_serverSeat);
+    auto inhibitorServer = server.globals.keyboard_shortcuts_inhibit_manager_v1->findInhibitor(
+        m_serverSurfaces[0], server.globals.seats.back().get());
 
     // Test deactivate
     inhibitorServer->setActive(false);

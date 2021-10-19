@@ -67,9 +67,8 @@ void SlideManager::Private::unsetCallback([[maybe_unused]] SlideManagerBind* bin
     surface->d_ptr->setSlide(QPointer<Slide>());
 }
 
-SlideManager::SlideManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+SlideManager::SlideManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

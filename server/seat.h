@@ -62,6 +62,7 @@ class WRAPLANDSERVER_EXPORT Seat : public QObject
 {
     Q_OBJECT
 public:
+    explicit Seat(Display* display);
     ~Seat() override;
 
     std::string name() const;
@@ -112,7 +113,6 @@ Q_SIGNALS:
     void focusedTextInputChanged();
 
 private:
-    friend class Display;
     friend class data_control_device_v1;
     friend class data_control_manager_v1;
     friend class data_device_manager;
@@ -125,8 +125,6 @@ private:
     friend class text_input_manager_v3;
     friend class text_input_pool;
     friend class touch_pool;
-
-    Seat(Display* display, QObject* parent);
 
     // Returns whether an actual change took place.
     bool setFocusedTextInputV2Surface(Surface* surface);

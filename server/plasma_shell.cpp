@@ -66,9 +66,8 @@ void PlasmaShell::Private::createSurface(PlasmaShellBind* bind, uint32_t id, Sur
     Q_EMIT handle()->surfaceCreated(shellSurface);
 }
 
-PlasmaShell::PlasmaShell(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+PlasmaShell::PlasmaShell(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

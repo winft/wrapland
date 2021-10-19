@@ -265,9 +265,8 @@ void FakeInput::Private::keyboardKeyCallback(FakeInputBind* bind, uint32_t butto
     }
 }
 
-FakeInput::FakeInput(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+FakeInput::FakeInput(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

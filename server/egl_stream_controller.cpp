@@ -61,8 +61,7 @@ void EglStreamController::Private::attachStreamConsumerAttribs([[maybe_unused]] 
     Q_EMIT handle(wlResource)->streamConsumerAttached(surface, eglStream, attribs);
 }
 
-EglStreamController::EglStreamController(Display* display, QObject* parent)
-    : QObject(parent)
+EglStreamController::EglStreamController(Display* display)
 {
     // libnvidia-egl-wayland.so.1 may not be present on all systems, so we load it dynamically
     // TODO(romangg): Cast from QFunctionPointer changes alignment from 4 to 8. Disable the check

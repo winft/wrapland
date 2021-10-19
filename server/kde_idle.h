@@ -33,6 +33,7 @@ class WRAPLANDSERVER_EXPORT KdeIdle : public QObject
 {
     Q_OBJECT
 public:
+    explicit KdeIdle(Display* display);
     ~KdeIdle() override;
 
     void inhibit();
@@ -44,8 +45,6 @@ Q_SIGNALS:
     void inhibitedChanged();
 
 private:
-    explicit KdeIdle(Display* display, QObject* parent = nullptr);
-    friend class Display;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };

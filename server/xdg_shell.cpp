@@ -259,9 +259,8 @@ XdgShellPositioner* XdgShell::Private::getPositioner(wl_resource* wlPositioner)
     return foundPositioner;
 }
 
-XdgShell::XdgShell(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+XdgShell::XdgShell(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }

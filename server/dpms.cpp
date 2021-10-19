@@ -51,9 +51,8 @@ void DpmsManager::Private::getDpmsCallback(DpmsManagerBind* bind, uint32_t id, w
     dpms->sendDone();
 }
 
-DpmsManager::DpmsManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+DpmsManager::DpmsManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

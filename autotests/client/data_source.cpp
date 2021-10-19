@@ -30,6 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 
 #include <wayland-client.h>
 
@@ -52,27 +53,32 @@ private Q_SLOTS:
     void test_destroy();
 
 private:
-    Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::data_device_manager* m_server_device_manager = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
+
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
     Wrapland::Client::DataDeviceManager* m_device_manager = nullptr;
     Wrapland::Client::EventQueue* m_queue = nullptr;
     QThread* m_thread = nullptr;
 };
 
-static const std::string s_socketName = "kwayland-test-wayland-datasource-0";
+constexpr auto socket_name{"kwayland-test-wayland-datasource-0"};
 
 void TestDataSource::init()
 {
     qRegisterMetaType<std::string>();
-    m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
+
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connected_spy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
-    m_connection->setSocketName(QString::fromStdString(s_socketName));
+    m_connection->setSocketName(QString::fromStdString(socket_name));
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -98,7 +104,7 @@ void TestDataSource::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    m_server_device_manager = m_display->createDataDeviceManager(m_display);
+    server.globals.data_device_manager = server.display->createDataDeviceManager();
 
     QVERIFY(device_manager_spy.wait());
     m_device_manager
@@ -126,14 +132,13 @@ void TestDataSource::cleanup()
     delete m_connection;
     m_connection = nullptr;
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
 }
 
 void TestDataSource::test_offer()
 {
     qRegisterMetaType<Wrapland::Server::data_source*>();
-    QSignalSpy source_created_spy(m_server_device_manager,
+    QSignalSpy source_created_spy(server.globals.data_device_manager.get(),
                                   &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
@@ -192,7 +197,7 @@ void TestDataSource::test_target_accepts_data()
 
 void TestDataSource::test_target_accepts()
 {
-    QSignalSpy source_created_spy(m_server_device_manager,
+    QSignalSpy source_created_spy(server.globals.data_device_manager.get(),
                                   &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
@@ -216,7 +221,7 @@ void TestDataSource::test_target_accepts()
 
 void TestDataSource::test_request_send()
 {
-    QSignalSpy source_created_spy(m_server_device_manager,
+    QSignalSpy source_created_spy(server.globals.data_device_manager.get(),
                                   &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
@@ -253,7 +258,7 @@ void TestDataSource::test_request_send_on_unbound()
 {
     // This test verifies that the server doesn't crash when requesting a send on an unbound
     // DataSource.
-    QSignalSpy source_created_spy(m_server_device_manager, &Wrapland::Server::data_device_manager::sourceCreated);
+    QSignalSpy source_created_spy(server.globals.data_device_manager.get(), &Wrapland::Server::data_device_manager::sourceCreated);
     QVERIFY(source_created_spy.isValid());
 
     std::unique_ptr<Wrapland::Client::DataSource> source(m_device_manager->createSource());
@@ -273,7 +278,7 @@ void TestDataSource::test_request_send_on_unbound()
 
 void TestDataSource::test_cancel()
 {
-    QSignalSpy source_created_spy(m_server_device_manager,
+    QSignalSpy source_created_spy(server.globals.data_device_manager.get(),
                                   &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
@@ -293,7 +298,7 @@ void TestDataSource::test_cancel()
 
 void TestDataSource::test_server_get()
 {
-    QSignalSpy source_created_spy(m_server_device_manager,
+    QSignalSpy source_created_spy(server.globals.data_device_manager.get(),
                                   &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_created_spy.isValid());
 
@@ -323,8 +328,7 @@ void TestDataSource::test_destroy()
             source.get(),
             &Wrapland::Client::DataSource::release);
 
-    delete m_display;
-    m_display = nullptr;
+    server = {};
     QTRY_VERIFY(!m_connection->established());
 
     // Now the pool should be destroyed.

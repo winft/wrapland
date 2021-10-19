@@ -48,9 +48,8 @@ void XdgActivationV1::Private::activateCallback(XdgActivationV1Bind* bind,
     Q_EMIT activation->activate(token, surface);
 }
 
-XdgActivationV1::XdgActivationV1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+XdgActivationV1::XdgActivationV1(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

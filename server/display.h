@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 struct wl_client;
 struct wl_display;
@@ -37,61 +38,59 @@ namespace Wrapland::Server
 
 class Client;
 class Private;
+class OutputDeviceV1;
+class WlOutput;
 
+class AppmenuManager;
+class BlurManager;
+class Compositor;
+class ContrastManager;
 class data_control_manager_v1;
 class data_device_manager;
 class DpmsManager;
 class drm_lease_device_v1;
-class WlOutput;
-class OutputConfigurationV1;
-class OutputDeviceV1;
-class OutputManagementV1;
-class PlasmaVirtualDesktopManager;
-class PlasmaWindowManager;
-class PresentationManager;
-class Seat;
-class XdgShell;
-
-class Compositor;
-class KdeIdle;
+class EglStreamController;
+class FakeInput;
 class IdleInhibitManagerV1;
 class input_method_manager_v2;
-class FakeInput;
+class KdeIdle;
+class KeyboardShortcutsInhibitManagerV1;
+class KeyState;
 class LayerShellV1;
+class LinuxDmabufV1;
+class Output;
+class OutputManagementV1;
 class PlasmaShell;
+class PlasmaVirtualDesktopManager;
+class PlasmaWindowManager;
+class PointerConstraintsV1;
+class PointerGesturesV1;
+class PresentationManager;
+class primary_selection_device_manager;
+class RelativePointerManagerV1;
+class Seat;
+class ServerSideDecorationPaletteManager;
 class ShadowManager;
-class BlurManager;
-class ContrastManager;
 class SlideManager;
 class Subcompositor;
-class TextInputManagerV2;
 class text_input_manager_v3;
-class RelativePointerManagerV1;
-class PointerGesturesV1;
-class PointerConstraintsV1;
-class primary_selection_device_manager;
-class XdgForeign;
-class AppmenuManager;
-class ServerSideDecorationPaletteManager;
+class TextInputManagerV2;
 class Viewporter;
-class XdgOutputManager;
-class XdgDecorationManager;
-class EglStreamController;
-class KeyState;
-class LinuxDmabufV1;
-class KeyboardShortcutsInhibitManagerV1;
 class XdgActivationV1;
+class XdgDecorationManager;
+class XdgForeign;
+class XdgOutputManager;
+class XdgShell;
 
 class WRAPLANDSERVER_EXPORT Display : public QObject
 {
     Q_OBJECT
 public:
-    explicit Display(QObject* parent = nullptr);
-
+    Display();
     ~Display() override;
 
-    void setSocketName(const std::string& name);
-    std::string socketName() const;
+    void set_socket_name(std::string const& name);
+    std::string socket_name() const;
 
     uint32_t serial();
     uint32_t nextSerial();
@@ -115,69 +114,65 @@ public:
     void removeOutput(WlOutput* output);
     std::vector<WlOutput*>& outputs() const;
 
-    Seat* createSeat(QObject* parent = nullptr);
+    std::unique_ptr<Seat> createSeat();
     std::vector<Seat*>& seats() const;
 
-    void setSocketName(const QString& name);
     void add_socket_fd(int fd);
 
     void add_output_device_v1(OutputDeviceV1* output);
     void removeOutputDevice(OutputDeviceV1* outputDevice);
     std::vector<OutputDeviceV1*> outputDevices() const;
 
-    Compositor* createCompositor(QObject* parent = nullptr);
+    std::unique_ptr<Compositor> createCompositor();
     void createShm();
 
-    Subcompositor* createSubCompositor(QObject* parent = nullptr);
+    std::unique_ptr<Subcompositor> createSubCompositor();
 
-    data_control_manager_v1* create_data_control_manager_v1(QObject* parent = nullptr);
-    data_device_manager* createDataDeviceManager(QObject* parent = nullptr);
+    std::unique_ptr<data_control_manager_v1> create_data_control_manager_v1();
+    std::unique_ptr<data_device_manager> createDataDeviceManager();
 
-    OutputManagementV1* createOutputManagementV1(QObject* parent = nullptr);
-    PlasmaShell* createPlasmaShell(QObject* parent = nullptr);
-    PlasmaWindowManager* createPlasmaWindowManager(QObject* parent = nullptr);
-    primary_selection_device_manager* createPrimarySelectionDeviceManager(QObject* parent
-                                                                          = nullptr);
-    KdeIdle* createIdle(QObject* parent = nullptr);
-    FakeInput* createFakeInput(QObject* parent = nullptr);
-    LayerShellV1* createLayerShellV1(QObject* parent = nullptr);
-    ShadowManager* createShadowManager(QObject* parent = nullptr);
-    BlurManager* createBlurManager(QObject* parent = nullptr);
-    SlideManager* createSlideManager(QObject* parent = nullptr);
-    ContrastManager* createContrastManager(QObject* parent = nullptr);
-    DpmsManager* createDpmsManager(QObject* parent = nullptr);
-    drm_lease_device_v1* createDrmLeaseDeviceV1(QObject* parent = nullptr);
+    std::unique_ptr<OutputManagementV1> createOutputManagementV1();
+    std::unique_ptr<PlasmaShell> createPlasmaShell();
+    std::unique_ptr<PlasmaWindowManager> createPlasmaWindowManager();
+    std::unique_ptr<primary_selection_device_manager> createPrimarySelectionDeviceManager();
+    std::unique_ptr<KdeIdle> createIdle();
+    std::unique_ptr<FakeInput> createFakeInput();
+    std::unique_ptr<LayerShellV1> createLayerShellV1();
+    std::unique_ptr<ShadowManager> createShadowManager();
+    std::unique_ptr<BlurManager> createBlurManager();
+    std::unique_ptr<SlideManager> createSlideManager();
+    std::unique_ptr<ContrastManager> createContrastManager();
+    std::unique_ptr<DpmsManager> createDpmsManager();
+    std::unique_ptr<drm_lease_device_v1> createDrmLeaseDeviceV1();
 
-    KeyState* createKeyState(QObject* parent = nullptr);
-    PresentationManager* createPresentationManager(QObject* parent = nullptr);
+    std::unique_ptr<KeyState> createKeyState();
+    std::unique_ptr<PresentationManager> createPresentationManager();
 
-    TextInputManagerV2* createTextInputManagerV2(QObject* parent = nullptr);
-    text_input_manager_v3* createTextInputManagerV3(QObject* parent = nullptr);
-    input_method_manager_v2* createInputMethodManagerV2(QObject* parent = nullptr);
+    std::unique_ptr<TextInputManagerV2> createTextInputManagerV2();
+    std::unique_ptr<text_input_manager_v3> createTextInputManagerV3();
+    std::unique_ptr<input_method_manager_v2> createInputMethodManagerV2();
 
-    XdgShell* createXdgShell(QObject* parent = nullptr);
+    std::unique_ptr<XdgShell> createXdgShell();
 
-    RelativePointerManagerV1* createRelativePointerManager(QObject* parent = nullptr);
-    PointerGesturesV1* createPointerGestures(QObject* parent = nullptr);
-    PointerConstraintsV1* createPointerConstraints(QObject* parent = nullptr);
+    std::unique_ptr<RelativePointerManagerV1> createRelativePointerManager();
+    std::unique_ptr<PointerGesturesV1> createPointerGestures();
+    std::unique_ptr<PointerConstraintsV1> createPointerConstraints();
 
-    XdgForeign* createXdgForeign(QObject* parent = nullptr);
+    std::unique_ptr<XdgForeign> createXdgForeign();
 
-    IdleInhibitManagerV1* createIdleInhibitManager(QObject* parent = nullptr);
-    KeyboardShortcutsInhibitManagerV1* createKeyboardShortcutsInhibitManager(QObject* parent
-                                                                             = nullptr);
-    AppmenuManager* createAppmenuManager(QObject* parent = nullptr);
+    std::unique_ptr<IdleInhibitManagerV1> createIdleInhibitManager();
+    std::unique_ptr<KeyboardShortcutsInhibitManagerV1> createKeyboardShortcutsInhibitManager();
+    std::unique_ptr<AppmenuManager> createAppmenuManager();
 
-    ServerSideDecorationPaletteManager* createServerSideDecorationPaletteManager(QObject* parent
-                                                                                 = nullptr);
-    LinuxDmabufV1* createLinuxDmabuf(QObject* parent = nullptr);
-    Viewporter* createViewporter(QObject* parent = nullptr);
+    std::unique_ptr<ServerSideDecorationPaletteManager> createServerSideDecorationPaletteManager();
+    std::unique_ptr<LinuxDmabufV1> createLinuxDmabuf();
+    std::unique_ptr<Viewporter> createViewporter();
     XdgOutputManager* xdgOutputManager() const;
 
-    PlasmaVirtualDesktopManager* createPlasmaVirtualDesktopManager(QObject* parent = nullptr);
-    XdgActivationV1* createXdgActivationV1(QObject* parent = nullptr);
-    XdgDecorationManager* createXdgDecorationManager(XdgShell* shell, QObject* parent = nullptr);
-    EglStreamController* createEglStreamController(QObject* parent = nullptr);
+    std::unique_ptr<PlasmaVirtualDesktopManager> createPlasmaVirtualDesktopManager();
+    std::unique_ptr<XdgActivationV1> createXdgActivationV1();
+    std::unique_ptr<XdgDecorationManager> createXdgDecorationManager(XdgShell* shell);
+    std::unique_ptr<EglStreamController> createEglStreamController();
 
     void dispatch();
     void flush();

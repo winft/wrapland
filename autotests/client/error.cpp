@@ -29,6 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/plasma_shell.h"
 #include "../../server/xdg_shell.h"
 
@@ -47,10 +48,10 @@ private Q_SLOTS:
     void testMultiplePlasmaShellSurfacesForSurface();
 
 private:
-    Wrapland::Server::Display* m_display = nullptr;
-    Wrapland::Server::Compositor* m_serverCompositor = nullptr;
-    Wrapland::Server::XdgShell* m_serverXdgShell = nullptr;
-    Wrapland::Server::PlasmaShell* m_psi = nullptr;
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
 
     Wrapland::Client::ConnectionThread* m_connection = nullptr;
     QThread* m_thread = nullptr;
@@ -60,25 +61,26 @@ private:
     Wrapland::Client::PlasmaShell* m_plasmaShell = nullptr;
 };
 
-static const QString s_socketName = QStringLiteral("wrapland-test-error-0");
+constexpr auto socket_name{"wrapland-test-error-0"};
 
 void ErrorTest::init()
 {
-    m_display = new Wrapland::Server::Display(this);
-    m_display->setSocketName(s_socketName);
-    m_display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    m_display->createShm();
-    m_serverCompositor = m_display->createCompositor(m_display);
+    server.display->createShm();
+    server.globals.compositor = server.display->createCompositor();
 
-    m_serverXdgShell = m_display->createXdgShell(m_display);
-    m_psi = m_display->createPlasmaShell(m_display);
+    server.globals.xdg_shell = server.display->createXdgShell();
+    server.globals.plasma_shell = server.display->createPlasmaShell();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(m_connection, &Wrapland::Client::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    m_connection->setSocketName(s_socketName);
+    m_connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     m_connection->moveToThread(m_thread);
@@ -138,11 +140,9 @@ void ErrorTest::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-    CLEANUP(m_psi)
-    CLEANUP(m_serverXdgShell)
-    CLEANUP(m_serverCompositor)
-    CLEANUP(m_display)
 #undef CLEANUP
+
+    server = {};
 }
 
 void ErrorTest::testMultipleShellSurfacesForSurface()

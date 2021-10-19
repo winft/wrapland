@@ -95,9 +95,8 @@ void XdgDecorationManager::Private::getToplevelDecorationCallback(XdgDecorationM
     Q_EMIT priv->handle()->decorationCreated(deco);
 }
 
-XdgDecorationManager::XdgDecorationManager(Display* display, XdgShell* shell, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display, shell))
+XdgDecorationManager::XdgDecorationManager(Display* display, XdgShell* shell)
+    : d_ptr(new Private(this, display, shell))
 {
     d_ptr->create();
 }

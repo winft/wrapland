@@ -17,11 +17,10 @@
 
 #include "../../server/buffer.h"
 #include "../../server/client.h"
-#include "../../server/compositor.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/layer_shell_v1.h"
 #include "../../server/surface.h"
-#include "../../server/xdg_shell.h"
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -44,12 +43,11 @@ private Q_SLOTS:
     void test_output_removal();
 
 private:
-    Srv::Display* display{nullptr};
+    struct {
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
+    } server;
 
-    Srv::Compositor* server_compositor{nullptr};
-    Srv::LayerShellV1* server_layer_shell{nullptr};
-    Srv::XdgShell* server_xdg_shell{nullptr};
-    Srv::Output* server_output{nullptr};
     QThread* m_thread{nullptr};
     Clt::ConnectionThread* connection{nullptr};
     Clt::EventQueue* queue{nullptr};
@@ -60,30 +58,32 @@ private:
     Clt::Output* output{nullptr};
 };
 
-static QString const s_socket_name = QStringLiteral("wrapland-test-layer-shell-0");
+constexpr auto socket_name{"wrapland-test-layer-shell-0"};
 
 void layer_shell_test::init()
 {
     qRegisterMetaType<Srv::Surface*>();
 
-    display = new Srv::Display(this);
-    display->setSocketName(s_socket_name);
-    display->start();
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(std::string(socket_name));
+    server.display->start();
+    QVERIFY(server.display->running());
 
-    display->createShm();
-    server_compositor = display->createCompositor(display);
-    server_layer_shell = display->createLayerShellV1(display);
-    server_xdg_shell = display->createXdgShell(display);
+    server.display->createShm();
+    server.globals.compositor = server.display->createCompositor();
+    server.globals.layer_shell_v1 = server.display->createLayerShellV1();
+    server.globals.xdg_shell = server.display->createXdgShell();
 
-    server_output = new Srv::Output(display, this);
-    server_output->set_enabled(true);
-    server_output->done();
+    server.globals.outputs.push_back(
+        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+    server.globals.outputs.back()->set_enabled(true);
+    server.globals.outputs.back()->done();
 
     // setup connection
     connection = new Clt::ConnectionThread;
     QSignalSpy connectedSpy(connection, &Clt::ConnectionThread::establishedChanged);
     QVERIFY(connectedSpy.isValid());
-    connection->setSocketName(s_socket_name);
+    connection->setSocketName(socket_name);
 
     m_thread = new QThread(this);
     connection->moveToThread(m_thread);
@@ -156,20 +156,16 @@ void layer_shell_test::cleanup()
         delete m_thread;
         m_thread = nullptr;
     }
-
-    CLEANUP(server_output)
-    CLEANUP(server_xdg_shell)
-    CLEANUP(server_layer_shell)
-    CLEANUP(server_compositor)
-    CLEANUP(display)
-
 #undef CLEANUP
+
+    server = {};
 }
 
 void layer_shell_test::test_create_layer_surface()
 {
     // This test verifies that a layer surface can be created and communicates.
-    QSignalSpy server_surface_spy(server_compositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy server_surface_spy(server.globals.compositor.get(),
+                                  &Srv::Compositor::surfaceCreated);
     QVERIFY(server_surface_spy.isValid());
 
     std::unique_ptr<Clt::Surface> surface{compositor->createSurface()};
@@ -177,7 +173,8 @@ void layer_shell_test::test_create_layer_surface()
     auto server_surface = server_surface_spy.first().first().value<Srv::Surface*>();
     QVERIFY(server_surface);
 
-    QSignalSpy layer_surface_spy(server_layer_shell, &Srv::LayerShellV1::surface_created);
+    QSignalSpy layer_surface_spy(server.globals.layer_shell_v1.get(),
+                                 &Srv::LayerShellV1::surface_created);
     QVERIFY(layer_surface_spy.isValid());
 
     std::unique_ptr<Clt::LayerSurfaceV1> layer_surface{layer_shell->get_layer_surface(
@@ -228,7 +225,8 @@ void layer_shell_test::test_create_layer_surface()
 void layer_shell_test::test_data_transfer()
 {
     // Tests that basic data is set and received.
-    QSignalSpy server_surface_spy(server_compositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy server_surface_spy(server.globals.compositor.get(),
+                                  &Srv::Compositor::surfaceCreated);
     QVERIFY(server_surface_spy.isValid());
 
     std::unique_ptr<Clt::Surface> surface{compositor->createSurface()};
@@ -236,7 +234,8 @@ void layer_shell_test::test_data_transfer()
     auto server_surface = server_surface_spy.first().first().value<Srv::Surface*>();
     QVERIFY(server_surface);
 
-    QSignalSpy layer_surface_spy(server_layer_shell, &Srv::LayerShellV1::surface_created);
+    QSignalSpy layer_surface_spy(server.globals.layer_shell_v1.get(),
+                                 &Srv::LayerShellV1::surface_created);
     QVERIFY(layer_surface_spy.isValid());
 
     std::unique_ptr<Clt::LayerSurfaceV1> layer_surface{layer_shell->get_layer_surface(
@@ -260,7 +259,7 @@ void layer_shell_test::test_data_transfer()
     surface->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(commit_spy.wait());
 
-    QCOMPARE(server_layer_surface->output(), server_output);
+    QCOMPARE(server_layer_surface->output(), server.globals.outputs.back().get());
     QCOMPARE(server_layer_surface->anchor(), Qt::LeftEdge);
     QCOMPARE(server_layer_surface->exclusive_zone(), 10);
     QCOMPARE(server_layer_surface->layer(), Srv::LayerSurfaceV1::Layer::Top);
@@ -285,7 +284,8 @@ void layer_shell_test::test_exclusive_edge_data()
 void layer_shell_test::test_exclusive_edge()
 {
     // Tests that the exclusive edge is correctly set.
-    QSignalSpy server_surface_spy(server_compositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy server_surface_spy(server.globals.compositor.get(),
+                                  &Srv::Compositor::surfaceCreated);
     QVERIFY(server_surface_spy.isValid());
 
     std::unique_ptr<Clt::Surface> surface{compositor->createSurface()};
@@ -293,7 +293,8 @@ void layer_shell_test::test_exclusive_edge()
     auto server_surface = server_surface_spy.first().first().value<Srv::Surface*>();
     QVERIFY(server_surface);
 
-    QSignalSpy layer_surface_spy(server_layer_shell, &Srv::LayerShellV1::surface_created);
+    QSignalSpy layer_surface_spy(server.globals.layer_shell_v1.get(),
+                                 &Srv::LayerShellV1::surface_created);
     QVERIFY(layer_surface_spy.isValid());
 
     std::unique_ptr<Clt::LayerSurfaceV1> layer_surface{layer_shell->get_layer_surface(
@@ -335,7 +336,8 @@ void layer_shell_test::test_exclusive_edge()
 void layer_shell_test::test_margin()
 {
     // Tests that margins are set and unset according to the anchor.
-    QSignalSpy server_surface_spy(server_compositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy server_surface_spy(server.globals.compositor.get(),
+                                  &Srv::Compositor::surfaceCreated);
     QVERIFY(server_surface_spy.isValid());
 
     std::unique_ptr<Clt::Surface> surface{compositor->createSurface()};
@@ -343,7 +345,8 @@ void layer_shell_test::test_margin()
     auto server_surface = server_surface_spy.first().first().value<Srv::Surface*>();
     QVERIFY(server_surface);
 
-    QSignalSpy layer_surface_spy(server_layer_shell, &Srv::LayerShellV1::surface_created);
+    QSignalSpy layer_surface_spy(server.globals.layer_shell_v1.get(),
+                                 &Srv::LayerShellV1::surface_created);
     QVERIFY(layer_surface_spy.isValid());
 
     std::unique_ptr<Clt::LayerSurfaceV1> layer_surface{layer_shell->get_layer_surface(
@@ -387,7 +390,8 @@ void layer_shell_test::test_margin()
 void layer_shell_test::test_xdg_popup()
 {
     // Tests setting the layer surface as parent to an xdg-popup.
-    QSignalSpy server_surface_spy(server_compositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy server_surface_spy(server.globals.compositor.get(),
+                                  &Srv::Compositor::surfaceCreated);
     QVERIFY(server_surface_spy.isValid());
 
     std::unique_ptr<Clt::Surface> surface{compositor->createSurface()};
@@ -395,7 +399,8 @@ void layer_shell_test::test_xdg_popup()
     auto server_surface = server_surface_spy.first().first().value<Srv::Surface*>();
     QVERIFY(server_surface);
 
-    QSignalSpy layer_surface_spy(server_layer_shell, &Srv::LayerShellV1::surface_created);
+    QSignalSpy layer_surface_spy(server.globals.layer_shell_v1.get(),
+                                 &Srv::LayerShellV1::surface_created);
     QVERIFY(layer_surface_spy.isValid());
 
     std::unique_ptr<Clt::LayerSurfaceV1> layer_surface{layer_shell->get_layer_surface(
@@ -406,7 +411,7 @@ void layer_shell_test::test_xdg_popup()
     QVERIFY(server_layer_surface);
     QCOMPARE(server_layer_surface->surface(), server_surface);
 
-    QSignalSpy popup_created_spy(server_xdg_shell, &Srv::XdgShell::popupCreated);
+    QSignalSpy popup_created_spy(server.globals.xdg_shell.get(), &Srv::XdgShell::popupCreated);
     QVERIFY(popup_created_spy.isValid());
 
     std::unique_ptr<Clt::Surface> popup_surface{compositor->createSurface()};
@@ -432,7 +437,8 @@ void layer_shell_test::test_xdg_popup()
 void layer_shell_test::test_output_removal()
 {
     // This test verifies that a layer surface is closed once the associated output is removed.
-    QSignalSpy server_surface_spy(server_compositor, &Srv::Compositor::surfaceCreated);
+    QSignalSpy server_surface_spy(server.globals.compositor.get(),
+                                  &Srv::Compositor::surfaceCreated);
     QVERIFY(server_surface_spy.isValid());
 
     std::unique_ptr<Clt::Surface> surface{compositor->createSurface()};
@@ -440,7 +446,8 @@ void layer_shell_test::test_output_removal()
     auto server_surface = server_surface_spy.first().first().value<Srv::Surface*>();
     QVERIFY(server_surface);
 
-    QSignalSpy layer_surface_spy(server_layer_shell, &Srv::LayerShellV1::surface_created);
+    QSignalSpy layer_surface_spy(server.globals.layer_shell_v1.get(),
+                                 &Srv::LayerShellV1::surface_created);
     QVERIFY(layer_surface_spy.isValid());
 
     std::unique_ptr<Clt::LayerSurfaceV1> layer_surface{layer_shell->get_layer_surface(
@@ -481,8 +488,7 @@ void layer_shell_test::test_output_removal()
     QVERIFY(closed_spy.isValid());
 
     // Now destroy output.
-    delete server_output;
-    server_output = nullptr;
+    server.globals.outputs.clear();
 
     QVERIFY(closed_spy.wait());
 

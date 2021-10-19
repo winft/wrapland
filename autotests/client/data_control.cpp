@@ -17,14 +17,12 @@
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
-#include "../../server/compositor.h"
 #include "../../server/data_control_v1.h"
 #include "../../server/data_device.h"
-#include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
+#include "../../server/globals.h"
 #include "../../server/primary_selection.h"
-#include "../../server/seat.h"
 #include "../../server/surface.h"
 
 class data_control_test : public QObject
@@ -70,12 +68,8 @@ private:
     void create_prim_sel_source(prim_sel_source_pair& source);
 
     struct {
-        Wrapland::Server::Display* display{nullptr};
-        Wrapland::Server::Compositor* compositor{nullptr};
-        Wrapland::Server::Seat* seat{nullptr};
-        Wrapland::Server::data_device_manager* data{nullptr};
-        Wrapland::Server::primary_selection_device_manager* prim_sel{nullptr};
-        Wrapland::Server::data_control_manager_v1* data_control{nullptr};
+        std::unique_ptr<Wrapland::Server::Display> display;
+        Wrapland::Server::globals globals;
     } server;
 
     struct client {
@@ -91,7 +85,7 @@ private:
     } client1;
 };
 
-constexpr auto socket_name = "wrapland-test-text-input-v3-0";
+constexpr auto socket_name{"wrapland-test-text-input-v3-0"};
 
 void data_control_test::init()
 {
@@ -99,20 +93,22 @@ void data_control_test::init()
     qRegisterMetaType<Wrapland::Server::data_source*>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
-    delete server.display;
-    server.display = new Wrapland::Server::Display(this);
-    server.display->setSocketName(std::string(socket_name));
+    server.display = std::make_unique<Wrapland::Server::Display>();
+    server.display->set_socket_name(socket_name);
     server.display->start();
+    QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.seat = server.display->createSeat();
-    server.seat->setHasKeyboard(true);
 
-    server.compositor = server.display->createCompositor();
+    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.back()->setHasKeyboard(true);
 
-    server.data = server.display->createDataDeviceManager();
-    server.prim_sel = server.display->createPrimarySelectionDeviceManager();
-    server.data_control = server.display->create_data_control_manager_v1();
+    server.globals.compositor = server.display->createCompositor();
+
+    server.globals.data_device_manager = server.display->createDataDeviceManager();
+    server.globals.primary_selection_device_manager
+        = server.display->createPrimarySelectionDeviceManager();
+    server.globals.data_control_manager_v1 = server.display->create_data_control_manager_v1();
 
     client1.connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(client1.connection,
@@ -196,19 +192,14 @@ void data_control_test::cleanup()
         delete client1.thread;
         client1.thread = nullptr;
     }
-
-    CLEANUP(server.data_control)
-    CLEANUP(server.prim_sel)
-    CLEANUP(server.data)
-    CLEANUP(server.compositor)
-    CLEANUP(server.seat)
-    CLEANUP(server.display)
 #undef CLEANUP
+
+    server = {};
 }
 
 void data_control_test::create_ctrl_device(ctrl_device_pair& device)
 {
-    QSignalSpy device_spy(server.data_control,
+    QSignalSpy device_spy(server.globals.data_control_manager_v1.get(),
                           &Wrapland::Server::data_control_manager_v1::device_created);
     QVERIFY(device_spy.isValid());
 
@@ -224,7 +215,8 @@ void data_control_test::create_ctrl_device(ctrl_device_pair& device)
 
 void data_control_test::create_data_device(data_device_pair& device)
 {
-    QSignalSpy device_spy(server.data, &Wrapland::Server::data_device_manager::device_created);
+    QSignalSpy device_spy(server.globals.data_device_manager.get(),
+                          &Wrapland::Server::data_device_manager::device_created);
     QVERIFY(device_spy.isValid());
 
     device.client.reset(client1.data->getDevice(client1.seat));
@@ -239,7 +231,7 @@ void data_control_test::create_data_device(data_device_pair& device)
 
 void data_control_test::create_prim_sel_device(prim_sel_device_pair& device)
 {
-    QSignalSpy device_spy(server.prim_sel,
+    QSignalSpy device_spy(server.globals.primary_selection_device_manager.get(),
                           &Wrapland::Server::primary_selection_device_manager::device_created);
     QVERIFY(device_spy.isValid());
 
@@ -255,7 +247,8 @@ void data_control_test::create_prim_sel_device(prim_sel_device_pair& device)
 
 void data_control_test::create_data_source(data_source_pair& source)
 {
-    QSignalSpy source_spy(server.data, &Wrapland::Server::data_device_manager::source_created);
+    QSignalSpy source_spy(server.globals.data_device_manager.get(),
+                          &Wrapland::Server::data_device_manager::source_created);
     QVERIFY(source_spy.isValid());
 
     source.client.reset(client1.data->createSource());
@@ -270,7 +263,7 @@ void data_control_test::create_data_source(data_source_pair& source)
 
 void data_control_test::create_prim_sel_source(prim_sel_source_pair& source)
 {
-    QSignalSpy source_spy(server.prim_sel,
+    QSignalSpy source_spy(server.globals.primary_selection_device_manager.get(),
                           &Wrapland::Server::primary_selection_device_manager::source_created);
     QVERIFY(source_spy.isValid());
 
@@ -286,7 +279,7 @@ void data_control_test::create_prim_sel_source(prim_sel_source_pair& source)
 
 void data_control_test::create_ctrl_source(ctrl_source_t& source)
 {
-    QSignalSpy source_spy(server.data_control,
+    QSignalSpy source_spy(server.globals.data_control_manager_v1.get(),
                           &Wrapland::Server::data_control_manager_v1::source_created);
     QVERIFY(source_spy.isValid());
 
@@ -303,17 +296,17 @@ void data_control_test::test_create()
     create_ctrl_device(devices);
 
     QVERIFY(!devices.server->selection());
-    QVERIFY(!server.seat->selection());
+    QVERIFY(!server.globals.seats.back().get()->selection());
 
-    server.seat->setSelection(devices.server->selection());
-    QCOMPARE(server.seat->selection(), devices.server->selection());
+    server.globals.seats.back().get()->setSelection(devices.server->selection());
+    QCOMPARE(server.globals.seats.back().get()->selection(), devices.server->selection());
 
     // And destroy.
     QSignalSpy destroyed_spy(devices.server, &QObject::destroyed);
     QVERIFY(destroyed_spy.isValid());
     devices.client.reset();
     QVERIFY(destroyed_spy.wait());
-    QVERIFY(!server.seat->selection());
+    QVERIFY(!server.globals.seats.back().get()->selection());
 }
 
 void data_control_test::test_set_selection()
@@ -324,12 +317,12 @@ void data_control_test::test_set_selection()
     ctrl_device_pair ctrl_devices;
     create_ctrl_device(ctrl_devices);
 
-    QCOMPARE(data_devices.server->seat(), server.seat);
+    QCOMPARE(data_devices.server->seat(), server.globals.seats.back().get());
     QVERIFY(!data_devices.server->selection());
 
-    QVERIFY(!server.seat->selection());
+    QVERIFY(!server.globals.seats.back().get()->selection());
 
-    QSignalSpy surface_created_spy(server.compositor,
+    QSignalSpy surface_created_spy(server.globals.compositor.get(),
                                    &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surface_created_spy.isValid());
 
@@ -339,7 +332,7 @@ void data_control_test::test_set_selection()
 
     auto server_surface = surface_created_spy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(server_surface);
-    server.seat->setFocusedKeyboardSurface(server_surface);
+    server.globals.seats.back().get()->setFocusedKeyboardSurface(server_surface);
 
     // First let the data control listen in on a selection change.
     QSignalSpy server_sel_changed_spy(data_devices.server,
@@ -398,12 +391,12 @@ void data_control_test::test_set_primary_selection()
     ctrl_device_pair ctrl_devices;
     create_ctrl_device(ctrl_devices);
 
-    QCOMPARE(prim_sel_devices.server->seat(), server.seat);
+    QCOMPARE(prim_sel_devices.server->seat(), server.globals.seats.back().get());
     QVERIFY(!prim_sel_devices.server->selection());
 
-    QVERIFY(!server.seat->selection());
+    QVERIFY(!server.globals.seats.back().get()->selection());
 
-    QSignalSpy surface_created_spy(server.compositor,
+    QSignalSpy surface_created_spy(server.globals.compositor.get(),
                                    &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surface_created_spy.isValid());
 
@@ -413,7 +406,7 @@ void data_control_test::test_set_primary_selection()
 
     auto server_surface = surface_created_spy.first().first().value<Wrapland::Server::Surface*>();
     QVERIFY(server_surface);
-    server.seat->setFocusedKeyboardSurface(server_surface);
+    server.globals.seats.back().get()->setFocusedKeyboardSurface(server_surface);
 
     // First let the data control listen in on a selection change.
     QSignalSpy server_sel_changed_spy(

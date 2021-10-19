@@ -78,9 +78,8 @@ void Viewporter::Private::getViewport(ViewporterBind* bind, uint32_t id, wl_reso
     Q_EMIT handle()->viewportCreated(viewport);
 }
 
-Viewporter::Viewporter(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+Viewporter::Viewporter(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

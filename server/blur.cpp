@@ -70,9 +70,8 @@ void BlurManager::Private::unsetCallback([[maybe_unused]] BlurManagerBind* bind,
     surface->d_ptr->setBlur(QPointer<Blur>());
 }
 
-BlurManager::BlurManager(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(display, this))
+BlurManager::BlurManager(Display* display)
+    : d_ptr(new Private(display, this))
 {
 }
 

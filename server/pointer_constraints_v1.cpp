@@ -120,9 +120,8 @@ void PointerConstraintsV1::Private::createConstraint(wl_resource* wlResource,
     surface->d_ptr->installPointerConstraint(constraint);
 }
 
-PointerConstraintsV1::PointerConstraintsV1(Display* display, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(this, display))
+PointerConstraintsV1::PointerConstraintsV1(Display* display)
+    : d_ptr(new Private(this, display))
 {
     d_ptr->create();
 }
