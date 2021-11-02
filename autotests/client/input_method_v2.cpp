@@ -76,7 +76,7 @@ void input_method_v2_test::init()
     server.seat->setHasKeyboard(true);
 
     server.globals.compositor = server.display->createCompositor();
-    server.globals.text_input_v3 = server.display->createTextInputManagerV3();
+    server.globals.text_input_manager_v3 = server.display->createTextInputManagerV3();
     server.globals.input_method_manager_v2 = server.display->createInputMethodManagerV2();
 
     // setup connection

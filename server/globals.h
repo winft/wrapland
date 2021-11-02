@@ -79,7 +79,7 @@ struct globals {
 
     /// Input method support
     std::unique_ptr<Server::TextInputManagerV2> text_input_manager_v2;
-    std::unique_ptr<Server::text_input_manager_v3> text_input_v3;
+    std::unique_ptr<Server::text_input_manager_v3> text_input_manager_v3;
     std::unique_ptr<Server::input_method_manager_v2> input_method_manager_v2;
 
     /// Global input state manipulation

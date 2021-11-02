@@ -76,7 +76,7 @@ void text_input_v3_test::init()
     server.seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
     server.seat->setHasKeyboard(true);
 
-    server.globals.text_input_v3 = server.display->createTextInputManagerV3();
+    server.globals.text_input_manager_v3 = server.display->createTextInputManagerV3();
 
     // setup connection
     client1.connection = new Wrapland::Client::ConnectionThread;
