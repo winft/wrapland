@@ -239,7 +239,8 @@ void TextInputTest::testEnterLeave()
     auto serverTextInput = server_text_inputs.v2.text_input;
     QVERIFY(serverTextInput);
 
-    QSignalSpy enabledChangedSpy(serverTextInput, &Wrapland::Server::text_input_v2::enabledChanged);
+    QSignalSpy enabledChangedSpy(serverTextInput,
+                                 &Wrapland::Server::text_input_v2::enabled_changed);
     QVERIFY(enabledChangedSpy.isValid());
     if (updatesDirectly) {
         QVERIFY(enabledChangedSpy.wait());
@@ -318,9 +319,11 @@ void TextInputTest::testShowHidePanel()
     auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
 
-    QSignalSpy showPanelRequestedSpy(ti, &Wrapland::Server::text_input_v2::requestShowInputPanel);
+    QSignalSpy showPanelRequestedSpy(ti,
+                                     &Wrapland::Server::text_input_v2::show_input_panel_requested);
     QVERIFY(showPanelRequestedSpy.isValid());
-    QSignalSpy hidePanelRequestedSpy(ti, &Wrapland::Server::text_input_v2::requestHideInputPanel);
+    QSignalSpy hidePanelRequestedSpy(ti,
+                                     &Wrapland::Server::text_input_v2::hide_input_panel_requested);
     QVERIFY(hidePanelRequestedSpy.isValid());
     QSignalSpy inputPanelStateChangedSpy(textInput.get(),
                                          &Wrapland::Client::TextInputV2::inputPanelStateChanged);
@@ -357,8 +360,8 @@ void TextInputTest::testCursorRectangle()
     auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
     QCOMPARE(ti->state().cursor_rectangle, QRect());
-    QSignalSpy cursorRectangleChangedSpy(ti,
-                                         &Wrapland::Server::text_input_v2::cursorRectangleChanged);
+    QSignalSpy cursorRectangleChangedSpy(
+        ti, &Wrapland::Server::text_input_v2::cursor_rectangle_changed);
     QVERIFY(cursorRectangleChangedSpy.isValid());
 
     textInput->setCursorRectangle(QRect(10, 20, 30, 40));
@@ -384,7 +387,7 @@ void TextInputTest::testPreferredLanguage()
     QVERIFY(ti->state().preferred_language.empty());
 
     QSignalSpy preferredLanguageChangedSpy(
-        ti, &Wrapland::Server::text_input_v2::preferredLanguageChanged);
+        ti, &Wrapland::Server::text_input_v2::preferred_language_changed);
     QVERIFY(preferredLanguageChangedSpy.isValid());
     textInput->setPreferredLanguage(QStringLiteral("foo"));
     QVERIFY(preferredLanguageChangedSpy.wait());
@@ -407,7 +410,7 @@ void TextInputTest::testReset()
     auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
 
-    QSignalSpy resetRequestedSpy(ti, &Wrapland::Server::text_input_v2::requestReset);
+    QSignalSpy resetRequestedSpy(ti, &Wrapland::Server::text_input_v2::reset_requested);
     QVERIFY(resetRequestedSpy.isValid());
 
     textInput->reset();
@@ -433,8 +436,8 @@ void TextInputTest::testSurroundingText()
     QCOMPARE(ti->state().surrounding_text.cursor_position, 0);
     QCOMPARE(ti->state().surrounding_text.selection_anchor, 0);
 
-    QSignalSpy surroundingTextChangedSpy(ti,
-                                         &Wrapland::Server::text_input_v2::surroundingTextChanged);
+    QSignalSpy surroundingTextChangedSpy(
+        ti, &Wrapland::Server::text_input_v2::surrounding_text_changed);
     QVERIFY(surroundingTextChangedSpy.isValid());
 
     textInput->setSurroundingText(QStringLiteral("100 €, 100 $"), 5, 6);
@@ -532,7 +535,7 @@ void TextInputTest::testContentHints()
     QVERIFY(ti);
     QCOMPARE(ti->state().content.hints, Wrapland::Server::text_input_v2_content_hints());
 
-    QSignalSpy contentTypeChangedSpy(ti, &Wrapland::Server::text_input_v2::contentTypeChanged);
+    QSignalSpy contentTypeChangedSpy(ti, &Wrapland::Server::text_input_v2::content_type_changed);
     QVERIFY(contentTypeChangedSpy.isValid());
     QFETCH(Wrapland::Client::TextInputV2::ContentHints, clientHints);
     textInput->setContentType(clientHints, Wrapland::Client::TextInputV2::ContentPurpose::Normal);
@@ -601,7 +604,7 @@ void TextInputTest::testContentPurpose()
     QVERIFY(ti);
     QCOMPARE(ti->state().content.purpose, Wrapland::Server::text_input_v2_content_purpose::normal);
 
-    QSignalSpy contentTypeChangedSpy(ti, &Wrapland::Server::text_input_v2::contentTypeChanged);
+    QSignalSpy contentTypeChangedSpy(ti, &Wrapland::Server::text_input_v2::content_type_changed);
     QVERIFY(contentTypeChangedSpy.isValid());
     QFETCH(Wrapland::Client::TextInputV2::ContentPurpose, clientPurpose);
     textInput->setContentType(Wrapland::Client::TextInputV2::ContentHints(), clientPurpose);

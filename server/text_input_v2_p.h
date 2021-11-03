@@ -42,7 +42,7 @@ public:
 
 private:
     static void
-    getTextInputCallback(text_input_manager_v2_bind* bind, uint32_t id, wl_resource* wlSeat);
+    get_text_input_callback(text_input_manager_v2_bind* bind, uint32_t id, wl_resource* wlSeat);
 
     static const struct zwp_text_input_manager_v2_interface s_interface;
 };
@@ -68,32 +68,33 @@ public:
 private:
     static const struct zwp_text_input_v2_interface s_interface;
 
-    static void enableCallback(wl_client* wlClient, wl_resource* wlResource, wl_resource* surface);
-    static void disableCallback(wl_client* wlClient, wl_resource* wlResource, wl_resource* surface);
-    static void updateStateCallback(wl_client* wlClient,
-                                    wl_resource* wlResource,
-                                    uint32_t serial,
-                                    uint32_t reason);
-    static void showInputPanelCallback(wl_client* wlClient, wl_resource* wlResource);
-    static void hideInputPanelCallback(wl_client* wlClient, wl_resource* wlResource);
-    static void setSurroundingTextCallback(wl_client* wlClient,
-                                           wl_resource* wlResource,
-                                           char const* text,
-                                           int32_t cursor,
-                                           int32_t anchor);
-    static void setContentTypeCallback(wl_client* wlClient,
-                                       wl_resource* wlResource,
-                                       uint32_t hint,
-                                       uint32_t purpose);
-    static void setCursorRectangleCallback(wl_client* wlClient,
-                                           wl_resource* wlResource,
-                                           int32_t x,
-                                           int32_t y,
-                                           int32_t width,
-                                           int32_t height);
-    static void setPreferredLanguageCallback(wl_client* wlClient,
-                                             wl_resource* wlResource,
-                                             char const* language);
+    static void enable_callback(wl_client* wlClient, wl_resource* wlResource, wl_resource* surface);
+    static void
+    disable_callback(wl_client* wlClient, wl_resource* wlResource, wl_resource* surface);
+    static void update_state_callback(wl_client* wlClient,
+                                      wl_resource* wlResource,
+                                      uint32_t serial,
+                                      uint32_t reason);
+    static void show_input_panel_callback(wl_client* wlClient, wl_resource* wlResource);
+    static void hide_input_panel_callback(wl_client* wlClient, wl_resource* wlResource);
+    static void set_surrounding_text_callback(wl_client* wlClient,
+                                              wl_resource* wlResource,
+                                              char const* text,
+                                              int32_t cursor,
+                                              int32_t anchor);
+    static void set_content_type_callback(wl_client* wlClient,
+                                          wl_resource* wlResource,
+                                          uint32_t hint,
+                                          uint32_t purpose);
+    static void set_cursor_rectangle_callback(wl_client* wlClient,
+                                              wl_resource* wlResource,
+                                              int32_t x,
+                                              int32_t y,
+                                              int32_t width,
+                                              int32_t height);
+    static void set_preferred_language_callback(wl_client* wlClient,
+                                                wl_resource* wlResource,
+                                                char const* language);
 
     void enable(Surface* s);
     void disable();

@@ -114,14 +114,14 @@ public:
     void set_language(std::string const& language_tag);
 
 Q_SIGNALS:
-    void requestShowInputPanel();
-    void requestHideInputPanel();
-    void requestReset();
-    void preferredLanguageChanged(const QByteArray& language);
-    void cursorRectangleChanged(const QRect& rect);
-    void contentTypeChanged();
-    void surroundingTextChanged();
-    void enabledChanged();
+    void enabled_changed();
+    void show_input_panel_requested();
+    void hide_input_panel_requested();
+    void reset_requested();
+    void preferred_language_changed();
+    void cursor_rectangle_changed();
+    void content_type_changed();
+    void surrounding_text_changed();
     void resourceDestroyed();
 
 private:
