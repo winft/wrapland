@@ -75,7 +75,12 @@ bool text_input_pool::set_v2_focused_surface(Surface* surface)
         old_ti->d_ptr->send_leave(serial, focus.surface);
     }
 
-    v2.text_input = interfaceForSurface(surface, v2_devices);
+    v2.text_input = nullptr;
+
+    if (!v3.text_input) {
+        // Only text-input v3 not set, we allow v2 to be active.
+        v2.text_input = interfaceForSurface(surface, v2_devices);
+    }
 
     if (surface) {
         v2.serial = serial;
@@ -111,7 +116,9 @@ void text_input_pool::set_focused_surface(Surface* surface)
         QObject::disconnect(focus.destroy_connection);
     }
 
-    auto changed = set_v2_focused_surface(surface) || set_v3_focused_surface(surface);
+    auto changed = set_v3_focused_surface(surface);
+    changed |= set_v2_focused_surface(surface);
+
     focus = {};
 
     if (surface) {
