@@ -306,7 +306,7 @@ Surface* input_method_popup_surface_v2::surface() const
 
 void input_method_popup_surface_v2::set_text_input_rectangle(QRect const& rect)
 {
-    return d_ptr->send<zwp_input_popup_surface_v2_send_text_input_rectangle>(
+    d_ptr->send<zwp_input_popup_surface_v2_send_text_input_rectangle>(
         rect.x(), rect.y(), rect.width(), rect.height());
 }
 
