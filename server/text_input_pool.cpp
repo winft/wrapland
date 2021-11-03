@@ -72,29 +72,20 @@ bool text_input_pool::set_v2_focused_surface(Surface* surface)
     auto const old_ti = v2.text_input;
 
     if (old_ti) {
-        // TODO(unknown author): setFocusedSurface like in other interfaces
         old_ti->d_ptr->send_leave(serial, focus.surface);
     }
 
-    auto ti = interfaceForSurface(surface, v2_devices);
-
-    if (ti && !ti->d_ptr->resource()) {
-        // TODO(romangg): can this check be removed?
-        ti = nullptr;
-    }
-
-    v2.text_input = ti;
+    v2.text_input = interfaceForSurface(surface, v2_devices);
 
     if (surface) {
         v2.serial = serial;
     }
 
-    if (ti) {
-        // TODO(unknown author): setFocusedSurface like in other interfaces
-        ti->d_ptr->send_enter(surface, serial);
+    if (v2.text_input) {
+        v2.text_input->d_ptr->send_enter(surface, serial);
     }
 
-    return old_ti != ti;
+    return old_ti != v2.text_input;
 }
 
 bool text_input_pool::set_v3_focused_surface(Surface* surface)
@@ -105,20 +96,13 @@ bool text_input_pool::set_v3_focused_surface(Surface* surface)
         old_ti->d_ptr->send_leave(focus.surface);
     }
 
-    auto ti = interfaceForSurface(surface, v3_devices);
+    v3.text_input = interfaceForSurface(surface, v3_devices);
 
-    if (ti && !ti->d_ptr->resource()) {
-        // TODO(romangg): can this check be removed?
-        ti = nullptr;
+    if (v3.text_input) {
+        v3.text_input->d_ptr->send_enter(surface);
     }
 
-    v3.text_input = ti;
-
-    if (ti) {
-        ti->d_ptr->send_enter(surface);
-    }
-
-    return old_ti != ti;
+    return old_ti != v3.text_input;
 }
 
 void text_input_pool::set_focused_surface(Surface* surface)
