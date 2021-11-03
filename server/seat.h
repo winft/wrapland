@@ -122,7 +122,7 @@ private:
     friend class pointer_pool;
     friend class primary_selection_device_manager;
     friend class input_method_manager_v2;
-    friend class TextInputManagerV2;
+    friend class text_input_manager_v2;
     friend class text_input_manager_v3;
     friend class text_input_pool;
     friend class touch_pool;

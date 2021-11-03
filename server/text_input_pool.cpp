@@ -18,7 +18,7 @@ text_input_pool::text_input_pool(Seat* seat)
 {
 }
 
-void text_input_pool::register_device(TextInputV2* ti)
+void text_input_pool::register_device(text_input_v2* ti)
 {
     // Text input version 0 might call this multiple times.
     if (std::find(v2_devices.begin(), v2_devices.end(), ti) != v2_devices.end()) {
@@ -33,7 +33,7 @@ void text_input_pool::register_device(TextInputV2* ti)
             Q_EMIT seat->focusedTextInputChanged();
         }
     }
-    QObject::connect(ti, &TextInputV2::resourceDestroyed, seat, [this, ti] {
+    QObject::connect(ti, &text_input_v2::resourceDestroyed, seat, [this, ti] {
         remove_one(v2_devices, ti);
         if (v2.text_input == ti) {
             v2.text_input = nullptr;

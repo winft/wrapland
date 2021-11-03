@@ -63,7 +63,19 @@ enum class text_input_v2_content_purpose : uint32_t {
     terminal,
 };
 
-class WRAPLANDSERVER_EXPORT TextInputV2 : public QObject
+class WRAPLANDSERVER_EXPORT text_input_manager_v2 : public QObject
+{
+    Q_OBJECT
+public:
+    explicit text_input_manager_v2(Display* display);
+    ~text_input_manager_v2() override;
+
+private:
+    class Private;
+    std::unique_ptr<Private> d_ptr;
+};
+
+class WRAPLANDSERVER_EXPORT text_input_v2 : public QObject
 {
     Q_OBJECT
 public:
@@ -102,8 +114,8 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    explicit TextInputV2(Client* client, uint32_t version, uint32_t id);
-    friend class TextInputManagerV2;
+    explicit text_input_v2(Client* client, uint32_t version, uint32_t id);
+    friend class text_input_manager_v2;
     friend class Seat;
     friend class text_input_pool;
 
@@ -111,21 +123,9 @@ private:
     Private* d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT TextInputManagerV2 : public QObject
-{
-    Q_OBJECT
-public:
-    explicit TextInputManagerV2(Display* display);
-    ~TextInputManagerV2() override;
-
-private:
-    class Private;
-    std::unique_ptr<Private> d_ptr;
-};
-
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::TextInputV2*)
+Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2*)
 Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2_content_hint)
 Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2_content_hints)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::text_input_v2_content_hints)

@@ -180,7 +180,7 @@ void TestWaylandRegistry::init()
         = std::make_unique<Wrapland::Server::XdgDecorationManager>(server.display.get(),
                                                                    server.globals.xdg_shell.get());
     server.globals.text_input_manager_v2
-        = std::make_unique<Wrapland::Server::TextInputManagerV2>(server.display.get());
+        = std::make_unique<Wrapland::Server::text_input_manager_v2>(server.display.get());
     server.globals.text_input_manager_v3
         = std::make_unique<Wrapland::Server::text_input_manager_v3>(server.display.get());
     server.globals.relative_pointer_manager_v1

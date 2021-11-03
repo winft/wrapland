@@ -30,26 +30,27 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-constexpr uint32_t TextInputManagerV2Version = 1;
-using TextInputManagerV2Global = Wayland::Global<TextInputManagerV2, TextInputManagerV2Version>;
-using TextInputManagerV2Bind = Wayland::Bind<TextInputManagerV2Global>;
+constexpr uint32_t text_input_manager_v2_version = 1;
+using text_input_manager_v2_global
+    = Wayland::Global<text_input_manager_v2, text_input_manager_v2_version>;
+using text_input_manager_v2_bind = Wayland::Bind<text_input_manager_v2_global>;
 
-class TextInputManagerV2::Private : public TextInputManagerV2Global
+class text_input_manager_v2::Private : public text_input_manager_v2_global
 {
 public:
-    Private(Display* display, TextInputManagerV2* q);
+    Private(Display* display, text_input_manager_v2* q);
 
 private:
     static void
-    getTextInputCallback(TextInputManagerV2Bind* bind, uint32_t id, wl_resource* wlSeat);
+    getTextInputCallback(text_input_manager_v2_bind* bind, uint32_t id, wl_resource* wlSeat);
 
     static const struct zwp_text_input_manager_v2_interface s_interface;
 };
 
-class TextInputV2::Private : public Wayland::Resource<TextInputV2>
+class text_input_v2::Private : public Wayland::Resource<text_input_v2>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, TextInputV2* q);
+    Private(Client* client, uint32_t version, uint32_t id, text_input_v2* q);
 
     void sendEnter(Surface* surface, quint32 serial);
     void sendLeave(quint32 serial, Surface* surface);

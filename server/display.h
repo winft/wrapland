@@ -72,8 +72,8 @@ class ServerSideDecorationPaletteManager;
 class ShadowManager;
 class SlideManager;
 class Subcompositor;
+class text_input_manager_v2;
 class text_input_manager_v3;
-class TextInputManagerV2;
 class Viewporter;
 class XdgActivationV1;
 class XdgDecorationManager;
@@ -147,7 +147,7 @@ public:
     std::unique_ptr<KeyState> createKeyState();
     std::unique_ptr<PresentationManager> createPresentationManager();
 
-    std::unique_ptr<TextInputManagerV2> createTextInputManagerV2();
+    std::unique_ptr<text_input_manager_v2> createTextInputManagerV2();
     std::unique_ptr<text_input_manager_v3> createTextInputManagerV3();
     std::unique_ptr<input_method_manager_v2> createInputMethodManagerV2();
 

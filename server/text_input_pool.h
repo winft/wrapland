@@ -15,7 +15,7 @@ namespace Wrapland::Server
 struct input_method_v2_state;
 class Seat;
 class Surface;
-class TextInputV2;
+class text_input_v2;
 class text_input_v3;
 struct text_input_v3_state;
 
@@ -24,7 +24,7 @@ class WRAPLANDSERVER_EXPORT text_input_pool
 public:
     explicit text_input_pool(Seat* seat);
 
-    void register_device(TextInputV2* ti);
+    void register_device(text_input_v2* ti);
     void register_device(text_input_v3* ti);
 
     void set_focused_surface(Surface* surface);
@@ -45,13 +45,13 @@ public:
     // That doesn't make sense, but there's no reason to enforce only one.
     struct {
         quint32 serial = 0;
-        TextInputV2* text_input{nullptr};
+        text_input_v2* text_input{nullptr};
     } v2;
     struct {
         text_input_v3* text_input{nullptr};
     } v3;
 
-    std::vector<TextInputV2*> v2_devices;
+    std::vector<text_input_v2*> v2_devices;
     std::vector<text_input_v3*> v3_devices;
 
     Seat* seat;

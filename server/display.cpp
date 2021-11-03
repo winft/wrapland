@@ -295,9 +295,9 @@ std::unique_ptr<drm_lease_device_v1> Display::createDrmLeaseDeviceV1()
     return std::make_unique<drm_lease_device_v1>(this);
 }
 
-std::unique_ptr<TextInputManagerV2> Display::createTextInputManagerV2()
+std::unique_ptr<text_input_manager_v2> Display::createTextInputManagerV2()
 {
-    return std::make_unique<TextInputManagerV2>(this);
+    return std::make_unique<text_input_manager_v2>(this);
 }
 
 std::unique_ptr<text_input_manager_v3> Display::createTextInputManagerV3()
