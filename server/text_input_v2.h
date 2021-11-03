@@ -114,7 +114,6 @@ public:
     void set_language(std::string const& language_tag);
 
 Q_SIGNALS:
-    void enabled_changed();
     void show_input_panel_requested();
     void hide_input_panel_requested();
     void reset_requested();

@@ -239,8 +239,8 @@ void TextInputTest::testEnterLeave()
     auto serverTextInput = server_text_inputs.v2.text_input;
     QVERIFY(serverTextInput);
 
-    QSignalSpy enabledChangedSpy(serverTextInput,
-                                 &Wrapland::Server::text_input_v2::enabled_changed);
+    QSignalSpy enabledChangedSpy(server.seat,
+                                 &Wrapland::Server::Seat::text_input_v2_enabled_changed);
     QVERIFY(enabledChangedSpy.isValid());
     if (updatesDirectly) {
         QVERIFY(enabledChangedSpy.wait());

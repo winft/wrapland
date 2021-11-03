@@ -132,6 +132,31 @@ void text_input_pool::set_focused_surface(Surface* surface)
     }
 }
 
+void sync_to_text_input_v2(text_input_v2* ti,
+                           input_method_v2_state const& prev,
+                           input_method_v2_state const& next)
+{
+    if (!ti) {
+        return;
+    }
+
+    if (next.delete_surrounding_text.update) {
+        auto const& text = next.delete_surrounding_text;
+        ti->delete_surrounding_text(text.before_length, text.after_length);
+    }
+    if (prev.preedit_string.data != next.preedit_string.data) {
+        ti->set_preedit_string(next.preedit_string.data, "");
+    }
+    if (prev.preedit_string.cursor_begin != next.preedit_string.cursor_begin
+        || prev.preedit_string.cursor_end != next.preedit_string.cursor_end) {
+        ti->set_cursor_position(static_cast<int32_t>(next.preedit_string.cursor_begin),
+                                static_cast<int32_t>(next.preedit_string.cursor_end));
+    }
+    if (prev.commit_string.data != next.commit_string.data) {
+        ti->commit(next.commit_string.data);
+    }
+}
+
 // TODO(romangg): With C++20's default comparision operator compare prev members with next members
 // and maybe remove the "update" members in the state. Or are the string comparisons to expensive?
 void sync_to_text_input_v3(text_input_v3* ti,
@@ -167,7 +192,60 @@ void sync_to_text_input_v3(text_input_v3* ti,
 void text_input_pool::sync_to_text_input(input_method_v2_state const& prev,
                                          input_method_v2_state const& next) const
 {
+    sync_to_text_input_v2(v2.text_input, prev, next);
     sync_to_text_input_v3(v3.text_input, prev, next);
+}
+
+text_input_v3_content_hints convert_hints_v2_to_v3(text_input_v2_content_hints hints)
+{
+    auto hints_number = static_cast<uint32_t>(hints);
+    return static_cast<text_input_v3_content_hints>(hints_number);
+}
+
+text_input_v3_content_purpose convert_purpose_v2_to_v3(text_input_v2_content_purpose purpose)
+{
+    return static_cast<text_input_v3_content_purpose>(purpose);
+}
+
+void sync_to_input_method_v2(input_method_v2* im,
+                             text_input_v2_state const& prev,
+                             text_input_v2_state const& next)
+{
+    if (!im) {
+        return;
+    }
+
+    auto has_update{false};
+
+    if (prev.enabled != next.enabled) {
+        im->set_active(next.enabled);
+        has_update = true;
+    }
+    if (next.surrounding_text.data != prev.surrounding_text.data
+        || next.surrounding_text.cursor_position != prev.surrounding_text.cursor_position
+        || next.surrounding_text.selection_anchor != prev.surrounding_text.selection_anchor) {
+        auto const& text = next.surrounding_text;
+        im->set_surrounding_text(text.data,
+                                 text.cursor_position,
+                                 text.selection_anchor,
+                                 text_input_v3_change_cause::input_method);
+        has_update = true;
+    }
+    if (prev.content.hints != next.content.hints || prev.content.purpose != next.content.purpose) {
+        im->set_content_type(convert_hints_v2_to_v3(next.content.hints),
+                             convert_purpose_v2_to_v3(next.content.purpose));
+        has_update = true;
+    }
+
+    if (has_update) {
+        im->done();
+    }
+
+    if (prev.cursor_rectangle != next.cursor_rectangle) {
+        for (auto popup : im->get_popups()) {
+            popup->set_text_input_rectangle(next.cursor_rectangle);
+        }
+    }
 }
 
 void sync_to_input_method_v2(input_method_v2* im,
@@ -204,6 +282,16 @@ void sync_to_input_method_v2(input_method_v2* im,
             popup->set_text_input_rectangle(next.cursor_rectangle);
         }
     }
+}
+
+void text_input_pool::sync_to_input_method(text_input_v2_state const& prev,
+                                           text_input_v2_state const& next) const
+{
+    if (prev.enabled != next.enabled) {
+        Q_EMIT seat->text_input_v2_enabled_changed(next.enabled);
+    }
+
+    sync_to_input_method_v2(seat->get_input_method_v2(), prev, next);
 }
 
 void text_input_pool::sync_to_input_method(text_input_v3_state const& prev,

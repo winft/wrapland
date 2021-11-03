@@ -52,6 +52,7 @@ class text_input_v2::Private : public Wayland::Resource<text_input_v2>
 public:
     Private(Client* client, uint32_t version, uint32_t id, text_input_v2* q);
 
+    void sync(text_input_v2_state const& old);
     void send_enter(Surface* surface, quint32 serial);
     void send_leave(quint32 serial, Surface* surface);
 
@@ -98,6 +99,8 @@ private:
 
     void enable(Surface* s);
     void disable();
+
+    text_input_v2* q_ptr;
 };
 
 }
