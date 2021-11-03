@@ -136,6 +136,13 @@ void input_method_v2::Private::get_input_popup_surface_callback(
 
     auto popup
         = new input_method_popup_surface_v2(priv->client()->handle(), priv->version(), id, surface);
+
+    priv->popups.push_back(popup);
+    QObject::connect(popup,
+                     &input_method_popup_surface_v2::resourceDestroyed,
+                     priv->q_ptr,
+                     [priv, popup] { remove_one(priv->popups, popup); });
+
     Q_EMIT priv->q_ptr->popup_surface_created(popup);
 }
 
@@ -203,6 +210,11 @@ void input_method_v2::done()
 input_method_v2_state const& input_method_v2::state() const
 {
     return d_ptr->current;
+}
+
+std::vector<input_method_popup_surface_v2*> const& input_method_v2::get_popups() const
+{
+    return d_ptr->popups;
 }
 
 struct zwp_input_method_keyboard_grab_v2_interface const

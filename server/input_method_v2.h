@@ -13,6 +13,7 @@
 
 #include <QObject>
 #include <memory>
+#include <vector>
 
 namespace Wrapland::Server
 {
@@ -58,6 +59,8 @@ class WRAPLANDSERVER_EXPORT input_method_v2 : public QObject
     Q_OBJECT
 public:
     input_method_v2_state const& state() const;
+
+    std::vector<input_method_popup_surface_v2*> const& get_popups() const;
 
     void set_active(bool active);
     void set_surrounding_text(std::string const& text,
