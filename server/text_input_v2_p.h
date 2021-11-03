@@ -67,8 +67,8 @@ public:
 
     QByteArray preferredLanguage;
     QRect cursorRectangle;
-    TextInputV2::ContentHints contentHints = TextInputV2::ContentHint::None;
-    TextInputV2::ContentPurpose contentPurpose = TextInputV2::ContentPurpose::Normal;
+    text_input_v2_content_hints contentHints{text_input_v2_content_hint::none};
+    text_input_v2_content_purpose contentPurpose{text_input_v2_content_purpose::normal};
     Seat* seat = nullptr;
     QPointer<Surface> surface;
     bool enabled = false;

@@ -248,76 +248,76 @@ void TextInputV2::Private::setSurroundingTextCallback([[maybe_unused]] wl_client
     Q_EMIT priv->handle()->surroundingTextChanged();
 }
 
-TextInputV2::ContentHints convertContentHint(uint32_t hint)
+text_input_v2_content_hints convertContentHint(uint32_t hint)
 {
     const auto hints = zwp_text_input_v2_content_hint(hint);
-    TextInputV2::ContentHints ret = TextInputV2::ContentHint::None;
+    text_input_v2_content_hints ret = text_input_v2_content_hint::none;
 
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_AUTO_COMPLETION) {
-        ret |= TextInputV2::ContentHint::AutoCompletion;
+        ret |= text_input_v2_content_hint::completion;
     }
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_AUTO_CORRECTION) {
-        ret |= TextInputV2::ContentHint::AutoCorrection;
+        ret |= text_input_v2_content_hint::correction;
     }
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_AUTO_CAPITALIZATION) {
-        ret |= TextInputV2::ContentHint::AutoCapitalization;
+        ret |= text_input_v2_content_hint::capitalization;
     }
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_LOWERCASE) {
-        ret |= TextInputV2::ContentHint::LowerCase;
+        ret |= text_input_v2_content_hint::lowercase;
     }
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_UPPERCASE) {
-        ret |= TextInputV2::ContentHint::UpperCase;
+        ret |= text_input_v2_content_hint::uppercase;
     }
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_TITLECASE) {
-        ret |= TextInputV2::ContentHint::TitleCase;
+        ret |= text_input_v2_content_hint::titlecase;
     }
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_HIDDEN_TEXT) {
-        ret |= TextInputV2::ContentHint::HiddenText;
+        ret |= text_input_v2_content_hint::hidden_text;
     }
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_SENSITIVE_DATA) {
-        ret |= TextInputV2::ContentHint::SensitiveData;
+        ret |= text_input_v2_content_hint::sensitive_data;
     }
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_LATIN) {
-        ret |= TextInputV2::ContentHint::Latin;
+        ret |= text_input_v2_content_hint::latin;
     }
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_MULTILINE) {
-        ret |= TextInputV2::ContentHint::MultiLine;
+        ret |= text_input_v2_content_hint::multiline;
     }
     return ret;
 }
 
-TextInputV2::ContentPurpose convertContentPurpose(uint32_t purpose)
+text_input_v2_content_purpose convertContentPurpose(uint32_t purpose)
 {
     const auto wlPurpose = zwp_text_input_v2_content_purpose(purpose);
 
     switch (wlPurpose) {
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_ALPHA:
-        return TextInputV2::ContentPurpose::Alpha;
+        return text_input_v2_content_purpose::alpha;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_DIGITS:
-        return TextInputV2::ContentPurpose::Digits;
+        return text_input_v2_content_purpose::digits;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_NUMBER:
-        return TextInputV2::ContentPurpose::Number;
+        return text_input_v2_content_purpose::number;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_PHONE:
-        return TextInputV2::ContentPurpose::Phone;
+        return text_input_v2_content_purpose::phone;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_URL:
-        return TextInputV2::ContentPurpose::Url;
+        return text_input_v2_content_purpose::url;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_EMAIL:
-        return TextInputV2::ContentPurpose::Email;
+        return text_input_v2_content_purpose::email;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_NAME:
-        return TextInputV2::ContentPurpose::Name;
+        return text_input_v2_content_purpose::name;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_PASSWORD:
-        return TextInputV2::ContentPurpose::Password;
+        return text_input_v2_content_purpose::password;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_DATE:
-        return TextInputV2::ContentPurpose::Date;
+        return text_input_v2_content_purpose::date;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_TIME:
-        return TextInputV2::ContentPurpose::Time;
+        return text_input_v2_content_purpose::time;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_DATETIME:
-        return TextInputV2::ContentPurpose::DateTime;
+        return text_input_v2_content_purpose::datetime;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_TERMINAL:
-        return TextInputV2::ContentPurpose::Terminal;
+        return text_input_v2_content_purpose::terminal;
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_NORMAL:
     default:
-        return TextInputV2::ContentPurpose::Normal;
+        return text_input_v2_content_purpose::normal;
     }
 }
 
@@ -377,12 +377,12 @@ QByteArray TextInputV2::preferredLanguage() const
     return d_ptr->preferredLanguage;
 }
 
-TextInputV2::ContentHints TextInputV2::contentHints() const
+text_input_v2_content_hints TextInputV2::contentHints() const
 {
     return d_ptr->contentHints;
 }
 
-TextInputV2::ContentPurpose TextInputV2::contentPurpose() const
+text_input_v2_content_purpose TextInputV2::contentPurpose() const
 {
 
     return d_ptr->contentPurpose;

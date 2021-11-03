@@ -32,46 +32,46 @@ class Client;
 class Seat;
 class Surface;
 
+enum class text_input_v2_content_hint : uint32_t {
+    none = 0,
+    completion = 1 << 0,
+    correction = 1 << 1,
+    capitalization = 1 << 2,
+    lowercase = 1 << 3,
+    uppercase = 1 << 4,
+    titlecase = 1 << 5,
+    hidden_text = 1 << 6,
+    sensitive_data = 1 << 7,
+    latin = 1 << 8,
+    multiline = 1 << 9,
+};
+Q_DECLARE_FLAGS(text_input_v2_content_hints, text_input_v2_content_hint)
+
+enum class text_input_v2_content_purpose : uint32_t {
+    normal,
+    alpha,
+    digits,
+    number,
+    phone,
+    url,
+    email,
+    name,
+    password,
+    date,
+    time,
+    datetime,
+    terminal,
+};
+
 class WRAPLANDSERVER_EXPORT TextInputV2 : public QObject
 {
     Q_OBJECT
 public:
-    enum class ContentHint : uint32_t {
-        None = 0,
-        AutoCompletion = 1 << 0,
-        AutoCorrection = 1 << 1,
-        AutoCapitalization = 1 << 2,
-        LowerCase = 1 << 3,
-        UpperCase = 1 << 4,
-        TitleCase = 1 << 5,
-        HiddenText = 1 << 6,
-        SensitiveData = 1 << 7,
-        Latin = 1 << 8,
-        MultiLine = 1 << 9,
-    };
-    Q_DECLARE_FLAGS(ContentHints, ContentHint)
-
-    enum class ContentPurpose : uint32_t {
-        Normal,
-        Alpha,
-        Digits,
-        Number,
-        Phone,
-        Url,
-        Email,
-        Name,
-        Password,
-        Date,
-        Time,
-        DateTime,
-        Terminal,
-    };
-
     Client* client() const;
     QByteArray preferredLanguage() const;
     QRect cursorRectangle() const;
-    ContentPurpose contentPurpose() const;
-    ContentHints contentHints() const;
+    text_input_v2_content_purpose contentPurpose() const;
+    text_input_v2_content_hints contentHints() const;
     QByteArray surroundingText() const;
     qint32 surroundingTextCursorPosition() const;
     qint32 surroundingTextSelectionAnchor() const;
@@ -126,7 +126,7 @@ private:
 }
 
 Q_DECLARE_METATYPE(Wrapland::Server::TextInputV2*)
-Q_DECLARE_METATYPE(Wrapland::Server::TextInputV2::ContentHint)
-Q_DECLARE_METATYPE(Wrapland::Server::TextInputV2::ContentHints)
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::TextInputV2::ContentHints)
-Q_DECLARE_METATYPE(Wrapland::Server::TextInputV2::ContentPurpose)
+Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2_content_hint)
+Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2_content_hints)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::text_input_v2_content_hints)
+Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2_content_purpose)
