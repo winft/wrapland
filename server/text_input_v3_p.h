@@ -40,7 +40,7 @@ private:
 class text_input_v3::Private : public Wayland::Resource<text_input_v3>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, text_input_v3* q);
+    Private(Client* client, uint32_t version, uint32_t id, text_input_v3* q_ptr);
 
     void send_enter(Surface* surface);
     void send_leave(Surface* surface);
@@ -52,7 +52,7 @@ public:
     text_input_v3_state current;
     text_input_v3_state pending;
 
-    text_input_v3* q;
+    text_input_v3* q_ptr;
 
 private:
     static void enable_callback(wl_client* wlClient, wl_resource* wlResource);
