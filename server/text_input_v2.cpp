@@ -88,18 +88,18 @@ text_input_v2::Private::Private(Client* client, uint32_t version, uint32_t id, t
 void text_input_v2::Private::enable(Surface* s)
 {
     surface = QPointer<Surface>(s);
-    enabled = true;
+    state.enabled = true;
     Q_EMIT handle()->enabledChanged();
 }
 
 void text_input_v2::Private::disable()
 {
     surface.clear();
-    enabled = false;
+    state.enabled = false;
     Q_EMIT handle()->enabledChanged();
 }
 
-void text_input_v2::Private::sendEnter(Surface* surface, quint32 serial)
+void text_input_v2::Private::send_enter(Surface* surface, uint32_t serial)
 {
     if (!surface) {
         return;
@@ -107,87 +107,12 @@ void text_input_v2::Private::sendEnter(Surface* surface, quint32 serial)
     send<zwp_text_input_v2_send_enter>(serial, surface->d_ptr->resource());
 }
 
-void text_input_v2::Private::sendLeave(quint32 serial, Surface* surface)
+void text_input_v2::Private::send_leave(uint32_t serial, Surface* surface)
 {
     if (!surface) {
         return;
     }
     send<zwp_text_input_v2_send_leave>(serial, surface->d_ptr->resource());
-}
-
-void text_input_v2::Private::preEdit(const QByteArray& text, const QByteArray& commit)
-{
-    send<zwp_text_input_v2_send_preedit_string>(text.constData(), commit.constData());
-}
-
-void text_input_v2::Private::commit(const QByteArray& text)
-{
-    send<zwp_text_input_v2_send_commit_string>(text.constData());
-}
-
-void text_input_v2::Private::keysymPressed(quint32 keysym,
-                                           [[maybe_unused]] Qt::KeyboardModifiers modifiers)
-{
-    send<zwp_text_input_v2_send_keysym>(
-        seat ? seat->timestamp() : 0, keysym, WL_KEYBOARD_KEY_STATE_PRESSED, 0);
-}
-
-void text_input_v2::Private::keysymReleased(quint32 keysym,
-                                            [[maybe_unused]] Qt::KeyboardModifiers modifiers)
-{
-    send<zwp_text_input_v2_send_keysym>(
-        seat ? seat->timestamp() : 0, keysym, WL_KEYBOARD_KEY_STATE_RELEASED, 0);
-}
-
-void text_input_v2::Private::deleteSurroundingText(quint32 beforeLength, quint32 afterLength)
-{
-    send<zwp_text_input_v2_send_delete_surrounding_text>(beforeLength, afterLength);
-}
-
-void text_input_v2::Private::setCursorPosition(qint32 index, qint32 anchor)
-{
-    send<zwp_text_input_v2_send_cursor_position>(index, anchor);
-}
-
-void text_input_v2::Private::setTextDirection(Qt::LayoutDirection direction)
-{
-    zwp_text_input_v2_text_direction wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_AUTO;
-    switch (direction) {
-    case Qt::LeftToRight:
-        wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_LTR;
-        break;
-    case Qt::RightToLeft:
-        wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_RTL;
-        break;
-    case Qt::LayoutDirectionAuto:
-        wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_AUTO;
-        break;
-    default:
-        Q_UNREACHABLE();
-        break;
-    }
-    send<zwp_text_input_v2_send_text_direction>(wlDirection);
-}
-
-void text_input_v2::Private::setPreEditCursor(qint32 index)
-{
-    send<zwp_text_input_v2_send_preedit_cursor>(index);
-}
-
-void text_input_v2::Private::sendInputPanelState()
-{
-    send<zwp_text_input_v2_send_input_panel_state>(
-        inputPanelVisible ? ZWP_TEXT_INPUT_V2_INPUT_PANEL_VISIBILITY_VISIBLE
-                          : ZWP_TEXT_INPUT_V2_INPUT_PANEL_VISIBILITY_HIDDEN,
-        overlappedSurfaceArea.x(),
-        overlappedSurfaceArea.y(),
-        overlappedSurfaceArea.width(),
-        overlappedSurfaceArea.height());
-}
-
-void text_input_v2::Private::sendLanguage()
-{
-    send<zwp_text_input_v2_send_language>(language.constData());
 }
 
 void text_input_v2::Private::enableCallback([[maybe_unused]] wl_client* wlClient,
@@ -235,20 +160,20 @@ void text_input_v2::Private::hideInputPanelCallback([[maybe_unused]] wl_client* 
 
 void text_input_v2::Private::setSurroundingTextCallback([[maybe_unused]] wl_client* wlClient,
                                                         wl_resource* wlResource,
-                                                        const char* text,
+                                                        char const* text,
                                                         int32_t cursor,
                                                         int32_t anchor)
 {
     auto priv = handle(wlResource)->d_ptr;
 
-    priv->surroundingText = QByteArray(text);
-    priv->surroundingTextCursorPosition = cursor;
-    priv->surroundingTextSelectionAnchor = anchor;
+    priv->state.surrounding_text.data = text;
+    priv->state.surrounding_text.cursor_position = cursor;
+    priv->state.surrounding_text.selection_anchor = anchor;
 
     Q_EMIT priv->handle()->surroundingTextChanged();
 }
 
-text_input_v2_content_hints convertContentHint(uint32_t hint)
+text_input_v2_content_hints convert_hint(uint32_t hint)
 {
     const auto hints = zwp_text_input_v2_content_hint(hint);
     text_input_v2_content_hints ret = text_input_v2_content_hint::none;
@@ -286,7 +211,7 @@ text_input_v2_content_hints convertContentHint(uint32_t hint)
     return ret;
 }
 
-text_input_v2_content_purpose convertContentPurpose(uint32_t purpose)
+text_input_v2_content_purpose convert_purpose(uint32_t purpose)
 {
     const auto wlPurpose = zwp_text_input_v2_content_purpose(purpose);
 
@@ -327,12 +252,13 @@ void text_input_v2::Private::setContentTypeCallback([[maybe_unused]] wl_client* 
                                                     uint32_t purpose)
 {
     auto priv = handle(wlResource)->d_ptr;
-    const auto contentHints = convertContentHint(hint);
-    const auto contentPurpose = convertContentPurpose(purpose);
+    auto const content_hints = convert_hint(hint);
+    auto const content_purpose = convert_purpose(purpose);
 
-    if (contentHints != priv->contentHints || contentPurpose != priv->contentPurpose) {
-        priv->contentHints = contentHints;
-        priv->contentPurpose = contentPurpose;
+    if (content_hints != priv->state.content.hints
+        || content_purpose != priv->state.content.purpose) {
+        priv->state.content.hints = content_hints;
+        priv->state.content.purpose = content_purpose;
         Q_EMIT priv->handle()->contentTypeChanged();
     }
 }
@@ -345,24 +271,23 @@ void text_input_v2::Private::setCursorRectangleCallback([[maybe_unused]] wl_clie
                                                         int32_t height)
 {
     auto priv = handle(wlResource)->d_ptr;
-    const QRect rect = QRect(x, y, width, height);
+    auto const rect = QRect(x, y, width, height);
 
-    if (priv->cursorRectangle != rect) {
-        priv->cursorRectangle = rect;
-        Q_EMIT priv->handle()->cursorRectangleChanged(priv->cursorRectangle);
+    if (priv->state.cursor_rectangle != rect) {
+        priv->state.cursor_rectangle = rect;
+        Q_EMIT priv->handle()->cursorRectangleChanged(rect);
     }
 }
 
 void text_input_v2::Private::setPreferredLanguageCallback([[maybe_unused]] wl_client* wlClient,
                                                           wl_resource* wlResource,
-                                                          const char* language)
+                                                          char const* language)
 {
     auto priv = handle(wlResource)->d_ptr;
-    const QByteArray preferredLanguage = QByteArray(language);
 
-    if (priv->preferredLanguage != preferredLanguage) {
-        priv->preferredLanguage = preferredLanguage;
-        Q_EMIT priv->handle()->preferredLanguageChanged(priv->preferredLanguage);
+    if (priv->state.preferred_language != language) {
+        priv->state.preferred_language = language;
+        Q_EMIT priv->handle()->preferredLanguageChanged(language);
     }
 }
 
@@ -372,112 +297,102 @@ text_input_v2::text_input_v2(Client* client, uint32_t version, uint32_t id)
 {
 }
 
-QByteArray text_input_v2::preferredLanguage() const
+text_input_v2_state const& text_input_v2::state() const
 {
-    return d_ptr->preferredLanguage;
+    return d_ptr->state;
 }
 
-text_input_v2_content_hints text_input_v2::contentHints() const
+void text_input_v2::set_preedit_string(std::string const& text, std::string const& commit)
 {
-    return d_ptr->contentHints;
+    d_ptr->send<zwp_text_input_v2_send_preedit_string>(text.c_str(), commit.c_str());
 }
 
-text_input_v2_content_purpose text_input_v2::contentPurpose() const
+void text_input_v2::commit(std::string const& text)
 {
-
-    return d_ptr->contentPurpose;
+    d_ptr->send<zwp_text_input_v2_send_commit_string>(text.c_str());
 }
 
-QByteArray text_input_v2::surroundingText() const
+void text_input_v2::keysym_pressed(uint32_t keysym, Qt::KeyboardModifiers /*modifiers*/)
 {
-    return d_ptr->surroundingText;
+    d_ptr->send<zwp_text_input_v2_send_keysym>(
+        d_ptr->seat ? d_ptr->seat->timestamp() : 0, keysym, WL_KEYBOARD_KEY_STATE_PRESSED, 0);
 }
 
-qint32 text_input_v2::surroundingTextCursorPosition() const
+void text_input_v2::keysym_released(uint32_t keysym, Qt::KeyboardModifiers /*modifiers*/)
 {
-    return d_ptr->surroundingTextCursorPosition;
+    d_ptr->send<zwp_text_input_v2_send_keysym>(
+        d_ptr->seat ? d_ptr->seat->timestamp() : 0, keysym, WL_KEYBOARD_KEY_STATE_RELEASED, 0);
 }
 
-qint32 text_input_v2::surroundingTextSelectionAnchor() const
+void text_input_v2::delete_surrounding_text(uint32_t beforeLength, uint32_t afterLength)
 {
-    return d_ptr->surroundingTextSelectionAnchor;
+    d_ptr->send<zwp_text_input_v2_send_delete_surrounding_text>(beforeLength, afterLength);
 }
 
-void text_input_v2::preEdit(const QByteArray& text, const QByteArray& commit)
+void text_input_v2::set_cursor_position(int32_t index, int32_t anchor)
 {
-    d_ptr->preEdit(text, commit);
+    d_ptr->send<zwp_text_input_v2_send_cursor_position>(index, anchor);
 }
 
-void text_input_v2::commit(const QByteArray& text)
+void text_input_v2::set_text_direction(Qt::LayoutDirection direction)
 {
-    d_ptr->commit(text);
+    auto wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_AUTO;
+
+    switch (direction) {
+    case Qt::LeftToRight:
+        wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_LTR;
+        break;
+    case Qt::RightToLeft:
+        wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_RTL;
+        break;
+    case Qt::LayoutDirectionAuto:
+        wlDirection = ZWP_TEXT_INPUT_V2_TEXT_DIRECTION_AUTO;
+        break;
+    default:
+        Q_UNREACHABLE();
+        break;
+    }
+
+    d_ptr->send<zwp_text_input_v2_send_text_direction>(wlDirection);
 }
 
-void text_input_v2::keysymPressed(quint32 keysym, Qt::KeyboardModifiers modifiers)
+void text_input_v2::set_preedit_cursor(int32_t index)
 {
-    d_ptr->keysymPressed(keysym, modifiers);
+    d_ptr->send<zwp_text_input_v2_send_preedit_cursor>(index);
 }
 
-void text_input_v2::keysymReleased(quint32 keysym, Qt::KeyboardModifiers modifiers)
+void text_input_v2::set_input_panel_state(bool visible, QRect const& overlapped_surface_area)
 {
-    d_ptr->keysymReleased(keysym, modifiers);
-}
-
-void text_input_v2::deleteSurroundingText(quint32 beforeLength, quint32 afterLength)
-{
-    d_ptr->deleteSurroundingText(beforeLength, afterLength);
-}
-
-void text_input_v2::setCursorPosition(qint32 index, qint32 anchor)
-{
-    d_ptr->setCursorPosition(index, anchor);
-}
-
-void text_input_v2::setTextDirection(Qt::LayoutDirection direction)
-{
-    d_ptr->setTextDirection(direction);
-}
-
-void text_input_v2::setPreEditCursor(qint32 index)
-{
-    d_ptr->setPreEditCursor(index);
-}
-
-void text_input_v2::setInputPanelState(bool visible, const QRect& overlappedSurfaceArea)
-{
-    if (d_ptr->inputPanelVisible == visible
-        && d_ptr->overlappedSurfaceArea == overlappedSurfaceArea) {
-        // not changed
+    if (d_ptr->input_panel_visible == visible
+        && d_ptr->overlapped_surface_area == overlapped_surface_area) {
+        // Not changed.
         return;
     }
-    d_ptr->inputPanelVisible = visible;
-    d_ptr->overlappedSurfaceArea = overlappedSurfaceArea;
-    d_ptr->sendInputPanelState();
+
+    d_ptr->input_panel_visible = visible;
+    d_ptr->overlapped_surface_area = overlapped_surface_area;
+
+    d_ptr->send<zwp_text_input_v2_send_input_panel_state>(
+        visible ? ZWP_TEXT_INPUT_V2_INPUT_PANEL_VISIBILITY_VISIBLE
+                : ZWP_TEXT_INPUT_V2_INPUT_PANEL_VISIBILITY_HIDDEN,
+        overlapped_surface_area.x(),
+        overlapped_surface_area.y(),
+        overlapped_surface_area.width(),
+        overlapped_surface_area.height());
 }
 
-void text_input_v2::setLanguage(const QByteArray& languageTag)
+void text_input_v2::set_language(std::string const& language_tag)
 {
-    if (d_ptr->language == languageTag) {
-        // not changed
+    if (d_ptr->language == language_tag) {
         return;
     }
-    d_ptr->language = languageTag;
-    d_ptr->sendLanguage();
+    d_ptr->language = language_tag;
+    d_ptr->send<zwp_text_input_v2_send_language>(language_tag.c_str());
 }
 
 QPointer<Surface> text_input_v2::surface() const
 {
     return d_ptr->surface;
-}
-
-QRect text_input_v2::cursorRectangle() const
-{
-    return d_ptr->cursorRectangle;
-}
-
-bool text_input_v2::isEnabled() const
-{
-    return d_ptr->enabled;
 }
 
 Client* text_input_v2::client() const

@@ -246,7 +246,7 @@ void TextInputTest::testEnterLeave()
         enabledChangedSpy.clear();
     }
     QCOMPARE(serverTextInput->surface().data(), serverSurface);
-    QVERIFY(serverTextInput->isEnabled());
+    QVERIFY(serverTextInput->state().enabled);
 
     // and trigger an enter
     if (enteredSpy.isEmpty()) {
@@ -261,7 +261,7 @@ void TextInputTest::testEnterLeave()
     QVERIFY(!server_text_inputs.v2.text_input);
     QVERIFY(leftSpy.wait());
     QVERIFY(!textInput->enteredSurface());
-    QVERIFY(serverTextInput->isEnabled());
+    QVERIFY(serverTextInput->state().enabled);
 
     // if we enter again we should directly get the text input as it's still activated
     server.seat->setFocusedKeyboardSurface(serverSurface);
@@ -270,13 +270,13 @@ void TextInputTest::testEnterLeave()
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.count(), 2);
     QCOMPARE(textInput->enteredSurface(), surface.get());
-    QVERIFY(serverTextInput->isEnabled());
+    QVERIFY(serverTextInput->state().enabled);
 
     // let's deactivate on client side
     textInput->disable(surface.get());
     QVERIFY(enabledChangedSpy.wait());
     QCOMPARE(enabledChangedSpy.count(), 1);
-    QVERIFY(!serverTextInput->isEnabled());
+    QVERIFY(!serverTextInput->state().enabled);
     // does not trigger a leave
     QCOMPARE(textInputChangedSpy.count(), 3);
     // should still be the same text input
@@ -329,13 +329,13 @@ void TextInputTest::testShowHidePanel()
     QCOMPARE(textInput->isInputPanelVisible(), false);
     textInput->showInputPanel();
     QVERIFY(showPanelRequestedSpy.wait());
-    ti->setInputPanelState(true, QRect(0, 0, 0, 0));
+    ti->set_input_panel_state(true, QRect(0, 0, 0, 0));
     QVERIFY(inputPanelStateChangedSpy.wait());
     QCOMPARE(textInput->isInputPanelVisible(), true);
 
     textInput->hideInputPanel();
     QVERIFY(hidePanelRequestedSpy.wait());
-    ti->setInputPanelState(false, QRect(0, 0, 0, 0));
+    ti->set_input_panel_state(false, QRect(0, 0, 0, 0));
     QVERIFY(inputPanelStateChangedSpy.wait());
     QCOMPARE(textInput->isInputPanelVisible(), false);
 }
@@ -356,14 +356,14 @@ void TextInputTest::testCursorRectangle()
     server.seat->setFocusedKeyboardSurface(serverSurface);
     auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
-    QCOMPARE(ti->cursorRectangle(), QRect());
+    QCOMPARE(ti->state().cursor_rectangle, QRect());
     QSignalSpy cursorRectangleChangedSpy(ti,
                                          &Wrapland::Server::text_input_v2::cursorRectangleChanged);
     QVERIFY(cursorRectangleChangedSpy.isValid());
 
     textInput->setCursorRectangle(QRect(10, 20, 30, 40));
     QVERIFY(cursorRectangleChangedSpy.wait());
-    QCOMPARE(ti->cursorRectangle(), QRect(10, 20, 30, 40));
+    QCOMPARE(ti->state().cursor_rectangle, QRect(10, 20, 30, 40));
 }
 
 void TextInputTest::testPreferredLanguage()
@@ -381,14 +381,14 @@ void TextInputTest::testPreferredLanguage()
     server.seat->setFocusedKeyboardSurface(serverSurface);
     auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
-    QVERIFY(ti->preferredLanguage().isEmpty());
+    QVERIFY(ti->state().preferred_language.empty());
 
     QSignalSpy preferredLanguageChangedSpy(
         ti, &Wrapland::Server::text_input_v2::preferredLanguageChanged);
     QVERIFY(preferredLanguageChangedSpy.isValid());
     textInput->setPreferredLanguage(QStringLiteral("foo"));
     QVERIFY(preferredLanguageChangedSpy.wait());
-    QCOMPARE(ti->preferredLanguage(), QStringLiteral("foo").toUtf8());
+    QCOMPARE(ti->state().preferred_language, "foo");
 }
 
 void TextInputTest::testReset()
@@ -429,9 +429,9 @@ void TextInputTest::testSurroundingText()
     server.seat->setFocusedKeyboardSurface(serverSurface);
     auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
-    QVERIFY(ti->surroundingText().isEmpty());
-    QCOMPARE(ti->surroundingTextCursorPosition(), 0);
-    QCOMPARE(ti->surroundingTextSelectionAnchor(), 0);
+    QVERIFY(ti->state().surrounding_text.data.empty());
+    QCOMPARE(ti->state().surrounding_text.cursor_position, 0);
+    QCOMPARE(ti->state().surrounding_text.selection_anchor, 0);
 
     QSignalSpy surroundingTextChangedSpy(ti,
                                          &Wrapland::Server::text_input_v2::surroundingTextChanged);
@@ -439,12 +439,13 @@ void TextInputTest::testSurroundingText()
 
     textInput->setSurroundingText(QStringLiteral("100 €, 100 $"), 5, 6);
     QVERIFY(surroundingTextChangedSpy.wait());
-    QCOMPARE(ti->surroundingText(), QStringLiteral("100 €, 100 $").toUtf8());
-    QCOMPARE(ti->surroundingTextCursorPosition(),
+    QCOMPARE(ti->state().surrounding_text.data, "100 €, 100 $");
+    QCOMPARE(ti->state().surrounding_text.cursor_position,
              QStringLiteral("100 €, 100 $").toUtf8().indexOf(','));
-    QCOMPARE(
-        ti->surroundingTextSelectionAnchor(),
-        QStringLiteral("100 €, 100 $").toUtf8().indexOf(' ', ti->surroundingTextCursorPosition()));
+    QCOMPARE(ti->state().surrounding_text.selection_anchor,
+             QStringLiteral("100 €, 100 $")
+                 .toUtf8()
+                 .indexOf(' ', ti->state().surrounding_text.cursor_position));
 }
 
 void TextInputTest::testContentHints_data()
@@ -529,14 +530,14 @@ void TextInputTest::testContentHints()
     server.seat->setFocusedKeyboardSurface(serverSurface);
     auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
-    QCOMPARE(ti->contentHints(), Wrapland::Server::text_input_v2_content_hints());
+    QCOMPARE(ti->state().content.hints, Wrapland::Server::text_input_v2_content_hints());
 
     QSignalSpy contentTypeChangedSpy(ti, &Wrapland::Server::text_input_v2::contentTypeChanged);
     QVERIFY(contentTypeChangedSpy.isValid());
     QFETCH(Wrapland::Client::TextInputV2::ContentHints, clientHints);
     textInput->setContentType(clientHints, Wrapland::Client::TextInputV2::ContentPurpose::Normal);
     QVERIFY(contentTypeChangedSpy.wait());
-    QTEST(ti->contentHints(), "serverHints");
+    QTEST(ti->state().content.hints, "serverHints");
 
     // setting to same should not trigger an update
     textInput->setContentType(clientHints, Wrapland::Client::TextInputV2::ContentPurpose::Normal);
@@ -546,7 +547,7 @@ void TextInputTest::testContentHints()
     textInput->setContentType(Wrapland::Client::TextInputV2::ContentHints(),
                               Wrapland::Client::TextInputV2::ContentPurpose::Normal);
     QVERIFY(contentTypeChangedSpy.wait());
-    QCOMPARE(ti->contentHints(), Wrapland::Server::text_input_v2_content_hints());
+    QCOMPARE(ti->state().content.hints, Wrapland::Server::text_input_v2_content_hints());
 }
 
 void TextInputTest::testContentPurpose_data()
@@ -598,14 +599,14 @@ void TextInputTest::testContentPurpose()
     server.seat->setFocusedKeyboardSurface(serverSurface);
     auto ti = server.seat->text_inputs().v2.text_input;
     QVERIFY(ti);
-    QCOMPARE(ti->contentPurpose(), Wrapland::Server::text_input_v2_content_purpose::normal);
+    QCOMPARE(ti->state().content.purpose, Wrapland::Server::text_input_v2_content_purpose::normal);
 
     QSignalSpy contentTypeChangedSpy(ti, &Wrapland::Server::text_input_v2::contentTypeChanged);
     QVERIFY(contentTypeChangedSpy.isValid());
     QFETCH(Wrapland::Client::TextInputV2::ContentPurpose, clientPurpose);
     textInput->setContentType(Wrapland::Client::TextInputV2::ContentHints(), clientPurpose);
     QVERIFY(contentTypeChangedSpy.wait());
-    QTEST(ti->contentPurpose(), "serverPurpose");
+    QTEST(ti->state().content.purpose, "serverPurpose");
 
     // setting to same should not trigger an update
     textInput->setContentType(Wrapland::Client::TextInputV2::ContentHints(), clientPurpose);
@@ -615,7 +616,7 @@ void TextInputTest::testContentPurpose()
     textInput->setContentType(Wrapland::Client::TextInputV2::ContentHints(),
                               Wrapland::Client::TextInputV2::ContentPurpose::Normal);
     QVERIFY(contentTypeChangedSpy.wait());
-    QCOMPARE(ti->contentPurpose(), Wrapland::Server::text_input_v2_content_purpose::normal);
+    QCOMPARE(ti->state().content.purpose, Wrapland::Server::text_input_v2_content_purpose::normal);
 }
 
 void TextInputTest::testTextDirection_data()
@@ -649,15 +650,15 @@ void TextInputTest::testTextDirection()
                                        &Wrapland::Client::TextInputV2::textDirectionChanged);
     QVERIFY(textDirectionChangedSpy.isValid());
     QFETCH(Qt::LayoutDirection, textDirection);
-    ti->setTextDirection(textDirection);
+    ti->set_text_direction(textDirection);
     QVERIFY(textDirectionChangedSpy.wait());
     QCOMPARE(textInput->textDirection(), textDirection);
     // setting again should not change
-    ti->setTextDirection(textDirection);
+    ti->set_text_direction(textDirection);
     QVERIFY(!textDirectionChangedSpy.wait(100));
 
     // setting back to auto
-    ti->setTextDirection(Qt::LayoutDirectionAuto);
+    ti->set_text_direction(Qt::LayoutDirectionAuto);
     QVERIFY(textDirectionChangedSpy.wait());
     QCOMPARE(textInput->textDirection(), Qt::LayoutDirectionAuto);
 }
@@ -684,14 +685,16 @@ void TextInputTest::testLanguage()
     QSignalSpy langugageChangedSpy(textInput.get(),
                                    &Wrapland::Client::TextInputV2::languageChanged);
     QVERIFY(langugageChangedSpy.isValid());
-    ti->setLanguage(QByteArrayLiteral("foo"));
+    ti->set_language("foo");
     QVERIFY(langugageChangedSpy.wait());
     QCOMPARE(textInput->language(), QByteArrayLiteral("foo"));
+
     // setting to same should not trigger
-    ti->setLanguage(QByteArrayLiteral("foo"));
+    ti->set_language("foo");
     QVERIFY(!langugageChangedSpy.wait(100));
+
     // but to something else should trigger again
-    ti->setLanguage(QByteArrayLiteral("bar"));
+    ti->set_language("bar");
     QVERIFY(langugageChangedSpy.wait());
     QCOMPARE(textInput->language(), QByteArrayLiteral("bar"));
 }
@@ -718,7 +721,7 @@ void TextInputTest::testKeyEvent()
     QSignalSpy keyEventSpy(textInput.get(), &Wrapland::Client::TextInputV2::keyEvent);
     QVERIFY(keyEventSpy.isValid());
     server.seat->setTimestamp(100);
-    ti->keysymPressed(2);
+    ti->keysym_pressed(2);
     QVERIFY(keyEventSpy.wait());
     QCOMPARE(keyEventSpy.count(), 1);
     QCOMPARE(keyEventSpy.last().at(0).value<quint32>(), 2u);
@@ -727,7 +730,7 @@ void TextInputTest::testKeyEvent()
     QCOMPARE(keyEventSpy.last().at(2).value<Qt::KeyboardModifiers>(), Qt::KeyboardModifiers());
     QCOMPARE(keyEventSpy.last().at(3).value<quint32>(), 100u);
     server.seat->setTimestamp(101);
-    ti->keysymReleased(2);
+    ti->keysym_released(2);
     QVERIFY(keyEventSpy.wait());
     QCOMPARE(keyEventSpy.count(), 2);
     QCOMPARE(keyEventSpy.last().at(0).value<quint32>(), 2u);
@@ -762,8 +765,8 @@ void TextInputTest::testPreEdit()
     QSignalSpy composingTextChangedSpy(textInput.get(),
                                        &Wrapland::Client::TextInputV2::composingTextChanged);
     QVERIFY(composingTextChangedSpy.isValid());
-    ti->setPreEditCursor(1);
-    ti->preEdit(QByteArrayLiteral("foo"), QByteArrayLiteral("bar"));
+    ti->set_preedit_cursor(1);
+    ti->set_preedit_string("foo", "bar");
     QVERIFY(composingTextChangedSpy.wait());
     QCOMPARE(composingTextChangedSpy.count(), 1);
     QCOMPARE(textInput->composingText(), QByteArrayLiteral("foo"));
@@ -771,7 +774,7 @@ void TextInputTest::testPreEdit()
     QCOMPARE(textInput->composingTextCursorPosition(), 1);
 
     // when no pre edit cursor is sent, it's at end of text
-    ti->preEdit(QByteArrayLiteral("foobar"), QByteArray());
+    ti->set_preedit_string("foobar", {});
     QVERIFY(composingTextChangedSpy.wait());
     QCOMPARE(composingTextChangedSpy.count(), 2);
     QCOMPARE(textInput->composingText(), QByteArrayLiteral("foobar"));
@@ -805,9 +808,9 @@ void TextInputTest::testCommit()
     // now let's commit
     QSignalSpy committedSpy(textInput.get(), &Wrapland::Client::TextInputV2::committed);
     QVERIFY(committedSpy.isValid());
-    ti->setCursorPosition(3, 4);
-    ti->deleteSurroundingText(2, 1);
-    ti->commit(QByteArrayLiteral("foo"));
+    ti->set_cursor_position(3, 4);
+    ti->delete_surrounding_text(2, 1);
+    ti->commit("foo");
 
     QVERIFY(committedSpy.wait());
     QCOMPARE(textInput->commitText(), QByteArrayLiteral("foo"));

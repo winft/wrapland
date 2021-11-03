@@ -52,33 +52,18 @@ class text_input_v2::Private : public Wayland::Resource<text_input_v2>
 public:
     Private(Client* client, uint32_t version, uint32_t id, text_input_v2* q);
 
-    void sendEnter(Surface* surface, quint32 serial);
-    void sendLeave(quint32 serial, Surface* surface);
-    void preEdit(const QByteArray& text, const QByteArray& commit);
-    void commit(const QByteArray& text);
-    void deleteSurroundingText(quint32 beforeLength, quint32 afterLength);
-    void setTextDirection(Qt::LayoutDirection direction);
-    void setPreEditCursor(qint32 index);
-    void setCursorPosition(qint32 index, qint32 anchor);
-    void keysymPressed(quint32 keysym, Qt::KeyboardModifiers modifiers);
-    void keysymReleased(quint32 keysym, Qt::KeyboardModifiers modifiers);
+    void send_enter(Surface* surface, quint32 serial);
+    void send_leave(quint32 serial, Surface* surface);
 
-    void sendInputPanelState();
-    void sendLanguage();
+    text_input_v2_state state;
 
-    QByteArray preferredLanguage;
-    QRect cursorRectangle;
-    text_input_v2_content_hints contentHints{text_input_v2_content_hint::none};
-    text_input_v2_content_purpose contentPurpose{text_input_v2_content_purpose::normal};
-    Seat* seat = nullptr;
+    Seat* seat{nullptr};
     QPointer<Surface> surface;
-    bool enabled = false;
-    QByteArray surroundingText;
-    qint32 surroundingTextCursorPosition = 0;
-    qint32 surroundingTextSelectionAnchor = 0;
-    bool inputPanelVisible = false;
-    QRect overlappedSurfaceArea;
-    QByteArray language;
+
+    bool input_panel_visible{false};
+    QRect overlapped_surface_area;
+
+    std::string language;
 
 private:
     static const struct zwp_text_input_v2_interface s_interface;
@@ -93,7 +78,7 @@ private:
     static void hideInputPanelCallback(wl_client* wlClient, wl_resource* wlResource);
     static void setSurroundingTextCallback(wl_client* wlClient,
                                            wl_resource* wlResource,
-                                           const char* text,
+                                           char const* text,
                                            int32_t cursor,
                                            int32_t anchor);
     static void setContentTypeCallback(wl_client* wlClient,
@@ -108,7 +93,7 @@ private:
                                            int32_t height);
     static void setPreferredLanguageCallback(wl_client* wlClient,
                                              wl_resource* wlResource,
-                                             const char* language);
+                                             char const* language);
 
     void enable(Surface* s);
     void disable();

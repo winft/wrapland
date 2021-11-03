@@ -29,7 +29,7 @@ void text_input_pool::register_device(text_input_v2* ti)
         // This is a text input for the currently focused text input surface.
         if (!v2.text_input) {
             v2.text_input = ti;
-            ti->d_ptr->sendEnter(focus.surface, v2.serial);
+            ti->d_ptr->send_enter(focus.surface, v2.serial);
             Q_EMIT seat->focusedTextInputChanged();
         }
     }
@@ -73,7 +73,7 @@ bool text_input_pool::set_v2_focused_surface(Surface* surface)
 
     if (old_ti) {
         // TODO(unknown author): setFocusedSurface like in other interfaces
-        old_ti->d_ptr->sendLeave(serial, focus.surface);
+        old_ti->d_ptr->send_leave(serial, focus.surface);
     }
 
     auto ti = interfaceForSurface(surface, v2_devices);
@@ -91,7 +91,7 @@ bool text_input_pool::set_v2_focused_surface(Surface* surface)
 
     if (ti) {
         // TODO(unknown author): setFocusedSurface like in other interfaces
-        ti->d_ptr->sendEnter(surface, serial);
+        ti->d_ptr->send_enter(surface, serial);
     }
 
     return old_ti != ti;

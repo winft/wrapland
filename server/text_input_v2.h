@@ -63,6 +63,23 @@ enum class text_input_v2_content_purpose : uint32_t {
     terminal,
 };
 
+struct text_input_v2_state {
+    bool enabled{false};
+    std::string preferred_language;
+    QRect cursor_rectangle;
+
+    struct {
+        text_input_v2_content_hints hints{text_input_v2_content_hint::none};
+        text_input_v2_content_purpose purpose{text_input_v2_content_purpose::normal};
+    } content;
+
+    struct {
+        std::string data;
+        int32_t cursor_position{0};
+        int32_t selection_anchor{0};
+    } surrounding_text;
+};
+
 class WRAPLANDSERVER_EXPORT text_input_manager_v2 : public QObject
 {
     Q_OBJECT
@@ -79,28 +96,22 @@ class WRAPLANDSERVER_EXPORT text_input_v2 : public QObject
 {
     Q_OBJECT
 public:
+    text_input_v2_state const& state() const;
+
     Client* client() const;
-    QByteArray preferredLanguage() const;
-    QRect cursorRectangle() const;
-    text_input_v2_content_purpose contentPurpose() const;
-    text_input_v2_content_hints contentHints() const;
-    QByteArray surroundingText() const;
-    qint32 surroundingTextCursorPosition() const;
-    qint32 surroundingTextSelectionAnchor() const;
     QPointer<Surface> surface() const;
-    bool isEnabled() const;
 
-    void preEdit(const QByteArray& text, const QByteArray& commitText);
-    void commit(const QByteArray& text);
-    void setPreEditCursor(qint32 index);
-    void deleteSurroundingText(quint32 beforeLength, quint32 afterLength);
-    void setCursorPosition(qint32 index, qint32 anchor);
-    void setTextDirection(Qt::LayoutDirection direction);
+    void set_preedit_string(std::string const& text, std::string const& commit);
+    void commit(std::string const& text);
+    void set_preedit_cursor(int32_t index);
+    void delete_surrounding_text(uint32_t beforeLength, uint32_t afterLength);
+    void set_cursor_position(int32_t index, int32_t anchor);
+    void set_text_direction(Qt::LayoutDirection direction);
 
-    void keysymPressed(quint32 keysym, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
-    void keysymReleased(quint32 keysym, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
-    void setInputPanelState(bool visible, const QRect& overlappedSurfaceArea);
-    void setLanguage(const QByteArray& languageTag);
+    void keysym_pressed(uint32_t keysym, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
+    void keysym_released(uint32_t keysym, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
+    void set_input_panel_state(bool visible, QRect const& overlapped_surface_area);
+    void set_language(std::string const& language_tag);
 
 Q_SIGNALS:
     void requestShowInputPanel();
