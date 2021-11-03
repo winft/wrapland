@@ -115,7 +115,12 @@ void input_method_v2::Private::commit_callback([[maybe_unused]] wl_client* wlCli
         priv->pending = priv->current;
         return;
     }
+
     priv->current = priv->pending;
+    priv->pending.preedit_string.update = false;
+    priv->pending.commit_string.update = false;
+    priv->pending.delete_surrounding_text.update = false;
+
     Q_EMIT priv->handle()->state_committed();
 }
 
