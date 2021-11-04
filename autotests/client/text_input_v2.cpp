@@ -34,7 +34,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/text_input_pool.h"
 #include "../../server/text_input_v2.h"
 
-class TextInputTest : public QObject
+class text_input_v2_test : public QObject
 {
     Q_OBJECT
 private Q_SLOTS:
@@ -78,9 +78,9 @@ private:
     Wrapland::Client::TextInputManagerV2* m_textInputManagerV2 = nullptr;
 };
 
-constexpr auto socket_name{"wrapland-test-text-input-0"};
+constexpr auto socket_name{"wrapland-test-text-input-v2-0"};
 
-void TextInputTest::init()
+void text_input_v2_test::init()
 {
     qRegisterMetaType<Wrapland::Server::Surface*>();
 
@@ -149,7 +149,7 @@ void TextInputTest::init()
     QVERIFY(m_textInputManagerV2->isValid());
 }
 
-void TextInputTest::cleanup()
+void text_input_v2_test::cleanup()
 {
 #define CLEANUP(variable)                                                                          \
     if (variable) {                                                                                \
@@ -176,7 +176,7 @@ void TextInputTest::cleanup()
     server = {};
 }
 
-Wrapland::Server::Surface* TextInputTest::waitForSurface()
+Wrapland::Server::Surface* text_input_v2_test::waitForSurface()
 {
     QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
                                  &Wrapland::Server::Compositor::surfaceCreated);
@@ -192,18 +192,18 @@ Wrapland::Server::Surface* TextInputTest::waitForSurface()
     return surfaceCreatedSpy.first().first().value<Wrapland::Server::Surface*>();
 }
 
-Wrapland::Client::TextInputV2* TextInputTest::createTextInput()
+Wrapland::Client::TextInputV2* text_input_v2_test::createTextInput()
 {
     return m_textInputManagerV2->createTextInput(m_seat);
 }
 
-void TextInputTest::testEnterLeave_data()
+void text_input_v2_test::testEnterLeave_data()
 {
     QTest::addColumn<bool>("updatesDirectly");
     QTest::newRow("UnstableV2") << true;
 }
 
-void TextInputTest::testEnterLeave()
+void text_input_v2_test::testEnterLeave()
 {
     // this test verifies that enter leave are sent correctly
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -302,7 +302,7 @@ void TextInputTest::testEnterLeave()
     QVERIFY(!textInput->enteredSurface());
 }
 
-void TextInputTest::testShowHidePanel()
+void text_input_v2_test::testShowHidePanel()
 {
     // this test verifies that the requests for show/hide panel work
     // and that status is properly sent to the client
@@ -343,7 +343,7 @@ void TextInputTest::testShowHidePanel()
     QCOMPARE(textInput->isInputPanelVisible(), false);
 }
 
-void TextInputTest::testCursorRectangle()
+void text_input_v2_test::testCursorRectangle()
 {
     // this test verifies that passing the cursor rectangle from client to server works
     // and that setting visibility state from server to client works
@@ -369,7 +369,7 @@ void TextInputTest::testCursorRectangle()
     QCOMPARE(ti->state().cursor_rectangle, QRect(10, 20, 30, 40));
 }
 
-void TextInputTest::testPreferredLanguage()
+void text_input_v2_test::testPreferredLanguage()
 {
     // this test verifies that passing the preferred language from client to server works
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -394,7 +394,7 @@ void TextInputTest::testPreferredLanguage()
     QCOMPARE(ti->state().preferred_language, "foo");
 }
 
-void TextInputTest::testReset()
+void text_input_v2_test::testReset()
 {
     // this test verifies that the reset request is properly passed from client to server
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -417,7 +417,7 @@ void TextInputTest::testReset()
     QVERIFY(resetRequestedSpy.wait());
 }
 
-void TextInputTest::testSurroundingText()
+void text_input_v2_test::testSurroundingText()
 {
     // this test verifies that surrounding text is properly passed around
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -451,7 +451,7 @@ void TextInputTest::testSurroundingText()
                  .indexOf(' ', ti->state().surrounding_text.cursor_position));
 }
 
-void TextInputTest::testContentHints_data()
+void text_input_v2_test::testContentHints_data()
 {
     namespace WC = Wrapland::Client;
     namespace WS = Wrapland::Server;
@@ -518,7 +518,7 @@ void TextInputTest::testContentHints_data()
             | WS::text_input_v2_content_hint::multiline);
 }
 
-void TextInputTest::testContentHints()
+void text_input_v2_test::testContentHints()
 {
     // this test verifies that content hints are properly passed from client to server
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -553,7 +553,7 @@ void TextInputTest::testContentHints()
     QCOMPARE(ti->state().content.hints, Wrapland::Server::text_input_v2_content_hints());
 }
 
-void TextInputTest::testContentPurpose_data()
+void text_input_v2_test::testContentPurpose_data()
 {
     namespace WC = Wrapland::Client;
     namespace WS = Wrapland::Server;
@@ -587,7 +587,7 @@ void TextInputTest::testContentPurpose_data()
                                  << WS::text_input_v2_content_purpose::terminal;
 }
 
-void TextInputTest::testContentPurpose()
+void text_input_v2_test::testContentPurpose()
 {
     // this test verifies that content purpose are properly passed from client to server
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -622,7 +622,7 @@ void TextInputTest::testContentPurpose()
     QCOMPARE(ti->state().content.purpose, Wrapland::Server::text_input_v2_content_purpose::normal);
 }
 
-void TextInputTest::testTextDirection_data()
+void text_input_v2_test::testTextDirection_data()
 {
     QTest::addColumn<Qt::LayoutDirection>("textDirection");
 
@@ -630,7 +630,7 @@ void TextInputTest::testTextDirection_data()
     QTest::newRow("rtl/v2") << Qt::RightToLeft;
 }
 
-void TextInputTest::testTextDirection()
+void text_input_v2_test::testTextDirection()
 {
     // this test verifies that the text direction is sent from server to client
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -666,7 +666,7 @@ void TextInputTest::testTextDirection()
     QCOMPARE(textInput->textDirection(), Qt::LayoutDirectionAuto);
 }
 
-void TextInputTest::testLanguage()
+void text_input_v2_test::testLanguage()
 {
     // this test verifies that language is sent from server to client
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -702,7 +702,7 @@ void TextInputTest::testLanguage()
     QCOMPARE(textInput->language(), QByteArrayLiteral("bar"));
 }
 
-void TextInputTest::testKeyEvent()
+void text_input_v2_test::testKeyEvent()
 {
     qRegisterMetaType<Qt::KeyboardModifiers>();
     qRegisterMetaType<Wrapland::Client::TextInputV2::KeyState>();
@@ -743,7 +743,7 @@ void TextInputTest::testKeyEvent()
     QCOMPARE(keyEventSpy.last().at(3).value<quint32>(), 101u);
 }
 
-void TextInputTest::testPreEdit()
+void text_input_v2_test::testPreEdit()
 {
     // this test verifies that pre-edit is correctly passed to the client
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -785,7 +785,7 @@ void TextInputTest::testPreEdit()
     QCOMPARE(textInput->composingTextCursorPosition(), 6);
 }
 
-void TextInputTest::testCommit()
+void text_input_v2_test::testCommit()
 {
     // this test verifies that the commit is handled correctly by the client
     std::unique_ptr<Wrapland::Client::Surface> surface(m_compositor->createSurface());
@@ -823,5 +823,5 @@ void TextInputTest::testCommit()
     QCOMPARE(textInput->deleteSurroundingText().afterLength, 1u);
 }
 
-QTEST_GUILESS_MAIN(TextInputTest)
-#include "text_input.moc"
+QTEST_GUILESS_MAIN(text_input_v2_test)
+#include "text_input_v2.moc"
