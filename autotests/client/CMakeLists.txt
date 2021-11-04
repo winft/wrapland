@@ -616,6 +616,21 @@ add_test(NAME wrapland-testSelection COMMAND testSelection)
 ecm_mark_as_test(testSelection)
 
 # ##################################################################################################
+# Test virtual keyboard v1
+# ##################################################################################################
+set(test_virtual_keyboard_v1_SRCS virtual_keyboard_v1.cpp)
+add_executable(test-virtual-keyboard-v1 ${test_virtual_keyboard_v1_SRCS})
+target_link_libraries(test-virtual-keyboard-v1
+  Qt5::Test
+  Qt5::Gui
+  Wrapland::Client
+  Wrapland::Server
+  Wayland::Client
+)
+add_test(NAME wrapland-test-virtual-keyboard-v1 COMMAND test-virtual-keyboard-v1)
+ecm_mark_as_test(test-virtual-keyboard-v1)
+
+# ##################################################################################################
 # Test XdgForeign
 # ##################################################################################################
 set(testXdgForeign_SRCS xdg_foreign.cpp)

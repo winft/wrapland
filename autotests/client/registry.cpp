@@ -47,6 +47,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/subcompositor.h"
 #include "../../src/client/surface.h"
+#include "../../src/client/virtual_keyboard_v1.h"
 #include "../../src/client/xdg_shell.h"
 #include "../../src/client/xdgdecoration.h"
 
@@ -64,6 +65,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/slide.h"
 #include "../../server/text_input_v2.h"
 #include "../../server/text_input_v3.h"
+#include "../../server/virtual_keyboard_v1.h"
 #include "../../server/xdg_decoration.h"
 
 #include <wayland-blur-client-protocol.h>
@@ -82,6 +84,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-slide-client-protocol.h>
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-text-input-v3-client-protocol.h>
+#include <wayland-virtual-keyboard-v1-client-protocol.h>
 #include <wayland-wlr-data-control-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-xdg-shell-client-protocol.h>
@@ -113,6 +116,7 @@ private Q_SLOTS:
     void testBindXdgDecorationUnstableV1();
     void testBindTextInputManagerV2();
     void testBindTextInputManagerV3();
+    void testBindVirtualKeyboardManagerV1();
     void testBindXdgShell();
     void testBindRelativePointerManagerUnstableV1();
     void testBindPointerGesturesUnstableV1();
@@ -198,6 +202,8 @@ void TestWaylandRegistry::init()
         = std::make_unique<Wrapland::Server::IdleInhibitManagerV1>(server.display.get());
     server.globals.linux_dmabuf_v1
         = std::make_unique<Wrapland::Server::LinuxDmabufV1>(server.display.get());
+    server.globals.virtual_keyboard_manager_v1
+        = std::make_unique<Wrapland::Server::virtual_keyboard_manager_v1>(server.display.get());
 
     server.globals.outputs.back()->set_enabled(true);
     server.globals.outputs.back()->done();
@@ -404,6 +410,14 @@ void TestWaylandRegistry::testBindTextInputManagerV3()
               SIGNAL(textInputManagerV3Announced(quint32, quint32)),
               bindTextInputManagerV3,
               zwp_text_input_manager_v3_destroy)
+}
+
+void TestWaylandRegistry::testBindVirtualKeyboardManagerV1()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::VirtualKeyboardManagerV1,
+              SIGNAL(virtualKeyboardManagerV1Announced(quint32, quint32)),
+              bindVirtualKeyboardManagerV1,
+              zwp_virtual_keyboard_manager_v1_destroy)
 }
 
 void TestWaylandRegistry::testBindXdgShell()

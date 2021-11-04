@@ -61,6 +61,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "text_input_v2_p.h"
 #include "text_input_v3_p.h"
 #include "viewporter.h"
+#include "virtual_keyboard_v1_p.h"
 #include "wayland_pointer_p.h"
 #include "wlr_output_manager_v1.h"
 #include "xdg_activation_v1.h"
@@ -101,6 +102,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-text-input-v2-client-protocol.h>
 #include <wayland-text-input-v3-client-protocol.h>
 #include <wayland-viewporter-client-protocol.h>
+#include <wayland-virtual-keyboard-v1-client-protocol.h>
 #include <wayland-wlr-data-control-v1-client-protocol.h>
 #include <wayland-wlr-layer-shell-client-protocol.h>
 #include <wayland-wlr-output-management-v1-client-protocol.h>
@@ -425,6 +427,16 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
             &wp_viewporter_interface,
             &Registry::viewporterAnnounced,
             &Registry::viewporterRemoved,
+        },
+    },
+    {
+        Registry::Interface::VirtualKeyboardManagerV1,
+        {
+            1,
+            QByteArrayLiteral("zwp_virtual_keyboard_manager_v1"),
+            &zwp_virtual_keyboard_manager_v1_interface,
+            &Registry::virtualKeyboardManagerV1Announced,
+            &Registry::virtualKeyboardManagerV1Removed,
         },
     },
     {
@@ -894,6 +906,7 @@ BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
 BIND(TextInputManagerV2, zwp_text_input_manager_v2)
 BIND(TextInputManagerV3, zwp_text_input_manager_v3)
 BIND(Viewporter, wp_viewporter)
+BIND(VirtualKeyboardManagerV1, zwp_virtual_keyboard_manager_v1)
 BIND(XdgShell, xdg_wm_base)
 BIND(RelativePointerManagerUnstableV1, zwp_relative_pointer_manager_v1)
 BIND(PointerGesturesUnstableV1, zwp_pointer_gestures_v1)
@@ -1090,6 +1103,13 @@ Registry::createIdleInhibitManager(quint32 name, quint32 version, QObject* paren
     default:
         return nullptr;
     }
+}
+
+virtual_keyboard_manager_v1*
+Registry::createVirtualKeyboardManagerV1(quint32 name, quint32 version, QObject* parent)
+{
+    return d->create<virtual_keyboard_manager_v1>(
+        name, version, parent, &Registry::bindVirtualKeyboardManagerV1);
 }
 
 XdgOutputManager* Registry::createXdgOutputManager(quint32 name, quint32 version, QObject* parent)
