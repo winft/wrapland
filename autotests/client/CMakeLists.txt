@@ -571,6 +571,21 @@ add_test(NAME wrapland-test-text-input-method-sync COMMAND test-text-input-metho
 ecm_mark_as_test(test-text-input-method-sync)
 
 # ##################################################################################################
+# Test text-input and input-method version compatibility
+# ##################################################################################################
+set(test_text_input_method_version_compat_SRCS text_input_method_version_compat.cpp)
+add_executable(test-text-input-method-version-compat ${test_text_input_method_version_compat_SRCS})
+target_link_libraries(test-text-input-method-version-compat
+  Qt5::Test
+  Qt5::Gui
+  Wrapland::Client
+  Wrapland::Server
+)
+add_test(NAME wrapland-test-text-input-method-version-compat
+         COMMAND test-text-input-method-version-compat)
+ecm_mark_as_test(test-text-input-method-version-compat)
+
+# ##################################################################################################
 # Test Error
 # ##################################################################################################
 set(testError_SRCS error.cpp)
