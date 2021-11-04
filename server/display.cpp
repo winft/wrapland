@@ -61,6 +61,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "text_input_v2.h"
 #include "text_input_v3.h"
 #include "viewporter.h"
+#include "virtual_keyboard_v1.h"
 #include "wl_output_p.h"
 #include "xdg_activation_v1.h"
 #include "xdg_decoration.h"
@@ -364,6 +365,11 @@ std::unique_ptr<PlasmaVirtualDesktopManager> Display::createPlasmaVirtualDesktop
 std::unique_ptr<Viewporter> Display::createViewporter()
 {
     return std::make_unique<Viewporter>(this);
+}
+
+std::unique_ptr<virtual_keyboard_manager_v1> Display::create_virtual_keyboard_manager_v1()
+{
+    return std::make_unique<virtual_keyboard_manager_v1>(this);
 }
 
 XdgOutputManager* Display::xdgOutputManager() const

@@ -53,6 +53,7 @@ set(SERVER_LIB_SRCS
   touch.cpp
   touch_pool.cpp
   viewporter.cpp
+  virtual_keyboard_v1.cpp
   wayland/buffer_manager.cpp
   wayland/client.cpp
   wayland/display.cpp
@@ -211,6 +212,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/virtual-keyboard-unstable-v1.xml
+  BASENAME virtual-keyboard-v1
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
   PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-data-control-unstable-v1.xml
   BASENAME wlr-data-control-v1
 )
@@ -307,6 +313,8 @@ set(SERVER_GENERATED_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-server-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-virtual-keyboard-v1-client-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-virtual-keyboard-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-activation-v1-client-protocol.h
@@ -414,6 +422,7 @@ set(SERVER_LIB_HEADERS
   touch.h
   touch_pool.h
   viewporter.h
+  virtual_keyboard_v1.h
   wl_output.h
   xdg_activation_v1.h
   xdg_decoration.h
