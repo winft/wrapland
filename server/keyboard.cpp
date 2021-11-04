@@ -19,7 +19,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "keyboard.h"
 #include "keyboard_p.h"
-#include "keyboard_pool.h"
 
 #include "client.h"
 #include "display.h"
@@ -126,18 +125,14 @@ void Keyboard::setFocusedSurface(quint32 serial, Surface* surface)
     d_ptr->client()->flush();
 }
 
-void Keyboard::keyPressed(quint32 serial, quint32 key)
+void Keyboard::key(uint32_t serial, uint32_t key, key_state state)
 {
     Q_ASSERT(d_ptr->focusedSurface);
-    d_ptr->send<wl_keyboard_send_key>(
-        serial, d_ptr->seat->timestamp(), key, WL_KEYBOARD_KEY_STATE_PRESSED);
-}
-
-void Keyboard::keyReleased(quint32 serial, quint32 key)
-{
-    Q_ASSERT(d_ptr->focusedSurface);
-    d_ptr->send<wl_keyboard_send_key>(
-        serial, d_ptr->seat->timestamp(), key, WL_KEYBOARD_KEY_STATE_RELEASED);
+    d_ptr->send<wl_keyboard_send_key>(serial,
+                                      d_ptr->seat->timestamp(),
+                                      key,
+                                      state == key_state::pressed ? WL_KEYBOARD_KEY_STATE_PRESSED
+                                                                  : WL_KEYBOARD_KEY_STATE_RELEASED);
 }
 
 void Keyboard::updateModifiers(quint32 serial,

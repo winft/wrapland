@@ -265,18 +265,15 @@ void input_method_keyboard_grab_v2::set_keymap(std::string const& content)
     d_ptr->keymap = file_wrap(tmpf);
 }
 
-void input_method_keyboard_grab_v2::press_key(uint32_t time, uint32_t key)
+void input_method_keyboard_grab_v2::key(uint32_t time, uint32_t key, key_state state)
 {
     auto serial = d_ptr->client()->display()->handle()->nextSerial();
-    d_ptr->send<zwp_input_method_keyboard_grab_v2_send_key>(
-        serial, time, key, WL_KEYBOARD_KEY_STATE_PRESSED);
-}
-
-void input_method_keyboard_grab_v2::release_key(uint32_t time, uint32_t key)
-{
-    auto serial = d_ptr->client()->display()->handle()->nextSerial();
-    d_ptr->send<zwp_input_method_keyboard_grab_v2_send_key>(
-        serial, time, key, WL_KEYBOARD_KEY_STATE_RELEASED);
+    d_ptr->send<zwp_input_method_keyboard_grab_v2_send_key>(serial,
+                                                            time,
+                                                            key,
+                                                            state == key_state::pressed
+                                                                ? WL_KEYBOARD_KEY_STATE_PRESSED
+                                                                : WL_KEYBOARD_KEY_STATE_RELEASED);
 }
 
 void input_method_keyboard_grab_v2::update_modifiers(uint32_t depressed,

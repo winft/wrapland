@@ -7,6 +7,7 @@
 */
 #pragma once
 
+#include "keyboard_pool.h"
 #include "text_input_v3.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>
@@ -90,8 +91,7 @@ class WRAPLANDSERVER_EXPORT input_method_keyboard_grab_v2 : public QObject
 public:
     void set_keymap(std::string const& content);
 
-    void press_key(uint32_t time, uint32_t key);
-    void release_key(uint32_t time, uint32_t key);
+    void key(uint32_t time, uint32_t key, key_state state);
 
     void update_modifiers(uint32_t depressed, uint32_t latched, uint32_t locked, uint32_t group);
     void set_repeat_info(int32_t rate, int32_t delay);

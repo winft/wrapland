@@ -76,8 +76,7 @@ public:
     keyboard_modifiers const& get_modifiers() const;
     keyboard_repeat_info const& get_repeat_info() const;
 
-    void key_pressed(uint32_t key);
-    void key_released(uint32_t key);
+    void key(uint32_t key, key_state state);
     void update_modifiers(uint32_t depressed, uint32_t latched, uint32_t locked, uint32_t group);
     void set_focused_surface(Surface* surface);
     void set_keymap(char const* keymap);

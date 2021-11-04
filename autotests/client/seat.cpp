@@ -1439,11 +1439,11 @@ void TestSeat::testKeyboard()
     QCOMPARE(keyboard->keyRepeatDelay(), 660);
 
     server.seat->setTimestamp(1);
-    keyboards.key_pressed(KEY_K);
+    keyboards.key(KEY_K, Wrapland::Server::key_state::pressed);
     server.seat->setTimestamp(2);
-    keyboards.key_pressed(KEY_D);
+    keyboards.key(KEY_D, Wrapland::Server::key_state::pressed);
     server.seat->setTimestamp(3);
-    keyboards.key_pressed(KEY_E);
+    keyboards.key(KEY_E, Wrapland::Server::key_state::pressed);
 
     QSignalSpy leftSpy(keyboard, &Clt::Keyboard::left);
     QVERIFY(leftSpy.isValid());
@@ -1475,19 +1475,19 @@ void TestSeat::testKeyboard()
     QVERIFY(keyChangedSpy.isValid());
 
     server.seat->setTimestamp(4);
-    keyboards.key_released(KEY_E);
+    keyboards.key(KEY_E, Wrapland::Server::key_state::released);
     QVERIFY(keyChangedSpy.wait());
     server.seat->setTimestamp(5);
-    keyboards.key_released(KEY_D);
+    keyboards.key(KEY_D, Wrapland::Server::key_state::released);
     QVERIFY(keyChangedSpy.wait());
     server.seat->setTimestamp(6);
-    keyboards.key_released(KEY_K);
+    keyboards.key(KEY_K, Wrapland::Server::key_state::released);
     QVERIFY(keyChangedSpy.wait());
     server.seat->setTimestamp(7);
-    keyboards.key_pressed(KEY_F1);
+    keyboards.key(KEY_F1, Wrapland::Server::key_state::pressed);
     QVERIFY(keyChangedSpy.wait());
     server.seat->setTimestamp(8);
-    keyboards.key_released(KEY_F1);
+    keyboards.key(KEY_F1, Wrapland::Server::key_state::released);
     QVERIFY(keyChangedSpy.wait());
 
     QCOMPARE(keyChangedSpy.count(), 5);
@@ -1513,20 +1513,20 @@ void TestSeat::testKeyboard()
     QCOMPARE(keyChangedSpy.at(4).at(2).value<quint32>(), quint32(8));
 
     // Releasing a key which is already released should not set a key changed.
-    keyboards.key_released(KEY_F1);
+    keyboards.key(KEY_F1, Wrapland::Server::key_state::released);
     QVERIFY(!keyChangedSpy.wait(200));
 
     // Let's press it again.
-    keyboards.key_pressed(KEY_F1);
+    keyboards.key(KEY_F1, Wrapland::Server::key_state::pressed);
     QVERIFY(keyChangedSpy.wait());
     QCOMPARE(keyChangedSpy.count(), 6);
 
     // Press again should be ignored.
-    keyboards.key_pressed(KEY_F1);
+    keyboards.key(KEY_F1, Wrapland::Server::key_state::pressed);
     QVERIFY(!keyChangedSpy.wait(200));
 
     // And release.
-    keyboards.key_released(KEY_F1);
+    keyboards.key(KEY_F1, Wrapland::Server::key_state::released);
     QVERIFY(keyChangedSpy.wait());
     QCOMPARE(keyChangedSpy.count(), 7);
 
@@ -1594,9 +1594,9 @@ void TestSeat::testKeyboard()
 
     // Verify that calling into the Keyboard related functionality doesn't crash.
     server.seat->setTimestamp(9);
-    keyboards.key_pressed(KEY_F2);
+    keyboards.key(KEY_F2, Wrapland::Server::key_state::pressed);
     server.seat->setTimestamp(10);
-    keyboards.key_released(KEY_F2);
+    keyboards.key(KEY_F2, Wrapland::Server::key_state::released);
     keyboards.set_repeat_info(30, 560);
     keyboards.set_repeat_info(25, 660);
     keyboards.update_modifiers(5, 6, 7, 8);
