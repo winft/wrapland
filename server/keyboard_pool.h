@@ -21,7 +21,10 @@ class Keyboard;
 class Surface;
 class Seat;
 
-enum class button_state;
+enum class key_state {
+    released,
+    pressed,
+};
 
 struct keyboard_focus {
     Surface* surface{nullptr};
@@ -81,7 +84,7 @@ public:
     void set_repeat_info(int32_t charactersPerSecond, int32_t delay);
 
     std::vector<uint32_t> pressed_keys() const;
-    bool update_key(uint32_t key, button_state state);
+    bool update_key(uint32_t key, key_state state);
 
 private:
     friend class Seat;
@@ -93,7 +96,7 @@ private:
     keyboard_modifiers modifiers;
     keyboard_repeat_info keyRepeat;
 
-    std::unordered_map<uint32_t, button_state> states;
+    std::unordered_map<uint32_t, key_state> states;
     uint32_t lastStateSerial{0};
 
     std::vector<Keyboard*> devices;
@@ -101,3 +104,5 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(Wrapland::Server::key_state)
