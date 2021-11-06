@@ -92,7 +92,7 @@ void pointer_pool::create_device(Client* client, uint32_t version, uint32_t id)
         // this is a pointer for the currently focused pointer surface
         focus.devices.push_back(pointer);
         pointer->setFocusedSurface(focus.serial, focus.surface);
-        pointer->d_ptr->sendFrame();
+        pointer->frame();
         if (focus.devices.size() == 1) {
             // got a new pointer
             Q_EMIT seat->focusedPointerChanged(pointer);
@@ -189,7 +189,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& trans
     if (focus.devices.empty()) {
         Q_EMIT seat->focusedPointerChanged(nullptr);
         for (auto pointer : framePointers) {
-            pointer->d_ptr->sendFrame();
+            pointer->frame();
         }
         return;
     }
@@ -203,7 +203,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& trans
     }
 
     for (auto pointer : framePointers) {
-        pointer->d_ptr->sendFrame();
+        pointer->frame();
     }
 }
 
@@ -454,6 +454,13 @@ void pointer_pool::cancel_pinch_gesture()
         p->d_ptr->cancelPinchGesture(serial);
     });
     gestureSurface.clear();
+}
+
+void pointer_pool::frame() const
+{
+    for (auto pointer : focus.devices) {
+        pointer->frame();
+    }
 }
 
 }

@@ -64,6 +64,7 @@ private:
     void axis(Qt::Orientation orientation, quint32 delta);
     void
     relativeMotion(const QSizeF& delta, const QSizeF& deltaNonAccelerated, quint64 microseconds);
+    void frame();
 
     friend class RelativePointerManagerV1;
     friend class PointerGesturesV1;

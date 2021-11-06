@@ -80,6 +80,7 @@ public:
     void update_pinch_gesture(const QSizeF& delta, qreal scale, qreal rotation) const;
     void end_pinch_gesture();
     void cancel_pinch_gesture();
+    void frame() const;
 
     bool is_button_pressed(uint32_t button) const;
     bool is_button_pressed(Qt::MouseButton button) const;

@@ -438,6 +438,7 @@ void TestSeat::testPointer()
     // Test motion.
     server.seat->setTimestamp(1);
     server_pointers.set_position(QPoint(10, 16));
+    server_pointers.frame();
 
     QVERIFY(motionSpy.wait());
     QTRY_COMPARE(frameSpy.count(), 4);
@@ -446,6 +447,8 @@ void TestSeat::testPointer()
 
     // Test relative motion.
     server_pointers.relative_motion(QSizeF(1, 2), QSizeF(3, 4), quint64(-1));
+    server_pointers.frame();
+
     QVERIFY(relativeMotionSpy.wait());
     QCOMPARE(relativeMotionSpy.count(), 1);
     QTRY_COMPARE(frameSpy.count(), 5);
@@ -456,13 +459,16 @@ void TestSeat::testPointer()
     // Test axis.
     server.seat->setTimestamp(2);
     server_pointers.send_axis(Qt::Horizontal, 10);
-    QVERIFY(axisSpy.wait());
-    QTRY_COMPARE(frameSpy.count(), 6);
-    server.seat->setTimestamp(3);
-    server_pointers.send_axis(Qt::Vertical, 20);
 
     QVERIFY(axisSpy.wait());
-    QTRY_COMPARE(frameSpy.count(), 7);
+    QTRY_COMPARE(frameSpy.count(), 5);
+
+    server.seat->setTimestamp(3);
+    server_pointers.send_axis(Qt::Vertical, 20);
+    server_pointers.frame();
+
+    QVERIFY(axisSpy.wait());
+    QTRY_COMPARE(frameSpy.count(), 6);
     QCOMPARE(axisSpy.first().at(0).value<quint32>(), quint32(2));
     QCOMPARE(axisSpy.first().at(1).value<Clt::Pointer::Axis>(), Clt::Pointer::Axis::Horizontal);
     QCOMPARE(axisSpy.first().at(2).value<qreal>(), qreal(10));
@@ -474,27 +480,35 @@ void TestSeat::testPointer()
     // Test button.
     server.seat->setTimestamp(4);
     server_pointers.button_pressed(1);
+    server_pointers.frame();
+
     QVERIFY(buttonSpy.wait());
     QTRY_COMPARE(buttonSpy.count(), 1);
-    QTRY_COMPARE(frameSpy.count(), 8);
+    QTRY_COMPARE(frameSpy.count(), 7);
     QCOMPARE(buttonSpy.at(0).at(0).value<quint32>(), server.display->serial());
+
     server.seat->setTimestamp(5);
     server_pointers.button_pressed(2);
+    server_pointers.frame();
+
+    QVERIFY(buttonSpy.wait());
+    QTRY_COMPARE(frameSpy.count(), 8);
+    QCOMPARE(buttonSpy.at(1).at(0).value<quint32>(), server.display->serial());
+
+    server.seat->setTimestamp(6);
+    server_pointers.button_released(2);
+    server_pointers.frame();
 
     QVERIFY(buttonSpy.wait());
     QTRY_COMPARE(frameSpy.count(), 9);
-    QCOMPARE(buttonSpy.at(1).at(0).value<quint32>(), server.display->serial());
-    server.seat->setTimestamp(6);
-    server_pointers.button_released(2);
+    QCOMPARE(buttonSpy.at(2).at(0).value<quint32>(), server.display->serial());
+
+    server.seat->setTimestamp(7);
+    server_pointers.button_released(1);
+    server_pointers.frame();
 
     QVERIFY(buttonSpy.wait());
     QTRY_COMPARE(frameSpy.count(), 10);
-    QCOMPARE(buttonSpy.at(2).at(0).value<quint32>(), server.display->serial());
-    server.seat->setTimestamp(7);
-    server_pointers.button_released(1);
-
-    QVERIFY(buttonSpy.wait());
-    QTRY_COMPARE(frameSpy.count(), 11);
     QCOMPARE(buttonSpy.count(), 4);
 
     // Timestamp
@@ -531,7 +545,7 @@ void TestSeat::testPointer()
     server_pointers.set_focused_surface(nullptr);
     QCOMPARE(focusedPointerChangedSpy.count(), 5);
     QVERIFY(leftSpy.wait());
-    QTRY_COMPARE(frameSpy.count(), 12);
+    QTRY_COMPARE(frameSpy.count(), 11);
     QCOMPARE(leftSpy.first().first().value<quint32>(), server.display->serial());
     QVERIFY(!p->enteredSurface());
     QVERIFY(!cp.enteredSurface());
@@ -544,7 +558,7 @@ void TestSeat::testPointer()
     server_pointers.set_focused_surface(serverSurface, QPoint(0, 0));
     QCOMPARE(focusedPointerChangedSpy.count(), 6);
     QVERIFY(enteredSpy.wait());
-    QTRY_COMPARE(frameSpy.count(), 13);
+    QTRY_COMPARE(frameSpy.count(), 12);
     QCOMPARE(p->enteredSurface(), s);
     QCOMPARE(cp.enteredSurface(), s);
 
@@ -1127,6 +1141,7 @@ void TestSeat::testPointerAxis()
     quint32 timestamp = 1;
     server.seat->setTimestamp(timestamp++);
     server_pointers.send_axis(Qt::Vertical, 10, 1, Srv::PointerAxisSource::Wheel);
+    server_pointers.frame();
 
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 2);
@@ -1149,6 +1164,7 @@ void TestSeat::testPointerAxis()
     // Let's scroll using fingers.
     server.seat->setTimestamp(timestamp++);
     server_pointers.send_axis(Qt::Horizontal, 42, 0, Srv::PointerAxisSource::Finger);
+    server_pointers.frame();
 
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 3);
@@ -1169,6 +1185,7 @@ void TestSeat::testPointerAxis()
     // Lift the fingers off the device.
     server.seat->setTimestamp(timestamp++);
     server_pointers.send_axis(Qt::Horizontal, 0, 0, Srv::PointerAxisSource::Finger);
+    server_pointers.frame();
 
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 4);
@@ -1188,6 +1205,7 @@ void TestSeat::testPointerAxis()
     // If the device is unknown, no axis_source event should be sent.
     server.seat->setTimestamp(timestamp++);
     server_pointers.send_axis(Qt::Horizontal, 42, 1, Srv::PointerAxisSource::Unknown);
+    server_pointers.frame();
 
     QVERIFY(frameSpy.wait());
     QCOMPARE(frameSpy.count(), 5);
