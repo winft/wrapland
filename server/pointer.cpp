@@ -244,7 +244,6 @@ void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
     auto& pointers = seat->pointers();
     auto const pos = pointers.get_focus().transformation.map(pointers.get_position());
     sendEnter(serial, focusedSurface, pos);
-    client()->flush();
 }
 
 Pointer::Pointer(Client* client, uint32_t version, uint32_t id, Seat* seat)
@@ -264,7 +263,6 @@ void Pointer::buttonPressed(quint32 serial, quint32 button)
 
     d_ptr->send<wl_pointer_send_button>(
         serial, d_ptr->seat->timestamp(), button, WL_POINTER_BUTTON_STATE_PRESSED);
-    d_ptr->sendFrame();
 }
 
 void Pointer::buttonReleased(quint32 serial, quint32 button)
@@ -273,7 +271,6 @@ void Pointer::buttonReleased(quint32 serial, quint32 button)
 
     d_ptr->send<wl_pointer_send_button>(
         serial, d_ptr->seat->timestamp(), button, WL_POINTER_BUTTON_STATE_RELEASED);
-    d_ptr->sendFrame();
 }
 
 void Pointer::axis(Qt::Orientation orientation,
@@ -324,8 +321,6 @@ void Pointer::axis(Qt::Orientation orientation,
         d_ptr->send<wl_pointer_send_axis_stop, WL_POINTER_AXIS_STOP_SINCE_VERSION>(
             d_ptr->seat->timestamp(), wlOrientation);
     }
-
-    d_ptr->sendFrame();
 }
 
 // TODO(romangg): Remove this legacy function.
@@ -336,7 +331,6 @@ void Pointer::axis(Qt::Orientation orientation, quint32 delta)
                                                         : WL_POINTER_AXIS_HORIZONTAL_SCROLL;
     d_ptr->send<wl_pointer_send_axis>(
         d_ptr->seat->timestamp(), wlorient, wl_fixed_from_int(static_cast<int>(delta)));
-    d_ptr->sendFrame();
 }
 
 Client* Pointer::client() const
@@ -374,7 +368,6 @@ void Pointer::motion(QPointF const& position)
     }
 
     d_ptr->sendMotion(position);
-    d_ptr->sendFrame();
 }
 
 void Pointer::relativeMotion(const QSizeF& delta,
@@ -387,6 +380,10 @@ void Pointer::relativeMotion(const QSizeF& delta,
     for (auto relativePointer : d_ptr->relativePointers) {
         relativePointer->relativeMotion(microseconds, delta, deltaNonAccelerated);
     }
+}
+
+void Pointer::frame()
+{
     d_ptr->sendFrame();
 }
 
