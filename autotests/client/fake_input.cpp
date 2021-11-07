@@ -160,6 +160,17 @@ void FakeInputTest::testAuthenticate()
     QCOMPARE(authenticationRequestedSpy.first().at(1).toString(), QStringLiteral("to test"));
     server.device->setAuthentication(true);
     QVERIFY(server.device->isAuthenticated());
+
+    QSignalSpy device_destroy_spy(server.globals.fake_input.get(),
+                                  &Wrapland::Server::FakeInput::device_destroyed);
+    QVERIFY(device_destroy_spy.isValid());
+
+    delete m_fakeInput;
+    m_fakeInput = nullptr;
+
+    QEXPECT_FAIL("", "Without the dtor in the protocol nothing is sent.", Continue);
+    QVERIFY(device_destroy_spy.wait(500));
+    server.device = nullptr;
 }
 
 void FakeInputTest::testMotion()
