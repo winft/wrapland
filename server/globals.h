@@ -13,7 +13,6 @@
 #include "data_device_manager.h"
 #include "dpms.h"
 #include "drm_lease_v1.h"
-#include "egl_stream_controller.h"
 #include "fake_input.h"
 #include "idle_inhibit_v1.h"
 #include "input_method_v2.h"
@@ -115,7 +114,6 @@ struct globals {
     std::unique_ptr<Server::KdeIdle> kde_idle;
     std::unique_ptr<Server::drm_lease_device_v1> drm_lease_device_v1;
     std::unique_ptr<Server::IdleInhibitManagerV1> idle_inhibit_manager_v1;
-    std::unique_ptr<Server::EglStreamController> egl_stream_controller;
 };
 
 }
