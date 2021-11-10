@@ -14,7 +14,6 @@ set(SERVER_LIB_SRCS
   dpms.cpp
   drag_pool.cpp
   drm_lease_v1.cpp
-  egl_stream_controller.cpp
   fake_input.cpp
   filtered_display.cpp
   idle_inhibit_v1.cpp
@@ -247,11 +246,6 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wayland-eglstream-controller.xml
-  BASENAME eglstream-controller
-)
-
-ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
   PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/keystate.xml
   BASENAME keystate
 )
@@ -271,7 +265,6 @@ set(SERVER_GENERATED_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-dpms-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-drm-lease-v1-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-drm-lease-v1-server-protocol.h
-  ${CMAKE_CURRENT_BINARY_DIR}/wayland-eglstream-controller-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-fake-input-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-fake-input-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-client-protocol.h
@@ -381,7 +374,6 @@ set(SERVER_LIB_HEADERS
   display.h
   dpms.h
   drm_lease_v1.h
-  egl_stream_controller.h
   fake_input.h
   filtered_display.h
   globals.h

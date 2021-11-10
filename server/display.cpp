@@ -33,7 +33,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "data_device_manager.h"
 #include "dpms.h"
 #include "drm_lease_v1.h"
-#include "egl_stream_controller.h"
 #include "fake_input.h"
 #include "idle_inhibit_v1.h"
 #include "input_method_v2.h"
@@ -380,11 +379,6 @@ std::unique_ptr<XdgActivationV1> Display::createXdgActivationV1()
 std::unique_ptr<XdgDecorationManager> Display::createXdgDecorationManager(XdgShell* shell)
 {
     return std::make_unique<XdgDecorationManager>(this, shell);
-}
-
-std::unique_ptr<EglStreamController> Display::createEglStreamController()
-{
-    return std::make_unique<EglStreamController>(this);
 }
 
 std::unique_ptr<KeyState> Display::createKeyState()
