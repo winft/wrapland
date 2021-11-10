@@ -49,7 +49,6 @@ class data_control_manager_v1;
 class data_device_manager;
 class DpmsManager;
 class drm_lease_device_v1;
-class EglStreamController;
 class FakeInput;
 class IdleInhibitManagerV1;
 class input_method_manager_v2;
@@ -172,7 +171,6 @@ public:
     std::unique_ptr<PlasmaVirtualDesktopManager> createPlasmaVirtualDesktopManager();
     std::unique_ptr<XdgActivationV1> createXdgActivationV1();
     std::unique_ptr<XdgDecorationManager> createXdgDecorationManager(XdgShell* shell);
-    std::unique_ptr<EglStreamController> createEglStreamController();
 
     void dispatch();
     void flush();
