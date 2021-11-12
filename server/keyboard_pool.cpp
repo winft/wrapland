@@ -125,17 +125,13 @@ void keyboard_pool::update_modifiers(uint32_t depressed,
                                      uint32_t locked,
                                      uint32_t group)
 {
-    bool changed = false;
-
     auto mods = keyboard_modifiers{depressed, latched, locked, group, modifiers.serial};
-    if (modifiers != mods) {
-        modifiers = mods;
-        changed = true;
-    }
 
-    if (!changed) {
+    if (modifiers == mods) {
         return;
     }
+
+    modifiers = mods;
 
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
     modifiers.serial = serial;
