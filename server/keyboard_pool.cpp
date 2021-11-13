@@ -58,8 +58,8 @@ void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
 
     if (focus.surface && focus.surface->client() == keyboard->client()) {
         // this is a keyboard for the currently focused keyboard surface
-        if (keymap.content) {
-            keyboard->setKeymap(keymap.content);
+        if (keymap) {
+            keyboard->setKeymap(keymap);
         }
         focus.devices.push_back(keyboard);
         keyboard->setFocusedSurface(focus.serial, focus.surface);
@@ -160,28 +160,27 @@ void keyboard_pool::set_focused_surface(Surface* surface)
     }
 
     for (auto kbd : focus.devices) {
-        if (kbd->d_ptr->needs_keymap_update && keymap.content) {
-            kbd->setKeymap(keymap.content);
+        if (kbd->d_ptr->needs_keymap_update && keymap) {
+            kbd->setKeymap(keymap);
         }
         kbd->setFocusedSurface(serial, surface);
     }
 }
 
-void keyboard_pool::set_keymap(char const* content)
+void keyboard_pool::set_keymap(char const* keymap)
 {
-    if (keymap.content == content) {
+    if (this->keymap == keymap) {
         return;
     }
 
-    keymap.xkbcommon_compatible = true;
-    keymap.content = content;
+    this->keymap = keymap;
 
     for (auto device : devices) {
         device->d_ptr->needs_keymap_update = true;
     }
-    if (content) {
+    if (keymap) {
         for (auto device : focus.devices) {
-            device->setKeymap(content);
+            device->setKeymap(keymap);
         }
     }
 }
