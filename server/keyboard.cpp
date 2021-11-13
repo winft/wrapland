@@ -104,6 +104,7 @@ void Keyboard::setKeymap(char const* content)
 
     d_ptr->sendKeymap(fileno(tmpf), strlen(content));
     d_ptr->keymap = file_wrap(tmpf);
+    d_ptr->needs_keymap_update = false;
 }
 
 void Keyboard::setFocusedSurface(quint32 serial, Surface* surface)

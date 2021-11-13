@@ -71,7 +71,9 @@ public:
 
     Surface* focusedSurface = nullptr;
     QMetaObject::Connection destroyConnection;
+
     file_wrap keymap;
+    bool needs_keymap_update{true};
 
     Seat* seat;
     Keyboard* q_ptr;
