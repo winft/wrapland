@@ -35,11 +35,6 @@ keyboard_focus const& keyboard_pool::get_focus() const
     return focus;
 }
 
-keyboard_map const& keyboard_pool::get_keymap() const
-{
-    return keymap;
-}
-
 keyboard_modifiers const& keyboard_pool::get_modifiers() const
 {
     return modifiers;
