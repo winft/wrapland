@@ -77,7 +77,7 @@ public:
     void key_released(uint32_t key);
     void update_modifiers(uint32_t depressed, uint32_t latched, uint32_t locked, uint32_t group);
     void set_focused_surface(Surface* surface);
-    void set_keymap(std::string const& content);
+    void set_keymap(char const* content);
     void set_repeat_info(int32_t charactersPerSecond, int32_t delay);
 
     std::vector<uint32_t> pressed_keys() const;
@@ -88,7 +88,7 @@ private:
     void create_device(Client* client, uint32_t version, uint32_t id);
 
     struct {
-        std::string content;
+        char const* content{nullptr};
         bool xkbcommon_compatible{false};
     } keymap;
 

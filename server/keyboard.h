@@ -44,7 +44,7 @@ Q_SIGNALS:
 
 private:
     void setFocusedSurface(quint32 serial, Surface* surface);
-    void setKeymap(std::string const& content);
+    void setKeymap(char const* content);
     void updateModifiers(quint32 serial,
                          quint32 depressed,
                          quint32 latched,

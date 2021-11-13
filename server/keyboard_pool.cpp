@@ -165,10 +165,15 @@ void keyboard_pool::set_focused_surface(Surface* surface)
     }
 }
 
-void keyboard_pool::set_keymap(std::string const& content)
+void keyboard_pool::set_keymap(char const* content)
 {
+    if (keymap.content == content) {
+        return;
+    }
+
     keymap.xkbcommon_compatible = true;
     keymap.content = content;
+
     for (auto device : devices) {
         device->setKeymap(content);
     }
