@@ -2372,7 +2372,23 @@ void TestSeat::testKeymap()
     QVERIFY(keymapChangedSpy.isValid());
 
     auto& keyboards = server.seat->keyboards();
-    keyboards.set_keymap("foo");
+
+    constexpr auto keymap1 = "foo";
+    keyboards.set_keymap(keymap1);
+
+    // Not yet received because does not have focus.
+    QVERIFY(!keymapChangedSpy.wait(500));
+
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(), &Srv::Compositor::surfaceCreated);
+    QVERIFY(surfaceCreatedSpy.isValid());
+    auto surface = std::unique_ptr<Clt::Surface>(m_compositor->createSurface());
+
+    QVERIFY(surfaceCreatedSpy.wait());
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
+    QVERIFY(serverSurface);
+
+    // With focus the keymap is changed.
+    keyboards.set_focused_surface(serverSurface);
     QVERIFY(keymapChangedSpy.wait());
 
     auto fd = keymapChangedSpy.first().first().toInt();
@@ -2389,7 +2405,11 @@ void TestSeat::testKeymap()
 
     // Change the keymap.
     keymapChangedSpy.clear();
-    keyboards.set_keymap("bar");
+
+    constexpr auto keymap2 = "bar";
+    keyboards.set_keymap(keymap2);
+
+    // Since we still have focus the keymap is received immediately.
     QVERIFY(keymapChangedSpy.wait());
 
     fd = keymapChangedSpy.first().first().toInt();

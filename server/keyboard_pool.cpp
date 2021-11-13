@@ -35,11 +35,6 @@ keyboard_focus const& keyboard_pool::get_focus() const
     return focus;
 }
 
-keyboard_map const& keyboard_pool::get_keymap() const
-{
-    return keymap;
-}
-
 keyboard_modifiers const& keyboard_pool::get_modifiers() const
 {
     return modifiers;
@@ -59,14 +54,13 @@ void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
 
     keyboard->repeatInfo(keyRepeat.rate, keyRepeat.delay);
 
-    if (keymap.xkbcommon_compatible) {
-        keyboard->setKeymap(keymap.content);
-    }
-
     devices.push_back(keyboard);
 
     if (focus.surface && focus.surface->client() == keyboard->client()) {
         // this is a keyboard for the currently focused keyboard surface
+        if (keymap) {
+            keyboard->setKeymap(keymap);
+        }
         focus.devices.push_back(keyboard);
         keyboard->setFocusedSurface(focus.serial, focus.surface);
     }
@@ -125,17 +119,13 @@ void keyboard_pool::update_modifiers(uint32_t depressed,
                                      uint32_t locked,
                                      uint32_t group)
 {
-    bool changed = false;
-
     auto mods = keyboard_modifiers{depressed, latched, locked, group, modifiers.serial};
-    if (modifiers != mods) {
-        modifiers = mods;
-        changed = true;
-    }
 
-    if (!changed) {
+    if (modifiers == mods) {
         return;
     }
+
+    modifiers = mods;
 
     auto const serial = seat->d_ptr->display()->handle()->nextSerial();
     modifiers.serial = serial;
@@ -170,16 +160,28 @@ void keyboard_pool::set_focused_surface(Surface* surface)
     }
 
     for (auto kbd : focus.devices) {
+        if (kbd->d_ptr->needs_keymap_update && keymap) {
+            kbd->setKeymap(keymap);
+        }
         kbd->setFocusedSurface(serial, surface);
     }
 }
 
-void keyboard_pool::set_keymap(std::string const& content)
+void keyboard_pool::set_keymap(char const* keymap)
 {
-    keymap.xkbcommon_compatible = true;
-    keymap.content = content;
+    if (this->keymap == keymap) {
+        return;
+    }
+
+    this->keymap = keymap;
+
     for (auto device : devices) {
-        device->setKeymap(content);
+        device->d_ptr->needs_keymap_update = true;
+    }
+    if (keymap) {
+        for (auto device : focus.devices) {
+            device->setKeymap(keymap);
+        }
     }
 }
 
