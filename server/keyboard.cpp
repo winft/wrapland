@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "surface_p.h"
 
 #include <QVector>
+#include <cstring>
 
 #include <wayland-server.h>
 
@@ -94,15 +95,16 @@ Keyboard::Keyboard(Client* client, uint32_t version, uint32_t id, Seat* seat)
     connect(client, &Client::disconnected, this, [this] { disconnect(d_ptr->destroyConnection); });
 }
 
-void Keyboard::setKeymap(std::string const& content)
+void Keyboard::setKeymap(char const* content)
 {
     auto tmpf = std::tmpfile();
 
-    std::fputs(content.data(), tmpf);
+    std::fputs(content, tmpf);
     std::rewind(tmpf);
 
-    d_ptr->sendKeymap(fileno(tmpf), content.size());
+    d_ptr->sendKeymap(fileno(tmpf), strlen(content));
     d_ptr->keymap = file_wrap(tmpf);
+    d_ptr->needs_keymap_update = false;
 }
 
 void Keyboard::setFocusedSurface(quint32 serial, Surface* surface)

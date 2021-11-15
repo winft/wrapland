@@ -41,6 +41,7 @@ public:
 
 Q_SIGNALS:
     void deviceCreated(Wrapland::Server::FakeInputDevice* device);
+    void device_destroyed(Wrapland::Server::FakeInputDevice* device);
 
 private:
     class Private;

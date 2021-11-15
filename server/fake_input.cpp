@@ -67,11 +67,14 @@ void FakeInput::Private::bindInit(FakeInputBind* bind)
 
 void FakeInput::Private::prepareUnbind(FakeInputBind* bind)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto handle = bind->global()->handle();
+    auto priv = handle->d_ptr.get();
     auto fakeDevice = device(bind);
 
     priv->devices.erase(std::remove(priv->devices.begin(), priv->devices.end(), fakeDevice),
                         priv->devices.end());
+
+    Q_EMIT handle->device_destroyed(fakeDevice);
 
     delete fakeDevice;
 }

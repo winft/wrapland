@@ -30,12 +30,6 @@ struct keyboard_focus {
     QMetaObject::Connection surface_lost_notifier;
 };
 
-struct keyboard_map {
-    int fd{-1};
-    std::string content;
-    bool xkbcommon_compatible{false};
-};
-
 struct keyboard_modifiers {
     uint32_t depressed{0};
     uint32_t latched{0};
@@ -76,7 +70,6 @@ public:
     ~keyboard_pool();
 
     keyboard_focus const& get_focus() const;
-    keyboard_map const& get_keymap() const;
     keyboard_modifiers const& get_modifiers() const;
     keyboard_repeat_info const& get_repeat_info() const;
 
@@ -84,7 +77,7 @@ public:
     void key_released(uint32_t key);
     void update_modifiers(uint32_t depressed, uint32_t latched, uint32_t locked, uint32_t group);
     void set_focused_surface(Surface* surface);
-    void set_keymap(std::string const& content);
+    void set_keymap(char const* keymap);
     void set_repeat_info(int32_t charactersPerSecond, int32_t delay);
 
     std::vector<uint32_t> pressed_keys() const;
@@ -94,8 +87,9 @@ private:
     friend class Seat;
     void create_device(Client* client, uint32_t version, uint32_t id);
 
+    char const* keymap{nullptr};
+
     keyboard_focus focus;
-    keyboard_map keymap;
     keyboard_modifiers modifiers;
     keyboard_repeat_info keyRepeat;
 
