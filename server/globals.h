@@ -39,6 +39,7 @@
 #include "text_input_v2.h"
 #include "text_input_v3.h"
 #include "viewporter.h"
+#include "virtual_keyboard_v1.h"
 #include "xdg_activation_v1.h"
 #include "xdg_decoration.h"
 #include "xdg_foreign.h"
@@ -78,8 +79,8 @@ struct globals {
     std::unique_ptr<Server::PointerConstraintsV1> pointer_constraints_v1;
 
     /// Input method support
-    std::unique_ptr<Server::TextInputManagerV2> text_input_manager_v2;
-    std::unique_ptr<Server::text_input_manager_v3> text_input_v3;
+    std::unique_ptr<Server::text_input_manager_v2> text_input_manager_v2;
+    std::unique_ptr<Server::text_input_manager_v3> text_input_manager_v3;
     std::unique_ptr<Server::input_method_manager_v2> input_method_manager_v2;
 
     /// Global input state manipulation
@@ -87,6 +88,7 @@ struct globals {
     std::unique_ptr<Server::FakeInput> fake_input;
     std::unique_ptr<Server::KeyboardShortcutsInhibitManagerV1>
         keyboard_shortcuts_inhibit_manager_v1;
+    std::unique_ptr<Server::virtual_keyboard_manager_v1> virtual_keyboard_manager_v1;
 
     /// Data sharing between clients
     std::unique_ptr<Server::data_device_manager> data_device_manager;

@@ -111,6 +111,8 @@ Q_SIGNALS:
     void dragStarted();
     void dragEnded(bool dropped);
     void focusedTextInputChanged();
+    void text_input_v2_enabled_changed(bool enabled);
+    void text_input_v3_enabled_changed(bool enabled);
 
 private:
     friend class data_control_device_v1;
@@ -121,7 +123,7 @@ private:
     friend class pointer_pool;
     friend class primary_selection_device_manager;
     friend class input_method_manager_v2;
-    friend class TextInputManagerV2;
+    friend class text_input_manager_v2;
     friend class text_input_manager_v3;
     friend class text_input_pool;
     friend class touch_pool;

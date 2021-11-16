@@ -19,6 +19,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
+#include "keyboard_pool.h"
+
 #include <QObject>
 
 #include <Wrapland/Server/wraplandserver_export.h>
@@ -50,8 +52,7 @@ private:
                          quint32 latched,
                          quint32 locked,
                          quint32 group);
-    void keyPressed(quint32 serial, quint32 key);
-    void keyReleased(quint32 serial, quint32 key);
+    void key(uint32_t serial, uint32_t key, key_state state);
     void repeatInfo(qint32 charactersPerSecond, qint32 delay);
 
     friend class Seat;

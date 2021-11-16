@@ -76,7 +76,7 @@ void input_method_v2_test::init()
     server.seat->setHasKeyboard(true);
 
     server.globals.compositor = server.display->createCompositor();
-    server.globals.text_input_v3 = server.display->createTextInputManagerV3();
+    server.globals.text_input_manager_v3 = server.display->createTextInputManagerV3();
     server.globals.input_method_manager_v2 = server.display->createInputMethodManagerV2();
 
     // setup connection
@@ -625,7 +625,7 @@ void input_method_v2_test::test_keyboard_grab()
     QSignalSpy key_spy(grab.get(), &Wrapland::Client::input_method_keyboard_grab_v2::key_changed);
     QVERIFY(key_spy.isValid());
 
-    server_grab->press_key(1, KEY_K);
+    server_grab->key(1, KEY_K, Wrapland::Server::key_state::pressed);
     QVERIFY(key_spy.wait());
 
     QCOMPARE(key_spy.first().at(0).value<uint32_t>(), KEY_K);

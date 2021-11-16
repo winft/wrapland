@@ -30,87 +30,77 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-constexpr uint32_t TextInputManagerV2Version = 1;
-using TextInputManagerV2Global = Wayland::Global<TextInputManagerV2, TextInputManagerV2Version>;
-using TextInputManagerV2Bind = Wayland::Bind<TextInputManagerV2Global>;
+constexpr uint32_t text_input_manager_v2_version = 1;
+using text_input_manager_v2_global
+    = Wayland::Global<text_input_manager_v2, text_input_manager_v2_version>;
+using text_input_manager_v2_bind = Wayland::Bind<text_input_manager_v2_global>;
 
-class TextInputManagerV2::Private : public TextInputManagerV2Global
+class text_input_manager_v2::Private : public text_input_manager_v2_global
 {
 public:
-    Private(Display* display, TextInputManagerV2* q);
+    Private(Display* display, text_input_manager_v2* q);
 
 private:
     static void
-    getTextInputCallback(TextInputManagerV2Bind* bind, uint32_t id, wl_resource* wlSeat);
+    get_text_input_callback(text_input_manager_v2_bind* bind, uint32_t id, wl_resource* wlSeat);
 
     static const struct zwp_text_input_manager_v2_interface s_interface;
 };
 
-class TextInputV2::Private : public Wayland::Resource<TextInputV2>
+class text_input_v2::Private : public Wayland::Resource<text_input_v2>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, TextInputV2* q);
+    Private(Client* client, uint32_t version, uint32_t id, text_input_v2* q);
 
-    void sendEnter(Surface* surface, quint32 serial);
-    void sendLeave(quint32 serial, Surface* surface);
-    void preEdit(const QByteArray& text, const QByteArray& commit);
-    void commit(const QByteArray& text);
-    void deleteSurroundingText(quint32 beforeLength, quint32 afterLength);
-    void setTextDirection(Qt::LayoutDirection direction);
-    void setPreEditCursor(qint32 index);
-    void setCursorPosition(qint32 index, qint32 anchor);
-    void keysymPressed(quint32 keysym, Qt::KeyboardModifiers modifiers);
-    void keysymReleased(quint32 keysym, Qt::KeyboardModifiers modifiers);
+    void sync(text_input_v2_state const& old);
+    void send_enter(Surface* surface, quint32 serial);
+    void send_leave(quint32 serial, Surface* surface);
 
-    void sendInputPanelState();
-    void sendLanguage();
+    text_input_v2_state state;
 
-    QByteArray preferredLanguage;
-    QRect cursorRectangle;
-    TextInputV2::ContentHints contentHints = TextInputV2::ContentHint::None;
-    TextInputV2::ContentPurpose contentPurpose = TextInputV2::ContentPurpose::Normal;
-    Seat* seat = nullptr;
+    Seat* seat{nullptr};
     QPointer<Surface> surface;
-    bool enabled = false;
-    QByteArray surroundingText;
-    qint32 surroundingTextCursorPosition = 0;
-    qint32 surroundingTextSelectionAnchor = 0;
-    bool inputPanelVisible = false;
-    QRect overlappedSurfaceArea;
-    QByteArray language;
+
+    bool input_panel_visible{false};
+    QRect overlapped_surface_area;
+
+    std::string language;
 
 private:
     static const struct zwp_text_input_v2_interface s_interface;
 
-    static void enableCallback(wl_client* wlClient, wl_resource* wlResource, wl_resource* surface);
-    static void disableCallback(wl_client* wlClient, wl_resource* wlResource, wl_resource* surface);
-    static void updateStateCallback(wl_client* wlClient,
-                                    wl_resource* wlResource,
-                                    uint32_t serial,
-                                    uint32_t reason);
-    static void showInputPanelCallback(wl_client* wlClient, wl_resource* wlResource);
-    static void hideInputPanelCallback(wl_client* wlClient, wl_resource* wlResource);
-    static void setSurroundingTextCallback(wl_client* wlClient,
-                                           wl_resource* wlResource,
-                                           const char* text,
-                                           int32_t cursor,
-                                           int32_t anchor);
-    static void setContentTypeCallback(wl_client* wlClient,
-                                       wl_resource* wlResource,
-                                       uint32_t hint,
-                                       uint32_t purpose);
-    static void setCursorRectangleCallback(wl_client* wlClient,
-                                           wl_resource* wlResource,
-                                           int32_t x,
-                                           int32_t y,
-                                           int32_t width,
-                                           int32_t height);
-    static void setPreferredLanguageCallback(wl_client* wlClient,
-                                             wl_resource* wlResource,
-                                             const char* language);
+    static void enable_callback(wl_client* wlClient, wl_resource* wlResource, wl_resource* surface);
+    static void
+    disable_callback(wl_client* wlClient, wl_resource* wlResource, wl_resource* surface);
+    static void update_state_callback(wl_client* wlClient,
+                                      wl_resource* wlResource,
+                                      uint32_t serial,
+                                      uint32_t reason);
+    static void show_input_panel_callback(wl_client* wlClient, wl_resource* wlResource);
+    static void hide_input_panel_callback(wl_client* wlClient, wl_resource* wlResource);
+    static void set_surrounding_text_callback(wl_client* wlClient,
+                                              wl_resource* wlResource,
+                                              char const* text,
+                                              int32_t cursor,
+                                              int32_t anchor);
+    static void set_content_type_callback(wl_client* wlClient,
+                                          wl_resource* wlResource,
+                                          uint32_t hint,
+                                          uint32_t purpose);
+    static void set_cursor_rectangle_callback(wl_client* wlClient,
+                                              wl_resource* wlResource,
+                                              int32_t x,
+                                              int32_t y,
+                                              int32_t width,
+                                              int32_t height);
+    static void set_preferred_language_callback(wl_client* wlClient,
+                                                wl_resource* wlResource,
+                                                char const* language);
 
     void enable(Surface* s);
     void disable();
+
+    text_input_v2* q_ptr;
 };
 
 }
