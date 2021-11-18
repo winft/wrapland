@@ -222,13 +222,14 @@ const struct zwp_text_input_v3_interface text_input_v3::Private::s_interface = {
     set_commit_callback,
 };
 
-text_input_v3::Private::Private(Client* client, uint32_t version, uint32_t id, text_input_v3* q)
+text_input_v3::Private::Private(Client* client, uint32_t version, uint32_t id, text_input_v3* q_ptr)
     : Wayland::Resource<text_input_v3>(client,
                                        version,
                                        id,
                                        &zwp_text_input_v3_interface,
                                        &s_interface,
-                                       q)
+                                       q_ptr)
+    , q_ptr{q_ptr}
 {
 }
 
@@ -311,6 +312,9 @@ void text_input_v3::Private::set_commit_callback([[maybe_unused]] wl_client* wlC
 
     priv->serial++;
 
+    if (auto pool = priv->seat->text_inputs(); pool.v3.text_input == priv->q_ptr) {
+        pool.sync_to_input_method(priv->current, priv->pending);
+    }
     priv->current = priv->pending;
     priv->pending.surrounding_text.update = false;
 

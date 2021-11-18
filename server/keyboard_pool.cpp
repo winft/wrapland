@@ -73,12 +73,7 @@ void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
     Q_EMIT seat->keyboardCreated(keyboard);
 }
 
-enum class button_state {
-    released,
-    pressed,
-};
-
-bool keyboard_pool::update_key(uint32_t key, button_state state)
+bool keyboard_pool::update_key(uint32_t key, key_state state)
 {
     auto it = states.find(key);
     if (it != states.end() && it->second == state) {
@@ -88,28 +83,15 @@ bool keyboard_pool::update_key(uint32_t key, button_state state)
     return true;
 }
 
-void keyboard_pool::key_pressed(uint32_t key)
+void keyboard_pool::key(uint32_t key, key_state state)
 {
     lastStateSerial = seat->d_ptr->display()->handle()->nextSerial();
-    if (!update_key(key, button_state::pressed)) {
+    if (!update_key(key, state)) {
         return;
     }
     if (focus.surface) {
         for (auto kbd : focus.devices) {
-            kbd->keyPressed(lastStateSerial, key);
-        }
-    }
-}
-
-void keyboard_pool::key_released(uint32_t key)
-{
-    lastStateSerial = seat->d_ptr->display()->handle()->nextSerial();
-    if (!update_key(key, button_state::released)) {
-        return;
-    }
-    if (focus.surface) {
-        for (auto kbd : focus.devices) {
-            kbd->keyReleased(lastStateSerial, key);
+            kbd->key(lastStateSerial, key, state);
         }
     }
 }
@@ -198,7 +180,7 @@ std::vector<uint32_t> keyboard_pool::pressed_keys() const
 {
     std::vector<uint32_t> keys;
     for (auto const& [serial, state] : states) {
-        if (state == button_state::pressed) {
+        if (state == key_state::pressed) {
             keys.push_back(serial);
         }
     }

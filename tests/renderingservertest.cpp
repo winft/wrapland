@@ -196,7 +196,7 @@ void CompositorWindow::keyPressEvent(QKeyEvent* event)
         updateFocus();
     }
     m_seat->setTimestamp(event->timestamp());
-    m_seat->keyboards().key_pressed(event->nativeScanCode() - 8);
+    m_seat->keyboards().key(event->nativeScanCode() - 8, Wrapland::Server::key_state::pressed);
 }
 
 void CompositorWindow::keyReleaseEvent(QKeyEvent* event)
@@ -206,7 +206,7 @@ void CompositorWindow::keyReleaseEvent(QKeyEvent* event)
         return;
     }
     m_seat->setTimestamp(event->timestamp());
-    m_seat->keyboards().key_released(event->nativeScanCode() - 8);
+    m_seat->keyboards().key(event->nativeScanCode() - 8, Wrapland::Server::key_state::released);
 }
 
 void CompositorWindow::mouseMoveEvent(QMouseEvent* event)

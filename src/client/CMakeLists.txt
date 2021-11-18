@@ -58,6 +58,7 @@ set(CLIENT_LIB_SRCS
     text_input_v2.cpp
     text_input_v3.cpp
     viewporter.cpp
+    virtual_keyboard_v1.cpp
     wlr_output_configuration_v1.cpp
     wlr_output_manager_v1.cpp
     xdg_activation_v1.cpp
@@ -216,6 +217,11 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/virtual-keyboard-unstable-v1.xml
+  BASENAME virtual-keyboard-v1
+)
+
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
   PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-output/xdg-output-unstable-v1.xml
   BASENAME xdg-output-unstable-v1
 )
@@ -271,6 +277,7 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-server-decoration-palette-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-virtual-keyboard-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-gestures-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-pointer-constraints-unstable-v1-client-protocol.h
@@ -377,6 +384,7 @@ set(CLIENT_LIB_HEADERS
     text_input_v2.h
     text_input_v3.h
     viewporter.h
+    virtual_keyboard_v1.h
     xdg_activation_v1.h
     xdgdecoration.h
     xdg_shell.h

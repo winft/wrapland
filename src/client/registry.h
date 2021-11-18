@@ -77,6 +77,7 @@ struct zxdg_output_manager_v1;
 struct zxdg_decoration_manager_v1;
 struct zwp_keyboard_shortcuts_inhibit_manager_v1;
 struct zwp_linux_dmabuf_v1;
+struct zwp_virtual_keyboard_manager_v1;
 
 namespace Wrapland
 {
@@ -122,6 +123,7 @@ class SubCompositor;
 class TextInputManagerV2;
 class text_input_manager_v3;
 class Viewporter;
+class virtual_keyboard_manager_v1;
 class XdgShell;
 class RelativePointerManager;
 class XdgActivationV1;
@@ -216,6 +218,7 @@ public:
         XdgDecorationUnstableV1,        /// refers to zxdg_decoration_manager_v1, @since 0.0.554
         Keystate,                       ///< refers to org_kwin_keystate, @since 0.0.557
         Viewporter,                     ///< Refers to wp_viewporter, @since 0.518.0
+        VirtualKeyboardManagerV1, ///< Refers to zwp_virtual_keyboard_manager_v1, @since 0.524.0
         KeyboardShortcutsInhibitManagerV1,
         LinuxDmabufV1,
         PrimarySelectionDeviceManager,
@@ -610,6 +613,17 @@ public:
      * @since 0.518.0
      **/
     wp_viewporter* bindViewporter(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the zwp_virtual_keyboard_manager_v1 with @p name and @p version.
+     * If the @p name does not exist or is not for the text input interface in unstable version 3,
+     * @c null will be returned.
+     *
+     * Prefer using createVirtualKeyboardManagerV1 instead.
+     * @see createVirtualKeyboardManagerV1
+     * @since 0.524.0
+     **/
+    zwp_virtual_keyboard_manager_v1* bindVirtualKeyboardManagerV1(uint32_t name,
+                                                                  uint32_t version) const;
     /**
      * Binds the xdg_wm_base with @p name and @p version.
      * If the @p name does not exist or is not for the xdg shell interface in unstable version 5,
@@ -1287,6 +1301,25 @@ public:
      **/
     Viewporter* createViewporter(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
+     * Creates a text_input_manager_v3 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * This factory method supports the following interfaces:
+     * @li zwp_virtual_keyboard_manager_v1
+     *
+     * If @p name is for one of the supported interfaces the corresponding manager will be created,
+     * otherwise @c null will be returned.
+     *
+     * @param name The name of the interface to bind
+     * @param version The version of the interface to use
+     * @param parent The parent for the virtual_keyboard_manager_v1
+     *
+     * @returns The created virtual_keyboard_manager_v1
+     * @since 0.524.0
+     **/
+    virtual_keyboard_manager_v1*
+    createVirtualKeyboardManagerV1(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
      * Creates an XdgShell and sets it up to manage the interface identified by
      * @p name and @p version.
      *
@@ -1789,6 +1822,13 @@ Q_SIGNALS:
      **/
     void viewporterAnnounced(quint32 name, quint32 version);
     /**
+     * Emitted whenever a zwp_virtual_keyboard_manager_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     * @since 0.524.0
+     **/
+    void virtualKeyboardManagerV1Announced(quint32 name, quint32 version);
+    /**
      * Emitted whenever a zwp_relative_pointer_manager_v1 interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -2080,6 +2120,12 @@ Q_SIGNALS:
      * @since 0.518.0
      **/
     void viewporterRemoved(quint32 name);
+    /**
+     * Emitted whenever a zwp_virtual_keyboard_manager_v1 interface gets removed.
+     * @param name The name for the removed interface
+     * @since 0.524.0
+     **/
+    void virtualKeyboardManagerV1Removed(quint32 name);
     /**
      * Emitted whenever a zwp_relative_pointer_manager_v1 interface gets removed.
      * @param name The name for the removed interface

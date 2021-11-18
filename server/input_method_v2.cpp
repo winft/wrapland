@@ -110,12 +110,20 @@ void input_method_v2::Private::commit_callback([[maybe_unused]] wl_client* wlCli
                                                uint32_t serial)
 {
     auto priv = handle(wlResource)->d_ptr;
+
     if (priv->serial != serial) {
         // Not on latest done event. Reset pending to current state and wait for next commit.
         priv->pending = priv->current;
         return;
     }
+
+    priv->seat->text_inputs().sync_to_text_input(priv->current, priv->pending);
     priv->current = priv->pending;
+
+    priv->pending.preedit_string.update = false;
+    priv->pending.commit_string.update = false;
+    priv->pending.delete_surrounding_text.update = false;
+
     Q_EMIT priv->handle()->state_committed();
 }
 
@@ -131,6 +139,17 @@ void input_method_v2::Private::get_input_popup_surface_callback(
 
     auto popup
         = new input_method_popup_surface_v2(priv->client()->handle(), priv->version(), id, surface);
+
+    priv->popups.push_back(popup);
+    QObject::connect(popup,
+                     &input_method_popup_surface_v2::resourceDestroyed,
+                     priv->q_ptr,
+                     [priv, popup] { remove_one(priv->popups, popup); });
+
+    if (auto ti = priv->seat->text_inputs().v3.text_input) {
+        popup->set_text_input_rectangle(ti->state().cursor_rectangle);
+    }
+
     Q_EMIT priv->q_ptr->popup_surface_created(popup);
 }
 
@@ -200,6 +219,11 @@ input_method_v2_state const& input_method_v2::state() const
     return d_ptr->current;
 }
 
+std::vector<input_method_popup_surface_v2*> const& input_method_v2::get_popups() const
+{
+    return d_ptr->popups;
+}
+
 struct zwp_input_method_keyboard_grab_v2_interface const
     input_method_keyboard_grab_v2::Private::s_interface{
         destroyCallback,
@@ -241,18 +265,15 @@ void input_method_keyboard_grab_v2::set_keymap(std::string const& content)
     d_ptr->keymap = file_wrap(tmpf);
 }
 
-void input_method_keyboard_grab_v2::press_key(uint32_t time, uint32_t key)
+void input_method_keyboard_grab_v2::key(uint32_t time, uint32_t key, key_state state)
 {
     auto serial = d_ptr->client()->display()->handle()->nextSerial();
-    d_ptr->send<zwp_input_method_keyboard_grab_v2_send_key>(
-        serial, time, key, WL_KEYBOARD_KEY_STATE_PRESSED);
-}
-
-void input_method_keyboard_grab_v2::release_key(uint32_t time, uint32_t key)
-{
-    auto serial = d_ptr->client()->display()->handle()->nextSerial();
-    d_ptr->send<zwp_input_method_keyboard_grab_v2_send_key>(
-        serial, time, key, WL_KEYBOARD_KEY_STATE_RELEASED);
+    d_ptr->send<zwp_input_method_keyboard_grab_v2_send_key>(serial,
+                                                            time,
+                                                            key,
+                                                            state == key_state::pressed
+                                                                ? WL_KEYBOARD_KEY_STATE_PRESSED
+                                                                : WL_KEYBOARD_KEY_STATE_RELEASED);
 }
 
 void input_method_keyboard_grab_v2::update_modifiers(uint32_t depressed,
@@ -306,7 +327,7 @@ Surface* input_method_popup_surface_v2::surface() const
 
 void input_method_popup_surface_v2::set_text_input_rectangle(QRect const& rect)
 {
-    return d_ptr->send<zwp_input_popup_surface_v2_send_text_input_rectangle>(
+    d_ptr->send<zwp_input_popup_surface_v2_send_text_input_rectangle>(
         rect.x(), rect.y(), rect.width(), rect.height());
 }
 

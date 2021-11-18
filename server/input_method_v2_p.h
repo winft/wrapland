@@ -47,6 +47,8 @@ public:
     input_method_v2_state current;
     input_method_v2_state pending;
 
+    std::vector<input_method_popup_surface_v2*> popups;
+
     input_method_v2* q_ptr;
 
 private:

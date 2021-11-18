@@ -72,9 +72,10 @@ class ServerSideDecorationPaletteManager;
 class ShadowManager;
 class SlideManager;
 class Subcompositor;
+class text_input_manager_v2;
 class text_input_manager_v3;
-class TextInputManagerV2;
 class Viewporter;
+class virtual_keyboard_manager_v1;
 class XdgActivationV1;
 class XdgDecorationManager;
 class XdgForeign;
@@ -147,7 +148,7 @@ public:
     std::unique_ptr<KeyState> createKeyState();
     std::unique_ptr<PresentationManager> createPresentationManager();
 
-    std::unique_ptr<TextInputManagerV2> createTextInputManagerV2();
+    std::unique_ptr<text_input_manager_v2> createTextInputManagerV2();
     std::unique_ptr<text_input_manager_v3> createTextInputManagerV3();
     std::unique_ptr<input_method_manager_v2> createInputMethodManagerV2();
 
@@ -166,6 +167,7 @@ public:
     std::unique_ptr<ServerSideDecorationPaletteManager> createServerSideDecorationPaletteManager();
     std::unique_ptr<LinuxDmabufV1> createLinuxDmabuf();
     std::unique_ptr<Viewporter> createViewporter();
+    std::unique_ptr<virtual_keyboard_manager_v1> create_virtual_keyboard_manager_v1();
     XdgOutputManager* xdgOutputManager() const;
 
     std::unique_ptr<PlasmaVirtualDesktopManager> createPlasmaVirtualDesktopManager();

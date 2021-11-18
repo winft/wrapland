@@ -32,78 +32,100 @@ class Client;
 class Seat;
 class Surface;
 
-class WRAPLANDSERVER_EXPORT TextInputV2 : public QObject
+enum class text_input_v2_content_hint : uint32_t {
+    none = 0,
+    completion = 1 << 0,
+    correction = 1 << 1,
+    capitalization = 1 << 2,
+    lowercase = 1 << 3,
+    uppercase = 1 << 4,
+    titlecase = 1 << 5,
+    hidden_text = 1 << 6,
+    sensitive_data = 1 << 7,
+    latin = 1 << 8,
+    multiline = 1 << 9,
+};
+Q_DECLARE_FLAGS(text_input_v2_content_hints, text_input_v2_content_hint)
+
+enum class text_input_v2_content_purpose : uint32_t {
+    normal,
+    alpha,
+    digits,
+    number,
+    phone,
+    url,
+    email,
+    name,
+    password,
+    date,
+    time,
+    datetime,
+    terminal,
+};
+
+struct text_input_v2_state {
+    bool enabled{false};
+    std::string preferred_language;
+    QRect cursor_rectangle;
+
+    struct {
+        text_input_v2_content_hints hints{text_input_v2_content_hint::none};
+        text_input_v2_content_purpose purpose{text_input_v2_content_purpose::normal};
+    } content;
+
+    struct {
+        std::string data;
+        int32_t cursor_position{0};
+        int32_t selection_anchor{0};
+    } surrounding_text;
+};
+
+class WRAPLANDSERVER_EXPORT text_input_manager_v2 : public QObject
 {
     Q_OBJECT
 public:
-    enum class ContentHint : uint32_t {
-        None = 0,
-        AutoCompletion = 1 << 0,
-        AutoCorrection = 1 << 1,
-        AutoCapitalization = 1 << 2,
-        LowerCase = 1 << 3,
-        UpperCase = 1 << 4,
-        TitleCase = 1 << 5,
-        HiddenText = 1 << 6,
-        SensitiveData = 1 << 7,
-        Latin = 1 << 8,
-        MultiLine = 1 << 9,
-    };
-    Q_DECLARE_FLAGS(ContentHints, ContentHint)
+    explicit text_input_manager_v2(Display* display);
+    ~text_input_manager_v2() override;
 
-    enum class ContentPurpose : uint32_t {
-        Normal,
-        Alpha,
-        Digits,
-        Number,
-        Phone,
-        Url,
-        Email,
-        Name,
-        Password,
-        Date,
-        Time,
-        DateTime,
-        Terminal,
-    };
+private:
+    class Private;
+    std::unique_ptr<Private> d_ptr;
+};
+
+class WRAPLANDSERVER_EXPORT text_input_v2 : public QObject
+{
+    Q_OBJECT
+public:
+    text_input_v2_state const& state() const;
 
     Client* client() const;
-    QByteArray preferredLanguage() const;
-    QRect cursorRectangle() const;
-    ContentPurpose contentPurpose() const;
-    ContentHints contentHints() const;
-    QByteArray surroundingText() const;
-    qint32 surroundingTextCursorPosition() const;
-    qint32 surroundingTextSelectionAnchor() const;
     QPointer<Surface> surface() const;
-    bool isEnabled() const;
 
-    void preEdit(const QByteArray& text, const QByteArray& commitText);
-    void commit(const QByteArray& text);
-    void setPreEditCursor(qint32 index);
-    void deleteSurroundingText(quint32 beforeLength, quint32 afterLength);
-    void setCursorPosition(qint32 index, qint32 anchor);
-    void setTextDirection(Qt::LayoutDirection direction);
+    void set_preedit_string(std::string const& text, std::string const& commit);
+    void commit(std::string const& text);
+    void set_preedit_cursor(int32_t index);
+    void delete_surrounding_text(uint32_t beforeLength, uint32_t afterLength);
+    void set_cursor_position(int32_t index, int32_t anchor);
+    void set_text_direction(Qt::LayoutDirection direction);
 
-    void keysymPressed(quint32 keysym, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
-    void keysymReleased(quint32 keysym, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
-    void setInputPanelState(bool visible, const QRect& overlappedSurfaceArea);
-    void setLanguage(const QByteArray& languageTag);
+    void keysym_pressed(uint32_t keysym, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
+    void keysym_released(uint32_t keysym, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
+    void set_input_panel_state(bool visible, QRect const& overlapped_surface_area);
+    void set_language(std::string const& language_tag);
 
 Q_SIGNALS:
-    void requestShowInputPanel();
-    void requestHideInputPanel();
-    void requestReset();
-    void preferredLanguageChanged(const QByteArray& language);
-    void cursorRectangleChanged(const QRect& rect);
-    void contentTypeChanged();
-    void surroundingTextChanged();
-    void enabledChanged();
+    void show_input_panel_requested();
+    void hide_input_panel_requested();
+    void reset_requested();
+    void preferred_language_changed();
+    void cursor_rectangle_changed();
+    void content_type_changed();
+    void surrounding_text_changed();
     void resourceDestroyed();
 
 private:
-    explicit TextInputV2(Client* client, uint32_t version, uint32_t id);
-    friend class TextInputManagerV2;
+    explicit text_input_v2(Client* client, uint32_t version, uint32_t id);
+    friend class text_input_manager_v2;
     friend class Seat;
     friend class text_input_pool;
 
@@ -111,22 +133,10 @@ private:
     Private* d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT TextInputManagerV2 : public QObject
-{
-    Q_OBJECT
-public:
-    explicit TextInputManagerV2(Display* display);
-    ~TextInputManagerV2() override;
-
-private:
-    class Private;
-    std::unique_ptr<Private> d_ptr;
-};
-
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::TextInputV2*)
-Q_DECLARE_METATYPE(Wrapland::Server::TextInputV2::ContentHint)
-Q_DECLARE_METATYPE(Wrapland::Server::TextInputV2::ContentHints)
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::TextInputV2::ContentHints)
-Q_DECLARE_METATYPE(Wrapland::Server::TextInputV2::ContentPurpose)
+Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2*)
+Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2_content_hint)
+Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2_content_hints)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::text_input_v2_content_hints)
+Q_DECLARE_METATYPE(Wrapland::Server::text_input_v2_content_purpose)
