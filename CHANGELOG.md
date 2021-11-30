@@ -1,5 +1,12 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+### [0.523.1](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.523.0...wrapland@0.523.1) (2021-11-30)
+
+
+### Bug Fixes
+
+* **server:** handle panels set to "Windows can cover" ([c83f317](https://gitlab.com/kwinft/wrapland/commit/c83f317a53380c060f2cf07d77b02da9fb2a9f00))
+
 ## [0.523.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.523.0-beta.0...wrapland@0.523.0) (2021-10-14)
 
 ## [0.523.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.522.0-beta.0...wrapland@0.523.0-beta.0) (2021-10-06)
