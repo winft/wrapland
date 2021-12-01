@@ -283,7 +283,8 @@ bool ParamsV1::validate_params(QSize const& size)
             return false;
         }
 
-        if (i == 0 && uint64_t(plane.offset) + plane.stride * height > UINT32_MAX) {
+        if (i == 0
+            && uint64_t(plane.offset) + static_cast<uint64_t>(plane.stride * height) > UINT32_MAX) {
             postError(
                 ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
             return false;
