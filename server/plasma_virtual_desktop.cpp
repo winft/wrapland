@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include "plasma_virtual_desktop_p.h"
 
+#include "utils.h"
 #include "wayland/display.h"
 #include "wayland/global.h"
 #include "wayland/resource.h"
@@ -208,9 +209,9 @@ void PlasmaVirtualDesktop::Private::createResource(Wayland::Client* client,
                                                    uint32_t serial)
 {
     auto resource = new PlasmaVirtualDesktopRes(client->handle(), version, serial, q_ptr);
-    resources << resource;
+    resources.push_back(resource);
     connect(resource, &PlasmaVirtualDesktopRes::resourceDestroyed, q_ptr, [this, resource]() {
-        resources.removeOne(resource);
+        remove_one(resources, resource);
     });
 
     resource->d_ptr->send<org_kde_plasma_virtual_desktop_send_desktop_id>(id.c_str());
@@ -248,8 +249,8 @@ void PlasmaVirtualDesktop::setName(std::string const& name)
     }
 
     d_ptr->name = name;
-    for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_virtual_desktop_send_name>(name.c_str());
+    for (auto& res : d_ptr->resources) {
+        res->d_ptr->send<org_kde_plasma_virtual_desktop_send_name>(name.c_str());
     }
 }
 
@@ -266,12 +267,12 @@ void PlasmaVirtualDesktop::setActive(bool active)
 
     d_ptr->active = active;
     if (active) {
-        for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-            (*it)->d_ptr->send<org_kde_plasma_virtual_desktop_send_activated>();
+        for (auto& res : d_ptr->resources) {
+            res->d_ptr->send<org_kde_plasma_virtual_desktop_send_activated>();
         }
     } else {
-        for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-            (*it)->d_ptr->send<org_kde_plasma_virtual_desktop_send_deactivated>();
+        for (auto& res : d_ptr->resources) {
+            res->d_ptr->send<org_kde_plasma_virtual_desktop_send_deactivated>();
         }
     }
 }

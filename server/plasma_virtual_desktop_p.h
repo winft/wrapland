@@ -77,7 +77,7 @@ public:
 
     void createResource(Wayland::Client* client, uint32_t version, uint32_t serial);
 
-    QVector<PlasmaVirtualDesktopRes*> resources;
+    std::vector<PlasmaVirtualDesktopRes*> resources;
     std::string id;
     std::string name;
     bool active = false;
