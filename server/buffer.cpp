@@ -85,8 +85,8 @@ QImage ShmImage::Private::createQImage()
     }
 
     auto const size = buffer->size();
-    return QImage(
-        data, size.width(), size.height(), stride, qtFormat, &imageBufferCleanupHandler, display);
+    return {
+        data, size.width(), size.height(), stride, qtFormat, &imageBufferCleanupHandler, display};
 }
 
 void ShmImage::Private::imageBufferCleanupHandler(void* info)

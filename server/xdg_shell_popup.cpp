@@ -147,19 +147,19 @@ QPoint XdgShellPopup::transientOffset() const
     case Qt::TopEdge | Qt::LeftEdge:
         return rect.topLeft();
     case Qt::TopEdge:
-        return QPoint(center.x(), rect.y());
+        return {center.x(), rect.y()};
     case Qt::TopEdge | Qt::RightEdge:
         return rect.topRight();
     case Qt::RightEdge:
-        return QPoint(rect.right(), center.y());
+        return {rect.right(), center.y()};
     case Qt::BottomEdge | Qt::RightEdge:
         return rect.bottomRight();
     case Qt::BottomEdge:
-        return QPoint(center.x(), rect.bottom());
+        return {center.x(), rect.bottom()};
     case Qt::BottomEdge | Qt::LeftEdge:
         return rect.bottomLeft();
     case Qt::LeftEdge:
-        return QPoint(rect.left(), center.y());
+        return {rect.left(), center.y()};
     default:
         return center;
     }
