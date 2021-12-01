@@ -96,7 +96,7 @@ public:
 
     PlasmaWindow* parentWindow = nullptr;
     QMetaObject::Connection parentWindowDestroyConnection;
-    QStringList plasmaVirtualDesktops;
+    std::vector<std::string> plasmaVirtualDesktops;
     QRect geometry;
 
 private:

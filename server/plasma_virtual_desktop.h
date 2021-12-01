@@ -19,14 +19,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
-// TODO(romangg): For registring uint32_t with the Qt meta object system. Remove when not needed
-//                anymore.
+// TODO(romangg): For registring std::string and uint32_t with the Qt meta object system. Remove
+//                when not needed anymore.
 #include "display.h"
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
 #include <QObject>
 #include <memory>
+#include <string>
 
 namespace Wrapland::Server
 {
@@ -43,18 +44,18 @@ public:
 
     void setRows(uint32_t rows);
 
-    PlasmaVirtualDesktop* desktop(const QString& id);
+    PlasmaVirtualDesktop* desktop(std::string const& id);
     std::vector<PlasmaVirtualDesktop*> const& desktops() const;
 
-    PlasmaVirtualDesktop* createDesktop(const QString& id,
+    PlasmaVirtualDesktop* createDesktop(std::string const& id,
                                         uint32_t position = std::numeric_limits<uint32_t>::max());
-    void removeDesktop(const QString& id);
+    void removeDesktop(std::string const& id);
     void sendDone();
 
 Q_SIGNALS:
-    void desktopActivated(const QString& id);
-    void desktopCreateRequested(const QString& name, uint32_t position);
-    void desktopRemoveRequested(const QString& id);
+    void desktopActivated(std::string const& id);
+    void desktopCreateRequested(std::string const& name, uint32_t position);
+    void desktopRemoveRequested(std::string const& id);
 
 private:
     class Private;
@@ -65,10 +66,10 @@ class WRAPLANDSERVER_EXPORT PlasmaVirtualDesktop : public QObject
 {
     Q_OBJECT
 public:
-    QString id() const;
+    std::string const& id() const;
 
-    void setName(const QString& name);
-    QString name() const;
+    void setName(std::string const& name);
+    std::string const& name() const;
 
     void setActive(bool active);
     bool active() const;

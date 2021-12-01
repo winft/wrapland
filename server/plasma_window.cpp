@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "plasma_virtual_desktop.h"
 #include "surface.h"
+#include "utils.h"
 
 #include <QFile>
 #include <QHash>
@@ -212,8 +213,7 @@ void PlasmaWindow::Private::createResource(uint32_t version,
 
     windowRes->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_changed>(m_virtualDesktop);
     for (const auto& desk : plasmaVirtualDesktops) {
-        windowRes->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(
-            desk.toUtf8().constData());
+        windowRes->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(desk.c_str());
     }
     if (!m_appId.isEmpty()) {
         windowRes->d_ptr->send<org_kde_plasma_window_send_app_id_changed>(
@@ -499,30 +499,29 @@ void PlasmaWindow::setOnAllDesktops(bool set)
 
     // the current vd management
     if (set) {
-        if (d_ptr->plasmaVirtualDesktops.isEmpty()) {
+        if (d_ptr->plasmaVirtualDesktops.empty()) {
             return;
         }
         // leaving everything means on all desktops
         auto const desktops = plasmaVirtualDesktops();
         for (auto const& desk : desktops) {
             for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-                (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(
-                    desk.toUtf8().constData());
+                (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(desk.c_str());
             }
         }
         d_ptr->plasmaVirtualDesktops.clear();
     } else {
-        if (!d_ptr->plasmaVirtualDesktops.isEmpty()) {
+        if (!d_ptr->plasmaVirtualDesktops.empty()) {
             return;
         }
         // enters the desktops which are active (usually only one  but not a given)
         for (auto desk : d_ptr->manager->virtualDesktopManager()->desktops()) {
-            if (desk->active() && !d_ptr->plasmaVirtualDesktops.contains(desk->id())) {
-                d_ptr->plasmaVirtualDesktops << desk->id();
+            if (desk->active() && !contains(d_ptr->plasmaVirtualDesktops, desk->id())) {
+                d_ptr->plasmaVirtualDesktops.push_back(desk->id());
                 for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd();
                      ++it) {
                     (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(
-                        desk->id().toUtf8().constData());
+                        desk->id().c_str());
                 }
             }
         }
@@ -569,10 +568,10 @@ void PlasmaWindow::setIcon(const QIcon& icon)
     d_ptr->setIcon(icon);
 }
 
-void PlasmaWindow::addPlasmaVirtualDesktop(const QString& id)
+void PlasmaWindow::addPlasmaVirtualDesktop(std::string const& id)
 {
     // don't add a desktop we're not sure it exists
-    if (!d_ptr->manager->virtualDesktopManager() || d_ptr->plasmaVirtualDesktops.contains(id)) {
+    if (!d_ptr->manager->virtualDesktopManager() || contains(d_ptr->plasmaVirtualDesktops, id)) {
         return;
     }
 
@@ -582,36 +581,34 @@ void PlasmaWindow::addPlasmaVirtualDesktop(const QString& id)
         return;
     }
 
-    d_ptr->plasmaVirtualDesktops << id;
+    d_ptr->plasmaVirtualDesktops.push_back(id);
 
     // if the desktop dies, remove it from or list
     connect(desktop, &QObject::destroyed, this, [this, id]() { removePlasmaVirtualDesktop(id); });
 
     for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(
-            id.toUtf8().constData());
+        (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(id.c_str());
     }
 }
 
-void PlasmaWindow::removePlasmaVirtualDesktop(const QString& id)
+void PlasmaWindow::removePlasmaVirtualDesktop(std::string const& id)
 {
-    if (!d_ptr->plasmaVirtualDesktops.contains(id)) {
+    if (!contains(d_ptr->plasmaVirtualDesktops, id)) {
         return;
     }
 
-    d_ptr->plasmaVirtualDesktops.removeAll(id);
+    remove_all(d_ptr->plasmaVirtualDesktops, id);
     for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(
-            id.toUtf8().constData());
+        (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(id.c_str());
     }
 
     // we went on all desktops
-    if (d_ptr->plasmaVirtualDesktops.isEmpty()) {
+    if (d_ptr->plasmaVirtualDesktops.empty()) {
         setOnAllDesktops(true);
     }
 }
 
-QStringList PlasmaWindow::plasmaVirtualDesktops() const
+std::vector<std::string> const& PlasmaWindow::plasmaVirtualDesktops() const
 {
     return d_ptr->plasmaVirtualDesktops;
 }

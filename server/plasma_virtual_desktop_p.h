@@ -45,7 +45,7 @@ public:
     Private(Display* display, PlasmaVirtualDesktopManager* q);
 
     void bindInit(PlasmaVirtualDesktopManagerBind* bind) override;
-    void send_removed(QString const& id);
+    void send_removed(std::string const& id);
 
     uint32_t rows = 0;
     uint32_t columns = 0;
@@ -78,8 +78,8 @@ public:
     void createResource(Wayland::Client* client, uint32_t version, uint32_t serial);
 
     QVector<PlasmaVirtualDesktopRes*> resources;
-    QString id;
-    QString name;
+    std::string id;
+    std::string name;
     bool active = false;
 
     PlasmaVirtualDesktopManager* manager;

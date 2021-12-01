@@ -45,7 +45,7 @@ PlasmaVirtualDesktopManager::Private::Private(Display* display, PlasmaVirtualDes
     create();
 }
 
-auto find_desktop(std::vector<PlasmaVirtualDesktop*> const& desktops, QString const& id)
+auto find_desktop(std::vector<PlasmaVirtualDesktop*> const& desktops, std::string const& id)
 {
     return std::find_if(
         desktops.cbegin(), desktops.cend(), [&id](auto desk) { return desk->id() == id; });
@@ -60,8 +60,7 @@ void PlasmaVirtualDesktopManager::Private::getVirtualDesktopCallback(
     auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
-    if (auto it = find_desktop(priv->desktops, QString::fromUtf8(id));
-        it != priv->desktops.cend()) {
+    if (auto it = find_desktop(priv->desktops, id); it != priv->desktops.cend()) {
         (*it)->d_ptr->createResource(bind->client(), bind->version(), serial);
     }
 }
@@ -74,8 +73,7 @@ void PlasmaVirtualDesktopManager::Private::requestCreateVirtualDesktopCallback(
 {
     auto manager = handle(wlResource);
     Q_EMIT manager->desktopCreateRequested(
-        QString::fromUtf8(name),
-        qBound<uint32_t>(0, position, static_cast<uint32_t>(manager->desktops().size())));
+        name, qBound<uint32_t>(0, position, static_cast<uint32_t>(manager->desktops().size())));
 }
 
 void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
@@ -84,7 +82,7 @@ void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
     const char* id)
 {
     auto manager = handle(wlResource);
-    Q_EMIT manager->desktopRemoveRequested(QString::fromUtf8(id));
+    Q_EMIT manager->desktopRemoveRequested(id);
 }
 
 void PlasmaVirtualDesktopManager::Private::bindInit(PlasmaVirtualDesktopManagerBind* bind)
@@ -92,7 +90,7 @@ void PlasmaVirtualDesktopManager::Private::bindInit(PlasmaVirtualDesktopManagerB
     uint32_t i = 0;
     for (auto& desktop : desktops) {
         bind->send<org_kde_plasma_virtual_desktop_management_send_desktop_created>(
-            desktop->id().toUtf8().constData(), i++);
+            desktop->id().c_str(), i++);
     }
 
     bind->send<org_kde_plasma_virtual_desktop_management_send_rows,
@@ -106,9 +104,9 @@ PlasmaVirtualDesktopManager::PlasmaVirtualDesktopManager(Display* display)
 {
 }
 
-void PlasmaVirtualDesktopManager::Private::send_removed(QString const& id)
+void PlasmaVirtualDesktopManager::Private::send_removed(std::string const& id)
 {
-    send<org_kde_plasma_virtual_desktop_management_send_desktop_removed>(id.toUtf8().constData());
+    send<org_kde_plasma_virtual_desktop_management_send_desktop_removed>(id.c_str());
 }
 
 PlasmaVirtualDesktopManager::~PlasmaVirtualDesktopManager()
@@ -129,7 +127,7 @@ void PlasmaVirtualDesktopManager::setRows(uint32_t rows)
     d_ptr->send<org_kde_plasma_virtual_desktop_management_send_rows>(rows);
 }
 
-PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::desktop(const QString& id)
+PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::desktop(std::string const& id)
 {
     if (auto it = find_desktop(d_ptr->desktops, id); it != d_ptr->desktops.cend()) {
         return *it;
@@ -137,7 +135,7 @@ PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::desktop(const QString& id)
     return nullptr;
 }
 
-PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::createDesktop(const QString& id,
+PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::createDesktop(std::string const& id,
                                                                  uint32_t position)
 {
     if (auto it = find_desktop(d_ptr->desktops, id); it != d_ptr->desktops.cend()) {
@@ -157,13 +155,13 @@ PlasmaVirtualDesktop* PlasmaVirtualDesktopManager::createDesktop(const QString& 
 
     d_ptr->desktops.insert(d_ptr->desktops.cbegin() + actualPosition, desktop);
 
-    d_ptr->send<org_kde_plasma_virtual_desktop_management_send_desktop_created>(
-        id.toUtf8().constData(), actualPosition);
+    d_ptr->send<org_kde_plasma_virtual_desktop_management_send_desktop_created>(id.c_str(),
+                                                                                actualPosition);
 
     return desktop;
 }
 
-void PlasmaVirtualDesktopManager::removeDesktop(const QString& id)
+void PlasmaVirtualDesktopManager::removeDesktop(std::string const& id)
 {
     auto deskIt = std::find_if(d_ptr->desktops.begin(), d_ptr->desktops.end(), [&id](auto desk) {
         return desk->id() == id;
@@ -215,10 +213,10 @@ void PlasmaVirtualDesktop::Private::createResource(Wayland::Client* client,
         resources.removeOne(resource);
     });
 
-    resource->d_ptr->send<org_kde_plasma_virtual_desktop_send_desktop_id>(id.toUtf8().constData());
+    resource->d_ptr->send<org_kde_plasma_virtual_desktop_send_desktop_id>(id.c_str());
 
-    if (!name.isEmpty()) {
-        resource->d_ptr->send<org_kde_plasma_virtual_desktop_send_name>(name.toUtf8().constData());
+    if (!name.empty()) {
+        resource->d_ptr->send<org_kde_plasma_virtual_desktop_send_name>(name.c_str());
     }
 
     if (active) {
@@ -238,12 +236,12 @@ PlasmaVirtualDesktop::PlasmaVirtualDesktop(PlasmaVirtualDesktopManager* parent)
 
 PlasmaVirtualDesktop::~PlasmaVirtualDesktop() = default;
 
-QString PlasmaVirtualDesktop::id() const
+std::string const& PlasmaVirtualDesktop::id() const
 {
     return d_ptr->id;
 }
 
-void PlasmaVirtualDesktop::setName(const QString& name)
+void PlasmaVirtualDesktop::setName(std::string const& name)
 {
     if (d_ptr->name == name) {
         return;
@@ -251,11 +249,11 @@ void PlasmaVirtualDesktop::setName(const QString& name)
 
     d_ptr->name = name;
     for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_virtual_desktop_send_name>(name.toUtf8().constData());
+        (*it)->d_ptr->send<org_kde_plasma_virtual_desktop_send_name>(name.c_str());
     }
 }
 
-QString PlasmaVirtualDesktop::name() const
+std::string const& PlasmaVirtualDesktop::name() const
 {
     return d_ptr->name;
 }

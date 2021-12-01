@@ -24,6 +24,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Server/wraplandserver_export.h>
 
 #include <memory>
+#include <string>
+#include <vector>
 
 class QSize;
 
@@ -104,9 +106,9 @@ public:
     void setGeometry(const QRect& geometry);
     void setIcon(const QIcon& icon);
 
-    void addPlasmaVirtualDesktop(const QString& id);
-    void removePlasmaVirtualDesktop(const QString& id);
-    QStringList plasmaVirtualDesktops() const;
+    void addPlasmaVirtualDesktop(std::string const& id);
+    void removePlasmaVirtualDesktop(std::string const& id);
+    std::vector<std::string> const& plasmaVirtualDesktops() const;
 
 Q_SIGNALS:
     void closeRequested();
