@@ -37,8 +37,8 @@ void KeyState::Private::fetchStatesCallback(KeyStateBind* bind)
 {
     auto priv = bind->global()->handle()->d_ptr.get();
 
-    for (int i = 0; i < priv->m_keyStates.count(); ++i) {
-        priv->send<org_kde_kwin_keystate_send_stateChanged>(bind, i, priv->m_keyStates[i]);
+    for (size_t i = 0; i < priv->key_states.size(); ++i) {
+        priv->send<org_kde_kwin_keystate_send_stateChanged>(bind, i, priv->key_states.at(i));
     }
 }
 
@@ -50,7 +50,7 @@ KeyState::~KeyState() = default;
 
 void KeyState::setState(KeyState::Key key, KeyState::State state)
 {
-    d_ptr->m_keyStates[int(key)] = state;
+    d_ptr->key_states.at(size_t(key)) = state;
     d_ptr->send<org_kde_kwin_keystate_send_stateChanged>(int(key), int(state));
 }
 

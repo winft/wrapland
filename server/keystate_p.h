@@ -26,7 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/global.h"
 #include "wayland/resource.h"
 
-#include <QVector>
+#include <array>
 #include <memory>
 #include <wayland-keystate-server-protocol.h>
 
@@ -46,7 +46,7 @@ public:
     ~Private() override;
     static void fetchStatesCallback(KeyStateBind* bind);
 
-    QVector<State> m_keyStates = QVector<State>(3, Unlocked);
+    std::array<State, 3> key_states{Unlocked};
     static const struct org_kde_kwin_keystate_interface s_interface;
 };
 }
