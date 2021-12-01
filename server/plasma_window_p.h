@@ -89,7 +89,7 @@ public:
     // TODO(romangg): Might make sense to have this as a non-static member function instead.
     static PlasmaWindowRes* getResourceOfParent(PlasmaWindow* parent, PlasmaWindowRes* childRes);
 
-    QVector<PlasmaWindowRes*> resources;
+    std::vector<PlasmaWindowRes*> resources;
     uint32_t windowId = 0;
     QHash<Surface*, QRect> minimizedGeometries;
     PlasmaWindowManager* manager;
