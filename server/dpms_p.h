@@ -25,9 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-dpms-server-protocol.h>
 
-namespace Wrapland
-{
-namespace Server
+namespace Wrapland::Server
 {
 
 class WlOutput;
@@ -79,5 +77,4 @@ private:
     static const struct org_kde_kwin_dpms_interface s_interface;
 };
 
-}
 }
