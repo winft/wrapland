@@ -45,14 +45,12 @@ public:
     Private(Display* display, PlasmaVirtualDesktopManager* q);
 
     void bindInit(PlasmaVirtualDesktopManagerBind* bind) override;
+    void send_removed(QString const& id);
 
     uint32_t rows = 0;
     uint32_t columns = 0;
 
-    QList<PlasmaVirtualDesktop*> desktops;
-
-    QList<PlasmaVirtualDesktop*>::const_iterator constFindDesktop(const QString& id) const;
-    QList<PlasmaVirtualDesktop*>::iterator findDesktop(const QString& id);
+    std::vector<PlasmaVirtualDesktop*> desktops;
 
 private:
     static void getVirtualDesktopCallback(wl_client* client,

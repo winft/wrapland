@@ -44,7 +44,7 @@ public:
     void setRows(uint32_t rows);
 
     PlasmaVirtualDesktop* desktop(const QString& id);
-    QList<PlasmaVirtualDesktop*> desktops() const;
+    std::vector<PlasmaVirtualDesktop*> const& desktops() const;
 
     PlasmaVirtualDesktop* createDesktop(const QString& id,
                                         uint32_t position = std::numeric_limits<uint32_t>::max());

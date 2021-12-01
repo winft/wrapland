@@ -265,7 +265,7 @@ void TestVirtualDesktop::testCreate()
     QCOMPARE(desktop3->name(), QStringLiteral("Desktop 3"));
 
     // coherence of order between client and server
-    QCOMPARE(server.plasma_vd->desktops().length(), 3);
+    QCOMPARE(server.plasma_vd->desktops().size(), 3);
     QCOMPARE(m_plasmaVirtualDesktopManagement->desktops().length(), 3);
 
     for (int i = 0; i < m_plasmaVirtualDesktopManagement->desktops().length(); ++i) {
@@ -326,7 +326,7 @@ void TestVirtualDesktop::testDestroy()
     // rebuild some desktops
     testCreate();
 
-    Wrapland::Server::PlasmaVirtualDesktop* serverDesktop1 = server.plasma_vd->desktops().first();
+    auto serverDesktop1 = server.plasma_vd->desktops().front();
     Wrapland::Client::PlasmaVirtualDesktop* desktop1
         = m_plasmaVirtualDesktopManagement->desktops().first();
 
@@ -342,7 +342,7 @@ void TestVirtualDesktop::testDestroy()
     QTRY_COMPARE(desktop1DestroyedSpy.count(), 1);
 
     // coherence of order between client and server
-    QCOMPARE(server.plasma_vd->desktops().length(), 2);
+    QCOMPARE(server.plasma_vd->desktops().size(), 2);
     QCOMPARE(m_plasmaVirtualDesktopManagement->desktops().length(), 2);
 
     for (int i = 0; i < m_plasmaVirtualDesktopManagement->desktops().length(); ++i) {
@@ -359,7 +359,7 @@ void TestVirtualDesktop::testDestroy()
     desktopManagerRemovedSpy.wait();
     QCOMPARE(desktopManagerRemovedSpy.takeFirst().at(0).toString(), QStringLiteral("0-2"));
 
-    QCOMPARE(server.plasma_vd->desktops().length(), 1);
+    QCOMPARE(server.plasma_vd->desktops().size(), 1);
     QCOMPARE(m_plasmaVirtualDesktopManagement->desktops().length(), 1);
 }
 
@@ -368,7 +368,7 @@ void TestVirtualDesktop::testActivate()
     // rebuild some desktops
     testCreate();
 
-    Wrapland::Server::PlasmaVirtualDesktop* serverDesktop1 = server.plasma_vd->desktops().first();
+    Wrapland::Server::PlasmaVirtualDesktop* serverDesktop1 = server.plasma_vd->desktops().front();
     Wrapland::Client::PlasmaVirtualDesktop* desktop1
         = m_plasmaVirtualDesktopManagement->desktops().first();
     QVERIFY(desktop1->isActive());
