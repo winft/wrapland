@@ -37,8 +37,10 @@ void KeyState::Private::fetchStatesCallback(KeyStateBind* bind)
 {
     auto priv = bind->global()->handle()->d_ptr.get();
 
-    for (size_t i = 0; i < priv->key_states.size(); ++i) {
-        priv->send<org_kde_kwin_keystate_send_stateChanged>(bind, i, priv->key_states.at(i));
+    auto index{0};
+    for (auto&& state : priv->key_states) {
+        priv->send<org_kde_kwin_keystate_send_stateChanged>(bind, index, state);
+        index++;
     }
 }
 

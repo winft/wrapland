@@ -59,7 +59,10 @@ void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
     // Send formats & modifiers.
     QHash<uint32_t, QSet<uint64_t>>::const_iterator it = supportedFormatsWithModifiers.constBegin();
 
-    while (it != supportedFormatsWithModifiers.constEnd()) {
+    for (;;) {
+        if (it == supportedFormatsWithModifiers.constEnd()) {
+            break;
+        }
         QSet<uint64_t> modifiers = it.value();
         if (modifiers.isEmpty()) {
             modifiers << DRM_FORMAT_MOD_INVALID;

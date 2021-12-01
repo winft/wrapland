@@ -66,7 +66,11 @@ void XdgShellPopup::Private::ackConfigure(uint32_t serial)
         return;
     }
 
-    while (!serials.empty()) {
+    for (;;) {
+        if (serials.empty()) {
+            break;
+        }
+
         uint32_t i = serials.front();
         serials.pop_front();
 

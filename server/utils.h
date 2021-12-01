@@ -44,9 +44,9 @@ static void forEachInterface(Surface* surface, Vector const& interfaces, UnaryFu
     if (!surface) {
         return;
     }
-    for (auto it = interfaces.cbegin(); it != interfaces.cend(); ++it) {
-        if ((*it)->client() == surface->client()) {
-            method(*it);
+    for (auto const& iface : interfaces) {
+        if (iface->client() == surface->client()) {
+            method(iface);
         }
     }
 }

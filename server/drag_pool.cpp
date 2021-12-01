@@ -193,13 +193,12 @@ void drag_pool::update_target(Surface* surface,
     for (auto&& dev : devices) {
         auto destroy_notifier
             = QObject::connect(dev, &data_device::resourceDestroyed, seat, [this, dev] {
-                  for (auto it = target.devices.begin(); it < target.devices.end(); it++) {
-                      if (it->dev != dev) {
-                          continue;
-                      }
+                  auto it = std::find_if(target.devices.begin(),
+                                         target.devices.end(),
+                                         [&dev](auto& target) { return target.dev == dev; });
+                  if (it != target.devices.end()) {
                       QObject::disconnect(it->destroy_notifier);
                       target.devices.erase(it);
-                      break;
                   }
                   if (target.devices.empty()) {
                       // TODO(romangg): Inform source?
