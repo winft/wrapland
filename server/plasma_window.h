@@ -48,7 +48,7 @@ public:
     void setShowingDesktopState(ShowingDesktopState state);
 
     PlasmaWindow* createWindow(QObject* parent = nullptr);
-    QList<PlasmaWindow*> windows() const;
+    std::vector<PlasmaWindow*> const& windows() const;
 
     void unmapWindow(PlasmaWindow* window);
 

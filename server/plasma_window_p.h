@@ -53,7 +53,7 @@ public:
     void bindInit(PlasmaWindowManagerBind* bind) override;
 
     ShowingDesktopState desktopState = ShowingDesktopState::Disabled;
-    QList<PlasmaWindow*> windows;
+    std::vector<PlasmaWindow*> windows;
     PlasmaVirtualDesktopManager* virtualDesktopManager = nullptr;
     uint32_t windowIdCounter = 0;
 

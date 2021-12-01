@@ -32,6 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 #include <QtConcurrentRun>
 
+#include <cassert>
 #include <csignal>
 #include <wayland-server.h>
 
@@ -67,8 +68,8 @@ PlasmaWindowManager::~PlasmaWindowManager() = default;
 
 void PlasmaWindowManager::Private::bindInit(PlasmaWindowManagerBind* bind)
 {
-    for (auto it = windows.constBegin(); it != windows.constEnd(); ++it) {
-        send<org_kde_plasma_window_management_send_window>(bind, (*it)->d_ptr->windowId);
+    for (auto&& window : windows) {
+        send<org_kde_plasma_window_management_send_window>(bind, window->d_ptr->windowId);
     }
 }
 
@@ -116,13 +117,12 @@ void PlasmaWindowManager::Private::getWindowCallback([[maybe_unused]] wl_client*
     auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
-    auto it = std::find_if(priv->windows.constBegin(),
-                           priv->windows.constEnd(),
-                           [internalWindowId](PlasmaWindow* window) {
-                               return window->d_ptr->windowId == internalWindowId;
-                           });
+    auto it = std::find_if(
+        priv->windows.cbegin(), priv->windows.cend(), [internalWindowId](auto window) {
+            return window->d_ptr->windowId == internalWindowId;
+        });
 
-    if (it == priv->windows.constEnd()) {
+    if (it == priv->windows.cend()) {
         // Create a temp window just for the resource and directly send unmapped.
         auto window = std::unique_ptr<PlasmaWindow>(new PlasmaWindow(priv->handle()));
         window->d_ptr->createResource(bind->version(), id, bind->client(), true);
@@ -149,14 +149,14 @@ PlasmaWindow* PlasmaWindowManager::createWindow(QObject* parent)
 
     d_ptr->send<org_kde_plasma_window_management_send_window>(window->d_ptr->windowId);
 
-    d_ptr->windows << window;
+    d_ptr->windows.push_back(window);
     connect(
-        window, &QObject::destroyed, this, [this, window] { d_ptr->windows.removeAll(window); });
+        window, &QObject::destroyed, this, [this, window] { remove_all(d_ptr->windows, window); });
 
     return window;
 }
 
-QList<PlasmaWindow*> PlasmaWindowManager::windows() const
+std::vector<PlasmaWindow*> const& PlasmaWindowManager::windows() const
 {
     return d_ptr->windows;
 }
@@ -167,8 +167,8 @@ void PlasmaWindowManager::unmapWindow(PlasmaWindow* window)
         return;
     }
 
-    d_ptr->windows.removeOne(window);
-    Q_ASSERT(!d_ptr->windows.contains(window));
+    remove_one(d_ptr->windows, window);
+    assert(!contains(d_ptr->windows, window));
 
     window->d_ptr->unmap();
     delete window;
