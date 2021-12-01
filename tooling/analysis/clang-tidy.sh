@@ -16,5 +16,5 @@ fi
 cd $SOURCE_DIR
 python2 <(curl -s $RUN_SCRIPT_URL) \
     -p="$BUILD_DIR" \
-    -header-filter="${SOURCE_DIR}/server/" \
+    -header-filter="^${SOURCE_DIR}/server/" \
     ${SOURCE_DIR}/server
