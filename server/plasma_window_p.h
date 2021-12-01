@@ -53,7 +53,7 @@ public:
     void bindInit(PlasmaWindowManagerBind* bind) override;
 
     ShowingDesktopState desktopState = ShowingDesktopState::Disabled;
-    QList<PlasmaWindow*> windows;
+    std::vector<PlasmaWindow*> windows;
     PlasmaVirtualDesktopManager* virtualDesktopManager = nullptr;
     uint32_t windowIdCounter = 0;
 
@@ -89,14 +89,14 @@ public:
     // TODO(romangg): Might make sense to have this as a non-static member function instead.
     static PlasmaWindowRes* getResourceOfParent(PlasmaWindow* parent, PlasmaWindowRes* childRes);
 
-    QVector<PlasmaWindowRes*> resources;
+    std::vector<PlasmaWindowRes*> resources;
     uint32_t windowId = 0;
     QHash<Surface*, QRect> minimizedGeometries;
     PlasmaWindowManager* manager;
 
     PlasmaWindow* parentWindow = nullptr;
     QMetaObject::Connection parentWindowDestroyConnection;
-    QStringList plasmaVirtualDesktops;
+    std::vector<std::string> plasmaVirtualDesktops;
     QRect geometry;
 
 private:

@@ -11,7 +11,6 @@
 #include "wayland/resource.h"
 
 #include <QObject>
-#include <deque>
 
 #include <wayland-virtual-keyboard-v1-server-protocol.h>
 

@@ -65,7 +65,7 @@ public:
     Surface* parentOf(Surface* surface);
 
 Q_SIGNALS:
-    void parentChanged(Wrapland::Server::Surface* child, Wrapland::Server::Surface* parent);
+    void parentChanged(Wrapland::Server::Surface* parent, Wrapland::Server::Surface* child);
 
 private:
     class Private;

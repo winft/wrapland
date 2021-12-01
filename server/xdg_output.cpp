@@ -21,6 +21,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "wl_output_p.h"
 
+#include <cassert>
+
 namespace Wrapland::Server
 {
 
@@ -48,19 +50,6 @@ void XdgOutputManager::Private::getXdgOutputCallback(XdgOutputManagerBind* bind,
 {
     auto priv = bind->global()->handle()->d_ptr.get();
 
-    auto output_handle = WlOutputGlobal::handle(outputResource);
-    if (!output_handle) {
-        // Output client is requesting XdgOutput for an wl_output that doesn't exist.
-        return;
-    }
-
-    auto output = output_handle->output();
-
-    if (priv->outputs.find(output) == priv->outputs.end()) {
-        // Server hasn't created an XdgOutput for this output yet, give the client nothing.
-        return;
-    }
-
     auto xdgOutputV1 = new XdgOutputV1(bind->client()->handle(), bind->version(), id);
     if (!xdgOutputV1->d_ptr->resource()) {
         bind->post_no_memory();
@@ -68,7 +57,17 @@ void XdgOutputManager::Private::getXdgOutputCallback(XdgOutputManagerBind* bind,
         return;
     }
 
+    auto output_handle = WlOutputGlobal::handle(outputResource);
+    if (!output_handle) {
+        // Has been destroyed in between.
+        return;
+    }
+
+    auto output = output_handle->output();
+
+    assert(priv->outputs.find(output) != priv->outputs.end());
     auto xdgOutput = priv->outputs[output];
+
     xdgOutput->d_ptr->resourceConnected(xdgOutputV1);
     connect(xdgOutputV1, &XdgOutputV1::resourceDestroyed, xdgOutput, [xdgOutput, xdgOutputV1]() {
         xdgOutput->d_ptr->resourceDisconnected(xdgOutputV1);

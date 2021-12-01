@@ -69,13 +69,12 @@ Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, WlOutput* 
 {
 }
 
-void Dpms::Private::setCallback(wl_client* client, wl_resource* wlResource, uint32_t mode)
+void Dpms::Private::setCallback(wl_client* /*client*/, wl_resource* wlResource, uint32_t mode)
 {
-    Q_UNUSED(client)
-    Output::DpmsMode dpmsMode;
+    auto dpmsMode{Output::DpmsMode::On};
+
     switch (mode) {
     case ORG_KDE_KWIN_DPMS_MODE_ON:
-        dpmsMode = Output::DpmsMode::On;
         break;
     case ORG_KDE_KWIN_DPMS_MODE_STANDBY:
         dpmsMode = Output::DpmsMode::Standby;
@@ -89,6 +88,7 @@ void Dpms::Private::setCallback(wl_client* client, wl_resource* wlResource, uint
     default:
         return;
     }
+
     Q_EMIT handle(wlResource)->d_ptr->output->output()->dpms_mode_requested(dpmsMode);
 }
 

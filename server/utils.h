@@ -44,9 +44,9 @@ static void forEachInterface(Surface* surface, Vector const& interfaces, UnaryFu
     if (!surface) {
         return;
     }
-    for (auto it = interfaces.cbegin(); it != interfaces.cend(); ++it) {
-        if ((*it)->client() == surface->client()) {
-            method(*it);
+    for (auto const& iface : interfaces) {
+        if (iface->client() == surface->client()) {
+            method(iface);
         }
     }
 }
@@ -58,6 +58,16 @@ bool has_keyboard_focus(Device* device, Seat* seat)
     return device && focused_surface && (focused_surface->client() == device->client());
 }
 
+template<typename V, typename T>
+bool contains(V const& container, T const& arg)
+{
+    return std::find(container.cbegin(), container.cend(), arg) != container.cend();
+}
+template<typename V, typename T>
+void remove_all(V& container, T const& arg)
+{
+    container.erase(std::remove(container.begin(), container.end(), arg), container.end());
+}
 template<typename V, typename T>
 bool remove_one(V& container, T const& arg)
 {
