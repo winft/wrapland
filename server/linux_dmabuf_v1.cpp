@@ -50,6 +50,8 @@ LinuxDmabufV1::Private::~Private() = default;
 const struct zwp_linux_dmabuf_v1_interface LinuxDmabufV1::Private::s_interface = {
     resourceDestroyCallback,
     cb<createParamsCallback>,
+    // TODO(romangg): Update linux-dmabuf protocol version (currently at 3).
+    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
 };
 
 constexpr size_t modifierShift = 32;
