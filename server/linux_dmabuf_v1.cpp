@@ -50,6 +50,8 @@ LinuxDmabufV1::Private::~Private() = default;
 const struct zwp_linux_dmabuf_v1_interface LinuxDmabufV1::Private::s_interface = {
     resourceDestroyCallback,
     cb<createParamsCallback>,
+    // TODO(romangg): Update linux-dmabuf protocol version (currently at 3).
+    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
 };
 
 constexpr size_t modifierShift = 32;
@@ -59,7 +61,10 @@ void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
     // Send formats & modifiers.
     QHash<uint32_t, QSet<uint64_t>>::const_iterator it = supportedFormatsWithModifiers.constBegin();
 
-    while (it != supportedFormatsWithModifiers.constEnd()) {
+    for (;;) {
+        if (it == supportedFormatsWithModifiers.constEnd()) {
+            break;
+        }
         QSet<uint64_t> modifiers = it.value();
         if (modifiers.isEmpty()) {
             modifiers << DRM_FORMAT_MOD_INVALID;
@@ -278,7 +283,8 @@ bool ParamsV1::validate_params(QSize const& size)
             return false;
         }
 
-        if (i == 0 && uint64_t(plane.offset) + plane.stride * height > UINT32_MAX) {
+        if (i == 0
+            && uint64_t(plane.offset) + static_cast<uint64_t>(plane.stride * height) > UINT32_MAX) {
             postError(
                 ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
             return false;

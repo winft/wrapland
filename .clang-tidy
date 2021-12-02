@@ -2,11 +2,12 @@
 #
 # Copyright (C) 2020 Roman Gilg <subdiff@gmail.com>
 
-HeaderFilterRegex: "server"
 WarningsAsErrors: "*"
 
 # Following checks are disabled:
 #
+# altera-unroll-loops: Lots of warnings that would lead to premature optimization.
+# bugprone-easily-swappable-parameters: Wrapping libwayland API makes this often necessary.
 # cert-dcl50-cpp: We need C-style variadic functions for message posting to the
 #   libwayland C-library.
 # cppcoreguidelines-non-private-member-variables-in-classes: We use public member variables in our
@@ -65,6 +66,8 @@ WarningsAsErrors: "*"
 
 Checks: "*,
 -altera-struct-pack-align,
+-altera-unroll-loops,
+-bugprone-easily-swappable-parameters,
 -cert-dcl50-cpp,
 -cppcoreguidelines-macro-usage,
 -cppcoreguidelines-non-private-member-variables-in-classes,

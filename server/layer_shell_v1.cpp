@@ -249,7 +249,11 @@ void LayerSurfaceV1::Private::ackConfigureCallback([[maybe_unused]] wl_client* w
         return;
     }
 
-    while (!serials.empty()) {
+    for (;;) {
+        if (serials.empty()) {
+            break;
+        }
+
         auto next = serials.front();
         serials.pop_front();
 

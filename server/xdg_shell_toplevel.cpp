@@ -153,7 +153,10 @@ void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
     if (std::count(serials.cbegin(), serials.cend(), serial) == 0) {
         return;
     }
-    while (!serials.empty()) {
+    for (;;) {
+        if (serials.empty()) {
+            break;
+        }
         uint32_t i = serials.front();
         serials.pop_front();
 

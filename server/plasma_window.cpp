@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "plasma_virtual_desktop.h"
 #include "surface.h"
+#include "utils.h"
 
 #include <QFile>
 #include <QHash>
@@ -31,6 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 #include <QtConcurrentRun>
 
+#include <cassert>
 #include <csignal>
 #include <wayland-server.h>
 
@@ -66,8 +68,8 @@ PlasmaWindowManager::~PlasmaWindowManager() = default;
 
 void PlasmaWindowManager::Private::bindInit(PlasmaWindowManagerBind* bind)
 {
-    for (auto it = windows.constBegin(); it != windows.constEnd(); ++it) {
-        send<org_kde_plasma_window_management_send_window>(bind, (*it)->d_ptr->windowId);
+    for (auto&& window : windows) {
+        send<org_kde_plasma_window_management_send_window>(bind, window->d_ptr->windowId);
     }
 }
 
@@ -115,13 +117,12 @@ void PlasmaWindowManager::Private::getWindowCallback([[maybe_unused]] wl_client*
     auto priv = handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
-    auto it = std::find_if(priv->windows.constBegin(),
-                           priv->windows.constEnd(),
-                           [internalWindowId](PlasmaWindow* window) {
-                               return window->d_ptr->windowId == internalWindowId;
-                           });
+    auto it = std::find_if(
+        priv->windows.cbegin(), priv->windows.cend(), [internalWindowId](auto window) {
+            return window->d_ptr->windowId == internalWindowId;
+        });
 
-    if (it == priv->windows.constEnd()) {
+    if (it == priv->windows.cend()) {
         // Create a temp window just for the resource and directly send unmapped.
         auto window = std::unique_ptr<PlasmaWindow>(new PlasmaWindow(priv->handle()));
         window->d_ptr->createResource(bind->version(), id, bind->client(), true);
@@ -148,14 +149,14 @@ PlasmaWindow* PlasmaWindowManager::createWindow(QObject* parent)
 
     d_ptr->send<org_kde_plasma_window_management_send_window>(window->d_ptr->windowId);
 
-    d_ptr->windows << window;
+    d_ptr->windows.push_back(window);
     connect(
-        window, &QObject::destroyed, this, [this, window] { d_ptr->windows.removeAll(window); });
+        window, &QObject::destroyed, this, [this, window] { remove_all(d_ptr->windows, window); });
 
     return window;
 }
 
-QList<PlasmaWindow*> PlasmaWindowManager::windows() const
+std::vector<PlasmaWindow*> const& PlasmaWindowManager::windows() const
 {
     return d_ptr->windows;
 }
@@ -166,8 +167,8 @@ void PlasmaWindowManager::unmapWindow(PlasmaWindow* window)
         return;
     }
 
-    d_ptr->windows.removeOne(window);
-    Q_ASSERT(!d_ptr->windows.contains(window));
+    remove_one(d_ptr->windows, window);
+    assert(!contains(d_ptr->windows, window));
 
     window->d_ptr->unmap();
     delete window;
@@ -204,16 +205,15 @@ void PlasmaWindow::Private::createResource(uint32_t version,
                                            bool temporary)
 {
     auto windowRes = new PlasmaWindowRes(client, version, id, temporary ? nullptr : q_ptr);
-    resources << windowRes;
+    resources.push_back(windowRes);
 
     connect(windowRes, &PlasmaWindowRes::resourceDestroyed, q_ptr, [this, windowRes]() {
-        resources.removeOne(windowRes);
+        remove_one(resources, windowRes);
     });
 
     windowRes->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_changed>(m_virtualDesktop);
     for (const auto& desk : plasmaVirtualDesktops) {
-        windowRes->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(
-            desk.toUtf8().constData());
+        windowRes->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(desk.c_str());
     }
     if (!m_appId.isEmpty()) {
         windowRes->d_ptr->send<org_kde_plasma_window_send_app_id_changed>(
@@ -267,8 +267,8 @@ void PlasmaWindow::Private::setAppId(const QString& appId)
     }
     m_appId = appId;
     const QByteArray utf8 = m_appId.toUtf8();
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_window_send_app_id_changed>(utf8.constData());
+    for (auto&& res : resources) {
+        res->d_ptr->send<org_kde_plasma_window_send_app_id_changed>(utf8.constData());
     }
 }
 
@@ -278,8 +278,8 @@ void PlasmaWindow::Private::setPid(uint32_t pid)
         return;
     }
     m_pid = pid;
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_window_send_pid_changed>(pid);
+    for (auto&& res : resources) {
+        res->d_ptr->send<org_kde_plasma_window_send_pid_changed>(pid);
     }
 }
 
@@ -290,8 +290,8 @@ void PlasmaWindow::Private::setThemedIconName(const QString& iconName)
     }
     m_themedIconName = iconName;
     const QByteArray utf8 = m_themedIconName.toUtf8();
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_window_send_themed_icon_name_changed>(utf8.constData());
+    for (auto&& res : resources) {
+        res->d_ptr->send<org_kde_plasma_window_send_themed_icon_name_changed>(utf8.constData());
     }
 }
 
@@ -300,10 +300,10 @@ void PlasmaWindow::Private::setIcon(const QIcon& icon)
     m_icon = icon;
     setThemedIconName(m_icon.name());
     if (m_icon.name().isEmpty()) {
-        for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-            if (wl_resource_get_version((*it)->d_ptr->resource())
+        for (auto&& res : resources) {
+            if (wl_resource_get_version(res->d_ptr->resource())
                 >= ORG_KDE_PLASMA_WINDOW_ICON_CHANGED_SINCE_VERSION) {
-                (*it)->d_ptr->send<org_kde_plasma_window_send_icon_changed>();
+                res->d_ptr->send<org_kde_plasma_window_send_icon_changed>();
             }
         }
     }
@@ -316,15 +316,15 @@ void PlasmaWindow::Private::setTitle(const QString& title)
     }
     m_title = title;
     const QByteArray utf8 = m_title.toUtf8();
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_window_send_title_changed>(utf8.constData());
+    for (auto&& res : resources) {
+        res->d_ptr->send<org_kde_plasma_window_send_title_changed>(utf8.constData());
     }
 }
 
 void PlasmaWindow::Private::unmap() const
 {
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        (*it)->unmap();
+    for (auto&& res : resources) {
+        res->unmap();
     }
 }
 
@@ -340,8 +340,8 @@ void PlasmaWindow::Private::setState(org_kde_plasma_window_management_state flag
         return;
     }
     m_desktopState = newState;
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_window_send_state_changed>(m_desktopState);
+    for (auto&& res : resources) {
+        res->d_ptr->send<org_kde_plasma_window_send_state_changed>(m_desktopState);
     }
 }
 
@@ -374,14 +374,14 @@ void PlasmaWindow::Private::setParentWindow(PlasmaWindow* window)
             = QObject::connect(window, &QObject::destroyed, q_ptr, [this] {
                   parentWindow = nullptr;
                   parentWindowDestroyConnection = QMetaObject::Connection();
-                  for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-                      (*it)->d_ptr->send<org_kde_plasma_window_send_parent_window>(nullptr);
+                  for (auto&& res : resources) {
+                      res->d_ptr->send<org_kde_plasma_window_send_parent_window>(nullptr);
                   }
               });
     }
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        auto parentRes = getResourceOfParent(window, *it);
-        (*it)->d_ptr->send<org_kde_plasma_window_send_parent_window>(
+    for (auto&& res : resources) {
+        auto parentRes = getResourceOfParent(window, res);
+        res->d_ptr->send<org_kde_plasma_window_send_parent_window>(
             parentRes ? parentRes->d_ptr->resource() : nullptr);
     }
 }
@@ -395,12 +395,12 @@ void PlasmaWindow::Private::setGeometry(const QRect& geo)
     if (!geometry.isValid()) {
         return;
     }
-    for (auto it = resources.constBegin(); it != resources.constEnd(); ++it) {
-        auto resource = (*it)->d_ptr->resource();
+    for (auto&& res : resources) {
+        auto resource = res->d_ptr->resource();
         if (wl_resource_get_version(resource) < ORG_KDE_PLASMA_WINDOW_GEOMETRY_SINCE_VERSION) {
             continue;
         }
-        (*it)->d_ptr->send<org_kde_plasma_window_send_geometry>(
+        res->d_ptr->send<org_kde_plasma_window_send_geometry>(
             geometry.x(), geometry.y(), geometry.width(), geometry.height());
     }
 }
@@ -499,30 +499,28 @@ void PlasmaWindow::setOnAllDesktops(bool set)
 
     // the current vd management
     if (set) {
-        if (d_ptr->plasmaVirtualDesktops.isEmpty()) {
+        if (d_ptr->plasmaVirtualDesktops.empty()) {
             return;
         }
         // leaving everything means on all desktops
         auto const desktops = plasmaVirtualDesktops();
         for (auto const& desk : desktops) {
-            for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-                (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(
-                    desk.toUtf8().constData());
+            for (auto&& res : d_ptr->resources) {
+                res->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(desk.c_str());
             }
         }
         d_ptr->plasmaVirtualDesktops.clear();
     } else {
-        if (!d_ptr->plasmaVirtualDesktops.isEmpty()) {
+        if (!d_ptr->plasmaVirtualDesktops.empty()) {
             return;
         }
         // enters the desktops which are active (usually only one  but not a given)
         for (auto desk : d_ptr->manager->virtualDesktopManager()->desktops()) {
-            if (desk->active() && !d_ptr->plasmaVirtualDesktops.contains(desk->id())) {
-                d_ptr->plasmaVirtualDesktops << desk->id();
-                for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd();
-                     ++it) {
-                    (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(
-                        desk->id().toUtf8().constData());
+            if (desk->active() && !contains(d_ptr->plasmaVirtualDesktops, desk->id())) {
+                d_ptr->plasmaVirtualDesktops.push_back(desk->id());
+                for (auto&& res : d_ptr->resources) {
+                    res->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(
+                        desk->id().c_str());
                 }
             }
         }
@@ -569,10 +567,10 @@ void PlasmaWindow::setIcon(const QIcon& icon)
     d_ptr->setIcon(icon);
 }
 
-void PlasmaWindow::addPlasmaVirtualDesktop(const QString& id)
+void PlasmaWindow::addPlasmaVirtualDesktop(std::string const& id)
 {
     // don't add a desktop we're not sure it exists
-    if (!d_ptr->manager->virtualDesktopManager() || d_ptr->plasmaVirtualDesktops.contains(id)) {
+    if (!d_ptr->manager->virtualDesktopManager() || contains(d_ptr->plasmaVirtualDesktops, id)) {
         return;
     }
 
@@ -582,36 +580,34 @@ void PlasmaWindow::addPlasmaVirtualDesktop(const QString& id)
         return;
     }
 
-    d_ptr->plasmaVirtualDesktops << id;
+    d_ptr->plasmaVirtualDesktops.push_back(id);
 
     // if the desktop dies, remove it from or list
     connect(desktop, &QObject::destroyed, this, [this, id]() { removePlasmaVirtualDesktop(id); });
 
-    for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(
-            id.toUtf8().constData());
+    for (auto&& res : d_ptr->resources) {
+        res->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(id.c_str());
     }
 }
 
-void PlasmaWindow::removePlasmaVirtualDesktop(const QString& id)
+void PlasmaWindow::removePlasmaVirtualDesktop(std::string const& id)
 {
-    if (!d_ptr->plasmaVirtualDesktops.contains(id)) {
+    if (!contains(d_ptr->plasmaVirtualDesktops, id)) {
         return;
     }
 
-    d_ptr->plasmaVirtualDesktops.removeAll(id);
-    for (auto it = d_ptr->resources.constBegin(); it != d_ptr->resources.constEnd(); ++it) {
-        (*it)->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(
-            id.toUtf8().constData());
+    remove_all(d_ptr->plasmaVirtualDesktops, id);
+    for (auto&& res : d_ptr->resources) {
+        res->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_left>(id.c_str());
     }
 
     // we went on all desktops
-    if (d_ptr->plasmaVirtualDesktops.isEmpty()) {
+    if (d_ptr->plasmaVirtualDesktops.empty()) {
         setOnAllDesktops(true);
     }
 }
 
-QStringList PlasmaWindow::plasmaVirtualDesktops() const
+std::vector<std::string> const& PlasmaWindow::plasmaVirtualDesktops() const
 {
     return d_ptr->plasmaVirtualDesktops;
 }

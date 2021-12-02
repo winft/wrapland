@@ -847,7 +847,7 @@ Subsurface* Surface::subsurface() const
 QSize Surface::size() const
 {
     if (!d_ptr->current.pub.buffer) {
-        return QSize();
+        return {};
     }
     if (d_ptr->current.destinationSize.isValid()) {
         return d_ptr->current.destinationSize;
