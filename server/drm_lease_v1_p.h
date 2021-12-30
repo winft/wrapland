@@ -31,6 +31,8 @@ public:
     ~Private() override;
 
     void bindInit(drm_lease_device_v1_bind* bind) override;
+
+    void add_connector(drm_lease_connector_v1* connector);
     void send_connector(drm_lease_device_v1_bind* bind, drm_lease_connector_v1* connector);
 
     void add_lease(drm_lease_v1* lease, int leese_id);
@@ -128,10 +130,18 @@ class drm_lease_connector_v1::Private : public QObject
 {
     Q_OBJECT
 public:
-    Private(Output* output, drm_lease_device_v1* device, drm_lease_connector_v1* q);
+    Private(std::string name,
+            std::string description,
+            int id,
+            drm_lease_device_v1* device,
+            drm_lease_connector_v1* q);
     void add_resource(drm_lease_connector_v1_res* res);
 
-    Output* output;
+    std::string name;
+    std::string description;
+    int connector_id;
+
+    Output* output{nullptr};
     drm_lease_device_v1* device;
     std::vector<drm_lease_connector_v1_res*> resources;
 

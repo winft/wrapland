@@ -63,6 +63,16 @@ void drm_lease_device_v1::Private::release_callback([[maybe_unused]] drm_lease_d
     delete bind;
 }
 
+void drm_lease_device_v1::Private::add_connector(drm_lease_connector_v1* connector)
+{
+    connectors.push_back(connector);
+
+    for (auto bind : active_binds) {
+        send_connector(bind, connector);
+        send<wp_drm_lease_device_v1_send_done>(bind);
+    }
+}
+
 void drm_lease_device_v1::Private::send_connector(drm_lease_device_v1_bind* bind,
                                                   drm_lease_connector_v1* connector)
 {
@@ -78,14 +88,19 @@ drm_lease_device_v1::drm_lease_device_v1(Display* display)
 
 drm_lease_device_v1::~drm_lease_device_v1() = default;
 
+drm_lease_connector_v1* drm_lease_device_v1::create_connector(std::string const& name,
+                                                              std::string const& description,
+                                                              int id)
+{
+    auto connector = new drm_lease_connector_v1(name, description, id, this);
+    d_ptr->add_connector(connector);
+    return connector;
+}
+
 drm_lease_connector_v1* drm_lease_device_v1::create_connector(Output* output)
 {
     auto connector = new drm_lease_connector_v1(output, this);
-    d_ptr->connectors.push_back(connector);
-    for (auto bind : d_ptr->active_binds) {
-        d_ptr->send_connector(bind, connector);
-        d_ptr->send<wp_drm_lease_device_v1_send_done>(bind);
-    }
+    d_ptr->add_connector(connector);
     return connector;
 }
 
@@ -113,10 +128,14 @@ void drm_lease_device_v1::update_fd(int fd)
     d_ptr->active_binds.push_back(bind);
 }
 
-drm_lease_connector_v1::Private::Private(Output* output,
+drm_lease_connector_v1::Private::Private(std::string name,
+                                         std::string description,
+                                         int id,
                                          drm_lease_device_v1* device,
                                          drm_lease_connector_v1* q)
-    : output{output}
+    : name{std::move(name)}
+    , description{std::move(description)}
+    , connector_id{id}
     , device{device}
     , q_ptr{q}
 {
@@ -125,16 +144,25 @@ drm_lease_connector_v1::Private::Private(Output* output,
 void drm_lease_connector_v1::Private::add_resource(drm_lease_connector_v1_res* res)
 {
     resources.push_back(res);
-    res->d_ptr->send<wp_drm_lease_connector_v1_send_name>(output->name().c_str());
-    res->d_ptr->send<wp_drm_lease_connector_v1_send_description>(output->description().c_str());
-    res->d_ptr->send<wp_drm_lease_connector_v1_send_connector_id>(output->connector_id());
+    res->d_ptr->send<wp_drm_lease_connector_v1_send_name>(name.c_str());
+    res->d_ptr->send<wp_drm_lease_connector_v1_send_description>(description.c_str());
+    res->d_ptr->send<wp_drm_lease_connector_v1_send_connector_id>(connector_id);
     res->d_ptr->send<wp_drm_lease_connector_v1_send_done>();
 }
 
-drm_lease_connector_v1::drm_lease_connector_v1(Output* output, drm_lease_device_v1* device)
+drm_lease_connector_v1::drm_lease_connector_v1(std::string const& name,
+                                               std::string const& description,
+                                               int id,
+                                               drm_lease_device_v1* device)
     : QObject(nullptr)
-    , d_ptr{new Private(output, device, this)}
+    , d_ptr{new Private(name, description, id, device, this)}
 {
+}
+
+drm_lease_connector_v1::drm_lease_connector_v1(Output* output, drm_lease_device_v1* device)
+    : drm_lease_connector_v1(output->name(), output->description(), output->connector_id(), device)
+{
+    d_ptr->output = output;
 }
 
 drm_lease_connector_v1::~drm_lease_connector_v1()
@@ -146,6 +174,11 @@ drm_lease_connector_v1::~drm_lease_connector_v1()
     if (d_ptr->device) {
         remove_one(d_ptr->device->d_ptr->connectors, this);
     }
+}
+
+uint32_t drm_lease_connector_v1::id() const
+{
+    return d_ptr->connector_id;
 }
 
 Output* drm_lease_connector_v1::output() const
