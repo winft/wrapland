@@ -359,6 +359,8 @@ const struct wl_surface_interface Surface::Private::s_interface = {
     bufferTransformCallback,
     bufferScaleCallback,
     damageBufferCallback,
+    // TODO(romangg): Update protocol version for offset callback (currently at 4).
+    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
 };
 
 Surface::Surface(Client* client, uint32_t version, uint32_t id)
