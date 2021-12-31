@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "nucleus.h"
 #include "send.h"
 
+#include <cassert>
 #include <tuple>
 #include <wayland-server.h>
 
@@ -56,7 +57,13 @@ public:
     Bind& operator=(Bind) = delete;
     Bind(Bind&&) noexcept = delete;
     Bind& operator=(Bind&&) noexcept = delete;
-    virtual ~Bind() = default;
+
+    virtual ~Bind()
+    {
+        if (global_nucleus) {
+            global_nucleus->unbind(this);
+        }
+    }
 
     Global* global() const
     {
@@ -106,16 +113,19 @@ public:
         wl_resource_post_no_memory(resource);
     }
 
-    static void destroy_callback([[maybe_unused]] wl_client* client, wl_resource* wl_res)
+    static void destroy_callback(wl_client* /*client*/, wl_resource* wl_res)
     {
         auto res = self(wl_res);
-        wl_resource_destroy(res->resource);
+        assert(res->resource == wl_res);
+        res->resource = nullptr;
+        wl_resource_destroy(wl_res);
     }
 
     void serverSideDestroy()
     {
         wl_resource_set_destructor(resource, nullptr);
         wl_resource_destroy(resource);
+        resource = nullptr;
     }
 
     Client* client;
@@ -130,17 +140,7 @@ private:
 
     static void destroy(wl_resource* wlResource)
     {
-        auto resource = self(wlResource);
-
-        resource->onDestroy();
-        delete resource;
-    }
-
-    void onDestroy()
-    {
-        if (global_nucleus) {
-            global_nucleus->unbind(this);
-        }
+        delete self(wlResource);
     }
 
     Nucleus<Global>* global_nucleus;
