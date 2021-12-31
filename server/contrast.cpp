@@ -52,10 +52,10 @@ void ContrastManager::Private::createCallback(ContrastManagerBind* bind,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
-    auto contrast = new Contrast(bind->client()->handle(), bind->version(), id);
-    if (!contrast->d_ptr->resource()) {
+    auto contrast = new Contrast(bind->client->handle, bind->version, id);
+    if (!contrast->d_ptr->resource) {
         bind->post_no_memory();
         delete contrast;
         return;
@@ -68,7 +68,7 @@ void ContrastManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClien
                                              [[maybe_unused]] wl_resource* wlResource,
                                              wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
     surface->d_ptr->setContrast(QPointer<Contrast>());
 }
 
@@ -103,7 +103,7 @@ Contrast::Private::~Private() = default;
 void Contrast::Private::commitCallback([[maybe_unused]] wl_client* wlClient,
                                        wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->commit();
 }
 
@@ -119,8 +119,8 @@ void Contrast::Private::setRegionCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,
                                           wl_resource* wlRegion)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto region = Wayland::Resource<Region>::handle(wlRegion);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto region = Wayland::Resource<Region>::get_handle(wlRegion);
 
     priv->pendingRegion = region ? region->region() : QRegion();
 }
@@ -129,7 +129,7 @@ void Contrast::Private::setContrastCallback([[maybe_unused]] wl_client* wlClient
                                             wl_resource* wlResource,
                                             wl_fixed_t contrast)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pendingContrast = wl_fixed_to_double(contrast);
 }
 
@@ -137,7 +137,7 @@ void Contrast::Private::setIntensityCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlResource,
                                              wl_fixed_t intensity)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pendingIntensity = wl_fixed_to_double(intensity);
 }
 
@@ -145,7 +145,7 @@ void Contrast::Private::setSaturationCallback([[maybe_unused]] wl_client* wlClie
                                               wl_resource* wlResource,
                                               wl_fixed_t saturation)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pendingSaturation = wl_fixed_to_double(saturation);
 }
 

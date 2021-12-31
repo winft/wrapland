@@ -47,8 +47,8 @@ const struct wl_keyboard_interface Keyboard::Private::s_interface {
 
 void Keyboard::Private::sendLeave(quint32 serial, Surface* surface)
 {
-    if (surface && surface->d_ptr->resource()) {
-        send<wl_keyboard_send_leave>(serial, surface->d_ptr->resource());
+    if (surface && surface->d_ptr->resource) {
+        send<wl_keyboard_send_leave>(serial, surface->d_ptr->resource);
     }
 }
 
@@ -61,7 +61,7 @@ void Keyboard::Private::sendEnter(quint32 serial, Surface* surface)
         auto key = static_cast<uint32_t*>(wl_array_add(&keys, sizeof(uint32_t)));
         *key = btn;
     }
-    send<wl_keyboard_send_enter>(serial, surface->d_ptr->resource(), &keys);
+    send<wl_keyboard_send_enter>(serial, surface->d_ptr->resource, &keys);
     wl_array_release(&keys);
 
     sendModifiers();
@@ -114,15 +114,14 @@ void Keyboard::setFocusedSurface(quint32 serial, Surface* surface)
     if (!d_ptr->focusedSurface) {
         return;
     }
-    d_ptr->destroyConnection
-        = connect(d_ptr->focusedSurface, &Surface::resourceDestroyed, this, [this] {
-              d_ptr->sendLeave(d_ptr->client()->display()->handle()->nextSerial(),
-                               d_ptr->focusedSurface);
-              d_ptr->focusedSurface = nullptr;
-          });
+    d_ptr->destroyConnection = connect(
+        d_ptr->focusedSurface, &Surface::resourceDestroyed, this, [this] {
+            d_ptr->sendLeave(d_ptr->client->display()->handle->nextSerial(), d_ptr->focusedSurface);
+            d_ptr->focusedSurface = nullptr;
+        });
 
     d_ptr->sendEnter(serial, d_ptr->focusedSurface);
-    d_ptr->client()->flush();
+    d_ptr->client->flush();
 }
 
 void Keyboard::key(uint32_t serial, uint32_t key, key_state state)
@@ -158,7 +157,7 @@ Surface* Keyboard::focusedSurface() const
 
 Client* Keyboard::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 }

@@ -85,7 +85,7 @@ bool keyboard_pool::update_key(uint32_t key, key_state state)
 
 void keyboard_pool::key(uint32_t key, key_state state)
 {
-    lastStateSerial = seat->d_ptr->display()->handle()->nextSerial();
+    lastStateSerial = seat->d_ptr->display()->handle->nextSerial();
     if (!update_key(key, state)) {
         return;
     }
@@ -109,7 +109,7 @@ void keyboard_pool::update_modifiers(uint32_t depressed,
 
     modifiers = mods;
 
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     modifiers.serial = serial;
 
     if (focus.surface) {
@@ -121,7 +121,7 @@ void keyboard_pool::update_modifiers(uint32_t depressed,
 
 void keyboard_pool::set_focused_surface(Surface* surface)
 {
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
 
     for (auto kbd : focus.devices) {
         kbd->setFocusedSurface(serial, nullptr);

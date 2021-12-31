@@ -23,7 +23,10 @@ private Q_SLOTS:
     void init();
     void cleanup();
 
+    void test_device_bind();
     void test_connectors();
+
+    void test_lease_data();
     void test_lease();
 
 private:
@@ -39,7 +42,12 @@ private:
         Wrapland::Client::Registry* registry{nullptr};
         Wrapland::Client::drm_lease_device_v1* lease_device{nullptr};
         QThread* thread{nullptr};
-    } client1;
+    } client1, client2;
+
+    void create_client(client& client_ref);
+    void cleanup_client(client& client_ref);
+    void create_lease_device(client& client_ref);
+    void cleanup_lease_device(client& client_ref);
 };
 
 constexpr auto socket_name{"wrapland-test-drm-lease-v1-0"};
@@ -72,60 +80,123 @@ void drm_lease_v1_test::init()
     server.globals.drm_lease_device_v1 = server.display->createDrmLeaseDeviceV1();
     server.lease_device = server.globals.drm_lease_device_v1.get();
 
-    // setup connection
-    client1.connection = new Wrapland::Client::ConnectionThread;
-    QSignalSpy connectedSpy(client1.connection,
-                            &Wrapland::Client::ConnectionThread::establishedChanged);
-    QVERIFY(connectedSpy.isValid());
-    client1.connection->setSocketName(socket_name);
-
-    client1.thread = new QThread(this);
-    client1.connection->moveToThread(client1.thread);
-    client1.thread->start();
-
-    client1.connection->establishConnection();
-    QVERIFY(connectedSpy.count() || connectedSpy.wait());
-    QCOMPARE(connectedSpy.count(), 1);
-
-    client1.queue = new Wrapland::Client::EventQueue(this);
-    client1.queue->setup(client1.connection);
-
-    client1.registry = new Wrapland::Client::Registry;
-
-    QSignalSpy interfacesAnnouncedSpy(client1.registry,
-                                      &Wrapland::Client::Registry::interfacesAnnounced);
-    QVERIFY(interfacesAnnouncedSpy.isValid());
-    client1.registry->setEventQueue(client1.queue);
-    client1.registry->create(client1.connection);
-
-    QVERIFY(client1.registry->isValid());
-    client1.registry->setup();
-    QVERIFY(interfacesAnnouncedSpy.wait());
+    create_client(client1);
 }
 
 void drm_lease_v1_test::cleanup()
 {
-#define CLEANUP(variable)                                                                          \
-    if (variable) {                                                                                \
-        delete variable;                                                                           \
-        variable = nullptr;                                                                        \
-    }
-    CLEANUP(client1.lease_device)
-    CLEANUP(client1.registry)
-    CLEANUP(client1.queue)
-    if (client1.connection) {
-        client1.connection->deleteLater();
-        client1.connection = nullptr;
-    }
-    if (client1.thread) {
-        client1.thread->quit();
-        client1.thread->wait();
-        delete client1.thread;
-        client1.thread = nullptr;
-    }
-#undef CLEANUP
+    cleanup_lease_device(client1);
+    cleanup_client(client1);
+    cleanup_lease_device(client2);
+    cleanup_client(client2);
 
     server = {};
+}
+
+void drm_lease_v1_test::create_client(client& client_ref)
+{
+    client_ref.connection = new Wrapland::Client::ConnectionThread;
+    QSignalSpy establishedSpy(client_ref.connection,
+                              &Wrapland::Client::ConnectionThread::establishedChanged);
+    client_ref.connection->setSocketName(socket_name);
+
+    client_ref.thread = new QThread(this);
+    client_ref.connection->moveToThread(client_ref.thread);
+    client_ref.thread->start();
+
+    client_ref.connection->establishConnection();
+    QVERIFY(establishedSpy.wait());
+
+    client_ref.queue = new Wrapland::Client::EventQueue(this);
+    client_ref.queue->setup(client_ref.connection);
+    QVERIFY(client_ref.queue->isValid());
+
+    QSignalSpy client_connected_spy(server.display.get(),
+                                    &Wrapland::Server::Display::clientConnected);
+    QVERIFY(client_connected_spy.isValid());
+
+    client_ref.registry = new Wrapland::Client::Registry();
+
+    QSignalSpy lease_device_spy(client_ref.registry,
+                                &Wrapland::Client::Registry::drmLeaseDeviceV1Announced);
+    QVERIFY(lease_device_spy.isValid());
+    QSignalSpy interfaces_spy(client_ref.registry,
+                              &Wrapland::Client::Registry::interfacesAnnounced);
+    QVERIFY(interfaces_spy.isValid());
+
+    client_ref.registry->setEventQueue(client_ref.queue);
+    client_ref.registry->create(client_ref.connection);
+    QVERIFY(client_ref.registry->isValid());
+    client_ref.registry->setup();
+
+    QVERIFY(interfaces_spy.wait());
+    QCOMPARE(lease_device_spy.count(), 1);
+}
+void drm_lease_v1_test::cleanup_client(client& client_ref)
+{
+    delete client_ref.queue;
+    client_ref.queue = nullptr;
+    delete client_ref.registry;
+    client_ref.registry = nullptr;
+
+    if (client_ref.thread) {
+        client_ref.thread->quit();
+        client_ref.thread->wait();
+        delete client_ref.thread;
+        client_ref.thread = nullptr;
+    }
+    delete client_ref.connection;
+    client_ref.connection = nullptr;
+}
+
+void drm_lease_v1_test::create_lease_device(client& client_ref)
+{
+    QVERIFY(!client_ref.lease_device);
+
+    auto Device = Wrapland::Client::Registry::Interface::DrmLeaseDeviceV1;
+
+    client_ref.lease_device = client_ref.registry->createDrmLeaseDeviceV1(
+        client_ref.registry->interface(Device).name,
+        client_ref.registry->interface(Device).version,
+        this);
+    QVERIFY(client_ref.lease_device->isValid());
+}
+
+void drm_lease_v1_test::cleanup_lease_device(client& client_ref)
+{
+    delete client_ref.lease_device;
+    client_ref.lease_device = nullptr;
+}
+
+void drm_lease_v1_test::test_device_bind()
+{
+    // This test verifies that a client can bind and unbind the device.
+
+    QSignalSpy server_fd_spy(server.lease_device,
+                             &Wrapland::Server::drm_lease_device_v1::needs_new_client_fd);
+    QVERIFY(server_fd_spy.isValid());
+
+    create_lease_device(client1);
+    QVERIFY(server_fd_spy.wait());
+
+    create_client(client2);
+    create_lease_device(client2);
+    QVERIFY(server_fd_spy.wait());
+
+    cleanup_lease_device(client1);
+    create_lease_device(client1);
+    QVERIFY(server_fd_spy.wait());
+
+    // Destroy the client without the device first.
+    // TODO(romangg): At the moment we can't test this since the Client library requires all class
+    //                instances to be cleaned up before the connection can go down.
+#if 0
+    cleanup_client(client1);
+#endif
+
+    cleanup_lease_device(client2);
+    create_lease_device(client2);
+    QVERIFY(server_fd_spy.wait());
 }
 
 void drm_lease_v1_test::test_connectors()
@@ -198,6 +269,14 @@ void drm_lease_v1_test::test_connectors()
     QVERIFY(client_connector1.done_spy.wait());
     QCOMPARE(client_connector1.done_spy.size(), 1);
     QVERIFY(!client_connector1.client->data().enabled);
+}
+
+void drm_lease_v1_test::test_lease_data()
+{
+    QTest::addColumn<bool>("server_sends_finish");
+
+    QTest::newRow("server-finish") << true;
+    QTest::newRow("client-finish") << false;
 }
 
 void drm_lease_v1_test::test_lease()
@@ -275,9 +354,12 @@ void drm_lease_v1_test::test_lease()
     QVERIFY(lease_leased_spy.wait());
     QVERIFY(lease_leased_spy[0].first().value<int>());
 
-    QSignalSpy lease_finished_spy(lease.get(), &Wrapland::Client::drm_lease_v1::finished);
-    server_lease->finish();
-    QVERIFY(lease_finished_spy.wait());
+    QFETCH(bool, server_sends_finish);
+    if (server_sends_finish) {
+        QSignalSpy lease_finished_spy(lease.get(), &Wrapland::Client::drm_lease_v1::finished);
+        server_lease->finish();
+        QVERIFY(lease_finished_spy.wait());
+    }
 }
 
 QTEST_GUILESS_MAIN(drm_lease_v1_test)

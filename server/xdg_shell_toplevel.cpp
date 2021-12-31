@@ -52,7 +52,7 @@ XdgShellToplevel::Private::Private(uint32_t version,
                                    uint32_t id,
                                    XdgShellSurface* surface,
                                    XdgShellToplevel* q)
-    : Wayland::Resource<XdgShellToplevel>(surface->d_ptr->client(),
+    : Wayland::Resource<XdgShellToplevel>(surface->d_ptr->client,
                                           version,
                                           id,
                                           &xdg_toplevel_interface,
@@ -66,28 +66,28 @@ void XdgShellToplevel::Private::setTitleCallback([[maybe_unused]] wl_client* wlC
                                                  wl_resource* wlResource,
                                                  const char* title)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (priv->title == title) {
         return;
     }
 
     priv->title = title;
-    Q_EMIT priv->handle()->titleChanged(title);
+    Q_EMIT priv->handle->titleChanged(title);
 }
 
 void XdgShellToplevel::Private::setAppIdCallback([[maybe_unused]] wl_client* wlClient,
                                                  wl_resource* wlResource,
                                                  const char* app_id)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (priv->appId == app_id) {
         return;
     }
 
     priv->appId = app_id;
-    Q_EMIT priv->handle()->appIdChanged(app_id);
+    Q_EMIT priv->handle->appIdChanged(app_id);
 }
 
 void XdgShellToplevel::Private::moveCallback([[maybe_unused]] wl_client* wlClient,
@@ -95,8 +95,8 @@ void XdgShellToplevel::Private::moveCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlSeat,
                                              uint32_t serial)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    Q_EMIT priv->handle()->moveRequested(SeatGlobal::handle(wlSeat), serial);
+    auto priv = get_handle(wlResource)->d_ptr;
+    Q_EMIT priv->handle->moveRequested(SeatGlobal::get_handle(wlSeat), serial);
 }
 
 Qt::Edges edgesToQtEdges(xdg_toplevel_resize_edge edges)
@@ -142,9 +142,9 @@ void XdgShellToplevel::Private::resizeCallback([[maybe_unused]] wl_client* wlCli
                                                uint32_t serial,
                                                uint32_t edges)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    Q_EMIT priv->handle()->resizeRequested(
-        SeatGlobal::handle(wlSeat), serial, edgesToQtEdges(xdg_toplevel_resize_edge(edges)));
+    auto priv = get_handle(wlResource)->d_ptr;
+    Q_EMIT priv->handle->resizeRequested(
+        SeatGlobal::get_handle(wlSeat), serial, edgesToQtEdges(xdg_toplevel_resize_edge(edges)));
 }
 
 void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
@@ -160,7 +160,7 @@ void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
         uint32_t i = serials.front();
         serials.pop_front();
 
-        Q_EMIT handle()->configureAcknowledged(i);
+        Q_EMIT handle->configureAcknowledged(i);
         if (i == serial) {
             break;
         }
@@ -169,7 +169,7 @@ void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
 
 uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, const QSize& size)
 {
-    const uint32_t serial = client()->display()->handle()->nextSerial();
+    const uint32_t serial = client->display()->handle->nextSerial();
 
     wl_array configureStates;
     wl_array_init(&configureStates);
@@ -212,7 +212,7 @@ uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, co
     send<xdg_toplevel_send_configure>(size.width(), size.height(), &configureStates);
     shellSurface->d_ptr->send<xdg_surface_send_configure>(serial);
 
-    client()->flush();
+    client->flush();
     wl_array_release(&configureStates);
     return serial;
 }
@@ -230,7 +230,7 @@ QSize XdgShellToplevel::Private::maximumSize() const
 void XdgShellToplevel::Private::close()
 {
     send<xdg_toplevel_send_close>();
-    client()->flush();
+    client->flush();
 }
 
 void XdgShellToplevel::Private::commit()
@@ -248,10 +248,10 @@ void XdgShellToplevel::Private::commit()
     m_pendingState = ShellSurfaceState{};
 
     if (minimumSizeChanged) {
-        Q_EMIT handle()->minSizeChanged(m_currentState.minimumSize);
+        Q_EMIT handle->minSizeChanged(m_currentState.minimumSize);
     }
     if (maximumSizeChanged) {
-        Q_EMIT handle()->maxSizeChanged(m_currentState.maximiumSize);
+        Q_EMIT handle->maxSizeChanged(m_currentState.maximiumSize);
     }
 }
 
@@ -260,7 +260,7 @@ void XdgShellToplevel::Private::setMaxSizeCallback([[maybe_unused]] wl_client* w
                                                    int32_t width,
                                                    int32_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (width < 0 || height < 0) {
         priv->postError(XDG_WM_BASE_ERROR_INVALID_SURFACE_STATE,
@@ -283,7 +283,7 @@ void XdgShellToplevel::Private::setMinSizeCallback([[maybe_unused]] wl_client* w
                                                    int32_t width,
                                                    int32_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (width < 0 || height < 0) {
         priv->postError(XDG_WM_BASE_ERROR_INVALID_SURFACE_STATE,
@@ -299,17 +299,17 @@ void XdgShellToplevel::Private::setParentCallback([[maybe_unused]] wl_client* wl
                                                   wl_resource* wlResource,
                                                   wl_resource* wlParent)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (!wlParent) {
         // setting null is valid API. Clear
         priv->parentSurface = nullptr;
-        Q_EMIT priv->handle()->transientForChanged();
+        Q_EMIT priv->handle->transientForChanged();
     } else {
-        auto parent = Wayland::Resource<XdgShellToplevel>::handle(wlParent);
+        auto parent = Wayland::Resource<XdgShellToplevel>::get_handle(wlParent);
         if (priv->parentSurface != parent) {
             priv->parentSurface = parent;
-            Q_EMIT priv->handle()->transientForChanged();
+            Q_EMIT priv->handle->transientForChanged();
         }
     }
 }
@@ -321,47 +321,47 @@ void XdgShellToplevel::Private::showWindowMenuCallback([[maybe_unused]] wl_clien
                                                        int32_t x,
                                                        int32_t y)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto seat = SeatGlobal::handle(wlSeat);
-    Q_EMIT priv->handle()->windowMenuRequested(seat, serial, QPoint(x, y));
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto seat = SeatGlobal::get_handle(wlSeat);
+    Q_EMIT priv->handle->windowMenuRequested(seat, serial, QPoint(x, y));
 }
 
 void XdgShellToplevel::Private::setMaximizedCallback([[maybe_unused]] wl_client* wlClient,
                                                      wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    Q_EMIT priv->handle()->maximizedChanged(true);
+    auto priv = get_handle(wlResource)->d_ptr;
+    Q_EMIT priv->handle->maximizedChanged(true);
 }
 
 void XdgShellToplevel::Private::unsetMaximizedCallback([[maybe_unused]] wl_client* wlClient,
                                                        wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    Q_EMIT priv->handle()->maximizedChanged(false);
+    auto priv = get_handle(wlResource)->d_ptr;
+    Q_EMIT priv->handle->maximizedChanged(false);
 }
 
 void XdgShellToplevel::Private::setFullscreenCallback([[maybe_unused]] wl_client* wlClient,
                                                       wl_resource* wlResource,
                                                       wl_resource* wlOutput)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto output = wlOutput ? WlOutputGlobal::handle(wlOutput)->output() : nullptr;
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto output = wlOutput ? WlOutputGlobal::get_handle(wlOutput)->output() : nullptr;
 
-    Q_EMIT priv->handle()->fullscreenChanged(true, output);
+    Q_EMIT priv->handle->fullscreenChanged(true, output);
 }
 
 void XdgShellToplevel::Private::unsetFullscreenCallback([[maybe_unused]] wl_client* wlClient,
                                                         wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    Q_EMIT priv->handle()->fullscreenChanged(false, nullptr);
+    auto priv = get_handle(wlResource)->d_ptr;
+    Q_EMIT priv->handle->fullscreenChanged(false, nullptr);
 }
 
 void XdgShellToplevel::Private::setMinimizedCallback([[maybe_unused]] wl_client* wlClient,
                                                      wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    Q_EMIT priv->handle()->minimizeRequested();
+    auto priv = get_handle(wlResource)->d_ptr;
+    Q_EMIT priv->handle->minimizeRequested();
 }
 
 XdgShellToplevel::XdgShellToplevel(uint32_t version, uint32_t id, XdgShellSurface* surface)
@@ -407,7 +407,7 @@ XdgShellSurface* XdgShellToplevel::surface() const
 
 Client* XdgShellToplevel::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 std::string XdgShellToplevel::title() const

@@ -185,7 +185,7 @@ private:
                                wl_resource* wlResource,
                                wl_resource* wlBuffer)
     {
-        auto priv = handle(wlResource)->d_ptr;
+        auto priv = get_handle(wlResource)->d_ptr;
         priv->attach<side>(wlBuffer);
     }
 
@@ -194,7 +194,7 @@ private:
                                wl_resource* wlResource,
                                wl_fixed_t wlOffset)
     {
-        auto priv = handle(wlResource)->d_ptr;
+        auto priv = get_handle(wlResource)->d_ptr;
         priv->pending.setOffset<side>(wl_fixed_to_double(wlOffset));
     }
 
@@ -203,7 +203,7 @@ private:
     template<AttachSide side>
     void attach(wl_resource* wlBuffer)
     {
-        auto display = client()->display()->handle();
+        auto display = client->display()->handle;
         auto buffer = Buffer::get(display, wlBuffer);
 
         attachConnect(side, buffer.get());

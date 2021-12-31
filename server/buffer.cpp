@@ -210,7 +210,7 @@ Buffer::Private::Private(Buffer* q,
 {
     if (!shmBuffer
         && wl_resource_instance_of(resource, &wl_buffer_interface, BufferV1::interface())) {
-        dmabufBuffer = Wayland::Resource<LinuxDmabufBufferV1>::handle(resource);
+        dmabufBuffer = Wayland::Resource<LinuxDmabufBufferV1>::get_handle(resource);
     }
 
     destroyWrapper.buffer = q;

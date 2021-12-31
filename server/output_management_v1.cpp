@@ -68,13 +68,12 @@ OutputManagementV1::Private::~Private()
 void OutputManagementV1::Private::createConfigurationCallback(OutputManagementV1Bind* bind,
                                                               uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
 
-    auto config
-        = new OutputConfigurationV1(bind->client()->handle(), bind->version(), id, priv->handle());
+    auto config = new OutputConfigurationV1(bind->client->handle, bind->version, id, priv->handle);
     priv->m_configurations.push_back(config);
 
-    connect(config, &OutputConfigurationV1::resourceDestroyed, priv->handle(), [priv, config] {
+    connect(config, &OutputConfigurationV1::resourceDestroyed, priv->handle, [priv, config] {
         auto& configs = priv->m_configurations;
         configs.erase(std::remove(configs.begin(), configs.end(), config), configs.end());
     });

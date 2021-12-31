@@ -100,7 +100,7 @@ Wayland::Client* Private::castClientImpl(Server::Client* client)
 Client* Private::createClientHandle(wl_client* wlClient)
 {
     if (auto* client = getClient(wlClient)) {
-        return client->handle();
+        return client->handle;
     }
     auto* clientHandle = new Client(wlClient, q_ptr);
     setupClient(clientHandle->d_ptr.get());
@@ -124,12 +124,12 @@ Display::~Display()
 
 void Display::set_socket_name(std::string const& name)
 {
-    d_ptr->setSocketName(name);
+    d_ptr->socket_name = name;
 }
 
 std::string Display::socket_name() const
 {
-    return d_ptr->socketName();
+    return d_ptr->socket_name;
 }
 
 void Display::add_socket_fd(int fd)
@@ -442,7 +442,7 @@ std::vector<Client*> Display::clients() const
 {
     std::vector<Client*> ret;
     for (auto* client : d_ptr->clients()) {
-        ret.push_back(client->handle());
+        ret.push_back(client->handle);
     }
     return ret;
 }

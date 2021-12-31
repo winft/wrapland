@@ -78,21 +78,18 @@ void XdgExporterV2::Private::exportToplevelCallback(XdgExporterV2Bind* bind,
                                                     uint32_t id,
                                                     wl_resource* wlSurface)
 {
-    auto priv = bind->global()->handle()->d_ptr;
+    auto priv = bind->global()->handle->d_ptr;
 
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
     const QString protocolHandle = QUuid::createUuid().toString();
 
-    auto exported = new XdgExportedV2(bind->client()->handle(),
-                                      wl_resource_get_version(bind->resource()),
-                                      id,
-                                      surface,
-                                      protocolHandle);
+    auto exported = new XdgExportedV2(
+        bind->client->handle, wl_resource_get_version(bind->resource), id, surface, protocolHandle);
     // TODO(romangg): error handling
 
     // Surface not exported anymore.
-    connect(exported, &XdgExportedV2::destroyed, priv->handle(), [priv, protocolHandle] {
+    connect(exported, &XdgExportedV2::destroyed, priv->handle, [priv, protocolHandle] {
         priv->exportedSurfaces.remove(protocolHandle);
     });
 
@@ -146,9 +143,9 @@ void XdgImporterV2::Private::importToplevelCallback([[maybe_unused]] wl_client* 
                                                     uint32_t id,
                                                     const char* handle)
 {
-    auto importerHandle = XdgImporterV2::Private::handle(wlResource);
+    auto importerHandle = XdgImporterV2::Private::get_handle(wlResource);
     auto bind = importerHandle->d_ptr->getBind(wlResource);
-    auto client = bind->client()->handle();
+    auto client = bind->client->handle;
 
     if (!importerHandle->d_ptr->exporter) {
         importerHandle->d_ptr->send<zxdg_imported_v2_send_destroyed>();
@@ -166,7 +163,7 @@ void XdgImporterV2::Private::importToplevelCallback([[maybe_unused]] wl_client* 
         return;
     }
 
-    auto imported = new XdgImportedV2(client, bind->version(), id, exported);
+    auto imported = new XdgImportedV2(client, bind->version, id, exported);
     // TODO(romangg): error handling
 
     connect(imported,
@@ -194,7 +191,7 @@ void XdgImporterV2::Private::childChange(Surface* parent, Surface* prevChild, Su
         parents[nextChild] = parent;
     }
 
-    Q_EMIT handle()->parentChanged(parent, nextChild);
+    Q_EMIT handle->parentChanged(parent, nextChild);
 }
 
 XdgImporterV2::XdgImporterV2(Display* display)
@@ -329,8 +326,8 @@ void XdgImportedV2::Private::setParentOfCallback([[maybe_unused]] wl_client* wlC
                                                  wl_resource* wlResource,
                                                  wl_resource* wlSurface)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
     // Guaranteed by libwayland (?).
     Q_ASSERT(surface);
@@ -346,18 +343,18 @@ void XdgImportedV2::Private::setChild(Surface* surface)
 {
     auto* prevChild = child;
     if (prevChild) {
-        disconnect(prevChild, &Surface::resourceDestroyed, handle(), nullptr);
+        disconnect(prevChild, &Surface::resourceDestroyed, handle, nullptr);
     }
 
     child = surface;
 
-    connect(surface, &Surface::resourceDestroyed, handle(), [this] {
+    connect(surface, &Surface::resourceDestroyed, handle, [this] {
         // Child surface is destroyed, this means relation is cancelled.
-        Q_EMIT handle()->childChanged(source->surface(), this->child, nullptr);
+        Q_EMIT handle->childChanged(source->surface(), this->child, nullptr);
         this->child = nullptr;
     });
 
-    Q_EMIT handle()->childChanged(source ? source->surface() : nullptr, prevChild, surface);
+    Q_EMIT handle->childChanged(source ? source->surface() : nullptr, prevChild, surface);
 }
 
 XdgImportedV2::Private::Private(Client* client,

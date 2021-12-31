@@ -46,13 +46,13 @@ void ServerSideDecorationPaletteManager::Private::createCallback(
     uint32_t id,
     wl_resource* wlSurface)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto priv = bind->global()->handle->d_ptr.get();
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
     auto palette
-        = new ServerSideDecorationPalette(bind->client()->handle(), bind->version(), id, surface);
+        = new ServerSideDecorationPalette(bind->client->handle, bind->version, id, surface);
 
-    if (!palette->d_ptr->resource()) {
+    if (!palette->d_ptr->resource) {
         bind->post_no_memory();
         delete palette;
         return;
@@ -60,13 +60,12 @@ void ServerSideDecorationPaletteManager::Private::createCallback(
 
     priv->palettes.push_back(palette);
 
-    QObject::connect(
-        palette, &ServerSideDecorationPalette::resourceDestroyed, priv->handle(), [=]() {
-            priv->palettes.erase(std::remove(priv->palettes.begin(), priv->palettes.end(), palette),
-                                 priv->palettes.end());
-        });
+    QObject::connect(palette, &ServerSideDecorationPalette::resourceDestroyed, priv->handle, [=]() {
+        priv->palettes.erase(std::remove(priv->palettes.begin(), priv->palettes.end(), palette),
+                             priv->palettes.end());
+    });
 
-    Q_EMIT priv->handle()->paletteCreated(palette);
+    Q_EMIT priv->handle->paletteCreated(palette);
 }
 
 ServerSideDecorationPaletteManager::ServerSideDecorationPaletteManager(Display* display)
@@ -97,13 +96,13 @@ void ServerSideDecorationPalette::Private::setPaletteCallback([[maybe_unused]] w
                                                               wl_resource* wlResource,
                                                               const char* palette)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (priv->palette == QLatin1String(palette)) {
         return;
     }
     priv->palette = QString::fromUtf8(palette);
-    Q_EMIT priv->handle()->paletteChanged(priv->palette);
+    Q_EMIT priv->handle->paletteChanged(priv->palette);
 }
 
 ServerSideDecorationPalette::Private::Private(Client* client,

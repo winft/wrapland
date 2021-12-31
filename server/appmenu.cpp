@@ -56,24 +56,24 @@ void AppmenuManager::Private::createCallback(AppmenuManagerBind* bind,
                                              uint32_t id,
                                              wl_resource* wlSurface)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto priv = bind->global()->handle->d_ptr.get();
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
-    auto appmenu = new Appmenu(bind->client()->handle(), bind->version(), id, surface);
+    auto appmenu = new Appmenu(bind->client->handle, bind->version, id, surface);
 
-    if (!appmenu->d_ptr->resource()) {
+    if (!appmenu->d_ptr->resource) {
         bind->post_no_memory();
         delete appmenu;
         return;
     }
     priv->appmenus.push_back(appmenu);
 
-    QObject::connect(appmenu, &Appmenu::resourceDestroyed, priv->handle(), [=]() {
+    QObject::connect(appmenu, &Appmenu::resourceDestroyed, priv->handle, [=]() {
         priv->appmenus.erase(std::remove(priv->appmenus.begin(), priv->appmenus.end(), appmenu),
                              priv->appmenus.end());
     });
 
-    Q_EMIT priv->handle()->appmenuCreated(appmenu);
+    Q_EMIT priv->handle->appmenuCreated(appmenu);
 }
 
 const struct org_kde_kwin_appmenu_interface Appmenu::Private::s_interface = {
@@ -108,7 +108,7 @@ void Appmenu::Private::setAddressCallback([[maybe_unused]] wl_client* wlClient,
                                           const char* service_name,
                                           const char* object_path)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (priv->address.serviceName == QLatin1String(service_name)
         && priv->address.objectPath == QLatin1String(object_path)) {
@@ -117,7 +117,7 @@ void Appmenu::Private::setAddressCallback([[maybe_unused]] wl_client* wlClient,
 
     priv->address.serviceName = QString::fromLatin1(service_name);
     priv->address.objectPath = QString::fromLatin1(object_path);
-    Q_EMIT priv->handle()->addressChanged(priv->address);
+    Q_EMIT priv->handle->addressChanged(priv->address);
 }
 
 Appmenu* AppmenuManager::appmenuForSurface(Surface* surface)

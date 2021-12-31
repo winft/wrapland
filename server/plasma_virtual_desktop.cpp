@@ -58,11 +58,11 @@ void PlasmaVirtualDesktopManager::Private::getVirtualDesktopCallback(
     uint32_t serial,
     const char* id)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
+    auto priv = get_handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     if (auto it = find_desktop(priv->desktops, id); it != priv->desktops.cend()) {
-        (*it)->d_ptr->createResource(bind->client(), bind->version(), serial);
+        (*it)->d_ptr->createResource(bind->client, bind->version, serial);
     }
 }
 
@@ -72,7 +72,7 @@ void PlasmaVirtualDesktopManager::Private::requestCreateVirtualDesktopCallback(
     const char* name,
     uint32_t position)
 {
-    auto manager = handle(wlResource);
+    auto manager = get_handle(wlResource);
     Q_EMIT manager->desktopCreateRequested(
         name, qBound<uint32_t>(0, position, static_cast<uint32_t>(manager->desktops().size())));
 }
@@ -82,7 +82,7 @@ void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
     wl_resource* wlResource,
     const char* id)
 {
-    auto manager = handle(wlResource);
+    auto manager = get_handle(wlResource);
     Q_EMIT manager->desktopRemoveRequested(id);
 }
 
@@ -208,7 +208,7 @@ void PlasmaVirtualDesktop::Private::createResource(Wayland::Client* client,
                                                    uint32_t version,
                                                    uint32_t serial)
 {
-    auto resource = new PlasmaVirtualDesktopRes(client->handle(), version, serial, q_ptr);
+    auto resource = new PlasmaVirtualDesktopRes(client->handle, version, serial, q_ptr);
     resources.push_back(resource);
     connect(resource, &PlasmaVirtualDesktopRes::resourceDestroyed, q_ptr, [this, resource]() {
         remove_one(resources, resource);
@@ -312,7 +312,7 @@ const struct org_kde_plasma_virtual_desktop_interface PlasmaVirtualDesktopRes::P
 void PlasmaVirtualDesktopRes::Private::requestActivateCallback([[maybe_unused]] wl_client* wlClient,
                                                                wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->virtualDesktop) {
         return;
     }

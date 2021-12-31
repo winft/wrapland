@@ -48,10 +48,10 @@ void SlideManager::Private::createCallback(SlideManagerBind* bind,
                                            uint32_t id,
                                            wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
-    auto slide = new Slide(bind->client()->handle(), bind->version(), id);
-    if (!slide->d_ptr->resource()) {
+    auto slide = new Slide(bind->client->handle, bind->version, id);
+    if (!slide->d_ptr->resource) {
         bind->post_no_memory();
         delete slide;
         return;
@@ -63,7 +63,7 @@ void SlideManager::Private::createCallback(SlideManagerBind* bind,
 void SlideManager::Private::unsetCallback([[maybe_unused]] SlideManagerBind* bind,
                                           wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
     surface->d_ptr->setSlide(QPointer<Slide>());
 }
 
@@ -93,7 +93,7 @@ Slide::Private::Private(Client* client, uint32_t version, uint32_t id, Slide* qp
 
 void Slide::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->currentLocation = priv->pendingLocation;
     priv->currentOffset = priv->pendingOffset;
 }
@@ -102,7 +102,7 @@ void Slide::Private::setLocationCallback([[maybe_unused]] wl_client* wlClient,
                                          wl_resource* wlResource,
                                          uint32_t location)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pendingLocation = static_cast<Slide::Location>(location);
 }
 
@@ -110,7 +110,7 @@ void Slide::Private::setOffsetCallback([[maybe_unused]] wl_client* wlClient,
                                        wl_resource* wlResource,
                                        int32_t offset)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pendingOffset = offset;
 }
 
