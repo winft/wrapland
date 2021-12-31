@@ -31,6 +31,7 @@ public:
     ~Private() override;
 
     void bindInit(drm_lease_device_v1_bind* bind) override;
+    void prepareUnbind(drm_lease_device_v1_bind* bind) override;
 
     void add_connector(drm_lease_connector_v1* connector);
     void send_connector(drm_lease_device_v1_bind* bind, drm_lease_connector_v1* connector);

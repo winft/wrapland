@@ -40,6 +40,14 @@ void drm_lease_device_v1::Private::bindInit(drm_lease_device_v1_bind* bind)
     Q_EMIT handle->needs_new_client_fd();
 }
 
+void drm_lease_device_v1::Private::prepareUnbind(drm_lease_device_v1_bind* bind)
+{
+    auto priv = bind->global()->handle->d_ptr.get();
+
+    remove_one(priv->active_binds, bind);
+    remove_one(priv->waiting_binds, bind);
+}
+
 void drm_lease_device_v1::Private::create_lease_request_callback(drm_lease_device_v1_bind* bind,
                                                                  uint32_t id)
 {
