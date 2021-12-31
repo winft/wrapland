@@ -68,6 +68,7 @@ void drm_lease_device_v1::Private::release_callback([[maybe_unused]] drm_lease_d
     remove_one(priv->waiting_binds, bind);
 
     priv->send<wp_drm_lease_device_v1_send_released>(bind);
+    bind->serverSideDestroy();
     delete bind;
 }
 
