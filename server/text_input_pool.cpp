@@ -25,7 +25,7 @@ void text_input_pool::register_device(text_input_v2* ti)
         return;
     }
     v2_devices.push_back(ti);
-    if (focus.surface && focus.surface->client() == ti->d_ptr->client()->handle()) {
+    if (focus.surface && focus.surface->client() == ti->d_ptr->client->handle) {
         // This is a text input for the currently focused text input surface.
         if (!v2.text_input) {
             v2.text_input = ti;
@@ -49,7 +49,7 @@ void text_input_pool::register_device(text_input_v3* ti)
         return;
     }
     v3_devices.push_back(ti);
-    if (focus.surface && focus.surface->client() == ti->d_ptr->client()->handle()) {
+    if (focus.surface && focus.surface->client() == ti->d_ptr->client->handle) {
         // This is a text input for the currently focused text input surface.
         if (!v3.text_input) {
             v3.text_input = ti;
@@ -68,7 +68,7 @@ void text_input_pool::register_device(text_input_v3* ti)
 
 bool text_input_pool::set_v2_focused_surface(Surface* surface)
 {
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     auto const old_ti = v2.text_input;
 
     if (old_ti) {

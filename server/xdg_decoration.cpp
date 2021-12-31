@@ -72,7 +72,7 @@ void XdgDecorationManager::Private::getToplevelDecorationCallback(XdgDecorationM
                                                                   uint32_t id,
                                                                   wl_resource* wlToplevel)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
 
     auto toplevel = priv->m_shell->d_ptr->getToplevel(wlToplevel);
     if (!toplevel) {
@@ -85,14 +85,14 @@ void XdgDecorationManager::Private::getToplevelDecorationCallback(XdgDecorationM
         return;
     }
 
-    auto deco = new XdgDecoration(bind->client()->handle(), bind->version(), id, toplevel);
+    auto deco = new XdgDecoration(bind->client->handle, bind->version, id, toplevel);
     // TODO(romangg): check resource
 
     priv->m_decorations[toplevel] = deco;
-    QObject::connect(deco, &XdgDecoration::resourceDestroyed, priv->handle(), [toplevel, priv]() {
+    QObject::connect(deco, &XdgDecoration::resourceDestroyed, priv->handle, [toplevel, priv]() {
         priv->m_decorations.erase(toplevel);
     });
-    Q_EMIT priv->handle()->decorationCreated(deco);
+    Q_EMIT priv->handle->decorationCreated(deco);
 }
 
 XdgDecorationManager::XdgDecorationManager(Display* display, XdgShell* shell)
@@ -147,7 +147,7 @@ void XdgDecoration::Private::setModeCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlResource,
                                              uint32_t wlMode)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     Mode mode = Mode::Undefined;
     switch (wlMode) {
@@ -162,16 +162,16 @@ void XdgDecoration::Private::setModeCallback([[maybe_unused]] wl_client* wlClien
     }
 
     priv->m_requestedMode = mode;
-    Q_EMIT priv->handle()->modeRequested();
+    Q_EMIT priv->handle->modeRequested();
 }
 
 void XdgDecoration::Private::unsetModeCallback([[maybe_unused]] wl_client* wlClient,
                                                wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     priv->m_requestedMode = Mode::Undefined;
-    Q_EMIT priv->handle()->modeRequested();
+    Q_EMIT priv->handle->modeRequested();
 }
 
 XdgDecoration::XdgDecoration(Client* client,

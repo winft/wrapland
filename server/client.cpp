@@ -55,7 +55,7 @@ wl_resource* Client::getResource(quint32 id)
 
 wl_client* Client::native() const
 {
-    return d_ptr->native();
+    return d_ptr->native;
 }
 
 Display* Client::display()

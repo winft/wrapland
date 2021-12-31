@@ -56,8 +56,8 @@ void Pointer::Private::setCursorCallback([[maybe_unused]] wl_client* wlClient,
                                          int32_t hotspot_x,
                                          int32_t hotspot_y)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto surface = wlSurface ? Wayland::Resource<Surface>::handle(wlSurface) : nullptr;
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto surface = wlSurface ? Wayland::Resource<Surface>::get_handle(wlSurface) : nullptr;
 
     priv->setCursor(serial, surface, QPoint(hotspot_x, hotspot_y));
 }
@@ -71,10 +71,10 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
 void Pointer::Private::setCursor(quint32 serial, Surface* surface, const QPoint& hotspot)
 {
     if (!cursor) {
-        cursor.reset(new Cursor(handle()));
+        cursor.reset(new Cursor(handle));
         cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
-        QObject::connect(cursor.get(), &Cursor::changed, handle(), &Pointer::cursorChanged);
-        Q_EMIT handle()->cursorChanged();
+        QObject::connect(cursor.get(), &Cursor::changed, handle, &Pointer::cursorChanged);
+        Q_EMIT handle->cursorChanged();
     } else {
         cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
     }
@@ -83,7 +83,7 @@ void Pointer::Private::setCursor(quint32 serial, Surface* surface, const QPoint&
 void Pointer::Private::sendEnter(quint32 serial, Surface* surface, QPointF const& pos)
 {
     send<wl_pointer_send_enter>(serial,
-                                surface->d_ptr->resource(),
+                                surface->d_ptr->resource,
                                 wl_fixed_from_double(pos.x()),
                                 wl_fixed_from_double(pos.y()));
 }
@@ -93,7 +93,7 @@ void Pointer::Private::sendLeave(quint32 serial, Surface* surface)
     if (!surface) {
         return;
     }
-    send<wl_pointer_send_leave>(serial, surface->d_ptr->resource());
+    send<wl_pointer_send_leave>(serial, surface->d_ptr->resource);
 }
 
 void Pointer::Private::sendMotion(const QPointF& position)
@@ -112,7 +112,7 @@ void Pointer::Private::registerRelativePointer(RelativePointerV1* relativePointe
     relativePointers.push_back(relativePointer);
 
     QObject::connect(
-        relativePointer, &RelativePointerV1::resourceDestroyed, handle(), [this, relativePointer] {
+        relativePointer, &RelativePointerV1::resourceDestroyed, handle, [this, relativePointer] {
             relativePointers.erase(
                 std::remove(relativePointers.begin(), relativePointers.end(), relativePointer),
                 relativePointers.end());
@@ -122,7 +122,7 @@ void Pointer::Private::registerRelativePointer(RelativePointerV1* relativePointe
 void Pointer::Private::registerSwipeGesture(PointerSwipeGestureV1* gesture)
 {
     swipeGestures.push_back(gesture);
-    QObject::connect(gesture, &PointerSwipeGestureV1::resourceDestroyed, handle(), [this, gesture] {
+    QObject::connect(gesture, &PointerSwipeGestureV1::resourceDestroyed, handle, [this, gesture] {
         swipeGestures.erase(std::remove(swipeGestures.begin(), swipeGestures.end(), gesture),
                             swipeGestures.end());
     });
@@ -131,7 +131,7 @@ void Pointer::Private::registerSwipeGesture(PointerSwipeGestureV1* gesture)
 void Pointer::Private::registerPinchGesture(PointerPinchGestureV1* gesture)
 {
     pinchGestures.push_back(gesture);
-    QObject::connect(gesture, &PointerPinchGestureV1::resourceDestroyed, handle(), [this, gesture] {
+    QObject::connect(gesture, &PointerPinchGestureV1::resourceDestroyed, handle, [this, gesture] {
         pinchGestures.erase(std::remove(pinchGestures.begin(), pinchGestures.end(), gesture),
                             pinchGestures.end());
     });
@@ -229,14 +229,13 @@ void Pointer::Private::setFocusedSurface(quint32 serial, Surface* surface)
     }
 
     focusedSurface = surface;
-    surfaceDestroyConnection
-        = connect(focusedSurface, &Surface::resourceDestroyed, handle(), [this] {
-              disconnect(clientDestroyConnection);
-              sendLeave(client()->display()->handle()->nextSerial(), focusedSurface);
-              sendFrame();
-              focusedSurface = nullptr;
-          });
-    clientDestroyConnection = connect(client()->handle(), &Client::disconnected, handle(), [this] {
+    surfaceDestroyConnection = connect(focusedSurface, &Surface::resourceDestroyed, handle, [this] {
+        disconnect(clientDestroyConnection);
+        sendLeave(client->display()->handle->nextSerial(), focusedSurface);
+        sendFrame();
+        focusedSurface = nullptr;
+    });
+    clientDestroyConnection = connect(client->handle, &Client::disconnected, handle, [this] {
         disconnect(surfaceDestroyConnection);
         focusedSurface = nullptr;
     });
@@ -335,7 +334,7 @@ void Pointer::axis(Qt::Orientation orientation, quint32 delta)
 
 Client* Pointer::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 Seat* Pointer::seat() const
@@ -389,7 +388,7 @@ void Pointer::frame()
 
 Pointer* Pointer::get(void* data)
 {
-    return Private::handle(reinterpret_cast<wl_resource*>(data));
+    return Private::get_handle(reinterpret_cast<wl_resource*>(data));
 }
 
 Cursor::Private::Private(Cursor* q, Pointer* _pointer)

@@ -47,7 +47,7 @@ XdgShellPopup::Private::Private(uint32_t version,
                                 XdgShellSurface* surface,
                                 XdgShellSurface* parent,
                                 XdgShellPopup* q)
-    : Wayland::Resource<XdgShellPopup>(surface->d_ptr->client(),
+    : Wayland::Resource<XdgShellPopup>(surface->d_ptr->client,
                                        version,
                                        id,
                                        &xdg_popup_interface,
@@ -74,7 +74,7 @@ void XdgShellPopup::Private::ackConfigure(uint32_t serial)
         uint32_t i = serials.front();
         serials.pop_front();
 
-        Q_EMIT handle()->configureAcknowledged(i);
+        Q_EMIT handle->configureAcknowledged(i);
         if (i == serial) {
             break;
         }
@@ -86,20 +86,20 @@ void XdgShellPopup::Private::grabCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlSeat,
                                           uint32_t serial)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto seat = SeatGlobal::handle(wlSeat);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto seat = SeatGlobal::get_handle(wlSeat);
 
-    priv->handle()->grabRequested(seat, serial);
+    priv->handle->grabRequested(seat, serial);
 }
 
 uint32_t XdgShellPopup::Private::configure(const QRect& rect)
 {
-    const uint32_t serial = client()->display()->handle()->nextSerial();
+    const uint32_t serial = client->display()->handle->nextSerial();
     shellSurface->d_ptr->configureSerials.push_back(serial);
 
     send<xdg_popup_send_configure>(rect.x(), rect.y(), rect.width(), rect.height());
     shellSurface->d_ptr->send<xdg_surface_send_configure>(serial);
-    client()->flush();
+    client->flush();
 
     return serial;
 }
@@ -108,7 +108,7 @@ void XdgShellPopup::Private::popupDone()
 {
     // TODO(unknown author): dismiss all child popups
     send<xdg_popup_send_popup_done>();
-    client()->flush();
+    client->flush();
 }
 
 XdgShellPopup::XdgShellPopup(uint32_t version,
@@ -203,7 +203,7 @@ uint32_t XdgShellPopup::configure(const QRect& rect)
 
 Client* XdgShellPopup::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 }

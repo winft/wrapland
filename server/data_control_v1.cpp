@@ -89,14 +89,14 @@ data_control_offer_v1_res* data_control_device_v1::impl::send_data_offer_impl(So
 {
     assert(source);
 
-    auto offer = new data_control_offer_v1_res(client()->handle(), version(), source);
+    auto offer = new data_control_offer_v1_res(client->handle, version, source);
 
-    if (!offer->impl->resource()) {
+    if (!offer->impl->resource) {
         delete offer;
         return nullptr;
     }
 
-    send<zwlr_data_control_device_v1_send_data_offer>(offer->impl->resource());
+    send<zwlr_data_control_device_v1_send_data_offer>(offer->impl->resource);
     offer->send_offers();
     return offer;
 }
@@ -175,7 +175,7 @@ void data_control_device_v1::impl::set_selection_impl(Devices& seat_devices,
         return;
     }
 
-    auto source = Resource<data_control_source_v1_res>::handle(wlSource);
+    auto source = Resource<data_control_source_v1_res>::get_handle(wlSource);
     if (!std::holds_alternative<std::monostate>(source->data_src)) {
         handle->d_ptr->postError(ZWLR_DATA_CONTROL_DEVICE_V1_ERROR_USED_SOURCE,
                                  "Source already used");
@@ -203,7 +203,7 @@ void data_control_device_v1::impl::set_selection_callback(wl_client* /*wlClient*
                                                           wl_resource* wlResource,
                                                           wl_resource* wlSource)
 {
-    auto handle = Resource::handle(wlResource);
+    auto handle = Resource::get_handle(wlResource);
     auto& seat_devices = handle->d_ptr->m_seat->d_ptr->data_devices;
     auto& selection_holder = handle->d_ptr->selection;
 
@@ -214,7 +214,7 @@ void data_control_device_v1::impl::set_primary_selection_callback(wl_client* /*w
                                                                   wl_resource* wlResource,
                                                                   wl_resource* wlSource)
 {
-    auto handle = Resource::handle(wlResource);
+    auto handle = Resource::get_handle(wlResource);
     auto& seat_devices = handle->d_ptr->m_seat->d_ptr->primary_selection_devices;
     auto& selection_holder = handle->d_ptr->primary_selection;
 
@@ -259,13 +259,13 @@ void data_control_device_v1::send_selection(data_source* source) const
     }
 
     if (auto offer = d_ptr->send_data_offer(source)) {
-        d_ptr->send<zwlr_data_control_device_v1_send_selection>(offer->impl->resource());
+        d_ptr->send<zwlr_data_control_device_v1_send_selection>(offer->impl->resource);
     }
 }
 
 void data_control_device_v1::send_primary_selection(primary_selection_source* source) const
 {
-    assert(d_ptr->version() >= ZWLR_DATA_CONTROL_DEVICE_V1_PRIMARY_SELECTION_SINCE_VERSION);
+    assert(d_ptr->version >= ZWLR_DATA_CONTROL_DEVICE_V1_PRIMARY_SELECTION_SINCE_VERSION);
 
     if (!source) {
         d_ptr->send<zwlr_data_control_device_v1_send_primary_selection>(nullptr);
@@ -273,7 +273,7 @@ void data_control_device_v1::send_primary_selection(primary_selection_source* so
     }
 
     if (auto offer = d_ptr->send_data_offer(source)) {
-        d_ptr->send<zwlr_data_control_device_v1_send_primary_selection>(offer->impl->resource());
+        d_ptr->send<zwlr_data_control_device_v1_send_primary_selection>(offer->impl->resource);
     }
 }
 
@@ -309,7 +309,7 @@ void data_control_source_v1_res::res_impl::offer_callback(wl_client* /*wlClient*
                                                           wl_resource* wlResource,
                                                           char const* mimeType)
 {
-    auto handle = Resource::handle(wlResource);
+    auto handle = Resource::get_handle(wlResource);
 
     std::visit(overload{[&](std::unique_ptr<data_source>& src) {
                             offer_mime_type(src->d_ptr.get(), mimeType);
@@ -371,7 +371,7 @@ void data_control_offer_v1_res_impl::receive_callback(wl_client* /*wlClient*/,
                                                       char const* mime_type,
                                                       int32_t fd)
 {
-    auto handle = Resource::handle(wlResource);
+    auto handle = Resource::get_handle(wlResource);
 
     std::visit(overload{[&](data_source* src) {
                             assert(src);

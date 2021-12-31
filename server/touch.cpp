@@ -61,13 +61,13 @@ Touch::Touch(Client* client, uint32_t version, uint32_t id, Seat* seat)
 void Touch::cancel()
 {
     d_ptr->send<wl_touch_send_cancel>();
-    d_ptr->client()->flush();
+    d_ptr->client->flush();
 }
 
 void Touch::frame()
 {
     d_ptr->send<wl_touch_send_frame>();
-    d_ptr->client()->flush();
+    d_ptr->client->flush();
 }
 
 void Touch::move(qint32 id, const QPointF& localPos)
@@ -80,13 +80,13 @@ void Touch::move(qint32 id, const QPointF& localPos)
                                       id,
                                       wl_fixed_from_double(localPos.x()),
                                       wl_fixed_from_double(localPos.y()));
-    d_ptr->client()->flush();
+    d_ptr->client->flush();
 }
 
 void Touch::up(qint32 id, quint32 serial)
 {
     d_ptr->send<wl_touch_send_up>(serial, d_ptr->seat->timestamp(), id);
-    d_ptr->client()->flush();
+    d_ptr->client->flush();
 }
 
 void Touch::down(qint32 id, quint32 serial, const QPointF& localPos)
@@ -97,12 +97,12 @@ void Touch::down(qint32 id, quint32 serial, const QPointF& localPos)
                                     id,
                                     wl_fixed_from_double(localPos.x()),
                                     wl_fixed_from_double(localPos.y()));
-    d_ptr->client()->flush();
+    d_ptr->client->flush();
 }
 
 Client* Touch::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 }

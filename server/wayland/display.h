@@ -46,17 +46,15 @@ class Client;
 class Display
 {
 public:
-    explicit Display(Server::Display* parent);
+    explicit Display(Server::Display* handle);
     virtual ~Display();
 
-    void setSocketName(const std::string& name);
     void add_socket_fd(int fd);
 
     void addGlobal(BasicNucleus* nucleus);
     void removeGlobal(BasicNucleus* nucleus);
 
     wl_display* native() const;
-    std::string socketName() const;
 
     void start(bool createSocket);
     void terminate();
@@ -81,11 +79,12 @@ public:
 
     std::vector<Client*> const& clients() const;
 
-    Server::Display* handle() const;
-
     static Display* backendCast(Server::Display* display);
 
     BufferManager* bufferManager() const;
+
+    std::string socket_name;
+    Server::Display* handle;
 
 protected:
     virtual Client* castClientImpl(Server::Client* client) = 0;
@@ -94,7 +93,6 @@ private:
     void addSocket();
     wl_display* m_display = nullptr;
     wl_event_loop* m_loop = nullptr;
-    std::string m_socketName;
 
     bool m_running = false;
 
@@ -104,8 +102,6 @@ private:
 
     std::vector<Client*> m_clients;
     std::unique_ptr<BufferManager> m_bufferManager;
-
-    Server::Display* m_handle;
 };
 
 }

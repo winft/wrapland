@@ -53,9 +53,9 @@ Client* Display::castClient(Server::Client* client)
     return backendCast(client->display())->castClientImpl(client);
 }
 
-Display::Display(Server::Display* parent)
-    : m_bufferManager{std::make_unique<BufferManager>()}
-    , m_handle(parent)
+Display::Display(Server::Display* handle)
+    : handle{handle}
+    , m_bufferManager{std::make_unique<BufferManager>()}
 {
 }
 
@@ -74,16 +74,6 @@ Display::~Display()
 wl_display* Display::native() const
 {
     return m_display;
-}
-
-std::string Display::socketName() const
-{
-    return m_socketName;
-}
-
-void Display::setSocketName(const std::string& name)
-{
-    m_socketName = name;
 }
 
 void Display::add_socket_fd(int fd)
@@ -118,10 +108,10 @@ void Display::removeGlobal(BasicNucleus* nucleus)
     m_globals.erase(std::remove(m_globals.begin(), m_globals.end(), nucleus), m_globals.end());
     m_stale_globals.push_back(nucleus);
 
-    // A single-shot QTimer is cleaned up by Qt internally when the receiver (here m_handle) goes
+    // A single-shot QTimer is cleaned up by Qt internally when the receiver (here handle) goes
     // away what clang-tidy does not understand.
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-    QTimer::singleShot(s_global_stale_time, m_handle, [this, nucleus] {
+    QTimer::singleShot(s_global_stale_time, handle, [this, nucleus] {
         delete nucleus;
         m_stale_globals.erase(std::remove(m_stale_globals.begin(), m_stale_globals.end(), nucleus),
                               m_stale_globals.end());
@@ -130,15 +120,15 @@ void Display::removeGlobal(BasicNucleus* nucleus)
 
 void Display::addSocket()
 {
-    if (!m_socketName.empty()) {
-        if (wl_display_add_socket(m_display, m_socketName.c_str()) != 0) {
+    if (!socket_name.empty()) {
+        if (wl_display_add_socket(m_display, socket_name.c_str()) != 0) {
             throw std::bad_exception();
         }
         return;
     }
 
-    m_socketName = wl_display_add_socket_auto(m_display);
-    if (m_socketName.empty()) {
+    socket_name = wl_display_add_socket_auto(m_display);
+    if (socket_name.empty()) {
         throw std::bad_exception();
     }
 }
@@ -162,14 +152,14 @@ void Display::start(bool createSocket)
     }
 
     m_loop = wl_display_get_event_loop(m_display);
-    installSocketNotifier(m_handle);
+    installSocketNotifier(handle);
 }
 
 void Display::startLoop()
 {
     Q_ASSERT(!running());
     Q_ASSERT(native());
-    installSocketNotifier(m_handle);
+    installSocketNotifier(handle);
 }
 
 void Display::terminate()
@@ -269,7 +259,7 @@ Client* Display::getClient(wl_client* wlClient)
     Q_ASSERT(wlClient);
 
     auto it = std::find_if(m_clients.cbegin(), m_clients.cend(), [wlClient](Client* client) {
-        return client->native() == wlClient;
+        return client->native == wlClient;
     });
 
     if (it != m_clients.cend()) {
@@ -284,18 +274,18 @@ void Display::setupClient(Client* client)
     m_clients.push_back(client);
 
     QObject::connect(
-        client->handle(), &Server::Client::disconnected, m_handle, [this](Server::Client* client) {
+        client->handle, &Server::Client::disconnected, handle, [this](Server::Client* client) {
             for (auto* internal : m_clients) {
-                if (internal->handle() != client) {
+                if (internal->handle != client) {
                     continue;
                 }
 
                 m_clients.erase(std::remove(m_clients.begin(), m_clients.end(), internal),
                                 m_clients.end());
-                Q_EMIT m_handle->clientDisconnected(client);
+                Q_EMIT handle->clientDisconnected(client);
             }
         });
-    Q_EMIT m_handle->clientConnected(client->handle());
+    Q_EMIT handle->clientConnected(client->handle);
 }
 
 std::vector<Client*> const& Display::clients() const
@@ -306,11 +296,6 @@ std::vector<Client*> const& Display::clients() const
 BufferManager* Display::bufferManager() const
 {
     return m_bufferManager.get();
-}
-
-Server::Display* Display::handle() const
-{
-    return m_handle;
 }
 
 }

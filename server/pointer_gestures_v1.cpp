@@ -56,9 +56,9 @@ void PointerGesturesV1::Private::swipeGestureCallback(PointerGesturesV1Bind* bin
                                                       uint32_t id,
                                                       wl_resource* wlPointer)
 {
-    auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
+    auto pointer = Wayland::Resource<Pointer>::get_handle(wlPointer);
 
-    auto swiper = new PointerSwipeGestureV1(bind->client()->handle(), bind->version(), id, pointer);
+    auto swiper = new PointerSwipeGestureV1(bind->client->handle, bind->version, id, pointer);
     if (!swiper) {
         return;
     }
@@ -70,10 +70,9 @@ void PointerGesturesV1::Private::pinchGestureCallback(PointerGesturesV1Bind* bin
                                                       uint32_t id,
                                                       wl_resource* wlPointer)
 {
-    auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
+    auto pointer = Wayland::Resource<Pointer>::get_handle(wlPointer);
 
-    auto pincher
-        = new PointerPinchGestureV1(bind->client()->handle(), bind->version(), id, pointer);
+    auto pincher = new PointerPinchGestureV1(bind->client->handle, bind->version, id, pointer);
     if (!pincher) {
         return;
     }
@@ -115,7 +114,7 @@ void PointerSwipeGestureV1::start(quint32 serial, quint32 fingerCount)
     d_ptr->send<zwp_pointer_gesture_swipe_v1_send_begin>(
         serial,
         seat->timestamp(),
-        seat->pointers().get_focus().surface->d_ptr->resource(),
+        seat->pointers().get_focus().surface->d_ptr->resource,
         fingerCount);
 }
 
@@ -182,7 +181,7 @@ void PointerPinchGestureV1::start(quint32 serial, quint32 fingerCount)
     d_ptr->send<zwp_pointer_gesture_pinch_v1_send_begin>(
         serial,
         seat->timestamp(),
-        seat->pointers().get_focus().surface->d_ptr->resource(),
+        seat->pointers().get_focus().surface->d_ptr->resource,
         fingerCount);
 }
 

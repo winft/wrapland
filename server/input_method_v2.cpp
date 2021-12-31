@@ -27,8 +27,8 @@ void input_method_manager_v2::Private::get_input_method_callback(input_method_ma
                                                                  wl_resource* wlSeat,
                                                                  uint32_t id)
 {
-    auto seat = SeatGlobal::handle(wlSeat);
-    auto im = new input_method_v2(bind->client()->handle(), bind->version(), id);
+    auto seat = SeatGlobal::get_handle(wlSeat);
+    auto im = new input_method_v2(bind->client->handle, bind->version, id);
     if (seat->get_input_method_v2()) {
         // Seat already has an input method.
         im->d_ptr->send<zwp_input_method_v2_send_unavailable>();
@@ -75,7 +75,7 @@ void input_method_v2::Private::commit_string_callback([[maybe_unused]] wl_client
                                                       wl_resource* wlResource,
                                                       char const* text)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.commit_string.data = text;
     priv->pending.commit_string.update = true;
 }
@@ -86,7 +86,7 @@ void input_method_v2::Private::preedit_string_callback([[maybe_unused]] wl_clien
                                                        int32_t cursor_begin,
                                                        int32_t cursor_end)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.preedit_string.data = text;
     priv->pending.preedit_string.cursor_begin = cursor_begin;
     priv->pending.preedit_string.cursor_end = cursor_end;
@@ -99,7 +99,7 @@ void input_method_v2::Private::delete_surrounding_text_callback(
     uint32_t beforeBytes,
     uint32_t afterBytes)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.delete_surrounding_text.before_length = beforeBytes;
     priv->pending.delete_surrounding_text.after_length = afterBytes;
     priv->pending.delete_surrounding_text.update = true;
@@ -109,7 +109,7 @@ void input_method_v2::Private::commit_callback([[maybe_unused]] wl_client* wlCli
                                                wl_resource* wlResource,
                                                uint32_t serial)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (priv->serial != serial) {
         // Not on latest done event. Reset pending to current state and wait for next commit.
@@ -124,7 +124,7 @@ void input_method_v2::Private::commit_callback([[maybe_unused]] wl_client* wlCli
     priv->pending.commit_string.update = false;
     priv->pending.delete_surrounding_text.update = false;
 
-    Q_EMIT priv->handle()->state_committed();
+    Q_EMIT priv->handle->state_committed();
 }
 
 void input_method_v2::Private::get_input_popup_surface_callback(
@@ -133,12 +133,12 @@ void input_method_v2::Private::get_input_popup_surface_callback(
     uint32_t id,
     wl_resource* wlSurface)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto surface = Surface::Private::handle(wlSurface);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto surface = Surface::Private::get_handle(wlSurface);
     // TODO(romangg): should send error when surface already has a role.
 
     auto popup
-        = new input_method_popup_surface_v2(priv->client()->handle(), priv->version(), id, surface);
+        = new input_method_popup_surface_v2(priv->client->handle, priv->version, id, surface);
 
     priv->popups.push_back(popup);
     QObject::connect(popup,
@@ -157,9 +157,9 @@ void input_method_v2::Private::grab_keyboard_callback([[maybe_unused]] wl_client
                                                       wl_resource* wlResource,
                                                       uint32_t id)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto grab = new input_method_keyboard_grab_v2(
-        priv->client()->handle(), priv->version(), id, priv->seat);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto grab
+        = new input_method_keyboard_grab_v2(priv->client->handle, priv->version, id, priv->seat);
     Q_EMIT priv->q_ptr->keyboard_grabbed(grab);
 }
 
@@ -267,7 +267,7 @@ void input_method_keyboard_grab_v2::set_keymap(std::string const& content)
 
 void input_method_keyboard_grab_v2::key(uint32_t time, uint32_t key, key_state state)
 {
-    auto serial = d_ptr->client()->display()->handle()->nextSerial();
+    auto serial = d_ptr->client->display()->handle->nextSerial();
     d_ptr->send<zwp_input_method_keyboard_grab_v2_send_key>(serial,
                                                             time,
                                                             key,
@@ -281,7 +281,7 @@ void input_method_keyboard_grab_v2::update_modifiers(uint32_t depressed,
                                                      uint32_t locked,
                                                      uint32_t group)
 {
-    auto serial = d_ptr->client()->display()->handle()->nextSerial();
+    auto serial = d_ptr->client->display()->handle->nextSerial();
     d_ptr->send<zwp_input_method_keyboard_grab_v2_send_modifiers>(
         serial, depressed, latched, locked, group);
 }

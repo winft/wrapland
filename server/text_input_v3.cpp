@@ -197,9 +197,9 @@ void text_input_manager_v3::Private::get_text_input_callback(text_input_manager_
                                                              uint32_t id,
                                                              wl_resource* wlSeat)
 {
-    auto seat = SeatGlobal::handle(wlSeat);
+    auto seat = SeatGlobal::get_handle(wlSeat);
 
-    auto textInput = new text_input_v3(bind->client()->handle(), bind->version(), id);
+    auto textInput = new text_input_v3(bind->client->handle, bind->version, id);
     textInput->d_ptr->seat = seat;
     seat->d_ptr->text_inputs.register_device(textInput);
 }
@@ -237,7 +237,7 @@ void text_input_v3::Private::send_enter(Surface* surface)
 {
     assert(surface);
     entered_surface = surface;
-    send<zwp_text_input_v3_send_enter>(surface->d_ptr->resource());
+    send<zwp_text_input_v3_send_enter>(surface->d_ptr->resource);
 }
 
 void text_input_v3::Private::send_leave(Surface* surface)
@@ -246,19 +246,19 @@ void text_input_v3::Private::send_leave(Surface* surface)
     current = {};
     pending = {};
     entered_surface = nullptr;
-    send<zwp_text_input_v3_send_leave>(surface->d_ptr->resource());
+    send<zwp_text_input_v3_send_leave>(surface->d_ptr->resource);
 }
 
 void text_input_v3::Private::enable_callback([[maybe_unused]] wl_client* wlClient,
                                              wl_resource* wlResource)
 {
-    handle(wlResource)->d_ptr->pending.enabled = true;
+    get_handle(wlResource)->d_ptr->pending.enabled = true;
 }
 
 void text_input_v3::Private::disable_callback([[maybe_unused]] wl_client* wlClient,
                                               wl_resource* wlResource)
 {
-    handle(wlResource)->d_ptr->pending.enabled = false;
+    get_handle(wlResource)->d_ptr->pending.enabled = false;
 }
 
 void text_input_v3::Private::set_surrounding_text_callback([[maybe_unused]] wl_client* wlClient,
@@ -267,7 +267,7 @@ void text_input_v3::Private::set_surrounding_text_callback([[maybe_unused]] wl_c
                                                            int32_t cursor,
                                                            int32_t anchor)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     priv->pending.surrounding_text.update = true;
     priv->pending.surrounding_text.data = text;
@@ -280,7 +280,7 @@ void text_input_v3::Private::set_content_type_callback([[maybe_unused]] wl_clien
                                                        uint32_t hint,
                                                        uint32_t purpose)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     priv->pending.content.hints = convert_content_hint(hint);
     priv->pending.content.purpose = convert_content_purpose(purpose);
@@ -293,7 +293,7 @@ void text_input_v3::Private::set_cursor_rectangle_callback([[maybe_unused]] wl_c
                                                            int32_t width,
                                                            int32_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.cursor_rectangle = QRect(x, y, width, height);
 }
 
@@ -301,14 +301,14 @@ void text_input_v3::Private::set_text_change_cause_callback([[maybe_unused]] wl_
                                                             wl_resource* wlResource,
                                                             uint32_t cause)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.surrounding_text.change_cause = convert_change_cause(cause);
 }
 
 void text_input_v3::Private::set_commit_callback([[maybe_unused]] wl_client* wlClient,
                                                  wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     priv->serial++;
 
@@ -318,7 +318,7 @@ void text_input_v3::Private::set_commit_callback([[maybe_unused]] wl_client* wlC
     priv->current = priv->pending;
     priv->pending.surrounding_text.update = false;
 
-    Q_EMIT priv->handle()->state_committed();
+    Q_EMIT priv->handle->state_committed();
 }
 
 text_input_v3::text_input_v3(Client* client, uint32_t version, uint32_t id)
@@ -355,7 +355,7 @@ text_input_v3_state const& text_input_v3::state() const
 
 Client* text_input_v3::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 Surface* text_input_v3::entered_surface() const

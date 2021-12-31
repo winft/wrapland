@@ -95,10 +95,8 @@ void Surface::Private::addChild(Subsurface* child)
     pending.pub.children.push_back(child);
     pending.pub.updates |= surface_change::children;
 
-    QObject::connect(child->surface(),
-                     &Surface::subsurfaceTreeChanged,
-                     handle(),
-                     &Surface::subsurfaceTreeChanged);
+    QObject::connect(
+        child->surface(), &Surface::subsurfaceTreeChanged, handle, &Surface::subsurfaceTreeChanged);
 }
 
 void Surface::Private::removeChild(Subsurface* child)
@@ -117,12 +115,12 @@ void Surface::Private::removeChild(Subsurface* child)
         current.pub.children.end());
 
     // TODO(romangg): only emit that if the child was mapped.
-    Q_EMIT handle()->subsurfaceTreeChanged();
+    Q_EMIT handle->subsurfaceTreeChanged();
 
     if (child->surface()) {
         QObject::disconnect(child->surface(),
                             &Surface::subsurfaceTreeChanged,
-                            handle(),
+                            handle,
                             &Surface::subsurfaceTreeChanged);
     }
 }
@@ -140,7 +138,7 @@ bool Surface::Private::raiseChild(Subsurface* subsurface, Surface* sibling)
         return true;
     }
 
-    if (sibling == handle()) {
+    if (sibling == handle) {
         // It's sibling to the parent, so needs to become last item.
         pending.pub.children.erase(it);
         pending.pub.children.push_back(subsurface);
@@ -181,7 +179,7 @@ bool Surface::Private::lowerChild(Subsurface* subsurface, Surface* sibling)
         // nothing to do
         return true;
     }
-    if (sibling == handle()) {
+    if (sibling == handle) {
         // it's to the parent, so needs to become first item
         auto value = *it;
         pending.pub.children.erase(it);
@@ -249,13 +247,13 @@ void Surface::Private::installViewport(Viewport* vp)
 {
     Q_ASSERT(viewport.isNull());
     viewport = QPointer<Viewport>(vp);
-    connect(viewport, &Viewport::destinationSizeSet, handle(), [this](const QSize& size) {
+    connect(viewport, &Viewport::destinationSizeSet, handle, [this](const QSize& size) {
         setDestinationSize(size);
     });
-    connect(viewport, &Viewport::sourceRectangleSet, handle(), [this](const QRectF& rect) {
+    connect(viewport, &Viewport::sourceRectangleSet, handle, [this](const QRectF& rect) {
         setSourceRectangle(rect);
     });
-    connect(viewport, &Viewport::resourceDestroyed, handle(), [this] {
+    connect(viewport, &Viewport::resourceDestroyed, handle, [this] {
         setDestinationSize(QSize());
         setSourceRectangle(QRectF());
     });
@@ -278,12 +276,12 @@ void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
         constrainsOneShotConnection = QMetaObject::Connection();
         disconnect(constrainsUnboundConnection);
         constrainsUnboundConnection = QMetaObject::Connection();
-        Q_EMIT handle()->pointerConstraintsChanged();
+        Q_EMIT handle->pointerConstraintsChanged();
     };
 
     if (lock->lifeTime() == LockedPointerV1::LifeTime::OneShot) {
         constrainsOneShotConnection
-            = QObject::connect(lock, &LockedPointerV1::lockedChanged, handle(), [this, cleanUp] {
+            = QObject::connect(lock, &LockedPointerV1::lockedChanged, handle, [this, cleanUp] {
                   if (lockedPointer.isNull() || lockedPointer->isLocked()) {
                       return;
                   }
@@ -291,13 +289,13 @@ void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
               });
     }
     constrainsUnboundConnection
-        = QObject::connect(lock, &LockedPointerV1::resourceDestroyed, handle(), [this, cleanUp] {
+        = QObject::connect(lock, &LockedPointerV1::resourceDestroyed, handle, [this, cleanUp] {
               if (lockedPointer.isNull()) {
                   return;
               }
               cleanUp();
           });
-    Q_EMIT handle()->pointerConstraintsChanged();
+    Q_EMIT handle->pointerConstraintsChanged();
 }
 
 void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
@@ -312,12 +310,12 @@ void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
         constrainsOneShotConnection = QMetaObject::Connection();
         disconnect(constrainsUnboundConnection);
         constrainsUnboundConnection = QMetaObject::Connection();
-        Q_EMIT handle()->pointerConstraintsChanged();
+        Q_EMIT handle->pointerConstraintsChanged();
     };
 
     if (confinement->lifeTime() == ConfinedPointerV1::LifeTime::OneShot) {
         constrainsOneShotConnection = QObject::connect(
-            confinement, &ConfinedPointerV1::confinedChanged, handle(), [this, cleanUp] {
+            confinement, &ConfinedPointerV1::confinedChanged, handle, [this, cleanUp] {
                 if (confinedPointer.isNull() || confinedPointer->isConfined()) {
                     return;
                 }
@@ -325,26 +323,26 @@ void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
             });
     }
     constrainsUnboundConnection = QObject::connect(
-        confinement, &ConfinedPointerV1::resourceDestroyed, handle(), [this, cleanUp] {
+        confinement, &ConfinedPointerV1::resourceDestroyed, handle, [this, cleanUp] {
             if (confinedPointer.isNull()) {
                 return;
             }
             cleanUp();
         });
-    Q_EMIT handle()->pointerConstraintsChanged();
+    Q_EMIT handle->pointerConstraintsChanged();
 }
 
 void Surface::Private::installIdleInhibitor(IdleInhibitor* inhibitor)
 {
     idleInhibitors << inhibitor;
-    QObject::connect(inhibitor, &IdleInhibitor::resourceDestroyed, handle(), [this, inhibitor] {
+    QObject::connect(inhibitor, &IdleInhibitor::resourceDestroyed, handle, [this, inhibitor] {
         idleInhibitors.removeOne(inhibitor);
         if (idleInhibitors.isEmpty()) {
-            Q_EMIT handle()->inhibitsIdleChanged();
+            Q_EMIT handle->inhibitsIdleChanged();
         }
     });
     if (idleInhibitors.count() == 1) {
-        Q_EMIT handle()->inhibitsIdleChanged();
+        Q_EMIT handle->inhibitsIdleChanged();
     }
 }
 
@@ -495,7 +493,7 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
         return;
     }
 
-    auto const surfaceSize = handle()->size();
+    auto const surfaceSize = handle->size();
     auto const surfaceRegion = QRegion(0, 0, surfaceSize.width(), surfaceSize.height());
     if (surfaceRegion.isEmpty()) {
         return;
@@ -657,7 +655,7 @@ void Surface::Private::commit()
         return;
     }
 
-    Q_EMIT handle()->committed();
+    Q_EMIT handle->committed();
 }
 
 void Surface::Private::damage(const QRect& rect)
@@ -689,9 +687,9 @@ void Surface::Private::setTransform(Output::Transform transform)
 void Surface::Private::addFrameCallback(uint32_t callback)
 {
     // TODO(unknown author): put the frame callback in a separate class inheriting Resource.
-    wl_resource* frameCallback = client()->createResource(&wl_callback_interface, 1, callback);
+    wl_resource* frameCallback = client->createResource(&wl_callback_interface, 1, callback);
     if (!frameCallback) {
-        wl_resource_post_no_memory(resource());
+        wl_resource_post_no_memory(resource);
         return;
     }
     wl_resource_set_implementation(frameCallback, nullptr, this, destroyFrameCallback);
@@ -717,7 +715,7 @@ void Surface::Private::attachBuffer(wl_resource* wlBuffer, const QPoint& offset)
 
     QObject::connect(pending.pub.buffer.get(),
                      &Buffer::resourceDestroyed,
-                     handle(),
+                     handle,
                      [this, buffer = pending.pub.buffer.get()]() {
                          if (pending.pub.buffer.get() == buffer) {
                              pending.pub.buffer.reset();
@@ -754,7 +752,7 @@ void Surface::Private::attachCallback([[maybe_unused]] wl_client* wlClient,
                                       int32_t sx,
                                       int32_t sy)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->attachBuffer(buffer, QPoint(sx, sy));
 }
 
@@ -765,7 +763,7 @@ void Surface::Private::damageCallback([[maybe_unused]] wl_client* wlClient,
                                       int32_t width,
                                       int32_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->damage(QRect(x, y, width, height));
 }
 
@@ -776,7 +774,7 @@ void Surface::Private::damageBufferCallback([[maybe_unused]] wl_client* wlClient
                                             int32_t width,
                                             int32_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->damageBuffer(QRect(x, y, width, height));
 }
 
@@ -784,7 +782,7 @@ void Surface::Private::frameCallback([[maybe_unused]] wl_client* wlClient,
                                      wl_resource* wlResource,
                                      uint32_t callback)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->addFrameCallback(callback);
 }
 
@@ -792,8 +790,8 @@ void Surface::Private::opaqueRegionCallback([[maybe_unused]] wl_client* wlClient
                                             wl_resource* wlResource,
                                             wl_resource* wlRegion)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto region = wlRegion ? Wayland::Resource<Region>::handle(wlRegion) : nullptr;
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto region = wlRegion ? Wayland::Resource<Region>::get_handle(wlRegion) : nullptr;
     priv->setOpaque(region ? region->region() : QRegion());
 }
 
@@ -807,8 +805,8 @@ void Surface::Private::inputRegionCallback([[maybe_unused]] wl_client* wlClient,
                                            wl_resource* wlResource,
                                            wl_resource* wlRegion)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto region = wlRegion ? Wayland::Resource<Region>::handle(wlRegion) : nullptr;
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto region = wlRegion ? Wayland::Resource<Region>::get_handle(wlRegion) : nullptr;
     priv->setInput(region ? region->region() : QRegion(), !region);
 }
 
@@ -821,7 +819,7 @@ void Surface::Private::setInput(const QRegion& region, bool isInfinite)
 
 void Surface::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->commit();
 }
 
@@ -829,7 +827,7 @@ void Surface::Private::bufferTransformCallback([[maybe_unused]] wl_client* wlCli
                                                wl_resource* wlResource,
                                                int32_t transform)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->setTransform(Output::Transform(transform));
 }
 
@@ -837,7 +835,7 @@ void Surface::Private::bufferScaleCallback([[maybe_unused]] wl_client* wlClient,
                                            wl_resource* wlResource,
                                            int32_t scale)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->setScale(scale);
 }
 
@@ -918,9 +916,9 @@ void Surface::setOutputs(std::vector<WlOutput*> const& outputs)
     }
 
     for (auto output : removed_outputs) {
-        auto const binds = output->d_ptr->getBinds(d_ptr->client()->handle());
+        auto const binds = output->d_ptr->getBinds(d_ptr->client->handle);
         for (auto bind : binds) {
-            d_ptr->send<wl_surface_send_leave>(bind->resource());
+            d_ptr->send<wl_surface_send_leave>(bind->resource);
         }
         disconnect(d_ptr->outputDestroyedConnections.take(output));
     }
@@ -932,9 +930,9 @@ void Surface::setOutputs(std::vector<WlOutput*> const& outputs)
     }
 
     for (auto output : added_outputs) {
-        auto const binds = output->d_ptr->getBinds(d_ptr->client()->handle());
+        auto const binds = output->d_ptr->getBinds(d_ptr->client->handle);
         for (auto bind : binds) {
-            d_ptr->send<wl_surface_send_enter>(bind->resource());
+            d_ptr->send<wl_surface_send_enter>(bind->resource);
         }
 
         d_ptr->outputDestroyedConnections[output]
@@ -979,12 +977,12 @@ bool Surface::inhibitsIdle() const
 
 Client* Surface::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 wl_resource* Surface::resource() const
 {
-    return d_ptr->resource();
+    return d_ptr->resource;
 }
 
 uint32_t Surface::id() const

@@ -100,10 +100,10 @@ void data_device::Private::startDragCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlIcon,
                                              uint32_t serial)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto source = wlSource ? Resource<data_source_res>::handle(wlSource)->src() : nullptr;
-    auto origin = Resource<Surface>::handle(wlOrigin);
-    auto icon = wlIcon ? Resource<Surface>::handle(wlIcon) : nullptr;
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto source = wlSource ? Resource<data_source_res>::get_handle(wlSource)->src() : nullptr;
+    auto origin = Resource<Surface>::get_handle(wlOrigin);
+    auto icon = wlIcon ? Resource<Surface>::get_handle(wlIcon) : nullptr;
 
     priv->startDrag(source, origin, icon, serial);
 }
@@ -143,8 +143,8 @@ void data_device::Private::set_selection_callback(wl_client* /*wlClient*/,
                                                   uint32_t /*id*/)
 {
     // TODO(unknown author): verify serial
-    auto handle = Resource::handle(wlResource);
-    auto source_res = wlSource ? Wayland::Resource<data_source_res>::handle(wlSource) : nullptr;
+    auto handle = Resource::get_handle(wlResource);
+    auto source_res = wlSource ? Wayland::Resource<data_source_res>::get_handle(wlSource) : nullptr;
 
     // TODO(romangg): move errors into Wayland namespace.
     if (source_res && source_res->src()->supported_dnd_actions()
@@ -164,15 +164,15 @@ data_offer* data_device::Private::createDataOffer(data_source* source)
         return nullptr;
     }
 
-    auto offer = new data_offer(client()->handle(), version(), source);
+    auto offer = new data_offer(client->handle, version, source);
 
-    if (!offer->d_ptr->resource()) {
+    if (!offer->d_ptr->resource) {
         // TODO(unknown author): send error?
         delete offer;
         return nullptr;
     }
 
-    send<wl_data_device_send_data_offer>(offer->d_ptr->resource());
+    send<wl_data_device_send_data_offer>(offer->d_ptr->resource);
     offer->send_all_offers();
     return offer;
 }
@@ -204,7 +204,7 @@ void data_device::send_selection(data_source* source)
         return;
     }
 
-    d_ptr->send<wl_data_device_send_selection>(offer->d_ptr->resource());
+    d_ptr->send<wl_data_device_send_selection>(offer->d_ptr->resource);
 }
 
 void data_device::send_clear_selection()
@@ -221,10 +221,10 @@ void data_device::enter(uint32_t serial, Surface* surface, QPointF const& pos, d
 {
     assert(surface);
     d_ptr->send<wl_data_device_send_enter>(serial,
-                                           surface->d_ptr->resource(),
+                                           surface->d_ptr->resource,
                                            wl_fixed_from_double(pos.x()),
                                            wl_fixed_from_double(pos.y()),
-                                           offer ? offer->d_ptr->resource() : nullptr);
+                                           offer ? offer->d_ptr->resource : nullptr);
 }
 
 void data_device::motion(uint32_t time, QPointF const& pos)
@@ -245,7 +245,7 @@ void data_device::drop()
 
 Client* data_device::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 }

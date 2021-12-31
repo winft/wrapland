@@ -89,7 +89,7 @@ void drag_pool::set_target(Surface* new_surface,
 
     cancel_target();
 
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
 
     if (source.mode == drag_mode::pointer) {
         seat->pointers().set_position(globalPosition);

@@ -51,9 +51,9 @@ void KeyboardShortcutsInhibitManagerV1::Private::inhibitShortcutsCallback(
     wl_resource* wlSurface,
     wl_resource* wlSeat)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
-    auto seat = SeatGlobal::handle(wlSeat);
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto priv = bind->global()->handle->d_ptr.get();
+    auto seat = SeatGlobal::get_handle(wlSeat);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
     if (priv->m_inhibitors.contains({surface, seat})) {
         bind->post_error(ZWP_KEYBOARD_SHORTCUTS_INHIBIT_MANAGER_V1_ERROR_ALREADY_INHIBITED,
@@ -61,18 +61,18 @@ void KeyboardShortcutsInhibitManagerV1::Private::inhibitShortcutsCallback(
         return;
     }
 
-    auto inhibitor = new KeyboardShortcutsInhibitorV1(
-        bind->client()->handle(), bind->version(), id, surface, seat);
+    auto inhibitor
+        = new KeyboardShortcutsInhibitorV1(bind->client->handle, bind->version, id, surface, seat);
 
     QObject::connect(inhibitor,
                      &KeyboardShortcutsInhibitorV1::resourceDestroyed,
-                     priv->handle(),
+                     priv->handle,
                      [priv, surface, seat]() {
                          priv->m_inhibitors.remove({surface, seat});
                      });
 
     priv->m_inhibitors[{surface, seat}] = inhibitor;
-    Q_EMIT bind->global()->handle()->inhibitorCreated(inhibitor);
+    Q_EMIT bind->global()->handle->inhibitorCreated(inhibitor);
     inhibitor->setActive(true);
 }
 

@@ -78,7 +78,7 @@ void OutputDeviceV1::Private::bindInit(OutputDeviceV1Bind* bind)
     send<zkwinft_output_device_v1_send_geometry>(bind, geometry_args(state));
 
     send<zkwinft_output_device_v1_send_done>(bind);
-    bind->client()->flush();
+    bind->client->flush();
 }
 
 void OutputDeviceV1::Private::sendMode(OutputDeviceV1Bind* bind, Output::Mode const& mode)

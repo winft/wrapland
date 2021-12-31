@@ -106,7 +106,7 @@ void PlasmaWindowManager::Private::showDesktopCallback([[maybe_unused]] wl_clien
         break;
     }
 
-    Q_EMIT handle(wlResource)->requestChangeShowingDesktop(state);
+    Q_EMIT get_handle(wlResource)->requestChangeShowingDesktop(state);
 }
 
 void PlasmaWindowManager::Private::getWindowCallback([[maybe_unused]] wl_client* wlClient,
@@ -114,7 +114,7 @@ void PlasmaWindowManager::Private::getWindowCallback([[maybe_unused]] wl_client*
                                                      uint32_t id,
                                                      uint32_t internalWindowId)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
+    auto priv = get_handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
 
     auto it = std::find_if(
@@ -124,11 +124,11 @@ void PlasmaWindowManager::Private::getWindowCallback([[maybe_unused]] wl_client*
 
     if (it == priv->windows.cend()) {
         // Create a temp window just for the resource and directly send unmapped.
-        auto window = std::unique_ptr<PlasmaWindow>(new PlasmaWindow(priv->handle()));
-        window->d_ptr->createResource(bind->version(), id, bind->client(), true);
+        auto window = std::unique_ptr<PlasmaWindow>(new PlasmaWindow(priv->handle));
+        window->d_ptr->createResource(bind->version, id, bind->client, true);
         return;
     }
-    (*it)->d_ptr->createResource(bind->version(), id, bind->client(), false);
+    (*it)->d_ptr->createResource(bind->version, id, bind->client, false);
 }
 
 void PlasmaWindowManager::setShowingDesktopState(ShowingDesktopState desktopState)
@@ -243,7 +243,7 @@ void PlasmaWindow::Private::createResource(uint32_t version,
 
     auto parentRes = getResourceOfParent(parentWindow, windowRes);
     windowRes->d_ptr->send<org_kde_plasma_window_send_parent_window>(
-        parentRes ? parentRes->d_ptr->resource() : nullptr);
+        parentRes ? parentRes->d_ptr->resource : nullptr);
 
     if (temporary) {
         windowRes->d_ptr->send<org_kde_plasma_window_send_unmapped>();
@@ -301,7 +301,7 @@ void PlasmaWindow::Private::setIcon(const QIcon& icon)
     setThemedIconName(m_icon.name());
     if (m_icon.name().isEmpty()) {
         for (auto&& res : resources) {
-            if (wl_resource_get_version(res->d_ptr->resource())
+            if (wl_resource_get_version(res->d_ptr->resource)
                 >= ORG_KDE_PLASMA_WINDOW_ICON_CHANGED_SINCE_VERSION) {
                 res->d_ptr->send<org_kde_plasma_window_send_icon_changed>();
             }
@@ -352,11 +352,11 @@ PlasmaWindowRes* PlasmaWindow::Private::getResourceOfParent(PlasmaWindow* parent
         return nullptr;
     }
 
-    auto childClient = childRes->d_ptr->client();
+    auto childClient = childRes->d_ptr->client;
     auto it = std::find_if(parent->d_ptr->resources.begin(),
                            parent->d_ptr->resources.end(),
                            [childClient](PlasmaWindowRes* parentRes) {
-                               return parentRes->d_ptr->client() == childClient;
+                               return parentRes->d_ptr->client == childClient;
                            });
     return it != parent->d_ptr->resources.end() ? *it : nullptr;
 }
@@ -382,7 +382,7 @@ void PlasmaWindow::Private::setParentWindow(PlasmaWindow* window)
     for (auto&& res : resources) {
         auto parentRes = getResourceOfParent(window, res);
         res->d_ptr->send<org_kde_plasma_window_send_parent_window>(
-            parentRes ? parentRes->d_ptr->resource() : nullptr);
+            parentRes ? parentRes->d_ptr->resource : nullptr);
     }
 }
 
@@ -396,7 +396,7 @@ void PlasmaWindow::Private::setGeometry(const QRect& geo)
         return;
     }
     for (auto&& res : resources) {
-        auto resource = res->d_ptr->resource();
+        auto resource = res->d_ptr->resource;
         if (wl_resource_get_version(resource) < ORG_KDE_PLASMA_WINDOW_GEOMETRY_SINCE_VERSION) {
             continue;
         }
@@ -689,7 +689,7 @@ void PlasmaWindowRes::Private::getIconCallback([[maybe_unused]] wl_client* wlCli
                                                wl_resource* wlResource,
                                                int32_t fd)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
         return;
     }
@@ -709,7 +709,7 @@ void PlasmaWindowRes::Private::requestEnterVirtualDesktopCallback(
     wl_resource* wlResource,
     const char* id)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
         return;
     }
@@ -720,7 +720,7 @@ void PlasmaWindowRes::Private::requestEnterNewVirtualDesktopCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
         return;
     }
@@ -732,7 +732,7 @@ void PlasmaWindowRes::Private::requestLeaveVirtualDesktopCallback(
     wl_resource* wlResource,
     const char* id)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
         return;
     }
@@ -742,7 +742,7 @@ void PlasmaWindowRes::Private::requestLeaveVirtualDesktopCallback(
 void PlasmaWindowRes::Private::closeCallback([[maybe_unused]] wl_client* wlClient,
                                              wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
         return;
     }
@@ -752,7 +752,7 @@ void PlasmaWindowRes::Private::closeCallback([[maybe_unused]] wl_client* wlClien
 void PlasmaWindowRes::Private::requestMoveCallback([[maybe_unused]] wl_client* wlClient,
                                                    wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
         return;
     }
@@ -762,7 +762,7 @@ void PlasmaWindowRes::Private::requestMoveCallback([[maybe_unused]] wl_client* w
 void PlasmaWindowRes::Private::requestResizeCallback([[maybe_unused]] wl_client* wlClient,
                                                      wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
         return;
     }
@@ -780,7 +780,7 @@ void PlasmaWindowRes::Private::setStateCallback([[maybe_unused]] wl_client* wlCl
                                                 uint32_t flags,
                                                 uint32_t desktopState)
 {
-    auto window = handle(wlResource)->d_ptr->window;
+    auto window = get_handle(wlResource)->d_ptr->window;
     if (!window) {
         return;
     }
@@ -884,12 +884,12 @@ void PlasmaWindowRes::Private::setMinimizedGeometryCallback([[maybe_unused]] wl_
                                                             uint32_t width,
                                                             uint32_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
         return;
     }
 
-    auto panel = Wayland::Resource<Surface>::handle(wlPanel);
+    auto panel = Wayland::Resource<Surface>::get_handle(wlPanel);
     auto const rect = QRect(static_cast<int>(x),
                             static_cast<int>(y),
                             static_cast<int>(width),
@@ -901,7 +901,7 @@ void PlasmaWindowRes::Private::setMinimizedGeometryCallback([[maybe_unused]] wl_
 
     priv->window->d_ptr->minimizedGeometries[panel] = rect;
     Q_EMIT priv->window->minimizedGeometriesChanged();
-    connect(panel, &Surface::resourceDestroyed, priv->handle(), [priv, panel]() {
+    connect(panel, &Surface::resourceDestroyed, priv->handle, [priv, panel]() {
         if (priv->window && priv->window->d_ptr->minimizedGeometries.remove(panel)) {
             Q_EMIT priv->window->minimizedGeometriesChanged();
         }
@@ -912,12 +912,12 @@ void PlasmaWindowRes::Private::unsetMinimizedGeometryCallback([[maybe_unused]] w
                                                               wl_resource* wlResource,
                                                               wl_resource* wlPanel)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
         return;
     }
 
-    auto panel = Wayland::Resource<Surface>::handle(wlPanel);
+    auto panel = Wayland::Resource<Surface>::get_handle(wlPanel);
 
     if (!panel) {
         return;
@@ -933,7 +933,7 @@ void PlasmaWindowRes::Private::unmap()
 {
     window = nullptr;
     send<org_kde_plasma_window_send_unmapped>();
-    client()->flush();
+    client->flush();
 }
 
 PlasmaWindowRes::PlasmaWindowRes(Wayland::Client* client,

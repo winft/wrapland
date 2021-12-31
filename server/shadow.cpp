@@ -47,10 +47,10 @@ void ShadowManager::Private::createCallback(ShadowManagerBind* bind,
                                             uint32_t id,
                                             wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
-    auto shadow = new Shadow(bind->client()->handle(), bind->version(), id);
-    if (!shadow->d_ptr->resource()) {
+    auto shadow = new Shadow(bind->client->handle, bind->version, id);
+    if (!shadow->d_ptr->resource) {
         bind->post_no_memory();
         delete shadow;
         return;
@@ -61,7 +61,7 @@ void ShadowManager::Private::createCallback(ShadowManagerBind* bind,
 void ShadowManager::Private::unsetCallback([[maybe_unused]] ShadowManagerBind* bind,
                                            wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
     surface->d_ptr->setShadow(QPointer<Shadow>());
 }
 
@@ -91,7 +91,7 @@ const struct org_kde_kwin_shadow_interface Shadow::Private::s_interface = {
 
 void Shadow::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->commit();
 }
 
@@ -118,7 +118,7 @@ void Shadow::Private::attachConnect(AttachSide side, Buffer* buffer)
         return;
     }
 
-    QObject::connect(buffer, &Buffer::resourceDestroyed, handle(), [this, buffer, side]() {
+    QObject::connect(buffer, &Buffer::resourceDestroyed, handle, [this, buffer, side]() {
         if (auto& buf = pending.get(side); buf.get() == buffer) {
             buf.reset();
         }

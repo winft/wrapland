@@ -71,7 +71,7 @@ void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
         }
 
         for (uint64_t modifier : qAsConst(modifiers)) {
-            if (bind->version() >= ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
+            if (bind->version >= ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
                 const uint32_t modifier_lo = modifier & 0xFFFFFFFF;
                 const uint32_t modifier_hi = modifier >> modifierShift;
                 send<zwp_linux_dmabuf_v1_send_modifier, ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION>(
@@ -87,10 +87,10 @@ void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
 
 void LinuxDmabufV1::Private::createParamsCallback(LinuxDmabufV1Bind* bind, uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
 
     [[maybe_unused]] auto params
-        = new ParamsWrapperV1(bind->client()->handle(), bind->version(), id, priv);
+        = new ParamsWrapperV1(bind->client->handle, bind->version, id, priv);
 }
 
 LinuxDmabufV1::LinuxDmabufV1(Display* display)
@@ -166,7 +166,7 @@ void ParamsV1::addCallback([[maybe_unused]] wl_client* wlClient,
                            uint32_t modifier_hi,
                            uint32_t modifier_lo)
 {
-    auto params = handle(wlResource);
+    auto params = get_handle(wlResource);
     params->d_ptr->add(
         fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << modifierShift) | modifier_lo);
 }
@@ -178,7 +178,7 @@ void ParamsV1::createCallback([[maybe_unused]] wl_client* wlClient,
                               uint32_t format,
                               uint32_t flags)
 {
-    auto params = handle(wlResource);
+    auto params = get_handle(wlResource);
     params->d_ptr->create(0, QSize(width, height), format, flags);
 }
 
@@ -190,7 +190,7 @@ void ParamsV1::createImmedCallback([[maybe_unused]] wl_client* wlClient,
                                    uint32_t format,
                                    uint32_t flags)
 {
-    auto params = handle(wlResource);
+    auto params = get_handle(wlResource);
     params->d_ptr->create(new_id, QSize(width, height), format, flags);
 }
 
@@ -227,13 +227,13 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
 
     // We import the buffer from the consumer. The consumer ensures the buffer exists.
     // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
-    buffer->d_ptr->buffer = new BufferV1(client()->handle(), 1, bufferId, buffer);
+    buffer->d_ptr->buffer = new BufferV1(client->handle, 1, bufferId, buffer);
 
     // TODO(romangg): error handling
 
     // Send a 'created' event when the request is not for an immediate import, i.e. bufferId is 0.
     if (bufferId == 0) {
-        send<zwp_linux_buffer_params_v1_send_created>(buffer->d_ptr->buffer->resource());
+        send<zwp_linux_buffer_params_v1_send_created>(buffer->d_ptr->buffer->resource);
     }
 }
 

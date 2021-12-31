@@ -30,14 +30,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server::Wayland
 {
 
-Client::Client(wl_client* wlClient, Server::Client* clientHandle)
-    : m_client{wlClient}
-    , q_ptr{clientHandle}
+Client::Client(wl_client* native, Server::Client* handle)
+    : native{native}
+    , handle{handle}
 {
     m_destroyWrapper.client = this;
     m_destroyWrapper.listener.notify = destroyListenerCallback;
-    wl_client_add_destroy_listener(wlClient, &m_destroyWrapper.listener);
-    wl_client_get_credentials(wlClient, &m_pid, &m_user, &m_group);
+    wl_client_add_destroy_listener(native, &m_destroyWrapper.listener);
+    wl_client_get_credentials(native, &m_pid, &m_user, &m_group);
 
     m_executablePath
         // Qt types have limited compatibility with modern C++. Remove this clang-tidy exception
@@ -48,35 +48,30 @@ Client::Client(wl_client* wlClient, Server::Client* clientHandle)
 
 Client::~Client()
 {
-    if (m_client) {
+    if (native) {
         wl_list_remove(&m_destroyWrapper.listener.link);
     }
 }
 
 Display* Client::display() const
 {
-    return Display::backendCast(q_ptr->display());
+    return Display::backendCast(handle->display());
 }
 
-Server::Client* Client::handle() const
+void Client::flush() const
 {
-    return q_ptr;
-}
-
-void Client::flush()
-{
-    if (!m_client) {
+    if (!native) {
         return;
     }
-    wl_client_flush(m_client);
+    wl_client_flush(native);
 }
 
-void Client::destroy()
+void Client::destroy() const
 {
-    if (!m_client) {
+    if (!native) {
         return;
     }
-    wl_client_destroy(m_client);
+    wl_client_destroy(native);
 }
 
 void Client::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] void* data)
@@ -93,30 +88,26 @@ void Client::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] voi
     auto client = wrapper->client;
 
     wl_list_remove(&client->m_destroyWrapper.listener.link);
-    client->m_client = nullptr;
-    Q_EMIT client->q_ptr->disconnected(client->q_ptr);
-    delete client->handle();
+    client->native = nullptr;
+    Q_EMIT client->handle->disconnected(client->handle);
+    delete client->handle;
 }
 
-wl_resource* Client::createResource(const wl_interface* interface, uint32_t version, uint32_t id)
+wl_resource*
+Client::createResource(const wl_interface* interface, uint32_t version, uint32_t id) const
 {
-    if (!m_client) {
+    if (!native) {
         return nullptr;
     }
-    return wl_resource_create(m_client, interface, static_cast<int>(version), id);
+    return wl_resource_create(native, interface, static_cast<int>(version), id);
 }
 
-wl_resource* Client::getResource(uint32_t id)
+wl_resource* Client::getResource(uint32_t id) const
 {
-    if (!m_client) {
+    if (!native) {
         return nullptr;
     }
-    return wl_client_get_object(m_client, id);
-}
-
-wl_client* Client::native() const
-{
-    return m_client;
+    return wl_client_get_object(native, id);
 }
 
 gid_t Client::groupId() const

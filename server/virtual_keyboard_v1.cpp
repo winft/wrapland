@@ -31,10 +31,10 @@ void virtual_keyboard_manager_v1::Private::create_virtual_keyboard_callback(
     wl_resource* wlSeat,
     uint32_t id)
 {
-    auto handle = bind->global()->handle();
-    auto seat = SeatGlobal::handle(wlSeat);
+    auto handle = bind->global()->handle;
+    auto seat = SeatGlobal::get_handle(wlSeat);
 
-    auto vk = new virtual_keyboard_v1(bind->client()->handle(), bind->version(), id);
+    auto vk = new virtual_keyboard_v1(bind->client->handle, bind->version, id);
     Q_EMIT handle->keyboard_created(vk, seat);
 }
 
@@ -71,7 +71,7 @@ void virtual_keyboard_v1::Private::keymap_callback(wl_client* /*wlClient*/,
                                                    int32_t fd,
                                                    uint32_t size)
 {
-    auto vk = handle(wlResource);
+    auto vk = get_handle(wlResource);
 
     vk->d_ptr->keymap_set = true;
     Q_EMIT vk->keymap(format, fd, size);
@@ -83,7 +83,7 @@ void virtual_keyboard_v1::Private::key_callback(wl_client* /*wlClient*/,
                                                 uint32_t key,
                                                 uint32_t state)
 {
-    auto vk = handle(wlResource);
+    auto vk = get_handle(wlResource);
 
     if (!vk->d_ptr->check_keymap_set()) {
         return;
@@ -100,7 +100,7 @@ void virtual_keyboard_v1::Private::modifiers_callback(wl_client* /*wlClient*/,
                                                       uint32_t locked,
                                                       uint32_t group)
 {
-    auto vk = handle(wlResource);
+    auto vk = get_handle(wlResource);
 
     if (!vk->d_ptr->check_keymap_set()) {
         return;

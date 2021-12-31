@@ -48,8 +48,8 @@ void LayerShellV1::Private::getCallback(LayerShellV1Bind* bind,
                                         uint32_t wlLayer,
                                         char const* nspace)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
-    auto output = wlOutput ? WlOutputGlobal::handle(wlOutput)->output() : nullptr;
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
+    auto output = wlOutput ? WlOutputGlobal::get_handle(wlOutput)->output() : nullptr;
     auto layer = get_layer(wlLayer);
 
     if (surface->d_ptr->has_role()) {
@@ -66,13 +66,13 @@ void LayerShellV1::Private::getCallback(LayerShellV1Bind* bind,
         return;
     }
     auto layer_surface = new LayerSurfaceV1(
-        bind->client()->handle(), bind->version(), id, surface, output, layer, std::string(nspace));
-    if (!layer_surface->d_ptr->resource()) {
+        bind->client->handle, bind->version, id, surface, output, layer, std::string(nspace));
+    if (!layer_surface->d_ptr->resource) {
         bind->post_no_memory();
         delete layer_surface;
         return;
     }
-    Q_EMIT bind->global()->handle()->surface_created(layer_surface);
+    Q_EMIT bind->global()->handle->surface_created(layer_surface);
 }
 
 void LayerShellV1::Private::destroyCallback([[maybe_unused]] LayerShellV1Bind* bind)
@@ -131,7 +131,7 @@ LayerSurfaceV1::Private::Private(Client* client,
         this->surface = nullptr;
 
         // TODO(romangg): do not use that but an extra signal or automatic with surface.
-        Q_EMIT handle()->resourceDestroyed();
+        Q_EMIT handle->resourceDestroyed();
     });
 }
 
@@ -147,7 +147,7 @@ void LayerSurfaceV1::Private::setSizeCallback([[maybe_unused]] wl_client* wlClie
                                               uint32_t width,
                                               uint32_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.size = QSize(static_cast<int>(width), static_cast<int>(height));
     priv->pending.set = true;
 }
@@ -173,7 +173,7 @@ void LayerSurfaceV1::Private::setAnchorCallback([[maybe_unused]] wl_client* wlCl
         return ret;
     };
 
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.anchor = get_anchor(anchor);
     priv->pending.set = true;
 }
@@ -182,7 +182,7 @@ void LayerSurfaceV1::Private::setExclusiveZoneCallback([[maybe_unused]] wl_clien
                                                        wl_resource* wlResource,
                                                        int zone)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.exclusive_zone = zone;
     priv->pending.set = true;
 }
@@ -194,7 +194,7 @@ void LayerSurfaceV1::Private::setMarginCallback([[maybe_unused]] wl_client* wlCl
                                                 int bottom,
                                                 int left)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.margins = QMargins(left, top, right, bottom);
     priv->pending.set = true;
 }
@@ -203,7 +203,7 @@ void LayerSurfaceV1::Private::setKeyboardInteractivityCallback([[maybe_unused]] 
                                                                wl_resource* wlResource,
                                                                uint32_t interactivity)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (interactivity == ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_EXCLUSIVE) {
         priv->pending.keyboard_interactivity = KeyboardInteractivity::Exclusive;
     } else if (interactivity == ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_ON_DEMAND) {
@@ -218,8 +218,8 @@ void LayerSurfaceV1::Private::getPopupCallback([[maybe_unused]] wl_client* wlCli
                                                wl_resource* wlResource,
                                                wl_resource* wlPopup)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto popup = Wayland::Resource<XdgShellPopup>::handle(wlPopup);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto popup = Wayland::Resource<XdgShellPopup>::get_handle(wlPopup);
 
     if (popup->transientFor()) {
         // TODO(romangg): * transientFor() does not cover the case where popup was assigned through
@@ -234,14 +234,14 @@ void LayerSurfaceV1::Private::getPopupCallback([[maybe_unused]] wl_client* wlCli
     }
 
     // TODO(romangg): check that the popup has a null parent and initial state already set.
-    Q_EMIT priv->handle()->got_popup(popup);
+    Q_EMIT priv->handle->got_popup(popup);
 }
 
 void LayerSurfaceV1::Private::ackConfigureCallback([[maybe_unused]] wl_client* wlClient,
                                                    wl_resource* wlResource,
                                                    uint32_t serial)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     auto& serials = priv->configure_serials;
 
@@ -261,14 +261,14 @@ void LayerSurfaceV1::Private::ackConfigureCallback([[maybe_unused]] wl_client* w
             break;
         }
     }
-    Q_EMIT priv->handle()->configure_acknowledged(serial);
+    Q_EMIT priv->handle->configure_acknowledged(serial);
 }
 
 void LayerSurfaceV1::Private::setLayerCallback([[maybe_unused]] wl_client* wlClient,
                                                wl_resource* wlResource,
                                                uint32_t layer)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->pending.layer = get_layer(layer);
     priv->pending.set = true;
 }
@@ -277,10 +277,10 @@ void LayerSurfaceV1::Private::set_output(Output* output)
 {
     assert(output);
     this->output = output;
-    connect(output->wayland_output(), &WlOutput::removed, handle(), [this]() {
+    connect(output->wayland_output(), &WlOutput::removed, handle, [this]() {
         this->output = nullptr;
-        handle()->close();
-        Q_EMIT handle()->resourceDestroyed();
+        handle->close();
+        Q_EMIT handle->resourceDestroyed();
     });
 }
 
@@ -444,7 +444,7 @@ Qt::Edge LayerSurfaceV1::exclusive_edge() const
 
 uint32_t LayerSurfaceV1::configure(QSize const& size)
 {
-    auto serial = d_ptr->client()->display()->handle()->nextSerial();
+    auto serial = d_ptr->client->display()->handle->nextSerial();
     d_ptr->configure_serials.push_back(serial);
     d_ptr->send<zwlr_layer_surface_v1_send_configure>(serial, size.width(), size.height());
     return serial;

@@ -52,10 +52,10 @@ void BlurManager::Private::createCallback(BlurManagerBind* bind,
                                           uint32_t id,
                                           wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
-    auto blur = new Blur(bind->client()->handle(), bind->version(), id);
-    if (!blur->d_ptr->resource()) {
+    auto blur = new Blur(bind->client->handle, bind->version, id);
+    if (!blur->d_ptr->resource) {
         bind->post_no_memory();
         delete blur;
         return;
@@ -66,7 +66,7 @@ void BlurManager::Private::createCallback(BlurManagerBind* bind,
 void BlurManager::Private::unsetCallback([[maybe_unused]] BlurManagerBind* bind,
                                          wl_resource* wlSurface)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
     surface->d_ptr->setBlur(QPointer<Blur>());
 }
 
@@ -92,7 +92,7 @@ Blur::Private::~Private() = default;
 
 void Blur::Private::commitCallback([[maybe_unused]] wl_client* wlClient, wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->commit();
 }
 
@@ -105,8 +105,8 @@ void Blur::Private::setRegionCallback([[maybe_unused]] wl_client* wlClient,
                                       wl_resource* wlResource,
                                       wl_resource* wlRegion)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto region = Wayland::Resource<Region>::handle(wlRegion);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto region = Wayland::Resource<Region>::get_handle(wlRegion);
     if (region) {
         priv->pendingRegion = region->region();
     } else {

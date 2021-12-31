@@ -35,7 +35,7 @@ KeyState::Private::~Private() = default;
 
 void KeyState::Private::fetchStatesCallback(KeyStateBind* bind)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
 
     auto index{0};
     for (auto&& state : priv->key_states) {

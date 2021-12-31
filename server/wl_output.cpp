@@ -89,7 +89,7 @@ void WlOutput::Private::bindInit(WlOutputBind* bind)
 
     send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(bind, state.client_scale);
     done(bind);
-    bind->client()->flush();
+    bind->client->flush();
 }
 
 void WlOutput::Private::sendMode(WlOutputBind* bind, Output::Mode const& mode)

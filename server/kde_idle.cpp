@@ -45,19 +45,18 @@ void KdeIdle::Private::getIdleTimeoutCallback(KdeIdleBind* bind,
                                               wl_resource* wlSeat,
                                               uint32_t timeout)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
-    auto seat = SeatGlobal::handle(wlSeat);
+    auto priv = bind->global()->handle->d_ptr.get();
+    auto seat = SeatGlobal::get_handle(wlSeat);
 
-    auto idleTimeout
-        = new IdleTimeout(bind->client()->handle(), bind->version(), id, seat, priv->handle());
-    if (!idleTimeout->d_ptr->resource()) {
+    auto idleTimeout = new IdleTimeout(bind->client->handle, bind->version, id, seat, priv->handle);
+    if (!idleTimeout->d_ptr->resource) {
         bind->post_no_memory();
         delete idleTimeout;
         return;
     }
     priv->idleTimeouts.push_back(idleTimeout);
     QObject::connect(
-        idleTimeout, &IdleTimeout::resourceDestroyed, priv->handle(), [priv, idleTimeout]() {
+        idleTimeout, &IdleTimeout::resourceDestroyed, priv->handle, [priv, idleTimeout]() {
             priv->idleTimeouts.erase(
                 std::remove(priv->idleTimeouts.begin(), priv->idleTimeouts.end(), idleTimeout),
                 priv->idleTimeouts.end());
@@ -128,7 +127,7 @@ IdleTimeout::Private::~Private() = default;
 void IdleTimeout::Private::simulateUserActivityCallback([[maybe_unused]] wl_client* wlClient,
                                                         wl_resource* wlResource)
 {
-    handle(wlResource)->d_ptr->simulateUserActivity();
+    get_handle(wlResource)->d_ptr->simulateUserActivity();
 }
 
 void IdleTimeout::Private::simulateUserActivity()
@@ -138,7 +137,7 @@ void IdleTimeout::Private::simulateUserActivity()
         // ignored while inhibited
         return;
     }
-    if (!timer->isActive() && resource()) {
+    if (!timer->isActive() && resource) {
         send<org_kde_kwin_idle_timeout_send_resumed>();
     }
     timer->start();
@@ -151,14 +150,13 @@ void IdleTimeout::Private::setup(uint32_t timeout)
     if (timer) {
         return;
     }
-    auto q_ptr = handle();
-    timer = new QTimer(q_ptr);
+    timer = new QTimer(handle);
     timer->setSingleShot(true);
 
     // less than 5 sec is not idle by definition
     timer->setInterval(static_cast<int>(std::max(timeout, minIdleTime)));
     QObject::connect(
-        timer, &QTimer::timeout, q_ptr, [this] { send<org_kde_kwin_idle_timeout_send_idle>(); });
+        timer, &QTimer::timeout, handle, [this] { send<org_kde_kwin_idle_timeout_send_idle>(); });
     if (manager->isInhibited()) {
         // don't start if inhibited
         return;
@@ -177,7 +175,7 @@ IdleTimeout::IdleTimeout(Client* client, uint32_t version, uint32_t id, Seat* se
             return;
         }
         if (d_ptr->manager->isInhibited()) {
-            if (!d_ptr->timer->isActive() && d_ptr->resource()) {
+            if (!d_ptr->timer->isActive() && d_ptr->resource) {
                 d_ptr->send<org_kde_kwin_idle_timeout_send_resumed>();
             }
             d_ptr->timer->stop();

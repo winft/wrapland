@@ -51,7 +51,7 @@ void data_offer::Private::acceptCallback([[maybe_unused]] wl_client* wlClient,
                                          char const* mimeType)
 {
     // TODO(unknown author): verify serial?
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->source) {
         return;
     }
@@ -63,14 +63,14 @@ void data_offer::Private::receive_callback(wl_client* /*wlClient*/,
                                            char const* mimeType,
                                            int32_t fd)
 {
-    auto handle = Resource::handle(wlResource);
+    auto handle = Resource::get_handle(wlResource);
     receive_mime_type_offer(handle->d_ptr->source, mimeType, fd);
 }
 
 void data_offer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
                                          wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->source->send_dnd_finished();
     // TODO(unknown author): It is a client error to perform other requests than
     //                       wl_data_offer.destroy after this one.
@@ -119,7 +119,7 @@ void data_offer::Private::setActionsCallback(wl_client* wlClient,
         preferredAction = dnd_action::ask;
     }
 
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->supportedDnDActions = supportedActions;
     priv->preferredDnDAction = preferredAction;
     Q_EMIT priv->q_ptr->dnd_actions_changed();

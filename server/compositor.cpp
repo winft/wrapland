@@ -73,25 +73,25 @@ Compositor::~Compositor() = default;
 
 void Compositor::Private::createSurfaceCallback(CompositorBind* bind, uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
 
-    auto surface = new Surface(bind->client()->handle(), bind->version(), id);
+    auto surface = new Surface(bind->client->handle, bind->version, id);
     // TODO(romangg): error handling (when resource not created)
 
     priv->surfaces.push_back(surface);
-    connect(surface, &Surface::resourceDestroyed, priv->handle(), [priv, surface] {
+    connect(surface, &Surface::resourceDestroyed, priv->handle, [priv, surface] {
         priv->surfaces.erase(std::remove(priv->surfaces.begin(), priv->surfaces.end(), surface),
                              priv->surfaces.end());
     });
 
-    Q_EMIT priv->handle()->surfaceCreated(surface);
+    Q_EMIT priv->handle->surfaceCreated(surface);
 }
 
 void Compositor::Private::createRegionCallback(CompositorBind* bind, uint32_t id)
 {
-    auto compositor = bind->global()->handle();
+    auto compositor = bind->global()->handle;
 
-    auto region = new Region(bind->client()->handle(), bind->version(), id);
+    auto region = new Region(bind->client->handle, bind->version, id);
     // TODO(romangg): error handling (when resource not created)
 
     Q_EMIT compositor->regionCreated(region);
@@ -101,7 +101,7 @@ Surface* Compositor::getSurface(uint32_t id, Client* client)
 {
     auto it = std::find_if(
         d_ptr->surfaces.cbegin(), d_ptr->surfaces.cend(), [id, client](Surface* surface) {
-            return surface->d_ptr->client()->handle() == client && surface->d_ptr->id() == id;
+            return surface->d_ptr->client->handle == client && surface->d_ptr->id() == id;
         });
     return it != d_ptr->surfaces.cend() ? *it : nullptr;
 }

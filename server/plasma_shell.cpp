@@ -40,8 +40,8 @@ void PlasmaShell::Private::createSurfaceCallback(PlasmaShellBind* bind,
                                                  uint32_t id,
                                                  wl_resource* surface)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
-    priv->createSurface(bind, id, Wayland::Resource<Surface>::handle(surface));
+    auto priv = bind->global()->handle->d_ptr.get();
+    priv->createSurface(bind, id, Wayland::Resource<Surface>::get_handle(surface));
 }
 
 void PlasmaShell::Private::createSurface(PlasmaShellBind* bind, uint32_t id, Surface* surface)
@@ -56,14 +56,14 @@ void PlasmaShell::Private::createSurface(PlasmaShellBind* bind, uint32_t id, Sur
     }
 
     auto shellSurface
-        = new PlasmaShellSurface(bind->client()->handle(), bind->version(), id, surface, handle());
+        = new PlasmaShellSurface(bind->client->handle, bind->version, id, surface, handle);
 
     surfaces << shellSurface;
     QObject::connect(shellSurface,
                      &PlasmaShellSurface::resourceDestroyed,
-                     handle(),
+                     handle,
                      [this, shellSurface] { surfaces.removeAll(shellSurface); });
-    Q_EMIT handle()->surfaceCreated(shellSurface);
+    Q_EMIT handle->surfaceCreated(shellSurface);
 }
 
 PlasmaShell::PlasmaShell(Display* display)
@@ -122,7 +122,7 @@ void PlasmaShellSurface::Private::setPositionCallback([[maybe_unused]] wl_client
                                                       int32_t x,
                                                       int32_t y)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->setPosition(QPoint(x, y));
 }
 
@@ -133,14 +133,14 @@ void PlasmaShellSurface::Private::setPosition(const QPoint& globalPos)
     }
     m_positionSet = true;
     m_globalPos = globalPos;
-    Q_EMIT handle()->positionChanged();
+    Q_EMIT handle->positionChanged();
 }
 
 void PlasmaShellSurface::Private::setRoleCallback([[maybe_unused]] wl_client* wlClient,
                                                   wl_resource* wlResource,
                                                   uint32_t role)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->setRole(role);
 }
 
@@ -175,14 +175,14 @@ void PlasmaShellSurface::Private::setRole(uint32_t role)
         return;
     }
     m_role = r;
-    Q_EMIT handle()->roleChanged();
+    Q_EMIT handle->roleChanged();
 }
 
 void PlasmaShellSurface::Private::setPanelBehaviorCallback([[maybe_unused]] wl_client* wlClient,
                                                            wl_resource* wlResource,
                                                            uint32_t flag)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->setPanelBehavior(org_kde_plasma_surface_panel_behavior(flag));
 }
 
@@ -190,54 +190,54 @@ void PlasmaShellSurface::Private::setSkipTaskbarCallback([[maybe_unused]] wl_cli
                                                          wl_resource* wlResource,
                                                          uint32_t skip)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->m_skipTaskbar = static_cast<bool>(skip);
-    Q_EMIT priv->handle()->skipTaskbarChanged();
+    Q_EMIT priv->handle->skipTaskbarChanged();
 }
 
 void PlasmaShellSurface::Private::setSkipSwitcherCallback([[maybe_unused]] wl_client* wlClient,
                                                           wl_resource* wlResource,
                                                           uint32_t skip)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->m_skipSwitcher = static_cast<bool>(skip);
-    Q_EMIT priv->handle()->skipSwitcherChanged();
+    Q_EMIT priv->handle->skipSwitcherChanged();
 }
 
 void PlasmaShellSurface::Private::panelAutoHideHideCallback([[maybe_unused]] wl_client* wlClient,
                                                             wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (priv->m_role != Role::Panel
         || (priv->m_panelBehavior != PanelBehavior::AutoHide
             && priv->m_panelBehavior != PanelBehavior::WindowsCanCover)) {
         priv->postError(ORG_KDE_PLASMA_SURFACE_ERROR_PANEL_NOT_AUTO_HIDE, "Not an auto hide panel");
         return;
     }
-    Q_EMIT priv->handle()->panelAutoHideHideRequested();
+    Q_EMIT priv->handle->panelAutoHideHideRequested();
 }
 
 void PlasmaShellSurface::Private::panelAutoHideShowCallback([[maybe_unused]] wl_client* wlClient,
                                                             wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (priv->m_role != Role::Panel || priv->m_panelBehavior != PanelBehavior::AutoHide) {
         priv->postError(ORG_KDE_PLASMA_SURFACE_ERROR_PANEL_NOT_AUTO_HIDE, "Not an auto hide panel");
         return;
     }
-    Q_EMIT priv->handle()->panelAutoHideShowRequested();
+    Q_EMIT priv->handle->panelAutoHideShowRequested();
 }
 
 void PlasmaShellSurface::Private::panelTakesFocusCallback([[maybe_unused]] wl_client* wlClient,
                                                           wl_resource* wlResource,
                                                           uint32_t takesFocus)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (priv->panelTakesFocus == takesFocus) {
         return;
     }
     priv->panelTakesFocus = takesFocus;
-    Q_EMIT priv->handle()->panelTakesFocusChanged();
+    Q_EMIT priv->handle->panelTakesFocusChanged();
 }
 
 void PlasmaShellSurface::Private::setPanelBehavior(org_kde_plasma_surface_panel_behavior behavior)
@@ -261,7 +261,7 @@ void PlasmaShellSurface::Private::setPanelBehavior(org_kde_plasma_surface_panel_
         return;
     }
     m_panelBehavior = newBehavior;
-    Q_EMIT handle()->panelBehaviorChanged();
+    Q_EMIT handle->panelBehaviorChanged();
 }
 
 PlasmaShellSurface::PlasmaShellSurface(Client* client,
@@ -289,12 +289,12 @@ PlasmaShell* PlasmaShellSurface::shell() const
 
 wl_resource* PlasmaShellSurface::resource() const
 {
-    return d_ptr->resource();
+    return d_ptr->resource;
 }
 
 Client* PlasmaShellSurface::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 QPoint PlasmaShellSurface::position() const
@@ -347,7 +347,7 @@ PlasmaShellSurface* PlasmaShellSurface::get(wl_resource* native)
     if (native == nullptr) {
         return nullptr;
     }
-    return Private::handle(native);
+    return Private::get_handle(native);
 }
 
 }

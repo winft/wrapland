@@ -66,13 +66,13 @@ public:
              const wl_interface* interface,
              const void* impl,
              Handle* handle)
-        : m_client{client}
-        , m_version{version}
-        , m_handle{handle}
-        , m_resource{client->createResource(interface, version, id)}
+        : client{client}
+        , version{version}
+        , handle{handle}
+        , resource{client->createResource(interface, version, id)}
     {
-        wl_resource_set_user_data(m_resource, this);
-        wl_resource_set_implementation(m_resource, impl, this, destroy);
+        wl_resource_set_user_data(resource, this);
+        wl_resource_set_implementation(resource, impl, this, destroy);
     }
 
     Resource(Resource&) = delete;
@@ -82,40 +82,25 @@ public:
 
     virtual ~Resource() = default;
 
-    wl_resource* resource() const
-    {
-        return m_resource;
-    }
-
-    Client* client() const
-    {
-        return m_client;
-    }
-
-    uint32_t version() const
-    {
-        return m_version;
-    }
-
     uint32_t id() const
     {
-        return m_resource ? wl_resource_get_id(m_resource) : 0;
+        return resource ? wl_resource_get_id(resource) : 0;
     }
 
     void flush()
     {
-        m_client->flush();
+        client->flush();
     }
 
-    static Handle* handle(wl_resource* resource)
+    static Handle* get_handle(wl_resource* resource)
     {
-        return self(resource)->m_handle;
+        return self(resource)->handle;
     }
 
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(Args&&... args)
     {
-        Wayland::send<sender, minVersion>(m_resource, m_version, args...);
+        Wayland::send<sender, minVersion>(resource, version, args...);
     }
 
     // We only support std::tuple but since it's just internal API that should be well enough.
@@ -123,33 +108,33 @@ public:
     void send(std::tuple<Args...>&& tuple)
     {
         Wayland::send_tuple<sender, minVersion>(
-            m_resource, m_version, std::forward<decltype(tuple)>(tuple));
+            resource, version, std::forward<decltype(tuple)>(tuple));
     }
 
     void postError(uint32_t code, char const* msg, ...)
     {
         va_list args;
         va_start(args, msg);
-        wl_resource_post_error(m_resource, code, msg, args);
+        wl_resource_post_error(resource, code, msg, args);
         va_end(args);
     }
 
     static void destroyCallback([[maybe_unused]] wl_client* client, wl_resource* wlResource)
     {
-        auto resource = self(wlResource);
-        wl_resource_destroy(resource->resource());
-    }
-
-    Handle* handle()
-    {
-        return m_handle;
+        auto res = self(wlResource);
+        wl_resource_destroy(res->resource);
     }
 
     void serverSideDestroy()
     {
-        wl_resource_set_destructor(m_resource, nullptr);
-        wl_resource_destroy(m_resource);
+        wl_resource_set_destructor(resource, nullptr);
+        wl_resource_destroy(resource);
     }
+
+    Client* client;
+    uint32_t version;
+    Handle* handle;
+    wl_resource* resource;
 
 private:
     static auto self(wl_resource* resource)
@@ -167,14 +152,9 @@ private:
 
     void onDestroy()
     {
-        Q_EMIT m_handle->resourceDestroyed();
-        delete m_handle;
+        Q_EMIT handle->resourceDestroyed();
+        delete handle;
     }
-
-    Client* m_client;
-    uint32_t m_version;
-    Handle* m_handle;
-    wl_resource* m_resource;
 };
 
 }
