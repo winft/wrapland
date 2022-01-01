@@ -37,7 +37,7 @@ template<typename Handle, typename Priv>
 void set_selection(Handle handle, Priv priv, wl_resource* wlSource)
 {
     using source_res_type = typename std::remove_pointer_t<decltype(priv)>::source_res_t;
-    auto source_res = wlSource ? Wayland::Resource<source_res_type>::handle(wlSource) : nullptr;
+    auto source_res = wlSource ? Wayland::Resource<source_res_type>::get_handle(wlSource) : nullptr;
     auto source = source_res ? source_res->src() : nullptr;
 
     if (priv->selection == source) {

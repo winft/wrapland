@@ -62,12 +62,12 @@ void FakeInput::Private::bindInit(FakeInputBind* bind)
     auto devicePriv = std::make_unique<FakeInputDevice::Private>(bind);
     auto device = new FakeInputDevice(std::move(devicePriv));
     devices.push_back(device);
-    Q_EMIT handle()->deviceCreated(device);
+    Q_EMIT handle->deviceCreated(device);
 }
 
 void FakeInput::Private::prepareUnbind(FakeInputBind* bind)
 {
-    auto handle = bind->global()->handle();
+    auto handle = bind->global()->handle;
     auto priv = handle->d_ptr.get();
     auto fakeDevice = device(bind);
 
@@ -81,7 +81,7 @@ void FakeInput::Private::prepareUnbind(FakeInputBind* bind)
 
 FakeInputDevice* FakeInput::Private::device(wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr.get();
+    auto priv = get_handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
     return priv->device(bind);
 }
@@ -101,7 +101,7 @@ void FakeInput::Private::authenticateCallback(FakeInputBind* bind,
                                               const char* application,
                                               const char* reason)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     Q_EMIT fakeDevice->authenticationRequested(QString::fromUtf8(application),
                                                QString::fromUtf8(reason));
 }
@@ -116,7 +116,7 @@ void FakeInput::Private::pointerMotionCallback(FakeInputBind* bind,
                                                wl_fixed_t delta_x,
                                                wl_fixed_t delta_y)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }
@@ -129,7 +129,7 @@ void FakeInput::Private::pointerMotionAbsoluteCallback(FakeInputBind* bind,
                                                        wl_fixed_t x,
                                                        wl_fixed_t y)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }
@@ -140,7 +140,7 @@ void FakeInput::Private::pointerMotionAbsoluteCallback(FakeInputBind* bind,
 
 void FakeInput::Private::axisCallback(FakeInputBind* bind, uint32_t axis, wl_fixed_t value)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }
@@ -162,7 +162,7 @@ void FakeInput::Private::axisCallback(FakeInputBind* bind, uint32_t axis, wl_fix
 
 void FakeInput::Private::buttonCallback(FakeInputBind* bind, uint32_t button, uint32_t state)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }
@@ -185,11 +185,11 @@ void FakeInput::Private::touchDownCallback(FakeInputBind* bind,
                                            wl_fixed_t x,
                                            wl_fixed_t y)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
     if (priv->touchIds.contains(id)) {
         return;
     }
@@ -203,11 +203,11 @@ void FakeInput::Private::touchMotionCallback(FakeInputBind* bind,
                                              wl_fixed_t x,
                                              wl_fixed_t y)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
     if (!priv->touchIds.contains(id)) {
         return;
     }
@@ -217,11 +217,11 @@ void FakeInput::Private::touchMotionCallback(FakeInputBind* bind,
 
 void FakeInput::Private::touchUpCallback(FakeInputBind* bind, quint32 id)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
     if (!priv->touchIds.contains(id)) {
         return;
     }
@@ -231,18 +231,18 @@ void FakeInput::Private::touchUpCallback(FakeInputBind* bind, quint32 id)
 
 void FakeInput::Private::touchCancelCallback(FakeInputBind* bind)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
     priv->touchIds.clear();
     Q_EMIT fakeDevice->touchCancelRequested();
 }
 
 void FakeInput::Private::touchFrameCallback(FakeInputBind* bind)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }
@@ -251,7 +251,7 @@ void FakeInput::Private::touchFrameCallback(FakeInputBind* bind)
 
 void FakeInput::Private::keyboardKeyCallback(FakeInputBind* bind, uint32_t button, uint32_t state)
 {
-    auto fakeDevice = device(bind->resource());
+    auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
         return;
     }

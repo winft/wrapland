@@ -75,7 +75,7 @@ void data_source_res_impl::offer_callback(wl_client* /*wlClient*/,
                                           wl_resource* wlResource,
                                           char const* mimeType)
 {
-    auto handle = Resource::handle(wlResource);
+    auto handle = Resource::get_handle(wlResource);
     offer_mime_type(handle->src_priv(), mimeType);
 }
 
@@ -102,7 +102,7 @@ void data_source_res_impl::setActionsCallback([[maybe_unused]] wl_client* wlClie
         return;
     }
 
-    handle(wlResource)->src_priv()->set_actions(supportedActions);
+    get_handle(wlResource)->src_priv()->set_actions(supportedActions);
 }
 
 data_source_res::data_source_res(Client* client, uint32_t version, uint32_t id)
@@ -134,7 +134,7 @@ void data_source_res::request_data(std::string const& mimeType, int32_t fd) cons
 void data_source_res::cancel() const
 {
     impl->send<wl_data_source_send_cancelled>();
-    impl->client()->flush();
+    impl->client->flush();
 }
 
 void data_source_res::send_dnd_drop_performed() const
@@ -237,11 +237,10 @@ Client* data_source::client() const
 {
     Client* cl{nullptr};
 
-    std::visit(
-        overload{[&](data_source_res* res) { cl = res->impl->client()->handle(); },
-                 [&](data_control_source_v1_res* res) { cl = res->impl->client()->handle(); },
-                 [&](data_source_ext* /*unused*/) {}},
-        d_ptr->res);
+    std::visit(overload{[&](data_source_res* res) { cl = res->impl->client->handle; },
+                        [&](data_control_source_v1_res* res) { cl = res->impl->client->handle; },
+                        [&](data_source_ext* /*unused*/) {}},
+               d_ptr->res);
 
     return cl;
 }

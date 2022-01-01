@@ -156,7 +156,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& trans
         return;
     }
 
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     std::unordered_set<Pointer*> framePointers;
 
     for (auto pointer : focus.devices) {
@@ -236,7 +236,7 @@ void pointer_pool::button_pressed(Qt::MouseButton button)
 
 void pointer_pool::button_pressed(uint32_t button)
 {
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     update_button_serial(button, serial);
     update_button_state(button, button_state::pressed);
     if (seat->drags().is_pointer_drag()) {
@@ -261,7 +261,7 @@ void pointer_pool::button_released(Qt::MouseButton button)
 
 void pointer_pool::button_released(uint32_t button)
 {
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     const uint32_t currentButtonSerial = button_serial(button);
     update_button_serial(button, serial);
     update_button_state(button, button_state::released);
@@ -367,7 +367,7 @@ void pointer_pool::start_swipe_gesture(uint32_t fingerCount)
     if (gestureSurface.isNull()) {
         return;
     }
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     forEachInterface(gestureSurface.data(), devices, [serial, fingerCount](Pointer* p) {
         p->d_ptr->startSwipeGesture(serial, fingerCount);
     });
@@ -388,7 +388,7 @@ void pointer_pool::end_swipe_gesture()
     if (gestureSurface.isNull()) {
         return;
     }
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     forEachInterface(gestureSurface.data(), devices, [serial](Pointer* p) {
         p->d_ptr->endSwipeGesture(serial);
     });
@@ -400,7 +400,7 @@ void pointer_pool::cancel_swipe_gesture()
     if (gestureSurface.isNull()) {
         return;
     }
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     forEachInterface(gestureSurface.data(), devices, [serial](Pointer* p) {
         p->d_ptr->cancelSwipeGesture(serial);
     });
@@ -416,7 +416,7 @@ void pointer_pool::start_pinch_gesture(uint32_t fingerCount)
     if (gestureSurface.isNull()) {
         return;
     }
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     forEachInterface(gestureSurface.data(), devices, [serial, fingerCount](Pointer* p) {
         p->d_ptr->startPinchGesture(serial, fingerCount);
     });
@@ -437,7 +437,7 @@ void pointer_pool::end_pinch_gesture()
     if (gestureSurface.isNull()) {
         return;
     }
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     forEachInterface(gestureSurface.data(), devices, [serial](Pointer* p) {
         p->d_ptr->endPinchGesture(serial);
     });
@@ -449,7 +449,7 @@ void pointer_pool::cancel_pinch_gesture()
     if (gestureSurface.isNull()) {
         return;
     }
-    auto const serial = seat->d_ptr->display()->handle()->nextSerial();
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
     forEachInterface(gestureSurface.data(), devices, [serial](Pointer* p) {
         p->d_ptr->cancelPinchGesture(serial);
     });

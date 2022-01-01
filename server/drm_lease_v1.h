@@ -30,6 +30,8 @@ public:
     ~drm_lease_device_v1() override;
 
     void update_fd(int fd);
+    drm_lease_connector_v1*
+    create_connector(std::string const& name, std::string const& description, int id);
     drm_lease_connector_v1* create_connector(Output* output);
 
 Q_SIGNALS:
@@ -49,9 +51,14 @@ class WRAPLANDSERVER_EXPORT drm_lease_connector_v1 : public QObject
 public:
     ~drm_lease_connector_v1() override;
 
+    uint32_t id() const;
     Output* output() const;
 
 private:
+    drm_lease_connector_v1(std::string const& name,
+                           std::string const& description,
+                           int id,
+                           drm_lease_device_v1* device);
     drm_lease_connector_v1(Output* output, drm_lease_device_v1* device);
     friend class drm_lease_connector_v1_res;
     friend class drm_lease_device_v1;

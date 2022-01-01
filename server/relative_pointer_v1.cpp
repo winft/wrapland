@@ -51,12 +51,12 @@ void RelativePointerManagerV1::Private::relativePointerCallback(RelativePointerM
                                                                 uint32_t id,
                                                                 wl_resource* wlPointer)
 {
-    auto relative = new RelativePointerV1(bind->client()->handle(), bind->version(), id);
+    auto relative = new RelativePointerV1(bind->client->handle, bind->version, id);
     if (!relative) {
         return;
     }
 
-    auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
+    auto pointer = Wayland::Resource<Pointer>::get_handle(wlPointer);
     pointer->d_ptr->registerRelativePointer(relative);
 }
 

@@ -144,7 +144,7 @@ void Seat::setName(const std::string& name)
 
 void Seat::Private::getPointerCallback(SeatBind* bind, uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
     auto& manager = priv->pointers;
     if (!manager) {
         // If we have no pointer capability we ignore the created resource.
@@ -154,12 +154,12 @@ void Seat::Private::getPointerCallback(SeatBind* bind, uint32_t id)
         }
         return;
     }
-    manager.value().create_device(bind->client()->handle(), bind->version(), id);
+    manager.value().create_device(bind->client->handle, bind->version, id);
 }
 
 void Seat::Private::getKeyboardCallback(SeatBind* bind, uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
     auto& manager = priv->keyboards;
     if (!manager) {
         // If we have no keyboard capability we ignore the created resource.
@@ -169,12 +169,12 @@ void Seat::Private::getKeyboardCallback(SeatBind* bind, uint32_t id)
         }
         return;
     }
-    manager.value().create_device(bind->client()->handle(), bind->version(), id);
+    manager.value().create_device(bind->client->handle, bind->version, id);
 }
 
 void Seat::Private::getTouchCallback(SeatBind* bind, uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
     auto& manager = priv->touches;
     if (!manager) {
         // If we have no touch capability we ignore the created resource.
@@ -184,7 +184,7 @@ void Seat::Private::getTouchCallback(SeatBind* bind, uint32_t id)
         }
         return;
     }
-    manager.value().create_device(bind->client()->handle(), bind->version(), id);
+    manager.value().create_device(bind->client->handle, bind->version, id);
 }
 
 std::string Seat::name() const

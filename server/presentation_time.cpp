@@ -75,9 +75,9 @@ void PresentationManager::Private::feedbackCallback(PresentationManagerBind* bin
                                                     wl_resource* wlSurface,
                                                     uint32_t id)
 {
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
-    auto feedback = new PresentationFeedback(bind->client()->handle(), bind->version(), id);
+    auto feedback = new PresentationFeedback(bind->client->handle, bind->version, id);
     // TODO(romangg): error handling (when resource not created)
 
     surface->d_ptr->addPresentationFeedback(feedback);
@@ -138,10 +138,10 @@ PresentationFeedback::~PresentationFeedback()
 
 void PresentationFeedback::sync(Output* output)
 {
-    auto outputBinds = output->wayland_output()->d_ptr->getBinds(d_ptr->client()->handle());
+    auto outputBinds = output->wayland_output()->d_ptr->getBinds(d_ptr->client->handle);
 
     for (auto bind : outputBinds) {
-        d_ptr->send<wp_presentation_feedback_send_sync_output>(bind->resource());
+        d_ptr->send<wp_presentation_feedback_send_sync_output>(bind->resource);
     }
 }
 

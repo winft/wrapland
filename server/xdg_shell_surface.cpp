@@ -63,15 +63,15 @@ void XdgShellSurface::Private::getTopLevelCallback([[maybe_unused]] wl_client* w
                                                    wl_resource* wlResource,
                                                    uint32_t id)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (!priv->check_creation_error()) {
         return;
     }
-    auto topLevel = new XdgShellToplevel(priv->version(), id, priv->handle());
+    auto topLevel = new XdgShellToplevel(priv->version, id, priv->handle);
     priv->toplevel = topLevel;
 
-    priv->m_surface->d_ptr->shellSurface = priv->handle();
+    priv->m_surface->d_ptr->shellSurface = priv->handle;
     QObject::connect(topLevel,
                      &XdgShellToplevel::resourceDestroyed,
                      priv->m_surface,
@@ -86,7 +86,7 @@ void XdgShellSurface::Private::getPopupCallback([[maybe_unused]] wl_client* wlCl
                                                 wl_resource* wlParent,
                                                 wl_resource* wlPositioner)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (!priv->check_creation_error()) {
         return;
@@ -105,7 +105,7 @@ void XdgShellSurface::Private::getPopupCallback([[maybe_unused]] wl_client* wlCl
         return;
     }
 
-    auto popup = new XdgShellPopup(priv->version(), id, priv->handle(), parent);
+    auto popup = new XdgShellPopup(priv->version, id, priv->handle, parent);
 
     popup->d_ptr->parent = parent;
     popup->d_ptr->initialSize = positioner->initialSize();
@@ -117,7 +117,7 @@ void XdgShellSurface::Private::getPopupCallback([[maybe_unused]] wl_client* wlCl
 
     priv->popup = popup;
 
-    priv->m_surface->d_ptr->shellSurface = priv->handle();
+    priv->m_surface->d_ptr->shellSurface = priv->handle;
     QObject::connect(popup,
                      &XdgShellPopup::resourceDestroyed,
                      priv->m_surface,
@@ -133,7 +133,7 @@ void XdgShellSurface::Private::setWindowGeometryCallback([[maybe_unused]] wl_cli
                                                          int32_t width,
                                                          int32_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (!priv->toplevel && !priv->popup) {
         priv->postError(XDG_SURFACE_ERROR_NOT_CONSTRUCTED, "No role object constructed.");
@@ -154,7 +154,7 @@ void XdgShellSurface::Private::ackConfigureCallback([[maybe_unused]] wl_client* 
                                                     wl_resource* wlResource,
                                                     uint32_t serial)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (!priv->toplevel && !priv->popup) {
         priv->postError(XDG_SURFACE_ERROR_NOT_CONSTRUCTED, "No role object constructed.");

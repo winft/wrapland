@@ -31,14 +31,14 @@ public:
 template<typename Global>
 void device_manager<Global>::get_device(Bind* bind, uint32_t id, wl_resource* wlSeat)
 {
-    auto seat = SeatGlobal::handle(wlSeat);
-    bind->global()->handle()->get_device(bind->client()->handle(), bind->version(), id, seat);
+    auto seat = SeatGlobal::get_handle(wlSeat);
+    bind->global()->handle->get_device(bind->client->handle, bind->version, id, seat);
 }
 
 template<typename Global>
 void device_manager<Global>::create_source(Bind* bind, uint32_t id)
 {
-    bind->global()->handle()->create_source(bind->client()->handle(), bind->version(), id);
+    bind->global()->handle->create_source(bind->client->handle, bind->version, id);
 }
 
 }

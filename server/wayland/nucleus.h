@@ -47,36 +47,19 @@ class BasicNucleus
 {
 public:
     explicit BasicNucleus(Server::Display* display)
-        : m_display{Display::backendCast(display)}
+        : display{Display::backendCast(display)}
     {
     }
     virtual ~BasicNucleus() = default;
 
-    Display* display()
-    {
-        return m_display;
-    }
-
-    wl_global* native()
-    {
-        return m_global;
-    }
-
     void release()
     {
-        m_display = nullptr;
-        m_global = nullptr;
+        display = nullptr;
+        native_global = nullptr;
     }
 
-protected:
-    void set_native(wl_global* global)
-    {
-        m_global = global;
-    }
-
-private:
-    Display* m_display;
-    wl_global* m_global{nullptr};
+    wl_global* native_global{nullptr};
+    Display* display;
 };
 
 template<typename Global>
@@ -88,11 +71,12 @@ public:
             const wl_interface* interface,
             void const* implementation)
         : BasicNucleus(display)
-        , m_global(global)
-        , m_interface(interface)
-        , m_implementation(implementation)
+        , global{global}
+        , interface {
+        interface
+    }, implementation{implementation}
     {
-        this->display()->addGlobal(this);
+        this->display->addGlobal(this);
     }
 
     Nucleus(Nucleus const&) = delete;
@@ -102,21 +86,21 @@ public:
 
     ~Nucleus() override
     {
-        if (native()) {
-            wl_global_set_user_data(native(), nullptr);
+        if (native_global) {
+            wl_global_set_user_data(native_global, nullptr);
         }
-        for (auto bind : m_binds) {
+        for (auto bind : binds) {
             bind->unset_global();
         }
     }
 
     void remove()
     {
-        m_global = nullptr;
+        global = nullptr;
 
-        if (native()) {
-            wl_global_remove(native());
-            display()->removeGlobal(this);
+        if (native_global) {
+            wl_global_remove(native_global);
+            display->removeGlobal(this);
         } else {
             delete this;
         }
@@ -124,37 +108,23 @@ public:
 
     void create()
     {
-        assert(!native());
-        set_native(wl_global_create(display()->native(), m_interface, Global::version, this, bind));
-    }
-
-    wl_interface const* interface() const
-    {
-        return m_interface;
-    }
-
-    void const* implementation() const
-    {
-        return m_implementation;
-    }
-
-    Global* global()
-    {
-        return m_global;
+        assert(!native_global);
+        native_global = wl_global_create(display->native(), interface, Global::version, this, bind);
     }
 
     void unbind(Bind<Global>* bind)
     {
-        if (m_global) {
-            m_global->prepareUnbind(bind);
+        if (global) {
+            global->prepareUnbind(bind);
         }
-        m_binds.erase(std::remove(m_binds.begin(), m_binds.end(), bind), m_binds.end());
+        binds.erase(std::remove(binds.begin(), binds.end(), bind), binds.end());
     }
 
-    std::vector<Bind<Global>*> const& binds()
-    {
-        return m_binds;
-    }
+    Global* global;
+    wl_interface const* interface;
+    void const* implementation;
+
+    std::vector<Bind<Global>*> binds;
 
 private:
     static void bind(wl_client* wlClient, void* data, uint32_t version, uint32_t id)
@@ -165,7 +135,7 @@ private:
             return;
         }
 
-        auto get_client = [&nucleus, &wlClient] { return nucleus->display()->getClient(wlClient); };
+        auto get_client = [&nucleus, &wlClient] { return nucleus->display->getClient(wlClient); };
         auto bind_to_global
             = [&nucleus, version, id](auto client) { nucleus->bind(client, version, id); };
 
@@ -175,7 +145,7 @@ private:
         }
         // Client not yet known to the server.
         // TODO(romangg): Create backend representation only?
-        nucleus->display()->handle()->getClient(wlClient);
+        nucleus->display->handle->getClient(wlClient);
 
         // Now the client must be available.
         // TODO(romangg): otherwise send protocol error (oom)
@@ -186,17 +156,12 @@ private:
     void bind(Client* client, uint32_t version, uint32_t id)
     {
         auto resource = new Bind(client, version, id, this);
-        m_binds.push_back(resource);
+        binds.push_back(resource);
 
-        if (m_global) {
-            m_global->bindInit(resource);
+        if (global) {
+            global->bindInit(resource);
         }
     }
-
-    Global* m_global;
-    wl_interface const* m_interface;
-    void const* m_implementation;
-    std::vector<Bind<Global>*> m_binds;
 };
 
 }

@@ -57,25 +57,25 @@ public:
 
     virtual ~Global()
     {
-        m_nucleus->remove();
+        nucleus->remove();
     }
 
     void create()
     {
-        m_nucleus->create();
+        nucleus->create();
     }
 
     Display* display()
     {
-        return m_nucleus->display();
+        return nucleus->display;
     }
 
-    static Handle* handle(wl_resource* wlResource)
+    static Handle* get_handle(wl_resource* wlResource)
     {
         auto bind = static_cast<Bind<type>*>(wl_resource_get_user_data(wlResource));
 
         if (auto global = bind->global()) {
-            return global->handle();
+            return global->handle;
         }
 
         // If we are here the global has been removed while not yet destroyed.
@@ -93,7 +93,7 @@ public:
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(Client* client, Args&&... args)
     {
-        for (auto bind : m_nucleus->binds()) {
+        for (auto bind : nucleus->binds()) {
             if (bind->client() == client) {
                 bind->template send<sender, minVersion>(std::forward<Args>(args)...);
             }
@@ -103,20 +103,15 @@ public:
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(Args&&... args)
     {
-        for (auto bind : m_nucleus->binds()) {
+        for (auto bind : nucleus->binds) {
             bind->template send<sender, minVersion>(std::forward<Args>(args)...);
         }
     }
 
-    Handle* handle()
-    {
-        return m_handle;
-    }
-
     Bind<type>* getBind(wl_resource* wlResource)
     {
-        for (auto bind : m_nucleus->binds()) {
-            if (bind->resource() == wlResource) {
+        for (auto bind : nucleus->binds) {
+            if (bind->resource == wlResource) {
                 return bind;
             }
         }
@@ -125,14 +120,14 @@ public:
 
     std::vector<Bind<type>*> getBinds()
     {
-        return m_nucleus->binds();
+        return nucleus->binds();
     }
 
     std::vector<Bind<type>*> getBinds(Server::Client* client)
     {
         std::vector<Bind<type>*> ret;
-        for (auto bind : m_nucleus->binds()) {
-            if (bind->client()->handle() == client) {
+        for (auto bind : nucleus->binds) {
+            if (bind->client->handle == client) {
                 ret.push_back(bind);
             }
         }
@@ -147,13 +142,15 @@ public:
     {
     }
 
+    Handle* handle;
+
 protected:
     Global(Handle* handle,
            Server::Display* display,
            const wl_interface* interface,
            void const* implementation)
-        : m_handle(handle)
-        , m_nucleus{new Nucleus<type>(this, display, interface, implementation)}
+        : handle{handle}
+        , nucleus{new Nucleus<type>(this, display, interface, implementation)}
     {
         // TODO(romangg): allow to create and destroy Globals while keeping the object existing (but
         //                always create on ctor call?).
@@ -168,15 +165,14 @@ protected:
     static void cb([[maybe_unused]] wl_client* client, wl_resource* resource, Args... args)
     {
         // The global might be destroyed already on the compositor side.
-        if (handle(resource)) {
+        if (get_handle(resource)) {
             auto bind = static_cast<Bind<type>*>(wl_resource_get_user_data(resource));
             callback(bind, std::forward<Args>(args)...);
         }
     }
 
 private:
-    Handle* m_handle;
-    Nucleus<type>* m_nucleus;
+    Nucleus<type>* nucleus;
 };
 
 }

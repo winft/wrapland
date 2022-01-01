@@ -52,12 +52,12 @@ void XdgShell::Private::prepareUnbind(XdgShellBind* bind)
         auto& positioners = it->second.positioners;
         for (auto surface : surfaces) {
             // We remove the bind, so disconnect destroy connection.
-            QObject::disconnect(surface, &XdgShellSurface::resourceDestroyed, handle(), nullptr);
+            QObject::disconnect(surface, &XdgShellSurface::resourceDestroyed, handle, nullptr);
         }
         for (auto positioner : positioners) {
             // We remove the bind, so disconnect destroy connection.
             QObject::disconnect(
-                positioner, &XdgShellPositioner::resourceDestroyed, handle(), nullptr);
+                positioner, &XdgShellPositioner::resourceDestroyed, handle, nullptr);
         }
         if (!surfaces.empty()) {
             bind->post_error(XDG_WM_BASE_ERROR_DEFUNCT_SURFACES,
@@ -69,9 +69,9 @@ void XdgShell::Private::prepareUnbind(XdgShellBind* bind)
 
 void XdgShell::Private::createPositionerCallback(XdgShellBind* bind, uint32_t id)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
 
-    auto positioner = new XdgShellPositioner(bind->client()->handle(), bind->version(), id);
+    auto positioner = new XdgShellPositioner(bind->client->handle, bind->version, id);
 
     auto bindsIt = priv->bindsObjects.find(bind);
     if (bindsIt == priv->bindsObjects.end()) {
@@ -83,7 +83,7 @@ void XdgShell::Private::createPositionerCallback(XdgShellBind* bind, uint32_t id
     }
 
     QObject::connect(
-        positioner, &XdgShellPositioner::resourceDestroyed, priv->handle(), [bindsIt, positioner] {
+        positioner, &XdgShellPositioner::resourceDestroyed, priv->handle, [bindsIt, positioner] {
             auto& positioners = (*bindsIt).second.positioners;
             positioners.erase(std::remove(positioners.begin(), positioners.end(), positioner),
                               positioners.end());
@@ -94,9 +94,9 @@ void XdgShell::Private::getXdgSurfaceCallback(XdgShellBind* bind,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
 
-    auto surface = Surface::Private::handle(wlSurface);
+    auto surface = Surface::Private::get_handle(wlSurface);
 
     auto bindsIt = priv->bindsObjects.find(bind);
     if (bindsIt != priv->bindsObjects.end()) {
@@ -110,8 +110,8 @@ void XdgShell::Private::getXdgSurfaceCallback(XdgShellBind* bind,
         }
     }
 
-    auto shellSurface = new XdgShellSurface(
-        bind->client()->handle(), bind->version(), id, priv->handle(), surface);
+    auto shellSurface
+        = new XdgShellSurface(bind->client->handle, bind->version, id, priv->handle, surface);
 
     if (bindsIt == priv->bindsObjects.end()) {
         BindResources b;
@@ -123,7 +123,7 @@ void XdgShell::Private::getXdgSurfaceCallback(XdgShellBind* bind,
 
     QObject::connect(shellSurface,
                      &XdgShellSurface::resourceDestroyed,
-                     priv->handle(),
+                     priv->handle,
                      [priv, bind, shellSurface] {
                          auto bindsIt = priv->bindsObjects.find(bind);
 
@@ -136,13 +136,13 @@ void XdgShell::Private::getXdgSurfaceCallback(XdgShellBind* bind,
 
 void XdgShell::Private::pongCallback(XdgShellBind* bind, uint32_t serial)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
 
     auto timerIt = priv->pingTimers.find(serial);
     if (timerIt != priv->pingTimers.end() && (*timerIt).second->isActive()) {
         delete (*timerIt).second;
         priv->pingTimers.erase(timerIt);
-        Q_EMIT priv->handle()->pongReceived(serial);
+        Q_EMIT priv->handle->pongReceived(serial);
     }
 }
 
@@ -156,14 +156,14 @@ void XdgShell::Private::setupTimer(uint32_t serial)
 
     int attempt = 0;
 
-    connect(pingTimer, &QTimer::timeout, handle(), [this, serial, attempt]() mutable {
+    connect(pingTimer, &QTimer::timeout, handle, [this, serial, attempt]() mutable {
         ++attempt;
 
         if (attempt == 1) {
-            Q_EMIT handle()->pingDelayed(serial);
+            Q_EMIT handle->pingDelayed(serial);
             return;
         }
-        Q_EMIT handle()->pingTimeout(serial);
+        Q_EMIT handle->pingTimeout(serial);
         auto timerIt = pingTimers.find(serial);
         if (timerIt != pingTimers.end()) {
             delete (*timerIt).second;
@@ -180,14 +180,14 @@ uint32_t XdgShell::Private::ping(Client* client)
     // Find bind for this surface:
     auto bindIt
         = std::find_if(bindsObjects.cbegin(), bindsObjects.cend(), [client](auto const& bind) {
-              return bind.first->client()->handle() == client;
+              return bind.first->client->handle == client;
           });
 
     if (bindIt == bindsObjects.cend()) {
         return 0;
     }
 
-    const uint32_t pingSerial = display()->handle()->nextSerial();
+    const uint32_t pingSerial = display()->handle->nextSerial();
 
     send<xdg_wm_base_send_ping>((*bindIt).first, pingSerial);
 
@@ -202,7 +202,7 @@ XdgShellSurface* XdgShell::Private::getSurface(wl_resource* wlSurface)
     for (auto const& bind : bindsObjects) {
         auto const& surfaces = bind.second.surfaces;
         for (auto const& surface : surfaces) {
-            if (surface->d_ptr->resource() == wlSurface) {
+            if (surface->d_ptr->resource == wlSurface) {
                 foundSurface = surface;
                 break;
             }
@@ -223,7 +223,7 @@ XdgShellToplevel* XdgShell::Private::getToplevel(wl_resource* wlToplevel)
         auto const& surfaces = bind.second.surfaces;
         for (auto const& surface : surfaces) {
             if (surface->d_ptr->toplevel
-                && surface->d_ptr->toplevel->d_ptr->resource() == wlToplevel) {
+                && surface->d_ptr->toplevel->d_ptr->resource == wlToplevel) {
                 foundSurface = surface;
                 break;
             }
@@ -246,7 +246,7 @@ XdgShellPositioner* XdgShell::Private::getPositioner(wl_resource* wlPositioner)
     for (auto const& bind : bindsObjects) {
         auto const& positioners = bind.second.positioners;
         for (auto const& positioner : positioners) {
-            if (positioner->d_ptr->resource() == wlPositioner) {
+            if (positioner->d_ptr->resource == wlPositioner) {
                 foundPositioner = positioner;
                 break;
             }

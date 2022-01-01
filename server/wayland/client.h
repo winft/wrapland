@@ -41,7 +41,7 @@ class Display;
 class Client
 {
 public:
-    Client(wl_client* wlClient, Server::Client* clientHandle);
+    Client(wl_client* native, Server::Client* handle);
 
     Client(Client const&) = delete;
     Client& operator=(Client const&) = delete;
@@ -50,33 +50,29 @@ public:
 
     virtual ~Client();
 
-    void flush();
-    wl_resource* createResource(const wl_interface* interface, uint32_t version, uint32_t id);
-    wl_resource* getResource(uint32_t id);
+    void flush() const;
+    wl_resource* createResource(const wl_interface* interface, uint32_t version, uint32_t id) const;
+    wl_resource* getResource(uint32_t id) const;
 
     Display* display() const;
-    Server::Client* handle() const;
 
     pid_t processId() const;
     uid_t userId() const;
     gid_t groupId() const;
     std::string executablePath() const;
 
-    wl_client* native() const;
+    void destroy() const;
 
-    void destroy();
+    wl_client* native;
+    Server::Client* handle;
 
 private:
     static void destroyListenerCallback(wl_listener* listener, void* data);
-
-    wl_client* m_client;
 
     pid_t m_pid = 0;
     uid_t m_user = 0;
     gid_t m_group = 0;
     std::string m_executablePath;
-
-    Server::Client* q_ptr;
 
     struct DestroyWrapper {
         Client* client;

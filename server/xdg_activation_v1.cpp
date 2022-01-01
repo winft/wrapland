@@ -30,9 +30,9 @@ XdgActivationV1::Private::~Private() = default;
 
 void XdgActivationV1::Private::getActivationTokenCallback(XdgActivationV1Bind* bind, uint32_t id)
 {
-    auto request = new XdgActivationTokenV1(
-        bind->client()->handle(), bind->version(), id, bind->global()->handle());
-    if (!request->d_ptr->resource()) {
+    auto request
+        = new XdgActivationTokenV1(bind->client->handle, bind->version, id, bind->global()->handle);
+    if (!request->d_ptr->resource) {
         bind->post_no_memory();
         delete request;
     }
@@ -42,8 +42,8 @@ void XdgActivationV1::Private::activateCallback(XdgActivationV1Bind* bind,
                                                 char const* token,
                                                 wl_resource* wlSurface)
 {
-    auto activation = handle(bind->resource());
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto activation = get_handle(bind->resource);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
     Q_EMIT activation->activate(token, surface);
 }
@@ -83,12 +83,12 @@ void XdgActivationTokenV1::Private::setSerialCallback([[maybe_unused]] wl_client
                                                       uint32_t serial,
                                                       wl_resource* wlSeat)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto seat = SeatGlobal::handle(wlSeat);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto seat = SeatGlobal::get_handle(wlSeat);
     if (priv->seat) {
-        disconnect(priv->seat, &Seat::destroyed, priv->handle(), nullptr);
+        disconnect(priv->seat, &Seat::destroyed, priv->handle, nullptr);
     }
-    connect(seat, &Seat::destroyed, priv->handle(), [priv] { priv->seat = nullptr; });
+    connect(seat, &Seat::destroyed, priv->handle, [priv] { priv->seat = nullptr; });
     priv->seat = seat;
     priv->serial = serial;
 }
@@ -97,7 +97,7 @@ void XdgActivationTokenV1::Private::setAppIdCallback([[maybe_unused]] wl_client*
                                                      wl_resource* wlResource,
                                                      char const* app_id)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->app_id = app_id;
 }
 
@@ -105,16 +105,16 @@ void XdgActivationTokenV1::Private::setSurfaceCallback([[maybe_unused]] wl_clien
                                                        wl_resource* wlResource,
                                                        wl_resource* wlSurface)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    priv->surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 }
 
 void XdgActivationTokenV1::Private::commitCallback([[maybe_unused]] wl_client* wlClient,
                                                    wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     if (priv->device) {
-        priv->device->token_requested(priv->handle());
+        priv->device->token_requested(priv->handle);
     }
 }
 

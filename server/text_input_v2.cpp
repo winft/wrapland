@@ -46,9 +46,9 @@ void text_input_manager_v2::Private::get_text_input_callback(text_input_manager_
                                                              uint32_t id,
                                                              wl_resource* wlSeat)
 {
-    auto seat = SeatGlobal::handle(wlSeat);
+    auto seat = SeatGlobal::get_handle(wlSeat);
 
-    auto textInput = new text_input_v2(bind->client()->handle(), bind->version(), id);
+    auto textInput = new text_input_v2(bind->client->handle, bind->version, id);
 
     textInput->d_ptr->seat = seat;
 
@@ -124,7 +124,7 @@ void text_input_v2::Private::send_enter(Surface* surface, uint32_t serial)
     if (!surface) {
         return;
     }
-    send<zwp_text_input_v2_send_enter>(serial, surface->d_ptr->resource());
+    send<zwp_text_input_v2_send_enter>(serial, surface->d_ptr->resource);
 }
 
 void text_input_v2::Private::send_leave(uint32_t serial, Surface* surface)
@@ -132,22 +132,22 @@ void text_input_v2::Private::send_leave(uint32_t serial, Surface* surface)
     if (!surface) {
         return;
     }
-    send<zwp_text_input_v2_send_leave>(serial, surface->d_ptr->resource());
+    send<zwp_text_input_v2_send_leave>(serial, surface->d_ptr->resource);
 }
 
 void text_input_v2::Private::enable_callback(wl_client* /*wlClient*/,
                                              wl_resource* wlResource,
                                              wl_resource* surface)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    priv->enable(Wayland::Resource<Surface>::handle(surface));
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->enable(Wayland::Resource<Surface>::get_handle(surface));
 }
 
 void text_input_v2::Private::disable_callback(wl_client* /*wlClient*/,
                                               wl_resource* wlResource,
                                               wl_resource* /*surface*/)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->disable();
 }
 
@@ -156,26 +156,26 @@ void text_input_v2::Private::update_state_callback(wl_client* /*wlClient*/,
                                                    uint32_t /*serial*/,
                                                    uint32_t reason)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     // TODO(unknown author): use other reason values reason
     if (reason == ZWP_TEXT_INPUT_V2_UPDATE_STATE_RESET) {
-        Q_EMIT priv->handle()->reset_requested();
+        Q_EMIT priv->handle->reset_requested();
     }
 }
 
 void text_input_v2::Private::show_input_panel_callback(wl_client* /*wlClient*/,
                                                        wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    Q_EMIT priv->handle()->show_input_panel_requested();
+    auto priv = get_handle(wlResource)->d_ptr;
+    Q_EMIT priv->handle->show_input_panel_requested();
 }
 
 void text_input_v2::Private::hide_input_panel_callback(wl_client* /*wlClient*/,
                                                        wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    Q_EMIT priv->handle()->hide_input_panel_requested();
+    auto priv = get_handle(wlResource)->d_ptr;
+    Q_EMIT priv->handle->hide_input_panel_requested();
 }
 
 void text_input_v2::Private::set_surrounding_text_callback(wl_client* /*wlClient*/,
@@ -184,7 +184,7 @@ void text_input_v2::Private::set_surrounding_text_callback(wl_client* /*wlClient
                                                            int32_t cursor,
                                                            int32_t anchor)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (priv->state.surrounding_text.data == text
         && priv->state.surrounding_text.cursor_position == cursor
@@ -198,7 +198,7 @@ void text_input_v2::Private::set_surrounding_text_callback(wl_client* /*wlClient
     priv->state.surrounding_text.selection_anchor = anchor;
 
     priv->sync(old);
-    Q_EMIT priv->handle()->surrounding_text_changed();
+    Q_EMIT priv->handle->surrounding_text_changed();
 }
 
 text_input_v2_content_hints convert_hint(uint32_t hint)
@@ -279,7 +279,7 @@ void text_input_v2::Private::set_content_type_callback(wl_client* /*wlClient*/,
                                                        uint32_t hint,
                                                        uint32_t purpose)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     auto const content_hints = convert_hint(hint);
     auto const content_purpose = convert_purpose(purpose);
 
@@ -293,7 +293,7 @@ void text_input_v2::Private::set_content_type_callback(wl_client* /*wlClient*/,
     priv->state.content.purpose = content_purpose;
 
     priv->sync(old);
-    Q_EMIT priv->handle()->content_type_changed();
+    Q_EMIT priv->handle->content_type_changed();
 }
 
 void text_input_v2::Private::set_cursor_rectangle_callback(wl_client* /*wlClient*/,
@@ -303,7 +303,7 @@ void text_input_v2::Private::set_cursor_rectangle_callback(wl_client* /*wlClient
                                                            int32_t width,
                                                            int32_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     auto const rect = QRect(x, y, width, height);
 
     if (priv->state.cursor_rectangle == rect) {
@@ -314,14 +314,14 @@ void text_input_v2::Private::set_cursor_rectangle_callback(wl_client* /*wlClient
     priv->state.cursor_rectangle = rect;
 
     priv->sync(old);
-    Q_EMIT priv->handle()->cursor_rectangle_changed();
+    Q_EMIT priv->handle->cursor_rectangle_changed();
 }
 
 void text_input_v2::Private::set_preferred_language_callback(wl_client* /*wlClient*/,
                                                              wl_resource* wlResource,
                                                              char const* language)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     if (priv->state.preferred_language == language) {
         return;
@@ -331,7 +331,7 @@ void text_input_v2::Private::set_preferred_language_callback(wl_client* /*wlClie
     priv->state.preferred_language = language;
 
     priv->sync(old);
-    Q_EMIT priv->handle()->preferred_language_changed();
+    Q_EMIT priv->handle->preferred_language_changed();
 }
 
 text_input_v2::text_input_v2(Client* client, uint32_t version, uint32_t id)
@@ -440,7 +440,7 @@ QPointer<Surface> text_input_v2::surface() const
 
 Client* text_input_v2::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 }

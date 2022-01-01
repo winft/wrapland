@@ -48,14 +48,14 @@ void Viewporter::Private::getViewportCallback(ViewporterBind* bind,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
-    auto priv = handle(bind->resource())->d_ptr.get();
+    auto priv = get_handle(bind->resource)->d_ptr.get();
     priv->getViewport(bind, id, wlSurface);
 }
 
 void Viewporter::Private::getViewport(ViewporterBind* bind, uint32_t id, wl_resource* wlSurface)
 {
 
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
     if (!surface) {
         // TODO(romangg): send error msg?
         return;
@@ -67,15 +67,15 @@ void Viewporter::Private::getViewport(ViewporterBind* bind, uint32_t id, wl_reso
         return;
     }
 
-    auto viewport = new Viewport(bind->client()->handle(), bind->version(), id, surface);
-    if (!viewport->d_ptr->resource()) {
+    auto viewport = new Viewport(bind->client->handle, bind->version, id, surface);
+    if (!viewport->d_ptr->resource) {
         bind->post_no_memory();
         delete viewport;
         return;
     }
     surface->d_ptr->installViewport(viewport);
 
-    Q_EMIT handle()->viewportCreated(viewport);
+    Q_EMIT handle->viewportCreated(viewport);
 }
 
 Viewporter::Viewporter(Display* display)
@@ -115,7 +115,7 @@ void Viewport::Private::setSourceCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_fixed_t width,
                                           wl_fixed_t height)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->setSource(wl_fixed_to_double(x),
                     wl_fixed_to_double(y),
                     wl_fixed_to_double(width),
@@ -136,7 +136,7 @@ void Viewport::Private::setSource(double x, double y, double width, double heigh
         }
     }
 
-    Q_EMIT handle()->sourceRectangleSet(QRectF(x, y, width, height));
+    Q_EMIT handle->sourceRectangleSet(QRectF(x, y, width, height));
 }
 
 void Viewport::Private::setDestinationCallback([[maybe_unused]] wl_client* wlClient,
@@ -144,7 +144,7 @@ void Viewport::Private::setDestinationCallback([[maybe_unused]] wl_client* wlCli
                                                int32_t width,
                                                int32_t height)
 {
-    handle(wlResource)->d_ptr->setDestination(width, height);
+    get_handle(wlResource)->d_ptr->setDestination(width, height);
 }
 
 void Viewport::Private::setDestination(int width, int height)
@@ -158,7 +158,7 @@ void Viewport::Private::setDestination(int width, int height)
         return;
     }
 
-    Q_EMIT handle()->destinationSizeSet(QSize(width, height));
+    Q_EMIT handle->destinationSizeSet(QSize(width, height));
 }
 
 }

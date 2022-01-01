@@ -67,10 +67,10 @@ void Subcompositor::Private::subsurfaceCallback(SubcompositorBind* bind,
                                                 wl_resource* wlSurface,
                                                 wl_resource* wlParent)
 {
-    auto priv = bind->global()->handle()->d_ptr.get();
+    auto priv = bind->global()->handle->d_ptr.get();
 
-    auto surface = Wayland::Resource<Surface>::handle(wlSurface);
-    auto parentSurface = Wayland::Resource<Surface>::handle(wlParent);
+    auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
+    auto parentSurface = Wayland::Resource<Surface>::get_handle(wlParent);
 
     if (!surface || !parentSurface) {
         bind->post_error(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE,
@@ -88,9 +88,9 @@ void Subcompositor::Private::subsurfaceCallback(SubcompositorBind* bind,
     // TODO(romangg): handle error
 
     auto subsurface
-        = new Subsurface(bind->client()->handle(), bind->version(), id, surface, parentSurface);
+        = new Subsurface(bind->client->handle, bind->version, id, surface, parentSurface);
 
-    Q_EMIT priv->handle()->subsurfaceCreated(subsurface);
+    Q_EMIT priv->handle->subsurfaceCreated(subsurface);
 }
 
 Subcompositor::Subcompositor(Display* display)
@@ -118,7 +118,7 @@ Subsurface::Private::Private(Client* client,
         // the wl_subsurface object becomes inert. Note, that destroying either object
         // takes effect immediately."
         if (this->parent) {
-            this->parent->d_ptr->removeChild(handle());
+            this->parent->d_ptr->removeChild(handle);
             this->parent = nullptr;
         }
         this->surface = nullptr;
@@ -130,7 +130,7 @@ Subsurface::Private::Private(Client* client,
 
 void Subsurface::Private::init()
 {
-    parent->d_ptr->addChild(handle());
+    parent->d_ptr->addChild(handle);
 }
 
 const struct wl_subsurface_interface Subsurface::Private::s_interface = {
@@ -150,10 +150,10 @@ void Subsurface::Private::applyCached(bool force)
         scheduledPosChange = false;
         pos = scheduledPos;
         scheduledPos = QPoint();
-        Q_EMIT handle()->positionChanged(pos);
+        Q_EMIT handle->positionChanged(pos);
     }
 
-    if (force || handle()->isSynchronized()) {
+    if (force || handle->isSynchronized()) {
         surface->d_ptr->updateCurrentState(cached, true);
         Q_EMIT surface->committed();
     } else {
@@ -168,7 +168,7 @@ void Subsurface::Private::commit()
 {
     assert(surface);
 
-    if (handle()->isSynchronized()) {
+    if (handle->isSynchronized()) {
         // Sync mode. We cache the pending state and wait for the parent surface to commit.
         cached = std::move(surface->d_ptr->pending);
         surface->d_ptr->pending = SurfaceState();
@@ -189,7 +189,7 @@ void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClie
                                               int32_t x,
                                               int32_t y)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
 
     // TODO(unknown author): is this a fixed position?
     priv->setPosition(QPoint(x, y));
@@ -208,8 +208,8 @@ void Subsurface::Private::placeAboveCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlResource,
                                              wl_resource* wlSibling)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto sibling = Wayland::Resource<Surface>::handle(wlSibling);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto sibling = Wayland::Resource<Surface>::get_handle(wlSibling);
     priv->placeAbove(sibling);
 }
 
@@ -219,7 +219,7 @@ void Subsurface::Private::placeAbove(Surface* sibling)
         // TODO(unknown author): raise error
         return;
     }
-    if (!parent->d_ptr->raiseChild(handle(), sibling)) {
+    if (!parent->d_ptr->raiseChild(handle, sibling)) {
         postError(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE, "Incorrect sibling");
     }
 }
@@ -228,8 +228,8 @@ void Subsurface::Private::placeBelowCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlResource,
                                              wl_resource* wlSibling)
 {
-    auto priv = handle(wlResource)->d_ptr;
-    auto sibling = Wayland::Resource<Surface>::handle(wlSibling);
+    auto priv = get_handle(wlResource)->d_ptr;
+    auto sibling = Wayland::Resource<Surface>::get_handle(wlSibling);
     priv->placeBelow(sibling);
 }
 
@@ -239,7 +239,7 @@ void Subsurface::Private::placeBelow(Surface* sibling)
         // TODO(unknown author): raise error
         return;
     }
-    if (!parent->d_ptr->lowerChild(handle(), sibling)) {
+    if (!parent->d_ptr->lowerChild(handle, sibling)) {
         postError(WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE, "Incorrect sibling");
     }
 }
@@ -247,14 +247,14 @@ void Subsurface::Private::placeBelow(Surface* sibling)
 void Subsurface::Private::setSyncCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->setMode(Mode::Synchronized);
 }
 
 void Subsurface::Private::setDeSyncCallback([[maybe_unused]] wl_client* wlClient,
                                             wl_resource* wlResource)
 {
-    auto priv = handle(wlResource)->d_ptr;
+    auto priv = get_handle(wlResource)->d_ptr;
     priv->setMode(Mode::Desynchronized);
 }
 
@@ -264,13 +264,13 @@ void Subsurface::Private::setMode(Mode m)
         return;
     }
     mode = m;
-    Q_EMIT handle()->modeChanged(m);
+    Q_EMIT handle->modeChanged(m);
 
     if (m == Mode::Desynchronized
         && (!parent->subsurface() || !parent->subsurface()->isSynchronized())) {
         // Parent subsurface list must be updated immediately.
         auto& cc = parent->d_ptr->current.pub.children;
-        auto subsurface = handle();
+        auto subsurface = handle;
         if (std::find(cc.cbegin(), cc.cend(), subsurface) == cc.cend()) {
             cc.push_back(subsurface);
         }

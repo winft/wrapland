@@ -95,7 +95,7 @@ void primary_selection_device::Private::set_selection_callback(wl_client* /*wlCl
                                                                uint32_t /*id*/)
 {
     // TODO(unknown author): verify serial
-    auto handle = Resource::handle(wlResource);
+    auto handle = Resource::get_handle(wlResource);
     set_selection(handle, handle->d_ptr, wlSource);
 }
 
@@ -111,7 +111,7 @@ void primary_selection_device::send_selection(Wrapland::Server::primary_selectio
         return;
     }
 
-    d_ptr->send<zwp_primary_selection_device_v1_send_selection>(offer->d_ptr->resource());
+    d_ptr->send<zwp_primary_selection_device_v1_send_selection>(offer->d_ptr->resource);
 }
 
 void primary_selection_device::send_clear_selection()
@@ -127,14 +127,14 @@ primary_selection_device::Private::sendDataOffer(primary_selection_source* sourc
         return nullptr;
     }
 
-    auto offer = new primary_selection_offer(client()->handle(), version(), source);
+    auto offer = new primary_selection_offer(client->handle, version, source);
 
-    if (!offer->d_ptr->resource()) {
+    if (!offer->d_ptr->resource) {
         delete offer;
         return nullptr;
     }
 
-    send<zwp_primary_selection_device_v1_send_data_offer>(offer->d_ptr->resource());
+    send<zwp_primary_selection_device_v1_send_data_offer>(offer->d_ptr->resource);
     offer->send_offer();
     return offer;
 }
@@ -156,7 +156,7 @@ primary_selection_source* primary_selection_device::selection()
 
 Client* primary_selection_device::client() const
 {
-    return d_ptr->client()->handle();
+    return d_ptr->client->handle;
 }
 
 Seat* primary_selection_device::seat() const
@@ -191,7 +191,7 @@ void primary_selection_offer::Private::receive_callback(wl_client* /*wlClient*/,
                                                         char const* mimeType,
                                                         int32_t fd)
 {
-    auto handle = Resource::handle(wlResource);
+    auto handle = Resource::get_handle(wlResource);
     receive_mime_type_offer(handle->d_ptr->source, mimeType, fd);
 }
 
@@ -257,7 +257,7 @@ void primary_selection_source_res_impl::offer_callback(wl_client* /*wlClient*/,
                                                        wl_resource* wlResource,
                                                        char const* mimeType)
 {
-    auto handle = Resource::handle(wlResource);
+    auto handle = Resource::get_handle(wlResource);
     offer_mime_type(handle->src_priv(), mimeType);
 }
 
@@ -277,7 +277,7 @@ primary_selection_source_res::primary_selection_source_res(Client* client,
 void primary_selection_source_res::cancel() const
 {
     impl->send<zwp_primary_selection_source_v1_send_cancelled>();
-    impl->client()->flush();
+    impl->client->flush();
 }
 
 void primary_selection_source_res::request_data(std::string const& mimeType, qint32 fd) const
@@ -323,11 +323,10 @@ Client* primary_selection_source::client() const
 {
     Client* cl{nullptr};
 
-    std::visit(
-        overload{[&](primary_selection_source_res* res) { cl = res->impl->client()->handle(); },
-                 [&](data_control_source_v1_res* res) { cl = res->impl->client()->handle(); },
-                 [&](primary_selection_source_ext* /*unused*/) {}},
-        d_ptr->res);
+    std::visit(overload{[&](primary_selection_source_res* res) { cl = res->impl->client->handle; },
+                        [&](data_control_source_v1_res* res) { cl = res->impl->client->handle; },
+                        [&](primary_selection_source_ext* /*unused*/) {}},
+               d_ptr->res);
 
     return cl;
 }
