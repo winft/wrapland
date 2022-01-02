@@ -120,9 +120,12 @@ void data_offer::Private::setActionsCallback(wl_client* wlClient,
     }
 
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->supportedDnDActions = supportedActions;
-    priv->preferredDnDAction = preferredAction;
-    Q_EMIT priv->q_ptr->dnd_actions_changed();
+    if (priv->supportedDnDActions != supportedActions
+        || priv->preferredDnDAction != preferredAction) {
+        priv->supportedDnDActions = supportedActions;
+        priv->preferredDnDAction = preferredAction;
+        Q_EMIT priv->q_ptr->dnd_actions_changed();
+    }
 }
 
 void data_offer::Private::send_source_actions()
