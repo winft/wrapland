@@ -83,6 +83,15 @@ void data_source_res_impl::setActionsCallback([[maybe_unused]] wl_client* wlClie
                                               wl_resource* wlResource,
                                               uint32_t dnd_actions)
 {
+    // verify that the no other actions are sent
+    if (dnd_actions
+        & ~(WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY | WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE
+            | WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK)) {
+        wl_resource_post_error(
+            wlResource, WL_DATA_SOURCE_ERROR_INVALID_ACTION_MASK, "Invalid action mask");
+        return;
+    }
+
     Server::dnd_actions supportedActions;
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
         supportedActions |= dnd_action::copy;
@@ -92,14 +101,6 @@ void data_source_res_impl::setActionsCallback([[maybe_unused]] wl_client* wlClie
     }
     if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK) {
         supportedActions |= dnd_action::ask;
-    }
-    // verify that the no other actions are sent
-    if (dnd_actions
-        & ~(WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY | WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE
-            | WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK)) {
-        wl_resource_post_error(
-            wlResource, WL_DATA_SOURCE_ERROR_INVALID_ACTION_MASK, "Invalid action mask");
-        return;
     }
 
     get_handle(wlResource)->src_priv()->set_actions(supportedActions);

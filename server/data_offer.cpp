@@ -83,16 +83,6 @@ void data_offer::Private::setActionsCallback(wl_client* wlClient,
 {
     // TODO(unknown author): check it's drag and drop, otherwise send error
     Q_UNUSED(wlClient)
-    Server::dnd_actions supportedActions;
-    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
-        supportedActions |= dnd_action::copy;
-    }
-    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE) {
-        supportedActions |= dnd_action::move;
-    }
-    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK) {
-        supportedActions |= dnd_action::ask;
-    }
     // verify that the no other actions are sent
     if (dnd_actions
         & ~(WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY | WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE
@@ -110,6 +100,16 @@ void data_offer::Private::setActionsCallback(wl_client* wlClient,
         return;
     }
 
+    Server::dnd_actions supportedActions;
+    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
+        supportedActions |= dnd_action::copy;
+    }
+    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE) {
+        supportedActions |= dnd_action::move;
+    }
+    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK) {
+        supportedActions |= dnd_action::ask;
+    }
     dnd_action preferredAction = dnd_action::none;
     if (preferred_action == WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
         preferredAction = dnd_action::copy;
