@@ -71,6 +71,9 @@ void data_offer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
                                          wl_resource* wlResource)
 {
     auto priv = get_handle(wlResource)->d_ptr;
+    if (!priv->source) {
+        return;
+    }
     priv->source->send_dnd_finished();
     // TODO(unknown author): It is a client error to perform other requests than
     //                       wl_data_offer.destroy after this one.
