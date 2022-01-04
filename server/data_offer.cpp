@@ -71,6 +71,9 @@ void data_offer::Private::finishCallback([[maybe_unused]] wl_client* wlClient,
                                          wl_resource* wlResource)
 {
     auto priv = get_handle(wlResource)->d_ptr;
+    if (!priv->source) {
+        return;
+    }
     priv->source->send_dnd_finished();
     // TODO(unknown author): It is a client error to perform other requests than
     //                       wl_data_offer.destroy after this one.
@@ -83,16 +86,6 @@ void data_offer::Private::setActionsCallback(wl_client* wlClient,
 {
     // TODO(unknown author): check it's drag and drop, otherwise send error
     Q_UNUSED(wlClient)
-    Server::dnd_actions supportedActions;
-    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
-        supportedActions |= dnd_action::copy;
-    }
-    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE) {
-        supportedActions |= dnd_action::move;
-    }
-    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK) {
-        supportedActions |= dnd_action::ask;
-    }
     // verify that the no other actions are sent
     if (dnd_actions
         & ~(WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY | WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE
@@ -110,6 +103,16 @@ void data_offer::Private::setActionsCallback(wl_client* wlClient,
         return;
     }
 
+    Server::dnd_actions supportedActions;
+    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
+        supportedActions |= dnd_action::copy;
+    }
+    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE) {
+        supportedActions |= dnd_action::move;
+    }
+    if (dnd_actions & WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK) {
+        supportedActions |= dnd_action::ask;
+    }
     dnd_action preferredAction = dnd_action::none;
     if (preferred_action == WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY) {
         preferredAction = dnd_action::copy;
@@ -120,9 +123,12 @@ void data_offer::Private::setActionsCallback(wl_client* wlClient,
     }
 
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->supportedDnDActions = supportedActions;
-    priv->preferredDnDAction = preferredAction;
-    Q_EMIT priv->q_ptr->dnd_actions_changed();
+    if (priv->supportedDnDActions != supportedActions
+        || priv->preferredDnDAction != preferredAction) {
+        priv->supportedDnDActions = supportedActions;
+        priv->preferredDnDAction = preferredAction;
+        Q_EMIT priv->q_ptr->dnd_actions_changed();
+    }
 }
 
 void data_offer::Private::send_source_actions()
