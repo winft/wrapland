@@ -21,7 +21,7 @@ void offer_callback(void* data, WlOffer* dataOffer, const char* mimeType)
     auto mime = QString::fromUtf8(mimeType);
 
     QMimeDatabase db;
-    const auto& m = db.mimeTypeForName(mimeType);
+    const auto& m = db.mimeTypeForName(mime);
     if (m.isValid()) {
         d->mimeTypes << m;
         Q_EMIT d->q->mimeTypeOffered(m.name());
