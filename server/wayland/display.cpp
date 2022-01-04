@@ -32,6 +32,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "client.h"
 #include "nucleus.h"
 
+#include "utils.h"
+
 #include "../client.h"
 #include "../display.h"
 #include "../display_p.h"
@@ -275,15 +277,8 @@ void Display::setupClient(Client* client)
 
     QObject::connect(
         client->handle, &Server::Client::disconnected, handle, [this](Server::Client* client) {
-            for (auto* internal : m_clients) {
-                if (internal->handle != client) {
-                    continue;
-                }
-
-                m_clients.erase(std::remove(m_clients.begin(), m_clients.end(), internal),
-                                m_clients.end());
-                Q_EMIT handle->clientDisconnected(client);
-            }
+            remove_all_if(m_clients, [client](auto&& c) { return c->handle == client; });
+            Q_EMIT handle->clientDisconnected(client);
         });
     Q_EMIT handle->clientConnected(client->handle);
 }

@@ -68,6 +68,11 @@ void remove_all(V& container, T const& arg)
 {
     container.erase(std::remove(container.begin(), container.end(), arg), container.end());
 }
+template<typename V, typename F>
+void remove_all_if(V& container, F&& f)
+{
+    container.erase(std::remove_if(container.begin(), container.end(), f), container.end());
+}
 template<typename V, typename T>
 bool remove_one(V& container, T const& arg)
 {
