@@ -45,10 +45,6 @@ public:
     Cursor* cursor() const;
     Client* client() const;
 
-    // legacy
-    static Pointer* get(void* data);
-    //
-
 Q_SIGNALS:
     void cursorChanged();
     void resourceDestroyed();

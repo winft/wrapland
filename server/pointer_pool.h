@@ -46,6 +46,10 @@ class WRAPLANDSERVER_EXPORT pointer_pool
 {
 public:
     explicit pointer_pool(Seat* seat);
+    pointer_pool(pointer_pool const&) = delete;
+    pointer_pool& operator=(pointer_pool const&) = delete;
+    pointer_pool(pointer_pool&&) noexcept = default;
+    pointer_pool& operator=(pointer_pool&&) noexcept = default;
     ~pointer_pool();
 
     pointer_focus const& get_focus() const;

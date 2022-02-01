@@ -70,6 +70,10 @@ class WRAPLANDSERVER_EXPORT keyboard_pool
 {
 public:
     explicit keyboard_pool(Seat* seat);
+    keyboard_pool(keyboard_pool const&) = delete;
+    keyboard_pool& operator=(keyboard_pool const&) = delete;
+    keyboard_pool(keyboard_pool&&) noexcept = default;
+    keyboard_pool& operator=(keyboard_pool&&) noexcept = default;
     ~keyboard_pool();
 
     keyboard_focus const& get_focus() const;

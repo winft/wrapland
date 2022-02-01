@@ -37,6 +37,10 @@ class WRAPLANDSERVER_EXPORT touch_pool
 {
 public:
     explicit touch_pool(Seat* seat);
+    touch_pool(touch_pool const&) = delete;
+    touch_pool& operator=(touch_pool const&) = delete;
+    touch_pool(touch_pool&&) noexcept = default;
+    touch_pool& operator=(touch_pool&&) noexcept = default;
     ~touch_pool();
 
     touch_focus const& get_focus() const;

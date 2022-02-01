@@ -96,10 +96,6 @@ public:
     input_method_v2* input_method{nullptr};
     text_input_pool text_inputs;
 
-    // legacy
-    friend class SeatInterface;
-    //
-
     Seat* q_ptr;
 
 private:

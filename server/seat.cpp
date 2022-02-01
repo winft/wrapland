@@ -110,16 +110,19 @@ void Seat::setHasTouch(bool has)
 
 pointer_pool& Seat::pointers() const
 {
+    assert(hasPointer());
     return *d_ptr->pointers;
 }
 
 keyboard_pool& Seat::keyboards() const
 {
+    assert(hasKeyboard());
     return *d_ptr->keyboards;
 }
 
 touch_pool& Seat::touches() const
 {
+    assert(hasTouch());
     return *d_ptr->touches;
 }
 

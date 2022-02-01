@@ -386,11 +386,6 @@ void Pointer::frame()
     d_ptr->sendFrame();
 }
 
-Pointer* Pointer::get(void* data)
-{
-    return Private::get_handle(reinterpret_cast<wl_resource*>(data));
-}
-
 Cursor::Private::Private(Cursor* q, Pointer* _pointer)
     : pointer(_pointer)
     , q_ptr(q)

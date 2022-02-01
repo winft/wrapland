@@ -82,10 +82,6 @@ std::vector<Pointer*> const& pointer_pool::get_devices() const
 void pointer_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     auto pointer = new Pointer(client, version, id, seat);
-    if (!pointer) {
-        return;
-    };
-
     devices.push_back(pointer);
 
     if (focus.surface && focus.surface->client() == pointer->client()) {
@@ -106,6 +102,9 @@ void pointer_pool::create_device(Client* client, uint32_t version, uint32_t id)
                 Q_EMIT seat->focusedPointerChanged(nullptr);
             }
         }
+
+        assert(!contains(devices, pointer));
+        assert(!contains(focus.devices, pointer));
     });
 
     Q_EMIT seat->pointerCreated(pointer);
