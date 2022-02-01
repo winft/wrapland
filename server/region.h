@@ -34,11 +34,7 @@ class WRAPLANDSERVER_EXPORT Region : public QObject
     Q_OBJECT
 public:
     QRegion region() const;
-
     Client* client() const;
-
-    // legacy?
-    static Region* get(void* native);
 
 Q_SIGNALS:
     void regionChanged(const QRegion&);
