@@ -104,14 +104,6 @@ QRegion Region::region() const
     return d_ptr->qtRegion;
 }
 
-Region* Region::get(void* native)
-{
-    return Region::Private::get_handle(static_cast<wl_resource*>(native));
-    //    d_ptr->resou
-    //    return Private::get<Region>(native);
-    return nullptr;
-}
-
 Client* Region::client() const
 {
     return d_ptr->client->handle;

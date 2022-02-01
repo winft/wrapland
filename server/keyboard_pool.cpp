@@ -48,12 +48,7 @@ keyboard_repeat_info const& keyboard_pool::get_repeat_info() const
 void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
     auto keyboard = new Keyboard(client, version, id, seat);
-    if (!keyboard) {
-        return;
-    }
-
     keyboard->repeatInfo(keyRepeat.rate, keyRepeat.delay);
-
     devices.push_back(keyboard);
 
     if (focus.surface && focus.surface->client() == keyboard->client()) {
@@ -68,6 +63,9 @@ void keyboard_pool::create_device(Client* client, uint32_t version, uint32_t id)
     QObject::connect(keyboard, &Keyboard::resourceDestroyed, seat, [keyboard, this] {
         remove_one(devices, keyboard);
         remove_one(focus.devices, keyboard);
+
+        assert(!contains(devices, keyboard));
+        assert(!contains(focus.devices, keyboard));
     });
 
     Q_EMIT seat->keyboardCreated(keyboard);

@@ -48,12 +48,7 @@ std::vector<Touch*> const& touch_pool::get_devices() const
 
 void touch_pool::create_device(Client* client, uint32_t version, uint32_t id)
 {
-    // TODO(unknown author): only create if seat has touch?
     auto touch = new Touch(client, version, id, seat);
-    if (!touch) {
-        return;
-    };
-
     devices.push_back(touch);
 
     if (focus.surface && focus.surface->client() == client) {
@@ -66,6 +61,9 @@ void touch_pool::create_device(Client* client, uint32_t version, uint32_t id)
     QObject::connect(touch, &Touch::resourceDestroyed, seat, [touch, this] {
         remove_one(devices, touch);
         remove_one(focus.devices, touch);
+
+        assert(!contains(devices, touch));
+        assert(!contains(focus.devices, touch));
     });
     Q_EMIT seat->touchCreated(touch);
 }
