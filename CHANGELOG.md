@@ -1,5 +1,123 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.524.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.523.0-beta.0...wrapland@0.524.0-beta.0) (2022-02-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **server:** legacy object from resource getters are removed
+* **server:** Plasma windows are retrieved in STL vector
+* **server:** virtual desktops identified by STL strings
+* **server:** virtual desktops getter returns STL vector instead of QList
+* **server:** key pressed/released calls replaced with single key call
+* **server:** text-input v2 API changes
+* **server:** keymaps are set as C strings
+* **server:** compositors must send frame events
+* **server:** globals are created as smart pointers by the display
+* **server:** socket name setter signature changed
+* **server:** dnd action enum definition relocated
+* **server:** proxy remote surfaces removed
+* **server:** drag surface changed signal removed
+* **server:** data devices lose selection changed argument
+
+### Features
+
+* **client:** add support for virtual_keyboard_unstable_v1 ([0596cef](https://gitlab.com/kwinft/wrapland/commit/0596cefc871de68ac8a93dfe7b0c2b17e5de9a02))
+* **client:** implement wlr_data_control_unstable_v1 ([2d62aab](https://gitlab.com/kwinft/wrapland/commit/2d62aabc45e4419b167aeba54f8236baa118e252))
+* **client:** remove data sharing selection cleared signals ([f8c4fa6](https://gitlab.com/kwinft/wrapland/commit/f8c4fa64abf8176cc6ff553df2f44e61ffdb5f4f))
+* **server:** add container helper macros ([f524540](https://gitlab.com/kwinft/wrapland/commit/f524540195ae22adf7ba70d8cdb7575178645943))
+* **server:** add dropped payload to drag ended signal ([d9575ff](https://gitlab.com/kwinft/wrapland/commit/d9575ff5ce455d696d898c4f1353f71a4afa8dd5))
+* **server:** add external data sharing sources ([7369617](https://gitlab.com/kwinft/wrapland/commit/736961724c849c81ead42afe55d09e798882f9b1))
+* **server:** add pointer frame function ([dd15cd2](https://gitlab.com/kwinft/wrapland/commit/dd15cd26dfb521450e8a393b393499cf463c4b92))
+* **server:** add source actions send function ([8f31559](https://gitlab.com/kwinft/wrapland/commit/8f31559c25926171bc798f664ee403ba7b434931))
+* **server:** add support for virtual_keyboard_unstable_v1 ([c39f41a](https://gitlab.com/kwinft/wrapland/commit/c39f41a72dae12e79567031d6e17eeb965f45923))
+* **server:** allow to create DRM lease connector without an output ([ec288d5](https://gitlab.com/kwinft/wrapland/commit/ec288d563233c8de85403eee296bd73c1f09ecb8))
+* **server:** expand data device API ([c34a2af](https://gitlab.com/kwinft/wrapland/commit/c34a2afdfd5dbf7d10486e789d9b3a04a51298ed))
+* **server:** identify virtual desktops with STL strings ([e1797aa](https://gitlab.com/kwinft/wrapland/commit/e1797aa3a5153142ef5b516af13a7022497dbf28))
+* **server:** implement wlr_data_control_unstable_v1 ([9a49860](https://gitlab.com/kwinft/wrapland/commit/9a498604cb49677b018270505a5b5a0409ea84af))
+* **server:** provide getter for input-method popups ([219e266](https://gitlab.com/kwinft/wrapland/commit/219e26623c444c221a35fd3e49a68ccfaa75ab44))
+* **server:** remove data sharing selection cleared signals ([fcfcb7c](https://gitlab.com/kwinft/wrapland/commit/fcfcb7ca4cc49c5f30f34d718006fe6ff475443c))
+* **server:** remove drag surface changed signal ([26d6e22](https://gitlab.com/kwinft/wrapland/commit/26d6e22fb6a0e0813faf457f9b517449d951e166))
+* **server:** remove EGLStream controller interface ([afd0993](https://gitlab.com/kwinft/wrapland/commit/afd0993608650b4eca7c4c02281839d95e1ecf78))
+* **server:** remove legacy resource getter functions ([3088e8f](https://gitlab.com/kwinft/wrapland/commit/3088e8f48f7789194d792033197ae5eaaf565237))
+* **server:** remove selection changed payload ([7b6c151](https://gitlab.com/kwinft/wrapland/commit/7b6c1519492729f4df4e5c8147f265f3f5f6ae11))
+* **server:** replace proxy remote surfaces with drag movement block ([6e542ee](https://gitlab.com/kwinft/wrapland/commit/6e542eec2f919bd41b7101c62c01cd51724ab7a5))
+* **server:** set keymap as raw C string ([ad4f397](https://gitlab.com/kwinft/wrapland/commit/ad4f3970bdc34dabc43779dad933353febae12ff))
+* **server:** signal fake input device destruction ([2cff939](https://gitlab.com/kwinft/wrapland/commit/2cff939b50708d8a5731a93966e9ae6793b6da18))
+* **server:** store Plasma windows in STL vector ([826458b](https://gitlab.com/kwinft/wrapland/commit/826458b2612c9fb90081ee97a1c3bd889631f935))
+* **server:** store virtual desktops in STL vector ([f0f4507](https://gitlab.com/kwinft/wrapland/commit/f0f4507a321f46cbef1e7c7a85f52176c17c8842))
+* **server:** sync input-method v2 state to text-input v3 ([e449069](https://gitlab.com/kwinft/wrapland/commit/e449069aa1824a9f6cee3d2142ccd91d87879087))
+* **server:** sync text-input v2 to input-method v2 ([3670431](https://gitlab.com/kwinft/wrapland/commit/367043141b418bd225d916b5dab68e738de5299c))
+* **server:** sync text-input v3 state to input-method v2 ([b5d99c8](https://gitlab.com/kwinft/wrapland/commit/b5d99c8e9a7f1aed8a64272590e7628e1f5c70c8))
+
+
+### Bug Fixes
+
+* **client:** name correct input-method grab destructor request ([02c4431](https://gitlab.com/kwinft/wrapland/commit/02c4431f99b070d944480510ea37e11a70e0d05d))
+* **server:** always create xdg-output ([45eb0a5](https://gitlab.com/kwinft/wrapland/commit/45eb0a5370d54c232cbfb028e3d96785f8c82760))
+* **server:** assert on input capability when accessing device pool ([dd3f40a](https://gitlab.com/kwinft/wrapland/commit/dd3f40a857c2c01a6a4227deb5dca90276e0640a))
+* **server:** assume input devices are created and ensure they are removed ([be3e472](https://gitlab.com/kwinft/wrapland/commit/be3e472f6cbcbf70fefe9fd880553b05cfd2fa5c))
+* **server:** cancel old selection source after setting new one ([7343c2c](https://gitlab.com/kwinft/wrapland/commit/7343c2c109d3713134de98eef055e2a7a5ab051b))
+* **server:** check for protocol errors before converting dnd actions ([7d6c5b4](https://gitlab.com/kwinft/wrapland/commit/7d6c5b4cf2c656e8392899ff516f5fdb80eb4aca))
+* **server:** do not reenter surfaces ([74214b8](https://gitlab.com/kwinft/wrapland/commit/74214b8c334a55a0389582ce3c10b72365f7a1f6))
+* **server:** ensure device pools are only moved ([e6dac90](https://gitlab.com/kwinft/wrapland/commit/e6dac90c9ad424cd2bf65a169d6b8e460412d7a9))
+* **server:** explicitly cast widening conversion ([6515950](https://gitlab.com/kwinft/wrapland/commit/6515950952a7b0ee3ee3d2afe24aba89af5e9424))
+* **server:** guard finishCallback against being deleted during transfer ([6a06e78](https://gitlab.com/kwinft/wrapland/commit/6a06e787b2768d5d73f7dfe999337075c012e737))
+* **server:** handle panels set to "Windows can cover" ([410ad72](https://gitlab.com/kwinft/wrapland/commit/410ad7241bb2480170d5fc6c93cb8d69bba4f17d))
+* **server:** initialize local variable ([a4aa050](https://gitlab.com/kwinft/wrapland/commit/a4aa050a1c1958762182529d1e64ff815e928612))
+* **server:** interchange signal argument names ([6c4cc29](https://gitlab.com/kwinft/wrapland/commit/6c4cc293fb246396db6d955a50c065ad4af3e94a))
+* **server:** no-lint missing Linux dmabuf request ([a93f2ef](https://gitlab.com/kwinft/wrapland/commit/a93f2ef783b655c95df8e1d413bab7ca2c11b19e))
+* **server:** only emit setActionsCallback if DnD actions change ([647db79](https://gitlab.com/kwinft/wrapland/commit/647db79ed0f1c69e095af2f737ab6a11cf471083))
+* **server:** prepare server side destroy of DRM lease device binds ([8767af1](https://gitlab.com/kwinft/wrapland/commit/8767af17713241f128bc2c708216406dd91d6063))
+* **server:** remove DRM lease device binds on unbind ([69adcd6](https://gitlab.com/kwinft/wrapland/commit/69adcd65179365c982097f4b34a1f2cbc1acdffc))
+* **server:** remove unnecessary include ([88da2d8](https://gitlab.com/kwinft/wrapland/commit/88da2d8ef8222fda67d53f1a99708e93fce306e6))
+* **server:** remove unnecessary return statement ([78f0240](https://gitlab.com/kwinft/wrapland/commit/78f0240aedbae2ea9e9c90cb4a79a2b15ed05a7a))
+* **server:** reset input-method state updates on commit ([894ba38](https://gitlab.com/kwinft/wrapland/commit/894ba382d87b2440be5f3b819aafb580a81e648c))
+* **server:** send selections on focus according to protocol ([c5b486a](https://gitlab.com/kwinft/wrapland/commit/c5b486a9112931da3e22e0caf69fe57a52031c6d))
+* **server:** set text-input v3 q-ptr ([bba9f60](https://gitlab.com/kwinft/wrapland/commit/bba9f6036427d144fc558bd26fb93407e21214ef))
+* **server:** switch between clients with different text-input versions ([311edb3](https://gitlab.com/kwinft/wrapland/commit/311edb36612d404c66c4471c7240744600563639))
+* use QString::fromUtf8 on mimetype ([920f8b8](https://gitlab.com/kwinft/wrapland/commit/920f8b8c548bc3030d69a6318f2613f5d1cce95d))
+* use remove_all_if instead of invalid erase ([b5b5293](https://gitlab.com/kwinft/wrapland/commit/b5b52933e95940c1ad761c5c250df84b34cdaca0))
+
+
+### Refactors
+
+* **client:** remove EGLStream client xml ([41b2db1](https://gitlab.com/kwinft/wrapland/commit/41b2db1ccb88de9f9f0ed6e05e4c1dc31989b4d6))
+* **server:** add helper function to set data source actions ([5d7cc49](https://gitlab.com/kwinft/wrapland/commit/5d7cc49eed176835b7f52f79dc92ae02a962ab0a))
+* **server:** always unbind from global nucleus ([291431f](https://gitlab.com/kwinft/wrapland/commit/291431f1f3202560e8999f466bd08ccb07d26cbe))
+* **server:** check data source integrity in non-generic code ([36319ca](https://gitlab.com/kwinft/wrapland/commit/36319ca561d806abf51c7a9f5042cb2ab5ec8db8))
+* **server:** cleanup data class includes ([655384a](https://gitlab.com/kwinft/wrapland/commit/655384aea3a9a8ae0b7d2f2598dabe7e7377b7f2))
+* **server:** consolidate primary selection source files ([c4a4158](https://gitlab.com/kwinft/wrapland/commit/c4a4158b8f31deb21184301bf483aa574fccdb77))
+* **server:** consolidate selection helpers in single header ([b3d5563](https://gitlab.com/kwinft/wrapland/commit/b3d5563c73c199c9f4c864a3688c17a789ebf02c))
+* **server:** expose key state enum ([e97d92e](https://gitlab.com/kwinft/wrapland/commit/e97d92ed1561a7eb652d2ef835f6fa6bae056855))
+* **server:** get globals with smart pointers ([3b969b2](https://gitlab.com/kwinft/wrapland/commit/3b969b2c8259a92a7bb3cee3742c2520a6ee95b1))
+* **server:** handle drags in drag_pool ([c8d6b72](https://gitlab.com/kwinft/wrapland/commit/c8d6b721ae47c1481b8cdfc8507643609b1fb5c7))
+* **server:** introduce resource classes for data sources ([da64244](https://gitlab.com/kwinft/wrapland/commit/da64244b0fd2a27185cc9274c8c1bbf9c96694e3))
+* **server:** introduce text-input v2 state type ([a04f6b0](https://gitlab.com/kwinft/wrapland/commit/a04f6b00c5d4cb7d02d97305cfd25e6bcd6389fa))
+* **server:** make plain data fields plublic in internal classes ([b5e7d13](https://gitlab.com/kwinft/wrapland/commit/b5e7d1337da9e6f786e5035965fbe9c690a20600))
+* **server:** merge key pressed and released API ([29e8be1](https://gitlab.com/kwinft/wrapland/commit/29e8be1d735aec4fde50fbbe2aadb5a588ac3402))
+* **server:** move dnd action enum to drag pool header ([e7b9ee5](https://gitlab.com/kwinft/wrapland/commit/e7b9ee5635d3264f1aaa7073c0a46ecffbcdfc41))
+* **server:** move offer callbacks in classes ([699f014](https://gitlab.com/kwinft/wrapland/commit/699f014dec8f0aae8b5bc5b9567c10e94e60909d))
+* **server:** move receive callbacks in classes ([78888c8](https://gitlab.com/kwinft/wrapland/commit/78888c80a1d3f04786fdbfb09dd18ac70ac5ce98))
+* **server:** move set selection callbacks in classes ([b2f55b7](https://gitlab.com/kwinft/wrapland/commit/b2f55b781cbf9a92e75472628f0d78a61b5e2d00))
+* **server:** remove keyboard_map struct ([495187b](https://gitlab.com/kwinft/wrapland/commit/495187bebaaf1bd5ca634aaf593e43b0c2e59e5a))
+* **server:** remove resource check on text-input ([4ac3d1b](https://gitlab.com/kwinft/wrapland/commit/4ac3d1bb2827c01fb67ce6eb03b70ff26a5a730c))
+* **server:** remove selection pool advertise function ([d377643](https://gitlab.com/kwinft/wrapland/commit/d37764312ab64f15b89b7e7cd7dc8655dea5afac))
+* **server:** remove selection pool update functions ([4c89a72](https://gitlab.com/kwinft/wrapland/commit/4c89a72b008ed73258d163dd8aeeb6e90ff662b8))
+* **server:** remove set selection helper functions ([e2277c4](https://gitlab.com/kwinft/wrapland/commit/e2277c450526509088c68ed92da16d3de51ca069))
+* **server:** remove xkbcommon-compatible variable ([5fcac58](https://gitlab.com/kwinft/wrapland/commit/5fcac58c6f1c6efa93cf8199bfdd1e216e4830f9))
+* **server:** restrict access to selection pool member fields ([6680387](https://gitlab.com/kwinft/wrapland/commit/6680387e8680bfce4706950f2162acb3b6338124))
+* **server:** restrict to single socket name setter ([134ca24](https://gitlab.com/kwinft/wrapland/commit/134ca244d3b900ec1000631f1541aacd00189737))
+* **server:** return braced initializer lists ([0e36253](https://gitlab.com/kwinft/wrapland/commit/0e362537b8a124e581b912f8b02aca92cdf5c204))
+* **server:** send selection always ([34879ad](https://gitlab.com/kwinft/wrapland/commit/34879adeccc6d78b03c1419b5aab7c933c52217c))
+* **server:** set selection from update ([6d671b8](https://gitlab.com/kwinft/wrapland/commit/6d671b874dd8e4b41541b10a261581d96c1f1354))
+* **server:** set selection sources instead of devices ([cafc9ad](https://gitlab.com/kwinft/wrapland/commit/cafc9adf98dc6249b8f0fd1793ad8651c04e44b4))
+* **server:** simplify modifiers changed comparison ([7f281aa](https://gitlab.com/kwinft/wrapland/commit/7f281aa096a442ef33d91d5b381af0732d1a4097))
+* **server:** store key states in STL array ([a333ff0](https://gitlab.com/kwinft/wrapland/commit/a333ff097ffe394326d14b2b8b0759d0c21d0580))
+* **server:** store Plasma window resources in STL vector ([ca2a062](https://gitlab.com/kwinft/wrapland/commit/ca2a0629afa7f949aef87740d94fc389c00ff11f))
+* **server:** store virtual desktop resources in STL vector ([37089fe](https://gitlab.com/kwinft/wrapland/commit/37089fe4d633fa3b89a4a2e2b0dced56e42d09e5))
+* **server:** transmit selection in separate function ([ca8a25b](https://gitlab.com/kwinft/wrapland/commit/ca8a25b4aa36d2662eb50069208008e7d4e9aa99))
+
 ### [0.523.1](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.523.0...wrapland@0.523.1) (2021-11-30)
 
 
