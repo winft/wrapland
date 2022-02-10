@@ -1,5 +1,6 @@
 /********************************************************************
 Copyright 2015 Marco Martin <mart@kde.org>
+Copyright 2022 Francesco Sorrentino <francesco.sorr@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -22,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
+#include "../../src/client/output.h"
 #include "../../src/client/plasmawindowmanagement.h"
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
@@ -34,6 +36,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/surface.h"
 
 #include <wayland-plasma-window-management-client-protocol.h>
+
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -85,6 +91,16 @@ private Q_SLOTS:
     void testPid();
     void testApplicationMenu();
 
+    void testStackingOrder_data();
+    void testStackingOrder();
+    void testStackingOrder_empty();
+
+    void testStackingOrderUuid_data();
+    void testStackingOrderUuid();
+    void testStackingOrderUuid_empty();
+
+    void testSendToOutput();
+
 private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
@@ -113,6 +129,8 @@ TestWindowManagement::TestWindowManagement(QObject* parent)
 
 void TestWindowManagement::init()
 {
+    qRegisterMetaType<std::string const&>();
+    qRegisterMetaType<Wrapland::Server::Output*>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
     qRegisterMetaType<Srv::PlasmaWindowManager::ShowingDesktopState>("ShowingDesktopState");
 
@@ -736,6 +754,125 @@ void TestWindowManagement::testApplicationMenu()
 
     QCOMPARE(m_window->applicationMenuServiceName(), serviceName);
     QCOMPARE(m_window->applicationMenuObjectPath(), objectPath);
+}
+
+void TestWindowManagement::testStackingOrder_data()
+{
+    QTest::addColumn<std::vector<uint32_t>>("stack");
+
+    QTest::newRow("0") << std::vector<uint32_t>{};
+    QTest::newRow("1") << std::vector<uint32_t>{42};
+    QTest::newRow("4") << std::vector<uint32_t>{74, 75, 76, 77};
+    QTest::newRow("7") << std::vector<uint32_t>{1121, 1119, 1117, 1115, 1113, 1111, 1109};
+}
+
+void TestWindowManagement::testStackingOrder()
+{
+    QSignalSpy stacking_order_spy(m_windowManagement,
+                                  &Clt::PlasmaWindowManagement::stacking_order_changed);
+    QVERIFY(stacking_order_spy.isValid());
+
+    QFETCH(std::vector<uint32_t>, stack);
+    server.globals.plasma_window_manager->set_stacking_order(stack);
+
+    QVERIFY(stacking_order_spy.wait() || stack.empty());
+    QCOMPARE(m_windowManagement->stacking_order().size(), stack.size());
+    QCOMPARE(m_windowManagement->stacking_order(), stack);
+}
+
+/// First populate the stack, then clear it.
+void TestWindowManagement::testStackingOrder_empty()
+{
+    QSignalSpy stacking_order_spy(m_windowManagement,
+                                  &Clt::PlasmaWindowManagement::stacking_order_changed);
+    QVERIFY(stacking_order_spy.isValid());
+
+    std::vector<uint32_t> stack{1};
+    server.globals.plasma_window_manager->set_stacking_order(stack);
+
+    QVERIFY(stacking_order_spy.wait());
+    QCOMPARE(m_windowManagement->stacking_order().size(), stack.size());
+    QCOMPARE(m_windowManagement->stacking_order(), stack);
+
+    stack.clear();
+    server.globals.plasma_window_manager->set_stacking_order(stack);
+
+    QVERIFY(stacking_order_spy.wait());
+    QCOMPARE(m_windowManagement->stacking_order_uuid().size(), 0);
+}
+
+void TestWindowManagement::testStackingOrderUuid_data()
+{
+    QTest::addColumn<std::vector<std::string>>("stack");
+
+    QTest::newRow("0") << std::vector<std::string>{};
+    QTest::newRow("1") << std::vector<std::string>{"forty-two"};
+    QTest::newRow("4") << std::vector<std::string>{"74", "seventy five", "76___", "77?"};
+    QTest::newRow("7") << std::vector<std::string>{
+        "1'121", "1119.", "hi", "11-15", "1113$", "++1111", "end"};
+}
+
+void TestWindowManagement::testStackingOrderUuid()
+{
+    QSignalSpy stacking_order_spy(m_windowManagement,
+                                  &Clt::PlasmaWindowManagement::stacking_order_uuid_changed);
+    QVERIFY(stacking_order_spy.isValid());
+
+    QFETCH(std::vector<std::string>, stack);
+    server.globals.plasma_window_manager->set_stacking_order_uuids(stack);
+
+    QVERIFY(stacking_order_spy.wait() || stack.empty());
+    QCOMPARE(m_windowManagement->stacking_order_uuid().size(), stack.size());
+    QCOMPARE(m_windowManagement->stacking_order_uuid(), stack);
+}
+
+/// First populate the stack, then clear it.
+void TestWindowManagement::testStackingOrderUuid_empty()
+{
+    QSignalSpy stacking_order_spy(m_windowManagement,
+                                  &Clt::PlasmaWindowManagement::stacking_order_uuid_changed);
+    QVERIFY(stacking_order_spy.isValid());
+
+    std::vector<std::string> stack{"HeLLo", "world!"};
+    server.globals.plasma_window_manager->set_stacking_order_uuids(stack);
+
+    QVERIFY(stacking_order_spy.wait());
+    QCOMPARE(m_windowManagement->stacking_order_uuid().size(), stack.size());
+    QCOMPARE(m_windowManagement->stacking_order_uuid(), stack);
+
+    stack.clear();
+    server.globals.plasma_window_manager->set_stacking_order_uuids(stack);
+
+    QVERIFY(stacking_order_spy.wait());
+    QCOMPARE(m_windowManagement->stacking_order_uuid().size(), 0);
+}
+
+void TestWindowManagement::testSendToOutput()
+{
+    QSignalSpy sendToOutputSpy(server.plasma_window, &Srv::PlasmaWindow::sendToOutputRequested);
+    QVERIFY(sendToOutputSpy.isValid());
+
+    // Create output
+    QSignalSpy outputAnnouncedSpy(m_registry, &Wrapland::Client::Registry::outputAnnounced);
+    QVERIFY(outputAnnouncedSpy.isValid());
+
+    auto srv_output = std::make_unique<Srv::Output>(server.display.get());
+    srv_output->set_enabled(true);
+    srv_output->done();
+
+    QVERIFY(outputAnnouncedSpy.wait());
+    std::unique_ptr<Wrapland::Client::Output> clt_output{
+        m_registry->createOutput(outputAnnouncedSpy.first().first().value<quint32>(),
+                                 outputAnnouncedSpy.first().last().value<quint32>())};
+    QVERIFY(clt_output->isValid());
+
+    // Send window to output
+    m_window->request_send_to_output(clt_output.get());
+    m_connection->flush();
+
+    QVERIFY(sendToOutputSpy.wait());
+    auto actual = sendToOutputSpy.first().first().value<Wrapland::Server::Output*>();
+    QCOMPARE(actual, srv_output.get());
 }
 
 QTEST_GUILESS_MAIN(TestWindowManagement)

@@ -1,5 +1,6 @@
 /********************************************************************
 Copyright 2015  Martin Gräßlin <mgraesslin@kde.org>
+Copyright 2022  Francesco Sorrentino <francesco.sorr@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -26,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland_pointer_p.h"
 // Wayland
 #include <wayland-plasma-window-management-client-protocol.h>
+#include <wayland-util.h>
 
 #include <QFutureWatcher>
 #include <QTimer>
@@ -45,16 +47,32 @@ public:
     EventQueue* queue = nullptr;
     bool showingDesktop = false;
     QList<PlasmaWindow*> windows;
+    std::vector<std::string> stacking_order_uuid;
+    std::vector<uint32_t> stacking_order;
     PlasmaWindow* activeWindow = nullptr;
 
     void setup(org_kde_plasma_window_management* proxy);
+    PlasmaWindow*
+    windowCreated(org_kde_plasma_window* id, quint32 internalId, std::string const& uuid);
 
 private:
     static void
     showDesktopCallback(void* data, org_kde_plasma_window_management* proxy, uint32_t state);
     static void windowCallback(void* data, org_kde_plasma_window_management* proxy, uint32_t id);
+    static void stacking_order_changed_callback(void* data,
+                                                org_kde_plasma_window_management* proxy,
+                                                wl_array* ids);
+    static void stacking_order_uuid_changed_callback(void* data,
+                                                     org_kde_plasma_window_management* proxy,
+                                                     char const* uuids);
+    static void window_with_uuid_callback(void* data,
+                                          org_kde_plasma_window_management* proxy,
+                                          uint32_t id,
+                                          char const* uuid);
+
     void setShowDesktop(bool set);
-    void windowCreated(org_kde_plasma_window* id, quint32 internalId);
+    void set_stacking_order(std::vector<uint32_t> const& stack);
+    void set_stacking_order_uuids(std::vector<std::string> const& stack);
 
     org_kde_plasma_window_management_listener static const s_listener;
     PlasmaWindowManagement* q;
@@ -63,9 +81,10 @@ private:
 class Q_DECL_HIDDEN PlasmaWindow::Private
 {
 public:
-    Private(org_kde_plasma_window* window, quint32 internalId, PlasmaWindow* q);
+    Private(org_kde_plasma_window* window, quint32 internalId, std::string uuid, PlasmaWindow* q);
     WaylandPointer<org_kde_plasma_window, org_kde_plasma_window_destroy> window;
     quint32 internalId;
+    std::string uuid;
     QString title;
     QString appId;
     quint32 desktop = 0;
@@ -131,6 +150,9 @@ private:
                                        org_kde_plasma_window* org_kde_plasma_window,
                                        char const* service_name,
                                        char const* object_path);
+    static void
+    activity_entered_callback(void* data, org_kde_plasma_window* window, char const* id);
+    static void activity_left_callback(void* data, org_kde_plasma_window* window, char const* id);
 
     void setActive(bool set);
     void setMinimized(bool set);
@@ -152,7 +174,6 @@ private:
     void setResizable(bool set);
     void setVirtualDesktopChangeable(bool set);
     void setParentWindow(PlasmaWindow* parentWindow);
-    void setPid(quint32 pid);
 
     static Private* cast(void* data)
     {
@@ -172,6 +193,9 @@ PlasmaWindowManagement::Private::Private(PlasmaWindowManagement* q)
 org_kde_plasma_window_management_listener const PlasmaWindowManagement::Private::s_listener = {
     showDesktopCallback,
     windowCallback,
+    stacking_order_changed_callback,
+    stacking_order_uuid_changed_callback,
+    window_with_uuid_callback,
 };
 
 void PlasmaWindowManagement::Private::setup(org_kde_plasma_window_management* proxy)
@@ -217,15 +241,96 @@ void PlasmaWindowManagement::Private::windowCallback(void* data,
     auto wm = reinterpret_cast<PlasmaWindowManagement::Private*>(data);
     Q_ASSERT(wm->wm == proxy);
 
-    wm->windowCreated(org_kde_plasma_window_management_get_window(wm->wm, id), id);
+    wm->windowCreated(org_kde_plasma_window_management_get_window(wm->wm, id), id, "unavailable");
 }
 
-void PlasmaWindowManagement::Private::windowCreated(org_kde_plasma_window* id, quint32 internalId)
+void PlasmaWindowManagement::Private::stacking_order_changed_callback(
+    void* data,
+    org_kde_plasma_window_management* proxy,
+    wl_array* ids)
+{
+    auto wm = reinterpret_cast<PlasmaWindowManagement::Private*>(data);
+    Q_ASSERT(wm->wm == proxy);
+
+    auto begin = static_cast<uint32_t*>(ids->data);
+    auto end = begin + ids->size / sizeof(uint32_t);
+    auto stack = std::vector(begin, end);
+
+    wm->set_stacking_order(stack);
+}
+
+void PlasmaWindowManagement::Private::set_stacking_order(std::vector<uint32_t> const& stack)
+{
+    if (stacking_order == stack) {
+        return;
+    }
+
+    stacking_order = stack;
+    Q_EMIT q->stacking_order_changed();
+}
+
+void PlasmaWindowManagement::Private::stacking_order_uuid_changed_callback(
+    void* data,
+    org_kde_plasma_window_management* proxy,
+    char const* uuids)
+{
+    auto wm = reinterpret_cast<PlasmaWindowManagement::Private*>(data);
+    Q_ASSERT(wm->wm == proxy);
+
+    // TODO(fsorrent): C++20
+    // for (auto const uuid : std::views::split(std::string_view(uuids), ';')) {
+    //     stack.push_back(uuid);
+    // }
+
+    auto s = std::string(uuids);
+    auto stack = std::vector<std::string>();
+    size_t pos = 0;
+    while ((pos = s.find(';')) != std::string::npos) {
+        std::string uuid = s.substr(0, pos);
+        stack.push_back(uuid);
+        s.erase(0, pos + 1);
+    }
+    if (!s.empty()) {
+        stack.push_back(s);
+    }
+
+    wm->set_stacking_order_uuids(stack);
+}
+
+void PlasmaWindowManagement::Private::set_stacking_order_uuids(
+    std::vector<std::string> const& stack)
+{
+    if (stacking_order_uuid == stack) {
+        return;
+    }
+
+    stacking_order_uuid = stack;
+    Q_EMIT q->stacking_order_uuid_changed();
+}
+
+void PlasmaWindowManagement::Private::window_with_uuid_callback(
+    void* data,
+    org_kde_plasma_window_management* proxy,
+    uint32_t id,
+    char const* uuid)
+{
+    auto wm = reinterpret_cast<PlasmaWindowManagement::Private*>(data);
+    Q_ASSERT(wm->wm == proxy);
+    Q_ASSERT(uuid != nullptr);
+
+    wm->windowCreated(org_kde_plasma_window_management_get_window_by_uuid(wm->wm, uuid), id, uuid);
+
+    Q_EMIT wm->q->window_with_uuid(uuid);
+}
+
+PlasmaWindow* PlasmaWindowManagement::Private::windowCreated(org_kde_plasma_window* id,
+                                                             quint32 internalId,
+                                                             std::string const& uuid)
 {
     if (queue) {
         queue->addProxy(id);
     }
-    auto window = new PlasmaWindow(q, id, internalId);
+    auto window = new PlasmaWindow(q, id, internalId, uuid);
     window->d->wm = q;
     windows << window;
     QObject::connect(window, &QObject::destroyed, q, [this, window] {
@@ -255,6 +360,8 @@ void PlasmaWindowManagement::Private::windowCreated(org_kde_plasma_window* id, q
             }
         }
     });
+
+    return window;
 }
 
 PlasmaWindowManagement::PlasmaWindowManagement(QObject* parent)
@@ -330,9 +437,25 @@ bool PlasmaWindowManagement::isShowingDesktop() const
     return d->showingDesktop;
 }
 
+PlasmaWindow* PlasmaWindowManagement::get_window_by_uuid(std::string const& uuid) const
+{
+    auto proxy = org_kde_plasma_window_management_get_window_by_uuid(d->wm, uuid.data());
+    return d->windowCreated(proxy, 0, uuid);
+}
+
 QList<PlasmaWindow*> PlasmaWindowManagement::windows() const
 {
     return d->windows;
+}
+
+std::vector<uint32_t> const& PlasmaWindowManagement::stacking_order() const
+{
+    return d->stacking_order;
+}
+
+std::vector<std::string> const& PlasmaWindowManagement::stacking_order_uuid() const
+{
+    return d->stacking_order_uuid;
 }
 
 PlasmaWindow* PlasmaWindowManagement::activeWindow() const
@@ -360,7 +483,21 @@ org_kde_plasma_window_listener const PlasmaWindow::Private::s_listener = {
     virtualDesktopEnteredCallback,
     virtualDesktopLeftCallback,
     appmenuChangedCallback,
+    activity_entered_callback,
+    activity_left_callback,
 };
+
+void PlasmaWindow::Private::activity_entered_callback(void* /*data*/,
+                                                      org_kde_plasma_window* /*window*/,
+                                                      char const* /*id*/)
+{
+}
+
+void PlasmaWindow::Private::activity_left_callback(void* /*data*/,
+                                                   org_kde_plasma_window* /*window*/,
+                                                   char const* /*id*/)
+{
+}
 
 void PlasmaWindow::Private::parentWindowCallback(void* data,
                                                  org_kde_plasma_window* window,
@@ -792,8 +929,12 @@ void PlasmaWindow::Private::setVirtualDesktopChangeable(bool set)
     Q_EMIT q->virtualDesktopChangeableChanged();
 }
 
-PlasmaWindow::Private::Private(org_kde_plasma_window* w, quint32 internalId, PlasmaWindow* q)
+PlasmaWindow::Private::Private(org_kde_plasma_window* w,
+                               quint32 internalId,
+                               std::string uuid,
+                               PlasmaWindow* q)
     : internalId(internalId)
+    , uuid(std::move(uuid))
     , q(q)
 {
     window.setup(w);
@@ -802,9 +943,10 @@ PlasmaWindow::Private::Private(org_kde_plasma_window* w, quint32 internalId, Pla
 
 PlasmaWindow::PlasmaWindow(PlasmaWindowManagement* parent,
                            org_kde_plasma_window* window,
-                           quint32 internalId)
+                           quint32 internalId,
+                           std::string const& uuid)
     : QObject(parent)
-    , d(new Private(window, internalId, this))
+    , d(new Private(window, internalId, uuid, this))
 {
 }
 
@@ -1071,6 +1213,11 @@ QRect PlasmaWindow::geometry() const
     return d->geometry;
 }
 
+std::string const& PlasmaWindow::uuid() const
+{
+    return d->uuid;
+}
+
 void PlasmaWindow::requestEnterVirtualDesktop(QString const& id)
 {
     org_kde_plasma_window_request_enter_virtual_desktop(d->window, id.toUtf8());
@@ -1084,6 +1231,11 @@ void PlasmaWindow::requestEnterNewVirtualDesktop()
 void PlasmaWindow::requestLeaveVirtualDesktop(QString const& id)
 {
     org_kde_plasma_window_request_leave_virtual_desktop(d->window, id.toUtf8());
+}
+
+void PlasmaWindow::request_send_to_output(Output* output)
+{
+    org_kde_plasma_window_send_to_output(d->window, output->output());
 }
 
 QStringList PlasmaWindow::plasmaVirtualDesktops() const

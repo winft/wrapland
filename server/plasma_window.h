@@ -33,6 +33,7 @@ namespace Wrapland::Server
 {
 
 class Display;
+class Output;
 class PlasmaWindow;
 class Surface;
 class PlasmaVirtualDesktopManager;
@@ -47,14 +48,20 @@ public:
     enum class ShowingDesktopState { Disabled, Enabled };
     void setShowingDesktopState(ShowingDesktopState state);
 
+    /// Create a window with random uuid.
     PlasmaWindow* createWindow();
-    std::vector<PlasmaWindow*> const& windows() const;
 
-    void unmapWindow(PlasmaWindow* window);
+    /// Create a window with specific uuid.
+    PlasmaWindow* createWindow(std::string const& uuid);
+
+    std::vector<PlasmaWindow*> const& windows() const;
 
     void setVirtualDesktopManager(PlasmaVirtualDesktopManager* manager);
 
     PlasmaVirtualDesktopManager* virtualDesktopManager() const;
+
+    void set_stacking_order(std::vector<uint32_t> const& stack);
+    void set_stacking_order_uuids(std::vector<std::string> const& stack);
 
 Q_SIGNALS:
     void requestChangeShowingDesktop(ShowingDesktopState requestedState);
@@ -109,6 +116,16 @@ public:
     void removePlasmaVirtualDesktop(std::string const& id);
     std::vector<std::string> const& plasmaVirtualDesktops() const;
 
+    /**
+     * @return unique number which identifies the window in the stacking order
+     */
+    std::uint32_t const& id() const;
+
+    /**
+     * @return unique string which identifies the window in the uuid stacking order
+     */
+    std::string const& uuid() const;
+
 Q_SIGNALS:
     void closeRequested();
     void moveRequested();
@@ -136,6 +153,9 @@ Q_SIGNALS:
     void enterPlasmaVirtualDesktopRequested(QString const& desktop);
     void enterNewPlasmaVirtualDesktopRequested();
     void leavePlasmaVirtualDesktopRequested(QString const& desktop);
+
+    /// Client asked for this window to be displayed on @p output
+    void sendToOutputRequested(Wrapland::Server::Output* output);
 
 private:
     friend class PlasmaWindowManager;
