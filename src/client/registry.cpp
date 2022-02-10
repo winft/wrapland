@@ -262,7 +262,7 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
     {
         Registry::Interface::PlasmaWindowManagement,
         {
-            10,
+            15,
             QByteArrayLiteral("org_kde_plasma_window_management"),
             &org_kde_plasma_window_management_interface,
             &Registry::plasmaWindowManagementAnnounced,
