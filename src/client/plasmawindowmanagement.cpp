@@ -32,37 +32,31 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtConcurrentRun>
 #include <qplatformdefs.h>
 
-#include <errno.h>
+#include <cerrno>
 
-namespace Wrapland
-{
-namespace Client
+namespace Wrapland::Client
 {
 
 class Q_DECL_HIDDEN PlasmaWindowManagement::Private
 {
 public:
-    Private(PlasmaWindowManagement* q);
+    explicit Private(PlasmaWindowManagement* q);
     WaylandPointer<org_kde_plasma_window_management, org_kde_plasma_window_management_destroy> wm;
     EventQueue* queue = nullptr;
     bool showingDesktop = false;
     QList<PlasmaWindow*> windows;
     PlasmaWindow* activeWindow = nullptr;
 
-    void setup(org_kde_plasma_window_management* wm);
+    void setup(org_kde_plasma_window_management* proxy);
 
 private:
     static void
-    showDesktopCallback(void* data,
-                        org_kde_plasma_window_management* org_kde_plasma_window_management,
-                        uint32_t state);
-    static void windowCallback(void* data,
-                               org_kde_plasma_window_management* org_kde_plasma_window_management,
-                               uint32_t id);
+    showDesktopCallback(void* data, org_kde_plasma_window_management* proxy, uint32_t state);
+    static void windowCallback(void* data, org_kde_plasma_window_management* proxy, uint32_t id);
     void setShowDesktop(bool set);
     void windowCreated(org_kde_plasma_window* id, quint32 internalId);
 
-    static struct org_kde_plasma_window_management_listener s_listener;
+    org_kde_plasma_window_management_listener static const s_listener;
     PlasmaWindowManagement* q;
 };
 
@@ -158,7 +152,7 @@ private:
     void setResizable(bool set);
     void setVirtualDesktopChangeable(bool set);
     void setParentWindow(PlasmaWindow* parentWindow);
-    void setPid(const quint32 pid);
+    void setPid(quint32 pid);
 
     static Private* cast(void* data)
     {
@@ -167,7 +161,7 @@ private:
 
     PlasmaWindow* q;
 
-    static struct org_kde_plasma_window_listener s_listener;
+    org_kde_plasma_window_listener static const s_listener;
 };
 
 PlasmaWindowManagement::Private::Private(PlasmaWindowManagement* q)
@@ -175,26 +169,25 @@ PlasmaWindowManagement::Private::Private(PlasmaWindowManagement* q)
 {
 }
 
-org_kde_plasma_window_management_listener PlasmaWindowManagement::Private::s_listener = {
+org_kde_plasma_window_management_listener const PlasmaWindowManagement::Private::s_listener = {
     showDesktopCallback,
     windowCallback,
 };
 
-void PlasmaWindowManagement::Private::setup(org_kde_plasma_window_management* windowManagement)
+void PlasmaWindowManagement::Private::setup(org_kde_plasma_window_management* proxy)
 {
     Q_ASSERT(!wm);
-    Q_ASSERT(windowManagement);
-    wm.setup(windowManagement);
-    org_kde_plasma_window_management_add_listener(windowManagement, &s_listener, this);
+    Q_ASSERT(proxy);
+    wm.setup(proxy);
+    org_kde_plasma_window_management_add_listener(proxy, &s_listener, this);
 }
 
-void PlasmaWindowManagement::Private::showDesktopCallback(
-    void* data,
-    org_kde_plasma_window_management* org_kde_plasma_window_management,
-    uint32_t state)
+void PlasmaWindowManagement::Private::showDesktopCallback(void* data,
+                                                          org_kde_plasma_window_management* proxy,
+                                                          uint32_t state)
 {
     auto wm = reinterpret_cast<PlasmaWindowManagement::Private*>(data);
-    Q_ASSERT(wm->wm == org_kde_plasma_window_management);
+    Q_ASSERT(wm->wm == proxy);
     switch (state) {
     case ORG_KDE_PLASMA_WINDOW_MANAGEMENT_SHOW_DESKTOP_ENABLED:
         wm->setShowDesktop(true);
@@ -214,16 +207,16 @@ void PlasmaWindowManagement::Private::setShowDesktop(bool set)
         return;
     }
     showingDesktop = set;
-    emit q->showingDesktopChanged(showingDesktop);
+    Q_EMIT q->showingDesktopChanged(showingDesktop);
 }
 
 void PlasmaWindowManagement::Private::windowCallback(void* data,
-                                                     org_kde_plasma_window_management* interface,
+                                                     org_kde_plasma_window_management* proxy,
                                                      uint32_t id)
 {
     auto wm = reinterpret_cast<PlasmaWindowManagement::Private*>(data);
-    Q_ASSERT(wm->wm == interface);
-    QTimer* timer = new QTimer();
+    Q_ASSERT(wm->wm == proxy);
+    auto timer = new QTimer();
     timer->setSingleShot(true);
     timer->setInterval(0);
     QObject::connect(
@@ -243,20 +236,20 @@ void PlasmaWindowManagement::Private::windowCreated(org_kde_plasma_window* id, q
     if (queue) {
         queue->addProxy(id);
     }
-    PlasmaWindow* window = new PlasmaWindow(q, id, internalId);
+    auto window = new PlasmaWindow(q, id, internalId);
     window->d->wm = q;
     windows << window;
     QObject::connect(window, &QObject::destroyed, q, [this, window] {
         windows.removeAll(window);
         if (activeWindow == window) {
             activeWindow = nullptr;
-            emit q->activeWindowChanged();
+            Q_EMIT q->activeWindowChanged();
         }
     });
     QObject::connect(window, &PlasmaWindow::unmapped, q, [this, window] {
         if (activeWindow == window) {
             activeWindow = nullptr;
-            emit q->activeWindowChanged();
+            Q_EMIT q->activeWindowChanged();
         }
     });
     QObject::connect(window, &PlasmaWindow::activeChanged, q, [this, window] {
@@ -265,11 +258,11 @@ void PlasmaWindowManagement::Private::windowCreated(org_kde_plasma_window* id, q
                 return;
             }
             activeWindow = window;
-            emit q->activeWindowChanged();
+            Q_EMIT q->activeWindowChanged();
         } else {
             if (activeWindow == window) {
                 activeWindow = nullptr;
-                emit q->activeWindowChanged();
+                Q_EMIT q->activeWindowChanged();
             }
         }
     });
@@ -291,13 +284,13 @@ void PlasmaWindowManagement::release()
     if (!d->wm) {
         return;
     }
-    emit interfaceAboutToBeReleased();
+    Q_EMIT interfaceAboutToBeReleased();
     d->wm.release();
 }
 
-void PlasmaWindowManagement::setup(org_kde_plasma_window_management* wm)
+void PlasmaWindowManagement::setup(org_kde_plasma_window_management* shell)
 {
-    d->setup(wm);
+    d->setup(shell);
 }
 
 void PlasmaWindowManagement::setEventQueue(EventQueue* queue)
@@ -363,7 +356,7 @@ PlasmaWindowModel* PlasmaWindowManagement::createWindowModel()
     return new PlasmaWindowModel(this);
 }
 
-org_kde_plasma_window_listener PlasmaWindow::Private::s_listener = {
+org_kde_plasma_window_listener const PlasmaWindow::Private::s_listener = {
     titleChangedCallback,
     appIdChangedCallback,
     stateChangedCallback,
@@ -407,7 +400,7 @@ void PlasmaWindow::Private::windowGeometryCallback(void* data,
         return;
     }
     p->geometry = geo;
-    emit p->q->geometryChanged();
+    Q_EMIT p->q->geometryChanged();
 }
 
 void PlasmaWindow::Private::setParentWindow(PlasmaWindow* parent)
@@ -423,7 +416,7 @@ void PlasmaWindow::Private::setParentWindow(PlasmaWindow* parent)
         parentWindowUnmappedConnection = QMetaObject::Connection();
     }
     if (parentWindow.data() != old.data()) {
-        emit q->parentWindowChanged();
+        Q_EMIT q->parentWindowChanged();
     }
 }
 
@@ -432,7 +425,7 @@ void PlasmaWindow::Private::initialStateCallback(void* data, org_kde_plasma_wind
     Q_UNUSED(window)
     Private* p = cast(data);
     if (!p->unmapped) {
-        emit p->wm->windowCreated(p->q);
+        Q_EMIT p->wm->windowCreated(p->q);
     }
 }
 
@@ -447,21 +440,21 @@ void PlasmaWindow::Private::titleChangedCallback(void* data,
         return;
     }
     p->title = t;
-    emit p->q->titleChanged();
+    Q_EMIT p->q->titleChanged();
 }
 
 void PlasmaWindow::Private::appIdChangedCallback(void* data,
                                                  org_kde_plasma_window* window,
-                                                 const char* appId)
+                                                 const char* app_id)
 {
     Q_UNUSED(window)
     Private* p = cast(data);
-    const QString s = QString::fromUtf8(appId);
+    const QString s = QString::fromUtf8(app_id);
     if (s == p->appId) {
         return;
     }
     p->appId = s;
-    emit p->q->appIdChanged();
+    Q_EMIT p->q->appIdChanged();
 }
 
 void PlasmaWindow::Private::pidChangedCallback(void* data,
@@ -505,7 +498,7 @@ void PlasmaWindow::Private::unmappedCallback(void* data, org_kde_plasma_window* 
     auto p = cast(data);
     Q_UNUSED(window);
     p->unmapped = true;
-    emit p->q->unmapped();
+    Q_EMIT p->q->unmapped();
     p->q->deleteLater();
 }
 
@@ -517,9 +510,9 @@ void PlasmaWindow::Private::virtualDesktopEnteredCallback(void* data,
     Q_UNUSED(window);
     const QString stringId(QString::fromUtf8(id));
     p->plasmaVirtualDesktops << stringId;
-    emit p->q->plasmaVirtualDesktopEntered(stringId);
+    Q_EMIT p->q->plasmaVirtualDesktopEntered(stringId);
     if (p->plasmaVirtualDesktops.count() == 1) {
-        emit p->q->onAllDesktopsChanged();
+        Q_EMIT p->q->onAllDesktopsChanged();
     }
 }
 
@@ -531,9 +524,9 @@ void PlasmaWindow::Private::virtualDesktopLeftCallback(void* data,
     Q_UNUSED(window);
     const QString stringId(QString::fromUtf8(id));
     p->plasmaVirtualDesktops.removeAll(stringId);
-    emit p->q->plasmaVirtualDesktopLeft(stringId);
+    Q_EMIT p->q->plasmaVirtualDesktopLeft(stringId);
     if (p->plasmaVirtualDesktops.isEmpty()) {
-        emit p->q->onAllDesktopsChanged();
+        Q_EMIT p->q->onAllDesktopsChanged();
     }
 }
 
@@ -578,7 +571,7 @@ void PlasmaWindow::Private::themedIconNameChangedCallback(void* data,
     } else {
         p->icon = QIcon();
     }
-    emit p->q->iconChanged();
+    Q_EMIT p->q->iconChanged();
 }
 
 static int readData(int fd, QByteArray& data)
@@ -617,7 +610,7 @@ void PlasmaWindow::Private::iconChangedCallback(void* data, org_kde_plasma_windo
         QByteArray content;
         if (readData(pipeFd, content) != 0) {
             close(pipeFd);
-            return QIcon();
+            return {};
         }
         close(pipeFd);
         QDataStream ds(content);
@@ -625,7 +618,7 @@ void PlasmaWindow::Private::iconChangedCallback(void* data, org_kde_plasma_windo
         ds >> icon;
         return icon;
     };
-    QFutureWatcher<QIcon>* watcher = new QFutureWatcher<QIcon>(p->q);
+    auto watcher = new QFutureWatcher<QIcon>(p->q);
     QObject::connect(watcher, &QFutureWatcher<QIcon>::finished, p->q, [p, watcher] {
         watcher->deleteLater();
         QIcon icon = watcher->result();
@@ -634,7 +627,7 @@ void PlasmaWindow::Private::iconChangedCallback(void* data, org_kde_plasma_windo
         } else {
             p->icon = QIcon::fromTheme(QStringLiteral("wayland"));
         }
-        emit p->q->iconChanged();
+        Q_EMIT p->q->iconChanged();
     });
     watcher->setFuture(QtConcurrent::run(readIcon));
 }
@@ -645,7 +638,7 @@ void PlasmaWindow::Private::setActive(bool set)
         return;
     }
     active = set;
-    emit q->activeChanged();
+    Q_EMIT q->activeChanged();
 }
 
 void PlasmaWindow::Private::setFullscreen(bool set)
@@ -654,7 +647,7 @@ void PlasmaWindow::Private::setFullscreen(bool set)
         return;
     }
     fullscreen = set;
-    emit q->fullscreenChanged();
+    Q_EMIT q->fullscreenChanged();
 }
 
 void PlasmaWindow::Private::setKeepAbove(bool set)
@@ -663,7 +656,7 @@ void PlasmaWindow::Private::setKeepAbove(bool set)
         return;
     }
     keepAbove = set;
-    emit q->keepAboveChanged();
+    Q_EMIT q->keepAboveChanged();
 }
 
 void PlasmaWindow::Private::setKeepBelow(bool set)
@@ -672,7 +665,7 @@ void PlasmaWindow::Private::setKeepBelow(bool set)
         return;
     }
     keepBelow = set;
-    emit q->keepBelowChanged();
+    Q_EMIT q->keepBelowChanged();
 }
 
 void PlasmaWindow::Private::setMaximized(bool set)
@@ -681,7 +674,7 @@ void PlasmaWindow::Private::setMaximized(bool set)
         return;
     }
     maximized = set;
-    emit q->maximizedChanged();
+    Q_EMIT q->maximizedChanged();
 }
 
 void PlasmaWindow::Private::setMinimized(bool set)
@@ -690,7 +683,7 @@ void PlasmaWindow::Private::setMinimized(bool set)
         return;
     }
     minimized = set;
-    emit q->minimizedChanged();
+    Q_EMIT q->minimizedChanged();
 }
 
 void PlasmaWindow::Private::setOnAllDesktops(bool set)
@@ -699,7 +692,7 @@ void PlasmaWindow::Private::setOnAllDesktops(bool set)
         return;
     }
     onAllDesktops = set;
-    emit q->onAllDesktopsChanged();
+    Q_EMIT q->onAllDesktopsChanged();
 }
 
 void PlasmaWindow::Private::setDemandsAttention(bool set)
@@ -708,7 +701,7 @@ void PlasmaWindow::Private::setDemandsAttention(bool set)
         return;
     }
     demandsAttention = set;
-    emit q->demandsAttentionChanged();
+    Q_EMIT q->demandsAttentionChanged();
 }
 
 void PlasmaWindow::Private::setCloseable(bool set)
@@ -717,7 +710,7 @@ void PlasmaWindow::Private::setCloseable(bool set)
         return;
     }
     closeable = set;
-    emit q->closeableChanged();
+    Q_EMIT q->closeableChanged();
 }
 
 void PlasmaWindow::Private::setFullscreenable(bool set)
@@ -726,7 +719,7 @@ void PlasmaWindow::Private::setFullscreenable(bool set)
         return;
     }
     fullscreenable = set;
-    emit q->fullscreenableChanged();
+    Q_EMIT q->fullscreenableChanged();
 }
 
 void PlasmaWindow::Private::setMaximizeable(bool set)
@@ -735,7 +728,7 @@ void PlasmaWindow::Private::setMaximizeable(bool set)
         return;
     }
     maximizeable = set;
-    emit q->maximizeableChanged();
+    Q_EMIT q->maximizeableChanged();
 }
 
 void PlasmaWindow::Private::setMinimizeable(bool set)
@@ -744,7 +737,7 @@ void PlasmaWindow::Private::setMinimizeable(bool set)
         return;
     }
     minimizeable = set;
-    emit q->minimizeableChanged();
+    Q_EMIT q->minimizeableChanged();
 }
 
 void PlasmaWindow::Private::setSkipTaskbar(bool skip)
@@ -753,7 +746,7 @@ void PlasmaWindow::Private::setSkipTaskbar(bool skip)
         return;
     }
     skipTaskbar = skip;
-    emit q->skipTaskbarChanged();
+    Q_EMIT q->skipTaskbarChanged();
 }
 
 void PlasmaWindow::Private::setSkipSwitcher(bool skip)
@@ -762,7 +755,7 @@ void PlasmaWindow::Private::setSkipSwitcher(bool skip)
         return;
     }
     skipSwitcher = skip;
-    emit q->skipSwitcherChanged();
+    Q_EMIT q->skipSwitcherChanged();
 }
 
 void PlasmaWindow::Private::setShadeable(bool set)
@@ -771,7 +764,7 @@ void PlasmaWindow::Private::setShadeable(bool set)
         return;
     }
     shadeable = set;
-    emit q->shadeableChanged();
+    Q_EMIT q->shadeableChanged();
 }
 
 void PlasmaWindow::Private::setShaded(bool set)
@@ -780,7 +773,7 @@ void PlasmaWindow::Private::setShaded(bool set)
         return;
     }
     shaded = set;
-    emit q->shadedChanged();
+    Q_EMIT q->shadedChanged();
 }
 
 void PlasmaWindow::Private::setMovable(bool set)
@@ -789,7 +782,7 @@ void PlasmaWindow::Private::setMovable(bool set)
         return;
     }
     movable = set;
-    emit q->movableChanged();
+    Q_EMIT q->movableChanged();
 }
 
 void PlasmaWindow::Private::setResizable(bool set)
@@ -798,7 +791,7 @@ void PlasmaWindow::Private::setResizable(bool set)
         return;
     }
     resizable = set;
-    emit q->resizableChanged();
+    Q_EMIT q->resizableChanged();
 }
 
 void PlasmaWindow::Private::setVirtualDesktopChangeable(bool set)
@@ -807,7 +800,7 @@ void PlasmaWindow::Private::setVirtualDesktopChangeable(bool set)
         return;
     }
     virtualDesktopChangeable = set;
-    emit q->virtualDesktopChangeableChanged();
+    Q_EMIT q->virtualDesktopChangeableChanged();
 }
 
 PlasmaWindow::Private::Private(org_kde_plasma_window* w, quint32 internalId, PlasmaWindow* q)
@@ -901,9 +894,9 @@ bool PlasmaWindow::isOnAllDesktops() const
     // from protocol version 8 virtual desktops are managed by plasmaVirtualDesktops
     if (org_kde_plasma_window_get_version(d->window) < 8) {
         return d->onAllDesktops;
-    } else {
-        return d->plasmaVirtualDesktops.isEmpty();
     }
+
+    return d->plasmaVirtualDesktops.isEmpty();
 }
 
 bool PlasmaWindow::isDemandingAttention() const
@@ -1109,5 +1102,4 @@ QStringList PlasmaWindow::plasmaVirtualDesktops() const
     return d->plasmaVirtualDesktops;
 }
 
-}
 }

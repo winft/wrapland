@@ -31,9 +31,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 struct org_kde_plasma_window_management;
 struct org_kde_plasma_window;
 
-namespace Wrapland
-{
-namespace Client
+namespace Wrapland::Client
 {
 class EventQueue;
 class PlasmaWindow;
@@ -645,13 +643,12 @@ Q_SIGNALS:
 private:
     friend class PlasmaWindowManagement;
     explicit PlasmaWindow(PlasmaWindowManagement* parent,
-                          org_kde_plasma_window* dataOffer,
+                          org_kde_plasma_window* window,
                           quint32 internalId);
     class Private;
     std::unique_ptr<Private> d;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Client::PlasmaWindow*)

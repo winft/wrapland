@@ -94,24 +94,20 @@ private:
         Srv::Surface* surface{nullptr};
     } server;
 
-    Clt::Surface* m_surface = nullptr;
-    Clt::ConnectionThread* m_connection;
-    Clt::Compositor* m_compositor;
-    Clt::EventQueue* m_queue;
-    Clt::PlasmaWindowManagement* m_windowManagement;
-    Clt::PlasmaWindow* m_window;
-    QThread* m_thread;
-    Clt::Registry* m_registry;
+    Clt::Surface* m_surface{};
+    Clt::ConnectionThread* m_connection{};
+    Clt::Compositor* m_compositor{};
+    Clt::EventQueue* m_queue{};
+    Clt::PlasmaWindowManagement* m_windowManagement{};
+    Clt::PlasmaWindow* m_window{};
+    QThread* m_thread{};
+    Clt::Registry* m_registry{};
 };
 
 constexpr auto socket_name{"wrapland-test-wayland-windowmanagement-0"};
 
 TestWindowManagement::TestWindowManagement(QObject* parent)
     : QObject(parent)
-    , m_connection(nullptr)
-    , m_compositor(nullptr)
-    , m_queue(nullptr)
-    , m_thread(nullptr)
 {
 }
 
@@ -288,8 +284,8 @@ void TestWindowManagement::testCreateAfterUnmap()
     serverWindow->unmap();
 
     QCOMPARE(server.globals.plasma_window_manager->children().count(), 0);
-    QCoreApplication::instance()->processEvents();
-    QCoreApplication::instance()->processEvents(QEventLoop::WaitForMoreEvents);
+    QCoreApplication::processEvents();
+    QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents);
     QTRY_COMPARE(m_windowManagement->children().count(), 2);
 
     auto window = dynamic_cast<Clt::PlasmaWindow*>(m_windowManagement->children().last());
