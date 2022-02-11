@@ -286,6 +286,7 @@ target_link_libraries(testLinuxDmabuf
   Qt5::Gui
   Wrapland::Client
   Wrapland::Server
+  Wayland::Client
 )
 add_test(NAME wrapland-testLinuxDmabuf COMMAND testLinuxDmabuf)
 ecm_mark_as_test(testLinuxDmabuf)
