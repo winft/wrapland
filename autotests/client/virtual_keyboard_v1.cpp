@@ -3,6 +3,8 @@
 
     SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
 */
+#include <wayland-client-protocol.h>
+
 #include <QtTest>
 #include <qobject.h>
 
