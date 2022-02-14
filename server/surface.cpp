@@ -665,11 +665,6 @@ void Surface::Private::damage(const QRect& rect)
 
 void Surface::Private::damageBuffer(const QRect& rect)
 {
-    auto const has_buffer_update = pending.pub.updates & surface_change::buffer;
-    if (!has_buffer_update || (has_buffer_update && !pending.pub.buffer)) {
-        // TODO(unknown author): should we send an error?
-        return;
-    }
     pending.bufferDamage = pending.bufferDamage.united(rect);
 }
 
