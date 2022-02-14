@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   ]]></copyright>
   <interface name="org_kde_kwin_server_decoration_palette_manager" version="1">
-l      <description summary="server side decoration palette manager interface">
+      <description summary="server side decoration palette manager interface">
           This interface allows a client to alter the palette of a server side decoration.
       </description>
       <request name="create">
@@ -35,7 +35,7 @@ l      <description summary="server side decoration palette manager interface">
             Absolute file path, or name of palette in the user's config directory.
             The server may choose not to follow the requested style.
           </description>
-          <arg name="palette" type="string"  summary="Absolute file path, or name of palette in the user's config directory"/>
+          <arg name="palette" type="string" summary="Absolute file path, or name of palette in the user's config directory"/>
       </request>
       <request name="release" type="destructor">
         <description summary="release the palette object"/>
