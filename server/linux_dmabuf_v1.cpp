@@ -91,6 +91,15 @@ void linux_dmabuf_v1::Private::bindInit(linux_dmabuf_v1_bind* bind)
     };
 
     for (auto const& fmt : supported_formats) {
+        if (fmt.modifiers.size() == 2 && contains(fmt.modifiers, DRM_FORMAT_MOD_INVALID)
+            && contains(fmt.modifiers, DRM_FORMAT_MOD_LINEAR)) {
+            // Workaround for Xwayland issue. Only send invalid mod in this case, see [1].
+            // [1] https://gitlab.freedesktop.org/wlroots/wlroots/-/commit/d37eb5c2
+            auto smod = get_smod(DRM_FORMAT_MOD_INVALID);
+            send<zwp_linux_dmabuf_v1_send_modifier>(bind, fmt.format, smod.hi, smod.lo);
+            continue;
+        }
+
         for (auto const& mod : fmt.modifiers) {
             auto smod = get_smod(mod);
             send<zwp_linux_dmabuf_v1_send_modifier>(bind, fmt.format, smod.hi, smod.lo);
