@@ -234,7 +234,7 @@ Buffer::Private::Private(Buffer* q,
             break;
         }
     } else if (dmabufBuffer) {
-        switch (dmabufBuffer->format()) {
+        switch (dmabufBuffer->format) {
         case DRM_FORMAT_ARGB4444:
         case DRM_FORMAT_ABGR4444:
         case DRM_FORMAT_RGBA4444:
@@ -269,7 +269,7 @@ Buffer::Private::Private(Buffer* q,
             alpha = false;
             break;
         }
-        size = dmabufBuffer->size();
+        size = dmabufBuffer->size;
     } else if (surface) {
         EGLDisplay eglDisplay = surface->client()->display()->eglDisplay();
 

@@ -52,16 +52,6 @@ private:
     static const struct zwp_linux_dmabuf_v1_interface s_interface;
 };
 
-class linux_dmabuf_buffer_v1::Private
-{
-public:
-    Private(uint32_t format, const QSize& size);
-    ~Private() = default;
-
-    uint32_t format;
-    QSize size;
-};
-
 class linux_dmabuf_buffer_v1_res_impl;
 
 class linux_dmabuf_buffer_v1_res : public QObject

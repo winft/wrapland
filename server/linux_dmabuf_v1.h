@@ -34,7 +34,6 @@ namespace Wrapland::Server
 {
 class Buffer;
 class Display;
-class linux_dmabuf_buffer_v1;
 
 enum class linux_dmabuf_flag_v1 {
     y_inverted = 0x1,
@@ -49,6 +48,20 @@ struct linux_dmabuf_plane_v1 {
     uint32_t offset;   /// The offset from the start of buffer
     uint32_t stride;   /// The distance from the start of a row to the next row in bytes
     uint64_t modifier; /// The layout modifier
+};
+
+class linux_dmabuf_buffer_v1
+{
+public:
+    linux_dmabuf_buffer_v1(uint32_t format, QSize const& size)
+        : format{format}
+        , size{size}
+    {
+    }
+    virtual ~linux_dmabuf_buffer_v1() = default;
+
+    uint32_t format;
+    QSize size;
 };
 
 using linux_dmabuf_import_v1
@@ -73,21 +86,6 @@ private:
 
     class Private;
     std::unique_ptr<Private> d_ptr;
-};
-
-class WRAPLANDSERVER_EXPORT linux_dmabuf_buffer_v1
-{
-public:
-    linux_dmabuf_buffer_v1(uint32_t format, const QSize& size);
-    virtual ~linux_dmabuf_buffer_v1();
-
-    uint32_t format() const;
-    QSize size() const;
-
-private:
-    friend class linux_dmabuf_params_v1;
-    class Private;
-    Private* d_ptr;
 };
 
 }

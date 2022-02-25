@@ -366,32 +366,6 @@ void linux_dmabuf_params_v1::add(int fd,
     m_planeCount++;
 }
 
-linux_dmabuf_buffer_v1::Private::Private(uint32_t format, const QSize& size)
-    : format(format)
-    , size(size)
-{
-}
-
-linux_dmabuf_buffer_v1::linux_dmabuf_buffer_v1(uint32_t format, const QSize& size)
-    : d_ptr{new linux_dmabuf_buffer_v1::Private(format, size)}
-{
-}
-
-linux_dmabuf_buffer_v1::~linux_dmabuf_buffer_v1()
-{
-    delete d_ptr;
-}
-
-uint32_t linux_dmabuf_buffer_v1::format() const
-{
-    return d_ptr->format;
-}
-
-QSize linux_dmabuf_buffer_v1::size() const
-{
-    return d_ptr->size;
-}
-
 linux_dmabuf_buffer_v1_res::linux_dmabuf_buffer_v1_res(Client* client,
                                                        uint32_t version,
                                                        uint32_t id,
