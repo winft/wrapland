@@ -41,13 +41,13 @@ using linux_dmabuf_v1_bind = Wayland::Bind<linux_dmabuf_v1_global>;
 class linux_dmabuf_v1::Private : public linux_dmabuf_v1_global
 {
 public:
-    Private(linux_dmabuf_v1* q, Display* display);
+    Private(linux_dmabuf_v1* q, Display* display, linux_dmabuf_import_v1 import);
     ~Private() override;
 
     void bindInit(linux_dmabuf_v1_bind* bind) final;
     static void create_params_callback(linux_dmabuf_v1_bind* bind, uint32_t id);
 
-    linux_dmabuf_v1::Impl* impl;
+    linux_dmabuf_import_v1 import;
     QHash<uint32_t, QSet<uint64_t>> supported_formats;
 
 private:

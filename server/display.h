@@ -165,7 +165,6 @@ public:
     std::unique_ptr<AppmenuManager> createAppmenuManager();
 
     std::unique_ptr<ServerSideDecorationPaletteManager> createServerSideDecorationPaletteManager();
-    std::unique_ptr<linux_dmabuf_v1> createLinuxDmabuf();
     std::unique_ptr<Viewporter> createViewporter();
     std::unique_ptr<virtual_keyboard_manager_v1> create_virtual_keyboard_manager_v1();
     XdgOutputManager* xdgOutputManager() const;

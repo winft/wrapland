@@ -27,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSet>
 #include <QSize>
 
+#include <functional>
 #include <memory>
 
 namespace Wrapland::Server
@@ -50,49 +51,18 @@ struct linux_dmabuf_plane_v1 {
     uint64_t modifier; /// The layout modifier
 };
 
+using linux_dmabuf_import_v1
+    = std::function<linux_dmabuf_buffer_v1*(QVector<linux_dmabuf_plane_v1> const& planes,
+                                            uint32_t format,
+                                            QSize const& size,
+                                            linux_dmabuf_flags_v1 flags)>;
+
 class WRAPLANDSERVER_EXPORT linux_dmabuf_v1 : public QObject
 {
     Q_OBJECT
 public:
-    /**
-     * The Impl class provides an interface from the LinuxDmabufInterface into the compositor.
-     */
-    class Impl
-    {
-    public:
-        Impl() = default;
-        virtual ~Impl() = default;
-
-        /**
-         * Imports a linux-dmabuf buffer into the compositor.
-         *
-         * The parent linux_dmabuf_v1 class takes ownership of returned
-         * buffer objects.
-         *
-         * In return the returned buffer takes ownership of the file descriptor for each
-         * plane.
-         *
-         * Note that it is the responsibility of the caller to close the file descriptors
-         * when the import fails.
-         *
-         * @return The imported buffer on success, and nullptr otherwise.
-         */
-        virtual linux_dmabuf_buffer_v1* importBuffer(QVector<linux_dmabuf_plane_v1> const& planes,
-                                                     uint32_t format,
-                                                     QSize const& size,
-                                                     linux_dmabuf_flags_v1 flags)
-            = 0;
-    };
-
-    explicit linux_dmabuf_v1(Display* display);
+    linux_dmabuf_v1(Display* display, linux_dmabuf_import_v1 import);
     ~linux_dmabuf_v1() override;
-
-    /**
-     * Sets the compositor implementation for the dmabuf interface.
-     *
-     * The ownership is not transferred by this call.
-     */
-    void setImpl(Impl* impl);
 
     void set_formats(QHash<uint32_t, QSet<uint64_t>> const& set);
 

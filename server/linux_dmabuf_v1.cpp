@@ -39,8 +39,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-linux_dmabuf_v1::Private::Private(linux_dmabuf_v1* q, Display* display)
+linux_dmabuf_v1::Private::Private(linux_dmabuf_v1* q,
+                                  Display* display,
+                                  linux_dmabuf_import_v1 import)
     : linux_dmabuf_v1_global(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
+    , import{std::move(import)}
 {
     create();
 }
@@ -93,17 +96,12 @@ void linux_dmabuf_v1::Private::create_params_callback(linux_dmabuf_v1_bind* bind
         = new linux_dmabuf_params_wrapper_v1(bind->client->handle, bind->version, id, priv);
 }
 
-linux_dmabuf_v1::linux_dmabuf_v1(Display* display)
-    : d_ptr(new Private(this, display))
+linux_dmabuf_v1::linux_dmabuf_v1(Display* display, linux_dmabuf_import_v1 import)
+    : d_ptr(new Private(this, display, std::move(import)))
 {
 }
 
 linux_dmabuf_v1::~linux_dmabuf_v1() = default;
-
-void linux_dmabuf_v1::setImpl(linux_dmabuf_v1::Impl* impl)
-{
-    d_ptr->impl = impl;
-}
 
 void linux_dmabuf_v1::set_formats(QHash<uint32_t, QSet<uint64_t>> const& set)
 {
@@ -210,7 +208,7 @@ void linux_dmabuf_params_v1::create(uint32_t buffer_id,
         planes << m_planes.at(i);
     }
 
-    auto buffer = m_dmabuf->impl->importBuffer(planes, format, size, linux_dmabuf_flags_v1(flags));
+    auto buffer = m_dmabuf->import(planes, format, size, linux_dmabuf_flags_v1(flags));
     if (!buffer) {
         if (buffer_id == 0) {
             send<zwp_linux_buffer_params_v1_send_failed>();
