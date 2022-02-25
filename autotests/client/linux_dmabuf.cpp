@@ -36,36 +36,36 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/globals.h"
 #include "../../server/linux_dmabuf_v1.h"
 
-class DmabufImpl : public Wrapland::Server::LinuxDmabufV1::Impl
+class DmabufImpl : public Wrapland::Server::linux_dmabuf_v1::Impl
 {
 public:
-    using Plane = Wrapland::Server::LinuxDmabufV1::Plane;
-    using Flags = Wrapland::Server::LinuxDmabufV1::Flags;
+    using Plane = Wrapland::Server::linux_dmabuf_plane_v1;
+    using Flags = Wrapland::Server::linux_dmabuf_flags_v1;
 
     DmabufImpl();
     ~DmabufImpl() = default;
 
-    Wrapland::Server::LinuxDmabufBufferV1* importBuffer(const QVector<Plane>& planes,
-                                                        uint32_t format,
-                                                        const QSize& size,
-                                                        Flags flags) override;
+    Wrapland::Server::linux_dmabuf_buffer_v1* importBuffer(const QVector<Plane>& planes,
+                                                           uint32_t format,
+                                                           const QSize& size,
+                                                           Flags flags) override;
     bool bufferAlwaysFail;
 };
 
 DmabufImpl::DmabufImpl()
-    : Wrapland::Server::LinuxDmabufV1::Impl()
+    : Wrapland::Server::linux_dmabuf_v1::Impl()
 {
     bufferAlwaysFail = false;
 }
 
-Wrapland::Server::LinuxDmabufBufferV1*
+Wrapland::Server::linux_dmabuf_buffer_v1*
 DmabufImpl::importBuffer([[maybe_unused]] const QVector<Plane>& planes,
                          uint32_t format,
                          const QSize& size,
                          [[maybe_unused]] Flags flags)
 {
     if (!bufferAlwaysFail) {
-        return new Wrapland::Server::LinuxDmabufBufferV1(format, size);
+        return new Wrapland::Server::linux_dmabuf_buffer_v1(format, size);
     } else {
         return nullptr;
     }
@@ -186,7 +186,7 @@ void TestLinuxDmabuf::cleanup()
 void TestLinuxDmabuf::testModifier()
 {
     QSignalSpy ModifierSpy(m_dmabuf, &Wrapland::Client::LinuxDmabufV1::supportedFormatsChanged);
-    server.globals.linux_dmabuf_v1->setSupportedFormatsWithModifiers(modifiers);
+    server.globals.linux_dmabuf_v1->set_formats(modifiers);
     auto paramV1 = m_dmabuf->createParamsV1();
     QVERIFY(paramV1->isValid());
     QVERIFY(ModifierSpy.wait());
@@ -219,7 +219,7 @@ void TestLinuxDmabuf::testCreateBufferFail()
 
 void TestLinuxDmabuf::testCreateBufferSucess()
 {
-    server.globals.linux_dmabuf_v1->setSupportedFormatsWithModifiers(modifiers);
+    server.globals.linux_dmabuf_v1->set_formats(modifiers);
     auto paramV1 = m_dmabuf->createParamsV1();
     QVERIFY(paramV1->isValid());
 

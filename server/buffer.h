@@ -35,7 +35,7 @@ namespace Wrapland::Server
 class Buffer;
 class Display;
 class Surface;
-class LinuxDmabufBufferV1;
+class linux_dmabuf_buffer_v1;
 
 class WRAPLANDSERVER_EXPORT ShmImage
 {
@@ -78,7 +78,7 @@ public:
 
     Surface* surface() const;
     wl_shm_buffer* shmBuffer();
-    LinuxDmabufBufferV1* linuxDmabufBuffer();
+    linux_dmabuf_buffer_v1* linuxDmabufBuffer();
     wl_resource* resource() const;
 
     std::optional<ShmImage> shmImage();

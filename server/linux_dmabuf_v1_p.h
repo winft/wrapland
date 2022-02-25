@@ -31,47 +31,49 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
-class BufferV1;
 
-constexpr uint32_t LinuxDmabufV1Version = 3;
-using LinuxDmabufV1Global = Wayland::Global<LinuxDmabufV1, LinuxDmabufV1Version>;
-using LinuxDmabufV1Bind = Wayland::Bind<LinuxDmabufV1Global>;
+class linux_dmabuf_buffer_v1_res;
 
-class LinuxDmabufV1::Private : public LinuxDmabufV1Global
+constexpr uint32_t linux_dmabuf_v1_version = 3;
+using linux_dmabuf_v1_global = Wayland::Global<linux_dmabuf_v1, linux_dmabuf_v1_version>;
+using linux_dmabuf_v1_bind = Wayland::Bind<linux_dmabuf_v1_global>;
+
+class linux_dmabuf_v1::Private : public linux_dmabuf_v1_global
 {
 public:
-    Private(LinuxDmabufV1* q, Display* display);
+    Private(linux_dmabuf_v1* q, Display* display);
     ~Private() override;
 
-    void bindInit(LinuxDmabufV1Bind* bind) final;
+    void bindInit(linux_dmabuf_v1_bind* bind) final;
+    static void create_params_callback(linux_dmabuf_v1_bind* bind, uint32_t id);
 
-    static const struct wl_buffer_interface* bufferInterface();
-    static void createParamsCallback(LinuxDmabufV1Bind* bind, uint32_t id);
-
-    LinuxDmabufV1::Impl* impl;
-    QHash<uint32_t, QSet<uint64_t>> supportedFormatsWithModifiers;
+    linux_dmabuf_v1::Impl* impl;
+    QHash<uint32_t, QSet<uint64_t>> supported_formats;
 
 private:
     static const struct zwp_linux_dmabuf_v1_interface s_interface;
 };
 
-class LinuxDmabufBufferV1::Private
+class linux_dmabuf_buffer_v1::Private
 {
 public:
-    Private(uint32_t format, const QSize& size, LinuxDmabufBufferV1* q);
+    Private(uint32_t format, const QSize& size, linux_dmabuf_buffer_v1* q);
     ~Private() = default;
 
     uint32_t format;
     QSize size;
 
-    BufferV1* buffer;
+    linux_dmabuf_buffer_v1_res* res{nullptr};
 };
 
-class BufferV1 : public Wayland::Resource<LinuxDmabufBufferV1>
+class linux_dmabuf_buffer_v1_res : public Wayland::Resource<linux_dmabuf_buffer_v1>
 {
 public:
-    BufferV1(Client* client, uint32_t version, uint32_t id, LinuxDmabufBufferV1* q);
-    ~BufferV1() override = default;
+    linux_dmabuf_buffer_v1_res(Client* client,
+                               uint32_t version,
+                               uint32_t id,
+                               linux_dmabuf_buffer_v1* q);
+    ~linux_dmabuf_buffer_v1_res() override = default;
 
     static const struct wl_buffer_interface* interface();
 
@@ -79,63 +81,66 @@ private:
     static const struct wl_buffer_interface s_interface;
 };
 
-class ParamsWrapperV1;
-class ParamsV1 : public Wayland::Resource<ParamsWrapperV1>
+class linux_dmabuf_params_wrapper_v1;
+class linux_dmabuf_params_v1 : public Wayland::Resource<linux_dmabuf_params_wrapper_v1>
 {
 public:
-    ParamsV1(Client* client,
-             uint32_t version,
-             uint32_t id,
-             LinuxDmabufV1::Private* dmabuf,
-             ParamsWrapperV1* q);
-    ~ParamsV1() override;
+    linux_dmabuf_params_v1(Client* client,
+                           uint32_t version,
+                           uint32_t id,
+                           linux_dmabuf_v1::Private* dmabuf,
+                           linux_dmabuf_params_wrapper_v1* q);
+    ~linux_dmabuf_params_v1() override;
 
     void add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride, uint64_t modifier);
-    void create(uint32_t bufferId, const QSize& size, uint32_t format, uint32_t flags);
+    void create(uint32_t buffer_id, const QSize& size, uint32_t format, uint32_t flags);
 
 private:
-    static void addCallback(wl_client* wlClient,
-                            wl_resource* wlResource,
-                            int fd,
-                            uint32_t plane_idx,
-                            uint32_t offset,
-                            uint32_t stride,
-                            uint32_t modifier_hi,
-                            uint32_t modifier_lo);
+    static void add_callback(wl_client* wlClient,
+                             wl_resource* wlResource,
+                             int fd,
+                             uint32_t plane_idx,
+                             uint32_t offset,
+                             uint32_t stride,
+                             uint32_t modifier_hi,
+                             uint32_t modifier_lo);
 
-    static void createCallback(wl_client* wlClient,
-                               wl_resource* wlResource,
-                               int width,
-                               int height,
-                               uint32_t format,
-                               uint32_t flags);
+    static void create_callback(wl_client* wlClient,
+                                wl_resource* wlResource,
+                                int width,
+                                int height,
+                                uint32_t format,
+                                uint32_t flags);
 
-    static void createImmedCallback(wl_client* wlClient,
-                                    wl_resource* wlResource,
-                                    uint32_t new_id,
-                                    int width,
-                                    int height,
-                                    uint32_t format,
-                                    uint32_t flags);
+    static void create_immed_callback(wl_client* wlClient,
+                                      wl_resource* wlResource,
+                                      uint32_t new_id,
+                                      int width,
+                                      int height,
+                                      uint32_t format,
+                                      uint32_t flags);
 
     bool validate_params(QSize const& size);
 
     static struct zwp_linux_buffer_params_v1_interface const s_interface;
 
-    LinuxDmabufV1::Private* m_dmabuf;
-    std::array<LinuxDmabufV1::Plane, 4> m_planes;
+    linux_dmabuf_v1::Private* m_dmabuf;
+    std::array<linux_dmabuf_plane_v1, 4> m_planes;
     size_t m_planeCount = 0;
     bool m_createRequested = false;
 };
 
 // TODO(romangg): Make this wrapper go away! For that Wayland::Resource can't depend any longer on
 //                the resourceDestroy signal being available.
-class ParamsWrapperV1 : public QObject
+class linux_dmabuf_params_wrapper_v1 : public QObject
 {
     Q_OBJECT
 public:
-    ParamsWrapperV1(Client* client, uint32_t version, uint32_t id, LinuxDmabufV1::Private* dmabuf);
-    ParamsV1* d_ptr;
+    linux_dmabuf_params_wrapper_v1(Client* client,
+                                   uint32_t version,
+                                   uint32_t id,
+                                   linux_dmabuf_v1::Private* dmabuf);
+    linux_dmabuf_params_v1* d_ptr;
 
 Q_SIGNALS:
     void resourceDestroyed();

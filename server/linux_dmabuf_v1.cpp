@@ -39,30 +39,30 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-LinuxDmabufV1::Private::Private(LinuxDmabufV1* q, Display* display)
-    : LinuxDmabufV1Global(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
+linux_dmabuf_v1::Private::Private(linux_dmabuf_v1* q, Display* display)
+    : linux_dmabuf_v1_global(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
 {
     create();
 }
 
-LinuxDmabufV1::Private::~Private() = default;
+linux_dmabuf_v1::Private::~Private() = default;
 
-const struct zwp_linux_dmabuf_v1_interface LinuxDmabufV1::Private::s_interface = {
+const struct zwp_linux_dmabuf_v1_interface linux_dmabuf_v1::Private::s_interface = {
     resourceDestroyCallback,
-    cb<createParamsCallback>,
+    cb<create_params_callback>,
     // TODO(romangg): Update linux-dmabuf protocol version (currently at 3).
     // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
 };
 
-constexpr size_t modifierShift = 32;
+constexpr size_t modifier_shift = 32;
 
-void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
+void linux_dmabuf_v1::Private::bindInit(linux_dmabuf_v1_bind* bind)
 {
     // Send formats & modifiers.
-    QHash<uint32_t, QSet<uint64_t>>::const_iterator it = supportedFormatsWithModifiers.constBegin();
+    QHash<uint32_t, QSet<uint64_t>>::const_iterator it = supported_formats.constBegin();
 
     for (;;) {
-        if (it == supportedFormatsWithModifiers.constEnd()) {
+        if (it == supported_formats.constEnd()) {
             break;
         }
         QSet<uint64_t> modifiers = it.value();
@@ -73,7 +73,7 @@ void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
         for (uint64_t modifier : qAsConst(modifiers)) {
             if (bind->version >= ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
                 const uint32_t modifier_lo = modifier & 0xFFFFFFFF;
-                const uint32_t modifier_hi = modifier >> modifierShift;
+                const uint32_t modifier_hi = modifier >> modifier_shift;
                 send<zwp_linux_dmabuf_v1_send_modifier, ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION>(
                     bind, it.key(), modifier_hi, modifier_lo);
             } else if (modifier == DRM_FORMAT_MOD_LINEAR || modifier == DRM_FORMAT_MOD_INVALID) {
@@ -85,51 +85,51 @@ void LinuxDmabufV1::Private::bindInit(LinuxDmabufV1Bind* bind)
     }
 }
 
-void LinuxDmabufV1::Private::createParamsCallback(LinuxDmabufV1Bind* bind, uint32_t id)
+void linux_dmabuf_v1::Private::create_params_callback(linux_dmabuf_v1_bind* bind, uint32_t id)
 {
     auto priv = bind->global()->handle->d_ptr.get();
 
     [[maybe_unused]] auto params
-        = new ParamsWrapperV1(bind->client->handle, bind->version, id, priv);
+        = new linux_dmabuf_params_wrapper_v1(bind->client->handle, bind->version, id, priv);
 }
 
-LinuxDmabufV1::LinuxDmabufV1(Display* display)
+linux_dmabuf_v1::linux_dmabuf_v1(Display* display)
     : d_ptr(new Private(this, display))
 {
 }
 
-LinuxDmabufV1::~LinuxDmabufV1() = default;
+linux_dmabuf_v1::~linux_dmabuf_v1() = default;
 
-void LinuxDmabufV1::setImpl(LinuxDmabufV1::Impl* impl)
+void linux_dmabuf_v1::setImpl(linux_dmabuf_v1::Impl* impl)
 {
     d_ptr->impl = impl;
 }
 
-void LinuxDmabufV1::setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> const& set)
+void linux_dmabuf_v1::set_formats(QHash<uint32_t, QSet<uint64_t>> const& set)
 {
-    d_ptr->supportedFormatsWithModifiers = set;
+    d_ptr->supported_formats = set;
 }
 
-ParamsWrapperV1::ParamsWrapperV1(Client* client,
-                                 uint32_t version,
-                                 uint32_t id,
-                                 LinuxDmabufV1::Private* dmabuf)
+linux_dmabuf_params_wrapper_v1::linux_dmabuf_params_wrapper_v1(Client* client,
+                                                               uint32_t version,
+                                                               uint32_t id,
+                                                               linux_dmabuf_v1::Private* dmabuf)
     : QObject(nullptr)
-    , d_ptr(new ParamsV1(client, version, id, dmabuf, this))
+    , d_ptr(new linux_dmabuf_params_v1(client, version, id, dmabuf, this))
 {
 }
 
-ParamsV1::ParamsV1(Client* client,
-                   uint32_t version,
-                   uint32_t id,
-                   LinuxDmabufV1::Private* dmabuf,
-                   ParamsWrapperV1* q)
-    : Wayland::Resource<ParamsWrapperV1>(client,
-                                         version,
-                                         id,
-                                         &zwp_linux_buffer_params_v1_interface,
-                                         &s_interface,
-                                         q)
+linux_dmabuf_params_v1::linux_dmabuf_params_v1(Client* client,
+                                               uint32_t version,
+                                               uint32_t id,
+                                               linux_dmabuf_v1::Private* dmabuf,
+                                               linux_dmabuf_params_wrapper_v1* q)
+    : Wayland::Resource<linux_dmabuf_params_wrapper_v1>(client,
+                                                        version,
+                                                        id,
+                                                        &zwp_linux_buffer_params_v1_interface,
+                                                        &s_interface,
+                                                        q)
     , m_dmabuf(dmabuf)
 {
     for (auto& plane : m_planes) {
@@ -140,7 +140,7 @@ ParamsV1::ParamsV1(Client* client,
     }
 }
 
-ParamsV1::~ParamsV1()
+linux_dmabuf_params_v1::~linux_dmabuf_params_v1()
 {
     // Close the file descriptors
     for (auto& plane : m_planes) {
@@ -150,66 +150,69 @@ ParamsV1::~ParamsV1()
     }
 }
 
-struct zwp_linux_buffer_params_v1_interface const ParamsV1::s_interface = {
+struct zwp_linux_buffer_params_v1_interface const linux_dmabuf_params_v1::s_interface = {
     destroyCallback,
-    addCallback,
-    createCallback,
-    createImmedCallback,
+    add_callback,
+    create_callback,
+    create_immed_callback,
 };
 
-void ParamsV1::addCallback([[maybe_unused]] wl_client* wlClient,
-                           wl_resource* wlResource,
-                           int fd,
-                           uint32_t plane_idx,
-                           uint32_t offset,
-                           uint32_t stride,
-                           uint32_t modifier_hi,
-                           uint32_t modifier_lo)
+void linux_dmabuf_params_v1::add_callback(wl_client* /*wlClient*/,
+                                          wl_resource* wlResource,
+                                          int fd,
+                                          uint32_t plane_idx,
+                                          uint32_t offset,
+                                          uint32_t stride,
+                                          uint32_t modifier_hi,
+                                          uint32_t modifier_lo)
 {
     auto params = get_handle(wlResource);
     params->d_ptr->add(
-        fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << modifierShift) | modifier_lo);
+        fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << modifier_shift) | modifier_lo);
 }
 
-void ParamsV1::createCallback([[maybe_unused]] wl_client* wlClient,
-                              wl_resource* wlResource,
-                              int width,
-                              int height,
-                              uint32_t format,
-                              uint32_t flags)
+void linux_dmabuf_params_v1::create_callback(wl_client* /*wlClient*/,
+                                             wl_resource* wlResource,
+                                             int width,
+                                             int height,
+                                             uint32_t format,
+                                             uint32_t flags)
 {
     auto params = get_handle(wlResource);
     params->d_ptr->create(0, QSize(width, height), format, flags);
 }
 
-void ParamsV1::createImmedCallback([[maybe_unused]] wl_client* wlClient,
-                                   wl_resource* wlResource,
-                                   uint32_t new_id,
-                                   int width,
-                                   int height,
-                                   uint32_t format,
-                                   uint32_t flags)
+void linux_dmabuf_params_v1::create_immed_callback(wl_client* /*wlClient*/,
+                                                   wl_resource* wlResource,
+                                                   uint32_t new_id,
+                                                   int width,
+                                                   int height,
+                                                   uint32_t format,
+                                                   uint32_t flags)
 {
     auto params = get_handle(wlResource);
     params->d_ptr->create(new_id, QSize(width, height), format, flags);
 }
 
-void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uint32_t flags)
+void linux_dmabuf_params_v1::create(uint32_t buffer_id,
+                                    const QSize& size,
+                                    uint32_t format,
+                                    uint32_t flags)
 {
     if (!validate_params(size)) {
         return;
     }
 
-    QVector<LinuxDmabufV1::Plane> planes;
+    QVector<linux_dmabuf_plane_v1> planes;
     planes.reserve(static_cast<int>(m_planeCount));
 
     for (uint32_t i = 0; i < m_planeCount; i++) {
         planes << m_planes.at(i);
     }
 
-    auto buffer = m_dmabuf->impl->importBuffer(planes, format, size, LinuxDmabufV1::Flags(flags));
+    auto buffer = m_dmabuf->impl->importBuffer(planes, format, size, linux_dmabuf_flags_v1(flags));
     if (!buffer) {
-        if (bufferId == 0) {
+        if (buffer_id == 0) {
             send<zwp_linux_buffer_params_v1_send_failed>();
             return;
         }
@@ -227,17 +230,17 @@ void ParamsV1::create(uint32_t bufferId, const QSize& size, uint32_t format, uin
 
     // We import the buffer from the consumer. The consumer ensures the buffer exists.
     // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
-    buffer->d_ptr->buffer = new BufferV1(client->handle, 1, bufferId, buffer);
+    buffer->d_ptr->res = new linux_dmabuf_buffer_v1_res(client->handle, 1, buffer_id, buffer);
 
     // TODO(romangg): error handling
 
-    // Send a 'created' event when the request is not for an immediate import, i.e. bufferId is 0.
-    if (bufferId == 0) {
-        send<zwp_linux_buffer_params_v1_send_created>(buffer->d_ptr->buffer->resource);
+    // Send a 'created' event when the request is not for an immediate import, i.e. buffer_id is 0.
+    if (buffer_id == 0) {
+        send<zwp_linux_buffer_params_v1_send_created>(buffer->d_ptr->res->resource);
     }
 }
 
-bool ParamsV1::validate_params(QSize const& size)
+bool linux_dmabuf_params_v1::validate_params(QSize const& size)
 {
     auto const width = static_cast<uint32_t>(size.width());
     auto const height = static_cast<uint32_t>(size.height());
@@ -326,7 +329,11 @@ bool ParamsV1::validate_params(QSize const& size)
     return true;
 }
 
-void ParamsV1::add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride, uint64_t modifier)
+void linux_dmabuf_params_v1::add(int fd,
+                                 uint32_t plane_idx,
+                                 uint32_t offset,
+                                 uint32_t stride,
+                                 uint64_t modifier)
 {
     if (m_createRequested) {
         postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_ALREADY_USED,
@@ -360,53 +367,55 @@ void ParamsV1::add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride,
     m_planeCount++;
 }
 
-LinuxDmabufBufferV1::Private::Private(uint32_t format,
-                                      const QSize& size,
-                                      [[maybe_unused]] LinuxDmabufBufferV1* q)
+linux_dmabuf_buffer_v1::Private::Private(uint32_t format,
+                                         const QSize& size,
+                                         [[maybe_unused]] linux_dmabuf_buffer_v1* q)
     : format(format)
     , size(size)
-    , buffer(nullptr)
 {
 }
 
 // TODO(romangg): This does not necessarily need to be a QObject. resourceDestroyed signal is not
 //                really needed.
-LinuxDmabufBufferV1::LinuxDmabufBufferV1(uint32_t format,
-                                         const QSize& size,
-                                         [[maybe_unused]] QObject* parent)
+linux_dmabuf_buffer_v1::linux_dmabuf_buffer_v1(uint32_t format,
+                                               const QSize& size,
+                                               [[maybe_unused]] QObject* parent)
     : QObject(nullptr)
-    , d_ptr(new LinuxDmabufBufferV1::Private(format, size, this))
+    , d_ptr(new linux_dmabuf_buffer_v1::Private(format, size, this))
 {
 }
 
-LinuxDmabufBufferV1::~LinuxDmabufBufferV1()
+linux_dmabuf_buffer_v1::~linux_dmabuf_buffer_v1()
 {
     delete d_ptr;
 }
 
-uint32_t LinuxDmabufBufferV1::format() const
+uint32_t linux_dmabuf_buffer_v1::format() const
 {
     return d_ptr->format;
 }
 
-QSize LinuxDmabufBufferV1::size() const
+QSize linux_dmabuf_buffer_v1::size() const
 {
     return d_ptr->size;
 }
 
-BufferV1::BufferV1(Client* client, uint32_t version, uint32_t id, LinuxDmabufBufferV1* q)
-    : Wayland::Resource<LinuxDmabufBufferV1>(client,
-                                             version,
-                                             id,
-                                             &wl_buffer_interface,
-                                             &s_interface,
-                                             q)
+linux_dmabuf_buffer_v1_res::linux_dmabuf_buffer_v1_res(Client* client,
+                                                       uint32_t version,
+                                                       uint32_t id,
+                                                       linux_dmabuf_buffer_v1* q)
+    : Wayland::Resource<linux_dmabuf_buffer_v1>(client,
+                                                version,
+                                                id,
+                                                &wl_buffer_interface,
+                                                &s_interface,
+                                                q)
 {
 }
 
-const struct wl_buffer_interface BufferV1::s_interface = {destroyCallback};
+const struct wl_buffer_interface linux_dmabuf_buffer_v1_res::s_interface = {destroyCallback};
 
-const struct wl_buffer_interface* BufferV1::interface()
+const struct wl_buffer_interface* linux_dmabuf_buffer_v1_res::interface()
 {
     return &s_interface;
 }
