@@ -229,7 +229,7 @@ void linux_dmabuf_params_v1::create(uint32_t buffer_id,
 
     // We import the buffer from the consumer. The consumer ensures the buffer exists.
     // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
-    auto res = new linux_dmabuf_buffer_v1_res(client->handle, 1, buffer_id, buffer);
+    auto res = new linux_dmabuf_buffer_v1_res(client->handle, 1, buffer_id, std::move(buffer));
 
     // TODO(romangg): error handling
 
@@ -366,11 +366,12 @@ void linux_dmabuf_params_v1::add(int fd,
     m_planeCount++;
 }
 
-linux_dmabuf_buffer_v1_res::linux_dmabuf_buffer_v1_res(Client* client,
-                                                       uint32_t version,
-                                                       uint32_t id,
-                                                       linux_dmabuf_buffer_v1* handle)
-    : handle{handle}
+linux_dmabuf_buffer_v1_res::linux_dmabuf_buffer_v1_res(
+    Client* client,
+    uint32_t version,
+    uint32_t id,
+    std::unique_ptr<linux_dmabuf_buffer_v1> handle)
+    : handle{std::move(handle)}
     , impl{new linux_dmabuf_buffer_v1_res_impl(client, version, id, this)}
 {
 }

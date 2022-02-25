@@ -49,7 +49,7 @@ private Q_SLOTS:
     void testCreateBufferSucess();
 
 private:
-    Wrapland::Server::linux_dmabuf_buffer_v1*
+    std::unique_ptr<Wrapland::Server::linux_dmabuf_buffer_v1>
     import_function(QVector<Wrapland::Server::linux_dmabuf_plane_v1> const& planes,
                     uint32_t format,
                     QSize const& size,
@@ -71,7 +71,7 @@ private:
 
 constexpr auto socket_name{"wrapland-test-wayland-dmabuf-0"};
 
-Wrapland::Server::linux_dmabuf_buffer_v1*
+std::unique_ptr<Wrapland::Server::linux_dmabuf_buffer_v1>
 TestLinuxDmabuf::import_function(QVector<Wrapland::Server::linux_dmabuf_plane_v1> const& /*planes*/,
                                  uint32_t format,
                                  QSize const& size,
@@ -80,7 +80,7 @@ TestLinuxDmabuf::import_function(QVector<Wrapland::Server::linux_dmabuf_plane_v1
     if (buffer_always_fail) {
         return nullptr;
     }
-    return new Wrapland::Server::linux_dmabuf_buffer_v1(format, size);
+    return std::make_unique<Wrapland::Server::linux_dmabuf_buffer_v1>(format, size);
 }
 
 TestLinuxDmabuf::TestLinuxDmabuf(QObject* parent)

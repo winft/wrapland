@@ -61,7 +61,7 @@ public:
     linux_dmabuf_buffer_v1_res(Client* client,
                                uint32_t version,
                                uint32_t id,
-                               linux_dmabuf_buffer_v1* handle);
+                               std::unique_ptr<linux_dmabuf_buffer_v1> handle);
 
     std::unique_ptr<linux_dmabuf_buffer_v1> handle;
     linux_dmabuf_buffer_v1_res_impl* impl;

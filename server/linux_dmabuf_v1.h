@@ -64,11 +64,11 @@ public:
     QSize size;
 };
 
-using linux_dmabuf_import_v1
-    = std::function<linux_dmabuf_buffer_v1*(QVector<linux_dmabuf_plane_v1> const& planes,
-                                            uint32_t format,
-                                            QSize const& size,
-                                            linux_dmabuf_flags_v1 flags)>;
+using linux_dmabuf_import_v1 = std::function<std::unique_ptr<linux_dmabuf_buffer_v1>(
+    QVector<linux_dmabuf_plane_v1> const& planes,
+    uint32_t format,
+    QSize const& size,
+    linux_dmabuf_flags_v1 flags)>;
 
 class WRAPLANDSERVER_EXPORT linux_dmabuf_v1 : public QObject
 {
