@@ -32,8 +32,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class linux_dmabuf_buffer_v1_res;
-
 constexpr uint32_t linux_dmabuf_v1_version = 3;
 using linux_dmabuf_v1_global = Wayland::Global<linux_dmabuf_v1, linux_dmabuf_v1_version>;
 using linux_dmabuf_v1_bind = Wayland::Bind<linux_dmabuf_v1_global>;
@@ -57,28 +55,40 @@ private:
 class linux_dmabuf_buffer_v1::Private
 {
 public:
-    Private(uint32_t format, const QSize& size, linux_dmabuf_buffer_v1* q);
+    Private(uint32_t format, const QSize& size);
     ~Private() = default;
 
     uint32_t format;
     QSize size;
-
-    linux_dmabuf_buffer_v1_res* res{nullptr};
 };
 
-class linux_dmabuf_buffer_v1_res : public Wayland::Resource<linux_dmabuf_buffer_v1>
+class linux_dmabuf_buffer_v1_res_impl;
+
+class linux_dmabuf_buffer_v1_res : public QObject
 {
+    Q_OBJECT
 public:
     linux_dmabuf_buffer_v1_res(Client* client,
                                uint32_t version,
                                uint32_t id,
-                               linux_dmabuf_buffer_v1* q);
-    ~linux_dmabuf_buffer_v1_res() override = default;
+                               linux_dmabuf_buffer_v1* handle);
 
-    static const struct wl_buffer_interface* interface();
+    std::unique_ptr<linux_dmabuf_buffer_v1> handle;
+    linux_dmabuf_buffer_v1_res_impl* impl;
 
-private:
-    static const struct wl_buffer_interface s_interface;
+Q_SIGNALS:
+    void resourceDestroyed();
+};
+
+class linux_dmabuf_buffer_v1_res_impl : public Wayland::Resource<linux_dmabuf_buffer_v1_res>
+{
+public:
+    linux_dmabuf_buffer_v1_res_impl(Client* client,
+                                    uint32_t version,
+                                    uint32_t id,
+                                    linux_dmabuf_buffer_v1_res* q);
+
+    static struct wl_buffer_interface const s_interface;
 };
 
 class linux_dmabuf_params_wrapper_v1;

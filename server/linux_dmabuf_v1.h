@@ -75,18 +75,14 @@ private:
     std::unique_ptr<Private> d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT linux_dmabuf_buffer_v1 : public QObject
+class WRAPLANDSERVER_EXPORT linux_dmabuf_buffer_v1
 {
-    Q_OBJECT
 public:
     linux_dmabuf_buffer_v1(uint32_t format, const QSize& size);
-    ~linux_dmabuf_buffer_v1() override;
+    virtual ~linux_dmabuf_buffer_v1();
 
     uint32_t format() const;
     QSize size() const;
-
-Q_SIGNALS:
-    void resourceDestroyed();
 
 private:
     friend class linux_dmabuf_params_v1;

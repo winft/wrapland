@@ -219,6 +219,7 @@ void linux_dmabuf_params_v1::create(uint32_t buffer_id,
         // kill the client instead of creating an invalid handle and waiting for it to be used.
         postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_WL_BUFFER,
                   "importing the supplied dmabufs failed");
+        return;
     }
 
     // The buffer has ownership of the file descriptors now
@@ -228,13 +229,13 @@ void linux_dmabuf_params_v1::create(uint32_t buffer_id,
 
     // We import the buffer from the consumer. The consumer ensures the buffer exists.
     // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
-    buffer->d_ptr->res = new linux_dmabuf_buffer_v1_res(client->handle, 1, buffer_id, buffer);
+    auto res = new linux_dmabuf_buffer_v1_res(client->handle, 1, buffer_id, buffer);
 
     // TODO(romangg): error handling
 
     // Send a 'created' event when the request is not for an immediate import, i.e. buffer_id is 0.
     if (buffer_id == 0) {
-        send<zwp_linux_buffer_params_v1_send_created>(buffer->d_ptr->res->resource);
+        send<zwp_linux_buffer_params_v1_send_created>(res->impl->resource);
     }
 }
 
@@ -365,18 +366,14 @@ void linux_dmabuf_params_v1::add(int fd,
     m_planeCount++;
 }
 
-linux_dmabuf_buffer_v1::Private::Private(uint32_t format,
-                                         const QSize& size,
-                                         [[maybe_unused]] linux_dmabuf_buffer_v1* q)
+linux_dmabuf_buffer_v1::Private::Private(uint32_t format, const QSize& size)
     : format(format)
     , size(size)
 {
 }
 
-// TODO(romangg): This does not necessarily need to be a QObject. resourceDestroyed signal is not
-//                really needed.
 linux_dmabuf_buffer_v1::linux_dmabuf_buffer_v1(uint32_t format, const QSize& size)
-    : d_ptr(new linux_dmabuf_buffer_v1::Private(format, size, this))
+    : d_ptr{new linux_dmabuf_buffer_v1::Private(format, size)}
 {
 }
 
@@ -398,21 +395,25 @@ QSize linux_dmabuf_buffer_v1::size() const
 linux_dmabuf_buffer_v1_res::linux_dmabuf_buffer_v1_res(Client* client,
                                                        uint32_t version,
                                                        uint32_t id,
-                                                       linux_dmabuf_buffer_v1* q)
-    : Wayland::Resource<linux_dmabuf_buffer_v1>(client,
-                                                version,
-                                                id,
-                                                &wl_buffer_interface,
-                                                &s_interface,
-                                                q)
+                                                       linux_dmabuf_buffer_v1* handle)
+    : handle{handle}
+    , impl{new linux_dmabuf_buffer_v1_res_impl(client, version, id, this)}
 {
 }
 
-const struct wl_buffer_interface linux_dmabuf_buffer_v1_res::s_interface = {destroyCallback};
-
-const struct wl_buffer_interface* linux_dmabuf_buffer_v1_res::interface()
+linux_dmabuf_buffer_v1_res_impl::linux_dmabuf_buffer_v1_res_impl(Client* client,
+                                                                 uint32_t version,
+                                                                 uint32_t id,
+                                                                 linux_dmabuf_buffer_v1_res* q)
+    : Wayland::Resource<linux_dmabuf_buffer_v1_res>(client,
+                                                    version,
+                                                    id,
+                                                    &wl_buffer_interface,
+                                                    &s_interface,
+                                                    q)
 {
-    return &s_interface;
 }
+
+struct wl_buffer_interface const linux_dmabuf_buffer_v1_res_impl::s_interface = {destroyCallback};
 
 }
