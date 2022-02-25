@@ -81,8 +81,8 @@ public:
 
 private:
     friend class Buffer;
-    friend class linux_dmabuf_params_wrapper_v1;
     friend class linux_dmabuf_params_v1;
+    friend class linux_dmabuf_params_v1_impl;
 
     class Private;
     std::unique_ptr<Private> d_ptr;

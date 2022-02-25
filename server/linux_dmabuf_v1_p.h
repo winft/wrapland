@@ -81,16 +81,17 @@ public:
     static struct wl_buffer_interface const s_interface;
 };
 
-class linux_dmabuf_params_wrapper_v1;
-class linux_dmabuf_params_v1 : public Wayland::Resource<linux_dmabuf_params_wrapper_v1>
+class linux_dmabuf_params_v1;
+
+class linux_dmabuf_params_v1_impl : public Wayland::Resource<linux_dmabuf_params_v1>
 {
 public:
-    linux_dmabuf_params_v1(Client* client,
-                           uint32_t version,
-                           uint32_t id,
-                           linux_dmabuf_v1::Private* dmabuf,
-                           linux_dmabuf_params_wrapper_v1* q);
-    ~linux_dmabuf_params_v1() override;
+    linux_dmabuf_params_v1_impl(Client* client,
+                                uint32_t version,
+                                uint32_t id,
+                                linux_dmabuf_v1::Private* dmabuf,
+                                linux_dmabuf_params_v1* q);
+    ~linux_dmabuf_params_v1_impl() override;
 
     void add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride, uint64_t modifier);
     void create(uint32_t buffer_id, const QSize& size, uint32_t format, uint32_t flags);
@@ -130,17 +131,15 @@ private:
     bool m_createRequested = false;
 };
 
-// TODO(romangg): Make this wrapper go away! For that Wayland::Resource can't depend any longer on
-//                the resourceDestroy signal being available.
-class linux_dmabuf_params_wrapper_v1 : public QObject
+class linux_dmabuf_params_v1 : public QObject
 {
     Q_OBJECT
 public:
-    linux_dmabuf_params_wrapper_v1(Client* client,
-                                   uint32_t version,
-                                   uint32_t id,
-                                   linux_dmabuf_v1::Private* dmabuf);
-    linux_dmabuf_params_v1* d_ptr;
+    linux_dmabuf_params_v1(Client* client,
+                           uint32_t version,
+                           uint32_t id,
+                           linux_dmabuf_v1::Private* dmabuf);
+    linux_dmabuf_params_v1_impl* d_ptr;
 
 Q_SIGNALS:
     void resourceDestroyed();
