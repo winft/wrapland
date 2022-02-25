@@ -49,7 +49,7 @@ public:
 
     std::vector<linux_dmabuf_params_v1*> pending_params;
     linux_dmabuf_import_v1 import;
-    QHash<uint32_t, QSet<uint64_t>> supported_formats;
+    std::vector<drm_format> supported_formats;
 
 private:
     static const struct zwp_linux_dmabuf_v1_interface s_interface;

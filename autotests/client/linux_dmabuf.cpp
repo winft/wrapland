@@ -63,7 +63,7 @@ private:
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::LinuxDmabufV1* m_dmabuf;
     Wrapland::Client::EventQueue* m_queue;
-    QHash<uint32_t, QSet<uint64_t>> modifiers;
+    std::vector<Wrapland::Server::drm_format> modifiers;
     QThread* m_thread;
 
     bool buffer_always_fail{false};
@@ -126,7 +126,8 @@ void TestLinuxDmabuf::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    modifiers[1212].insert(12);
+    Wrapland::Server::drm_format test_format{1212, {12}};
+    modifiers.push_back(test_format);
 
     server.globals.linux_dmabuf_v1 = std::make_unique<Wrapland::Server::linux_dmabuf_v1>(
         server.display.get(),

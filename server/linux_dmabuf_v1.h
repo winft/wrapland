@@ -22,18 +22,24 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include <QHash>
 #include <QObject>
-#include <QSet>
 #include <QSize>
 
 #include <functional>
 #include <memory>
+#include <unordered_set>
+#include <vector>
 
 namespace Wrapland::Server
 {
+
 class Buffer;
 class Display;
+
+struct drm_format {
+    uint32_t format;
+    std::unordered_set<uint64_t> modifiers;
+};
 
 enum class linux_dmabuf_flag_v1 {
     y_inverted = 0x1,
@@ -77,7 +83,7 @@ public:
     linux_dmabuf_v1(Display* display, linux_dmabuf_import_v1 import);
     ~linux_dmabuf_v1() override;
 
-    void set_formats(QHash<uint32_t, QSet<uint64_t>> const& set);
+    void set_formats(std::vector<drm_format> const& formats);
 
 private:
     friend class Buffer;

@@ -64,33 +64,37 @@ const struct zwp_linux_dmabuf_v1_interface linux_dmabuf_v1::Private::s_interface
 };
 
 constexpr size_t modifier_shift = 32;
+constexpr uint32_t modifier_cut = 0xFFFFFFFF;
 
 void linux_dmabuf_v1::Private::bindInit(linux_dmabuf_v1_bind* bind)
 {
     // Send formats & modifiers.
-    QHash<uint32_t, QSet<uint64_t>>::const_iterator it = supported_formats.constBegin();
-
-    for (;;) {
-        if (it == supported_formats.constEnd()) {
-            break;
-        }
-        QSet<uint64_t> modifiers = it.value();
-        if (modifiers.isEmpty()) {
-            modifiers << DRM_FORMAT_MOD_INVALID;
-        }
-
-        for (uint64_t modifier : qAsConst(modifiers)) {
-            if (bind->version >= ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
-                const uint32_t modifier_lo = modifier & 0xFFFFFFFF;
-                const uint32_t modifier_hi = modifier >> modifier_shift;
-                send<zwp_linux_dmabuf_v1_send_modifier, ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION>(
-                    bind, it.key(), modifier_hi, modifier_lo);
-            } else if (modifier == DRM_FORMAT_MOD_LINEAR || modifier == DRM_FORMAT_MOD_INVALID) {
-                send<zwp_linux_dmabuf_v1_send_format>(bind, it.key());
+    if (bind->version < ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
+        for (auto const& fmt : supported_formats) {
+            if (contains(fmt.modifiers, DRM_FORMAT_MOD_INVALID)) {
+                send<zwp_linux_dmabuf_v1_send_format>(bind, fmt.format);
             }
         }
+        return;
+    }
 
-        it++;
+    struct split_mod {
+        uint32_t hi;
+        uint32_t lo;
+    };
+
+    auto get_smod = [](auto mod) -> split_mod {
+        return {
+            static_cast<uint32_t>(mod >> modifier_shift),
+            static_cast<uint32_t>(mod & modifier_cut),
+        };
+    };
+
+    for (auto const& fmt : supported_formats) {
+        for (auto const& mod : fmt.modifiers) {
+            auto smod = get_smod(mod);
+            send<zwp_linux_dmabuf_v1_send_modifier>(bind, fmt.format, smod.hi, smod.lo);
+        }
     }
 }
 
@@ -109,9 +113,9 @@ linux_dmabuf_v1::linux_dmabuf_v1(Display* display, linux_dmabuf_import_v1 import
 
 linux_dmabuf_v1::~linux_dmabuf_v1() = default;
 
-void linux_dmabuf_v1::set_formats(QHash<uint32_t, QSet<uint64_t>> const& set)
+void linux_dmabuf_v1::set_formats(std::vector<drm_format> const& formats)
 {
-    d_ptr->supported_formats = set;
+    d_ptr->supported_formats = formats;
 }
 
 linux_dmabuf_params_v1::linux_dmabuf_params_v1(Client* client,
