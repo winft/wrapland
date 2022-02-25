@@ -79,7 +79,7 @@ class WRAPLANDSERVER_EXPORT linux_dmabuf_buffer_v1 : public QObject
 {
     Q_OBJECT
 public:
-    linux_dmabuf_buffer_v1(uint32_t format, const QSize& size, QObject* parent = nullptr);
+    linux_dmabuf_buffer_v1(uint32_t format, const QSize& size);
     ~linux_dmabuf_buffer_v1() override;
 
     uint32_t format() const;

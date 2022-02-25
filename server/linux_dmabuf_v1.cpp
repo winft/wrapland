@@ -375,11 +375,8 @@ linux_dmabuf_buffer_v1::Private::Private(uint32_t format,
 
 // TODO(romangg): This does not necessarily need to be a QObject. resourceDestroyed signal is not
 //                really needed.
-linux_dmabuf_buffer_v1::linux_dmabuf_buffer_v1(uint32_t format,
-                                               const QSize& size,
-                                               [[maybe_unused]] QObject* parent)
-    : QObject(nullptr)
-    , d_ptr(new linux_dmabuf_buffer_v1::Private(format, size, this))
+linux_dmabuf_buffer_v1::linux_dmabuf_buffer_v1(uint32_t format, const QSize& size)
+    : d_ptr(new linux_dmabuf_buffer_v1::Private(format, size, this))
 {
 }
 
