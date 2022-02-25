@@ -32,6 +32,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
+class linux_dmabuf_params_v1;
+
 constexpr uint32_t linux_dmabuf_v1_version = 3;
 using linux_dmabuf_v1_global = Wayland::Global<linux_dmabuf_v1, linux_dmabuf_v1_version>;
 using linux_dmabuf_v1_bind = Wayland::Bind<linux_dmabuf_v1_global>;
@@ -45,6 +47,7 @@ public:
     void bindInit(linux_dmabuf_v1_bind* bind) final;
     static void create_params_callback(linux_dmabuf_v1_bind* bind, uint32_t id);
 
+    std::vector<linux_dmabuf_params_v1*> pending_params;
     linux_dmabuf_import_v1 import;
     QHash<uint32_t, QSet<uint64_t>> supported_formats;
 
@@ -81,8 +84,6 @@ public:
     static struct wl_buffer_interface const s_interface;
 };
 
-class linux_dmabuf_params_v1;
-
 class linux_dmabuf_params_v1_impl : public Wayland::Resource<linux_dmabuf_params_v1>
 {
 public:
@@ -95,6 +96,8 @@ public:
 
     void add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride, uint64_t modifier);
     void create(uint32_t buffer_id, const QSize& size, uint32_t format, uint32_t flags);
+
+    linux_dmabuf_v1::Private* m_dmabuf;
 
 private:
     static void add_callback(wl_client* wlClient,
@@ -125,7 +128,6 @@ private:
 
     static struct zwp_linux_buffer_params_v1_interface const s_interface;
 
-    linux_dmabuf_v1::Private* m_dmabuf;
     std::array<linux_dmabuf_plane_v1, 4> m_planes;
     size_t m_planeCount = 0;
     bool m_createRequested = false;
@@ -139,6 +141,8 @@ public:
                            uint32_t version,
                            uint32_t id,
                            linux_dmabuf_v1::Private* dmabuf);
+    ~linux_dmabuf_params_v1() override;
+
     linux_dmabuf_params_v1_impl* d_ptr;
 
 Q_SIGNALS:

@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "linux_dmabuf_v1_p.h"
 
 #include "display.h"
+#include "utils.h"
 #include "wayland/display.h"
 
 #include "wayland-server-protocol.h"
@@ -48,7 +49,12 @@ linux_dmabuf_v1::Private::Private(linux_dmabuf_v1* q,
     create();
 }
 
-linux_dmabuf_v1::Private::~Private() = default;
+linux_dmabuf_v1::Private::~Private()
+{
+    for (auto params : pending_params) {
+        params->d_ptr->m_dmabuf = nullptr;
+    }
+}
 
 const struct zwp_linux_dmabuf_v1_interface linux_dmabuf_v1::Private::s_interface = {
     resourceDestroyCallback,
@@ -92,8 +98,8 @@ void linux_dmabuf_v1::Private::create_params_callback(linux_dmabuf_v1_bind* bind
 {
     auto priv = bind->global()->handle->d_ptr.get();
 
-    [[maybe_unused]] auto params
-        = new linux_dmabuf_params_v1(bind->client->handle, bind->version, id, priv);
+    auto params = new linux_dmabuf_params_v1(bind->client->handle, bind->version, id, priv);
+    priv->pending_params.push_back(params);
 }
 
 linux_dmabuf_v1::linux_dmabuf_v1(Display* display, linux_dmabuf_import_v1 import)
@@ -114,6 +120,13 @@ linux_dmabuf_params_v1::linux_dmabuf_params_v1(Client* client,
                                                linux_dmabuf_v1::Private* dmabuf)
     : d_ptr(new linux_dmabuf_params_v1_impl(client, version, id, dmabuf, this))
 {
+}
+
+linux_dmabuf_params_v1::~linux_dmabuf_params_v1()
+{
+    if (d_ptr->m_dmabuf) {
+        remove_all(d_ptr->m_dmabuf->pending_params, this);
+    }
 }
 
 linux_dmabuf_params_v1_impl::linux_dmabuf_params_v1_impl(Client* client,
@@ -196,6 +209,11 @@ void linux_dmabuf_params_v1_impl::create(uint32_t buffer_id,
                                          uint32_t format,
                                          uint32_t flags)
 {
+    if (!m_dmabuf) {
+        // Global gone. Ignore request.
+        return;
+    }
+
     if (!validate_params(size)) {
         return;
     }
