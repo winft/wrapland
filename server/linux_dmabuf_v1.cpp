@@ -35,7 +35,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <array>
 #include <cassert>
-#include <unistd.h>
 
 namespace Wrapland::Server
 {

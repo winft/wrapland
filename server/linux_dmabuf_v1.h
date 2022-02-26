@@ -27,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <functional>
 #include <memory>
+#include <unistd.h>
 #include <unordered_set>
 #include <vector>
 
@@ -69,7 +70,14 @@ public:
         , flags{flags}
     {
     }
-    virtual ~linux_dmabuf_buffer_v1() = default;
+    virtual ~linux_dmabuf_buffer_v1()
+    {
+        for (auto& plane : planes) {
+            if (plane.fd != -1) {
+                ::close(plane.fd);
+            }
+        }
+    }
 
     std::vector<linux_dmabuf_plane_v1> planes;
     uint32_t format;
