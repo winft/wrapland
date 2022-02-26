@@ -59,19 +59,26 @@ struct linux_dmabuf_plane_v1 {
 class linux_dmabuf_buffer_v1
 {
 public:
-    linux_dmabuf_buffer_v1(uint32_t format, QSize const& size)
-        : format{format}
+    linux_dmabuf_buffer_v1(std::vector<linux_dmabuf_plane_v1> planes,
+                           uint32_t format,
+                           QSize const& size,
+                           linux_dmabuf_flags_v1 flags)
+        : planes{std::move(planes)}
+        , format{format}
         , size{size}
+        , flags{flags}
     {
     }
     virtual ~linux_dmabuf_buffer_v1() = default;
 
+    std::vector<linux_dmabuf_plane_v1> planes;
     uint32_t format;
     QSize size;
+    linux_dmabuf_flags_v1 flags;
 };
 
 using linux_dmabuf_import_v1 = std::function<std::unique_ptr<linux_dmabuf_buffer_v1>(
-    QVector<linux_dmabuf_plane_v1> const& planes,
+    std::vector<linux_dmabuf_plane_v1> const& planes,
     uint32_t format,
     QSize const& size,
     linux_dmabuf_flags_v1 flags)>;

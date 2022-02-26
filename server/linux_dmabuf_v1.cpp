@@ -231,11 +231,11 @@ void linux_dmabuf_params_v1_impl::create(uint32_t buffer_id,
         return;
     }
 
-    QVector<linux_dmabuf_plane_v1> planes;
+    std::vector<linux_dmabuf_plane_v1> planes;
     planes.reserve(static_cast<int>(m_planeCount));
 
     for (uint32_t i = 0; i < m_planeCount; i++) {
-        planes << m_planes.at(i);
+        planes.push_back(m_planes.at(i));
     }
 
     auto buffer = m_dmabuf->import(planes, format, size, linux_dmabuf_flags_v1(flags));
