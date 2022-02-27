@@ -36,41 +36,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/globals.h"
 #include "../../server/linux_dmabuf_v1.h"
 
-class DmabufImpl : public Wrapland::Server::LinuxDmabufV1::Impl
-{
-public:
-    using Plane = Wrapland::Server::LinuxDmabufV1::Plane;
-    using Flags = Wrapland::Server::LinuxDmabufV1::Flags;
-
-    DmabufImpl();
-    ~DmabufImpl() = default;
-
-    Wrapland::Server::LinuxDmabufBufferV1* importBuffer(const QVector<Plane>& planes,
-                                                        uint32_t format,
-                                                        const QSize& size,
-                                                        Flags flags) override;
-    bool bufferAlwaysFail;
-};
-
-DmabufImpl::DmabufImpl()
-    : Wrapland::Server::LinuxDmabufV1::Impl()
-{
-    bufferAlwaysFail = false;
-}
-
-Wrapland::Server::LinuxDmabufBufferV1*
-DmabufImpl::importBuffer([[maybe_unused]] const QVector<Plane>& planes,
-                         uint32_t format,
-                         const QSize& size,
-                         [[maybe_unused]] Flags flags)
-{
-    if (!bufferAlwaysFail) {
-        return new Wrapland::Server::LinuxDmabufBufferV1(format, size);
-    } else {
-        return nullptr;
-    }
-}
-
 class TestLinuxDmabuf : public QObject
 {
     Q_OBJECT
@@ -84,6 +49,11 @@ private Q_SLOTS:
     void testCreateBufferSucess();
 
 private:
+    std::unique_ptr<Wrapland::Server::linux_dmabuf_buffer_v1>
+    import_function(std::vector<Wrapland::Server::linux_dmabuf_plane_v1> const& planes,
+                    uint32_t format,
+                    QSize const& size,
+                    Wrapland::Server::linux_dmabuf_flags_v1 flags);
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
         Wrapland::Server::globals globals;
@@ -93,12 +63,25 @@ private:
     Wrapland::Client::Compositor* m_compositor;
     Wrapland::Client::LinuxDmabufV1* m_dmabuf;
     Wrapland::Client::EventQueue* m_queue;
-    QHash<uint32_t, QSet<uint64_t>> modifiers;
+    std::vector<Wrapland::Server::drm_format> modifiers;
     QThread* m_thread;
-    DmabufImpl* m_bufferImpl;
+
+    bool buffer_always_fail{false};
 };
 
 constexpr auto socket_name{"wrapland-test-wayland-dmabuf-0"};
+
+std::unique_ptr<Wrapland::Server::linux_dmabuf_buffer_v1>
+TestLinuxDmabuf::import_function(std::vector<Wrapland::Server::linux_dmabuf_plane_v1> const& planes,
+                                 uint32_t format,
+                                 QSize const& size,
+                                 Wrapland::Server::linux_dmabuf_flags_v1 flags)
+{
+    if (buffer_always_fail) {
+        return nullptr;
+    }
+    return std::make_unique<Wrapland::Server::linux_dmabuf_buffer_v1>(planes, format, size, flags);
+}
 
 TestLinuxDmabuf::TestLinuxDmabuf(QObject* parent)
     : QObject(parent)
@@ -111,6 +94,8 @@ TestLinuxDmabuf::TestLinuxDmabuf(QObject* parent)
 
 void TestLinuxDmabuf::init()
 {
+    buffer_always_fail = false;
+
     server.display = std::make_unique<Wrapland::Server::Display>();
     server.display->set_socket_name(std::string(socket_name));
     server.display->start();
@@ -141,12 +126,14 @@ void TestLinuxDmabuf::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    modifiers[1212].insert(12);
+    Wrapland::Server::drm_format test_format{1212, {12}};
+    modifiers.push_back(test_format);
 
-    server.globals.linux_dmabuf_v1 = server.display->createLinuxDmabuf();
-
-    m_bufferImpl = new DmabufImpl();
-    server.globals.linux_dmabuf_v1->setImpl(m_bufferImpl);
+    server.globals.linux_dmabuf_v1 = std::make_unique<Wrapland::Server::linux_dmabuf_v1>(
+        server.display.get(),
+        [this](auto const& planes, auto format, auto const& size, auto flags) {
+            return import_function(planes, format, size, flags);
+        });
     QVERIFY(dmabufSpy.wait());
 
     m_dmabuf = registry.createLinuxDmabufV1(dmabufSpy.first().first().value<quint32>(),
@@ -164,9 +151,6 @@ void TestLinuxDmabuf::cleanup()
         delete m_compositor;
         m_compositor = nullptr;
     }
-
-    delete m_bufferImpl;
-    m_bufferImpl = nullptr;
 
     if (m_connection) {
         m_connection->deleteLater();
@@ -186,7 +170,7 @@ void TestLinuxDmabuf::cleanup()
 void TestLinuxDmabuf::testModifier()
 {
     QSignalSpy ModifierSpy(m_dmabuf, &Wrapland::Client::LinuxDmabufV1::supportedFormatsChanged);
-    server.globals.linux_dmabuf_v1->setSupportedFormatsWithModifiers(modifiers);
+    server.globals.linux_dmabuf_v1->set_formats(modifiers);
     auto paramV1 = m_dmabuf->createParamsV1();
     QVERIFY(paramV1->isValid());
     QVERIFY(ModifierSpy.wait());
@@ -200,7 +184,7 @@ void TestLinuxDmabuf::testModifier()
 }
 void TestLinuxDmabuf::testCreateBufferFail()
 {
-    m_bufferImpl->bufferAlwaysFail = true;
+    buffer_always_fail = true;
     auto* paramV1 = m_dmabuf->createParamsV1();
     QVERIFY(paramV1->isValid());
 
@@ -219,7 +203,7 @@ void TestLinuxDmabuf::testCreateBufferFail()
 
 void TestLinuxDmabuf::testCreateBufferSucess()
 {
-    server.globals.linux_dmabuf_v1->setSupportedFormatsWithModifiers(modifiers);
+    server.globals.linux_dmabuf_v1->set_formats(modifiers);
     auto paramV1 = m_dmabuf->createParamsV1();
     QVERIFY(paramV1->isValid());
 

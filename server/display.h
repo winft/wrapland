@@ -56,7 +56,7 @@ class KdeIdle;
 class KeyboardShortcutsInhibitManagerV1;
 class KeyState;
 class LayerShellV1;
-class LinuxDmabufV1;
+class linux_dmabuf_v1;
 class Output;
 class OutputManagementV1;
 class PlasmaShell;
@@ -165,7 +165,6 @@ public:
     std::unique_ptr<AppmenuManager> createAppmenuManager();
 
     std::unique_ptr<ServerSideDecorationPaletteManager> createServerSideDecorationPaletteManager();
-    std::unique_ptr<LinuxDmabufV1> createLinuxDmabuf();
     std::unique_ptr<Viewporter> createViewporter();
     std::unique_ptr<virtual_keyboard_manager_v1> create_virtual_keyboard_manager_v1();
     XdgOutputManager* xdgOutputManager() const;

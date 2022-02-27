@@ -64,7 +64,7 @@ public:
 
     wl_resource* resource;
     wl_shm_buffer* shmBuffer;
-    LinuxDmabufBufferV1* dmabufBuffer{nullptr};
+    linux_dmabuf_buffer_v1* dmabufBuffer{nullptr};
 
     Surface* surface;
     int refCount{0};

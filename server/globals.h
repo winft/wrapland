@@ -56,7 +56,7 @@ struct globals {
     /// Basic graphical operations
     std::unique_ptr<Server::Compositor> compositor;
     std::unique_ptr<Server::Subcompositor> subcompositor;
-    std::unique_ptr<Server::LinuxDmabufV1> linux_dmabuf_v1;
+    std::unique_ptr<Server::linux_dmabuf_v1> linux_dmabuf_v1;
     std::unique_ptr<Server::Viewporter> viewporter;
     std::unique_ptr<Server::PresentationManager> presentation_manager;
 

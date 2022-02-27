@@ -209,8 +209,10 @@ Buffer::Private::Private(Buffer* q,
     , q_ptr{q}
 {
     if (!shmBuffer
-        && wl_resource_instance_of(resource, &wl_buffer_interface, BufferV1::interface())) {
-        dmabufBuffer = Wayland::Resource<LinuxDmabufBufferV1>::get_handle(resource);
+        && wl_resource_instance_of(
+            resource, &wl_buffer_interface, &linux_dmabuf_buffer_v1_res_impl::s_interface)) {
+        dmabufBuffer
+            = Wayland::Resource<linux_dmabuf_buffer_v1_res>::get_handle(resource)->handle.get();
     }
 
     destroyWrapper.buffer = q;
@@ -232,7 +234,7 @@ Buffer::Private::Private(Buffer* q,
             break;
         }
     } else if (dmabufBuffer) {
-        switch (dmabufBuffer->format()) {
+        switch (dmabufBuffer->format) {
         case DRM_FORMAT_ARGB4444:
         case DRM_FORMAT_ABGR4444:
         case DRM_FORMAT_RGBA4444:
@@ -267,7 +269,7 @@ Buffer::Private::Private(Buffer* q,
             alpha = false;
             break;
         }
-        size = dmabufBuffer->size();
+        size = dmabufBuffer->size;
     } else if (surface) {
         EGLDisplay eglDisplay = surface->client()->display()->eglDisplay();
 
@@ -393,7 +395,7 @@ wl_shm_buffer* Buffer::shmBuffer()
     return d_ptr->shmBuffer;
 }
 
-LinuxDmabufBufferV1* Buffer::linuxDmabufBuffer()
+linux_dmabuf_buffer_v1* Buffer::linuxDmabufBuffer()
 {
     return d_ptr->dmabufBuffer;
 }
