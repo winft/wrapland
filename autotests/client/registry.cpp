@@ -200,8 +200,8 @@ void TestWaylandRegistry::init()
             server.display.get());
     server.globals.idle_inhibit_manager_v1
         = std::make_unique<Wrapland::Server::IdleInhibitManagerV1>(server.display.get());
-    server.globals.linux_dmabuf_v1
-        = std::make_unique<Wrapland::Server::LinuxDmabufV1>(server.display.get());
+    server.globals.linux_dmabuf_v1 = std::make_unique<Wrapland::Server::linux_dmabuf_v1>(
+        server.display.get(), Wrapland::Server::linux_dmabuf_import_v1());
     server.globals.virtual_keyboard_manager_v1
         = std::make_unique<Wrapland::Server::virtual_keyboard_manager_v1>(server.display.get());
 

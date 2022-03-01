@@ -352,11 +352,6 @@ Display::createServerSideDecorationPaletteManager()
     return std::make_unique<ServerSideDecorationPaletteManager>(this);
 }
 
-std::unique_ptr<LinuxDmabufV1> Display::createLinuxDmabuf()
-{
-    return std::make_unique<LinuxDmabufV1>(this);
-}
-
 std::unique_ptr<PlasmaVirtualDesktopManager> Display::createPlasmaVirtualDesktopManager()
 {
     return std::make_unique<PlasmaVirtualDesktopManager>(this);

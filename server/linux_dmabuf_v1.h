@@ -22,115 +22,94 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
-#include <QHash>
 #include <QObject>
-#include <QSet>
 #include <QSize>
 
+#include <functional>
 #include <memory>
+#include <unistd.h>
+#include <unordered_set>
+#include <vector>
 
 namespace Wrapland::Server
 {
+
 class Buffer;
 class Display;
-class LinuxDmabufBufferV1;
 
-/**
- * Represents the global zpw_linux_dmabuf_v1 interface.
- *
- * This interface provides a way for clients to create generic dmabuf based wl_buffers.
- */
-class WRAPLANDSERVER_EXPORT LinuxDmabufV1 : public QObject
+struct drm_format {
+    uint32_t format;
+    std::unordered_set<uint64_t> modifiers;
+};
+
+enum class linux_dmabuf_flag_v1 {
+    y_inverted = 0x1,
+    interlaced = 0x2,
+    bottom_field_first = 0x4,
+};
+
+Q_DECLARE_FLAGS(linux_dmabuf_flags_v1, linux_dmabuf_flag_v1)
+
+struct linux_dmabuf_plane_v1 {
+    int fd;            /// The dmabuf file descriptor
+    uint32_t offset;   /// The offset from the start of buffer
+    uint32_t stride;   /// The distance from the start of a row to the next row in bytes
+    uint64_t modifier; /// The layout modifier
+};
+
+class linux_dmabuf_buffer_v1
+{
+public:
+    linux_dmabuf_buffer_v1(std::vector<linux_dmabuf_plane_v1> planes,
+                           uint32_t format,
+                           QSize const& size,
+                           linux_dmabuf_flags_v1 flags)
+        : planes{std::move(planes)}
+        , format{format}
+        , size{size}
+        , flags{flags}
+    {
+    }
+    virtual ~linux_dmabuf_buffer_v1()
+    {
+        for (auto& plane : planes) {
+            if (plane.fd != -1) {
+                ::close(plane.fd);
+            }
+        }
+    }
+
+    std::vector<linux_dmabuf_plane_v1> planes;
+    uint32_t format;
+    QSize size;
+    linux_dmabuf_flags_v1 flags;
+};
+
+using linux_dmabuf_import_v1 = std::function<std::unique_ptr<linux_dmabuf_buffer_v1>(
+    std::vector<linux_dmabuf_plane_v1> const& planes,
+    uint32_t format,
+    QSize const& size,
+    linux_dmabuf_flags_v1 flags)>;
+
+class WRAPLANDSERVER_EXPORT linux_dmabuf_v1 : public QObject
 {
     Q_OBJECT
 public:
-    enum Flag {
-        YInverted = (1 << 0),        /// Contents are y-inverted
-        Interlaced = (1 << 1),       /// Content is interlaced
-        BottomFieldFirst = (1 << 2), /// Bottom field first
-    };
+    linux_dmabuf_v1(Display* display, linux_dmabuf_import_v1 import);
+    ~linux_dmabuf_v1() override;
 
-    Q_DECLARE_FLAGS(Flags, Flag)
-
-    /**
-     * Represents a plane in a buffer
-     */
-    struct Plane {
-        int fd;            /// The dmabuf file descriptor
-        uint32_t offset;   /// The offset from the start of buffer
-        uint32_t stride;   /// The distance from the start of a row to the next row in bytes
-        uint64_t modifier; /// The layout modifier
-    };
-
-    /**
-     * The Impl class provides an interface from the LinuxDmabufInterface into the compositor.
-     */
-    class Impl
-    {
-    public:
-        Impl() = default;
-        virtual ~Impl() = default;
-
-        /**
-         * Imports a linux-dmabuf buffer into the compositor.
-         *
-         * The parent LinuxDmabufV1 class takes ownership of returned
-         * buffer objects.
-         *
-         * In return the returned buffer takes ownership of the file descriptor for each
-         * plane.
-         *
-         * Note that it is the responsibility of the caller to close the file descriptors
-         * when the import fails.
-         *
-         * @return The imported buffer on success, and nullptr otherwise.
-         */
-        virtual LinuxDmabufBufferV1*
-        importBuffer(const QVector<Plane>& planes, uint32_t format, const QSize& size, Flags flags)
-            = 0;
-    };
-
-    explicit LinuxDmabufV1(Display* display);
-    ~LinuxDmabufV1() override;
-
-    /**
-     * Sets the compositor implementation for the dmabuf interface.
-     *
-     * The ownership is not transferred by this call.
-     */
-    void setImpl(Impl* impl);
-
-    void setSupportedFormatsWithModifiers(QHash<uint32_t, QSet<uint64_t>> const& set);
+    void set_formats(std::vector<drm_format> const& formats);
 
 private:
     friend class Buffer;
-    friend class ParamsWrapperV1;
-    friend class ParamsV1;
+    friend class linux_dmabuf_params_v1;
+    friend class linux_dmabuf_params_v1_impl;
 
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT LinuxDmabufBufferV1 : public QObject
-{
-    Q_OBJECT
-public:
-    LinuxDmabufBufferV1(uint32_t format, const QSize& size, QObject* parent = nullptr);
-    ~LinuxDmabufBufferV1() override;
-
-    uint32_t format() const;
-    QSize size() const;
-
-Q_SIGNALS:
-    void resourceDestroyed();
-
-private:
-    friend class ParamsV1;
-    class Private;
-    Private* d_ptr;
-};
-
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::LinuxDmabufV1*)
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::LinuxDmabufV1::Flags)
+Q_DECLARE_METATYPE(Wrapland::Server::linux_dmabuf_v1*)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Server::linux_dmabuf_flags_v1)
