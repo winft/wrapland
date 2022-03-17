@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   ]]></copyright>
   <interface name="org_kde_kwin_server_decoration_palette_manager" version="1">
-l      <description summary="server side decoration palette manager interface">
+      <description summary="server side decoration palette manager interface">
           This interface allows a client to alter the palette of a server side decoration.
       </description>
       <request name="create">
