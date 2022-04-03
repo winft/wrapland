@@ -81,7 +81,7 @@ void DataOffer::Private::sourceActionsCallback(void* data,
     auto d = reinterpret_cast<Private*>(data);
     if (d->sourceActions != actions) {
         d->sourceActions = actions;
-        emit d->q->sourceDragAndDropActionsChanged();
+        Q_EMIT d->q->sourceDragAndDropActionsChanged();
     }
 }
 
@@ -115,7 +115,7 @@ void DataOffer::Private::setAction(DataDeviceManager::DnDAction action)
         return;
     }
     selectedAction = action;
-    emit q->selectedDragAndDropActionChanged();
+    Q_EMIT q->selectedDragAndDropActionChanged();
 }
 
 DataOffer::DataOffer(DataDevice* parent, wl_data_offer* dataOffer)

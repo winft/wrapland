@@ -161,7 +161,7 @@ void Surface::Private::frameCallback(void* data, wl_callback* callback, uint32_t
 void Surface::Private::handleFrameCallback()
 {
     pendingFrameCallback = nullptr;
-    emit q->frameRendered();
+    Q_EMIT q->frameRendered();
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -191,7 +191,7 @@ void Surface::Private::enterCallback(void* data, wl_surface* surface, wl_output*
         s->outputs.removeOne(o);
         s->q->outputLeft(o);
     });
-    emit s->q->outputEntered(o);
+    Q_EMIT s->q->outputEntered(o);
 }
 
 void Surface::Private::leaveCallback(void* data, wl_surface* surface, wl_output* output)
@@ -203,7 +203,7 @@ void Surface::Private::leaveCallback(void* data, wl_surface* surface, wl_output*
         return;
     }
     s->outputs.removeOne(o);
-    emit s->q->outputLeft(o);
+    Q_EMIT s->q->outputLeft(o);
 }
 
 void Surface::Private::setupFrameCallback()
@@ -296,7 +296,7 @@ void Surface::setSize(QSize const& size)
         return;
     }
     d->size = size;
-    emit sizeChanged(d->size);
+    Q_EMIT sizeChanged(d->size);
 }
 
 Surface* Surface::get(wl_surface* native)

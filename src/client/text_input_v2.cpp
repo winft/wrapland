@@ -127,7 +127,7 @@ void TextInputV2::Private::enterCallback(void* data,
     Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     t->latestSerial = serial;
     t->enteredSurface = Surface::get(surface);
-    emit t->q->entered();
+    Q_EMIT t->q->entered();
 }
 
 void TextInputV2::Private::leaveCallback(void* data,
@@ -140,7 +140,7 @@ void TextInputV2::Private::leaveCallback(void* data,
     Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     t->enteredSurface = nullptr;
     t->latestSerial = serial;
-    emit t->q->left();
+    Q_EMIT t->q->left();
 }
 
 void TextInputV2::Private::inputPanelStateCallback(void* data,
@@ -160,7 +160,7 @@ void TextInputV2::Private::inputPanelStateCallback(void* data,
     // TODO: add rect
     if (t->inputPanelVisible != state) {
         t->inputPanelVisible = state;
-        emit t->q->inputPanelStateChanged();
+        Q_EMIT t->q->inputPanelStateChanged();
     }
 }
 
@@ -178,7 +178,7 @@ void TextInputV2::Private::preeditStringCallback(void* data,
     }
     t->currentPreEdit = t->pendingPreEdit;
     t->pendingPreEdit = TextInputV2::Private::PreEdit();
-    emit t->q->composingTextChanged();
+    Q_EMIT t->q->composingTextChanged();
 }
 
 void TextInputV2::Private::preeditStylingCallback(void* data,
@@ -217,7 +217,7 @@ void TextInputV2::Private::commitStringCallback(void* data,
     t->pendingCommit = TextInputV2::Private::Commit();
     t->pendingCommit.deleteSurrounding.beforeLength = 0;
     t->pendingCommit.deleteSurrounding.afterLength = 0;
-    emit t->q->committed();
+    Q_EMIT t->q->committed();
 }
 
 void TextInputV2::Private::cursorPositionCallback(void* data,
@@ -275,7 +275,7 @@ void TextInputV2::Private::keysymCallback(void* data,
         // invalid
         return;
     }
-    emit t->q->keyEvent(sym, state, Qt::KeyboardModifiers(), time);
+    Q_EMIT t->q->keyEvent(sym, state, Qt::KeyboardModifiers(), time);
 }
 
 void TextInputV2::Private::languageCallback(void* data,
@@ -286,7 +286,7 @@ void TextInputV2::Private::languageCallback(void* data,
     Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
     if (qstrcmp(t->language, language) != 0) {
         t->language = QByteArray(language);
-        emit t->q->languageChanged();
+        Q_EMIT t->q->languageChanged();
     }
 }
 
@@ -313,7 +313,7 @@ void TextInputV2::Private::textDirectionCallback(void* data,
     }
     if (direction != t->textDirection) {
         t->textDirection = direction;
-        emit t->q->textDirectionChanged();
+        Q_EMIT t->q->textDirectionChanged();
     }
 }
 

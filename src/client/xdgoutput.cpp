@@ -221,7 +221,7 @@ void XdgOutput::Private::done()
     }
 
     if (changed) {
-        emit q->changed();
+        Q_EMIT q->changed();
     }
 }
 

@@ -160,7 +160,7 @@ void OutputDeviceV1::Private::enabledCallback(void* data,
 
     if (out->enabled != _enabled) {
         out->enabled = _enabled;
-        emit out->q->enabledChanged(out->enabled);
+        Q_EMIT out->q->enabledChanged(out->enabled);
     }
 }
 
@@ -279,8 +279,8 @@ void OutputDeviceV1::Private::doneCallback(void* data, zkwinft_output_device_v1*
     Q_ASSERT(out->output == output);
     out->done = true;
 
-    emit out->q->changed();
-    emit out->q->done();
+    Q_EMIT out->q->changed();
+    Q_EMIT out->q->done();
 }
 
 void OutputDeviceV1::setup(zkwinft_output_device_v1* output)
