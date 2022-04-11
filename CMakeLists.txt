@@ -6,7 +6,7 @@ set(PROJECT_VERSION_MAJOR 0)
 
 # ECM setup
 include(FeatureSummary)
-find_package(ECM 5.66.0 NO_MODULE)
+find_package(ECM 5.91.0 NO_MODULE)
 set_package_properties(ECM PROPERTIES
   TYPE REQUIRED
   DESCRIPTION "Extra CMake Modules."
@@ -41,7 +41,8 @@ ecm_setup_version(PROJECT
 )
 
 # Dependencies
-set(REQUIRED_QT_VERSION 5.12.0)
+set(REQUIRED_QT_VERSION 5.15.0)
+set(KDE_COMPILERSETTINGS_LEVEL "5.84")
 find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Concurrent Gui)
 
 find_package(Wayland 1.18 COMPONENTS Client Server)
@@ -56,9 +57,8 @@ find_package(EGL)
 set_package_properties(EGL PROPERTIES TYPE REQUIRED)
 
 include(KDEInstallDirs)
-include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
-include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
+include(KDECMakeSettings)
 include(CheckIncludeFile)
 
 set(CMAKE_CXX_STANDARD 17)
