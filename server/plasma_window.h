@@ -120,6 +120,11 @@ public:
     std::vector<std::string> const& plasmaVirtualDesktops() const;
 
     /**
+     * @return a windowId identifying the window in the stacking_order.
+     */
+    std::uint32_t const& id() const;
+
+    /**
      * @return a unique string that identifies this window
      */
     std::string const& uuid() const;

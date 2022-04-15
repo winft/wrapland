@@ -734,6 +734,11 @@ std::vector<std::string> const& PlasmaWindow::plasmaVirtualDesktops() const
     return d_ptr->plasmaVirtualDesktops;
 }
 
+std::uint32_t const& PlasmaWindow::id() const
+{
+    return d_ptr->windowId;
+}
+
 std::string const& PlasmaWindow::uuid() const
 {
     return d_ptr->uuid;
