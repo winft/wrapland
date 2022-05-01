@@ -216,19 +216,8 @@ void PlasmaWindowManagement::Private::windowCallback(void* data,
 {
     auto wm = reinterpret_cast<PlasmaWindowManagement::Private*>(data);
     Q_ASSERT(wm->wm == proxy);
-    auto timer = new QTimer();
-    timer->setSingleShot(true);
-    timer->setInterval(0);
-    QObject::connect(
-        timer,
-        &QTimer::timeout,
-        wm->q,
-        [timer, wm, id] {
-            wm->windowCreated(org_kde_plasma_window_management_get_window(wm->wm, id), id);
-            timer->deleteLater();
-        },
-        Qt::QueuedConnection);
-    timer->start();
+
+    wm->windowCreated(org_kde_plasma_window_management_get_window(wm->wm, id), id);
 }
 
 void PlasmaWindowManagement::Private::windowCreated(org_kde_plasma_window* id, quint32 internalId)
