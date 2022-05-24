@@ -100,6 +100,7 @@ private Q_SLOTS:
     void testStackingOrderUuid_empty();
 
     void testSendToOutput();
+    void testResourceNameChanged();
 
 private:
     struct {
@@ -873,6 +874,18 @@ void TestWindowManagement::testSendToOutput()
     QVERIFY(sendToOutputSpy.wait());
     auto actual = sendToOutputSpy.first().first().value<Wrapland::Server::Output*>();
     QCOMPARE(actual, srv_output.get());
+}
+
+void TestWindowManagement::testResourceNameChanged()
+{
+    QSignalSpy name_spy(m_window, &Clt::PlasmaWindow::resource_name_changed);
+    QVERIFY(name_spy.isValid());
+
+    std::string const resource_name{"Hello, world!"};
+    server.plasma_window->set_resource_name(resource_name);
+
+    QVERIFY(name_spy.wait());
+    QCOMPARE(m_window->resource_name(), resource_name);
 }
 
 QTEST_GUILESS_MAIN(TestWindowManagement)

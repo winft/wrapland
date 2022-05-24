@@ -126,6 +126,11 @@ public:
      */
     std::string const& uuid() const;
 
+    /**
+     * Inform the client the X11 resource name has changed (XWayland windows only).
+     **/
+    void set_resource_name(std::string const& resource_name) const;
+
 Q_SIGNALS:
     void closeRequested();
     void moveRequested();

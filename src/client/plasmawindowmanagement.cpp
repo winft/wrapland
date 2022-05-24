@@ -85,6 +85,7 @@ public:
     WaylandPointer<org_kde_plasma_window, org_kde_plasma_window_destroy> window;
     quint32 internalId;
     std::string uuid;
+    std::string resource_name;
     QString title;
     QString appId;
     quint32 desktop = 0;
@@ -153,6 +154,9 @@ private:
     static void
     activity_entered_callback(void* data, org_kde_plasma_window* window, char const* id);
     static void activity_left_callback(void* data, org_kde_plasma_window* window, char const* id);
+    static void resource_name_changed_callback(void* data,
+                                               org_kde_plasma_window* window,
+                                               char const* resource_name);
 
     void setActive(bool set);
     void setMinimized(bool set);
@@ -485,6 +489,7 @@ org_kde_plasma_window_listener const PlasmaWindow::Private::s_listener = {
     appmenuChangedCallback,
     activity_entered_callback,
     activity_left_callback,
+    resource_name_changed_callback,
 };
 
 void PlasmaWindow::Private::activity_entered_callback(void* /*data*/,
@@ -698,6 +703,19 @@ void PlasmaWindow::Private::themedIconNameChangedCallback(void* data,
         p->icon = QIcon();
     }
     Q_EMIT p->q->iconChanged();
+}
+
+void PlasmaWindow::Private::resource_name_changed_callback(void* data,
+                                                           org_kde_plasma_window* window,
+                                                           char const* resource_name)
+{
+    Q_UNUSED(window)
+    auto priv = reinterpret_cast<Private*>(data);
+    if (priv->resource_name == resource_name) {
+        return;
+    }
+    priv->resource_name = resource_name;
+    Q_EMIT priv->q->resource_name_changed();
 }
 
 static int readData(int fd, QByteArray& data)
@@ -1216,6 +1234,11 @@ QRect PlasmaWindow::geometry() const
 std::string const& PlasmaWindow::uuid() const
 {
     return d->uuid;
+}
+
+std::string const& PlasmaWindow::resource_name() const
+{
+    return d->resource_name;
 }
 
 void PlasmaWindow::requestEnterVirtualDesktop(QString const& id)

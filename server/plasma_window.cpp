@@ -299,7 +299,7 @@ PlasmaVirtualDesktopManager* PlasmaWindowManager::virtualDesktopManager() const
     return d_ptr->virtualDesktopManager;
 }
 
-/////////////////////////// Plasma Window ///////////////////////////
+/////////////////////////// Plasma Window Private ////////////////////////////
 
 PlasmaWindow::Private::Private(PlasmaWindowManager* manager, PlasmaWindow* q_ptr)
     : manager(manager)
@@ -345,6 +345,11 @@ void PlasmaWindow::Private::createResource(uint32_t version,
         windowRes->d_ptr->send<org_kde_plasma_window_send_application_menu>(
             m_applicationMenu.serviceName.toLatin1().constData(),
             m_applicationMenu.objectPath.toLatin1().constData());
+    }
+    if (!resource_name.empty()) {
+        windowRes->d_ptr->send<org_kde_plasma_window_send_resource_name_changed,
+                               ORG_KDE_PLASMA_WINDOW_RESOURCE_NAME_CHANGED_SINCE_VERSION>(
+            resource_name.data());
     }
     windowRes->d_ptr->send<org_kde_plasma_window_send_state_changed>(m_desktopState);
     if (!m_themedIconName.isEmpty()) {
@@ -532,6 +537,21 @@ void PlasmaWindow::Private::setApplicationMenuPaths(QString const& serviceName,
             service_name.data(), object_path.data());
     }
 }
+
+void PlasmaWindow::Private::set_resource_name(std::string const& resource_name)
+{
+    if (this->resource_name == resource_name) {
+        return;
+    }
+
+    this->resource_name = resource_name;
+
+    for (auto const res : resources) {
+        res->d_ptr->send<org_kde_plasma_window_send_resource_name_changed, 0>(resource_name.data());
+    }
+}
+
+/////////////////////////////// Plasma Window ////////////////////////////////
 
 PlasmaWindow::PlasmaWindow(PlasmaWindowManager* manager)
     : d_ptr(new Private(manager, this))
@@ -767,6 +787,11 @@ void PlasmaWindow::setParentWindow(PlasmaWindow* parentWindow)
 void PlasmaWindow::setGeometry(QRect const& geometry)
 {
     d_ptr->setGeometry(geometry);
+}
+
+void PlasmaWindow::set_resource_name(std::string const& resource_name) const
+{
+    d_ptr->set_resource_name(resource_name);
 }
 
 /////////////////////////// Plasma Window Resource ///////////////////////////

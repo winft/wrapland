@@ -278,6 +278,10 @@ public:
      */
     std::string const& uuid() const;
     /**
+     * X11 resource name, only relevant for Xwayland windows
+     */
+    std::string const& resource_name() const;
+    /**
      * @returns Whether the window is currently the active Window.
      * @see activeChanged
      **/
@@ -685,6 +689,11 @@ Q_SIGNALS:
      *  object path for the window's application menu changes.
      **/
     void applicationMenuChanged();
+
+    /**
+     * X11 resource name has changed (XWayland windows only).
+     **/
+    void resource_name_changed();
 
 private:
     friend class PlasmaWindowManagement;

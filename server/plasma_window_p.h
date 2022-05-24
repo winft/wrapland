@@ -94,6 +94,7 @@ public:
     void setParentWindow(PlasmaWindow* window);
     void setGeometry(QRect const& geometry);
     void setApplicationMenuPaths(QString const& serviceName, QString const& objectPath);
+    void set_resource_name(std::string const& resource_name);
 
     // TODO(romangg): Might make sense to have this as a non-static member function instead.
     static PlasmaWindowRes* getResourceOfParent(PlasmaWindow* parent, PlasmaWindowRes* childRes);
@@ -113,6 +114,7 @@ private:
     friend class PlasmaWindowRes;
 
     PlasmaWindow* q_ptr;
+
     QString m_title;
     QString m_appId;
     uint32_t m_pid = 0;
@@ -124,6 +126,7 @@ private:
         QString serviceName;
         QString objectPath;
     } m_applicationMenu;
+    std::string resource_name;
 };
 
 class PlasmaWindowRes : public QObject
