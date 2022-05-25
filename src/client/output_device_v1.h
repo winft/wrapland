@@ -20,13 +20,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
+#include <Wrapland/Client/wraplandclient_export.h>
+
 #include <QObject>
-#include <QPointer>
 #include <QSize>
 #include <QVector>
-// STD
-#include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
+#include <vector>
 
 class QRectF;
 struct zkwinft_output_device_v1;
@@ -97,10 +97,6 @@ public:
          **/
         int refreshRate = 0;
         bool preferred{false};
-        /**
-         * The OutputDeviceV1 to which this Mode belongs.
-         **/
-        QPointer<OutputDeviceV1> output;
         /**
          * The id of this mode, unique per OutputDeviceV1. This id can be used to call
          * OutputConfiguration->setMode();
@@ -177,7 +173,7 @@ public:
     /**
      * @returns The Modes of this OutputDeviceV1.
      **/
-    QList<Mode> modes() const;
+    std::vector<Mode> const& modes() const;
 
     Wrapland::Client::OutputDeviceV1::Mode currentMode() const;
 

@@ -245,24 +245,18 @@ void TestOutputDevice::testModeChanges()
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().size, QSize(800, 600));
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().preferred, true);
-    QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().output,
-             QPointer<OutputDeviceV1>(&output));
     QVERIFY(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().id > -1);
 
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().size, QSize(1280, 1024));
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().refreshRate, 90000);
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().preferred, false);
-    QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().output,
-             QPointer<OutputDeviceV1>(&output));
     QVERIFY(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().id > -1);
 
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().size, QSize(1024, 768));
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().id, output.currentMode().id);
-    QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().output,
-             QPointer<OutputDeviceV1>(&output));
 
-    const QList<OutputDeviceV1::Mode>& modes = output.modes();
+    auto modes = output.modes();
     QVERIFY(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().id > -1);
     QCOMPARE(modes.size(), 3);
     QCOMPARE(modes.at(0), modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>());
@@ -289,7 +283,7 @@ void TestOutputDevice::testModeChanges()
     QVERIFY(!outputChanged.isEmpty());
     QCOMPARE(output.pixelSize(), QSize(800, 600));
 
-    const QList<OutputDeviceV1::Mode>& modes2 = output.modes();
+    auto modes2 = output.modes();
     QCOMPARE(modes2.at(0).size, QSize(800, 600));
     QCOMPARE(modes2.at(0).refreshRate, 60000);
     QCOMPARE(modes2.at(0).preferred, true);
