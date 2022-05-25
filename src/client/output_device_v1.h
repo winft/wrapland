@@ -27,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // STD
 #include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
+#include <vector>
 
 class QRectF;
 struct zkwinft_output_device_v1;
@@ -177,7 +178,7 @@ public:
     /**
      * @returns The Modes of this OutputDeviceV1.
      **/
-    QList<Mode> modes() const;
+    std::vector<Mode> const& modes() const;
 
     Wrapland::Client::OutputDeviceV1::Mode currentMode() const;
 

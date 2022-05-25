@@ -477,7 +477,7 @@ void TestOutputManagement::testExampleConfig()
     auto config = m_outputConfiguration;
     Clt::OutputDeviceV1* output = m_clientOutputs.first();
 
-    config->setMode(output, m_clientOutputs.first()->modes().last().id);
+    config->setMode(output, m_clientOutputs.first()->modes().back().id);
     config->setTransform(output, Clt::OutputDeviceV1::Transform::Normal);
     // config->setGeometry(output, QRectF(QPoint(-1, -1), output->geometry().size()));
 

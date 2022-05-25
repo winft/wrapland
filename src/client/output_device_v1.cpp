@@ -35,7 +35,7 @@ namespace Wrapland
 namespace Client
 {
 
-typedef QList<OutputDeviceV1::Mode> Modes;
+using Modes = std::vector<OutputDeviceV1::Mode>;
 
 class Q_DECL_HIDDEN OutputDeviceV1::Private
 {
@@ -211,10 +211,11 @@ void OutputDeviceV1::Private::addMode(uint32_t flags,
     }
 
     // New mode added.
-    modes.append(mode);
+    modes.push_back(mode);
     if (flags & WL_OUTPUT_MODE_CURRENT) {
         currentMode = modes.end() - 1;
     }
+
     Q_EMIT q->modeAdded(mode);
 }
 
@@ -376,7 +377,7 @@ OutputDeviceV1::Transform OutputDeviceV1::transform() const
     return d->transform;
 }
 
-QList<OutputDeviceV1::Mode> OutputDeviceV1::modes() const
+std::vector<OutputDeviceV1::Mode> const& OutputDeviceV1::modes() const
 {
     return d->modes;
 }
