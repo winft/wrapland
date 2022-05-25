@@ -113,8 +113,7 @@ void OutputDeviceV1::Private::setup(zkwinft_output_device_v1* o)
 
 bool OutputDeviceV1::Mode::operator==(const OutputDeviceV1::Mode& m) const
 {
-    return size == m.size && refreshRate == m.refreshRate && preferred == m.preferred
-        && output == m.output;
+    return size == m.size && refreshRate == m.refreshRate && preferred == m.preferred;
 }
 
 zkwinft_output_device_v1_listener OutputDeviceV1::Private::s_outputListener = {
@@ -185,7 +184,6 @@ void OutputDeviceV1::Private::addMode(uint32_t flags,
                                       int32_t mode_id)
 {
     Mode mode;
-    mode.output = QPointer<OutputDeviceV1>(q);
     mode.refreshRate = refresh;
     mode.size = QSize(width, height);
     mode.id = mode_id;

@@ -245,22 +245,16 @@ void TestOutputDevice::testModeChanges()
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().size, QSize(800, 600));
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
     QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().preferred, true);
-    QCOMPARE(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().output,
-             QPointer<OutputDeviceV1>(&output));
     QVERIFY(modeAddedSpy.at(0).first().value<OutputDeviceV1::Mode>().id > -1);
 
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().size, QSize(1280, 1024));
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().refreshRate, 90000);
     QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().preferred, false);
-    QCOMPARE(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().output,
-             QPointer<OutputDeviceV1>(&output));
     QVERIFY(modeAddedSpy.at(1).first().value<OutputDeviceV1::Mode>().id > -1);
 
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().size, QSize(1024, 768));
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().refreshRate, 60000);
     QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().id, output.currentMode().id);
-    QCOMPARE(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().output,
-             QPointer<OutputDeviceV1>(&output));
 
     auto modes = output.modes();
     QVERIFY(modeAddedSpy.at(2).first().value<OutputDeviceV1::Mode>().id > -1);

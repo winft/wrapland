@@ -20,12 +20,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
+#include <Wrapland/Client/wraplandclient_export.h>
+
 #include <QObject>
-#include <QPointer>
 #include <QSize>
 #include <QVector>
-// STD
-#include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
 #include <vector>
 
@@ -98,10 +97,6 @@ public:
          **/
         int refreshRate = 0;
         bool preferred{false};
-        /**
-         * The OutputDeviceV1 to which this Mode belongs.
-         **/
-        QPointer<OutputDeviceV1> output;
         /**
          * The id of this mode, unique per OutputDeviceV1. This id can be used to call
          * OutputConfiguration->setMode();
