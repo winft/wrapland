@@ -35,7 +35,7 @@ namespace Wrapland
 namespace Client
 {
 
-typedef QList<OutputDeviceV1::Mode> Modes;
+using Modes = std::vector<OutputDeviceV1::Mode>;
 
 class Q_DECL_HIDDEN OutputDeviceV1::Private
 {
@@ -113,8 +113,7 @@ void OutputDeviceV1::Private::setup(zkwinft_output_device_v1* o)
 
 bool OutputDeviceV1::Mode::operator==(const OutputDeviceV1::Mode& m) const
 {
-    return size == m.size && refreshRate == m.refreshRate && preferred == m.preferred
-        && output == m.output;
+    return size == m.size && refreshRate == m.refreshRate && preferred == m.preferred;
 }
 
 zkwinft_output_device_v1_listener OutputDeviceV1::Private::s_outputListener = {
@@ -185,7 +184,6 @@ void OutputDeviceV1::Private::addMode(uint32_t flags,
                                       int32_t mode_id)
 {
     Mode mode;
-    mode.output = QPointer<OutputDeviceV1>(q);
     mode.refreshRate = refresh;
     mode.size = QSize(width, height);
     mode.id = mode_id;
@@ -211,10 +209,11 @@ void OutputDeviceV1::Private::addMode(uint32_t flags,
     }
 
     // New mode added.
-    modes.append(mode);
+    modes.push_back(mode);
     if (flags & WL_OUTPUT_MODE_CURRENT) {
         currentMode = modes.end() - 1;
     }
+
     Q_EMIT q->modeAdded(mode);
 }
 
@@ -376,7 +375,7 @@ OutputDeviceV1::Transform OutputDeviceV1::transform() const
     return d->transform;
 }
 
-QList<OutputDeviceV1::Mode> OutputDeviceV1::modes() const
+std::vector<OutputDeviceV1::Mode> const& OutputDeviceV1::modes() const
 {
     return d->modes;
 }
