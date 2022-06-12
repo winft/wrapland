@@ -1,5 +1,42 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.525.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.524.0-beta.0...wrapland@0.525.0-beta.0) (2022-06-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **client:** output pointer removed from mode struct
+* **client:** output device modes are provided as std::vector
+* **server:** dmabuf API changes
+
+### Features
+
+* **client:** remove output pointer in mode type ([88280c2](https://gitlab.com/kwinft/wrapland/commit/88280c2a06be386ef6e02fe5e85f003727301393))
+* **server:** close dmabuf buffer plane fds ([5159ee4](https://gitlab.com/kwinft/wrapland/commit/5159ee4efdde38ca506cd4778d5bdf8dd96d9722))
+* **server:** make dmabuf buffer class a POD-like type ([9dc0454](https://gitlab.com/kwinft/wrapland/commit/9dc04544fcaa780669511b6c12f73b690b715726))
+* **server:** provide dmabuf import as std::function ([47801c8](https://gitlab.com/kwinft/wrapland/commit/47801c84d33d7d3c99f64b47e98da510372a47f1))
+* **server:** receive dmabuf buffer as smart pointer ([8048153](https://gitlab.com/kwinft/wrapland/commit/80481531d821fc7cecb13a25136ebb3c268208f0))
+* **server:** store dmabuf buffer planes and flags ([2b8fdc0](https://gitlab.com/kwinft/wrapland/commit/2b8fdc0cbbcab842c074686955042683372abb66))
+
+
+### Bug Fixes
+
+* add wayland-client-protocol.h in virtual_keyboard_v1.cpp ([4134b7a](https://gitlab.com/kwinft/wrapland/commit/4134b7a5cf54cfaa8f9524bda74c075e864a1d05))
+* **client:** use STL vector for iterator correctness ([f203e3a](https://gitlab.com/kwinft/wrapland/commit/f203e3a41817bb27debf60fbd47f8e71b596bfc9))
+* link testLinuxDmabuf with Wayland::Client ([7342423](https://gitlab.com/kwinft/wrapland/commit/73424230b47531d8b17a53e7e0a580408d973aef))
+* resolve xml DTD issues ([bb351ba](https://gitlab.com/kwinft/wrapland/commit/bb351ba3028a63ccb242d5818b64aaef99f8fb7c))
+* **server:** accept buffer damage unconditionally ([758d8f0](https://gitlab.com/kwinft/wrapland/commit/758d8f01ab069c5f30905392b55fb7961024cc50))
+* **server:** check global on dmabuf buffer creation ([4b7da9d](https://gitlab.com/kwinft/wrapland/commit/4b7da9d4b48f5fa8f7f51e4da52216646a164b21))
+* **server:** drop "wayland-server.h" in seat header ([94b3fa5](https://gitlab.com/kwinft/wrapland/commit/94b3fa59536edfe7de956f77a2b6394c0289160b))
+* **server:** remove QObject parent argument ([5b6bfb7](https://gitlab.com/kwinft/wrapland/commit/5b6bfb7359bc2cb037a55f415baf073816c5ad1e))
+* **server:** workaround Xwayland issue with invalid and linear mods ([c03d426](https://gitlab.com/kwinft/wrapland/commit/c03d4261ce67ab9920c2cf4f72a58276ee155756))
+
+
+### Refactors
+
+* add internal dmabuf buffer resource class ([b385b02](https://gitlab.com/kwinft/wrapland/commit/b385b02b465a2da4c11fdad2d16ef8f3b873bd87))
+* **server:** set dmabuf formats with drm_format struct ([5321d5d](https://gitlab.com/kwinft/wrapland/commit/5321d5d41498c0f0a0ec8a67171450418ca7b98c))
+
 ## [0.524.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.524.0-beta.0...wrapland@0.524.0) (2022-02-08)
 
 ## [0.524.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.523.0-beta.0...wrapland@0.524.0-beta.0) (2022-02-03)
