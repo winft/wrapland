@@ -196,7 +196,7 @@ void TestLinuxDmabuf::testCreateBufferFail()
 
     int fd = memfd_create("AutotestBuffercreatesucces", 0);
     ftruncate(fd, 500);
-    paramV1->addDmabuf(fd, 0, 0, 0, 0, 12);
+    paramV1->addDmabuf(fd, 0, 0, 0, 12);
     paramV1->createDmabuf(32, 32, 64, 0);
 
     QVERIFY(CreateBufferFailSpy.wait());
@@ -216,7 +216,7 @@ void TestLinuxDmabuf::testCreateBufferSucess()
     // Format 64 = Sucess
     int fd = memfd_create("AutotestBuffercreatesucces", 0);
     ftruncate(fd, 500);
-    paramV1->addDmabuf(fd, 0, 0, 0, 0, 12);
+    paramV1->addDmabuf(fd, 0, 0, 0, 12);
     paramV1->createDmabuf(32, 32, 64, 0);
 
     QVERIFY(CreateBufferSuccessSpy.wait());

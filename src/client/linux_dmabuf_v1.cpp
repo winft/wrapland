@@ -26,6 +26,7 @@ namespace Wrapland::Client
 {
 
 constexpr size_t modifier_shift = 32;
+constexpr uint32_t modifier_cut = 0xFFFFFFFF;
 
 const struct zwp_linux_dmabuf_v1_listener LinuxDmabufV1::Private::s_listener = {
     LinuxDmabufV1::Private::callbackFormat,
@@ -188,9 +189,10 @@ void ParamsV1::addDmabuf(int32_t fd,
                          uint32_t plane_idx,
                          uint32_t offset,
                          uint32_t stride,
-                         uint32_t modifier_hi,
-                         uint32_t modifier_lo)
+                         uint64_t modifier)
 {
+    auto modifier_hi = static_cast<uint32_t>(modifier >> modifier_shift);
+    auto modifier_lo = static_cast<uint32_t>(modifier & modifier_cut);
     zwp_linux_buffer_params_v1_add(
         d_ptr->params, fd, plane_idx, offset, stride, modifier_hi, modifier_lo);
 }
