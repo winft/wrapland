@@ -51,10 +51,10 @@ enum class linux_dmabuf_flag_v1 {
 Q_DECLARE_FLAGS(linux_dmabuf_flags_v1, linux_dmabuf_flag_v1)
 
 struct linux_dmabuf_plane_v1 {
-    int fd;            /// The dmabuf file descriptor
-    uint32_t offset;   /// The offset from the start of buffer
-    uint32_t stride;   /// The distance from the start of a row to the next row in bytes
-    uint64_t modifier; /// The layout modifier
+    int fd;
+    uint32_t offset;
+    uint32_t stride;
+    uint64_t modifier;
 };
 
 class linux_dmabuf_buffer_v1
