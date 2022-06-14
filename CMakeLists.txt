@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(Wrapland)
-set(PROJECT_VERSION "0.524.90")
+set(PROJECT_VERSION "0.525.0")
 set(PROJECT_VERSION_MAJOR 0)
 
 # ECM setup

@@ -1,5 +1,7 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.525.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.525.0-beta.0...wrapland@0.525.0) (2022-06-14)
+
 ## [0.525.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.524.0-beta.0...wrapland@0.525.0-beta.0) (2022-06-12)
 
 
