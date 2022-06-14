@@ -23,9 +23,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QPoint>
 #include <QSize>
-
-// STD
 #include <memory>
+#include <unordered_set>
 
 #include <Wrapland/Client/wraplandclient_export.h>
 
@@ -39,15 +38,15 @@ namespace Wrapland::Client
 class EventQueue;
 class ParamsV1;
 
+struct drm_format {
+    uint32_t format;
+    uint64_t modifier;
+};
+
 class WRAPLANDCLIENT_EXPORT LinuxDmabufV1 : public QObject
 {
     Q_OBJECT
 public:
-    struct Modifier {
-        uint32_t modifier_hi;
-        uint32_t modifier_lo;
-    };
-
     explicit LinuxDmabufV1(QObject* parent = nullptr);
     ~LinuxDmabufV1() override;
 
@@ -58,7 +57,7 @@ public:
     EventQueue* eventQueue();
 
     ParamsV1* createParamsV1(QObject* parent = nullptr);
-    QHash<uint32_t, Modifier> supportedFormats();
+    std::vector<drm_format> const& supportedFormats();
 
     operator zwp_linux_dmabuf_v1*();
     operator zwp_linux_dmabuf_v1*() const;

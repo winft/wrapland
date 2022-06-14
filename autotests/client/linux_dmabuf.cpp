@@ -179,9 +179,9 @@ void TestLinuxDmabuf::testModifier()
     QVERIFY(ModifierSpy.wait());
 
     auto receivedFormat = m_dmabuf->supportedFormats();
-    QVERIFY(receivedFormat.contains(1212));
-    QVERIFY(receivedFormat[1212].modifier_hi == 0);
-    QVERIFY(receivedFormat[1212].modifier_lo == 12);
+    QCOMPARE(receivedFormat.size(), 1);
+    QCOMPARE(receivedFormat.at(0).format, 1212);
+    QCOMPARE(receivedFormat.at(0).modifier, 12);
 
     delete paramV1;
 }

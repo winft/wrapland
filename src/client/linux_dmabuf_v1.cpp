@@ -20,8 +20,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "event_queue.h"
 #include "linux_dmabuf_v1_p.h"
 
+#include <drm_fourcc.h>
+
 namespace Wrapland::Client
 {
+
+constexpr size_t modifier_shift = 32;
 
 const struct zwp_linux_dmabuf_v1_listener LinuxDmabufV1::Private::s_listener = {
     LinuxDmabufV1::Private::callbackFormat,
@@ -48,13 +52,7 @@ void LinuxDmabufV1::Private::callbackFormat(
 {
     /* DEPRECATED */
     auto dmabuf = reinterpret_cast<LinuxDmabufV1*>(data);
-
-    LinuxDmabufV1::Modifier modifier;
-    modifier.modifier_hi = 0;
-    modifier.modifier_lo = 0;
-
-    dmabuf->d_ptr->modifiers.insert(format, modifier);
-
+    dmabuf->d_ptr->formats.push_back({format, DRM_FORMAT_MOD_INVALID});
     Q_EMIT dmabuf->supportedFormatsChanged();
 }
 
@@ -67,18 +65,14 @@ void LinuxDmabufV1::Private::callbackModifier(
 {
     LinuxDmabufV1* dmabuf = reinterpret_cast<LinuxDmabufV1*>(data);
 
-    LinuxDmabufV1::Modifier modifier;
-    modifier.modifier_hi = modifier_hi;
-    modifier.modifier_lo = modifier_lo;
-
-    dmabuf->d_ptr->modifiers.insert(format, modifier);
-
+    auto modifier = (static_cast<uint64_t>(modifier_hi) << modifier_shift) | modifier_lo;
+    dmabuf->d_ptr->formats.push_back({format, modifier});
     Q_EMIT dmabuf->supportedFormatsChanged();
 }
 
-QHash<uint32_t, LinuxDmabufV1::Modifier> LinuxDmabufV1::supportedFormats()
+std::vector<drm_format> const& LinuxDmabufV1::supportedFormats()
 {
-    return d_ptr->modifiers;
+    return d_ptr->formats;
 }
 
 ParamsV1* LinuxDmabufV1::createParamsV1(QObject* parent)
