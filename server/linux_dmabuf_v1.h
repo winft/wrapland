@@ -51,10 +51,9 @@ enum class linux_dmabuf_flag_v1 {
 Q_DECLARE_FLAGS(linux_dmabuf_flags_v1, linux_dmabuf_flag_v1)
 
 struct linux_dmabuf_plane_v1 {
-    int fd;            /// The dmabuf file descriptor
-    uint32_t offset;   /// The offset from the start of buffer
-    uint32_t stride;   /// The distance from the start of a row to the next row in bytes
-    uint64_t modifier; /// The layout modifier
+    int fd;
+    uint32_t offset;
+    uint32_t stride;
 };
 
 class linux_dmabuf_buffer_v1
@@ -62,10 +61,12 @@ class linux_dmabuf_buffer_v1
 public:
     linux_dmabuf_buffer_v1(std::vector<linux_dmabuf_plane_v1> planes,
                            uint32_t format,
+                           uint64_t modifier,
                            QSize const& size,
                            linux_dmabuf_flags_v1 flags)
         : planes{std::move(planes)}
         , format{format}
+        , modifier{modifier}
         , size{size}
         , flags{flags}
     {
@@ -81,6 +82,7 @@ public:
 
     std::vector<linux_dmabuf_plane_v1> planes;
     uint32_t format;
+    uint64_t modifier;
     QSize size;
     linux_dmabuf_flags_v1 flags;
 };
@@ -88,6 +90,7 @@ public:
 using linux_dmabuf_import_v1 = std::function<std::unique_ptr<linux_dmabuf_buffer_v1>(
     std::vector<linux_dmabuf_plane_v1> const& planes,
     uint32_t format,
+    uint64_t modifier,
     QSize const& size,
     linux_dmabuf_flags_v1 flags)>;
 

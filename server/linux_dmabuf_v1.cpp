@@ -29,7 +29,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/display.h"
 
 #include "wayland-server-protocol.h"
-#include <drm_fourcc.h>
 
 #include <QVector>
 
@@ -158,7 +157,6 @@ linux_dmabuf_params_v1_impl::linux_dmabuf_params_v1_impl(Client* client,
         plane.fd = -1;
         plane.offset = 0;
         plane.stride = 0;
-        plane.modifier = 0;
     }
 }
 
@@ -237,7 +235,7 @@ void linux_dmabuf_params_v1_impl::create(uint32_t buffer_id,
         planes.push_back(m_planes.at(i));
     }
 
-    auto buffer = m_dmabuf->import(planes, format, size, linux_dmabuf_flags_v1(flags));
+    auto buffer = m_dmabuf->import(planes, format, modifier, size, linux_dmabuf_flags_v1(flags));
     if (!buffer) {
         if (buffer_id == 0) {
             send<zwp_linux_buffer_params_v1_send_failed>();
@@ -387,10 +385,21 @@ void linux_dmabuf_params_v1_impl::add(int fd,
         return;
     }
 
+    if (modifier_sent && this->modifier != modifier) {
+        postError(ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_FORMAT,
+                  "modifier %u sent, but excepted %u like other planes",
+                  modifier,
+                  this->modifier);
+        ::close(fd);
+        return;
+    }
+
+    this->modifier = modifier;
+    modifier_sent = true;
+
     plane.fd = fd;
     plane.offset = offset;
     plane.stride = stride;
-    plane.modifier = modifier;
 
     m_planeCount++;
 }

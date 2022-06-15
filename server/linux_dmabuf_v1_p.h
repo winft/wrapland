@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland-linux-dmabuf-unstable-v1-server-protocol.h"
 
 #include <array>
+#include <drm_fourcc.h>
 
 namespace Wrapland::Server
 {
@@ -131,6 +132,8 @@ private:
     std::array<linux_dmabuf_plane_v1, 4> m_planes;
     size_t m_planeCount = 0;
     bool m_createRequested = false;
+    uint64_t modifier{DRM_FORMAT_MOD_INVALID};
+    bool modifier_sent{false};
 };
 
 class linux_dmabuf_params_v1 : public QObject

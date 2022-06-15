@@ -27,10 +27,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QPoint>
 #include <QSize>
 
-// STD
-#include <memory>
-
-// wayland
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
 
 struct wl_buffer;
@@ -45,7 +41,7 @@ class Q_DECL_HIDDEN LinuxDmabufV1::Private
 public:
     Private(LinuxDmabufV1* q);
 
-    QHash<uint32_t, LinuxDmabufV1::Modifier> modifiers;
+    std::vector<drm_format> formats;
 
     static void
     callbackFormat(void* data, zwp_linux_dmabuf_v1* zwp_linux_dmabuf_v1, uint32_t format);

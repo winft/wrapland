@@ -314,6 +314,7 @@ target_link_libraries(WraplandClient
   PRIVATE
     Wayland::Client
     Qt5::Concurrent
+    external::external
 )
 
 set_target_properties(WraplandClient PROPERTIES

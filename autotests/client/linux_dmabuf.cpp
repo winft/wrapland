@@ -52,6 +52,7 @@ private:
     std::unique_ptr<Wrapland::Server::linux_dmabuf_buffer_v1>
     import_function(std::vector<Wrapland::Server::linux_dmabuf_plane_v1> const& planes,
                     uint32_t format,
+                    uint64_t modifier,
                     QSize const& size,
                     Wrapland::Server::linux_dmabuf_flags_v1 flags);
     struct {
@@ -74,13 +75,15 @@ constexpr auto socket_name{"wrapland-test-wayland-dmabuf-0"};
 std::unique_ptr<Wrapland::Server::linux_dmabuf_buffer_v1>
 TestLinuxDmabuf::import_function(std::vector<Wrapland::Server::linux_dmabuf_plane_v1> const& planes,
                                  uint32_t format,
+                                 uint64_t modifier,
                                  QSize const& size,
                                  Wrapland::Server::linux_dmabuf_flags_v1 flags)
 {
     if (buffer_always_fail) {
         return nullptr;
     }
-    return std::make_unique<Wrapland::Server::linux_dmabuf_buffer_v1>(planes, format, size, flags);
+    return std::make_unique<Wrapland::Server::linux_dmabuf_buffer_v1>(
+        planes, format, modifier, size, flags);
 }
 
 TestLinuxDmabuf::TestLinuxDmabuf(QObject* parent)
@@ -131,8 +134,8 @@ void TestLinuxDmabuf::init()
 
     server.globals.linux_dmabuf_v1 = std::make_unique<Wrapland::Server::linux_dmabuf_v1>(
         server.display.get(),
-        [this](auto const& planes, auto format, auto const& size, auto flags) {
-            return import_function(planes, format, size, flags);
+        [this](auto const& planes, auto format, auto modifier, auto const& size, auto flags) {
+            return import_function(planes, format, modifier, size, flags);
         });
     QVERIFY(dmabufSpy.wait());
 
@@ -176,9 +179,9 @@ void TestLinuxDmabuf::testModifier()
     QVERIFY(ModifierSpy.wait());
 
     auto receivedFormat = m_dmabuf->supportedFormats();
-    QVERIFY(receivedFormat.contains(1212));
-    QVERIFY(receivedFormat[1212].modifier_hi == 0);
-    QVERIFY(receivedFormat[1212].modifier_lo == 12);
+    QCOMPARE(receivedFormat.size(), 1);
+    QCOMPARE(receivedFormat.at(0).format, 1212);
+    QCOMPARE(receivedFormat.at(0).modifier, 12);
 
     delete paramV1;
 }
@@ -193,7 +196,7 @@ void TestLinuxDmabuf::testCreateBufferFail()
 
     int fd = memfd_create("AutotestBuffercreatesucces", 0);
     ftruncate(fd, 500);
-    paramV1->addDmabuf(fd, 0, 0, 0, 0, 12);
+    paramV1->addDmabuf(fd, 0, 0, 0, 12);
     paramV1->createDmabuf(32, 32, 64, 0);
 
     QVERIFY(CreateBufferFailSpy.wait());
@@ -213,7 +216,7 @@ void TestLinuxDmabuf::testCreateBufferSucess()
     // Format 64 = Sucess
     int fd = memfd_create("AutotestBuffercreatesucces", 0);
     ftruncate(fd, 500);
-    paramV1->addDmabuf(fd, 0, 0, 0, 0, 12);
+    paramV1->addDmabuf(fd, 0, 0, 0, 12);
     paramV1->createDmabuf(32, 32, 64, 0);
 
     QVERIFY(CreateBufferSuccessSpy.wait());
