@@ -120,7 +120,7 @@ public:
 
     std::vector<Bind<type>*> getBinds()
     {
-        return nucleus->binds();
+        return nucleus->binds;
     }
 
     std::vector<Bind<type>*> getBinds(Server::Client* client)

@@ -24,18 +24,20 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QSize>
 // STD
+#include <cstdint>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <Wrapland/Client/wraplandclient_export.h>
 
 struct org_kde_plasma_window_management;
 struct org_kde_plasma_window;
 
-namespace Wrapland
-{
-namespace Client
+namespace Wrapland::Client
 {
 class EventQueue;
+class Output;
 class PlasmaWindow;
 class PlasmaWindowModel;
 class Surface;
@@ -139,10 +141,26 @@ public:
     void hideDesktop();
 
     /**
+     * Retrieve a window or create a new one.
+     **/
+    PlasmaWindow* get_window_by_uuid(std::string const& uuid) const;
+
+    /**
      * @returns All windows currently known to the PlasmaWindowManagement
      * @see windowCreated
      **/
     QList<PlasmaWindow*> windows() const;
+
+    /**
+     * @returns The stack of windows, by internal id (deprecated).
+     **/
+    std::vector<uint32_t> const& stacking_order() const;
+
+    /**
+     * @returns The stack of windows, by unique identifiers.
+     **/
+    std::vector<std::string> const& stacking_order_uuid() const;
+
     /**
      * @returns The currently active PlasmaWindow, the PlasmaWindow which
      * returns @c true in {@link PlasmaWindow::isActive} or @c nullptr in case
@@ -177,6 +195,23 @@ Q_SIGNALS:
      * @see activeWindow
      **/
     void activeWindowChanged();
+
+    /**
+     * Windows stacking order changed (deprecated).
+     * @see stacking_order
+     **/
+    void stacking_order_changed();
+
+    /**
+     * Windows stacking order changed.
+     * @see stacking_order_with_uuids
+     **/
+    void stacking_order_uuid_changed();
+
+    /**
+     * A window was mapped.
+     **/
+    void window_with_uuid(std::string const& uuid);
 
     /**
      * The corresponding global for this interface on the Registry got removed.
@@ -238,6 +273,10 @@ public:
      * @see appIdChanged
      **/
     QString appId() const;
+    /**
+     * @returns the window's uuid
+     */
+    std::string const& uuid() const;
     /**
      * @returns Whether the window is currently the active Window.
      * @see activeChanged
@@ -464,6 +503,11 @@ public:
     void requestLeaveVirtualDesktop(const QString& id);
 
     /**
+     * Requests this window to be displayed in a specific output.
+     */
+    void request_send_to_output(Output* output);
+
+    /**
      * Return all the virtual desktop ids this window is associated to.
      * When a desktop gets deleted, it will be automatically removed from this list.
      * If this list is empty, assume it's on all desktops.
@@ -645,13 +689,13 @@ Q_SIGNALS:
 private:
     friend class PlasmaWindowManagement;
     explicit PlasmaWindow(PlasmaWindowManagement* parent,
-                          org_kde_plasma_window* dataOffer,
-                          quint32 internalId);
+                          org_kde_plasma_window* window,
+                          quint32 internalId,
+                          std::string const& uuid);
     class Private;
     std::unique_ptr<Private> d;
 };
 
-}
 }
 
 Q_DECLARE_METATYPE(Wrapland::Client::PlasmaWindow*)
