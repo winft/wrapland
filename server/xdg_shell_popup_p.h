@@ -44,6 +44,7 @@ public:
     void ackConfigure(uint32_t serial);
 
     void popupDone();
+    void sendRepositioned(uint32_t token);
 
     QSize initialSize;
     bool has_window_geometry{false};
@@ -62,8 +63,11 @@ private:
                              wl_resource* wlResource,
                              wl_resource* wlSeat,
                              uint32_t serial);
+    static void popupRepositionCallback(wl_client* wlClient,
+                                        wl_resource* wlResource,
+                                        wl_resource* positioner_resource,
+                                        uint32_t token);
 
     static const struct xdg_popup_interface s_interface;
 };
-
 }

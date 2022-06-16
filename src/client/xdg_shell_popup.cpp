@@ -57,6 +57,7 @@ private:
                                   int32_t height);
     static void popupDoneCallback(void* data, xdg_popup* xdg_popup);
     static void surfaceConfigureCallback(void* data, xdg_surface* xdg_surface, uint32_t serial);
+    static void popupRepositionCallback(void* data, xdg_popup* xdg_popup, uint32_t token);
 
     QRect pendingRect;
 
@@ -72,6 +73,7 @@ private:
 struct xdg_popup_listener const XdgShellPopup::Private::s_popupListener = {
     configureCallback,
     popupDoneCallback,
+    popupRepositionCallback,
 };
 
 struct xdg_surface_listener const XdgShellPopup::Private::s_surfaceListener = {
@@ -105,6 +107,15 @@ void XdgShellPopup::Private::popupDoneCallback(void* data, xdg_popup* xdg_popup)
     auto s = static_cast<XdgShellPopup::Private*>(data);
     Q_ASSERT(s->xdgpopup == xdg_popup);
     Q_EMIT s->q_ptr->popupDone();
+}
+
+void XdgShellPopup::Private::popupRepositionCallback(void* data,
+                                                     xdg_popup* xdg_popup,
+                                                     uint32_t token)
+{
+    auto s = static_cast<XdgShellPopup::Private*>(data);
+    Q_ASSERT(s->xdgpopup == xdg_popup);
+    Q_EMIT s->q_ptr->repositionRequested(xdg_popup, token);
 }
 
 XdgShellPopup::Private::Private(XdgShellPopup* q)

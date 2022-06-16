@@ -47,6 +47,9 @@ public:
     Qt::Edges gravity() const;
     XdgShellSurface::ConstraintAdjustments constraintAdjustments() const;
     QPoint anchorOffset() const;
+    bool isReactive() const;
+    QSize parentSize() const;
+    uint32_t parentConfigure() const;
 
 Q_SIGNALS:
     void resourceDestroyed();
@@ -69,6 +72,9 @@ public:
     Qt::Edges gravity;
     XdgShellSurface::ConstraintAdjustments constraintAdjustments;
     QPoint anchorOffset;
+    bool is_reactive;
+    uint32_t parent_configure;
+    QSize parent_size;
 
 private:
     static void
@@ -86,6 +92,14 @@ private:
                                                 uint32_t constraint_adjustment);
     static void
     setOffsetCallback(wl_client* wlClient, wl_resource* wlResource, int32_t x, int32_t y);
+
+    static void setReactiveCallback(wl_client* wlClient, wl_resource* wlResource);
+    static void setParentSizeCallback(wl_client* wlClient,
+                                      wl_resource* wlResource,
+                                      int32_t width,
+                                      int32_t height);
+    static void
+    setParentConfigureCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t serial);
 
     static const struct xdg_positioner_interface s_interface;
 };

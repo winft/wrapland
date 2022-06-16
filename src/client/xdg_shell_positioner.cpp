@@ -18,6 +18,9 @@ public:
     Qt::Edges anchorEdge;
     XdgPositioner::Constraints constraints;
     QPoint anchorOffset;
+    bool isReactive;
+    uint32_t parentConfigure;
+    QSize parentSize;
 };
 
 XdgPositioner::XdgPositioner(const QSize& initialSize, const QRect& anchor)
@@ -95,6 +98,36 @@ void XdgPositioner::setConstraints(Constraints constraints)
 XdgPositioner::Constraints XdgPositioner::constraints() const
 {
     return d_ptr->constraints;
+}
+
+void XdgPositioner::setReactive(bool isReactive)
+{
+    d_ptr->isReactive = isReactive;
+}
+
+bool XdgPositioner::isReactive() const
+{
+    return d_ptr->isReactive;
+}
+
+void XdgPositioner::setParentSize(const QSize& parentSize)
+{
+    d_ptr->parentSize = parentSize;
+}
+
+QSize XdgPositioner::parentSize() const
+{
+    return d_ptr->parentSize;
+}
+
+void XdgPositioner::setParentConfigure(uint32_t parentConfigure)
+{
+    d_ptr->parentConfigure = parentConfigure;
+}
+
+uint32_t XdgPositioner::parentConfigure() const
+{
+    return d_ptr->parentConfigure;
 }
 
 }

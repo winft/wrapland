@@ -45,8 +45,9 @@ const struct xdg_positioner_interface XdgShellPositioner::Private::s_interface =
     setGravityCallback,
     setConstraintAdjustmentCallback,
     setOffsetCallback,
-    // TODO(romangg): Update xdg-shell protocol version (currently at 1).
-    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
+    setReactiveCallback,
+    setParentSizeCallback,
+    setParentConfigureCallback,
 };
 
 void XdgShellPositioner::Private::setSizeCallback([[maybe_unused]] wl_client* wlClient,
@@ -192,6 +193,30 @@ void XdgShellPositioner::Private::setOffsetCallback([[maybe_unused]] wl_client* 
     priv->anchorOffset = QPoint(x, y);
 }
 
+void XdgShellPositioner::Private::setReactiveCallback([[maybe_unused]] wl_client* wlClient,
+                                                      wl_resource* wlResource)
+{
+    auto priv = handle(wlResource)->d_ptr;
+    priv->is_reactive = true;
+}
+
+void XdgShellPositioner::Private::setParentSizeCallback([[maybe_unused]] wl_client* wlClient,
+                                                        wl_resource* wlResource,
+                                                        int32_t width,
+                                                        int32_t height)
+{
+    auto priv = handle(wlResource)->d_ptr;
+    priv->parent_size = QSize(width, height);
+}
+
+void XdgShellPositioner::Private::setParentConfigureCallback([[maybe_unused]] wl_client* wlClient,
+                                                             wl_resource* wlResource,
+                                                             uint32_t serial)
+{
+    auto priv = handle(wlResource)->d_ptr;
+    priv->parent_configure = serial;
+}
+
 XdgShellPositioner::XdgShellPositioner(Client* client, uint32_t version, uint32_t id)
     : QObject(nullptr)
     , d_ptr(new Private(client, version, id, this))
@@ -226,6 +251,21 @@ XdgShellSurface::ConstraintAdjustments XdgShellPositioner::constraintAdjustments
 QPoint XdgShellPositioner::anchorOffset() const
 {
     return d_ptr->anchorOffset;
+}
+
+bool XdgShellPositioner::isReactive() const
+{
+    return d_ptr->is_reactive;
+}
+
+QSize XdgShellPositioner::parentSize() const
+{
+    return d_ptr->parent_size;
+}
+
+uint32_t XdgShellPositioner::parentConfigure() const
+{
+    return d_ptr->parent_configure;
 }
 
 }

@@ -105,6 +105,15 @@ public:
     QPoint anchorOffset() const;
     void setAnchorOffset(const QPoint& offset);
 
+    bool isReactive() const;
+    void setReactive(bool isReactive);
+
+    uint32_t parentConfigure() const;
+    void setParentConfigure(uint32_t parentConfigure);
+
+    QSize parentSize() const;
+    void setParentSize(const QSize& parent);
+
 private:
     class Private;
     std::unique_ptr<Private> d_ptr;

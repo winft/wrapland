@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "display.h"
 #include "seat_p.h"
+#include "xdg_shell_p.h"
 #include "xdg_shell_surface_p.h"
 
 #include "wayland/global.h"
@@ -38,8 +39,7 @@ namespace Wrapland::Server
 const struct xdg_popup_interface XdgShellPopup::Private::s_interface = {
     destroyCallback,
     grabCallback,
-    // TODO(romangg): Update xdg-shell protocol version (currently at 1).
-    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
+    popupRepositionCallback,
 };
 
 XdgShellPopup::Private::Private(uint32_t version,
@@ -92,6 +92,17 @@ void XdgShellPopup::Private::grabCallback([[maybe_unused]] wl_client* wlClient,
     priv->handle->grabRequested(seat, serial);
 }
 
+void XdgShellPopup::Private::popupRepositionCallback([[maybe_unused]] wl_client* wlClient,
+                                                     wl_resource* wlResource,
+                                                     wl_resource* positioner_resource,
+                                                     uint32_t token)
+{
+    auto priv = handle(wlResource)->d_ptr;
+    auto positioner = XdgShellGlobal::handle(positioner_resource);
+
+    emit priv->handle()->repositionRequested(positioner, token);
+}
+
 uint32_t XdgShellPopup::Private::configure(const QRect& rect)
 {
     const uint32_t serial = client->display()->handle->nextSerial();
@@ -109,6 +120,12 @@ void XdgShellPopup::Private::popupDone()
     // TODO(unknown author): dismiss all child popups
     send<xdg_popup_send_popup_done>();
     client->flush();
+}
+
+void XdgShellPopup::Private::sendRepositioned(uint32_t token)
+{
+    send<xdg_popup_send_repositioned>(token);
+    client()->flush();
 }
 
 XdgShellPopup::XdgShellPopup(uint32_t version,
@@ -194,6 +211,11 @@ XdgShellSurface::ConstraintAdjustments XdgShellPopup::constraintAdjustments() co
 void XdgShellPopup::popupDone()
 {
     return d_ptr->popupDone();
+}
+
+void XdgShellPopup::sendRepositioned(uint32_t token)
+{
+    return d_ptr->sendRepositioned(token);
 }
 
 uint32_t XdgShellPopup::configure(const QRect& rect)

@@ -59,11 +59,13 @@ public:
     XdgShellSurface::ConstraintAdjustments constraintAdjustments() const;
 
     void popupDone();
+    void sendRepositioned(uint32_t token);
 
 Q_SIGNALS:
     void configureAcknowledged(uint32_t serial);
     void grabRequested(Seat* seat, uint32_t serial);
     void resourceDestroyed();
+    void repositionRequested(XdgShell* positioner, uint32_t token);
 
 private:
     friend class XdgShellSurface;
