@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "keyboard.h"
+#include "logging.h"
 
 #include "wayland/resource.h"
 
@@ -46,8 +47,8 @@ struct file_wrap {
     }
     ~file_wrap()
     {
-        if (file) {
-            std::fclose(file);
+        if (file && !std::fclose(file)) {
+            qCWarning(WRAPLAND_SERVER, "Failed to close keymap file %p.", static_cast<void*>(file));
         }
     }
     FILE* file{nullptr};

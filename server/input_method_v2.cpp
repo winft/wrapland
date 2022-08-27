@@ -8,6 +8,7 @@
 #include "input_method_v2_p.h"
 
 #include "display.h"
+#include "logging.h"
 #include "seat_p.h"
 #include "surface_p.h"
 #include "text_input_v3_p.h"
@@ -260,9 +261,12 @@ void input_method_keyboard_grab_v2::set_keymap(std::string const& content)
 {
     auto tmpf = std::tmpfile();
 
-    std::fputs(content.data(), tmpf);
-    std::rewind(tmpf);
+    if (auto rc = std::fputs(content.data(), tmpf); rc < 0) {
+        qCWarning(WRAPLAND_SERVER, "Failed to set input-method keymap with %d.", rc);
+        // TODO(romangg): Handle error by closing file here and returning?
+    }
 
+    std::rewind(tmpf);
     d_ptr->send<zwp_input_method_keyboard_grab_v2_send_keymap>(
         WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, fileno(tmpf), content.size());
     d_ptr->keymap = file_wrap(tmpf);

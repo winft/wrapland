@@ -102,9 +102,12 @@ void Keyboard::setKeymap(char const* content)
 {
     auto tmpf = std::tmpfile();
 
-    std::fputs(content, tmpf);
-    std::rewind(tmpf);
+    if (auto rc = std::fputs(content, tmpf); rc < 0) {
+        qCWarning(WRAPLAND_SERVER, "Failed to set keyboard keymap with %d.", rc);
+        // TODO(romangg): Handle error by closing file here and returning?
+    }
 
+    std::rewind(tmpf);
     d_ptr->sendKeymap(fileno(tmpf), strlen(content));
     d_ptr->keymap = file_wrap(tmpf);
     d_ptr->needs_keymap_update = false;
