@@ -76,7 +76,7 @@ private:
     friend class FakeInput;
     class Private;
 
-    explicit FakeInputDevice(std::unique_ptr<Private> p);
+    explicit FakeInputDevice(std::unique_ptr<Private> d_ptr);
     std::unique_ptr<Private> d_ptr;
 };
 

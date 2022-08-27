@@ -41,7 +41,7 @@ public:
             uint32_t id,
             XdgShell* shell,
             Surface* surface,
-            XdgShellSurface* q);
+            XdgShellSurface* q_ptr);
 
     // Implement here?
     void close();
@@ -78,8 +78,8 @@ private:
     static void ackConfigureCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t serial);
     static void setWindowGeometryCallback(wl_client* wlClient,
                                           wl_resource* wlResource,
-                                          int32_t x,
-                                          int32_t y,
+                                          int32_t pos_x,
+                                          int32_t pos_y,
                                           int32_t width,
                                           int32_t height);
 

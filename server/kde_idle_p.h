@@ -43,7 +43,7 @@ using KdeIdleBind = Wayland::Bind<KdeIdleGlobal>;
 class KdeIdle::Private : public KdeIdleGlobal
 {
 public:
-    Private(Display* display, KdeIdle* q);
+    Private(Display* display, KdeIdle* q_ptr);
     ~Private() override;
     int inhibitCount = 0;
     std::vector<IdleTimeout*> idleTimeouts;
@@ -83,7 +83,7 @@ public:
             uint32_t id,
             Seat* seat,
             KdeIdle* manager,
-            IdleTimeout* q);
+            IdleTimeout* q_ptr);
 
     ~Private() override;
     void setup(uint32_t timeout);

@@ -43,7 +43,7 @@ using ShadowManagerBind = Wayland::Bind<ShadowManagerGlobal>;
 class ShadowManager::Private : public ShadowManagerGlobal
 {
 public:
-    Private(Display* display, ShadowManager* qptr);
+    Private(Display* display, ShadowManager* q_ptr);
 
 private:
     static void createCallback(ShadowManagerBind* bind, uint32_t id, wl_resource* surface);
@@ -55,7 +55,7 @@ private:
 class Shadow::Private : public Wayland::Resource<Shadow>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Shadow* q);
+    Private(Client* client, uint32_t version, uint32_t id, Shadow* q_ptr);
     ~Private() override;
 
     enum class AttachSide {

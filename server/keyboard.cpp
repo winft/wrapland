@@ -34,10 +34,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Keyboard::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Keyboard* q)
-    : Wayland::Resource<Keyboard>(client, version, id, &wl_keyboard_interface, &s_interface, q)
+Keyboard::Private::Private(Client* client,
+                           uint32_t version,
+                           uint32_t id,
+                           Seat* _seat,
+                           Keyboard* q_ptr)
+    : Wayland::Resource<Keyboard>(client, version, id, &wl_keyboard_interface, &s_interface, q_ptr)
     , seat(_seat)
-    , q_ptr{q}
+    , q_ptr{q_ptr}
 {
 }
 

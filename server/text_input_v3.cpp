@@ -187,8 +187,11 @@ uint32_t convert_change_cause(text_input_v3_change_cause cause)
     }
 }
 
-text_input_manager_v3::Private::Private(Display* display, text_input_manager_v3* q)
-    : text_input_manager_v3_global(q, display, &zwp_text_input_manager_v3_interface, &s_interface)
+text_input_manager_v3::Private::Private(Display* display, text_input_manager_v3* q_ptr)
+    : text_input_manager_v3_global(q_ptr,
+                                   display,
+                                   &zwp_text_input_manager_v3_interface,
+                                   &s_interface)
 {
     create();
 }
@@ -288,13 +291,13 @@ void text_input_v3::Private::set_content_type_callback([[maybe_unused]] wl_clien
 
 void text_input_v3::Private::set_cursor_rectangle_callback([[maybe_unused]] wl_client* wlClient,
                                                            wl_resource* wlResource,
-                                                           int32_t x,
-                                                           int32_t y,
+                                                           int32_t pos_x,
+                                                           int32_t pos_y,
                                                            int32_t width,
                                                            int32_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->pending.cursor_rectangle = QRect(x, y, width, height);
+    priv->pending.cursor_rectangle = QRect(pos_x, pos_y, width, height);
 }
 
 void text_input_v3::Private::set_text_change_cause_callback([[maybe_unused]] wl_client* wlClient,

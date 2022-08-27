@@ -16,8 +16,8 @@ static T* interfaceForSurface(Surface* surface, std::vector<T*> const& interface
         return nullptr;
     }
 
-    auto it = std::find_if(interfaces.begin(), interfaces.end(), [surface](auto const* c) {
-        return surface->client() == c->client();
+    auto it = std::find_if(interfaces.begin(), interfaces.end(), [surface](auto iface) {
+        return surface->client() == iface->client();
     });
     return it == interfaces.end() ? nullptr : *it;
 }
@@ -69,9 +69,9 @@ void remove_all(V& container, T const& arg)
     container.erase(std::remove(container.begin(), container.end(), arg), container.end());
 }
 template<typename V, typename F>
-void remove_all_if(V& container, F&& f)
+void remove_all_if(V& container, F&& condition)
 {
-    container.erase(std::remove_if(container.begin(), container.end(), f), container.end());
+    container.erase(std::remove_if(container.begin(), container.end(), condition), container.end());
 }
 template<typename V, typename T>
 bool remove_one(V& container, T const& arg)

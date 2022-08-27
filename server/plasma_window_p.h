@@ -47,7 +47,7 @@ using PlasmaWindowManagerBind = Wayland::Bind<PlasmaWindowManagerGlobal>;
 class PlasmaWindowManager::Private : public PlasmaWindowManagerGlobal
 {
 public:
-    Private(Display* display, PlasmaWindowManager* qptr);
+    Private(Display* display, PlasmaWindowManager* q_ptr);
     void sendShowingDesktopState();
 
     void bindInit(PlasmaWindowManagerBind* bind) override;
@@ -71,7 +71,7 @@ private:
 class PlasmaWindow::Private
 {
 public:
-    Private(PlasmaWindowManager* manager, PlasmaWindow* q);
+    Private(PlasmaWindowManager* manager, PlasmaWindow* q_ptr);
     ~Private();
 
     void createResource(uint32_t version, uint32_t id, Wayland::Client* client, bool temporary);
@@ -141,7 +141,7 @@ public:
             uint32_t version,
             uint32_t id,
             PlasmaWindow* window,
-            PlasmaWindowRes* q);
+            PlasmaWindowRes* q_ptr);
 
     void unmap();
 
@@ -158,8 +158,8 @@ private:
     static void setMinimizedGeometryCallback(wl_client* client,
                                              wl_resource* resource,
                                              wl_resource* wlPanel,
-                                             uint32_t x,
-                                             uint32_t y,
+                                             uint32_t pos_x,
+                                             uint32_t pos_y,
                                              uint32_t width,
                                              uint32_t height);
     static void

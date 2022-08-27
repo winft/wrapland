@@ -37,7 +37,7 @@ using PointerGesturesV1Bind = Wayland::Bind<PointerGesturesV1Global>;
 class PointerGesturesV1::Private : public PointerGesturesV1Global
 {
 public:
-    Private(PointerGesturesV1* q, Display* display);
+    Private(PointerGesturesV1* q_ptr, Display* display);
 
 private:
     static void
@@ -76,7 +76,7 @@ public:
             uint32_t version,
             uint32_t id,
             Pointer* _pointer,
-            PointerSwipeGestureV1* q);
+            PointerSwipeGestureV1* q_ptr);
 
     Pointer* pointer;
 
@@ -119,7 +119,7 @@ public:
             uint32_t version,
             uint32_t id,
             Pointer* pointer,
-            PointerPinchGestureV1* q);
+            PointerPinchGestureV1* q_ptr);
 
     Pointer* pointer;
 

@@ -35,7 +35,7 @@ class RelativePointerV1;
 class Cursor::Private
 {
 public:
-    Private(Cursor* q, Pointer* _pointer);
+    Private(Cursor* q_ptr, Pointer* _pointer);
 
     Pointer* pointer;
     quint32 enteredSerial = 0;
@@ -51,7 +51,7 @@ private:
 class Pointer::Private : public Wayland::Resource<Pointer>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Pointer* q);
+    Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Pointer* q_ptr);
 
     Seat* seat;
 

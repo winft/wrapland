@@ -28,7 +28,7 @@ OutputChangesetV1::Private::Private(OutputDeviceV1* outputDevice, OutputChangese
     , modeId{device->output()->mode_id()}
     , transform{device->output()->transform()}
     , geometry{device->output()->geometry()}
-    , q{parent}
+    , q_ptr{parent}
 {
 }
 

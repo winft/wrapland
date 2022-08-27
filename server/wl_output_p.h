@@ -35,7 +35,7 @@ using WlOutputBind = Wayland::Bind<WlOutputGlobal>;
 class WlOutput::Private : public WlOutputGlobal
 {
 public:
-    Private(Output* output, Display* display, WlOutput* q);
+    Private(Output* output, Display* display, WlOutput* q_ptr);
 
     bool broadcast();
     void done();

@@ -36,8 +36,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-PointerGesturesV1::Private::Private(PointerGesturesV1* q, Display* display)
-    : Wayland::Global<PointerGesturesV1>(q,
+PointerGesturesV1::Private::Private(PointerGesturesV1* q_ptr, Display* display)
+    : Wayland::Global<PointerGesturesV1>(q_ptr,
                                          display,
                                          &zwp_pointer_gestures_v1_interface,
                                          &s_interface)
@@ -92,13 +92,13 @@ PointerSwipeGestureV1::Private::Private(Client* client,
                                         uint32_t version,
                                         uint32_t id,
                                         Pointer* _pointer,
-                                        PointerSwipeGestureV1* q)
+                                        PointerSwipeGestureV1* q_ptr)
     : Wayland::Resource<PointerSwipeGestureV1>(client,
                                                version,
                                                id,
                                                &zwp_pointer_gesture_swipe_v1_interface,
                                                &s_interface,
-                                               q)
+                                               q_ptr)
     , pointer(_pointer)
 {
 }
@@ -151,13 +151,13 @@ PointerPinchGestureV1::Private::Private(Client* client,
                                         uint32_t version,
                                         uint32_t id,
                                         Pointer* _pointer,
-                                        PointerPinchGestureV1* q)
+                                        PointerPinchGestureV1* q_ptr)
     : Wayland::Resource<PointerPinchGestureV1>(client,
                                                version,
                                                id,
                                                &zwp_pointer_gesture_pinch_v1_interface,
                                                &s_interface,
-                                               q)
+                                               q_ptr)
     , pointer(_pointer)
 {
 }

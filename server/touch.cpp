@@ -36,7 +36,7 @@ namespace Wrapland::Server
 class Touch::Private : public Wayland::Resource<Touch>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Seat* seat, Touch* q);
+    Private(Client* client, uint32_t version, uint32_t id, Seat* seat, Touch* q_ptr);
 
     Seat* seat;
 
@@ -46,8 +46,8 @@ private:
 
 const struct wl_touch_interface Touch::Private::s_interface = {destroyCallback};
 
-Touch::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* seat, Touch* q)
-    : Wayland::Resource<Touch>(client, version, id, &wl_touch_interface, &s_interface, q)
+Touch::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* seat, Touch* q_ptr)
+    : Wayland::Resource<Touch>(client, version, id, &wl_touch_interface, &s_interface, q_ptr)
     , seat(seat)
 {
 }

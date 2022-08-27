@@ -35,10 +35,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Output::Private::Private(Display* display, Output* q)
+Output::Private::Private(Display* display, Output* q_ptr)
     : display_handle(display)
-    , device{new OutputDeviceV1(q, display)}
-    , q_ptr{q}
+    , device{new OutputDeviceV1(q_ptr, display)}
+    , q_ptr{q_ptr}
 {
 }
 

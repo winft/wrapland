@@ -28,13 +28,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-OutputDeviceV1::Private::Private(Output* output, Display* display, OutputDeviceV1* q)
-    : OutputDeviceV1Global(q, display, &zkwinft_output_device_v1_interface, nullptr)
+OutputDeviceV1::Private::Private(Output* output, Display* display, OutputDeviceV1* q_ptr)
+    : OutputDeviceV1Global(q_ptr, display, &zkwinft_output_device_v1_interface, nullptr)
     , displayHandle{display}
     , output(output)
 {
     create();
-    displayHandle->add_output_device_v1(q);
+    displayHandle->add_output_device_v1(q_ptr);
 }
 
 std::tuple<char const*, char const*, char const*, char const*, char const*, int32_t, int32_t>

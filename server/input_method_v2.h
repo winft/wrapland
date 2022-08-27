@@ -27,7 +27,7 @@ class WRAPLANDSERVER_EXPORT input_method_manager_v2 : public QObject
 {
     Q_OBJECT
 public:
-    explicit input_method_manager_v2(Display* d);
+    explicit input_method_manager_v2(Display* display);
     ~input_method_manager_v2() override;
 
 private:

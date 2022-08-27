@@ -45,8 +45,8 @@ const struct org_kde_plasma_window_management_interface PlasmaWindowManager::Pri
         getWindowCallback,
 };
 
-PlasmaWindowManager::Private::Private(Display* display, PlasmaWindowManager* qptr)
-    : PlasmaWindowManagerGlobal(qptr,
+PlasmaWindowManager::Private::Private(Display* display, PlasmaWindowManager* q_ptr)
+    : PlasmaWindowManagerGlobal(q_ptr,
                                 display,
                                 &org_kde_plasma_window_management_interface,
                                 &s_interface)
@@ -186,9 +186,9 @@ PlasmaVirtualDesktopManager* PlasmaWindowManager::virtualDesktopManager() const
 
 /////////////////////////// Plasma Window ///////////////////////////
 
-PlasmaWindow::Private::Private(PlasmaWindowManager* manager, PlasmaWindow* q)
+PlasmaWindow::Private::Private(PlasmaWindowManager* manager, PlasmaWindow* q_ptr)
     : manager(manager)
-    , q_ptr(q)
+    , q_ptr{q_ptr}
 {
 }
 
@@ -659,13 +659,13 @@ PlasmaWindowRes::Private::Private(Wayland::Client* client,
                                   uint32_t version,
                                   uint32_t id,
                                   PlasmaWindow* window,
-                                  PlasmaWindowRes* q)
+                                  PlasmaWindowRes* q_ptr)
     : Wayland::Resource<PlasmaWindowRes>(client,
                                          version,
                                          id,
                                          &org_kde_plasma_window_interface,
                                          &s_interface,
-                                         q)
+                                         q_ptr)
     , window(window)
 {
 }
@@ -879,8 +879,8 @@ void PlasmaWindowRes::Private::setStateCallback([[maybe_unused]] wl_client* wlCl
 void PlasmaWindowRes::Private::setMinimizedGeometryCallback([[maybe_unused]] wl_client* wlClient,
                                                             wl_resource* wlResource,
                                                             wl_resource* wlPanel,
-                                                            uint32_t x,
-                                                            uint32_t y,
+                                                            uint32_t pos_x,
+                                                            uint32_t pos_y,
                                                             uint32_t width,
                                                             uint32_t height)
 {
@@ -890,8 +890,8 @@ void PlasmaWindowRes::Private::setMinimizedGeometryCallback([[maybe_unused]] wl_
     }
 
     auto panel = Wayland::Resource<Surface>::get_handle(wlPanel);
-    auto const rect = QRect(static_cast<int>(x),
-                            static_cast<int>(y),
+    auto const rect = QRect(static_cast<int>(pos_x),
+                            static_cast<int>(pos_y),
                             static_cast<int>(width),
                             static_cast<int>(height));
 

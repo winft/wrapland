@@ -34,7 +34,7 @@ namespace Wrapland::Server
 class XdgShellToplevel::Private : public Wayland::Resource<XdgShellToplevel>
 {
 public:
-    Private(uint32_t version, uint32_t id, XdgShellSurface* surface, XdgShellToplevel* q);
+    Private(uint32_t version, uint32_t id, XdgShellSurface* surface, XdgShellToplevel* q_ptr);
 
     void setWindowGeometry(QRect const& rect);
 
@@ -73,8 +73,8 @@ private:
                                        wl_resource* wlResource,
                                        wl_resource* wlSeat,
                                        uint32_t serial,
-                                       int32_t x,
-                                       int32_t y);
+                                       int32_t pos_x,
+                                       int32_t pos_y);
     static void
     setMaxSizeCallback(wl_client* wlClient, wl_resource* wlResource, int32_t width, int32_t height);
     static void

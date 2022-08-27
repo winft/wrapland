@@ -30,8 +30,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-WlOutput::Private::Private(Output* output, Display* display, WlOutput* q)
-    : WlOutputGlobal(q, display, &wl_output_interface, &s_interface)
+WlOutput::Private::Private(Output* output, Display* display, WlOutput* q_ptr)
+    : WlOutputGlobal(q_ptr, display, &wl_output_interface, &s_interface)
     , displayHandle(display)
     , output(output)
 {

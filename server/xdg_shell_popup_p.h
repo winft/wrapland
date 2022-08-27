@@ -38,7 +38,7 @@ public:
             uint32_t id,
             XdgShellSurface* surface,
             XdgShellSurface* parent,
-            XdgShellPopup* q);
+            XdgShellPopup* q_ptr);
 
     uint32_t configure(QRect const& rect);
     void ackConfigure(uint32_t serial);

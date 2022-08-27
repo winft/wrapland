@@ -66,7 +66,7 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    explicit Appmenu(Client* client, uint32_t version, uint32_t id, Surface* s);
+    explicit Appmenu(Client* client, uint32_t version, uint32_t id, Surface* surface);
     friend class AppmenuManager;
 
     class Private;

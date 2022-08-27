@@ -31,8 +31,8 @@ const struct zxdg_output_manager_v1_interface XdgOutputManager::Private::s_inter
     cb<getXdgOutputCallback>,
 };
 
-XdgOutputManager::Private::Private(Display* display, XdgOutputManager* qptr)
-    : XdgOutputManagerGlobal(qptr, display, &zxdg_output_manager_v1_interface, &s_interface)
+XdgOutputManager::Private::Private(Display* display, XdgOutputManager* q_ptr)
+    : XdgOutputManagerGlobal(q_ptr, display, &zxdg_output_manager_v1_interface, &s_interface)
 {
     create();
 }
@@ -74,12 +74,12 @@ void XdgOutputManager::Private::getXdgOutputCallback(XdgOutputManagerBind* bind,
     });
 }
 
-XdgOutput::Private::Private(Output* output, Display* display, XdgOutput* q)
+XdgOutput::Private::Private(Output* output, Display* display, XdgOutput* q_ptr)
     : output{output}
     , manager{display->xdgOutputManager()}
 {
     assert(manager->d_ptr->outputs.find(output) == manager->d_ptr->outputs.end());
-    manager->d_ptr->outputs[output] = q;
+    manager->d_ptr->outputs[output] = q_ptr;
 }
 
 bool XdgOutput::Private::broadcast()
@@ -169,13 +169,13 @@ XdgOutput::XdgOutput(Output* output, Display* display)
 
 XdgOutput::~XdgOutput() = default;
 
-XdgOutputV1::Private::Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q)
+XdgOutputV1::Private::Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q_ptr)
     : Wayland::Resource<XdgOutputV1>(client,
                                      version,
                                      id,
                                      &zxdg_output_v1_interface,
                                      &s_interface,
-                                     q)
+                                     q_ptr)
 {
 }
 

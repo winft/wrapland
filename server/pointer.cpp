@@ -62,8 +62,12 @@ void Pointer::Private::setCursorCallback([[maybe_unused]] wl_client* wlClient,
     priv->setCursor(serial, surface, QPoint(hotspot_x, hotspot_y));
 }
 
-Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Pointer* q)
-    : Wayland::Resource<Pointer>(client, version, id, &wl_pointer_interface, &s_interface, q)
+Pointer::Private::Private(Client* client,
+                          uint32_t version,
+                          uint32_t id,
+                          Seat* _seat,
+                          Pointer* q_ptr)
+    : Wayland::Resource<Pointer>(client, version, id, &wl_pointer_interface, &s_interface, q_ptr)
     , seat{_seat}
 {
 }
@@ -386,13 +390,15 @@ void Pointer::frame()
     d_ptr->sendFrame();
 }
 
-Cursor::Private::Private(Cursor* q, Pointer* _pointer)
+Cursor::Private::Private(Cursor* q_ptr, Pointer* _pointer)
     : pointer(_pointer)
-    , q_ptr(q)
+    , q_ptr{q_ptr}
 {
 }
 
-void Cursor::Private::update(QPointer<Surface> const& s, quint32 serial, QPoint const& _hotspot)
+void Cursor::Private::update(QPointer<Surface> const& surface,
+                             quint32 serial,
+                             QPoint const& _hotspot)
 {
     bool emitChanged = false;
     if (enteredSerial != serial) {
@@ -405,14 +411,15 @@ void Cursor::Private::update(QPointer<Surface> const& s, quint32 serial, QPoint 
         emitChanged = true;
         Q_EMIT q_ptr->hotspotChanged();
     }
-    if (surface != s) {
+    if (this->surface != surface) {
         if (!surface.isNull()) {
             QObject::disconnect(surface.data(), &Surface::committed, q_ptr, nullptr);
         }
-        surface = s;
+
+        this->surface = surface;
         if (!surface.isNull()) {
             QObject::connect(surface.data(), &Surface::committed, q_ptr, [this] {
-                if (!surface->state().damage.isEmpty()) {
+                if (!this->surface->state().damage.isEmpty()) {
                     Q_EMIT q_ptr->changed();
                 }
             });

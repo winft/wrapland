@@ -40,8 +40,8 @@ const struct org_kde_kwin_contrast_manager_interface ContrastManager::Private::s
     unsetCallback,
 };
 
-ContrastManager::Private::Private(Display* display, ContrastManager* q)
-    : ContrastManagerGlobal(q, display, &org_kde_kwin_contrast_manager_interface, &s_interface)
+ContrastManager::Private::Private(Display* display, ContrastManager* q_ptr)
+    : ContrastManagerGlobal(q_ptr, display, &org_kde_kwin_contrast_manager_interface, &s_interface)
 {
     create();
 }
@@ -88,13 +88,13 @@ const struct org_kde_kwin_contrast_interface Contrast::Private::s_interface = {
     destroyCallback,
 };
 
-Contrast::Private::Private(Client* client, uint32_t version, uint32_t id, Contrast* q)
+Contrast::Private::Private(Client* client, uint32_t version, uint32_t id, Contrast* q_ptr)
     : Wayland::Resource<Contrast>(client,
                                   version,
                                   id,
                                   &org_kde_kwin_contrast_interface,
                                   &s_interface,
-                                  q)
+                                  q_ptr)
 {
 }
 

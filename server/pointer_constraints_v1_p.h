@@ -38,7 +38,7 @@ using PointerConstraintsV1Bind = Wayland::Bind<PointerConstraintsV1Global>;
 class PointerConstraintsV1::Private : public PointerConstraintsV1Global
 {
 public:
-    Private(PointerConstraintsV1* q, Display* display);
+    Private(PointerConstraintsV1* q_ptr, Display* display);
 
     static void destroyCallback(wl_client* client, wl_resource* resource);
     static void lockPointerCallback(PointerConstraintsV1Bind* bind,
@@ -71,7 +71,7 @@ private:
 class LockedPointerV1::Private : public Wayland::Resource<LockedPointerV1>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, LockedPointerV1* q);
+    Private(Client* client, uint32_t version, uint32_t id, LockedPointerV1* q_ptr);
 
     void update();
     void commit();
@@ -102,7 +102,7 @@ private:
 class ConfinedPointerV1::Private : public Wayland::Resource<ConfinedPointerV1>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, ConfinedPointerV1* q);
+    Private(Client* client, uint32_t version, uint32_t id, ConfinedPointerV1* q_ptr);
 
     void update();
     void commit();

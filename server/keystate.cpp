@@ -25,8 +25,8 @@ namespace Wrapland::Server
 const struct org_kde_kwin_keystate_interface KeyState::Private::s_interface
     = {KeyState::Private::cb<fetchStatesCallback>};
 
-KeyState::Private::Private(Display* display, KeyState* q)
-    : Wayland::Global<KeyState>(q, display, &org_kde_kwin_keystate_interface, &s_interface)
+KeyState::Private::Private(Display* display, KeyState* q_ptr)
+    : Wayland::Global<KeyState>(q_ptr, display, &org_kde_kwin_keystate_interface, &s_interface)
 {
     create();
 }

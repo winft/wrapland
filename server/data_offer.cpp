@@ -37,10 +37,18 @@ const struct wl_data_offer_interface data_offer::Private::s_interface = {
     setActionsCallback,
 };
 
-data_offer::Private::Private(Client* client, uint32_t version, data_source* source, data_offer* q)
-    : Wayland::Resource<data_offer>(client, version, 0, &wl_data_offer_interface, &s_interface, q)
+data_offer::Private::Private(Client* client,
+                             uint32_t version,
+                             data_source* source,
+                             data_offer* q_ptr)
+    : Wayland::Resource<data_offer>(client,
+                                    version,
+                                    0,
+                                    &wl_data_offer_interface,
+                                    &s_interface,
+                                    q_ptr)
     , source(source)
-    , q_ptr{q}
+    , q_ptr{q_ptr}
 {
     // TODO(unknown author): connect to new selections.
 }

@@ -32,8 +32,8 @@ const struct org_kde_kwin_dpms_manager_interface DpmsManager::Private::s_interfa
     cb<getDpmsCallback>,
 };
 
-DpmsManager::Private::Private(Display* display, DpmsManager* q)
-    : DpmsManagerGlobal(q, display, &org_kde_kwin_dpms_manager_interface, &s_interface)
+DpmsManager::Private::Private(Display* display, DpmsManager* q_ptr)
+    : DpmsManagerGlobal(q_ptr, display, &org_kde_kwin_dpms_manager_interface, &s_interface)
 {
     create();
 }
@@ -63,8 +63,13 @@ const struct org_kde_kwin_dpms_interface Dpms::Private::s_interface = {
     destroyCallback,
 };
 
-Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, WlOutput* output, Dpms* q)
-    : Wayland::Resource<Dpms>(client, version, id, &org_kde_kwin_dpms_interface, &s_interface, q)
+Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, WlOutput* output, Dpms* q_ptr)
+    : Wayland::Resource<Dpms>(client,
+                              version,
+                              id,
+                              &org_kde_kwin_dpms_interface,
+                              &s_interface,
+                              q_ptr)
     , output(output)
 {
 }

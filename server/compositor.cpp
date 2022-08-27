@@ -39,7 +39,7 @@ using CompositorBind = Wayland::Bind<CompositorGlobal>;
 class Compositor::Private : public CompositorGlobal
 {
 public:
-    Private(Compositor* q, Display* display);
+    Private(Compositor* q_ptr, Display* display);
     ~Private() override;
 
     std::vector<Surface*> surfaces;
@@ -51,8 +51,8 @@ private:
     static const struct wl_compositor_interface s_interface;
 };
 
-Compositor::Private::Private(Compositor* q, Display* display)
-    : CompositorGlobal(q, display, &wl_compositor_interface, &s_interface)
+Compositor::Private::Private(Compositor* q_ptr, Display* display)
+    : CompositorGlobal(q_ptr, display, &wl_compositor_interface, &s_interface)
 {
 }
 

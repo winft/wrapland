@@ -44,13 +44,13 @@ OutputConfigurationV1::Private::Private(Client* client,
                                         uint32_t version,
                                         uint32_t id,
                                         OutputManagementV1* manager,
-                                        OutputConfigurationV1* q)
+                                        OutputConfigurationV1* q_ptr)
     : Wayland::Resource<OutputConfigurationV1>(client,
                                                version,
                                                id,
                                                &zkwinft_output_configuration_v1_interface,
                                                &s_interface,
-                                               q)
+                                               q_ptr)
     , manager{manager}
 {
 }
@@ -76,8 +76,8 @@ void OutputConfigurationV1::Private::modeCallback([[maybe_unused]] wl_client* wl
     auto outputDevice = OutputDeviceV1Global::get_handle(wlOutputDevice);
 
     bool modeValid = false;
-    for (auto const& m : outputDevice->output()->modes()) {
-        if (m.id == mode_id) {
+    for (auto const& mode : outputDevice->output()->modes()) {
+        if (mode.id == mode_id) {
             modeValid = true;
             break;
         }
@@ -127,16 +127,16 @@ void OutputConfigurationV1::Private::transformCallback([[maybe_unused]] wl_clien
 void OutputConfigurationV1::Private::geometryCallback([[maybe_unused]] wl_client* wlClient,
                                                       wl_resource* wlResource,
                                                       wl_resource* wlOutputDevice,
-                                                      wl_fixed_t x,
-                                                      wl_fixed_t y,
+                                                      wl_fixed_t pos_x,
+                                                      wl_fixed_t pos_y,
                                                       wl_fixed_t width,
                                                       wl_fixed_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
     auto outputDevice = OutputDeviceV1Global::get_handle(wlOutputDevice);
 
-    const QRectF geo(wl_fixed_to_double(x),
-                     wl_fixed_to_double(y),
+    const QRectF geo(wl_fixed_to_double(pos_x),
+                     wl_fixed_to_double(pos_y),
                      wl_fixed_to_double(width),
                      wl_fixed_to_double(height));
 

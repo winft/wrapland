@@ -141,12 +141,12 @@ drm_lease_connector_v1::Private::Private(std::string name,
                                          std::string description,
                                          int id,
                                          drm_lease_device_v1* device,
-                                         drm_lease_connector_v1* q)
+                                         drm_lease_connector_v1* q_ptr)
     : name{std::move(name)}
     , description{std::move(description)}
     , connector_id{id}
     , device{device}
-    , q_ptr{q}
+    , q_ptr{q_ptr}
 {
 }
 
@@ -240,13 +240,13 @@ drm_lease_request_v1::Private::Private(Client* client,
                                        uint32_t version,
                                        uint32_t id,
                                        drm_lease_device_v1* device,
-                                       drm_lease_request_v1* qptr)
+                                       drm_lease_request_v1* q_ptr)
     : Wayland::Resource<drm_lease_request_v1>(client,
                                               version,
                                               id,
                                               &wp_drm_lease_request_v1_interface,
                                               &s_interface,
-                                              qptr)
+                                              q_ptr)
     , device{device}
 {
 }
@@ -332,13 +332,13 @@ drm_lease_v1::Private::Private(Client* client,
                                uint32_t id,
                                std::vector<drm_lease_connector_v1*> connectors,
                                drm_lease_device_v1* device,
-                               drm_lease_v1* q)
+                               drm_lease_v1* q_ptr)
     : Wayland::Resource<drm_lease_v1>(client,
                                       version,
                                       id,
                                       &wp_drm_lease_v1_interface,
                                       &s_interface,
-                                      q)
+                                      q_ptr)
     , connectors{std::move(connectors)}
     , device{device}
 {

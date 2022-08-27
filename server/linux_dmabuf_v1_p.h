@@ -42,7 +42,7 @@ using linux_dmabuf_v1_bind = Wayland::Bind<linux_dmabuf_v1_global>;
 class linux_dmabuf_v1::Private : public linux_dmabuf_v1_global
 {
 public:
-    Private(linux_dmabuf_v1* q, Display* display, linux_dmabuf_import_v1 import);
+    Private(linux_dmabuf_v1* q_ptr, Display* display, linux_dmabuf_import_v1 import);
     ~Private() override;
 
     void bindInit(linux_dmabuf_v1_bind* bind) final;
@@ -80,7 +80,7 @@ public:
     linux_dmabuf_buffer_v1_res_impl(Client* client,
                                     uint32_t version,
                                     uint32_t id,
-                                    linux_dmabuf_buffer_v1_res* q);
+                                    linux_dmabuf_buffer_v1_res* q_ptr);
 
     static struct wl_buffer_interface const s_interface;
 };
@@ -92,7 +92,7 @@ public:
                                 uint32_t version,
                                 uint32_t id,
                                 linux_dmabuf_v1::Private* dmabuf,
-                                linux_dmabuf_params_v1* q);
+                                linux_dmabuf_params_v1* q_ptr);
     ~linux_dmabuf_params_v1_impl() override;
 
     void add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride, uint64_t modifier);

@@ -46,13 +46,13 @@ XdgShellPopup::Private::Private(uint32_t version,
                                 uint32_t id,
                                 XdgShellSurface* surface,
                                 XdgShellSurface* parent,
-                                XdgShellPopup* q)
+                                XdgShellPopup* q_ptr)
     : Wayland::Resource<XdgShellPopup>(surface->d_ptr->client,
                                        version,
                                        id,
                                        &xdg_popup_interface,
                                        &s_interface,
-                                       q)
+                                       q_ptr)
     , shellSurface{surface}
     , parent{parent}
 {
@@ -71,11 +71,11 @@ void XdgShellPopup::Private::ackConfigure(uint32_t serial)
             break;
         }
 
-        uint32_t i = serials.front();
+        auto next_serial = serials.front();
         serials.pop_front();
 
-        Q_EMIT handle->configureAcknowledged(i);
-        if (i == serial) {
+        Q_EMIT handle->configureAcknowledged(next_serial);
+        if (next_serial == serial) {
             break;
         }
     }

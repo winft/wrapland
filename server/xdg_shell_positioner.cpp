@@ -27,13 +27,13 @@ namespace Wrapland::Server
 XdgShellPositioner::Private::Private(Client* client,
                                      uint32_t version,
                                      uint32_t id,
-                                     XdgShellPositioner* q)
+                                     XdgShellPositioner* q_ptr)
     : Wayland::Resource<XdgShellPositioner>(client,
                                             version,
                                             id,
                                             &xdg_positioner_interface,
                                             &s_interface,
-                                            q)
+                                            q_ptr)
 {
 }
 
@@ -60,13 +60,13 @@ void XdgShellPositioner::Private::setSizeCallback([[maybe_unused]] wl_client* wl
 
 void XdgShellPositioner::Private::setAnchorRectCallback([[maybe_unused]] wl_client* wlClient,
                                                         wl_resource* wlResource,
-                                                        int32_t x,
-                                                        int32_t y,
+                                                        int32_t pos_x,
+                                                        int32_t pos_y,
                                                         int32_t width,
                                                         int32_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->anchorRect = QRect(x, y, width, height);
+    priv->anchorRect = QRect(pos_x, pos_y, width, height);
 }
 
 void XdgShellPositioner::Private::setAnchorCallback([[maybe_unused]] wl_client* wlClient,
@@ -185,11 +185,11 @@ void XdgShellPositioner::Private::setConstraintAdjustmentCallback(
 
 void XdgShellPositioner::Private::setOffsetCallback([[maybe_unused]] wl_client* wlClient,
                                                     wl_resource* wlResource,
-                                                    int32_t x,
-                                                    int32_t y)
+                                                    int32_t pos_x,
+                                                    int32_t pos_y)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->anchorOffset = QPoint(x, y);
+    priv->anchorOffset = QPoint(pos_x, pos_y);
 }
 
 XdgShellPositioner::XdgShellPositioner(Client* client, uint32_t version, uint32_t id)

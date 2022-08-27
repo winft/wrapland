@@ -28,7 +28,7 @@ using text_input_manager_v3_bind = Wayland::Bind<text_input_manager_v3_global>;
 class text_input_manager_v3::Private : public text_input_manager_v3_global
 {
 public:
-    Private(Display* display, text_input_manager_v3* q);
+    Private(Display* display, text_input_manager_v3* q_ptr);
 
 private:
     static void
@@ -69,8 +69,8 @@ private:
                                           uint32_t purpose);
     static void set_cursor_rectangle_callback(wl_client* wlClient,
                                               wl_resource* wlResource,
-                                              int32_t x,
-                                              int32_t y,
+                                              int32_t pos_x,
+                                              int32_t pos_y,
                                               int32_t width,
                                               int32_t height);
     static void set_text_change_cause_callback(wl_client* wlClient,

@@ -39,7 +39,7 @@ using XdgShellBind = Wayland::Bind<XdgShellGlobal>;
 class XdgShell::Private : public XdgShellGlobal
 {
 public:
-    Private(XdgShell* q, Display* display);
+    Private(XdgShell* q_ptr, Display* display);
 
     void setupTimer(uint32_t serial);
 

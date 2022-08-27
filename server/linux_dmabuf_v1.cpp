@@ -38,10 +38,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-linux_dmabuf_v1::Private::Private(linux_dmabuf_v1* q,
+linux_dmabuf_v1::Private::Private(linux_dmabuf_v1* q_ptr,
                                   Display* display,
                                   linux_dmabuf_import_v1 import)
-    : linux_dmabuf_v1_global(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
+    : linux_dmabuf_v1_global(q_ptr, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
     , import{std::move(import)}
 {
     create();
@@ -144,13 +144,13 @@ linux_dmabuf_params_v1_impl::linux_dmabuf_params_v1_impl(Client* client,
                                                          uint32_t version,
                                                          uint32_t id,
                                                          linux_dmabuf_v1::Private* dmabuf,
-                                                         linux_dmabuf_params_v1* q)
+                                                         linux_dmabuf_params_v1* q_ptr)
     : Wayland::Resource<linux_dmabuf_params_v1>(client,
                                                 version,
                                                 id,
                                                 &zwp_linux_buffer_params_v1_interface,
                                                 &s_interface,
-                                                q)
+                                                q_ptr)
     , m_dmabuf(dmabuf)
 {
     for (auto& plane : m_planes) {
@@ -417,13 +417,13 @@ linux_dmabuf_buffer_v1_res::linux_dmabuf_buffer_v1_res(
 linux_dmabuf_buffer_v1_res_impl::linux_dmabuf_buffer_v1_res_impl(Client* client,
                                                                  uint32_t version,
                                                                  uint32_t id,
-                                                                 linux_dmabuf_buffer_v1_res* q)
+                                                                 linux_dmabuf_buffer_v1_res* q_ptr)
     : Wayland::Resource<linux_dmabuf_buffer_v1_res>(client,
                                                     version,
                                                     id,
                                                     &wl_buffer_interface,
                                                     &s_interface,
-                                                    q)
+                                                    q_ptr)
 {
 }
 

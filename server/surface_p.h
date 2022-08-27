@@ -67,7 +67,7 @@ public:
 class Surface::Private : public Wayland::Resource<Surface>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Surface* q);
+    Private(Client* client, uint32_t version, uint32_t id, Surface* q_ptr);
     ~Private() override;
 
     void addChild(Subsurface* child);
@@ -160,12 +160,12 @@ private:
     static void attachCallback(wl_client* wlClient,
                                wl_resource* wlResource,
                                wl_resource* buffer,
-                               int32_t sx,
-                               int32_t sy);
+                               int32_t pos_x,
+                               int32_t pos_y);
     static void damageCallback(wl_client* wlClient,
                                wl_resource* wlResource,
-                               int32_t x,
-                               int32_t y,
+                               int32_t pos_x,
+                               int32_t pos_y,
                                int32_t width,
                                int32_t height);
     static void frameCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t callback);
@@ -185,8 +185,8 @@ private:
     // Since version 4.
     static void damageBufferCallback(wl_client* wlClient,
                                      wl_resource* wlResource,
-                                     int32_t x,
-                                     int32_t y,
+                                     int32_t pos_x,
+                                     int32_t pos_y,
                                      int32_t width,
                                      int32_t height);
 

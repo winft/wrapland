@@ -198,7 +198,7 @@ std::optional<ShmImage> ShmImage::get(Buffer* buffer)
     return ShmImage(buffer, imageFormat);
 }
 
-Buffer::Private::Private(Buffer* q,
+Buffer::Private::Private(Buffer* q_ptr,
                          wl_resource* wlResource,
                          Surface* surface,
                          Wayland::Display* display)
@@ -206,7 +206,7 @@ Buffer::Private::Private(Buffer* q,
     , shmBuffer(wl_shm_buffer_get(wlResource))
     , surface(surface)
     , display(display)
-    , q_ptr{q}
+    , q_ptr{q_ptr}
 {
     if (!shmBuffer
         && wl_resource_instance_of(
@@ -215,7 +215,7 @@ Buffer::Private::Private(Buffer* q,
             = Wayland::Resource<linux_dmabuf_buffer_v1_res>::get_handle(resource)->handle.get();
     }
 
-    destroyWrapper.buffer = q;
+    destroyWrapper.buffer = q_ptr;
     destroyWrapper.listener.notify = destroyListenerCallback;
     destroyWrapper.listener.link.prev = nullptr;
     destroyWrapper.listener.link.next = nullptr;

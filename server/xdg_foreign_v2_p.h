@@ -34,7 +34,7 @@ class XdgImportedV2;
 class Q_DECL_HIDDEN XdgForeign::Private
 {
 public:
-    Private(Display* display, XdgForeign* q);
+    Private(Display* display, XdgForeign* q_ptr);
 
     std::unique_ptr<XdgExporterV2> exporter;
     std::unique_ptr<XdgImporterV2> importer;

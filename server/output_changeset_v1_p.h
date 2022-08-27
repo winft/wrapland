@@ -39,7 +39,7 @@ public:
     Output::Transform transform;
     QRectF geometry;
 
-    OutputChangesetV1* q;
+    OutputChangesetV1* q_ptr;
 };
 
 }

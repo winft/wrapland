@@ -45,8 +45,8 @@ void input_method_manager_v2::Private::get_input_method_callback(input_method_ma
     Q_EMIT seat->input_method_v2_changed();
 }
 
-input_method_manager_v2::Private::Private(Display* display, input_method_manager_v2* q)
-    : input_method_manager_v2_global(q,
+input_method_manager_v2::Private::Private(Display* display, input_method_manager_v2* q_ptr)
+    : input_method_manager_v2_global(q_ptr,
                                      display,
                                      &zwp_input_method_manager_v2_interface,
                                      &s_interface)
@@ -163,14 +163,17 @@ void input_method_v2::Private::grab_keyboard_callback([[maybe_unused]] wl_client
     Q_EMIT priv->q_ptr->keyboard_grabbed(grab);
 }
 
-input_method_v2::Private::Private(Client* client, uint32_t version, uint32_t id, input_method_v2* q)
+input_method_v2::Private::Private(Client* client,
+                                  uint32_t version,
+                                  uint32_t id,
+                                  input_method_v2* q_ptr)
     : Wayland::Resource<input_method_v2>(client,
                                          version,
                                          id,
                                          &zwp_input_method_v2_interface,
                                          &s_interface,
-                                         q)
-    , q_ptr{q}
+                                         q_ptr)
+    , q_ptr{q_ptr}
 {
 }
 
@@ -233,13 +236,13 @@ input_method_keyboard_grab_v2::Private::Private(Client* client,
                                                 uint32_t version,
                                                 uint32_t id,
                                                 Seat* seat,
-                                                input_method_keyboard_grab_v2* q)
+                                                input_method_keyboard_grab_v2* q_ptr)
     : Wayland::Resource<input_method_keyboard_grab_v2>(client,
                                                        version,
                                                        id,
                                                        &zwp_input_method_keyboard_grab_v2_interface,
                                                        &s_interface,
-                                                       q)
+                                                       q_ptr)
     , seat{seat}
 {
 }
@@ -300,13 +303,13 @@ input_method_popup_surface_v2::Private::Private(Client* client,
                                                 uint32_t version,
                                                 uint32_t id,
                                                 Surface* surface,
-                                                input_method_popup_surface_v2* q)
+                                                input_method_popup_surface_v2* q_ptr)
     : Wayland::Resource<input_method_popup_surface_v2>(client,
                                                        version,
                                                        id,
                                                        &zwp_input_popup_surface_v2_interface,
                                                        &s_interface,
-                                                       q)
+                                                       q_ptr)
     , surface{surface}
 {
 }

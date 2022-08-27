@@ -39,7 +39,7 @@ public:
             uint32_t id,
             Surface* surface,
             Surface* parent,
-            Subsurface* q);
+            Subsurface* q_ptr);
 
     /**
      * Initializes the subsurface in relation to its parent. Needs to be after the subsurface
@@ -66,7 +66,7 @@ private:
     void placeBelow(Surface* sibling);
 
     static void
-    setPositionCallback(wl_client* wlClient, wl_resource* wlResource, int32_t x, int32_t y);
+    setPositionCallback(wl_client* wlClient, wl_resource* wlResource, int32_t pos_x, int32_t pos_y);
     static void
     placeAboveCallback(wl_client* wlClient, wl_resource* wlResource, wl_resource* wlSibling);
     static void

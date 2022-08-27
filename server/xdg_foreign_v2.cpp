@@ -42,7 +42,7 @@ class Q_DECL_HIDDEN XdgExporterV2::Private
     : public Wayland::Global<XdgExporterV2, XdgExporterV2Version>
 {
 public:
-    Private(XdgExporterV2* q, Display* display);
+    Private(XdgExporterV2* q_ptr, Display* display);
 
     QHash<QString, XdgExportedV2*> exportedSurfaces;
 
@@ -53,8 +53,8 @@ private:
     static const struct zxdg_exporter_v2_interface s_interface;
 };
 
-XdgExporterV2::Private::Private(XdgExporterV2* q, Display* display)
-    : Wayland::Global<XdgExporterV2, XdgExporterV2Version>(q,
+XdgExporterV2::Private::Private(XdgExporterV2* q_ptr, Display* display)
+    : Wayland::Global<XdgExporterV2, XdgExporterV2Version>(q_ptr,
                                                            display,
                                                            &zxdg_exporter_v2_interface,
                                                            &s_interface)
@@ -113,7 +113,7 @@ class Q_DECL_HIDDEN XdgImporterV2::Private
     : public Wayland::Global<XdgImporterV2, XdgImporterV2Version>
 {
 public:
-    Private(XdgImporterV2* q, Display* display);
+    Private(XdgImporterV2* q_ptr, Display* display);
 
     void parentChange(XdgImportedV2* imported, XdgExportedV2* exported);
 
@@ -174,8 +174,8 @@ void XdgImporterV2::Private::importToplevelCallback([[maybe_unused]] wl_client* 
             });
 }
 
-XdgImporterV2::Private::Private(XdgImporterV2* q, Display* display)
-    : Wayland::Global<XdgImporterV2, XdgImporterV2Version>(q,
+XdgImporterV2::Private::Private(XdgImporterV2* q_ptr, Display* display)
+    : Wayland::Global<XdgImporterV2, XdgImporterV2Version>(q_ptr,
                                                            display,
                                                            &zxdg_importer_v2_interface,
                                                            &s_interface)
@@ -221,7 +221,7 @@ Surface* XdgImporterV2::parentOf(Surface* surface)
 class Q_DECL_HIDDEN XdgExportedV2::Private : public Wayland::Resource<XdgExportedV2>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Surface* surface, XdgExportedV2* q);
+    Private(Client* client, uint32_t version, uint32_t id, Surface* surface, XdgExportedV2* q_ptr);
 
     Surface* exportedSurface;
 
@@ -251,13 +251,13 @@ XdgExportedV2::Private::Private(Client* client,
                                 uint32_t version,
                                 uint32_t id,
                                 Surface* surface,
-                                XdgExportedV2* q)
+                                XdgExportedV2* q_ptr)
     : Wayland::Resource<XdgExportedV2>(client,
                                        version,
                                        id,
                                        &zxdg_exported_v2_interface,
                                        &s_interface,
-                                       q)
+                                       q_ptr)
     , exportedSurface(surface)
 {
 }
@@ -269,7 +269,7 @@ public:
             uint32_t version,
             uint32_t id,
             XdgExportedV2* exported,
-            XdgImportedV2* q);
+            XdgImportedV2* q_ptr);
 
     void setChild(Surface* surface);
 
@@ -361,13 +361,13 @@ XdgImportedV2::Private::Private(Client* client,
                                 uint32_t version,
                                 uint32_t id,
                                 XdgExportedV2* exported,
-                                XdgImportedV2* q)
+                                XdgImportedV2* q_ptr)
     : Wayland::Resource<XdgImportedV2>(client,
                                        version,
                                        id,
                                        &zxdg_imported_v2_interface,
                                        &s_interface,
-                                       q)
+                                       q_ptr)
     , source(exported)
 {
 }

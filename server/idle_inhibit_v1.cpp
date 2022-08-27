@@ -27,8 +27,8 @@ const struct zwp_idle_inhibit_manager_v1_interface IdleInhibitManagerV1::Private
     cb<createInhibitorCallback>,
 };
 
-IdleInhibitManagerV1::Private::Private(Display* display, IdleInhibitManagerV1* q)
-    : Wayland::Global<IdleInhibitManagerV1>(q,
+IdleInhibitManagerV1::Private::Private(Display* display, IdleInhibitManagerV1* q_ptr)
+    : Wayland::Global<IdleInhibitManagerV1>(q_ptr,
                                             display,
                                             &zwp_idle_inhibit_manager_v1_interface,
                                             &s_interface)
@@ -58,13 +58,13 @@ IdleInhibitManagerV1::~IdleInhibitManagerV1() = default;
 const struct zwp_idle_inhibitor_v1_interface IdleInhibitor::Private::s_interface
     = {destroyCallback};
 
-IdleInhibitor::Private::Private(Client* client, uint32_t version, uint32_t id, IdleInhibitor* q)
+IdleInhibitor::Private::Private(Client* client, uint32_t version, uint32_t id, IdleInhibitor* q_ptr)
     : Wayland::Resource<IdleInhibitor>(client,
                                        version,
                                        id,
                                        &zwp_idle_inhibitor_v1_interface,
                                        &s_interface,
-                                       q)
+                                       q_ptr)
 {
 }
 

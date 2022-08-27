@@ -40,7 +40,7 @@ using FakeInputBind = Wayland::Bind<FakeInputGlobal>;
 class FakeInput::Private : public FakeInputGlobal
 {
 public:
-    Private(Display* display, FakeInput* q);
+    Private(Display* display, FakeInput* q_ptr);
     ~Private() override;
 
     std::vector<FakeInputDevice*> devices;
@@ -52,11 +52,14 @@ private:
     static void
     authenticateCallback(FakeInputBind* bind, char const* application, char const* reason);
     static void pointerMotionCallback(FakeInputBind* bind, wl_fixed_t delta_x, wl_fixed_t delta_y);
-    static void pointerMotionAbsoluteCallback(FakeInputBind* bind, wl_fixed_t x, wl_fixed_t y);
+    static void
+    pointerMotionAbsoluteCallback(FakeInputBind* bind, wl_fixed_t pos_x, wl_fixed_t pos_y);
     static void buttonCallback(FakeInputBind* bind, uint32_t button, uint32_t state);
     static void axisCallback(FakeInputBind* bind, uint32_t axis, wl_fixed_t value);
-    static void touchDownCallback(FakeInputBind* bind, quint32 id, wl_fixed_t x, wl_fixed_t y);
-    static void touchMotionCallback(FakeInputBind* bind, quint32 id, wl_fixed_t x, wl_fixed_t y);
+    static void
+    touchDownCallback(FakeInputBind* bind, quint32 id, wl_fixed_t pos_x, wl_fixed_t pos_y);
+    static void
+    touchMotionCallback(FakeInputBind* bind, quint32 id, wl_fixed_t pos_x, wl_fixed_t pos_y);
     static void touchUpCallback(FakeInputBind* bind, quint32 id);
     static void touchCancelCallback(FakeInputBind* bind);
     static void touchFrameCallback(FakeInputBind* bind);

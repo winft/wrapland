@@ -56,7 +56,7 @@ struct file_wrap {
 class Keyboard::Private : public Wayland::Resource<Keyboard>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Keyboard* q);
+    Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Keyboard* q_ptr);
 
     void sendKeymap(int fd, quint32 size);
     void sendModifiers();

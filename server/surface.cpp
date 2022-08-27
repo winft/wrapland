@@ -48,9 +48,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Surface::Private::Private(Client* client, uint32_t version, uint32_t id, Surface* q)
-    : Wayland::Resource<Surface>(client, version, id, &wl_surface_interface, &s_interface, q)
-    , q_ptr{q}
+Surface::Private::Private(Client* client, uint32_t version, uint32_t id, Surface* q_ptr)
+    : Wayland::Resource<Surface>(client, version, id, &wl_surface_interface, &s_interface, q_ptr)
+    , q_ptr{q_ptr}
 {
 }
 
@@ -744,33 +744,33 @@ void Surface::Private::destroyFrameCallback(wl_resource* wlResource)
 void Surface::Private::attachCallback([[maybe_unused]] wl_client* wlClient,
                                       wl_resource* wlResource,
                                       wl_resource* buffer,
-                                      int32_t sx,
-                                      int32_t sy)
+                                      int32_t pos_x,
+                                      int32_t pos_y)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->attachBuffer(buffer, QPoint(sx, sy));
+    priv->attachBuffer(buffer, QPoint(pos_x, pos_y));
 }
 
 void Surface::Private::damageCallback([[maybe_unused]] wl_client* wlClient,
                                       wl_resource* wlResource,
-                                      int32_t x,
-                                      int32_t y,
+                                      int32_t pos_x,
+                                      int32_t pos_y,
                                       int32_t width,
                                       int32_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->damage(QRect(x, y, width, height));
+    priv->damage(QRect(pos_x, pos_y, width, height));
 }
 
 void Surface::Private::damageBufferCallback([[maybe_unused]] wl_client* wlClient,
                                             wl_resource* wlResource,
-                                            int32_t x,
-                                            int32_t y,
+                                            int32_t pos_x,
+                                            int32_t pos_y,
                                             int32_t width,
                                             int32_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->damageBuffer(QRect(x, y, width, height));
+    priv->damageBuffer(QRect(pos_x, pos_y, width, height));
 }
 
 void Surface::Private::frameCallback([[maybe_unused]] wl_client* wlClient,

@@ -54,14 +54,14 @@ data_source::data_source()
 data_source_res_impl::data_source_res_impl(Client* client,
                                            uint32_t version,
                                            uint32_t id,
-                                           data_source_res* q)
+                                           data_source_res* q_ptr)
     : Wayland::Resource<data_source_res>(client,
                                          version,
                                          id,
                                          &wl_data_source_interface,
                                          &s_interface,
-                                         q)
-    , q_ptr{q}
+                                         q_ptr)
+    , q_ptr{q_ptr}
 {
 }
 

@@ -78,7 +78,8 @@ public:
 
 private:
     static void setOutputCallback(wl_client* client, wl_resource* resource, wl_resource* output);
-    static void setPositionCallback(wl_client* client, wl_resource* resource, int32_t x, int32_t y);
+    static void
+    setPositionCallback(wl_client* client, wl_resource* resource, int32_t pos_x, int32_t pos_y);
     static void setRoleCallback(wl_client* client, wl_resource* resource, uint32_t role);
     static void setPanelBehaviorCallback(wl_client* client, wl_resource* resource, uint32_t flag);
     static void setSkipTaskbarCallback(wl_client* client, wl_resource* resource, uint32_t skip);
