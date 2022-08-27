@@ -52,8 +52,9 @@ KeyState::~KeyState() = default;
 
 void KeyState::setState(KeyState::Key key, KeyState::State state)
 {
-    d_ptr->key_states.at(size_t(key)) = state;
-    d_ptr->send<org_kde_kwin_keystate_send_stateChanged>(int(key), int(state));
+    d_ptr->key_states.at(static_cast<size_t>(key)) = state;
+    d_ptr->send<org_kde_kwin_keystate_send_stateChanged>(static_cast<int>(key),
+                                                         static_cast<int>(state));
 }
 
 }

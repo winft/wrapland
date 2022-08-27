@@ -823,7 +823,7 @@ void Surface::Private::bufferTransformCallback([[maybe_unused]] wl_client* wlCli
                                                int32_t transform)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->setTransform(Output::Transform(transform));
+    priv->setTransform(static_cast<Output::Transform>(transform));
 }
 
 void Surface::Private::bufferScaleCallback([[maybe_unused]] wl_client* wlClient,

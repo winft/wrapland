@@ -183,7 +183,7 @@ void PlasmaShellSurface::Private::setPanelBehaviorCallback([[maybe_unused]] wl_c
                                                            uint32_t flag)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->setPanelBehavior(org_kde_plasma_surface_panel_behavior(flag));
+    priv->setPanelBehavior(static_cast<org_kde_plasma_surface_panel_behavior>(flag));
 }
 
 void PlasmaShellSurface::Private::setSkipTaskbarCallback([[maybe_unused]] wl_client* wlClient,

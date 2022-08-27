@@ -187,8 +187,11 @@ void linux_dmabuf_params_v1_impl::add_callback(wl_client* /*wlClient*/,
                                                uint32_t modifier_lo)
 {
     auto params = get_handle(wlResource);
-    params->d_ptr->add(
-        fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << modifier_shift) | modifier_lo);
+    params->d_ptr->add(fd,
+                       plane_idx,
+                       offset,
+                       stride,
+                       (static_cast<uint64_t>(modifier_hi) << modifier_shift) | modifier_lo);
 }
 
 void linux_dmabuf_params_v1_impl::create_callback(wl_client* /*wlClient*/,
@@ -306,14 +309,15 @@ bool linux_dmabuf_params_v1_impl::validate_params(QSize const& size)
     for (uint32_t i = 0; i < m_planeCount; i++) {
         auto& plane = m_planes.at(i);
 
-        if (uint64_t(plane.offset) + plane.stride > UINT32_MAX) {
+        if (static_cast<uint64_t>(plane.offset) + plane.stride > UINT32_MAX) {
             postError(
                 ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
             return false;
         }
 
         if (i == 0
-            && uint64_t(plane.offset) + static_cast<uint64_t>(plane.stride * height) > UINT32_MAX) {
+            && static_cast<uint64_t>(plane.offset) + static_cast<uint64_t>(plane.stride * height)
+                > UINT32_MAX) {
             postError(
                 ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
             return false;

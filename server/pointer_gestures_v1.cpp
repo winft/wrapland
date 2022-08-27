@@ -131,7 +131,8 @@ void PointerSwipeGestureV1::end(quint32 serial, bool cancel)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send<zwp_pointer_gesture_swipe_v1_send_end>(serial, seat->timestamp(), uint32_t(cancel));
+    d_ptr->send<zwp_pointer_gesture_swipe_v1_send_end>(
+        serial, seat->timestamp(), static_cast<uint32_t>(cancel));
 }
 
 void PointerSwipeGestureV1::cancel(quint32 serial)
@@ -200,7 +201,8 @@ void PointerPinchGestureV1::end(quint32 serial, bool cancel)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send<zwp_pointer_gesture_pinch_v1_send_end>(serial, seat->timestamp(), uint32_t(cancel));
+    d_ptr->send<zwp_pointer_gesture_pinch_v1_send_end>(
+        serial, seat->timestamp(), static_cast<uint32_t>(cancel));
 }
 
 void PointerPinchGestureV1::cancel(quint32 serial)

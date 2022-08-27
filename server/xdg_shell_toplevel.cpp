@@ -144,7 +144,9 @@ void XdgShellToplevel::Private::resizeCallback([[maybe_unused]] wl_client* wlCli
 {
     auto priv = get_handle(wlResource)->d_ptr;
     Q_EMIT priv->handle->resizeRequested(
-        SeatGlobal::get_handle(wlSeat), serial, edgesToQtEdges(xdg_toplevel_resize_edge(edges)));
+        SeatGlobal::get_handle(wlSeat),
+        serial,
+        edgesToQtEdges(static_cast<xdg_toplevel_resize_edge>(edges)));
 }
 
 void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
