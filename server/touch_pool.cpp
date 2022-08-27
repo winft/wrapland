@@ -68,7 +68,7 @@ void touch_pool::create_device(Client* client, uint32_t version, uint32_t id)
     Q_EMIT seat->touchCreated(touch);
 }
 
-void touch_pool::set_focused_surface(Surface* surface, const QPointF& surfacePosition)
+void touch_pool::set_focused_surface(Surface* surface, QPointF const& surfacePosition)
 {
     if (is_in_progress()) {
         // changing surface not allowed during a touch sequence
@@ -97,16 +97,16 @@ void touch_pool::set_focused_surface(Surface* surface, const QPointF& surfacePos
     }
 }
 
-void touch_pool::set_focused_surface_position(const QPointF& surfacePosition)
+void touch_pool::set_focused_surface_position(QPointF const& surfacePosition)
 {
     focus.offset = surfacePosition;
 }
 
-int32_t touch_pool::touch_down(const QPointF& globalPosition)
+int32_t touch_pool::touch_down(QPointF const& globalPosition)
 {
     const int32_t id = ids.empty() ? 0 : ids.crbegin()->first + 1;
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    const auto pos = globalPosition - focus.offset;
+    auto const pos = globalPosition - focus.offset;
     for (auto touch : focus.devices) {
         touch->down(id, serial, pos);
     }
@@ -158,10 +158,10 @@ void touch_pool::touch_up(int32_t id)
     ids.erase(id);
 }
 
-void touch_pool::touch_move(int32_t id, const QPointF& globalPosition)
+void touch_pool::touch_move(int32_t id, QPointF const& globalPosition)
 {
     Q_ASSERT(ids.count(id));
-    const auto pos = globalPosition - focus.offset;
+    auto const pos = globalPosition - focus.offset;
     for (auto touch : focus.devices) {
         touch->move(id, pos);
     }

@@ -32,7 +32,7 @@ class FilteredDisplay::Private
 public:
     explicit Private(FilteredDisplay* q);
 
-    static bool filterCallback(const wl_client* wlClient, const wl_global* wlGlobal, void* data);
+    static bool filterCallback(wl_client const* wlClient, wl_global const* wlGlobal, void* data);
 
 private:
     FilteredDisplay* q_ptr;
@@ -43,8 +43,8 @@ FilteredDisplay::Private::Private(FilteredDisplay* q)
 {
 }
 
-bool FilteredDisplay::Private::filterCallback(const wl_client* wlClient,
-                                              const wl_global* wlGlobal,
+bool FilteredDisplay::Private::filterCallback(wl_client const* wlClient,
+                                              wl_global const* wlGlobal,
                                               void* data)
 {
     auto priv = static_cast<FilteredDisplay::Private*>(data);

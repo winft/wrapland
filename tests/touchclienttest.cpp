@@ -193,7 +193,7 @@ void WaylandClientTest::setupRegistry(Registry* registry)
     registry->setup();
 }
 
-void WaylandClientTest::render(const QSize& size)
+void WaylandClientTest::render(QSize const& size)
 {
     m_currentSize = size;
     render();

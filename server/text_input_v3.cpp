@@ -22,7 +22,7 @@ struct zwp_text_input_manager_v3_interface const text_input_manager_v3::Private:
 
 text_input_v3_content_hints convert_content_hint(uint32_t hint)
 {
-    const auto hints = zwp_text_input_v3_content_hint(hint);
+    auto const hints = zwp_text_input_v3_content_hint(hint);
     text_input_v3_content_hints ret = text_input_v3_content_hint::none;
 
     if (hints & ZWP_TEXT_INPUT_V3_CONTENT_HINT_COMPLETION) {
@@ -97,7 +97,7 @@ uint32_t convert_content_hints(text_input_v3_content_hints hints)
 
 static text_input_v3_content_purpose convert_content_purpose(uint32_t purpose)
 {
-    const auto wlPurpose = zwp_text_input_v3_content_purpose(purpose);
+    auto const wlPurpose = zwp_text_input_v3_content_purpose(purpose);
 
     switch (wlPurpose) {
     case ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_ALPHA:

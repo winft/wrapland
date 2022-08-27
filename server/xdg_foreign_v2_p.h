@@ -47,7 +47,7 @@ public:
     explicit XdgExporterV2(Display* display);
     ~XdgExporterV2() override;
 
-    XdgExportedV2* exportedSurface(const QString& handle);
+    XdgExportedV2* exportedSurface(QString const& handle);
 
 private:
     class Private;
@@ -80,7 +80,7 @@ public:
                   uint32_t version,
                   uint32_t id,
                   Surface* surface,
-                  const QString& protocolHandle);
+                  QString const& protocolHandle);
 
     Surface* surface() const;
 

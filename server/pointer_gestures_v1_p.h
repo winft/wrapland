@@ -55,7 +55,7 @@ public:
     PointerSwipeGestureV1(Client* client, uint32_t version, uint32_t id, Pointer* pointer);
 
     void start(quint32 serial, quint32 fingerCount);
-    void update(const QSizeF& delta);
+    void update(QSizeF const& delta);
     void end(quint32 serial, bool cancel = false);
     void cancel(quint32 serial);
 
@@ -100,7 +100,7 @@ public:
     PointerPinchGestureV1(Client* client, uint32_t version, uint32_t id, Pointer* pointer);
 
     void start(quint32 serial, quint32 fingerCount);
-    void update(const QSizeF& delta, qreal scale, qreal rotation);
+    void update(QSizeF const& delta, qreal scale, qreal rotation);
     void end(quint32 serial, bool cancel = false);
     void cancel(quint32 serial);
 

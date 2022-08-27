@@ -94,8 +94,8 @@ RelativePointerV1::RelativePointerV1(Client* client, uint32_t version, uint32_t 
 constexpr size_t shift = 32;
 
 void RelativePointerV1::relativeMotion(quint64 microseconds,
-                                       const QSizeF& delta,
-                                       const QSizeF& deltaNonAccelerated)
+                                       QSizeF const& delta,
+                                       QSizeF const& deltaNonAccelerated)
 {
     d_ptr->send<zwp_relative_pointer_v1_send_relative_motion>(
         (microseconds >> shift),

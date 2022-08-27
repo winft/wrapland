@@ -125,7 +125,7 @@ SubSurface::Mode SubSurface::mode() const
     return d->mode;
 }
 
-void SubSurface::setPosition(const QPoint& pos)
+void SubSurface::setPosition(QPoint const& pos)
 {
     if (pos == d->pos) {
         return;

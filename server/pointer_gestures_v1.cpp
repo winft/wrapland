@@ -118,7 +118,7 @@ void PointerSwipeGestureV1::start(quint32 serial, quint32 fingerCount)
         fingerCount);
 }
 
-void PointerSwipeGestureV1::update(const QSizeF& delta)
+void PointerSwipeGestureV1::update(QSizeF const& delta)
 {
     auto seat = d_ptr->pointer->seat();
 
@@ -185,7 +185,7 @@ void PointerPinchGestureV1::start(quint32 serial, quint32 fingerCount)
         fingerCount);
 }
 
-void PointerPinchGestureV1::update(const QSizeF& delta, qreal scale, qreal rotation)
+void PointerPinchGestureV1::update(QSizeF const& delta, qreal scale, qreal rotation)
 {
     auto seat = d_ptr->pointer->seat();
 

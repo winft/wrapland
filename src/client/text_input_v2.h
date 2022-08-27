@@ -209,7 +209,7 @@ public:
      * @param cursor Index in the text describing the cursor position
      * @param anchor Index of the selection anchor, if no selection same as cursor
      **/
-    void setSurroundingText(const QString& text, quint32 cursor, quint32 anchor);
+    void setSurroundingText(QString const& text, quint32 cursor, quint32 anchor);
 
     /**
      * The possible states for a keyEvent.
@@ -344,7 +344,7 @@ public:
      * Allows the compositor to e.g. put a window with word suggestions
      * near the cursor.
      **/
-    void setCursorRectangle(const QRect& rect);
+    void setCursorRectangle(QRect const& rect);
 
     /**
      * Sets a specific @p language.
@@ -352,7 +352,7 @@ public:
      * This allows for example a virtual keyboard to show a language specific layout.
      * The @p language argument is a RFC-3066 format language tag.
      **/
-    void setPreferredLanguage(const QString& language);
+    void setPreferredLanguage(QString const& language);
 
     /**
      * The text direction of input text.

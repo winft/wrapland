@@ -54,7 +54,7 @@ public:
     Private();
     virtual ~Private();
 
-    virtual XdgImported* importTopLevelV2(const QString& handle, QObject* parent) = 0;
+    virtual XdgImported* importTopLevelV2(QString const& handle, QObject* parent) = 0;
 
     virtual void setupV2(zxdg_importer_v2* arg) = 0;
     virtual zxdg_importer_v2* importerV2() = 0;

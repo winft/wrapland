@@ -70,7 +70,7 @@ void Touch::frame()
     d_ptr->client->flush();
 }
 
-void Touch::move(qint32 id, const QPointF& localPos)
+void Touch::move(qint32 id, QPointF const& localPos)
 {
     if (d_ptr->seat->drags().is_touch_drag()) {
         // Handled by data_device.
@@ -89,7 +89,7 @@ void Touch::up(qint32 id, quint32 serial)
     d_ptr->client->flush();
 }
 
-void Touch::down(qint32 id, quint32 serial, const QPointF& localPos)
+void Touch::down(qint32 id, quint32 serial, QPointF const& localPos)
 {
     d_ptr->send<wl_touch_send_down>(serial,
                                     d_ptr->seat->timestamp(),

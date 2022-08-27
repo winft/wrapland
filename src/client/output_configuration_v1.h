@@ -153,7 +153,7 @@ public:
      * @param outputdevice the OutputDevice this change applies to.
      * @param modeId the id of the mode.
      */
-    void setMode(OutputDeviceV1* outputDevice, const int modeId);
+    void setMode(OutputDeviceV1* outputDevice, int const modeId);
     /**
      * Set transformation for this output, for example rotated or flipped.
      * The changes done in this call will be recorded in the
@@ -181,7 +181,7 @@ public:
      * @param geo the OutputDevice geometry relative to other outputs,
      *
      */
-    void setGeometry(OutputDeviceV1* outputDevice, const QRectF& geo);
+    void setGeometry(OutputDeviceV1* outputDevice, QRectF const& geo);
 
     /**
      * Ask the compositor to apply the changes.

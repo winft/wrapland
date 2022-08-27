@@ -46,8 +46,8 @@ public:
     }
 
     void setTransientFor(XdgShellToplevel* parent);
-    void setTitle(const QString& title);
-    void setAppId(const QByteArray& appId);
+    void setTitle(QString const& title);
+    void setAppId(QByteArray const& appId);
     void showWindowMenu(Seat* seat, quint32 serial, qint32 x, qint32 y);
     void move(Seat* seat, quint32 serial);
     void resize(Seat* seat, quint32 serial, Qt::Edges edges);
@@ -57,9 +57,9 @@ public:
     void setFullscreen(Output* output);
     void unsetFullscreen();
     void setMinimized();
-    void setMaxSize(const QSize& size);
-    void setMinSize(const QSize& size);
-    void setWindowGeometry(const QRect& windowGeometry);
+    void setMaxSize(QSize const& size);
+    void setMinSize(QSize const& size);
+    void setWindowGeometry(QRect const& windowGeometry);
 
 private:
     WaylandPointer<xdg_toplevel, xdg_toplevel_destroy> xdgtoplevel;
@@ -192,12 +192,12 @@ void XdgShellToplevel::Private::setTransientFor(XdgShellToplevel* parent)
     xdg_toplevel_set_parent(xdgtoplevel, parentSurface);
 }
 
-void XdgShellToplevel::Private::setTitle(const QString& title)
+void XdgShellToplevel::Private::setTitle(QString const& title)
 {
     xdg_toplevel_set_title(xdgtoplevel, title.toUtf8().constData());
 }
 
-void XdgShellToplevel::Private::setAppId(const QByteArray& appId)
+void XdgShellToplevel::Private::setAppId(QByteArray const& appId)
 {
     xdg_toplevel_set_app_id(xdgtoplevel, appId.constData());
 }
@@ -273,17 +273,17 @@ void XdgShellToplevel::Private::setMinimized()
     xdg_toplevel_set_minimized(xdgtoplevel);
 }
 
-void XdgShellToplevel::Private::setMaxSize(const QSize& size)
+void XdgShellToplevel::Private::setMaxSize(QSize const& size)
 {
     xdg_toplevel_set_max_size(xdgtoplevel, size.width(), size.height());
 }
 
-void XdgShellToplevel::Private::setMinSize(const QSize& size)
+void XdgShellToplevel::Private::setMinSize(QSize const& size)
 {
     xdg_toplevel_set_min_size(xdgtoplevel, size.width(), size.height());
 }
 
-void XdgShellToplevel::Private::setWindowGeometry(const QRect& windowGeometry)
+void XdgShellToplevel::Private::setWindowGeometry(QRect const& windowGeometry)
 {
     xdg_surface_set_window_geometry(xdgsurface,
                                     windowGeometry.x(),
@@ -353,17 +353,17 @@ void XdgShellToplevel::setTransientFor(XdgShellToplevel* parent)
     d_ptr->setTransientFor(parent);
 }
 
-void XdgShellToplevel::setTitle(const QString& title)
+void XdgShellToplevel::setTitle(QString const& title)
 {
     d_ptr->setTitle(title);
 }
 
-void XdgShellToplevel::setAppId(const QByteArray& appId)
+void XdgShellToplevel::setAppId(QByteArray const& appId)
 {
     d_ptr->setAppId(appId);
 }
 
-void XdgShellToplevel::requestShowWindowMenu(Seat* seat, quint32 serial, const QPoint& pos)
+void XdgShellToplevel::requestShowWindowMenu(Seat* seat, quint32 serial, QPoint const& pos)
 {
     d_ptr->showWindowMenu(seat, serial, pos.x(), pos.y());
 }
@@ -401,17 +401,17 @@ void XdgShellToplevel::setFullscreen(bool set, Output* output)
     }
 }
 
-void XdgShellToplevel::setMaxSize(const QSize& size)
+void XdgShellToplevel::setMaxSize(QSize const& size)
 {
     d_ptr->setMaxSize(size);
 }
 
-void XdgShellToplevel::setMinSize(const QSize& size)
+void XdgShellToplevel::setMinSize(QSize const& size)
 {
     d_ptr->setMinSize(size);
 }
 
-void XdgShellToplevel::setWindowGeometry(const QRect& windowGeometry)
+void XdgShellToplevel::setWindowGeometry(QRect const& windowGeometry)
 {
     d_ptr->setWindowGeometry(windowGeometry);
 }
@@ -421,7 +421,7 @@ void XdgShellToplevel::requestMinimize()
     d_ptr->setMinimized();
 }
 
-void XdgShellToplevel::setSize(const QSize& size)
+void XdgShellToplevel::setSize(QSize const& size)
 {
     if (d_ptr->size == size) {
         return;

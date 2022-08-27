@@ -58,14 +58,14 @@ public:
     bool isAuthenticated() const;
 
 Q_SIGNALS:
-    void authenticationRequested(const QString& application, const QString& reason);
-    void pointerMotionRequested(const QSizeF& delta);
-    void pointerMotionAbsoluteRequested(const QPointF& pos);
+    void authenticationRequested(QString const& application, QString const& reason);
+    void pointerMotionRequested(QSizeF const& delta);
+    void pointerMotionAbsoluteRequested(QPointF const& pos);
     void pointerButtonPressRequested(quint32 button);
     void pointerButtonReleaseRequested(quint32 button);
     void pointerAxisRequested(Qt::Orientation orientation, qreal delta);
-    void touchDownRequested(quint32 id, const QPointF& pos);
-    void touchMotionRequested(quint32 id, const QPointF& pos);
+    void touchDownRequested(quint32 id, QPointF const& pos);
+    void touchMotionRequested(quint32 id, QPointF const& pos);
     void touchUpRequested(quint32 id);
     void touchCancelRequested();
     void touchFrameRequested();

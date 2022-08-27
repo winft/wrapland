@@ -56,19 +56,19 @@ public:
     std::vector<Pointer*> const& get_devices() const;
 
     QPointF get_position() const;
-    void set_position(const QPointF& position);
+    void set_position(QPointF const& position);
 
-    void set_focused_surface(Surface* surface, const QPointF& surfacePosition = QPoint());
-    void set_focused_surface(Surface* surface, const QMatrix4x4& transformation);
-    void set_focused_surface_position(const QPointF& surfacePosition);
-    void set_focused_surface_transformation(const QMatrix4x4& transformation);
+    void set_focused_surface(Surface* surface, QPointF const& surfacePosition = QPoint());
+    void set_focused_surface(Surface* surface, QMatrix4x4 const& transformation);
+    void set_focused_surface_position(QPointF const& surfacePosition);
+    void set_focused_surface_transformation(QMatrix4x4 const& transformation);
 
     void button_pressed(uint32_t button);
     void button_pressed(Qt::MouseButton button);
     void button_released(uint32_t button);
     void button_released(Qt::MouseButton button);
-    void relative_motion(const QSizeF& delta,
-                         const QSizeF& deltaNonAccelerated,
+    void relative_motion(QSizeF const& delta,
+                         QSizeF const& deltaNonAccelerated,
                          uint64_t microseconds) const;
     void send_axis(Qt::Orientation orientation,
                    qreal delta,
@@ -77,11 +77,11 @@ public:
     void send_axis(Qt::Orientation orientation, uint32_t delta) const;
 
     void start_swipe_gesture(uint32_t fingerCount);
-    void update_swipe_gesture(const QSizeF& delta) const;
+    void update_swipe_gesture(QSizeF const& delta) const;
     void end_swipe_gesture();
     void cancel_swipe_gesture();
     void start_pinch_gesture(uint32_t fingerCount);
-    void update_pinch_gesture(const QSizeF& delta, qreal scale, qreal rotation) const;
+    void update_pinch_gesture(QSizeF const& delta, qreal scale, qreal rotation) const;
     void end_pinch_gesture();
     void cancel_pinch_gesture();
     void frame() const;

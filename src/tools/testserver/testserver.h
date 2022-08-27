@@ -50,7 +50,7 @@ public:
     virtual ~TestServer();
 
     void init();
-    void startTestApp(const QString& app, const QStringList& arguments);
+    void startTestApp(QString const& app, QStringList const& arguments);
 
 private:
     void repaint();

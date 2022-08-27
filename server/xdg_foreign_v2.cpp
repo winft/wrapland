@@ -66,7 +66,7 @@ const struct zxdg_exporter_v2_interface XdgExporterV2::Private::s_interface = {
     cb<exportToplevelCallback>,
 };
 
-XdgExportedV2* XdgExporterV2::exportedSurface(const QString& handle)
+XdgExportedV2* XdgExporterV2::exportedSurface(QString const& handle)
 {
     auto it = d_ptr->exportedSurfaces.constFind(handle);
     if (it != d_ptr->exportedSurfaces.constEnd()) {
@@ -128,7 +128,7 @@ private:
     static void importToplevelCallback(wl_client* wlClient,
                                        wl_resource* wlResource,
                                        uint32_t id,
-                                       const char* handle);
+                                       char const* handle);
 
     static const struct zxdg_importer_v2_interface s_interface;
 };
@@ -141,7 +141,7 @@ const struct zxdg_importer_v2_interface XdgImporterV2::Private::s_interface = {
 void XdgImporterV2::Private::importToplevelCallback([[maybe_unused]] wl_client* wlClient,
                                                     wl_resource* wlResource,
                                                     uint32_t id,
-                                                    const char* handle)
+                                                    char const* handle)
 {
     auto importerHandle = XdgImporterV2::Private::get_handle(wlResource);
     auto bind = importerHandle->d_ptr->getBind(wlResource);
@@ -235,7 +235,7 @@ XdgExportedV2::XdgExportedV2(Client* client,
                              uint32_t version,
                              uint32_t id,
                              Surface* surface,
-                             const QString& protocolHandle)
+                             QString const& protocolHandle)
     : QObject(nullptr)
     , d_ptr(new Private(client, version, id, surface, this))
 {

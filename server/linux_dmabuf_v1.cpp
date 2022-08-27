@@ -215,7 +215,7 @@ void linux_dmabuf_params_v1_impl::create_immed_callback(wl_client* /*wlClient*/,
 }
 
 void linux_dmabuf_params_v1_impl::create(uint32_t buffer_id,
-                                         const QSize& size,
+                                         QSize const& size,
                                          uint32_t format,
                                          uint32_t flags)
 {

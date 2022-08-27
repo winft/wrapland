@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     output->add_mode(Wrapland::Server::Output::Mode{QSize(1024, 768)});
 
     // starts XWayland by forking and opening a pipe
-    const int pipe = startXServer();
+    int const pipe = startXServer();
     if (pipe == -1) {
         exit(1);
     }

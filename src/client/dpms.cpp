@@ -101,7 +101,7 @@ DpmsManager::operator org_kde_kwin_dpms_manager*()
 class Q_DECL_HIDDEN Dpms::Private
 {
 public:
-    explicit Private(const QPointer<Output>& output, Dpms* q);
+    explicit Private(QPointer<Output> const& output, Dpms* q);
     void setup(org_kde_kwin_dpms* d);
 
     WaylandPointer<org_kde_kwin_dpms, org_kde_kwin_dpms_release> dpms;
@@ -172,9 +172,9 @@ void Dpms::Private::doneCallback(void* data, org_kde_kwin_dpms* org_kde_kwin_dpm
 {
     Q_UNUSED(org_kde_kwin_dpms)
     Private* p = reinterpret_cast<Private*>(data);
-    const bool supportedChanged
+    bool const supportedChanged
         = p->pending.supportedChanged && p->pending.supported != p->current.supported;
-    const bool modeChanged = p->pending.modeChanged && p->pending.mode != p->current.mode;
+    bool const modeChanged = p->pending.modeChanged && p->pending.mode != p->current.mode;
     if (supportedChanged) {
         p->current.supported = p->pending.supported;
         emit p->q->supportedChanged();
@@ -186,7 +186,7 @@ void Dpms::Private::doneCallback(void* data, org_kde_kwin_dpms* org_kde_kwin_dpm
     p->pending = Data();
 }
 
-Dpms::Private::Private(const QPointer<Output>& output, Dpms* q)
+Dpms::Private::Private(QPointer<Output> const& output, Dpms* q)
     : output(output)
     , q(q)
 {
@@ -200,7 +200,7 @@ void Dpms::Private::setup(org_kde_kwin_dpms* d)
     org_kde_kwin_dpms_add_listener(dpms, &s_listener, this);
 }
 
-Dpms::Dpms(const QPointer<Output>& o, QObject* parent)
+Dpms::Dpms(QPointer<Output> const& o, QObject* parent)
     : QObject(parent)
     , d(new Private(o, this))
 {

@@ -48,8 +48,8 @@ public:
     Drag drag;
 
     void dragEnter(quint32 serial,
-                   const QPointer<Surface>& surface,
-                   const QPointF& relativeToSurface,
+                   QPointer<Surface> const& surface,
+                   QPointF const& relativeToSurface,
                    wl_data_offer* dataOffer);
     void dragLeft();
     static void enterCallback(void* data,
@@ -99,8 +99,8 @@ void DataDevice::Private::enterCallback(void* data,
 }
 
 void DataDevice::Private::dragEnter(quint32 serial,
-                                    const QPointer<Surface>& surface,
-                                    const QPointF& relativeToSurface,
+                                    QPointer<Surface> const& surface,
+                                    QPointF const& relativeToSurface,
                                     wl_data_offer* dataOffer)
 {
     drag.surface = surface;
@@ -193,7 +193,7 @@ void DataDevice::startDragInternally(quint32 serial, Surface* origin, Surface* i
 
 namespace
 {
-static wl_data_source* dataSource(const DataSource* source)
+static wl_data_source* dataSource(DataSource const* source)
 {
     if (!source) {
         return nullptr;

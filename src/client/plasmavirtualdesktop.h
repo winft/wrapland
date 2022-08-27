@@ -109,13 +109,13 @@ public:
      * @returns the PlasmaVirtualDesktop representing the desktop id.
      * The PlasmaVirtualDesktop instance is guaranteed to be unique for each id.
      */
-    PlasmaVirtualDesktop* getVirtualDesktop(const QString& id);
+    PlasmaVirtualDesktop* getVirtualDesktop(QString const& id);
 
     /**
      * Requests for the desktop identified by id to be removed.
      * The server may or may not acconsent to the request.
      */
-    void requestRemoveVirtualDesktop(const QString& id);
+    void requestRemoveVirtualDesktop(QString const& id);
 
     /**
      * Ask the server to create a new virtual desktop, and position it at a specified position.
@@ -124,7 +124,7 @@ public:
      * @param name The name we want for the desktop
      * @param position The position for the desktop to be created
      */
-    void requestCreateVirtualDesktop(const QString& name,
+    void requestCreateVirtualDesktop(QString const& name,
                                      quint32 position = std::numeric_limits<uint32_t>::max());
 
     /**
@@ -147,12 +147,12 @@ Q_SIGNALS:
     /**
      * Emitted when a new desktop has been added
      */
-    void desktopCreated(const QString& id, quint32 position);
+    void desktopCreated(QString const& id, quint32 position);
 
     /**
      * Emitted when a desktop has been removed
      */
-    void desktopRemoved(const QString& id);
+    void desktopRemoved(QString const& id);
 
     /**
      * Emitted when the number of rows of virtual desktops has been changed by the server

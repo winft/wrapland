@@ -31,7 +31,7 @@ enum class button_state {
 uint32_t qtToWaylandButton(Qt::MouseButton button)
 {
 #if HAVE_LINUX_INPUT_H
-    static const QHash<Qt::MouseButton, uint32_t> s_buttons({
+    static QHash<Qt::MouseButton, uint32_t> const s_buttons({
         {Qt::LeftButton, BTN_LEFT},
         {Qt::RightButton, BTN_RIGHT},
         {Qt::MiddleButton, BTN_MIDDLE},
@@ -125,7 +125,7 @@ QPointF pointer_pool::get_position() const
     return pos;
 }
 
-void pointer_pool::set_position(const QPointF& position)
+void pointer_pool::set_position(QPointF const& position)
 {
     if (pos != position) {
         pos = position;
@@ -137,7 +137,7 @@ void pointer_pool::set_position(const QPointF& position)
     }
 }
 
-void pointer_pool::set_focused_surface(Surface* surface, const QPointF& surfacePosition)
+void pointer_pool::set_focused_surface(Surface* surface, QPointF const& surfacePosition)
 {
     QMatrix4x4 m;
     m.translate(-static_cast<float>(surfacePosition.x()), -static_cast<float>(surfacePosition.y()));
@@ -148,7 +148,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QPointF& surfaceP
     }
 }
 
-void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& transformation)
+void pointer_pool::set_focused_surface(Surface* surface, QMatrix4x4 const& transformation)
 {
     if (seat->drags().is_pointer_drag()) {
         // ignore
@@ -206,7 +206,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& trans
     }
 }
 
-void pointer_pool::set_focused_surface_position(const QPointF& surfacePosition)
+void pointer_pool::set_focused_surface_position(QPointF const& surfacePosition)
 {
     if (focus.surface) {
         focus.offset = surfacePosition;
@@ -216,7 +216,7 @@ void pointer_pool::set_focused_surface_position(const QPointF& surfacePosition)
     }
 }
 
-void pointer_pool::set_focused_surface_transformation(const QMatrix4x4& transformation)
+void pointer_pool::set_focused_surface_transformation(QMatrix4x4 const& transformation)
 {
 
     if (focus.surface) {
@@ -346,8 +346,8 @@ bool pointer_pool::has_implicit_grab(uint32_t serial) const
     return false;
 }
 
-void pointer_pool::relative_motion(const QSizeF& delta,
-                                   const QSizeF& deltaNonAccelerated,
+void pointer_pool::relative_motion(QSizeF const& delta,
+                                   QSizeF const& deltaNonAccelerated,
                                    uint64_t microseconds) const
 {
     if (focus.surface) {
@@ -372,7 +372,7 @@ void pointer_pool::start_swipe_gesture(uint32_t fingerCount)
     });
 }
 
-void pointer_pool::update_swipe_gesture(const QSizeF& delta) const
+void pointer_pool::update_swipe_gesture(QSizeF const& delta) const
 {
     if (gestureSurface.isNull()) {
         return;
@@ -421,7 +421,7 @@ void pointer_pool::start_pinch_gesture(uint32_t fingerCount)
     });
 }
 
-void pointer_pool::update_pinch_gesture(const QSizeF& delta, qreal scale, qreal rotation) const
+void pointer_pool::update_pinch_gesture(QSizeF const& delta, qreal scale, qreal rotation) const
 {
     if (gestureSurface.isNull()) {
         return;

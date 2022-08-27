@@ -181,7 +181,7 @@ public:
      **/
     void setup(wl_shell_surface* surface);
     QSize size() const;
-    void setSize(const QSize& size);
+    void setSize(QSize const& size);
 
     /**
      * Sets the ShellSurface fullscreen on @p output.
@@ -208,7 +208,7 @@ public:
      * @since 5.5
      **/
     void setTransient(Surface* parent,
-                      const QPoint& offset = QPoint(),
+                      QPoint const& offset = QPoint(),
                       TransientFlags flags = TransientFlag::Default);
 
     /**
@@ -232,7 +232,7 @@ public:
     void setTransientPopup(Surface* parent,
                            Seat* grabbedSeat,
                            quint32 grabSerial,
-                           const QPoint& offset = QPoint(),
+                           QPoint const& offset = QPoint(),
                            TransientFlags flags = TransientFlag::Default);
 
     bool isValid() const;
@@ -265,7 +265,7 @@ public:
      *
      * @since 0.0.555
      **/
-    void setTitle(const QString& title);
+    void setTitle(QString const& title);
 
     /**
      * Sets a window class for the surface.
@@ -276,7 +276,7 @@ public:
      *
      * @since 0.0.555
      **/
-    void setWindowClass(const QByteArray& windowClass);
+    void setWindowClass(QByteArray const& windowClass);
 
     /**
      * Creates a ShellSurface for the given @p window.
@@ -317,7 +317,7 @@ Q_SIGNALS:
      * The ShellSurface automatically responds to the ping.
      **/
     void pinged();
-    void sizeChanged(const QSize&);
+    void sizeChanged(QSize const&);
 
     /**
      * The popupDone signal is sent out when a popup grab is broken, that is,

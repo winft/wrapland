@@ -144,12 +144,12 @@ QList<QMimeType> DataOffer::offeredMimeTypes() const
     return d->mimeTypes;
 }
 
-void DataOffer::receive(const QMimeType& mimeType, qint32 fd)
+void DataOffer::receive(QMimeType const& mimeType, qint32 fd)
 {
     receive(mimeType.name(), fd);
 }
 
-void DataOffer::receive(const QString& mimeType, qint32 fd)
+void DataOffer::receive(QString const& mimeType, qint32 fd)
 {
     Q_ASSERT(isValid());
     wl_data_offer_receive(d->dataOffer, mimeType.toUtf8().constData(), fd);

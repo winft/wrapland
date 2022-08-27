@@ -60,7 +60,7 @@ private:
 
     static void set_surrounding_text_callback(wl_client* wlClient,
                                               wl_resource* wlResource,
-                                              const char* text,
+                                              char const* text,
                                               int32_t cursor,
                                               int32_t anchor);
     static void set_content_type_callback(wl_client* wlClient,

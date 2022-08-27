@@ -33,22 +33,22 @@ namespace Client
 class Q_DECL_HIDDEN Region::Private
 {
 public:
-    Private(const QRegion& region);
-    void installRegion(const QRect& rect);
-    void installRegion(const QRegion& region);
-    void uninstallRegion(const QRect& rect);
-    void uninstallRegion(const QRegion& region);
+    Private(QRegion const& region);
+    void installRegion(QRect const& rect);
+    void installRegion(QRegion const& region);
+    void uninstallRegion(QRect const& rect);
+    void uninstallRegion(QRegion const& region);
 
     WaylandPointer<wl_region, wl_region_destroy> region;
     QRegion qtRegion;
 };
 
-Region::Private::Private(const QRegion& region)
+Region::Private::Private(QRegion const& region)
     : qtRegion(region)
 {
 }
 
-void Region::Private::installRegion(const QRect& rect)
+void Region::Private::installRegion(QRect const& rect)
 {
     if (!region.isValid()) {
         return;
@@ -56,14 +56,14 @@ void Region::Private::installRegion(const QRect& rect)
     wl_region_add(region, rect.x(), rect.y(), rect.width(), rect.height());
 }
 
-void Region::Private::installRegion(const QRegion& region)
+void Region::Private::installRegion(QRegion const& region)
 {
-    for (const QRect& rect : region) {
+    for (QRect const& rect : region) {
         installRegion(rect);
     }
 }
 
-void Region::Private::uninstallRegion(const QRect& rect)
+void Region::Private::uninstallRegion(QRect const& rect)
 {
     if (!region.isValid()) {
         return;
@@ -71,14 +71,14 @@ void Region::Private::uninstallRegion(const QRect& rect)
     wl_region_subtract(region, rect.x(), rect.y(), rect.width(), rect.height());
 }
 
-void Region::Private::uninstallRegion(const QRegion& region)
+void Region::Private::uninstallRegion(QRegion const& region)
 {
-    for (const QRect& rect : region) {
+    for (QRect const& rect : region) {
         uninstallRegion(rect);
     }
 }
 
-Region::Region(const QRegion& region, QObject* parent)
+Region::Region(QRegion const& region, QObject* parent)
     : QObject(parent)
     , d(new Private(region))
 {
@@ -106,25 +106,25 @@ bool Region::isValid() const
     return d->region.isValid();
 }
 
-void Region::add(const QRect& rect)
+void Region::add(QRect const& rect)
 {
     d->qtRegion = d->qtRegion.united(rect);
     d->installRegion(rect);
 }
 
-void Region::add(const QRegion& region)
+void Region::add(QRegion const& region)
 {
     d->qtRegion = d->qtRegion.united(region);
     d->installRegion(region);
 }
 
-void Region::subtract(const QRect& rect)
+void Region::subtract(QRect const& rect)
 {
     d->qtRegion = d->qtRegion.subtracted(rect);
     d->uninstallRegion(rect);
 }
 
-void Region::subtract(const QRegion& region)
+void Region::subtract(QRegion const& region)
 {
     d->qtRegion = d->qtRegion.subtracted(region);
     d->uninstallRegion(region);

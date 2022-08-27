@@ -76,7 +76,7 @@ void OutputConfigurationV1::Private::modeCallback([[maybe_unused]] wl_client* wl
     auto outputDevice = OutputDeviceV1Global::get_handle(wlOutputDevice);
 
     bool modeValid = false;
-    for (const auto& m : outputDevice->output()->modes()) {
+    for (auto const& m : outputDevice->output()->modes()) {
         if (m.id == mode_id) {
             modeValid = true;
             break;

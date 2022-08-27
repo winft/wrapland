@@ -40,7 +40,7 @@ public:
     DataDeviceManager::DnDAction selectedAction = DataDeviceManager::DnDAction::None;
 
     void setAction(DataDeviceManager::DnDAction action);
-    static void targetCallback(void* data, wl_data_source* dataSource, const char* mimeType);
+    static void targetCallback(void* data, wl_data_source* dataSource, char const* mimeType);
     static void dndDropPerformedCallback(void* data, wl_data_source* wl_data_source);
     static void dndFinishedCallback(void* data, wl_data_source* wl_data_source);
     static void actionCallback(void* data, wl_data_source* wl_data_source, uint32_t dnd_action);
@@ -66,7 +66,7 @@ DataSource::Private::Private(DataSource* q)
 
 void DataSource::Private::targetCallback(void* data,
                                          wl_data_source* dataSource,
-                                         const char* mimeType)
+                                         char const* mimeType)
 {
     auto d = reinterpret_cast<DataSource::Private*>(data);
     Q_ASSERT(d->source == dataSource);
@@ -154,12 +154,12 @@ void DataSource::setup(wl_data_source* dataSource)
     d->setup(dataSource);
 }
 
-void DataSource::offer(const QString& mimeType)
+void DataSource::offer(QString const& mimeType)
 {
     wl_data_source_offer(d->source, mimeType.toUtf8().constData());
 }
 
-void DataSource::offer(const QMimeType& mimeType)
+void DataSource::offer(QMimeType const& mimeType)
 {
     if (!mimeType.isValid()) {
         return;

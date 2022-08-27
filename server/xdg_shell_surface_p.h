@@ -46,7 +46,7 @@ public:
     // Implement here?
     void close();
 
-    uint32_t configure(States states, const QSize& size);
+    uint32_t configure(States states, QSize const& size);
     QRect windowGeometry() const;
     QSize minimumSize() const;
     QSize maximumSize() const;

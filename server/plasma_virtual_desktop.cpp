@@ -56,7 +56,7 @@ void PlasmaVirtualDesktopManager::Private::getVirtualDesktopCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource,
     uint32_t serial,
-    const char* id)
+    char const* id)
 {
     auto priv = get_handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
@@ -69,7 +69,7 @@ void PlasmaVirtualDesktopManager::Private::getVirtualDesktopCallback(
 void PlasmaVirtualDesktopManager::Private::requestCreateVirtualDesktopCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource,
-    const char* name,
+    char const* name,
     uint32_t position)
 {
     auto manager = get_handle(wlResource);
@@ -80,7 +80,7 @@ void PlasmaVirtualDesktopManager::Private::requestCreateVirtualDesktopCallback(
 void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource,
-    const char* id)
+    char const* id)
 {
     auto manager = get_handle(wlResource);
     Q_EMIT manager->desktopRemoveRequested(id);

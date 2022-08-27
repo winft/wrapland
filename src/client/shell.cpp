@@ -269,7 +269,7 @@ void ShellSurface::Private::ping(uint32_t serial)
     emit q->pinged();
 }
 
-void ShellSurface::setSize(const QSize& size)
+void ShellSurface::setSize(QSize const& size)
 {
     if (d->size == size) {
         return;
@@ -299,7 +299,7 @@ void ShellSurface::setToplevel()
     wl_shell_surface_set_toplevel(d->surface);
 }
 
-void ShellSurface::setTransient(Surface* parent, const QPoint& offset, TransientFlags flags)
+void ShellSurface::setTransient(Surface* parent, QPoint const& offset, TransientFlags flags)
 {
     Q_ASSERT(isValid());
     uint32_t wlFlags = 0;
@@ -312,7 +312,7 @@ void ShellSurface::setTransient(Surface* parent, const QPoint& offset, Transient
 void ShellSurface::setTransientPopup(Surface* parent,
                                      Seat* grabbedSeat,
                                      quint32 grabSerial,
-                                     const QPoint& offset,
+                                     QPoint const& offset,
                                      TransientFlags flags)
 {
     Q_ASSERT(isValid());
@@ -365,12 +365,12 @@ void ShellSurface::requestResize(Seat* seat, quint32 serial, Qt::Edges edges)
     wl_shell_surface_resize(d->surface, *seat, serial, wlEdge);
 }
 
-void ShellSurface::setTitle(const QString& title)
+void ShellSurface::setTitle(QString const& title)
 {
     wl_shell_surface_set_title(d->surface, title.toUtf8().constData());
 }
 
-void ShellSurface::setWindowClass(const QByteArray& windowClass)
+void ShellSurface::setWindowClass(QByteArray const& windowClass)
 {
     wl_shell_surface_set_class(d->surface, windowClass.constData());
 }

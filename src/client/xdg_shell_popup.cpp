@@ -29,7 +29,7 @@ public:
     bool isValid() const;
     void requestGrab(Seat* seat, quint32 serial);
     void ackConfigure(quint32 serial);
-    void setWindowGeometry(const QRect& windowGeometry);
+    void setWindowGeometry(QRect const& windowGeometry);
 
     operator xdg_surface*()
     {
@@ -146,7 +146,7 @@ void XdgShellPopup::Private::ackConfigure(quint32 serial)
     xdg_surface_ack_configure(xdgsurface, serial);
 }
 
-void XdgShellPopup::Private::setWindowGeometry(const QRect& windowGeometry)
+void XdgShellPopup::Private::setWindowGeometry(QRect const& windowGeometry)
 {
     xdg_surface_set_window_geometry(xdgsurface,
                                     windowGeometry.x(),
@@ -196,7 +196,7 @@ void XdgShellPopup::ackConfigure(quint32 serial)
     d_ptr->ackConfigure(serial);
 }
 
-void XdgShellPopup::setWindowGeometry(const QRect& windowGeometry)
+void XdgShellPopup::setWindowGeometry(QRect const& windowGeometry)
 {
     d_ptr->setWindowGeometry(windowGeometry);
 }

@@ -182,7 +182,7 @@ public:
      * otherwise
      * @see getBuffer
      **/
-    Buffer::Ptr createBuffer(const QImage& image);
+    Buffer::Ptr createBuffer(QImage const& image);
     /**
      * Provides a Buffer with @p size, @p stride and @p format.
      *
@@ -197,9 +197,9 @@ public:
      * @return Buffer with copied content of @p src in success case, a @c null Buffer::Ptr otherwise
      * @see getBuffer
      **/
-    Buffer::Ptr createBuffer(const QSize& size,
+    Buffer::Ptr createBuffer(QSize const& size,
                              int32_t stride,
-                             const void* src,
+                             void const* src,
                              Buffer::Format format = Buffer::Format::ARGB32);
     void* poolAddress() const;
     /**
@@ -216,7 +216,7 @@ public:
      * @see createBuffer
      **/
     Buffer::Ptr
-    getBuffer(const QSize& size, int32_t stride, Buffer::Format format = Buffer::Format::ARGB32);
+    getBuffer(QSize const& size, int32_t stride, Buffer::Format format = Buffer::Format::ARGB32);
     wl_shm* shm();
 Q_SIGNALS:
     /**

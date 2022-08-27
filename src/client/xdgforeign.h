@@ -192,7 +192,7 @@ public:
      *               in some way, such as command line or a DBus call)
      * @param parent the parent in the QObject's hierarchy of the new XdgImported
      */
-    XdgImported* importTopLevel(const QString& handle, QObject* parent = nullptr);
+    XdgImported* importTopLevel(QString const& handle, QObject* parent = nullptr);
 
     operator zxdg_importer_v2*();
     operator zxdg_importer_v2*() const;

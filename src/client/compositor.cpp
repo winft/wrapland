@@ -109,7 +109,7 @@ Region* Compositor::createRegion(QObject* parent)
     return createRegion(QRegion(), parent);
 }
 
-Region* Compositor::createRegion(const QRegion& region, QObject* parent)
+Region* Compositor::createRegion(QRegion const& region, QObject* parent)
 {
     Q_ASSERT(isValid());
     Region* r = new Region(region, parent);
@@ -121,7 +121,7 @@ Region* Compositor::createRegion(const QRegion& region, QObject* parent)
     return r;
 }
 
-std::unique_ptr<Region> Compositor::createRegion(const QRegion& region)
+std::unique_ptr<Region> Compositor::createRegion(QRegion const& region)
 {
     return std::unique_ptr<Region>(createRegion(region, nullptr));
 }

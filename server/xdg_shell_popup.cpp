@@ -92,7 +92,7 @@ void XdgShellPopup::Private::grabCallback([[maybe_unused]] wl_client* wlClient,
     priv->handle->grabRequested(seat, serial);
 }
 
-uint32_t XdgShellPopup::Private::configure(const QRect& rect)
+uint32_t XdgShellPopup::Private::configure(QRect const& rect)
 {
     const uint32_t serial = client->display()->handle->nextSerial();
     shellSurface->d_ptr->configureSerials.push_back(serial);
@@ -196,7 +196,7 @@ void XdgShellPopup::popupDone()
     return d_ptr->popupDone();
 }
 
-uint32_t XdgShellPopup::configure(const QRect& rect)
+uint32_t XdgShellPopup::configure(QRect const& rect)
 {
     return d_ptr->configure(rect);
 }

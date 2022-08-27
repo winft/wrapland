@@ -50,7 +50,7 @@ private:
     void prepareUnbind(FakeInputBind* bind) override;
 
     static void
-    authenticateCallback(FakeInputBind* bind, const char* application, const char* reason);
+    authenticateCallback(FakeInputBind* bind, char const* application, char const* reason);
     static void pointerMotionCallback(FakeInputBind* bind, wl_fixed_t delta_x, wl_fixed_t delta_y);
     static void pointerMotionAbsoluteCallback(FakeInputBind* bind, wl_fixed_t x, wl_fixed_t y);
     static void buttonCallback(FakeInputBind* bind, uint32_t button, uint32_t state);

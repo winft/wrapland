@@ -54,7 +54,7 @@ public:
     explicit RelativePointerV1(Client* client, uint32_t version, uint32_t id);
 
     void
-    relativeMotion(quint64 microseconds, const QSizeF& delta, const QSizeF& deltaNonAccelerated);
+    relativeMotion(quint64 microseconds, QSizeF const& delta, QSizeF const& deltaNonAccelerated);
 
 Q_SIGNALS:
     void resourceDestroyed();

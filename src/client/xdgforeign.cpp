@@ -144,7 +144,7 @@ EventQueue* XdgImporter::eventQueue()
     return d->queue;
 }
 
-XdgImported* XdgImporter::importTopLevel(const QString& handle, QObject* parent)
+XdgImported* XdgImporter::importTopLevel(QString const& handle, QObject* parent)
 {
     Q_ASSERT(isValid());
     return d->importTopLevelV2(handle, parent);

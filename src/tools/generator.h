@@ -35,7 +35,7 @@ class Argument
 {
 public:
     explicit Argument();
-    explicit Argument(const QXmlStreamAttributes& attributes);
+    explicit Argument(QXmlStreamAttributes const& attributes);
     ~Argument();
 
     enum class Type {
@@ -70,7 +70,7 @@ public:
     QString typeAsServerWl() const;
 
 private:
-    Type parseType(const QStringRef& type);
+    Type parseType(QStringRef const& type);
     QString m_name;
     Type m_type = Type::Unknown;
     bool m_allowNull = false;
@@ -81,10 +81,10 @@ class Request
 {
 public:
     explicit Request();
-    explicit Request(const QString& name);
+    explicit Request(QString const& name);
     ~Request();
 
-    void addArgument(const Argument& arg)
+    void addArgument(Argument const& arg)
     {
         m_arguments << arg;
     }
@@ -120,10 +120,10 @@ class Event
 {
 public:
     explicit Event();
-    explicit Event(const QString& name);
+    explicit Event(QString const& name);
     ~Event();
 
-    void addArgument(const Argument& arg)
+    void addArgument(Argument const& arg)
     {
         m_arguments << arg;
     }
@@ -147,14 +147,14 @@ class Interface
 {
 public:
     explicit Interface();
-    explicit Interface(const QXmlStreamAttributes& attributes);
+    explicit Interface(QXmlStreamAttributes const& attributes);
     virtual ~Interface();
 
-    void addRequest(const Request& request)
+    void addRequest(Request const& request)
     {
         m_requests << request;
     }
-    void addEvent(const Event& event)
+    void addEvent(Event const& event)
     {
         m_events << event;
     }
@@ -225,11 +225,11 @@ public:
     explicit Generator(QObject* parent = nullptr);
     virtual ~Generator();
 
-    void setXmlFileName(const QString& name)
+    void setXmlFileName(QString const& name)
     {
         m_xmlFileName = name;
     }
-    void setBaseFileName(const QString& name)
+    void setBaseFileName(QString const& name)
     {
         m_baseFileName = name;
     }
@@ -243,42 +243,42 @@ private:
     void generateEndNamespace();
     void generateHeaderIncludes();
     void generateCppIncludes();
-    void generatePrivateClass(const Interface& interface);
-    void generateClientPrivateClass(const Interface& interface);
-    void generateClientPrivateResourceClass(const Interface& interface);
-    void generateClientPrivateGlobalClass(const Interface& interface);
-    void generateServerPrivateGlobalFunction(const Interface& interface);
-    void generateServerPrivateHeaderGlobalClass(const Interface& interface);
-    void generateServerPrivateResourceFunction(const Interface& interface);
-    void generateServerPrivateHeaderResourceClass(const Interface& interface);
-    void generateServerPrivateInterfaceClass(const Interface& interface);
-    void generateServerPrivateGlobalConstructor(const Interface& interface);
-    void generateServerPrivateResourceCtorDtorClass(const Interface& interface);
-    void generateServerPrivateCallbackDefinitions(const Interface& interface);
-    void generateServerPrivateCallbackImpl(const Interface& interface);
-    void generateClientCpp(const Interface& interface);
-    void generateClass(const Interface& interface);
-    void generateClientGlobalClass(const Interface& interface);
-    void generateClientResourceClass(const Interface& interface);
-    void generateServerGlobalClass(const Interface& interface);
-    void generateServerGlobalClassUnstable(const Interface& interface);
-    void generateServerResourceClass(const Interface& interface);
-    void generateServerResourceClassUnstable(const Interface& interface);
-    void generateClientClassQObjectDerived(const Interface& interface);
-    void generateClientGlobalClassDoxy(const Interface& interface);
-    void generateClientGlobalClassCtor(const Interface& interface);
-    void generateClientGlobalClassSetup(const Interface& interface);
-    void generateClientResourceClassSetup(const Interface& interface);
-    void generateClientClassDtor(const Interface& interface);
-    void generateClientClassReleaseDestroy(const Interface& interface);
-    void generateClientClassStart(const Interface& interface);
-    void generateClientClassCasts(const Interface& interface);
-    void generateClientClassSignals(const Interface& interface);
-    void generateClientClassDptr(const Interface& interface);
-    void generateClientGlobalClassEnd(const Interface& interface);
-    void generateClientResourceClassEnd(const Interface& interface);
-    void generateClientClassRequests(const Interface& interface);
-    void generateClientCppRequests(const Interface& interface);
+    void generatePrivateClass(Interface const& interface);
+    void generateClientPrivateClass(Interface const& interface);
+    void generateClientPrivateResourceClass(Interface const& interface);
+    void generateClientPrivateGlobalClass(Interface const& interface);
+    void generateServerPrivateGlobalFunction(Interface const& interface);
+    void generateServerPrivateHeaderGlobalClass(Interface const& interface);
+    void generateServerPrivateResourceFunction(Interface const& interface);
+    void generateServerPrivateHeaderResourceClass(Interface const& interface);
+    void generateServerPrivateInterfaceClass(Interface const& interface);
+    void generateServerPrivateGlobalConstructor(Interface const& interface);
+    void generateServerPrivateResourceCtorDtorClass(Interface const& interface);
+    void generateServerPrivateCallbackDefinitions(Interface const& interface);
+    void generateServerPrivateCallbackImpl(Interface const& interface);
+    void generateClientCpp(Interface const& interface);
+    void generateClass(Interface const& interface);
+    void generateClientGlobalClass(Interface const& interface);
+    void generateClientResourceClass(Interface const& interface);
+    void generateServerGlobalClass(Interface const& interface);
+    void generateServerGlobalClassUnstable(Interface const& interface);
+    void generateServerResourceClass(Interface const& interface);
+    void generateServerResourceClassUnstable(Interface const& interface);
+    void generateClientClassQObjectDerived(Interface const& interface);
+    void generateClientGlobalClassDoxy(Interface const& interface);
+    void generateClientGlobalClassCtor(Interface const& interface);
+    void generateClientGlobalClassSetup(Interface const& interface);
+    void generateClientResourceClassSetup(Interface const& interface);
+    void generateClientClassDtor(Interface const& interface);
+    void generateClientClassReleaseDestroy(Interface const& interface);
+    void generateClientClassStart(Interface const& interface);
+    void generateClientClassCasts(Interface const& interface);
+    void generateClientClassSignals(Interface const& interface);
+    void generateClientClassDptr(Interface const& interface);
+    void generateClientGlobalClassEnd(Interface const& interface);
+    void generateClientResourceClassEnd(Interface const& interface);
+    void generateClientClassRequests(Interface const& interface);
+    void generateClientCppRequests(Interface const& interface);
     void generateWaylandForwardDeclarations();
     void generateNamespaceForwardDeclarations();
     void startParseXml();

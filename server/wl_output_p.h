@@ -48,7 +48,7 @@ private:
     void bindInit(WlOutputBind* bind) override;
 
     static std::
-        tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
+        tuple<int32_t, int32_t, int32_t, int32_t, int32_t, char const*, char const*, int32_t>
         geometry_args(OutputState const& state);
 
     void sendMode(WlOutputBind* bind, Output::Mode const& mode);

@@ -41,7 +41,7 @@ public:
     XdgShellToplevel* getXdgToplevel(Surface* surface, QObject* parent);
     XdgShellPopup* get_xdg_popup(Surface* surface,
                                  xdg_surface* parentSurface,
-                                 const XdgPositioner& positioner,
+                                 XdgPositioner const& positioner,
                                  QObject* parent);
 
     EventQueue* queue = nullptr;
@@ -104,7 +104,7 @@ XdgShellToplevel* XdgShell::Private::getXdgToplevel(Surface* surface, QObject* p
 
 XdgShellPopup* XdgShell::Private::get_xdg_popup(Surface* surface,
                                                 xdg_surface* parentSurface,
-                                                const XdgPositioner& positioner,
+                                                XdgPositioner const& positioner,
                                                 QObject* parent)
 {
     Q_ASSERT(isValid());
@@ -281,7 +281,7 @@ XdgShellToplevel* XdgShell::create_toplevel(Surface* surface, QObject* parent)
 
 XdgShellPopup* XdgShell::create_popup(Surface* surface,
                                       XdgShellToplevel* parentSurface,
-                                      const XdgPositioner& positioner,
+                                      XdgPositioner const& positioner,
                                       QObject* parent)
 {
     return d_ptr->get_xdg_popup(surface, *parentSurface, positioner, parent);
@@ -289,14 +289,14 @@ XdgShellPopup* XdgShell::create_popup(Surface* surface,
 
 XdgShellPopup* XdgShell::create_popup(Surface* surface,
                                       XdgShellPopup* parentSurface,
-                                      const XdgPositioner& positioner,
+                                      XdgPositioner const& positioner,
                                       QObject* parent)
 {
     return d_ptr->get_xdg_popup(surface, *parentSurface, positioner, parent);
 }
 
 XdgShellPopup*
-XdgShell::create_popup(Surface* surface, const XdgPositioner& positioner, QObject* parent)
+XdgShell::create_popup(Surface* surface, XdgPositioner const& positioner, QObject* parent)
 {
     return d_ptr->get_xdg_popup(surface, nullptr, positioner, parent);
 }

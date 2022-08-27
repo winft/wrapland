@@ -147,7 +147,7 @@ public:
 protected:
     Global(Handle* handle,
            Server::Display* display,
-           const wl_interface* interface,
+           wl_interface const* interface,
            void const* implementation)
         : handle{handle}
         , nucleus{new Nucleus<type>(this, display, interface, implementation)}

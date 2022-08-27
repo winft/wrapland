@@ -290,7 +290,7 @@ public:
      * @param surfaceLocal The new position hint in surface local coordinates
      * @see Surface::commit
      **/
-    void setCursorPositionHint(const QPointF& surfaceLocal);
+    void setCursorPositionHint(QPointF const& surfaceLocal);
 
     /**
      * Set a new region used to lock the pointer.

@@ -51,7 +51,7 @@ public:
 private:
     void setupRegistry(Registry* registry);
     void render();
-    void copy(const QString& mimeType, qint32 fd);
+    void copy(QString const& mimeType, qint32 fd);
     QThread* m_connectionThread;
     ConnectionThread* m_connectionThreadObject;
     EventQueue* m_eventQueue = nullptr;
@@ -162,7 +162,7 @@ void CopyClient::setupRegistry(Registry* registry)
 
 void CopyClient::render()
 {
-    const QSize& size = m_shellSurface->size();
+    QSize const& size = m_shellSurface->size();
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(
@@ -175,7 +175,7 @@ void CopyClient::render()
     buffer->setUsed(false);
 }
 
-void CopyClient::copy(const QString& mimeType, qint32 fd)
+void CopyClient::copy(QString const& mimeType, qint32 fd)
 {
     qDebug() << "Requested to copy for mimeType" << mimeType;
     QFile c;

@@ -139,7 +139,7 @@ Q_SIGNALS:
     void hasKeyboardChanged(bool);
     void hasPointerChanged(bool);
     void hasTouchChanged(bool);
-    void nameChanged(const QString& name);
+    void nameChanged(QString const& name);
 
     /**
      * This signal is emitted right before the interface is going to be released.

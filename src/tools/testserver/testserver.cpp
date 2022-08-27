@@ -164,7 +164,7 @@ void TestServer::init()
     m_timeSinceStart->start();
 }
 
-void TestServer::startTestApp(const QString& app, const QStringList& arguments)
+void TestServer::startTestApp(QString const& app, QStringList const& arguments)
 {
     int sx[2];
     if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, sx) < 0) {

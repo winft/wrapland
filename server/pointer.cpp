@@ -68,7 +68,7 @@ Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _
 {
 }
 
-void Pointer::Private::setCursor(quint32 serial, Surface* surface, const QPoint& hotspot)
+void Pointer::Private::setCursor(quint32 serial, Surface* surface, QPoint const& hotspot)
 {
     if (!cursor) {
         cursor.reset(new Cursor(handle));
@@ -96,7 +96,7 @@ void Pointer::Private::sendLeave(quint32 serial, Surface* surface)
     send<wl_pointer_send_leave>(serial, surface->d_ptr->resource);
 }
 
-void Pointer::Private::sendMotion(const QPointF& position)
+void Pointer::Private::sendMotion(QPointF const& position)
 {
     send<wl_pointer_send_motion>(
         seat->timestamp(), wl_fixed_from_double(position.x()), wl_fixed_from_double(position.y()));
@@ -147,7 +147,7 @@ void Pointer::Private::startSwipeGesture(quint32 serial, quint32 fingerCount)
     }
 }
 
-void Pointer::Private::updateSwipeGesture(const QSizeF& delta)
+void Pointer::Private::updateSwipeGesture(QSizeF const& delta)
 {
     if (swipeGestures.empty()) {
         return;
@@ -187,7 +187,7 @@ void Pointer::Private::startPinchGesture(quint32 serial, quint32 fingerCount)
     }
 }
 
-void Pointer::Private::updatePinchGesture(const QSizeF& delta, qreal scale, qreal rotation)
+void Pointer::Private::updatePinchGesture(QSizeF const& delta, qreal scale, qreal rotation)
 {
     if (pinchGestures.empty()) {
         return;
@@ -279,7 +279,7 @@ void Pointer::axis(Qt::Orientation orientation,
 {
     Q_ASSERT(d_ptr->focusedSurface);
 
-    const auto wlOrientation = (orientation == Qt::Vertical) ? WL_POINTER_AXIS_VERTICAL_SCROLL
+    auto const wlOrientation = (orientation == Qt::Vertical) ? WL_POINTER_AXIS_VERTICAL_SCROLL
                                                              : WL_POINTER_AXIS_HORIZONTAL_SCROLL;
 
     auto getWlSource = [source] {
@@ -369,8 +369,8 @@ void Pointer::motion(QPointF const& position)
     d_ptr->sendMotion(position);
 }
 
-void Pointer::relativeMotion(const QSizeF& delta,
-                             const QSizeF& deltaNonAccelerated,
+void Pointer::relativeMotion(QSizeF const& delta,
+                             QSizeF const& deltaNonAccelerated,
                              quint64 microseconds)
 {
     if (d_ptr->relativePointers.empty()) {
@@ -392,7 +392,7 @@ Cursor::Private::Private(Cursor* q, Pointer* _pointer)
 {
 }
 
-void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const QPoint& _hotspot)
+void Cursor::Private::update(QPointer<Surface> const& s, quint32 serial, QPoint const& _hotspot)
 {
     bool emitChanged = false;
     if (enteredSerial != serial) {

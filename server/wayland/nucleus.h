@@ -68,7 +68,7 @@ class Nucleus : public BasicNucleus
 public:
     Nucleus(Global* global,
             Server::Display* display,
-            const wl_interface* interface,
+            wl_interface const* interface,
             void const* implementation)
         : BasicNucleus(display)
         , global{global}

@@ -61,7 +61,7 @@ public:
 
 private:
     void setMode(Mode mode);
-    void setPosition(const QPoint& pos);
+    void setPosition(QPoint const& pos);
     void placeAbove(Surface* sibling);
     void placeBelow(Surface* sibling);
 

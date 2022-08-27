@@ -96,7 +96,7 @@ public:
     ~linux_dmabuf_params_v1_impl() override;
 
     void add(int fd, uint32_t plane_idx, uint32_t offset, uint32_t stride, uint64_t modifier);
-    void create(uint32_t buffer_id, const QSize& size, uint32_t format, uint32_t flags);
+    void create(uint32_t buffer_id, QSize const& size, uint32_t format, uint32_t flags);
 
     linux_dmabuf_v1::Private* m_dmabuf;
 

@@ -40,7 +40,7 @@ public:
             XdgShellSurface* parent,
             XdgShellPopup* q);
 
-    uint32_t configure(const QRect& rect);
+    uint32_t configure(QRect const& rect);
     void ackConfigure(uint32_t serial);
 
     void popupDone();

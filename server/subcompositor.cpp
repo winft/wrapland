@@ -195,7 +195,7 @@ void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClie
     priv->setPosition(QPoint(x, y));
 }
 
-void Subsurface::Private::setPosition(const QPoint& p)
+void Subsurface::Private::setPosition(QPoint const& p)
 {
     if (pos == p) {
         return;

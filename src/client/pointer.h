@@ -95,7 +95,7 @@ public:
      * @see hideCursor
      * @since 5.3
      **/
-    void setCursor(Surface* surface, const QPoint& hotspot = QPoint());
+    void setCursor(Surface* surface, QPoint const& hotspot = QPoint());
     /**
      * Hides the cursor. Same as calling setCursor with @c null for surface.
      * @see setCursor
@@ -126,7 +126,7 @@ Q_SIGNALS:
      * @param serial The serial for this enter
      * @param relativeToSurface Coordinates relative to the upper-left corner of the Surface.
      **/
-    void entered(quint32 serial, const QPointF& relativeToSurface);
+    void entered(quint32 serial, QPointF const& relativeToSurface);
     /**
      * Notification that this seat's pointer is no longer focused on a certain surface.
      *
@@ -142,7 +142,7 @@ Q_SIGNALS:
      * Surface.
      * @param time timestamp with millisecond granularity
      **/
-    void motion(const QPointF& relativeToSurface, quint32 time);
+    void motion(QPointF const& relativeToSurface, quint32 time);
     /**
      * Mouse button click and release notifications.
      *

@@ -164,8 +164,8 @@ public:
      **/
     bool isValid() const;
 
-    void setSourceRectangle(const QRectF& source);
-    void setDestinationSize(const QSize& dest);
+    void setSourceRectangle(QRectF const& source);
+    void setDestinationSize(QSize const& dest);
 
     operator wp_viewport*();
     operator wp_viewport*() const;

@@ -37,7 +37,7 @@ OutputDeviceV1::Private::Private(Output* output, Display* display, OutputDeviceV
     displayHandle->add_output_device_v1(q);
 }
 
-std::tuple<const char*, const char*, const char*, const char*, const char*, int32_t, int32_t>
+std::tuple<char const*, char const*, char const*, char const*, char const*, int32_t, int32_t>
 info_args(OutputState const& state)
 {
     return std::make_tuple(state.info.name.c_str(),

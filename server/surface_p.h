@@ -76,13 +76,13 @@ public:
     bool raiseChild(Subsurface* subsurface, Surface* sibling);
     bool lowerChild(Subsurface* subsurface, Surface* sibling);
 
-    void setShadow(const QPointer<Shadow>& shadow);
-    void setBlur(const QPointer<Blur>& blur);
-    void setSlide(const QPointer<Slide>& slide);
-    void setContrast(const QPointer<Contrast>& contrast);
+    void setShadow(QPointer<Shadow> const& shadow);
+    void setBlur(QPointer<Blur> const& blur);
+    void setSlide(QPointer<Slide> const& slide);
+    void setContrast(QPointer<Contrast> const& contrast);
 
-    void setSourceRectangle(const QRectF& source);
-    void setDestinationSize(const QSize& dest);
+    void setSourceRectangle(QRectF const& source);
+    void setDestinationSize(QSize const& dest);
     void addPresentationFeedback(PresentationFeedback* feedback) const;
 
     void installPointerConstraint(LockedPointerV1* lock);
@@ -130,30 +130,30 @@ private:
     void copy_to_current(SurfaceState const& source, bool& resized);
     void synced_child_update();
 
-    void damage(const QRect& rect);
-    void damageBuffer(const QRect& rect);
+    void damage(QRect const& rect);
+    void damageBuffer(QRect const& rect);
 
     void setScale(qint32 scale);
     void setTransform(Output::Transform transform);
 
     void addFrameCallback(uint32_t callback);
-    void attachBuffer(wl_resource* wlBuffer, const QPoint& offset);
+    void attachBuffer(wl_resource* wlBuffer, QPoint const& offset);
 
-    void setOpaque(const QRegion& region);
-    void setInput(const QRegion& region, bool isInfinite);
+    void setOpaque(QRegion const& region);
+    void setInput(QRegion const& region, bool isInfinite);
 
     /**
      * Posts Wayland error in case the source rectangle needs to be integer valued but is not.
      */
-    void soureRectangleIntegerCheck(const QSize& destinationSize,
-                                    const QRectF& sourceRectangle) const;
+    void soureRectangleIntegerCheck(QSize const& destinationSize,
+                                    QRectF const& sourceRectangle) const;
     /**
      * Posts Wayland error in case the source rectangle is not contained in surface size.
      */
-    void soureRectangleContainCheck(const Buffer* buffer,
+    void soureRectangleContainCheck(Buffer const* buffer,
                                     Output::Transform transform,
                                     qint32 scale,
-                                    const QRectF& sourceRectangle) const;
+                                    QRectF const& sourceRectangle) const;
 
     static void destroyFrameCallback(wl_resource* wlResource);
 

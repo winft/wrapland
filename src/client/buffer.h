@@ -59,7 +59,7 @@ public:
     /**
      * Copies the data from @p src into the Buffer.
      **/
-    void copy(const void* src);
+    void copy(void const* src);
     /**
      * Sets the Buffer as @p released.
      * This is automatically invoked when the Wayland server sends the release event.
@@ -122,7 +122,7 @@ private:
     friend class ShmPool;
     explicit Buffer(ShmPool* parent,
                     wl_buffer* buffer,
-                    const QSize& size,
+                    QSize const& size,
                     int32_t stride,
                     size_t offset,
                     Format format);

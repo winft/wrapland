@@ -166,8 +166,8 @@ void TextInputV2::Private::inputPanelStateCallback(void* data,
 
 void TextInputV2::Private::preeditStringCallback(void* data,
                                                  zwp_text_input_v2* zwp_text_input_v2,
-                                                 const char* text,
-                                                 const char* commit)
+                                                 char const* text,
+                                                 char const* commit)
 {
     auto t = reinterpret_cast<TextInputV2::Private*>(data);
     Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
@@ -207,7 +207,7 @@ void TextInputV2::Private::preeditCursorCallback(void* data,
 
 void TextInputV2::Private::commitStringCallback(void* data,
                                                 zwp_text_input_v2* zwp_text_input_v2,
-                                                const char* text)
+                                                char const* text)
 {
     auto t = reinterpret_cast<TextInputV2::Private*>(data);
     Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
@@ -280,7 +280,7 @@ void TextInputV2::Private::keysymCallback(void* data,
 
 void TextInputV2::Private::languageCallback(void* data,
                                             zwp_text_input_v2* zwp_text_input_v2,
-                                            const char* language)
+                                            char const* language)
 {
     auto t = reinterpret_cast<TextInputV2::Private*>(data);
     Q_ASSERT(t->text_input_ptr == zwp_text_input_v2);
@@ -374,18 +374,18 @@ void TextInputV2::Private::hideInputPanel()
     zwp_text_input_v2_hide_input_panel(text_input_ptr);
 }
 
-void TextInputV2::Private::setCursorRectangle(const QRect& rect)
+void TextInputV2::Private::setCursorRectangle(QRect const& rect)
 {
     zwp_text_input_v2_set_cursor_rectangle(
         text_input_ptr, rect.x(), rect.y(), rect.width(), rect.height());
 }
 
-void TextInputV2::Private::setPreferredLanguage(const QString& lang)
+void TextInputV2::Private::setPreferredLanguage(QString const& lang)
 {
     zwp_text_input_v2_set_preferred_language(text_input_ptr, lang.toUtf8().constData());
 }
 
-void TextInputV2::Private::setSurroundingText(const QString& text, quint32 cursor, quint32 anchor)
+void TextInputV2::Private::setSurroundingText(QString const& text, quint32 cursor, quint32 anchor)
 {
     zwp_text_input_v2_set_surrounding_text(text_input_ptr,
                                            text.toUtf8().constData(),
@@ -538,7 +538,7 @@ void TextInputV2::reset()
     d_ptr->reset();
 }
 
-void TextInputV2::setSurroundingText(const QString& text, quint32 cursor, quint32 anchor)
+void TextInputV2::setSurroundingText(QString const& text, quint32 cursor, quint32 anchor)
 {
     d_ptr->setSurroundingText(text, cursor, anchor);
 }
@@ -548,12 +548,12 @@ void TextInputV2::setContentType(ContentHints hint, ContentPurpose purpose)
     d_ptr->setContentType(hint, purpose);
 }
 
-void TextInputV2::setCursorRectangle(const QRect& rect)
+void TextInputV2::setCursorRectangle(QRect const& rect)
 {
     d_ptr->setCursorRectangle(rect);
 }
 
-void TextInputV2::setPreferredLanguage(const QString& language)
+void TextInputV2::setPreferredLanguage(QString const& language)
 {
     d_ptr->setPreferredLanguage(language);
 }

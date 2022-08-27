@@ -212,7 +212,7 @@ void PlasmaWindow::Private::createResource(uint32_t version,
     });
 
     windowRes->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_changed>(m_virtualDesktop);
-    for (const auto& desk : plasmaVirtualDesktops) {
+    for (auto const& desk : plasmaVirtualDesktops) {
         windowRes->d_ptr->send<org_kde_plasma_window_send_virtual_desktop_entered>(desk.c_str());
     }
     if (!m_appId.isEmpty()) {
@@ -260,7 +260,7 @@ void PlasmaWindow::Private::createResource(uint32_t version,
     client->flush();
 }
 
-void PlasmaWindow::Private::setAppId(const QString& appId)
+void PlasmaWindow::Private::setAppId(QString const& appId)
 {
     if (m_appId == appId) {
         return;
@@ -283,7 +283,7 @@ void PlasmaWindow::Private::setPid(uint32_t pid)
     }
 }
 
-void PlasmaWindow::Private::setThemedIconName(const QString& iconName)
+void PlasmaWindow::Private::setThemedIconName(QString const& iconName)
 {
     if (m_themedIconName == iconName) {
         return;
@@ -295,7 +295,7 @@ void PlasmaWindow::Private::setThemedIconName(const QString& iconName)
     }
 }
 
-void PlasmaWindow::Private::setIcon(const QIcon& icon)
+void PlasmaWindow::Private::setIcon(QIcon const& icon)
 {
     m_icon = icon;
     setThemedIconName(m_icon.name());
@@ -309,7 +309,7 @@ void PlasmaWindow::Private::setIcon(const QIcon& icon)
     }
 }
 
-void PlasmaWindow::Private::setTitle(const QString& title)
+void PlasmaWindow::Private::setTitle(QString const& title)
 {
     if (m_title == title) {
         return;
@@ -386,7 +386,7 @@ void PlasmaWindow::Private::setParentWindow(PlasmaWindow* window)
     }
 }
 
-void PlasmaWindow::Private::setGeometry(const QRect& geo)
+void PlasmaWindow::Private::setGeometry(QRect const& geo)
 {
     if (geometry == geo) {
         return;
@@ -405,8 +405,8 @@ void PlasmaWindow::Private::setGeometry(const QRect& geo)
     }
 }
 
-void PlasmaWindow::Private::setApplicationMenuPaths(const QString& serviceName,
-                                                    const QString& objectPath)
+void PlasmaWindow::Private::setApplicationMenuPaths(QString const& serviceName,
+                                                    QString const& objectPath)
 {
     if (m_applicationMenu.serviceName == serviceName
         && m_applicationMenu.objectPath == objectPath) {
@@ -433,7 +433,7 @@ PlasmaWindow::PlasmaWindow(PlasmaWindowManager* manager, QObject* parent)
 
 PlasmaWindow::~PlasmaWindow() = default;
 
-void PlasmaWindow::setAppId(const QString& appId)
+void PlasmaWindow::setAppId(QString const& appId)
 {
     d_ptr->setAppId(appId);
 }
@@ -443,7 +443,7 @@ void PlasmaWindow::setPid(uint32_t pid)
     d_ptr->setPid(pid);
 }
 
-void PlasmaWindow::setTitle(const QString& title)
+void PlasmaWindow::setTitle(QString const& title)
 {
     d_ptr->setTitle(title);
 }
@@ -562,7 +562,7 @@ void PlasmaWindow::setSkipSwitcher(bool set)
     d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_SKIPSWITCHER, set);
 }
 
-void PlasmaWindow::setIcon(const QIcon& icon)
+void PlasmaWindow::setIcon(QIcon const& icon)
 {
     d_ptr->setIcon(icon);
 }
@@ -632,8 +632,8 @@ void PlasmaWindow::setResizable(bool set)
     d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_RESIZABLE, set);
 }
 
-void PlasmaWindow::setApplicationMenuPaths(const QString& serviceName,
-                                           const QString& objectPath) const
+void PlasmaWindow::setApplicationMenuPaths(QString const& serviceName,
+                                           QString const& objectPath) const
 {
     d_ptr->setApplicationMenuPaths(serviceName, objectPath);
 }
@@ -648,7 +648,7 @@ void PlasmaWindow::setParentWindow(PlasmaWindow* parentWindow)
     d_ptr->setParentWindow(parentWindow);
 }
 
-void PlasmaWindow::setGeometry(const QRect& geometry)
+void PlasmaWindow::setGeometry(QRect const& geometry)
 {
     d_ptr->setGeometry(geometry);
 }
@@ -694,7 +694,7 @@ void PlasmaWindowRes::Private::getIconCallback([[maybe_unused]] wl_client* wlCli
         return;
     }
     QtConcurrent::run(
-        [fd](const QIcon& icon) {
+        [fd](QIcon const& icon) {
             QFile file;
             file.open(fd, QIODevice::WriteOnly, QFileDevice::AutoCloseHandle);
             QDataStream ds(&file);
@@ -707,7 +707,7 @@ void PlasmaWindowRes::Private::getIconCallback([[maybe_unused]] wl_client* wlCli
 void PlasmaWindowRes::Private::requestEnterVirtualDesktopCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource,
-    const char* id)
+    char const* id)
 {
     auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {
@@ -730,7 +730,7 @@ void PlasmaWindowRes::Private::requestEnterNewVirtualDesktopCallback(
 void PlasmaWindowRes::Private::requestLeaveVirtualDesktopCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource,
-    const char* id)
+    char const* id)
 {
     auto priv = get_handle(wlResource)->d_ptr;
     if (!priv->window) {

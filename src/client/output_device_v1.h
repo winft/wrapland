@@ -104,7 +104,7 @@ public:
          **/
         int id;
 
-        bool operator==(const Mode& m) const;
+        bool operator==(Mode const& m) const;
     };
 
     explicit OutputDeviceV1(QObject* parent = nullptr);
@@ -221,19 +221,19 @@ Q_SIGNALS:
      * @param mode The newly added Mode.
      * @see modeChanged
      **/
-    void modeAdded(const Wrapland::Client::OutputDeviceV1::Mode& mode);
+    void modeAdded(Wrapland::Client::OutputDeviceV1::Mode const& mode);
 
     /**
      * Emitted whenever a Mode changes.
      * This normally means that the @c Mode::Flag::Current is added or removed.
      * @param mode The changed Mode
      **/
-    void modeChanged(const Wrapland::Client::OutputDeviceV1::Mode& mode);
+    void modeChanged(Wrapland::Client::OutputDeviceV1::Mode const& mode);
 
     /**
      * Emitted whenever the geometry changes.
      **/
-    void geometryChanged(const QRectF& geometry);
+    void geometryChanged(QRectF const& geometry);
 
     /**
      * The corresponding global for this interface on the Registry got removed.

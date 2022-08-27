@@ -126,7 +126,7 @@ void PlasmaShellSurface::Private::setPositionCallback([[maybe_unused]] wl_client
     priv->setPosition(QPoint(x, y));
 }
 
-void PlasmaShellSurface::Private::setPosition(const QPoint& globalPos)
+void PlasmaShellSurface::Private::setPosition(QPoint const& globalPos)
 {
     if (m_globalPos == globalPos && m_positionSet) {
         return;

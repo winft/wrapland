@@ -207,37 +207,37 @@ bool Surface::Private::lowerChild(Subsurface* subsurface, Surface* sibling)
     return true;
 }
 
-void Surface::Private::setShadow(const QPointer<Shadow>& shadow)
+void Surface::Private::setShadow(QPointer<Shadow> const& shadow)
 {
     pending.pub.shadow = shadow;
     pending.pub.updates |= surface_change::shadow;
 }
 
-void Surface::Private::setBlur(const QPointer<Blur>& blur)
+void Surface::Private::setBlur(QPointer<Blur> const& blur)
 {
     pending.pub.blur = blur;
     pending.pub.updates |= surface_change::blur;
 }
 
-void Surface::Private::setSlide(const QPointer<Slide>& slide)
+void Surface::Private::setSlide(QPointer<Slide> const& slide)
 {
     pending.pub.slide = slide;
     pending.pub.updates |= surface_change::slide;
 }
 
-void Surface::Private::setContrast(const QPointer<Contrast>& contrast)
+void Surface::Private::setContrast(QPointer<Contrast> const& contrast)
 {
     pending.pub.contrast = contrast;
     pending.pub.updates |= surface_change::contrast;
 }
 
-void Surface::Private::setSourceRectangle(const QRectF& source)
+void Surface::Private::setSourceRectangle(QRectF const& source)
 {
     pending.pub.source_rectangle = source;
     pending.pub.updates |= surface_change::source_rectangle;
 }
 
-void Surface::Private::setDestinationSize(const QSize& dest)
+void Surface::Private::setDestinationSize(QSize const& dest)
 {
     pending.destinationSize = dest;
     pending.destinationSizeIsSet = true;
@@ -247,10 +247,10 @@ void Surface::Private::installViewport(Viewport* vp)
 {
     Q_ASSERT(viewport.isNull());
     viewport = QPointer<Viewport>(vp);
-    connect(viewport, &Viewport::destinationSizeSet, handle, [this](const QSize& size) {
+    connect(viewport, &Viewport::destinationSizeSet, handle, [this](QSize const& size) {
         setDestinationSize(size);
     });
-    connect(viewport, &Viewport::sourceRectangleSet, handle, [this](const QRectF& rect) {
+    connect(viewport, &Viewport::sourceRectangleSet, handle, [this](QRectF const& rect) {
         setSourceRectangle(rect);
     });
     connect(viewport, &Viewport::resourceDestroyed, handle, [this] {
@@ -392,8 +392,8 @@ bool Surface::Private::has_role() const
     return has_xdg_shell_role || subsurface || layer_surface;
 }
 
-void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
-                                                  const QRectF& sourceRectangle) const
+void Surface::Private::soureRectangleIntegerCheck(QSize const& destinationSize,
+                                                  QRectF const& sourceRectangle) const
 {
     if (destinationSize.isValid()) {
         // Source rectangle must be integer valued only when the destination size is not set.
@@ -405,8 +405,8 @@ void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
     }
     Q_ASSERT(viewport);
 
-    const double width = sourceRectangle.width();
-    const double height = sourceRectangle.height();
+    double const width = sourceRectangle.width();
+    double const height = sourceRectangle.height();
 
     if (!qFuzzyCompare(width, static_cast<int>(width))
         || !qFuzzyCompare(height, static_cast<int>(height))) {
@@ -415,10 +415,10 @@ void Surface::Private::soureRectangleIntegerCheck(const QSize& destinationSize,
     }
 }
 
-void Surface::Private::soureRectangleContainCheck(const Buffer* buffer,
+void Surface::Private::soureRectangleContainCheck(Buffer const* buffer,
                                                   Output::Transform transform,
                                                   qint32 scale,
-                                                  const QRectF& sourceRectangle) const
+                                                  QRectF const& sourceRectangle) const
 {
     if (!buffer || !viewport || !sourceRectangle.isValid()) {
         return;
@@ -510,8 +510,8 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
             || tr == Tr::Flipped270) {
 
             // Calculate transformed + scaled buffer damage.
-            for (const auto& rect : current.bufferDamage) {
-                const auto add
+            for (auto const& rect : current.bufferDamage) {
+                auto const add
                     = QRegion(rect.x() / sc, rect.y() / sc, rect.height() / sc, rect.width() / sc);
                 bufferDamage = bufferDamage.united(add);
             }
@@ -658,12 +658,12 @@ void Surface::Private::commit()
     Q_EMIT handle->committed();
 }
 
-void Surface::Private::damage(const QRect& rect)
+void Surface::Private::damage(QRect const& rect)
 {
     pending.pub.damage = pending.pub.damage.united(rect);
 }
 
-void Surface::Private::damageBuffer(const QRect& rect)
+void Surface::Private::damageBuffer(QRect const& rect)
 {
     pending.bufferDamage = pending.bufferDamage.united(rect);
 }
@@ -691,7 +691,7 @@ void Surface::Private::addFrameCallback(uint32_t callback)
     pending.callbacks.push_back(frameCallback);
 }
 
-void Surface::Private::attachBuffer(wl_resource* wlBuffer, const QPoint& offset)
+void Surface::Private::attachBuffer(wl_resource* wlBuffer, QPoint const& offset)
 {
     had_buffer_attached = true;
 
@@ -790,7 +790,7 @@ void Surface::Private::opaqueRegionCallback([[maybe_unused]] wl_client* wlClient
     priv->setOpaque(region ? region->region() : QRegion());
 }
 
-void Surface::Private::setOpaque(const QRegion& region)
+void Surface::Private::setOpaque(QRegion const& region)
 {
     pending.pub.opaque = region;
     pending.pub.updates |= surface_change::opaque;
@@ -805,7 +805,7 @@ void Surface::Private::inputRegionCallback([[maybe_unused]] wl_client* wlClient,
     priv->setInput(region ? region->region() : QRegion(), !region);
 }
 
-void Surface::Private::setInput(const QRegion& region, bool isInfinite)
+void Surface::Private::setInput(QRegion const& region, bool isInfinite)
 {
     pending.pub.input_is_infinite = isInfinite;
     pending.pub.input = region;

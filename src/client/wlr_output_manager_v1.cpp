@@ -171,7 +171,7 @@ public:
     WaylandPointer<zwlr_output_mode_v1, zwlr_output_mode_v1_destroy> outputMode;
     EventQueue* queue = nullptr;
 
-    void name(const QString& name);
+    void name(QString const& name);
 
     static void sizeCallback(void* data, zwlr_output_mode_v1* mode, int width, int height);
     static void refreshCallback(void* data, zwlr_output_mode_v1* mode, int refresh);
@@ -267,8 +267,8 @@ public:
     WaylandPointer<zwlr_output_head_v1, zwlr_output_head_v1_destroy> outputHead;
     EventQueue* queue = nullptr;
 
-    static void nameCallback(void* data, zwlr_output_head_v1* head, const char* name);
-    static void descriptionCallback(void* data, zwlr_output_head_v1* head, const char* description);
+    static void nameCallback(void* data, zwlr_output_head_v1* head, char const* name);
+    static void descriptionCallback(void* data, zwlr_output_head_v1* head, char const* description);
     static void physicalSizeCallback(void* data, zwlr_output_head_v1* head, int width, int height);
     static void modeCallback(void* data, zwlr_output_head_v1* head, zwlr_output_mode_v1* mode);
     static void enabledCallback(void* data, zwlr_output_head_v1* head, int enabled);
@@ -279,10 +279,10 @@ public:
     static void scaleCallback(void* data, zwlr_output_head_v1* head, wl_fixed_t scale);
     static void finishedCallback(void* data, zwlr_output_head_v1* head);
 
-    static void makeCallback(void* data, zwlr_output_head_v1* head, const char* make);
-    static void modelCallback(void* data, zwlr_output_head_v1* head, const char* model);
+    static void makeCallback(void* data, zwlr_output_head_v1* head, char const* make);
+    static void modelCallback(void* data, zwlr_output_head_v1* head, char const* model);
     static void
-    serialNumberCallback(void* data, zwlr_output_head_v1* head, const char* serialNumber);
+    serialNumberCallback(void* data, zwlr_output_head_v1* head, char const* serialNumber);
 
     WlrOutputHeadV1* q;
     static const struct zwlr_output_head_v1_listener s_listener;
@@ -322,7 +322,7 @@ const zwlr_output_head_v1_listener WlrOutputHeadV1::Private::s_listener = {
     serialNumberCallback,
 };
 
-void WlrOutputHeadV1::Private::nameCallback(void* data, zwlr_output_head_v1* head, const char* name)
+void WlrOutputHeadV1::Private::nameCallback(void* data, zwlr_output_head_v1* head, char const* name)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -333,7 +333,7 @@ void WlrOutputHeadV1::Private::nameCallback(void* data, zwlr_output_head_v1* hea
 
 void WlrOutputHeadV1::Private::descriptionCallback(void* data,
                                                    zwlr_output_head_v1* head,
-                                                   const char* description)
+                                                   char const* description)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -481,7 +481,7 @@ void WlrOutputHeadV1::Private::finishedCallback(void* data, zwlr_output_head_v1*
     delete d->q;
 }
 
-void WlrOutputHeadV1::Private::makeCallback(void* data, zwlr_output_head_v1* head, const char* make)
+void WlrOutputHeadV1::Private::makeCallback(void* data, zwlr_output_head_v1* head, char const* make)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -492,7 +492,7 @@ void WlrOutputHeadV1::Private::makeCallback(void* data, zwlr_output_head_v1* hea
 
 void WlrOutputHeadV1::Private::modelCallback(void* data,
                                              zwlr_output_head_v1* head,
-                                             const char* model)
+                                             char const* model)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);
@@ -503,7 +503,7 @@ void WlrOutputHeadV1::Private::modelCallback(void* data,
 
 void WlrOutputHeadV1::Private::serialNumberCallback(void* data,
                                                     zwlr_output_head_v1* head,
-                                                    const char* serialNumber)
+                                                    char const* serialNumber)
 {
     auto d = reinterpret_cast<Private*>(data);
     Q_ASSERT(d->outputHead == head);

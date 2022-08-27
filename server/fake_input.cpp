@@ -98,8 +98,8 @@ FakeInputDevice* FakeInput::Private::device(FakeInputBind* bind) const
 }
 
 void FakeInput::Private::authenticateCallback(FakeInputBind* bind,
-                                              const char* application,
-                                              const char* reason)
+                                              char const* application,
+                                              char const* reason)
 {
     auto fakeDevice = device(bind->resource);
     Q_EMIT fakeDevice->authenticationRequested(QString::fromUtf8(application),

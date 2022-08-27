@@ -136,7 +136,7 @@ drag_pool& Seat::drags() const
     return d_ptr->drags;
 }
 
-void Seat::setName(const std::string& name)
+void Seat::setName(std::string const& name)
 {
     if (d_ptr->name == name) {
         return;

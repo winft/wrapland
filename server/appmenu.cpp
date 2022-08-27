@@ -105,8 +105,8 @@ Appmenu::Appmenu(Client* client, uint32_t version, uint32_t id, Surface* surface
 
 void Appmenu::Private::setAddressCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,
-                                          const char* service_name,
-                                          const char* object_path)
+                                          char const* service_name,
+                                          char const* object_path)
 {
     auto priv = get_handle(wlResource)->d_ptr;
 

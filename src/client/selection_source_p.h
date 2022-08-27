@@ -12,7 +12,7 @@ namespace Wrapland::Client
 {
 
 template<typename PrivateSource, typename WlSource>
-void send_callback(void* data, WlSource* dataSource, const char* mimeType, int32_t fd)
+void send_callback(void* data, WlSource* dataSource, char const* mimeType, int32_t fd)
 {
     auto d = reinterpret_cast<PrivateSource*>(data);
     Q_ASSERT(d->source == dataSource);

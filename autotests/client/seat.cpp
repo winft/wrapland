@@ -372,7 +372,7 @@ void TestSeat::testPointer()
     auto p = m_seat->createPointer(m_seat);
     QSignalSpy frameSpy(p, &Clt::Pointer::frame);
     QVERIFY(frameSpy.isValid());
-    const Clt::Pointer& cp = *p;
+    Clt::Pointer const& cp = *p;
     QVERIFY(p->isValid());
 
     QScopedPointer<Clt::RelativePointer> relativePointer(
@@ -672,7 +672,7 @@ void TestSeat::testPointerTransformation()
     QVERIFY(server_pointers.get_focus().devices.empty());
 
     auto p = m_seat->createPointer(m_seat);
-    const Clt::Pointer& cp = *p;
+    Clt::Pointer const& cp = *p;
     QVERIFY(p->isValid());
     QSignalSpy pointerCreatedSpy(server.seat, &Srv::Seat::pointerCreated);
     QVERIFY(pointerCreatedSpy.isValid());
@@ -1413,7 +1413,7 @@ void TestSeat::testKeyboard()
     auto* keyboard = m_seat->createKeyboard(m_seat);
     QSignalSpy repeatInfoSpy(keyboard, &Clt::Keyboard::keyRepeatChanged);
     QVERIFY(repeatInfoSpy.isValid());
-    const Clt::Keyboard& ckeyboard = *keyboard;
+    Clt::Keyboard const& ckeyboard = *keyboard;
     QVERIFY(keyboard->isValid());
     QCOMPARE(keyboard->isKeyRepeatEnabled(), false);
     QCOMPARE(keyboard->keyRepeatDelay(), 0);
@@ -1657,7 +1657,7 @@ void TestSeat::testCast()
     QVERIFY(s.isValid());
 
     QCOMPARE((wl_seat*)s, wlSeat);
-    const Clt::Seat& s2(s);
+    Clt::Seat const& s2(s);
     QCOMPARE((wl_seat*)s2, wlSeat);
 }
 

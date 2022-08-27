@@ -64,7 +64,7 @@ XdgShellToplevel::Private::Private(uint32_t version,
 
 void XdgShellToplevel::Private::setTitleCallback([[maybe_unused]] wl_client* wlClient,
                                                  wl_resource* wlResource,
-                                                 const char* title)
+                                                 char const* title)
 {
     auto priv = get_handle(wlResource)->d_ptr;
 
@@ -78,7 +78,7 @@ void XdgShellToplevel::Private::setTitleCallback([[maybe_unused]] wl_client* wlC
 
 void XdgShellToplevel::Private::setAppIdCallback([[maybe_unused]] wl_client* wlClient,
                                                  wl_resource* wlResource,
-                                                 const char* app_id)
+                                                 char const* app_id)
 {
     auto priv = get_handle(wlResource)->d_ptr;
 
@@ -167,7 +167,7 @@ void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
     }
 }
 
-uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, const QSize& size)
+uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, QSize const& size)
 {
     const uint32_t serial = client->display()->handle->nextSerial();
 
@@ -235,8 +235,8 @@ void XdgShellToplevel::Private::close()
 
 void XdgShellToplevel::Private::commit()
 {
-    const bool minimumSizeChanged = m_pendingState.minimumSizeIsSet;
-    const bool maximumSizeChanged = m_pendingState.maximumSizeIsSet;
+    bool const minimumSizeChanged = m_pendingState.minimumSizeIsSet;
+    bool const maximumSizeChanged = m_pendingState.maximumSizeIsSet;
 
     if (minimumSizeChanged) {
         m_currentState.minimumSize = m_pendingState.minimumSize;
@@ -385,7 +385,7 @@ QSize XdgShellToplevel::maximumSize() const
     return d_ptr->maximumSize();
 }
 
-uint32_t XdgShellToplevel::configure(XdgShellSurface::States states, const QSize& size)
+uint32_t XdgShellToplevel::configure(XdgShellSurface::States states, QSize const& size)
 {
     return d_ptr->configure(states, size);
 }

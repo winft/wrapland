@@ -173,7 +173,7 @@ public:
      *
      * @see setSocketFd
      **/
-    void setSocketName(const QString& socketName);
+    void setSocketName(QString const& socketName);
     /**
      * Sets the socket @p fd to connect to.
      * Only applies if called before calling establishConnection.

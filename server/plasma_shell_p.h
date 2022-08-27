@@ -88,7 +88,7 @@ private:
     static void
     panelTakesFocusCallback(wl_client* client, wl_resource* resource, uint32_t takesFocus);
 
-    void setPosition(const QPoint& globalPos);
+    void setPosition(QPoint const& globalPos);
     void setRole(uint32_t role);
     void setPanelBehavior(org_kde_plasma_surface_panel_behavior behavior);
 

@@ -56,13 +56,13 @@ private:
     static void getVirtualDesktopCallback(wl_client* client,
                                           wl_resource* resource,
                                           uint32_t serial,
-                                          const char* id);
+                                          char const* id);
     static void requestCreateVirtualDesktopCallback(wl_client* client,
                                                     wl_resource* resource,
-                                                    const char* name,
+                                                    char const* name,
                                                     uint32_t position);
     static void
-    requestRemoveVirtualDesktopCallback(wl_client* client, wl_resource* resource, const char* id);
+    requestRemoveVirtualDesktopCallback(wl_client* client, wl_resource* resource, char const* id);
 
     static const struct org_kde_plasma_virtual_desktop_management_interface s_interface;
 };

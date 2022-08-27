@@ -153,7 +153,7 @@ void TestServerDisplay::testClientConnection()
              QCoreApplication::applicationFilePath().toUtf8().constData());
     QCOMPARE((connection->native()), wlClient);
 
-    const Client& constRef = *connection;
+    Client const& constRef = *connection;
     QCOMPARE(constRef.native(), wlClient);
     QCOMPARE(connectedSpy.count(), 1);
 
