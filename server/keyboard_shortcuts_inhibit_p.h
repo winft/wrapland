@@ -68,7 +68,7 @@ public:
 
     Surface* m_surface;
     Seat* m_seat;
-    bool m_active;
+    bool m_active{false};
 
 private:
     static const struct zwp_keyboard_shortcuts_inhibitor_v1_interface s_interface;

@@ -124,7 +124,6 @@ KeyboardShortcutsInhibitorV1::Private::Private(Client* client,
         q_ptr)
     , m_surface(surface)
     , m_seat(seat)
-    , m_active(false)
 {
 }
 
