@@ -47,7 +47,7 @@ public:
 
 private:
     void init();
-    void render(const QSize& size);
+    void render(QSize const& size);
     void render();
     void setupRegistry(Wrapland::Client::Registry* registry);
     void toggleTimer();

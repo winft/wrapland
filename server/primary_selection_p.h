@@ -27,7 +27,7 @@ class primary_selection_device_manager::Private
     : public device_manager<primary_selection_device_manager_global>
 {
 public:
-    Private(Display* display, primary_selection_device_manager* q);
+    Private(Display* display, primary_selection_device_manager* q_ptr);
     ~Private() override;
 
 private:
@@ -45,7 +45,7 @@ public:
             uint32_t version,
             uint32_t id,
             Seat* seat,
-            primary_selection_device* qptr);
+            primary_selection_device* q_ptr);
     ~Private() override;
 
     Seat* m_seat;
@@ -69,7 +69,7 @@ public:
     Private(Client* client,
             uint32_t version,
             primary_selection_source* source,
-            primary_selection_offer* qptr);
+            primary_selection_offer* q_ptr);
     ~Private() override;
 
     primary_selection_source* source;
@@ -85,7 +85,7 @@ private:
 class primary_selection_source::Private
 {
 public:
-    explicit Private(primary_selection_source* q);
+    explicit Private(primary_selection_source* q_ptr);
 
     std::vector<std::string> mimeTypes;
 

@@ -66,8 +66,8 @@ public:
 private:
     static void setAddressCallback(wl_client* wlClient,
                                    wl_resource* wlResource,
-                                   const char* service_name,
-                                   const char* object_path);
+                                   char const* service_name,
+                                   char const* object_path);
 
     static const struct org_kde_kwin_appmenu_interface s_interface;
 };

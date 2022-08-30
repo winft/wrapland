@@ -63,8 +63,8 @@ public:
     Private* d_ptr;
 
 Q_SIGNALS:
-    void destinationSizeSet(const QSize& size);
-    void sourceRectangleSet(const QRectF& rect);
+    void destinationSizeSet(QSize const& size);
+    void sourceRectangleSet(QRectF const& rect);
     void resourceDestroyed();
 };
 }

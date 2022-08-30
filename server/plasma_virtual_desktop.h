@@ -66,6 +66,8 @@ class WRAPLANDSERVER_EXPORT PlasmaVirtualDesktop : public QObject
 {
     Q_OBJECT
 public:
+    ~PlasmaVirtualDesktop() override;
+
     std::string const& id() const;
 
     void setName(std::string const& name);
@@ -81,7 +83,6 @@ Q_SIGNALS:
 
 private:
     explicit PlasmaVirtualDesktop(PlasmaVirtualDesktopManager* parent);
-    ~PlasmaVirtualDesktop() override;
 
     friend class PlasmaVirtualDesktopManager;
 

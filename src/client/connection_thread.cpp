@@ -137,7 +137,7 @@ void ConnectionThread::Private::doEstablishConnection()
 
 void ConnectionThread::Private::setupSocketNotifier()
 {
-    const int fd = wl_display_get_fd(display);
+    int const fd = wl_display_get_fd(display);
     socketNotifier.reset(new QSocketNotifier(fd, QSocketNotifier::Read));
     QObject::connect(socketNotifier.get(), &QSocketNotifier::activated, q, [this](int count) {
         Q_UNUSED(count)
@@ -220,7 +220,7 @@ void ConnectionThread::doEstablishConnection()
     d->doEstablishConnection();
 }
 
-void ConnectionThread::setSocketName(const QString& socketName)
+void ConnectionThread::setSocketName(QString const& socketName)
 {
     if (d->display) {
         // already initialized

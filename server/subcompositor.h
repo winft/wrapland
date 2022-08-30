@@ -68,7 +68,7 @@ public:
     Surface* mainSurface() const;
 
 Q_SIGNALS:
-    void positionChanged(const QPoint&);
+    void positionChanged(QPoint const&);
     void modeChanged(Wrapland::Server::Subsurface::Mode);
     void resourceDestroyed();
 

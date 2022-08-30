@@ -46,13 +46,13 @@ XdgShellPopup::Private::Private(uint32_t version,
                                 uint32_t id,
                                 XdgShellSurface* surface,
                                 XdgShellSurface* parent,
-                                XdgShellPopup* q)
+                                XdgShellPopup* q_ptr)
     : Wayland::Resource<XdgShellPopup>(surface->d_ptr->client,
                                        version,
                                        id,
                                        &xdg_popup_interface,
                                        &s_interface,
-                                       q)
+                                       q_ptr)
     , shellSurface{surface}
     , parent{parent}
 {
@@ -71,11 +71,11 @@ void XdgShellPopup::Private::ackConfigure(uint32_t serial)
             break;
         }
 
-        uint32_t i = serials.front();
+        auto next_serial = serials.front();
         serials.pop_front();
 
-        Q_EMIT handle->configureAcknowledged(i);
-        if (i == serial) {
+        Q_EMIT handle->configureAcknowledged(next_serial);
+        if (next_serial == serial) {
             break;
         }
     }
@@ -92,7 +92,7 @@ void XdgShellPopup::Private::grabCallback([[maybe_unused]] wl_client* wlClient,
     priv->handle->grabRequested(seat, serial);
 }
 
-uint32_t XdgShellPopup::Private::configure(const QRect& rect)
+uint32_t XdgShellPopup::Private::configure(QRect const& rect)
 {
     const uint32_t serial = client->display()->handle->nextSerial();
     shellSurface->d_ptr->configureSerials.push_back(serial);
@@ -196,7 +196,7 @@ void XdgShellPopup::popupDone()
     return d_ptr->popupDone();
 }
 
-uint32_t XdgShellPopup::configure(const QRect& rect)
+uint32_t XdgShellPopup::configure(QRect const& rect)
 {
     return d_ptr->configure(rect);
 }

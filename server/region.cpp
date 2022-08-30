@@ -32,21 +32,21 @@ namespace Wrapland::Server
 class Region::Private : public Wayland::Resource<Region>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Region* q);
+    Private(Client* client, uint32_t version, uint32_t id, Region* q_ptr);
 
     QRegion qtRegion;
 
 private:
     static void addCallback(wl_client* wlClient,
                             wl_resource* wlResource,
-                            int32_t x,
-                            int32_t y,
+                            int32_t pos_x,
+                            int32_t pos_y,
                             int32_t width,
                             int32_t height);
     static void subtractCallback(wl_client* wlClient,
                                  wl_resource* wlResource,
-                                 int32_t x,
-                                 int32_t y,
+                                 int32_t pos_x,
+                                 int32_t pos_y,
                                  int32_t width,
                                  int32_t height);
 
@@ -59,28 +59,28 @@ const struct wl_region_interface Region::Private::s_interface = {
     subtractCallback,
 };
 
-Region::Private::Private(Client* client, uint32_t version, uint32_t id, Region* q)
-    : Wayland::Resource<Region>(client, version, id, &wl_region_interface, &s_interface, q)
+Region::Private::Private(Client* client, uint32_t version, uint32_t id, Region* q_ptr)
+    : Wayland::Resource<Region>(client, version, id, &wl_region_interface, &s_interface, q_ptr)
 {
 }
 
 void Region::Private::addCallback([[maybe_unused]] wl_client* client,
                                   wl_resource* wlResource,
-                                  int32_t x,
-                                  int32_t y,
+                                  int32_t pos_x,
+                                  int32_t pos_y,
                                   int32_t width,
                                   int32_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
 
-    priv->qtRegion = priv->qtRegion.united(QRect(x, y, width, height));
+    priv->qtRegion = priv->qtRegion.united(QRect(pos_x, pos_y, width, height));
     Q_EMIT priv->handle->regionChanged(priv->qtRegion);
 }
 
 void Region::Private::subtractCallback([[maybe_unused]] wl_client* wlClient,
                                        wl_resource* wlResource,
-                                       int32_t x,
-                                       int32_t y,
+                                       int32_t pos_x,
+                                       int32_t pos_y,
                                        int32_t width,
                                        int32_t height)
 {
@@ -89,7 +89,7 @@ void Region::Private::subtractCallback([[maybe_unused]] wl_client* wlClient,
     if (priv->qtRegion.isEmpty()) {
         return;
     }
-    priv->qtRegion = priv->qtRegion.subtracted(QRect(x, y, width, height));
+    priv->qtRegion = priv->qtRegion.subtracted(QRect(pos_x, pos_y, width, height));
     Q_EMIT priv->handle->regionChanged(priv->qtRegion);
 }
 

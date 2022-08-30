@@ -68,7 +68,7 @@ void touch_pool::create_device(Client* client, uint32_t version, uint32_t id)
     Q_EMIT seat->touchCreated(touch);
 }
 
-void touch_pool::set_focused_surface(Surface* surface, const QPointF& surfacePosition)
+void touch_pool::set_focused_surface(Surface* surface, QPointF const& surfacePosition)
 {
     if (is_in_progress()) {
         // changing surface not allowed during a touch sequence
@@ -97,16 +97,16 @@ void touch_pool::set_focused_surface(Surface* surface, const QPointF& surfacePos
     }
 }
 
-void touch_pool::set_focused_surface_position(const QPointF& surfacePosition)
+void touch_pool::set_focused_surface_position(QPointF const& surfacePosition)
 {
     focus.offset = surfacePosition;
 }
 
-int32_t touch_pool::touch_down(const QPointF& globalPosition)
+int32_t touch_pool::touch_down(QPointF const& globalPosition)
 {
     const int32_t id = ids.empty() ? 0 : ids.crbegin()->first + 1;
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    const auto pos = globalPosition - focus.offset;
+    auto const pos = globalPosition - focus.offset;
     for (auto touch : focus.devices) {
         touch->down(id, serial, pos);
     }
@@ -120,11 +120,11 @@ int32_t touch_pool::touch_down(const QPointF& globalPosition)
         // If the client did not bind the touch interface fall back
         // to at least emulating touch through pointer events.
         forEachInterface(
-            focus.surface, seat->pointers().get_devices(), [this, pos, serial](Pointer* p) {
-                p->d_ptr->sendEnter(serial, focus.surface, pos);
-                p->d_ptr->sendMotion(pos);
-                p->buttonPressed(serial, BTN_LEFT);
-                p->d_ptr->sendFrame();
+            focus.surface, seat->pointers().get_devices(), [this, pos, serial](auto pointer) {
+                pointer->d_ptr->sendEnter(serial, focus.surface, pos);
+                pointer->d_ptr->sendMotion(pos);
+                pointer->buttonPressed(serial, BTN_LEFT);
+                pointer->d_ptr->sendFrame();
             });
     }
 #endif
@@ -149,8 +149,8 @@ void touch_pool::touch_up(int32_t id)
     if (id == 0 && focus.devices.empty() && seat->hasPointer()) {
         // Client did not bind touch, fall back to emulating with pointer events.
         const uint32_t serial = seat->d_ptr->display()->handle->nextSerial();
-        forEachInterface(focus.surface, seat->pointers().get_devices(), [serial](Pointer* p) {
-            p->buttonReleased(serial, BTN_LEFT);
+        forEachInterface(focus.surface, seat->pointers().get_devices(), [serial](auto pointer) {
+            pointer->buttonReleased(serial, BTN_LEFT);
         });
     }
 #endif
@@ -158,10 +158,10 @@ void touch_pool::touch_up(int32_t id)
     ids.erase(id);
 }
 
-void touch_pool::touch_move(int32_t id, const QPointF& globalPosition)
+void touch_pool::touch_move(int32_t id, QPointF const& globalPosition)
 {
     Q_ASSERT(ids.count(id));
-    const auto pos = globalPosition - focus.offset;
+    auto const pos = globalPosition - focus.offset;
     for (auto touch : focus.devices) {
         touch->move(id, pos);
     }
@@ -172,8 +172,8 @@ void touch_pool::touch_move(int32_t id, const QPointF& globalPosition)
 
     if (id == 0 && focus.devices.empty() && seat->hasPointer()) {
         // Client did not bind touch, fall back to emulating with pointer events.
-        forEachInterface(focus.surface, seat->pointers().get_devices(), [pos](Pointer* p) {
-            p->d_ptr->sendMotion(pos);
+        forEachInterface(focus.surface, seat->pointers().get_devices(), [pos](auto pointer) {
+            pointer->d_ptr->sendMotion(pos);
         });
     }
     Q_EMIT seat->touchMoved(id, ids[id], globalPosition);

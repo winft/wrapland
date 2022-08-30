@@ -40,7 +40,7 @@ class data_device::Private : public Wayland::Resource<data_device>
 public:
     using source_res_t = Wrapland::Server::data_source_res;
 
-    Private(Client* client, uint32_t version, uint32_t id, Seat* seat, data_device* q);
+    Private(Client* client, uint32_t version, uint32_t id, Seat* seat, data_device* q_ptr);
     ~Private() override;
 
     data_offer* createDataOffer(data_source* source);
@@ -80,13 +80,13 @@ data_device::Private::Private(Client* client,
                               uint32_t version,
                               uint32_t id,
                               Seat* seat,
-                              data_device* q)
+                              data_device* q_ptr)
     : Wayland::Resource<data_device>(client,
                                      version,
                                      id,
                                      &wl_data_device_interface,
                                      &s_interface,
-                                     q)
+                                     q_ptr)
     , seat(seat)
 {
 }

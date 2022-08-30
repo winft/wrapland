@@ -38,7 +38,7 @@ using OutputManagementV1Bind = Wayland::Bind<OutputManagementV1Global>;
 class OutputManagementV1::Private : public OutputManagementV1Global
 {
 public:
-    Private(OutputManagementV1* q, Display* display);
+    Private(OutputManagementV1* q_ptr, Display* display);
     ~Private() override;
 
 private:
@@ -52,8 +52,11 @@ private:
 struct zkwinft_output_management_v1_interface const OutputManagementV1::Private::s_interface
     = {cb<createConfigurationCallback>};
 
-OutputManagementV1::Private::Private(OutputManagementV1* q, Display* display)
-    : OutputManagementV1Global(q, display, &zkwinft_output_management_v1_interface, &s_interface)
+OutputManagementV1::Private::Private(OutputManagementV1* q_ptr, Display* display)
+    : OutputManagementV1Global(q_ptr,
+                               display,
+                               &zkwinft_output_management_v1_interface,
+                               &s_interface)
 {
     create();
 }

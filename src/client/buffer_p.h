@@ -35,7 +35,7 @@ public:
     Private(Buffer* q,
             ShmPool* parent,
             wl_buffer* nativeBuffer,
-            const QSize& size,
+            QSize const& size,
             int32_t stride,
             size_t offset,
             Format format);

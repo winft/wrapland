@@ -277,7 +277,8 @@ void Display::setupClient(Client* client)
 
     QObject::connect(
         client->handle, &Server::Client::disconnected, handle, [this](Server::Client* client) {
-            remove_all_if(m_clients, [client](auto&& c) { return c->handle == client; });
+            remove_all_if(m_clients,
+                          [client](auto&& candidate) { return candidate->handle == client; });
             Q_EMIT handle->clientDisconnected(client);
         });
     Q_EMIT handle->clientConnected(client->handle);

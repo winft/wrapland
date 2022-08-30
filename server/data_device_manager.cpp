@@ -40,7 +40,7 @@ using data_device_manager_global
 class data_device_manager::Private : public device_manager<data_device_manager_global>
 {
 public:
-    Private(data_device_manager* q, Display* display);
+    Private(data_device_manager* q_ptr, Display* display);
 
 private:
     static const struct wl_data_device_manager_interface s_interface;
@@ -51,8 +51,8 @@ const struct wl_data_device_manager_interface data_device_manager::Private::s_in
     cb<get_device>,
 };
 
-data_device_manager::Private::Private(data_device_manager* q, Display* display)
-    : device_manager<data_device_manager_global>(q,
+data_device_manager::Private::Private(data_device_manager* q_ptr, Display* display)
+    : device_manager<data_device_manager_global>(q_ptr,
                                                  display,
                                                  &wl_data_device_manager_interface,
                                                  &s_interface)

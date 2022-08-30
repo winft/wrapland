@@ -42,7 +42,7 @@ using PlasmaVirtualDesktopManagerBind = Wayland::Bind<PlasmaVirtualDesktopManage
 class PlasmaVirtualDesktopManager::Private : public PlasmaVirtualDesktopManagerGlobal
 {
 public:
-    Private(Display* display, PlasmaVirtualDesktopManager* q);
+    Private(Display* display, PlasmaVirtualDesktopManager* q_ptr);
 
     void bindInit(PlasmaVirtualDesktopManagerBind* bind) override;
     void send_removed(std::string const& id);
@@ -56,13 +56,13 @@ private:
     static void getVirtualDesktopCallback(wl_client* client,
                                           wl_resource* resource,
                                           uint32_t serial,
-                                          const char* id);
+                                          char const* id);
     static void requestCreateVirtualDesktopCallback(wl_client* client,
                                                     wl_resource* resource,
-                                                    const char* name,
+                                                    char const* name,
                                                     uint32_t position);
     static void
-    requestRemoveVirtualDesktopCallback(wl_client* client, wl_resource* resource, const char* id);
+    requestRemoveVirtualDesktopCallback(wl_client* client, wl_resource* resource, char const* id);
 
     static const struct org_kde_plasma_virtual_desktop_management_interface s_interface;
 };
@@ -72,7 +72,7 @@ class PlasmaVirtualDesktopRes;
 class PlasmaVirtualDesktop::Private
 {
 public:
-    Private(PlasmaVirtualDesktop* q, PlasmaVirtualDesktopManager* manager);
+    Private(PlasmaVirtualDesktop* q_ptr, PlasmaVirtualDesktopManager* manager);
     ~Private();
 
     void createResource(Wayland::Client* client, uint32_t version, uint32_t serial);
@@ -118,7 +118,7 @@ public:
             uint32_t version,
             uint32_t id,
             PlasmaVirtualDesktop* virtualDesktop,
-            PlasmaVirtualDesktopRes* q);
+            PlasmaVirtualDesktopRes* q_ptr);
 
     PlasmaVirtualDesktop* virtualDesktop;
 

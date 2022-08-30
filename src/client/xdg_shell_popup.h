@@ -84,7 +84,7 @@ public:
      * Sets the position of the window contents within the buffer
      * @since 0.0.559
      */
-    void setWindowGeometry(const QRect& windowGeometry);
+    void setWindowGeometry(QRect const& windowGeometry);
 
     operator xdg_surface*();
     operator xdg_surface*() const;
@@ -103,7 +103,7 @@ Q_SIGNALS:
      * relativePosition This is emitted for V6 surfaces only
      * @since 0.0.539
      **/
-    void configureRequested(const QRect& relativePosition, quint32 serial);
+    void configureRequested(QRect const& relativePosition, quint32 serial);
 
 private:
     explicit XdgShellPopup(QObject* parent = nullptr);

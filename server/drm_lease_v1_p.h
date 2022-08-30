@@ -78,7 +78,7 @@ public:
             uint32_t version,
             uint32_t id,
             drm_lease_device_v1* device,
-            drm_lease_request_v1* qptr);
+            drm_lease_request_v1* q_ptr);
     ~Private() override = default;
 
     drm_lease_device_v1* device;
@@ -135,7 +135,7 @@ public:
             std::string description,
             int id,
             drm_lease_device_v1* device,
-            drm_lease_connector_v1* q);
+            drm_lease_connector_v1* q_ptr);
     void add_resource(drm_lease_connector_v1_res* res);
 
     std::string name;
@@ -157,7 +157,7 @@ public:
             uint32_t id,
             std::vector<drm_lease_connector_v1*> connectors,
             drm_lease_device_v1* device,
-            drm_lease_v1* qptr);
+            drm_lease_v1* q_ptr);
     ~Private() override = default;
 
     int lessee_id{-1};

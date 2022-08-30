@@ -43,8 +43,8 @@ class Resource
 public:
     Resource(Resource* parent,
              uint32_t id,
-             const wl_interface* interface,
-             const void* impl,
+             wl_interface const* interface,
+             void const* impl,
              Handle* handle)
         : Resource(parent->client(), parent->version(), id, interface, impl, handle)
     {
@@ -53,8 +53,8 @@ public:
     Resource(Server::Client* client,
              uint32_t version,
              uint32_t id,
-             const wl_interface* interface,
-             const void* impl,
+             wl_interface const* interface,
+             void const* impl,
              Handle* handle)
         : Resource(Display::castClient(client), version, id, interface, impl, handle)
     {
@@ -63,8 +63,8 @@ public:
     Resource(Client* client,
              uint32_t version,
              uint32_t id,
-             const wl_interface* interface,
-             const void* impl,
+             wl_interface const* interface,
+             void const* impl,
              Handle* handle)
         : client{client}
         , version{version}

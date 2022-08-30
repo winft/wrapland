@@ -67,7 +67,7 @@ public:
 
 private:
     static void
-    setPaletteCallback(wl_client* wlClient, wl_resource* wlResource, const char* palette);
+    setPaletteCallback(wl_client* wlClient, wl_resource* wlResource, char const* palette);
 
     static ServerSideDecorationPalette* get(Surface* surface);
 

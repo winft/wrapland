@@ -39,7 +39,7 @@ const struct wl_buffer_listener Buffer::Private::s_listener = {
 Buffer::Private::Private(Buffer* q,
                          ShmPool* parent,
                          wl_buffer* nativeBuffer,
-                         const QSize& size,
+                         QSize const& size,
                          int32_t stride,
                          size_t offset,
                          Format format)
@@ -70,7 +70,7 @@ void Buffer::Private::releasedCallback(void* data, wl_buffer* buffer)
 
 Buffer::Buffer(ShmPool* parent,
                wl_buffer* buffer,
-               const QSize& size,
+               QSize const& size,
                int32_t stride,
                size_t offset,
                Format format)
@@ -80,7 +80,7 @@ Buffer::Buffer(ShmPool* parent,
 
 Buffer::~Buffer() = default;
 
-void Buffer::copy(const void* src)
+void Buffer::copy(void const* src)
 {
     memcpy(address(), src, d->size.height() * d->stride);
 }

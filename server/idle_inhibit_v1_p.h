@@ -39,7 +39,7 @@ using IdleInhibitManagerV1Bind = Wayland::Bind<IdleInhibitManagerV1Global>;
 class IdleInhibitManagerV1::Private : public IdleInhibitManagerV1Global
 {
 public:
-    Private(Display* display, IdleInhibitManagerV1* q);
+    Private(Display* display, IdleInhibitManagerV1* q_ptr);
     ~Private() override;
 
 private:
@@ -65,7 +65,7 @@ Q_SIGNALS:
 class IdleInhibitor::Private : public Wayland::Resource<IdleInhibitor>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, IdleInhibitor* q);
+    Private(Client* client, uint32_t version, uint32_t id, IdleInhibitor* q_ptr);
     ~Private() override;
 
 private:

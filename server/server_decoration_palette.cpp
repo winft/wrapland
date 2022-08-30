@@ -94,7 +94,7 @@ const struct org_kde_kwin_server_decoration_palette_interface
 
 void ServerSideDecorationPalette::Private::setPaletteCallback([[maybe_unused]] wl_client* wlClient,
                                                               wl_resource* wlResource,
-                                                              const char* palette)
+                                                              char const* palette)
 {
     auto priv = get_handle(wlResource)->d_ptr;
 

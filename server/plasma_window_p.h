@@ -47,7 +47,7 @@ using PlasmaWindowManagerBind = Wayland::Bind<PlasmaWindowManagerGlobal>;
 class PlasmaWindowManager::Private : public PlasmaWindowManagerGlobal
 {
 public:
-    Private(Display* display, PlasmaWindowManager* qptr);
+    Private(Display* display, PlasmaWindowManager* q_ptr);
     void sendShowingDesktopState();
 
     void bindInit(PlasmaWindowManagerBind* bind) override;
@@ -71,19 +71,19 @@ private:
 class PlasmaWindow::Private
 {
 public:
-    Private(PlasmaWindowManager* manager, PlasmaWindow* q);
+    Private(PlasmaWindowManager* manager, PlasmaWindow* q_ptr);
     ~Private();
 
     void createResource(uint32_t version, uint32_t id, Wayland::Client* client, bool temporary);
-    void setTitle(const QString& title);
-    void setAppId(const QString& appId);
+    void setTitle(QString const& title);
+    void setAppId(QString const& appId);
     void setPid(uint32_t pid);
-    void setThemedIconName(const QString& iconName);
-    void setIcon(const QIcon& icon);
+    void setThemedIconName(QString const& iconName);
+    void setIcon(QIcon const& icon);
     void unmap() const;
     void setState(org_kde_plasma_window_management_state flag, bool set);
     void setParentWindow(PlasmaWindow* window);
-    void setGeometry(const QRect& geometry);
+    void setGeometry(QRect const& geometry);
     void setApplicationMenuPaths(QString const& serviceName, QString const& objectPath);
 
     // TODO(romangg): Might make sense to have this as a non-static member function instead.
@@ -141,7 +141,7 @@ public:
             uint32_t version,
             uint32_t id,
             PlasmaWindow* window,
-            PlasmaWindowRes* q);
+            PlasmaWindowRes* q_ptr);
 
     void unmap();
 
@@ -158,18 +158,18 @@ private:
     static void setMinimizedGeometryCallback(wl_client* client,
                                              wl_resource* resource,
                                              wl_resource* wlPanel,
-                                             uint32_t x,
-                                             uint32_t y,
+                                             uint32_t pos_x,
+                                             uint32_t pos_y,
                                              uint32_t width,
                                              uint32_t height);
     static void
     unsetMinimizedGeometryCallback(wl_client* client, wl_resource* resource, wl_resource* wlPanel);
     static void getIconCallback(wl_client* client, wl_resource* resource, int32_t fd);
     static void
-    requestEnterVirtualDesktopCallback(wl_client* client, wl_resource* resource, const char* id);
+    requestEnterVirtualDesktopCallback(wl_client* client, wl_resource* resource, char const* id);
     static void requestEnterNewVirtualDesktopCallback(wl_client* client, wl_resource* resource);
     static void
-    requestLeaveVirtualDesktopCallback(wl_client* client, wl_resource* resource, const char* id);
+    requestLeaveVirtualDesktopCallback(wl_client* client, wl_resource* resource, char const* id);
 
     PlasmaWindow* window;
     static const struct org_kde_plasma_window_interface s_interface;

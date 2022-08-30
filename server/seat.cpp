@@ -37,13 +37,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Seat::Private::Private(Seat* q, Display* display)
-    : SeatGlobal(q, display, &wl_seat_interface, &s_interface)
-    , drags(q)
-    , data_devices(q)
-    , primary_selection_devices(q)
-    , text_inputs(q)
-    , q_ptr(q)
+Seat::Private::Private(Seat* q_ptr, Display* display)
+    : SeatGlobal(q_ptr, display, &wl_seat_interface, &s_interface)
+    , drags{q_ptr}
+    , data_devices{q_ptr}
+    , primary_selection_devices{q_ptr}
+    , text_inputs{q_ptr}
+    , q_ptr{q_ptr}
 {
 }
 
@@ -136,7 +136,7 @@ drag_pool& Seat::drags() const
     return d_ptr->drags;
 }
 
-void Seat::setName(const std::string& name)
+void Seat::setName(std::string const& name)
 {
     if (d_ptr->name == name) {
         return;

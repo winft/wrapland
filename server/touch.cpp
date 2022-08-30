@@ -36,7 +36,7 @@ namespace Wrapland::Server
 class Touch::Private : public Wayland::Resource<Touch>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Seat* seat, Touch* q);
+    Private(Client* client, uint32_t version, uint32_t id, Seat* seat, Touch* q_ptr);
 
     Seat* seat;
 
@@ -46,8 +46,8 @@ private:
 
 const struct wl_touch_interface Touch::Private::s_interface = {destroyCallback};
 
-Touch::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* seat, Touch* q)
-    : Wayland::Resource<Touch>(client, version, id, &wl_touch_interface, &s_interface, q)
+Touch::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* seat, Touch* q_ptr)
+    : Wayland::Resource<Touch>(client, version, id, &wl_touch_interface, &s_interface, q_ptr)
     , seat(seat)
 {
 }
@@ -70,7 +70,7 @@ void Touch::frame()
     d_ptr->client->flush();
 }
 
-void Touch::move(qint32 id, const QPointF& localPos)
+void Touch::move(qint32 id, QPointF const& localPos)
 {
     if (d_ptr->seat->drags().is_touch_drag()) {
         // Handled by data_device.
@@ -89,7 +89,7 @@ void Touch::up(qint32 id, quint32 serial)
     d_ptr->client->flush();
 }
 
-void Touch::down(qint32 id, quint32 serial, const QPointF& localPos)
+void Touch::down(qint32 id, quint32 serial, QPointF const& localPos)
 {
     d_ptr->send<wl_touch_send_down>(serial,
                                     d_ptr->seat->timestamp(),

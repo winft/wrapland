@@ -65,7 +65,7 @@ class TestDisplay : public Wrapland::Server::FilteredDisplay
 {
 public:
     TestDisplay();
-    bool allowInterface(Wrapland::Server::Client* client, const QByteArray& interfaceName) override;
+    bool allowInterface(Wrapland::Server::Client* client, QByteArray const& interfaceName) override;
     QList<wl_client*> m_allowedClients;
 };
 
@@ -74,7 +74,7 @@ TestDisplay::TestDisplay()
 {
 }
 
-bool TestDisplay::allowInterface(Wrapland::Server::Client* client, const QByteArray& interfaceName)
+bool TestDisplay::allowInterface(Wrapland::Server::Client* client, QByteArray const& interfaceName)
 {
     if (interfaceName == "org_kde_kwin_blur_manager") {
         return m_allowedClients.contains(client->native());

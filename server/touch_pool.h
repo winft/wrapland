@@ -46,11 +46,11 @@ public:
     touch_focus const& get_focus() const;
     std::vector<Touch*> const& get_devices() const;
 
-    void set_focused_surface(Surface* surface, const QPointF& surfacePosition = QPointF());
-    void set_focused_surface_position(const QPointF& surfacePosition);
-    int32_t touch_down(const QPointF& globalPosition);
+    void set_focused_surface(Surface* surface, QPointF const& surfacePosition = QPointF());
+    void set_focused_surface_position(QPointF const& surfacePosition);
+    int32_t touch_down(QPointF const& globalPosition);
     void touch_up(int32_t id);
-    void touch_move(int32_t id, const QPointF& globalPosition);
+    void touch_move(int32_t id, QPointF const& globalPosition);
     void touch_move_any(QPointF const& pos);
     void touch_frame() const;
     void cancel_sequence();

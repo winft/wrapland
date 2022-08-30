@@ -38,8 +38,8 @@ const struct wp_viewporter_interface Viewporter::Private::s_interface = {
     cb<getViewportCallback>,
 };
 
-Viewporter::Private::Private(Display* display, Viewporter* qptr)
-    : ViewporterGlobal(qptr, display, &wp_viewporter_interface, &s_interface)
+Viewporter::Private::Private(Display* display, Viewporter* q_ptr)
+    : ViewporterGlobal(q_ptr, display, &wp_viewporter_interface, &s_interface)
 {
     create();
 }
@@ -95,8 +95,8 @@ Viewport::Private::Private(Client* client,
                            uint32_t version,
                            uint32_t id,
                            Surface* _surface,
-                           Viewport* q)
-    : Wayland::Resource<Viewport>(client, version, id, &wp_viewport_interface, &s_interface, q)
+                           Viewport* q_ptr)
+    : Wayland::Resource<Viewport>(client, version, id, &wp_viewport_interface, &s_interface, q_ptr)
     , surface(_surface)
 {
 }
@@ -110,33 +110,33 @@ Viewport::Viewport(Client* client, uint32_t version, uint32_t id, Surface* surfa
 
 void Viewport::Private::setSourceCallback([[maybe_unused]] wl_client* wlClient,
                                           wl_resource* wlResource,
-                                          wl_fixed_t x,
-                                          wl_fixed_t y,
+                                          wl_fixed_t pos_x,
+                                          wl_fixed_t pos_y,
                                           wl_fixed_t width,
                                           wl_fixed_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->setSource(wl_fixed_to_double(x),
-                    wl_fixed_to_double(y),
+    priv->setSource(wl_fixed_to_double(pos_x),
+                    wl_fixed_to_double(pos_y),
                     wl_fixed_to_double(width),
                     wl_fixed_to_double(height));
 }
 
-void Viewport::Private::setSource(double x, double y, double width, double height)
+void Viewport::Private::setSource(double pos_x, double pos_y, double width, double height)
 {
     if (!surface) {
         postError(WP_VIEWPORT_ERROR_NO_SURFACE, "Viewport without surface");
         return;
     }
-    if (x < 0 || y < 0 || width <= 0 || height <= 0) {
+    if (pos_x < 0 || pos_y < 0 || width <= 0 || height <= 0) {
         auto cmp = [](double number) { return !qFuzzyCompare(number, -1.); };
-        if (cmp(x) || cmp(y) || cmp(width) || cmp(height)) {
+        if (cmp(pos_x) || cmp(pos_y) || cmp(width) || cmp(height)) {
             postError(WP_VIEWPORT_ERROR_BAD_VALUE, "Source rectangle not well defined");
             return;
         }
     }
 
-    Q_EMIT handle->sourceRectangleSet(QRectF(x, y, width, height));
+    Q_EMIT handle->sourceRectangleSet(QRectF(pos_x, pos_y, width, height));
 }
 
 void Viewport::Private::setDestinationCallback([[maybe_unused]] wl_client* wlClient,

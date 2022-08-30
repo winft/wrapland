@@ -58,9 +58,9 @@ public:
 private:
     void setupRegistry(Registry* registry);
     void render();
-    void showTooltip(const QPointF& pos);
+    void showTooltip(QPointF const& pos);
     void hideTooltip();
-    void moveTooltip(const QPointF& pos);
+    void moveTooltip(QPointF const& pos);
     QThread* m_connectionThread;
     ConnectionThread* m_connectionThreadObject;
     EventQueue* m_eventQueue = nullptr;
@@ -118,7 +118,7 @@ void PanelTest::init()
     m_connectionThreadObject->establishConnection();
 }
 
-void PanelTest::showTooltip(const QPointF& pos)
+void PanelTest::showTooltip(QPointF const& pos)
 {
     if (!m_tooltip.surface) {
         m_tooltip.surface = m_compositor->createSurface(this);
@@ -154,7 +154,7 @@ void PanelTest::hideTooltip()
     m_tooltip.visible = false;
 }
 
-void PanelTest::moveTooltip(const QPointF& pos)
+void PanelTest::moveTooltip(QPointF const& pos)
 {
     if (m_tooltip.plasmaSurface) {
         m_tooltip.plasmaSurface->setPosition(QPoint(10, 0) + pos.toPoint());
@@ -314,7 +314,7 @@ void PanelTest::setupRegistry(Registry* registry)
 
 void PanelTest::render()
 {
-    const QSize& size = m_shellSurface->size().isValid() ? m_shellSurface->size() : QSize(300, 20);
+    QSize const& size = m_shellSurface->size().isValid() ? m_shellSurface->size() : QSize(300, 20);
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(

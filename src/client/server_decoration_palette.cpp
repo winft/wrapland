@@ -176,7 +176,7 @@ bool ServerSideDecorationPalette::isValid() const
     return d->decoration_palette.isValid();
 }
 
-void ServerSideDecorationPalette::setPalette(const QString& palette)
+void ServerSideDecorationPalette::setPalette(QString const& palette)
 {
     Q_ASSERT(isValid());
     org_kde_kwin_server_decoration_palette_set_palette(*this, palette.toUtf8());

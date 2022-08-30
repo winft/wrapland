@@ -28,7 +28,7 @@ using XdgActivationV1Bind = Wayland::Bind<XdgActivationV1Global>;
 class XdgActivationV1::Private : public XdgActivationV1Global
 {
 public:
-    Private(Display* display, XdgActivationV1* qptr);
+    Private(Display* display, XdgActivationV1* q_ptr);
     ~Private() override;
 
 private:
@@ -46,7 +46,7 @@ public:
             uint32_t version,
             uint32_t id,
             XdgActivationV1* device,
-            XdgActivationTokenV1* qptr);
+            XdgActivationTokenV1* q_ptr);
     ~Private() override = default;
 
     uint32_t serial{0};

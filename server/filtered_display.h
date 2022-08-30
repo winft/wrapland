@@ -49,7 +49,7 @@ public:
      * @return true if the client should be able to access the global with the following
      * interfaceName
      */
-    virtual bool allowInterface(Client* client, const QByteArray& interfaceName) = 0;
+    virtual bool allowInterface(Client* client, QByteArray const& interfaceName) = 0;
 
 private:
     class Private;

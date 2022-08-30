@@ -155,7 +155,7 @@ public:
      * @param size the custom mode size of the head.
      * @param refresh the custom refresh rate of the head.
      */
-    void setCustomMode(WlrOutputHeadV1* head, const QSize& size, int refresh);
+    void setCustomMode(WlrOutputHeadV1* head, QSize const& size, int refresh);
 
     /**
      * Set transformation for this output, for example rotated or flipped.
@@ -174,7 +174,7 @@ public:
      * @param geo the head geometry relative to other outputs,
      *
      */
-    void setPosition(WlrOutputHeadV1* head, const QPoint& pos);
+    void setPosition(WlrOutputHeadV1* head, QPoint const& pos);
 
     /**
      * Sets the position of this output in the global space.

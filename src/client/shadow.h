@@ -196,7 +196,7 @@ public:
     void attachBottomLeft(wl_buffer* buffer);
     void attachBottomLeft(Buffer* buffer);
     void attachBottomLeft(Buffer::Ptr buffer);
-    void setOffsets(const QMarginsF& margins);
+    void setOffsets(QMarginsF const& margins);
 
     operator org_kde_kwin_shadow*();
     operator org_kde_kwin_shadow*() const;

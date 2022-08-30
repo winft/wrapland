@@ -54,7 +54,7 @@ public:
     quint32 enteredSerial = 0;
 
 private:
-    void enter(uint32_t serial, wl_surface* surface, const QPointF& relativeToSurface);
+    void enter(uint32_t serial, wl_surface* surface, QPointF const& relativeToSurface);
     void leave(uint32_t serial);
     static void enterCallback(void* data,
                               wl_pointer* pointer,
@@ -142,7 +142,7 @@ void Pointer::Private::enterCallback(void* data,
     p->enter(serial, surface, QPointF(wl_fixed_to_double(sx), wl_fixed_to_double(sy)));
 }
 
-void Pointer::Private::enter(uint32_t serial, wl_surface* surface, const QPointF& relativeToSurface)
+void Pointer::Private::enter(uint32_t serial, wl_surface* surface, QPointF const& relativeToSurface)
 {
     enteredSurface = QPointer<Surface>(Surface::get(surface));
     enteredSerial = serial;
@@ -259,7 +259,7 @@ void Pointer::Private::axisDiscreteCallback(void* data,
     emit p->q->axisDiscreteChanged(wlAxisToPointerAxis(axis), discrete);
 }
 
-void Pointer::setCursor(Surface* surface, const QPoint& hotspot)
+void Pointer::setCursor(Surface* surface, QPoint const& hotspot)
 {
     Q_ASSERT(isValid());
     wl_surface* s = nullptr;

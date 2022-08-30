@@ -135,7 +135,7 @@ bool Viewport::isValid() const
     return d->viewport.isValid();
 }
 
-void Viewport::setSourceRectangle(const QRectF& source)
+void Viewport::setSourceRectangle(QRectF const& source)
 {
     Q_ASSERT(isValid());
     wp_viewport_set_source(d->viewport,
@@ -145,7 +145,7 @@ void Viewport::setSourceRectangle(const QRectF& source)
                            wl_fixed_from_double(source.height()));
 }
 
-void Viewport::setDestinationSize(const QSize& dest)
+void Viewport::setDestinationSize(QSize const& dest)
 {
     Q_ASSERT(isValid());
     wp_viewport_set_destination(d->viewport, dest.width(), dest.height());

@@ -26,8 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/global.h"
 #include "wayland/resource.h"
 
-#include "viewporter.h"
-
 #include <wayland-viewporter-server-protocol.h>
 
 namespace Wrapland::Server
@@ -43,7 +41,7 @@ using ViewporterBind = Wayland::Bind<ViewporterGlobal>;
 class Viewporter::Private : public ViewporterGlobal
 {
 public:
-    Private(Display* display, Viewporter* qptr);
+    Private(Display* display, Viewporter* q_ptr);
 
 private:
     void getViewport(ViewporterBind* bind, uint32_t id, wl_resource* wlSurface);
@@ -56,18 +54,18 @@ private:
 class Viewport::Private : public Wayland::Resource<Viewport>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Surface* _surface, Viewport* q);
+    Private(Client* client, uint32_t version, uint32_t id, Surface* _surface, Viewport* q_ptr);
 
     Surface* surface;
 
 private:
-    void setSource(double x, double y, double width, double height);
+    void setSource(double pos_x, double pos_y, double width, double height);
     void setDestination(int width, int height);
 
     static void setSourceCallback(wl_client* wlClient,
                                   wl_resource* wlResource,
-                                  wl_fixed_t x,
-                                  wl_fixed_t y,
+                                  wl_fixed_t pos_x,
+                                  wl_fixed_t pos_y,
                                   wl_fixed_t width,
                                   wl_fixed_t height);
     static void setDestinationCallback(wl_client* wlClient,

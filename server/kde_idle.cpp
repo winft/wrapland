@@ -33,8 +33,8 @@ namespace Wrapland::Server
 const struct org_kde_kwin_idle_interface KdeIdle::Private::s_interface
     = {cb<getIdleTimeoutCallback>};
 
-KdeIdle::Private::Private(Display* display, KdeIdle* qptr)
-    : Wayland::Global<KdeIdle>(qptr, display, &org_kde_kwin_idle_interface, &s_interface)
+KdeIdle::Private::Private(Display* display, KdeIdle* q_ptr)
+    : Wayland::Global<KdeIdle>(q_ptr, display, &org_kde_kwin_idle_interface, &s_interface)
 {
     create();
 }
@@ -95,8 +95,8 @@ bool KdeIdle::isInhibited() const
 
 void KdeIdle::simulateUserActivity()
 {
-    for (auto i : d_ptr->idleTimeouts) {
-        i->d_ptr->simulateUserActivity();
+    for (auto timeout : d_ptr->idleTimeouts) {
+        timeout->d_ptr->simulateUserActivity();
     }
 }
 
@@ -110,13 +110,13 @@ IdleTimeout::Private::Private(Client* client,
                               uint32_t id,
                               Seat* seat,
                               KdeIdle* manager,
-                              IdleTimeout* q)
+                              IdleTimeout* q_ptr)
     : Wayland::Resource<IdleTimeout>(client,
                                      version,
                                      id,
                                      &org_kde_kwin_idle_timeout_interface,
                                      &s_interface,
-                                     q)
+                                     q_ptr)
     , seat(seat)
     , manager(manager)
 {

@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "keyboard.h"
+#include "logging.h"
 
 #include "wayland/resource.h"
 
@@ -46,8 +47,8 @@ struct file_wrap {
     }
     ~file_wrap()
     {
-        if (file) {
-            std::fclose(file);
+        if (file && !std::fclose(file)) {
+            qCWarning(WRAPLAND_SERVER, "Failed to close keymap file %p.", static_cast<void*>(file));
         }
     }
     FILE* file{nullptr};
@@ -56,7 +57,7 @@ struct file_wrap {
 class Keyboard::Private : public Wayland::Resource<Keyboard>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Keyboard* q);
+    Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Keyboard* q_ptr);
 
     void sendKeymap(int fd, quint32 size);
     void sendModifiers();

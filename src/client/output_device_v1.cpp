@@ -63,11 +63,11 @@ public:
 private:
     static void infoCallback(void* data,
                              zkwinft_output_device_v1* output,
-                             const char* name,
-                             const char* description,
-                             const char* make,
-                             const char* model,
-                             const char* serial_number,
+                             char const* name,
+                             char const* description,
+                             char const* make,
+                             char const* model,
+                             char const* serial_number,
                              int32_t physical_width,
                              int32_t physical_height);
 
@@ -111,7 +111,7 @@ void OutputDeviceV1::Private::setup(zkwinft_output_device_v1* o)
     zkwinft_output_device_v1_add_listener(output, &s_outputListener, this);
 }
 
-bool OutputDeviceV1::Mode::operator==(const OutputDeviceV1::Mode& m) const
+bool OutputDeviceV1::Mode::operator==(OutputDeviceV1::Mode const& m) const
 {
     return size == m.size && refreshRate == m.refreshRate && preferred == m.preferred;
 }
@@ -127,11 +127,11 @@ zkwinft_output_device_v1_listener OutputDeviceV1::Private::s_outputListener = {
 
 void OutputDeviceV1::Private::infoCallback(void* data,
                                            zkwinft_output_device_v1* output,
-                                           const char* name,
-                                           const char* description,
-                                           const char* make,
-                                           const char* model,
-                                           const char* serial_number,
+                                           char const* name,
+                                           char const* description,
+                                           char const* make,
+                                           char const* model,
+                                           char const* serial_number,
                                            int32_t physical_width,
                                            int32_t physical_height)
 {

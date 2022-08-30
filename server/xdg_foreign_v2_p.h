@@ -34,7 +34,7 @@ class XdgImportedV2;
 class Q_DECL_HIDDEN XdgForeign::Private
 {
 public:
-    Private(Display* display, XdgForeign* q);
+    Private(Display* display, XdgForeign* q_ptr);
 
     std::unique_ptr<XdgExporterV2> exporter;
     std::unique_ptr<XdgImporterV2> importer;
@@ -47,7 +47,7 @@ public:
     explicit XdgExporterV2(Display* display);
     ~XdgExporterV2() override;
 
-    XdgExportedV2* exportedSurface(const QString& handle);
+    XdgExportedV2* exportedSurface(QString const& handle);
 
 private:
     class Private;
@@ -80,7 +80,7 @@ public:
                   uint32_t version,
                   uint32_t id,
                   Surface* surface,
-                  const QString& protocolHandle);
+                  QString const& protocolHandle);
 
     Surface* surface() const;
 

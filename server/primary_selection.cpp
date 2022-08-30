@@ -24,9 +24,9 @@ const struct zwp_primary_selection_device_manager_v1_interface
 };
 
 primary_selection_device_manager::Private::Private(Display* display,
-                                                   primary_selection_device_manager* q)
+                                                   primary_selection_device_manager* q_ptr)
     : device_manager<primary_selection_device_manager_global>(
-        q,
+        q_ptr,
         display,
         &zwp_primary_selection_device_manager_v1_interface,
         &s_interface)
@@ -76,13 +76,13 @@ primary_selection_device::Private::Private(Client* client,
                                            uint32_t version,
                                            uint32_t id,
                                            Seat* seat,
-                                           primary_selection_device* qptr)
+                                           primary_selection_device* q_ptr)
     : Wayland::Resource<primary_selection_device>(client,
                                                   version,
                                                   id,
                                                   &zwp_primary_selection_device_v1_interface,
                                                   &s_interface,
-                                                  qptr)
+                                                  q_ptr)
     , m_seat(seat)
 {
 }
@@ -173,13 +173,13 @@ const struct zwp_primary_selection_offer_v1_interface primary_selection_offer::P
 primary_selection_offer::Private::Private(Client* client,
                                           uint32_t version,
                                           primary_selection_source* source,
-                                          primary_selection_offer* qptr)
+                                          primary_selection_offer* q_ptr)
     : Wayland::Resource<primary_selection_offer>(client,
                                                  version,
                                                  0,
                                                  &zwp_primary_selection_offer_v1_interface,
                                                  &s_interface,
-                                                 qptr)
+                                                 q_ptr)
     , source(source)
 {
 }

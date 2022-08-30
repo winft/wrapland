@@ -35,9 +35,9 @@ const struct zwp_keyboard_shortcuts_inhibit_manager_v1_interface
 };
 
 KeyboardShortcutsInhibitManagerV1::Private::Private(Display* display,
-                                                    KeyboardShortcutsInhibitManagerV1* q)
+                                                    KeyboardShortcutsInhibitManagerV1* q_ptr)
     : Wayland::Global<KeyboardShortcutsInhibitManagerV1>(
-        q,
+        q_ptr,
         display,
         &zwp_keyboard_shortcuts_inhibit_manager_v1_interface,
         &s_interface)
@@ -114,17 +114,16 @@ KeyboardShortcutsInhibitorV1::Private::Private(Client* client,
                                                uint32_t id,
                                                Surface* surface,
                                                Seat* seat,
-                                               KeyboardShortcutsInhibitorV1* q)
+                                               KeyboardShortcutsInhibitorV1* q_ptr)
     : Wayland::Resource<KeyboardShortcutsInhibitorV1>(
         client,
         version,
         id,
         &zwp_keyboard_shortcuts_inhibitor_v1_interface,
         &s_interface,
-        q)
+        q_ptr)
     , m_surface(surface)
     , m_seat(seat)
-    , m_active(false)
 {
 }
 

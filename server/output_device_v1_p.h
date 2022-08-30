@@ -37,7 +37,7 @@ using OutputDeviceV1Bind = Wayland::Bind<OutputDeviceV1Global>;
 class OutputDeviceV1::Private : public OutputDeviceV1Global
 {
 public:
-    Private(Output* output, Display* display, OutputDeviceV1* q);
+    Private(Output* output, Display* display, OutputDeviceV1* q_ptr);
 
     bool broadcast();
     void done();

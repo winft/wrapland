@@ -33,8 +33,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-XdgShell::Private::Private(XdgShell* q, Display* display)
-    : XdgShellGlobal(q, display, &xdg_wm_base_interface, &s_interface)
+XdgShell::Private::Private(XdgShell* q_ptr, Display* display)
+    : XdgShellGlobal(q_ptr, display, &xdg_wm_base_interface, &s_interface)
 {
 }
 
@@ -75,9 +75,9 @@ void XdgShell::Private::createPositionerCallback(XdgShellBind* bind, uint32_t id
 
     auto bindsIt = priv->bindsObjects.find(bind);
     if (bindsIt == priv->bindsObjects.end()) {
-        BindResources b;
-        b.positioners.push_back(positioner);
-        priv->bindsObjects[bind] = b;
+        BindResources bind_res;
+        bind_res.positioners.push_back(positioner);
+        priv->bindsObjects[bind] = bind_res;
     } else {
         (*bindsIt).second.positioners.push_back(positioner);
     }
@@ -101,9 +101,10 @@ void XdgShell::Private::getXdgSurfaceCallback(XdgShellBind* bind,
     auto bindsIt = priv->bindsObjects.find(bind);
     if (bindsIt != priv->bindsObjects.end()) {
         auto const& surfaces = (*bindsIt).second.surfaces;
-        auto surfaceIt = std::find_if(surfaces.cbegin(), surfaces.cend(), [surface](auto s) {
-            return surface == s->surface();
-        });
+        auto surfaceIt
+            = std::find_if(surfaces.cbegin(), surfaces.cend(), [surface](auto shell_surface) {
+                  return surface == shell_surface->surface();
+              });
         if (surfaceIt != surfaces.cend()) {
             bind->post_error(XDG_WM_BASE_ERROR_ROLE, "XDG Surface already created");
             return;
@@ -114,9 +115,9 @@ void XdgShell::Private::getXdgSurfaceCallback(XdgShellBind* bind,
         = new XdgShellSurface(bind->client->handle, bind->version, id, priv->handle, surface);
 
     if (bindsIt == priv->bindsObjects.end()) {
-        BindResources b;
-        b.surfaces.push_back(shellSurface);
-        priv->bindsObjects[bind] = b;
+        BindResources bind_res;
+        bind_res.surfaces.push_back(shellSurface);
+        priv->bindsObjects[bind] = bind_res;
     } else {
         (*bindsIt).second.surfaces.push_back(shellSurface);
     }

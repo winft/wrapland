@@ -199,14 +199,14 @@ public:
 
     QList<QMimeType> offeredMimeTypes() const;
 
-    void receive(const QMimeType& mimeType, qint32 fd);
-    void receive(const QString& mimeType, qint32 fd);
+    void receive(QMimeType const& mimeType, qint32 fd);
+    void receive(QString const& mimeType, qint32 fd);
 
     operator zwp_primary_selection_offer_v1*();
     operator zwp_primary_selection_offer_v1*() const;
 
 Q_SIGNALS:
-    void mimeTypeOffered(const QString&);
+    void mimeTypeOffered(QString const&);
 
 private:
     class Private;
@@ -247,8 +247,8 @@ public:
      **/
     bool isValid() const;
 
-    void offer(const QString& mimeType);
-    void offer(const QMimeType& mimeType);
+    void offer(QString const& mimeType);
+    void offer(QMimeType const& mimeType);
 
     operator zwp_primary_selection_source_v1*();
     operator zwp_primary_selection_source_v1*() const;
@@ -258,13 +258,13 @@ Q_SIGNALS:
      * Emitted when a target accepts pointer_focus or motion events. If
      * a target does not accept any of the offered types, @p mimeType is empty.
      **/
-    void targetAccepts(const QString& mimeType);
+    void targetAccepts(QString const& mimeType);
     /**
      * Request for data from the client. Send the data as the
      * specified @p mimeType over the passed file descriptor @p fd, then close
      * it.
      **/
-    void sendDataRequested(const QString& mimeType, qint32 fd);
+    void sendDataRequested(QString const& mimeType, qint32 fd);
     /**
      * This PrimarySelectionSource has been replaced by another PrimarySelectionSource.
      * The client should clean up and destroy this PrimarySelectionSource.

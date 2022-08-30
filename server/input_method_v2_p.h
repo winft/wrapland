@@ -30,7 +30,7 @@ private:
     static struct zwp_input_method_manager_v2_interface const s_interface;
 
 public:
-    Private(Display* display, input_method_manager_v2* q);
+    Private(Display* display, input_method_manager_v2* q_ptr);
 };
 
 class input_method_v2::Private : public Wayland::Resource<input_method_v2>
@@ -39,7 +39,7 @@ private:
     static struct zwp_input_method_v2_interface const s_interface;
 
 public:
-    Private(Client* client, uint32_t version, uint32_t id, input_method_v2* q);
+    Private(Client* client, uint32_t version, uint32_t id, input_method_v2* q_ptr);
 
     Seat* seat{nullptr};
     uint32_t serial{0};
@@ -86,7 +86,7 @@ public:
             uint32_t version,
             uint32_t id,
             Seat* seat,
-            input_method_keyboard_grab_v2* q);
+            input_method_keyboard_grab_v2* q_ptr);
 
     Seat* seat;
     file_wrap keymap;
@@ -103,7 +103,7 @@ public:
             uint32_t version,
             uint32_t id,
             Surface* surface,
-            input_method_popup_surface_v2* q);
+            input_method_popup_surface_v2* q_ptr);
 
     Surface* surface;
 };

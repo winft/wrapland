@@ -68,8 +68,8 @@ public:
      **/
     bool isValid() const;
 
-    void offer(const QString& mimeType);
-    void offer(const QMimeType& mimeType);
+    void offer(QString const& mimeType);
+    void offer(QMimeType const& mimeType);
 
     /**
      * Sets the actions that the source side client supports for this
@@ -98,13 +98,13 @@ Q_SIGNALS:
      * Emitted when a target accepts pointer_focus or motion events. If
      * a target does not accept any of the offered types, @p mimeType is empty.
      **/
-    void targetAccepts(const QString& mimeType);
+    void targetAccepts(QString const& mimeType);
     /**
      * Request for data from the client. Send the data as the
      * specified @p mimeType over the passed file descriptor @p fd, then close
      * it.
      **/
-    void sendDataRequested(const QString& mimeType, qint32 fd);
+    void sendDataRequested(QString const& mimeType, qint32 fd);
     /**
      * This DataSource has been replaced by another DataSource.
      * The client should clean up and destroy this DataSource.

@@ -43,8 +43,8 @@ const struct org_kde_kwin_fake_input_interface FakeInput::Private::s_interface =
     cb<keyboardKeyCallback>,
 };
 
-FakeInput::Private::Private(Display* display, FakeInput* q)
-    : FakeInputGlobal(q, display, &org_kde_kwin_fake_input_interface, &s_interface)
+FakeInput::Private::Private(Display* display, FakeInput* q_ptr)
+    : FakeInputGlobal(q_ptr, display, &org_kde_kwin_fake_input_interface, &s_interface)
 {
     create();
 }
@@ -98,8 +98,8 @@ FakeInputDevice* FakeInput::Private::device(FakeInputBind* bind) const
 }
 
 void FakeInput::Private::authenticateCallback(FakeInputBind* bind,
-                                              const char* application,
-                                              const char* reason)
+                                              char const* application,
+                                              char const* reason)
 {
     auto fakeDevice = device(bind->resource);
     Q_EMIT fakeDevice->authenticationRequested(QString::fromUtf8(application),
@@ -126,8 +126,8 @@ void FakeInput::Private::pointerMotionCallback(FakeInputBind* bind,
 }
 
 void FakeInput::Private::pointerMotionAbsoluteCallback(FakeInputBind* bind,
-                                                       wl_fixed_t x,
-                                                       wl_fixed_t y)
+                                                       wl_fixed_t pos_x,
+                                                       wl_fixed_t pos_y)
 {
     auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
@@ -135,7 +135,7 @@ void FakeInput::Private::pointerMotionAbsoluteCallback(FakeInputBind* bind,
     }
 
     Q_EMIT fakeDevice->pointerMotionAbsoluteRequested(
-        QPointF(wl_fixed_to_double(x), wl_fixed_to_double(y)));
+        QPointF(wl_fixed_to_double(pos_x), wl_fixed_to_double(pos_y)));
 }
 
 void FakeInput::Private::axisCallback(FakeInputBind* bind, uint32_t axis, wl_fixed_t value)
@@ -182,8 +182,8 @@ void FakeInput::Private::buttonCallback(FakeInputBind* bind, uint32_t button, ui
 
 void FakeInput::Private::touchDownCallback(FakeInputBind* bind,
                                            quint32 id,
-                                           wl_fixed_t x,
-                                           wl_fixed_t y)
+                                           wl_fixed_t pos_x,
+                                           wl_fixed_t pos_y)
 {
     auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
@@ -194,14 +194,14 @@ void FakeInput::Private::touchDownCallback(FakeInputBind* bind,
         return;
     }
     priv->touchIds << id;
-    Q_EMIT fakeDevice->touchDownRequested(id,
-                                          QPointF(wl_fixed_to_double(x), wl_fixed_to_double(y)));
+    Q_EMIT fakeDevice->touchDownRequested(
+        id, QPointF(wl_fixed_to_double(pos_x), wl_fixed_to_double(pos_y)));
 }
 
 void FakeInput::Private::touchMotionCallback(FakeInputBind* bind,
                                              quint32 id,
-                                             wl_fixed_t x,
-                                             wl_fixed_t y)
+                                             wl_fixed_t pos_x,
+                                             wl_fixed_t pos_y)
 {
     auto fakeDevice = device(bind->resource);
     if (!check(fakeDevice)) {
@@ -211,8 +211,8 @@ void FakeInput::Private::touchMotionCallback(FakeInputBind* bind,
     if (!priv->touchIds.contains(id)) {
         return;
     }
-    Q_EMIT fakeDevice->touchMotionRequested(id,
-                                            QPointF(wl_fixed_to_double(x), wl_fixed_to_double(y)));
+    Q_EMIT fakeDevice->touchMotionRequested(
+        id, QPointF(wl_fixed_to_double(pos_x), wl_fixed_to_double(pos_y)));
 }
 
 void FakeInput::Private::touchUpCallback(FakeInputBind* bind, quint32 id)
@@ -280,9 +280,9 @@ FakeInputDevice::Private::Private(FakeInputBind* bind)
 {
 }
 
-FakeInputDevice::FakeInputDevice(std::unique_ptr<FakeInputDevice::Private> p)
+FakeInputDevice::FakeInputDevice(std::unique_ptr<FakeInputDevice::Private> d_ptr)
     : QObject(nullptr)
-    , d_ptr(std::move(p))
+    , d_ptr{std::move(d_ptr)}
 {
 }
 

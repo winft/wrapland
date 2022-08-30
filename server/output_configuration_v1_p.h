@@ -37,7 +37,7 @@ public:
             uint32_t version,
             uint32_t id,
             OutputManagementV1* manager,
-            OutputConfigurationV1* q);
+            OutputConfigurationV1* q_ptr);
 
     void sendApplied();
     void sendFailed();
@@ -65,8 +65,8 @@ private:
     static void geometryCallback(wl_client* wlClient,
                                  wl_resource* wlResource,
                                  wl_resource* wlOutputDevice,
-                                 wl_fixed_t x,
-                                 wl_fixed_t y,
+                                 wl_fixed_t pos_x,
+                                 wl_fixed_t pos_y,
                                  wl_fixed_t width,
                                  wl_fixed_t height);
     static void applyCallback(wl_client* wlClient, wl_resource* wlResource);

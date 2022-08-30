@@ -49,7 +49,7 @@ public:
     };
     Q_ENUM(State)
 
-    void setState(Key k, State s);
+    void setState(Key key, State state);
 
 private:
     class Private;

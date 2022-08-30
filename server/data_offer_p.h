@@ -32,7 +32,7 @@ namespace Wrapland::Server
 class data_offer::Private : public Wayland::Resource<data_offer>
 {
 public:
-    Private(Client* client, uint32_t version, data_source* source, data_offer* q);
+    Private(Client* client, uint32_t version, data_source* source, data_offer* q_ptr);
 
     data_source* source;
 

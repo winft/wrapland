@@ -137,38 +137,38 @@ public:
      * Mark @p rect as damaged for the next frame.
      * @see damageBuffer
      **/
-    void damage(const QRect& rect);
+    void damage(QRect const& rect);
     /**
      * Mark @p region as damaged for the next frame.
      * @see damageBuffer
      **/
-    void damage(const QRegion& region);
+    void damage(QRegion const& region);
     /**
      * Mark @p rect in buffer coordinates as damaged for the next frame.
      * @see damage
      * @since 0.0.559
      **/
-    void damageBuffer(const QRect& rect);
+    void damageBuffer(QRect const& rect);
     /**
      * Mark @p region in buffer coordinates as damaged for the next frame.
      * @see damage
      * @since 0.0.559
      **/
-    void damageBuffer(const QRegion& region);
+    void damageBuffer(QRegion const& region);
     /**
      * Attaches the @p buffer to this Surface for the next frame.
      * @param buffer The buffer to attach to this Surface
      * @param offset Position of the new upper-left corner in relation to previous frame
      **/
-    void attachBuffer(wl_buffer* buffer, const QPoint& offset = QPoint());
+    void attachBuffer(wl_buffer* buffer, QPoint const& offset = QPoint());
     /**
      * Overloaded method for convenience.
      **/
-    void attachBuffer(Buffer* buffer, const QPoint& offset = QPoint());
+    void attachBuffer(Buffer* buffer, QPoint const& offset = QPoint());
     /**
      * Overloaded method for convenience.
      **/
-    void attachBuffer(Buffer::Ptr buffer, const QPoint& offset = QPoint());
+    void attachBuffer(Buffer::Ptr buffer, QPoint const& offset = QPoint());
     /**
      * Sets the input region to @p region.
      *
@@ -183,7 +183,7 @@ public:
      * @param region The new input region or an infinite region if @c null
      * @see commit
      **/
-    void setInputRegion(const Region* region = nullptr);
+    void setInputRegion(Region const* region = nullptr);
     /**
      * Sets the opaque region to @p region.
      *
@@ -198,8 +198,8 @@ public:
      * @param region The new opaque region or an empty region if @c null
      * @see commit
      **/
-    void setOpaqueRegion(const Region* region = nullptr);
-    void setSize(const QSize& size);
+    void setOpaqueRegion(Region const* region = nullptr);
+    void setSize(QSize const& size);
     QSize size() const;
 
     /**
@@ -248,7 +248,7 @@ public:
      * All Surfaces which are currently created.
      * TODO: KF6 return QList<Surface*> instead of const-ref
      **/
-    static const QList<Surface*>& all(); // krazy:exclude=constref
+    static QList<Surface*> const& all(); // krazy:exclude=constref
     /**
      * @returns The Surface referencing the @p native wl_surface or @c null if there is no such
      * Surface.
@@ -264,7 +264,7 @@ Q_SIGNALS:
      * @see commit
      **/
     void frameRendered();
-    void sizeChanged(const QSize&);
+    void sizeChanged(QSize const&);
 
     /**
      * Emitted whenever a change in the Surface (e.g. creation, movement, resize) results in

@@ -261,7 +261,7 @@ void WlrOutputConfigurationV1::setTransform(WlrOutputHeadV1* head,
     configurationHead->transformSet = true;
 }
 
-void WlrOutputConfigurationV1::setPosition(WlrOutputHeadV1* head, const QPoint& pos)
+void WlrOutputConfigurationV1::setPosition(WlrOutputHeadV1* head, QPoint const& pos)
 {
     auto configurationHead = d->getConfigurationHead(head);
 

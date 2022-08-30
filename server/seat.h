@@ -68,7 +68,7 @@ public:
     bool hasKeyboard() const;
     bool hasTouch() const;
 
-    void setName(const std::string& name);
+    void setName(std::string const& name);
     void setHasPointer(bool has);
     void setHasKeyboard(bool has);
     void setHasTouch(bool has);
@@ -93,8 +93,8 @@ public:
     void setPrimarySelection(primary_selection_source* source);
 
 Q_SIGNALS:
-    void pointerPosChanged(const QPointF& pos);
-    void touchMoved(int32_t id, uint32_t serial, const QPointF& globalPosition);
+    void pointerPosChanged(QPointF const& pos);
+    void touchMoved(int32_t id, uint32_t serial, QPointF const& globalPosition);
     void timestampChanged(uint32_t);
 
     void pointerCreated(Wrapland::Server::Pointer*);

@@ -38,7 +38,7 @@ using text_input_manager_v2_bind = Wayland::Bind<text_input_manager_v2_global>;
 class text_input_manager_v2::Private : public text_input_manager_v2_global
 {
 public:
-    Private(Display* display, text_input_manager_v2* q);
+    Private(Display* display, text_input_manager_v2* q_ptr);
 
 private:
     static void
@@ -50,7 +50,7 @@ private:
 class text_input_v2::Private : public Wayland::Resource<text_input_v2>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, text_input_v2* q);
+    Private(Client* client, uint32_t version, uint32_t id, text_input_v2* q_ptr);
 
     void sync(text_input_v2_state const& old);
     void send_enter(Surface* surface, quint32 serial);
@@ -89,15 +89,15 @@ private:
                                           uint32_t purpose);
     static void set_cursor_rectangle_callback(wl_client* wlClient,
                                               wl_resource* wlResource,
-                                              int32_t x,
-                                              int32_t y,
+                                              int32_t pos_x,
+                                              int32_t pos_y,
                                               int32_t width,
                                               int32_t height);
     static void set_preferred_language_callback(wl_client* wlClient,
                                                 wl_resource* wlResource,
                                                 char const* language);
 
-    void enable(Surface* s);
+    void enable(Surface* surface);
     void disable();
 
     text_input_v2* q_ptr;

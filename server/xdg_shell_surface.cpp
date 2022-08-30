@@ -47,13 +47,13 @@ XdgShellSurface::Private::Private(Client* client,
                                   uint32_t id,
                                   XdgShell* shell,
                                   Surface* surface,
-                                  XdgShellSurface* q)
+                                  XdgShellSurface* q_ptr)
     : Wayland::Resource<XdgShellSurface>(client,
                                          version,
                                          id,
                                          &xdg_surface_interface,
                                          &s_interface,
-                                         q)
+                                         q_ptr)
     , m_shell(shell)
     , m_surface(surface)
 {
@@ -128,8 +128,8 @@ void XdgShellSurface::Private::getPopupCallback([[maybe_unused]] wl_client* wlCl
 
 void XdgShellSurface::Private::setWindowGeometryCallback([[maybe_unused]] wl_client* wlClient,
                                                          wl_resource* wlResource,
-                                                         int32_t x,
-                                                         int32_t y,
+                                                         int32_t pos_x,
+                                                         int32_t pos_y,
                                                          int32_t width,
                                                          int32_t height)
 {
@@ -146,7 +146,7 @@ void XdgShellSurface::Private::setWindowGeometryCallback([[maybe_unused]] wl_cli
         return;
     }
 
-    priv->pending_state.window_geometry = QRect(x, y, width, height);
+    priv->pending_state.window_geometry = QRect(pos_x, pos_y, width, height);
     priv->pending_state.window_geometry_set = true;
 }
 

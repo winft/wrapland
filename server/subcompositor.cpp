@@ -40,7 +40,7 @@ using SubcompositorBind = Wayland::Bind<SubcompositorGlobal>;
 class Subcompositor::Private : public SubcompositorGlobal
 {
 public:
-    Private(Subcompositor* q, Display* display);
+    Private(Subcompositor* q_ptr, Display* display);
 
 private:
     static void destroyCallback(SubcompositorBind* bind);
@@ -57,8 +57,8 @@ const struct wl_subcompositor_interface Subcompositor::Private::s_interface = {
     cb<subsurfaceCallback>,
 };
 
-Subcompositor::Private::Private(Subcompositor* q, Display* display)
-    : Wayland::Global<Subcompositor>(q, display, &wl_subcompositor_interface, &s_interface)
+Subcompositor::Private::Private(Subcompositor* q_ptr, Display* display)
+    : Wayland::Global<Subcompositor>(q_ptr, display, &wl_subcompositor_interface, &s_interface)
 {
 }
 
@@ -106,14 +106,19 @@ Subsurface::Private::Private(Client* client,
                              uint32_t id,
                              Surface* surface,
                              Surface* parent,
-                             Subsurface* q)
-    : Wayland::Resource<Subsurface>(client, version, id, &wl_subsurface_interface, &s_interface, q)
+                             Subsurface* q_ptr)
+    : Wayland::Resource<Subsurface>(client,
+                                    version,
+                                    id,
+                                    &wl_subsurface_interface,
+                                    &s_interface,
+                                    q_ptr)
     , surface{surface}
     , parent{parent}
 {
-    surface->d_ptr->subsurface = q;
+    surface->d_ptr->subsurface = q_ptr;
 
-    QObject::connect(surface, &Surface::resourceDestroyed, q, [this, q] {
+    QObject::connect(surface, &Surface::resourceDestroyed, q_ptr, [this, q_ptr] {
         // From spec: "If the wl_surface associated with the wl_subsurface is destroyed,
         // the wl_subsurface object becomes inert. Note, that destroying either object
         // takes effect immediately."
@@ -124,7 +129,7 @@ Subsurface::Private::Private(Client* client,
         this->surface = nullptr;
 
         // TODO(romangg): do not use that but an extra signal or automatic with surface.
-        Q_EMIT q->resourceDestroyed();
+        Q_EMIT q_ptr->resourceDestroyed();
     });
 }
 
@@ -186,21 +191,21 @@ void Subsurface::Private::commit()
 
 void Subsurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClient,
                                               wl_resource* wlResource,
-                                              int32_t x,
-                                              int32_t y)
+                                              int32_t pos_x,
+                                              int32_t pos_y)
 {
     auto priv = get_handle(wlResource)->d_ptr;
 
     // TODO(unknown author): is this a fixed position?
-    priv->setPosition(QPoint(x, y));
+    priv->setPosition(QPoint(pos_x, pos_y));
 }
 
-void Subsurface::Private::setPosition(const QPoint& p)
+void Subsurface::Private::setPosition(QPoint const& pos)
 {
-    if (pos == p) {
+    if (this->pos == pos) {
         return;
     }
-    scheduledPos = p;
+    scheduledPos = pos;
     scheduledPosChange = true;
 }
 
@@ -258,15 +263,16 @@ void Subsurface::Private::setDeSyncCallback([[maybe_unused]] wl_client* wlClient
     priv->setMode(Mode::Desynchronized);
 }
 
-void Subsurface::Private::setMode(Mode m)
+void Subsurface::Private::setMode(Mode mode)
 {
-    if (mode == m) {
+    if (this->mode == mode) {
         return;
     }
-    mode = m;
-    Q_EMIT handle->modeChanged(m);
 
-    if (m == Mode::Desynchronized
+    this->mode = mode;
+    Q_EMIT handle->modeChanged(mode);
+
+    if (mode == Mode::Desynchronized
         && (!parent->subsurface() || !parent->subsurface()->isSynchronized())) {
         // Parent subsurface list must be updated immediately.
         auto& cc = parent->d_ptr->current.pub.children;

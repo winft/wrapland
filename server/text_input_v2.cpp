@@ -36,8 +36,11 @@ const struct zwp_text_input_manager_v2_interface text_input_manager_v2::Private:
     cb<get_text_input_callback>,
 };
 
-text_input_manager_v2::Private::Private(Display* display, text_input_manager_v2* q)
-    : text_input_manager_v2_global(q, display, &zwp_text_input_manager_v2_interface, &s_interface)
+text_input_manager_v2::Private::Private(Display* display, text_input_manager_v2* q_ptr)
+    : text_input_manager_v2_global(q_ptr,
+                                   display,
+                                   &zwp_text_input_manager_v2_interface,
+                                   &s_interface)
 {
     create();
 }
@@ -75,14 +78,14 @@ const struct zwp_text_input_v2_interface text_input_v2::Private::s_interface = {
     update_state_callback,
 };
 
-text_input_v2::Private::Private(Client* client, uint32_t version, uint32_t id, text_input_v2* q)
+text_input_v2::Private::Private(Client* client, uint32_t version, uint32_t id, text_input_v2* q_ptr)
     : Wayland::Resource<text_input_v2>(client,
                                        version,
                                        id,
                                        &zwp_text_input_v2_interface,
                                        &s_interface,
-                                       q)
-    , q_ptr{q}
+                                       q_ptr)
+    , q_ptr{q_ptr}
 {
 }
 
@@ -93,12 +96,12 @@ void text_input_v2::Private::sync(text_input_v2_state const& old)
     }
 }
 
-void text_input_v2::Private::enable(Surface* s)
+void text_input_v2::Private::enable(Surface* surface)
 {
-    auto changed = surface.data() != s || !state.enabled;
+    auto changed = this->surface.data() != surface || !state.enabled;
     auto const old = state;
 
-    surface = QPointer<Surface>(s);
+    this->surface = QPointer<Surface>(surface);
     state.enabled = true;
 
     if (changed) {
@@ -203,7 +206,7 @@ void text_input_v2::Private::set_surrounding_text_callback(wl_client* /*wlClient
 
 text_input_v2_content_hints convert_hint(uint32_t hint)
 {
-    const auto hints = zwp_text_input_v2_content_hint(hint);
+    auto const hints = static_cast<zwp_text_input_v2_content_hint>(hint);
     text_input_v2_content_hints ret = text_input_v2_content_hint::none;
 
     if (hints & ZWP_TEXT_INPUT_V2_CONTENT_HINT_AUTO_COMPLETION) {
@@ -241,7 +244,7 @@ text_input_v2_content_hints convert_hint(uint32_t hint)
 
 text_input_v2_content_purpose convert_purpose(uint32_t purpose)
 {
-    const auto wlPurpose = zwp_text_input_v2_content_purpose(purpose);
+    auto const wlPurpose = static_cast<zwp_text_input_v2_content_purpose>(purpose);
 
     switch (wlPurpose) {
     case ZWP_TEXT_INPUT_V2_CONTENT_PURPOSE_ALPHA:
@@ -298,13 +301,13 @@ void text_input_v2::Private::set_content_type_callback(wl_client* /*wlClient*/,
 
 void text_input_v2::Private::set_cursor_rectangle_callback(wl_client* /*wlClient*/,
                                                            wl_resource* wlResource,
-                                                           int32_t x,
-                                                           int32_t y,
+                                                           int32_t pos_x,
+                                                           int32_t pos_y,
                                                            int32_t width,
                                                            int32_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    auto const rect = QRect(x, y, width, height);
+    auto const rect = QRect(pos_x, pos_y, width, height);
 
     if (priv->state.cursor_rectangle == rect) {
         return;

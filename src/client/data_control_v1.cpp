@@ -239,12 +239,12 @@ QList<QMimeType> data_control_offer_v1::offered_mime_types() const
     return d_ptr->mimeTypes;
 }
 
-void data_control_offer_v1::receive(const QMimeType& mimeType, int32_t fd)
+void data_control_offer_v1::receive(QMimeType const& mimeType, int32_t fd)
 {
     receive(mimeType.name(), fd);
 }
 
-void data_control_offer_v1::receive(const QString& mimeType, int32_t fd)
+void data_control_offer_v1::receive(QString const& mimeType, int32_t fd)
 {
     Q_ASSERT(isValid());
     zwlr_data_control_offer_v1_receive(d_ptr->dataOffer, mimeType.toUtf8().constData(), fd);
@@ -304,12 +304,12 @@ void data_control_source_v1::setup(zwlr_data_control_source_v1* dataSource)
     d_ptr->setup(dataSource);
 }
 
-void data_control_source_v1::offer(const QString& mimeType)
+void data_control_source_v1::offer(QString const& mimeType)
 {
     zwlr_data_control_source_v1_offer(d_ptr->source, mimeType.toUtf8().constData());
 }
 
-void data_control_source_v1::offer(const QMimeType& mimeType)
+void data_control_source_v1::offer(QMimeType const& mimeType)
 {
     if (!mimeType.isValid()) {
         return;

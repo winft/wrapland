@@ -54,9 +54,9 @@ public:
     void disable(Surface* surface);
     void showInputPanel();
     void hideInputPanel();
-    void setCursorRectangle(const QRect& rect);
-    void setPreferredLanguage(const QString& lang);
-    void setSurroundingText(const QString& text, quint32 cursor, quint32 anchor);
+    void setCursorRectangle(QRect const& rect);
+    void setPreferredLanguage(QString const& lang);
+    void setSurroundingText(QString const& text, quint32 cursor, quint32 anchor);
     void reset();
     void setContentType(ContentHints hint, ContentPurpose purpose);
 
@@ -106,8 +106,8 @@ private:
                                         int32_t height);
     static void preeditStringCallback(void* data,
                                       zwp_text_input_v2* zwp_text_input_v2,
-                                      const char* text,
-                                      const char* commit);
+                                      char const* text,
+                                      char const* commit);
     static void preeditStylingCallback(void* data,
                                        zwp_text_input_v2* zwp_text_input_v2,
                                        uint32_t index,
@@ -116,7 +116,7 @@ private:
     static void
     preeditCursorCallback(void* data, zwp_text_input_v2* zwp_text_input_v2, int32_t index);
     static void
-    commitStringCallback(void* data, zwp_text_input_v2* zwp_text_input_v2, const char* text);
+    commitStringCallback(void* data, zwp_text_input_v2* zwp_text_input_v2, char const* text);
     static void cursorPositionCallback(void* data,
                                        zwp_text_input_v2* zwp_text_input_v2,
                                        int32_t index,
@@ -134,7 +134,7 @@ private:
                                uint32_t state,
                                uint32_t modifiers);
     static void
-    languageCallback(void* data, zwp_text_input_v2* zwp_text_input_v2, const char* language);
+    languageCallback(void* data, zwp_text_input_v2* zwp_text_input_v2, char const* language);
     static void
     textDirectionCallback(void* data, zwp_text_input_v2* zwp_text_input_v2, uint32_t direction);
     static void configureSurroundingTextCallback(void* data,

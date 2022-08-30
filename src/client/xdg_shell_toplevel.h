@@ -99,7 +99,7 @@ public:
      * @see size
      * @see sizeChanged
      **/
-    void setSize(const QSize& size);
+    void setSize(QSize const& size);
 
     /**
      * Set this XdgShellToplevel as transient for @p parent.
@@ -109,17 +109,17 @@ public:
     /**
      * Sets the window title of this XdgShellToplevel to @p title.
      **/
-    void setTitle(const QString& title);
+    void setTitle(QString const& title);
 
     /**
      * Set an application identifier for the surface.
      **/
-    void setAppId(const QByteArray& appId);
+    void setAppId(QByteArray const& appId);
 
     /**
      * Requests to show the window menu at @p pos in surface coordinates.
      **/
-    void requestShowWindowMenu(Seat* seat, quint32 serial, const QPoint& pos);
+    void requestShowWindowMenu(Seat* seat, quint32 serial, QPoint const& pos);
 
     /**
      * Requests a move on the given @p seat after the pointer button press with the given @p serial.
@@ -175,19 +175,19 @@ public:
      * Set this surface to have a given maximum size
      * @since 0.0.539
      */
-    void setMaxSize(const QSize& size);
+    void setMaxSize(QSize const& size);
 
     /**
      * Set this surface to have a given minimum size
      * @since 0.0.539
      */
-    void setMinSize(const QSize& size);
+    void setMinSize(QSize const& size);
 
     /**
      * Sets the position of the window contents within the buffer
      * @since 0.0.559
      */
-    void setWindowGeometry(const QRect& windowGeometry);
+    void setWindowGeometry(QRect const& windowGeometry);
 
     operator xdg_surface*();
     operator xdg_surface*() const;
@@ -203,7 +203,7 @@ Q_SIGNALS:
      * The compositor sent a configure with the new @p size and the @p states.
      * Before the next commit of the surface the @p serial needs to be passed to ackConfigure.
      **/
-    void configureRequested(const QSize& size,
+    void configureRequested(QSize const& size,
                             Wrapland::Client::XdgShellToplevel::States states,
                             quint32 serial);
 
@@ -215,7 +215,7 @@ Q_SIGNALS:
      * @see size
      * @see setSize
      **/
-    void sizeChanged(const QSize&);
+    void sizeChanged(QSize const&);
 
 private:
     explicit XdgShellToplevel(QObject* parent = nullptr);

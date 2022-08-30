@@ -61,7 +61,7 @@ private:
 class XdgShellPositioner::Private : public Wayland::Resource<XdgShellPositioner>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, XdgShellPositioner* q);
+    Private(Client* client, uint32_t version, uint32_t id, XdgShellPositioner* q_ptr);
 
     QSize initialSize;
     QRect anchorRect;
@@ -75,8 +75,8 @@ private:
     setSizeCallback(wl_client* wlClient, wl_resource* wlResource, int32_t width, int32_t height);
     static void setAnchorRectCallback(wl_client* wlClient,
                                       wl_resource* wlResource,
-                                      int32_t x,
-                                      int32_t y,
+                                      int32_t pos_x,
+                                      int32_t pos_y,
                                       int32_t width,
                                       int32_t height);
     static void setAnchorCallback(wl_client* wlClient, wl_resource* wlResource, uint32_t anchor);
@@ -85,7 +85,7 @@ private:
                                                 wl_resource* wlResource,
                                                 uint32_t constraint_adjustment);
     static void
-    setOffsetCallback(wl_client* wlClient, wl_resource* wlResource, int32_t x, int32_t y);
+    setOffsetCallback(wl_client* wlClient, wl_resource* wlResource, int32_t pos_x, int32_t pos_y);
 
     static const struct xdg_positioner_interface s_interface;
 };

@@ -32,8 +32,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-RelativePointerManagerV1::Private::Private(RelativePointerManagerV1* q, Display* display)
-    : Wayland::Global<RelativePointerManagerV1>(q,
+RelativePointerManagerV1::Private::Private(RelativePointerManagerV1* q_ptr, Display* display)
+    : Wayland::Global<RelativePointerManagerV1>(q_ptr,
                                                 display,
                                                 &zwp_relative_pointer_manager_v1_interface,
                                                 &s_interface)
@@ -71,13 +71,13 @@ RelativePointerManagerV1::~RelativePointerManagerV1() = default;
 RelativePointerV1::Private::Private(Client* client,
                                     uint32_t version,
                                     uint32_t id,
-                                    RelativePointerV1* q)
+                                    RelativePointerV1* q_ptr)
     : Wayland::Resource<RelativePointerV1>(client,
                                            version,
                                            id,
                                            &zwp_relative_pointer_v1_interface,
                                            &s_interface,
-                                           q)
+                                           q_ptr)
 {
 }
 
@@ -94,8 +94,8 @@ RelativePointerV1::RelativePointerV1(Client* client, uint32_t version, uint32_t 
 constexpr size_t shift = 32;
 
 void RelativePointerV1::relativeMotion(quint64 microseconds,
-                                       const QSizeF& delta,
-                                       const QSizeF& deltaNonAccelerated)
+                                       QSizeF const& delta,
+                                       QSizeF const& deltaNonAccelerated)
 {
     d_ptr->send<zwp_relative_pointer_v1_send_relative_motion>(
         (microseconds >> shift),

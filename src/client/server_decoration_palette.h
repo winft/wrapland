@@ -150,7 +150,7 @@ public:
      * Absolute file path, or name of palette in the user's config directory.
      * If set to empty the default palette will be used.
      */
-    void setPalette(const QString& palette);
+    void setPalette(QString const& palette);
 
     operator org_kde_kwin_server_decoration_palette*();
     operator org_kde_kwin_server_decoration_palette*() const;

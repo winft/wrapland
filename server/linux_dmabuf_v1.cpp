@@ -38,10 +38,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-linux_dmabuf_v1::Private::Private(linux_dmabuf_v1* q,
+linux_dmabuf_v1::Private::Private(linux_dmabuf_v1* q_ptr,
                                   Display* display,
                                   linux_dmabuf_import_v1 import)
-    : linux_dmabuf_v1_global(q, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
+    : linux_dmabuf_v1_global(q_ptr, display, &zwp_linux_dmabuf_v1_interface, &s_interface)
     , import{std::move(import)}
 {
     create();
@@ -144,13 +144,13 @@ linux_dmabuf_params_v1_impl::linux_dmabuf_params_v1_impl(Client* client,
                                                          uint32_t version,
                                                          uint32_t id,
                                                          linux_dmabuf_v1::Private* dmabuf,
-                                                         linux_dmabuf_params_v1* q)
+                                                         linux_dmabuf_params_v1* q_ptr)
     : Wayland::Resource<linux_dmabuf_params_v1>(client,
                                                 version,
                                                 id,
                                                 &zwp_linux_buffer_params_v1_interface,
                                                 &s_interface,
-                                                q)
+                                                q_ptr)
     , m_dmabuf(dmabuf)
 {
     for (auto& plane : m_planes) {
@@ -187,8 +187,11 @@ void linux_dmabuf_params_v1_impl::add_callback(wl_client* /*wlClient*/,
                                                uint32_t modifier_lo)
 {
     auto params = get_handle(wlResource);
-    params->d_ptr->add(
-        fd, plane_idx, offset, stride, (uint64_t(modifier_hi) << modifier_shift) | modifier_lo);
+    params->d_ptr->add(fd,
+                       plane_idx,
+                       offset,
+                       stride,
+                       (static_cast<uint64_t>(modifier_hi) << modifier_shift) | modifier_lo);
 }
 
 void linux_dmabuf_params_v1_impl::create_callback(wl_client* /*wlClient*/,
@@ -215,7 +218,7 @@ void linux_dmabuf_params_v1_impl::create_immed_callback(wl_client* /*wlClient*/,
 }
 
 void linux_dmabuf_params_v1_impl::create(uint32_t buffer_id,
-                                         const QSize& size,
+                                         QSize const& size,
                                          uint32_t format,
                                          uint32_t flags)
 {
@@ -306,14 +309,15 @@ bool linux_dmabuf_params_v1_impl::validate_params(QSize const& size)
     for (uint32_t i = 0; i < m_planeCount; i++) {
         auto& plane = m_planes.at(i);
 
-        if (uint64_t(plane.offset) + plane.stride > UINT32_MAX) {
+        if (static_cast<uint64_t>(plane.offset) + plane.stride > UINT32_MAX) {
             postError(
                 ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
             return false;
         }
 
         if (i == 0
-            && uint64_t(plane.offset) + static_cast<uint64_t>(plane.stride * height) > UINT32_MAX) {
+            && static_cast<uint64_t>(plane.offset) + static_cast<uint64_t>(plane.stride * height)
+                > UINT32_MAX) {
             postError(
                 ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_OUT_OF_BOUNDS, "size overflow for plane %i", i);
             return false;
@@ -417,13 +421,13 @@ linux_dmabuf_buffer_v1_res::linux_dmabuf_buffer_v1_res(
 linux_dmabuf_buffer_v1_res_impl::linux_dmabuf_buffer_v1_res_impl(Client* client,
                                                                  uint32_t version,
                                                                  uint32_t id,
-                                                                 linux_dmabuf_buffer_v1_res* q)
+                                                                 linux_dmabuf_buffer_v1_res* q_ptr)
     : Wayland::Resource<linux_dmabuf_buffer_v1_res>(client,
                                                     version,
                                                     id,
                                                     &wl_buffer_interface,
                                                     &s_interface,
-                                                    q)
+                                                    q_ptr)
 {
 }
 

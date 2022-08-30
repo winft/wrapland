@@ -161,7 +161,7 @@ void TestCompositor::testCast()
     c.setup(wlComp);
     QCOMPARE((wl_compositor*)c, wlComp);
 
-    const Compositor& c2(c);
+    Compositor const& c2(c);
     QCOMPARE((wl_compositor*)c2, wlComp);
 }
 

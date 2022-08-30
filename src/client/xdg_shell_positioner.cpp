@@ -20,14 +20,14 @@ public:
     QPoint anchorOffset;
 };
 
-XdgPositioner::XdgPositioner(const QSize& initialSize, const QRect& anchor)
+XdgPositioner::XdgPositioner(QSize const& initialSize, QRect const& anchor)
     : d_ptr(new Private)
 {
     d_ptr->initialSize = initialSize;
     d_ptr->anchorRect = anchor;
 }
 
-XdgPositioner::XdgPositioner(const XdgPositioner& other)
+XdgPositioner::XdgPositioner(XdgPositioner const& other)
     : d_ptr(new Private)
 {
     *d_ptr = *other.d_ptr;
@@ -37,7 +37,7 @@ XdgPositioner::~XdgPositioner()
 {
 }
 
-void XdgPositioner::setInitialSize(const QSize& size)
+void XdgPositioner::setInitialSize(QSize const& size)
 {
     d_ptr->initialSize = size;
 }
@@ -47,7 +47,7 @@ QSize XdgPositioner::initialSize() const
     return d_ptr->initialSize;
 }
 
-void XdgPositioner::setAnchorRect(const QRect& anchor)
+void XdgPositioner::setAnchorRect(QRect const& anchor)
 {
     d_ptr->anchorRect = anchor;
 }
@@ -67,7 +67,7 @@ Qt::Edges XdgPositioner::anchorEdge() const
     return d_ptr->anchorEdge;
 }
 
-void XdgPositioner::setAnchorOffset(const QPoint& offset)
+void XdgPositioner::setAnchorOffset(QPoint const& offset)
 {
     d_ptr->anchorOffset = offset;
 }

@@ -100,7 +100,7 @@ public:
      *
      * The change is only applied after the parent Surface got committed.
      **/
-    void setPosition(const QPoint& pos);
+    void setPosition(QPoint const& pos);
     QPoint position() const;
 
     /**

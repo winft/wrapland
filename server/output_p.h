@@ -55,7 +55,7 @@ struct OutputState {
 class Output::Private
 {
 public:
-    Private(Display* display, Output* q);
+    Private(Display* display, Output* q_ptr);
 
     void update_client_scale();
     void done();

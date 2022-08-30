@@ -49,7 +49,7 @@ public:
 class data_source_res_impl : public Wayland::Resource<data_source_res>
 {
 public:
-    data_source_res_impl(Client* client, uint32_t version, uint32_t id, data_source_res* q);
+    data_source_res_impl(Client* client, uint32_t version, uint32_t id, data_source_res* q_ptr);
 
     data_source_res* q_ptr;
 

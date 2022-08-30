@@ -398,7 +398,7 @@ public:
      * relative to a panel in particular
      * @since 5.5
      */
-    void setMinimizedGeometry(Surface* panel, const QRect& geom);
+    void setMinimizedGeometry(Surface* panel, QRect const& geom);
 
     /**
      * Remove the task geometry information for a particular panel
@@ -445,7 +445,7 @@ public:
      *
      * @since 0.0.552
      */
-    void requestEnterVirtualDesktop(const QString& id);
+    void requestEnterVirtualDesktop(QString const& id);
 
     /**
      * Make the window enter a new virtual desktop. If the server consents the request,
@@ -461,7 +461,7 @@ public:
      *
      * @since 0.0.552
      */
-    void requestLeaveVirtualDesktop(const QString& id);
+    void requestLeaveVirtualDesktop(QString const& id);
 
     /**
      * Return all the virtual desktop ids this window is associated to.
@@ -626,7 +626,7 @@ Q_SIGNALS:
      * The window can be on more than one desktop, or none: then is considered on all of them.
      * @since 0.0.546
      */
-    void plasmaVirtualDesktopEntered(const QString& id);
+    void plasmaVirtualDesktopEntered(QString const& id);
 
     /**
      * This signal is emitted when the window left a virtual desktop.
@@ -634,7 +634,7 @@ Q_SIGNALS:
      *
      * @since 0.0.546
      */
-    void plasmaVirtualDesktopLeft(const QString& id);
+    void plasmaVirtualDesktopLeft(QString const& id);
 
     /**
      *  This signal is emitted when either the D-BUS service name or

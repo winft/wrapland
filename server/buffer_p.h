@@ -59,7 +59,7 @@ private:
 class Buffer::Private
 {
 public:
-    Private(Buffer* q, wl_resource* wlResource, Surface* surface, Wayland::Display* display);
+    Private(Buffer* q_ptr, wl_resource* wlResource, Surface* surface, Wayland::Display* display);
     ~Private();
 
     wl_resource* resource;
