@@ -35,14 +35,14 @@ class RelativePointerV1;
 class Cursor::Private
 {
 public:
-    Private(Cursor* q, Pointer* _pointer);
+    Private(Cursor* q_ptr, Pointer* _pointer);
 
     Pointer* pointer;
     quint32 enteredSerial = 0;
     QPoint hotspot;
     QPointer<Surface> surface;
 
-    void update(const QPointer<Surface>& surface, quint32 serial, const QPoint& _hotspot);
+    void update(QPointer<Surface> const& surface, quint32 serial, QPoint const& _hotspot);
 
 private:
     Cursor* q_ptr;
@@ -51,7 +51,7 @@ private:
 class Pointer::Private : public Wayland::Resource<Pointer>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Pointer* q);
+    Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Pointer* q_ptr);
 
     Seat* seat;
 
@@ -66,7 +66,7 @@ public:
 
     void sendEnter(quint32 serial, Surface* surface, QPointF const& pos);
     void sendLeave(quint32 serial, Surface* surface);
-    void sendMotion(const QPointF& position);
+    void sendMotion(QPointF const& position);
     void sendFrame();
 
     void registerRelativePointer(RelativePointerV1* relativePointer);
@@ -74,12 +74,12 @@ public:
     void registerPinchGesture(PointerPinchGestureV1* gesture);
 
     void startSwipeGesture(quint32 serial, quint32 fingerCount);
-    void updateSwipeGesture(const QSizeF& delta);
+    void updateSwipeGesture(QSizeF const& delta);
     void endSwipeGesture(quint32 serial);
     void cancelSwipeGesture(quint32 serial);
 
     void startPinchGesture(quint32 serial, quint32 fingerCount);
-    void updatePinchGesture(const QSizeF& delta, qreal scale, qreal rotation);
+    void updatePinchGesture(QSizeF const& delta, qreal scale, qreal rotation);
     void endPinchGesture(quint32 serial);
     void cancelPinchGesture(quint32 serial);
 
@@ -92,7 +92,7 @@ private:
                                   wl_resource* wlSurface,
                                   int32_t hotspot_x,
                                   int32_t hotspot_y);
-    void setCursor(quint32 serial, Surface* surface, const QPoint& hotspot);
+    void setCursor(quint32 serial, Surface* surface, QPoint const& hotspot);
 
     static const struct wl_pointer_interface s_interface;
 };

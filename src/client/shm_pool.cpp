@@ -45,7 +45,7 @@ public:
     bool createPool();
     bool resizePool(int32_t newSize);
     QList<std::shared_ptr<Buffer>>::iterator
-    getBuffer(const QSize& size, int32_t stride, Buffer::Format format);
+    getBuffer(QSize const& size, int32_t stride, Buffer::Format format);
     WaylandPointer<wl_shm, wl_shm_destroy> shm;
     WaylandPointer<wl_shm_pool, wl_shm_pool_destroy> pool;
     void* poolData = nullptr;
@@ -152,7 +152,7 @@ bool ShmPool::Private::resizePool(int32_t newSize)
 
 namespace
 {
-static Buffer::Format toBufferFormat(const QImage& image)
+static Buffer::Format toBufferFormat(QImage const& image)
 {
     switch (image.format()) {
     case QImage::Format_ARGB32_Premultiplied:
@@ -172,7 +172,7 @@ static Buffer::Format toBufferFormat(const QImage& image)
 }
 }
 
-Buffer::Ptr ShmPool::createBuffer(const QImage& image)
+Buffer::Ptr ShmPool::createBuffer(QImage const& image)
 {
     if (image.isNull() || !d->valid) {
         return std::weak_ptr<Buffer>();
@@ -192,7 +192,7 @@ Buffer::Ptr ShmPool::createBuffer(const QImage& image)
 }
 
 Buffer::Ptr
-ShmPool::createBuffer(const QSize& size, int32_t stride, const void* src, Buffer::Format format)
+ShmPool::createBuffer(QSize const& size, int32_t stride, void const* src, Buffer::Format format)
 {
     if (size.isEmpty() || !d->valid) {
         return std::weak_ptr<Buffer>();
@@ -219,7 +219,7 @@ static wl_shm_format toWaylandFormat(Buffer::Format format)
 }
 }
 
-Buffer::Ptr ShmPool::getBuffer(const QSize& size, int32_t stride, Buffer::Format format)
+Buffer::Ptr ShmPool::getBuffer(QSize const& size, int32_t stride, Buffer::Format format)
 {
     auto it = d->getBuffer(size, stride, format);
     if (it == d->buffers.end()) {
@@ -229,7 +229,7 @@ Buffer::Ptr ShmPool::getBuffer(const QSize& size, int32_t stride, Buffer::Format
 }
 
 QList<std::shared_ptr<Buffer>>::iterator
-ShmPool::Private::getBuffer(const QSize& s, int32_t stride, Buffer::Format format)
+ShmPool::Private::getBuffer(QSize const& s, int32_t stride, Buffer::Format format)
 {
     for (auto it = buffers.begin(); it != buffers.end(); ++it) {
         auto buffer = *it;

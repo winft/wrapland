@@ -728,8 +728,8 @@ void TestWindowManagement::testPid()
 
 void TestWindowManagement::testApplicationMenu()
 {
-    const auto serviceName = QStringLiteral("org.kde.foo");
-    const auto objectPath = QStringLiteral("/org/kde/bar");
+    auto const serviceName = QStringLiteral("org.kde.foo");
+    auto const objectPath = QStringLiteral("/org/kde/bar");
 
     QSignalSpy applicationMenuChangedSpy(m_window, &Clt::PlasmaWindow::applicationMenuChanged);
     QVERIFY(applicationMenuChangedSpy.isValid());

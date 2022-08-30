@@ -30,21 +30,21 @@ namespace Wrapland::Server
 class FilteredDisplay::Private
 {
 public:
-    explicit Private(FilteredDisplay* q);
+    explicit Private(FilteredDisplay* q_ptr);
 
-    static bool filterCallback(const wl_client* wlClient, const wl_global* wlGlobal, void* data);
+    static bool filterCallback(wl_client const* wlClient, wl_global const* wlGlobal, void* data);
 
 private:
     FilteredDisplay* q_ptr;
 };
 
-FilteredDisplay::Private::Private(FilteredDisplay* q)
-    : q_ptr(q)
+FilteredDisplay::Private::Private(FilteredDisplay* q_ptr)
+    : q_ptr{q_ptr}
 {
 }
 
-bool FilteredDisplay::Private::filterCallback(const wl_client* wlClient,
-                                              const wl_global* wlGlobal,
+bool FilteredDisplay::Private::filterCallback(wl_client const* wlClient,
+                                              wl_global const* wlGlobal,
                                               void* data)
 {
     auto priv = static_cast<FilteredDisplay::Private*>(data);

@@ -251,7 +251,7 @@ bool LockedPointer::isValid() const
     return d->lockedpointer.isValid();
 }
 
-void LockedPointer::setCursorPositionHint(const QPointF& surfaceLocal)
+void LockedPointer::setCursorPositionHint(QPointF const& surfaceLocal)
 {
     Q_ASSERT(isValid());
     zwp_locked_pointer_v1_set_cursor_position_hint(d->lockedpointer,

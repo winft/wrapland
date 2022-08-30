@@ -51,20 +51,20 @@ const struct xdg_toplevel_interface XdgShellToplevel::Private::s_interface = {
 XdgShellToplevel::Private::Private(uint32_t version,
                                    uint32_t id,
                                    XdgShellSurface* surface,
-                                   XdgShellToplevel* q)
+                                   XdgShellToplevel* q_ptr)
     : Wayland::Resource<XdgShellToplevel>(surface->d_ptr->client,
                                           version,
                                           id,
                                           &xdg_toplevel_interface,
                                           &s_interface,
-                                          q)
+                                          q_ptr)
     , shellSurface{surface}
 {
 }
 
 void XdgShellToplevel::Private::setTitleCallback([[maybe_unused]] wl_client* wlClient,
                                                  wl_resource* wlResource,
-                                                 const char* title)
+                                                 char const* title)
 {
     auto priv = get_handle(wlResource)->d_ptr;
 
@@ -78,7 +78,7 @@ void XdgShellToplevel::Private::setTitleCallback([[maybe_unused]] wl_client* wlC
 
 void XdgShellToplevel::Private::setAppIdCallback([[maybe_unused]] wl_client* wlClient,
                                                  wl_resource* wlResource,
-                                                 const char* app_id)
+                                                 char const* app_id)
 {
     auto priv = get_handle(wlResource)->d_ptr;
 
@@ -144,7 +144,9 @@ void XdgShellToplevel::Private::resizeCallback([[maybe_unused]] wl_client* wlCli
 {
     auto priv = get_handle(wlResource)->d_ptr;
     Q_EMIT priv->handle->resizeRequested(
-        SeatGlobal::get_handle(wlSeat), serial, edgesToQtEdges(xdg_toplevel_resize_edge(edges)));
+        SeatGlobal::get_handle(wlSeat),
+        serial,
+        edgesToQtEdges(static_cast<xdg_toplevel_resize_edge>(edges)));
 }
 
 void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
@@ -157,17 +159,17 @@ void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
         if (serials.empty()) {
             break;
         }
-        uint32_t i = serials.front();
+        auto next_serial = serials.front();
         serials.pop_front();
 
-        Q_EMIT handle->configureAcknowledged(i);
-        if (i == serial) {
+        Q_EMIT handle->configureAcknowledged(next_serial);
+        if (next_serial == serial) {
             break;
         }
     }
 }
 
-uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, const QSize& size)
+uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, QSize const& size)
 {
     const uint32_t serial = client->display()->handle->nextSerial();
 
@@ -175,36 +177,36 @@ uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, co
     wl_array_init(&configureStates);
 
     if (states.testFlag(XdgShellSurface::State::Maximized)) {
-        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
-        *s = XDG_TOPLEVEL_STATE_MAXIMIZED;
+        auto state = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *state = XDG_TOPLEVEL_STATE_MAXIMIZED;
     }
     if (states.testFlag(XdgShellSurface::State::Fullscreen)) {
-        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
-        *s = XDG_TOPLEVEL_STATE_FULLSCREEN;
+        auto state = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *state = XDG_TOPLEVEL_STATE_FULLSCREEN;
     }
     if (states.testFlag(XdgShellSurface::State::Resizing)) {
-        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
-        *s = XDG_TOPLEVEL_STATE_RESIZING;
+        auto state = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *state = XDG_TOPLEVEL_STATE_RESIZING;
     }
     if (states.testFlag(XdgShellSurface::State::Activated)) {
-        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
-        *s = XDG_TOPLEVEL_STATE_ACTIVATED;
+        auto state = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *state = XDG_TOPLEVEL_STATE_ACTIVATED;
     }
     if (states.testFlag(XdgShellSurface::State::TiledLeft)) {
-        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
-        *s = XDG_TOPLEVEL_STATE_TILED_LEFT;
+        auto state = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *state = XDG_TOPLEVEL_STATE_TILED_LEFT;
     }
     if (states.testFlag(XdgShellSurface::State::TiledRight)) {
-        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
-        *s = XDG_TOPLEVEL_STATE_TILED_RIGHT;
+        auto state = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *state = XDG_TOPLEVEL_STATE_TILED_RIGHT;
     }
     if (states.testFlag(XdgShellSurface::State::TiledTop)) {
-        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
-        *s = XDG_TOPLEVEL_STATE_TILED_TOP;
+        auto state = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *state = XDG_TOPLEVEL_STATE_TILED_TOP;
     }
     if (states.testFlag(XdgShellSurface::State::TiledBottom)) {
-        auto s = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
-        *s = XDG_TOPLEVEL_STATE_TILED_BOTTOM;
+        auto state = static_cast<uint32_t*>(wl_array_add(&configureStates, sizeof(uint32_t)));
+        *state = XDG_TOPLEVEL_STATE_TILED_BOTTOM;
     }
 
     shellSurface->d_ptr->configureSerials.push_back(serial);
@@ -235,8 +237,8 @@ void XdgShellToplevel::Private::close()
 
 void XdgShellToplevel::Private::commit()
 {
-    const bool minimumSizeChanged = m_pendingState.minimumSizeIsSet;
-    const bool maximumSizeChanged = m_pendingState.maximumSizeIsSet;
+    bool const minimumSizeChanged = m_pendingState.minimumSizeIsSet;
+    bool const maximumSizeChanged = m_pendingState.maximumSizeIsSet;
 
     if (minimumSizeChanged) {
         m_currentState.minimumSize = m_pendingState.minimumSize;
@@ -318,12 +320,12 @@ void XdgShellToplevel::Private::showWindowMenuCallback([[maybe_unused]] wl_clien
                                                        wl_resource* wlResource,
                                                        wl_resource* wlSeat,
                                                        uint32_t serial,
-                                                       int32_t x,
-                                                       int32_t y)
+                                                       int32_t pos_x,
+                                                       int32_t pos_y)
 {
     auto priv = get_handle(wlResource)->d_ptr;
     auto seat = SeatGlobal::get_handle(wlSeat);
-    Q_EMIT priv->handle->windowMenuRequested(seat, serial, QPoint(x, y));
+    Q_EMIT priv->handle->windowMenuRequested(seat, serial, QPoint(pos_x, pos_y));
 }
 
 void XdgShellToplevel::Private::setMaximizedCallback([[maybe_unused]] wl_client* wlClient,
@@ -385,7 +387,7 @@ QSize XdgShellToplevel::maximumSize() const
     return d_ptr->maximumSize();
 }
 
-uint32_t XdgShellToplevel::configure(XdgShellSurface::States states, const QSize& size)
+uint32_t XdgShellToplevel::configure(XdgShellSurface::States states, QSize const& size)
 {
     return d_ptr->configure(states, size);
 }

@@ -228,49 +228,49 @@ void Surface::commit(Surface::CommitFlag flag)
     wl_surface_commit(d->surface);
 }
 
-void Surface::damage(const QRegion& region)
+void Surface::damage(QRegion const& region)
 {
-    for (const QRect& rect : region) {
+    for (QRect const& rect : region) {
         damage(rect);
     }
 }
 
-void Surface::damage(const QRect& rect)
+void Surface::damage(QRect const& rect)
 {
     Q_ASSERT(isValid());
     wl_surface_damage(d->surface, rect.x(), rect.y(), rect.width(), rect.height());
 }
 
-void Surface::damageBuffer(const QRegion& region)
+void Surface::damageBuffer(QRegion const& region)
 {
-    for (const QRect& r : region) {
+    for (QRect const& r : region) {
         damageBuffer(r);
     }
 }
 
-void Surface::damageBuffer(const QRect& rect)
+void Surface::damageBuffer(QRect const& rect)
 {
     Q_ASSERT(isValid());
     wl_surface_damage_buffer(d->surface, rect.x(), rect.y(), rect.width(), rect.height());
 }
 
-void Surface::attachBuffer(wl_buffer* buffer, const QPoint& offset)
+void Surface::attachBuffer(wl_buffer* buffer, QPoint const& offset)
 {
     Q_ASSERT(isValid());
     wl_surface_attach(d->surface, buffer, offset.x(), offset.y());
 }
 
-void Surface::attachBuffer(Buffer* buffer, const QPoint& offset)
+void Surface::attachBuffer(Buffer* buffer, QPoint const& offset)
 {
     attachBuffer(buffer ? buffer->buffer() : nullptr, offset);
 }
 
-void Surface::attachBuffer(Buffer::Ptr buffer, const QPoint& offset)
+void Surface::attachBuffer(Buffer::Ptr buffer, QPoint const& offset)
 {
     attachBuffer(buffer.lock().get(), offset);
 }
 
-void Surface::setInputRegion(const Region* region)
+void Surface::setInputRegion(Region const* region)
 {
     Q_ASSERT(isValid());
     if (region) {
@@ -280,7 +280,7 @@ void Surface::setInputRegion(const Region* region)
     }
 }
 
-void Surface::setOpaqueRegion(const Region* region)
+void Surface::setOpaqueRegion(Region const* region)
 {
     Q_ASSERT(isValid());
     if (region) {
@@ -290,7 +290,7 @@ void Surface::setOpaqueRegion(const Region* region)
     }
 }
 
-void Surface::setSize(const QSize& size)
+void Surface::setSize(QSize const& size)
 {
     if (d->size == size) {
         return;
@@ -310,7 +310,7 @@ Surface* Surface::get(wl_surface* native)
     return nullptr;
 }
 
-const QList<Surface*>& Surface::all()
+QList<Surface*> const& Surface::all()
 {
     return Private::s_surfaces;
 }

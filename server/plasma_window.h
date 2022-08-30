@@ -70,8 +70,8 @@ class WRAPLANDSERVER_EXPORT PlasmaWindow : public QObject
 public:
     ~PlasmaWindow() override;
 
-    void setTitle(const QString& title);
-    void setAppId(const QString& appId);
+    void setTitle(QString const& title);
+    void setAppId(QString const& appId);
     void setPid(uint32_t pid);
     void setActive(bool set);
     void setMinimized(bool set);
@@ -91,7 +91,7 @@ public:
     void setShaded(bool set);
     void setMovable(bool set);
     void setResizable(bool set);
-    void setApplicationMenuPaths(const QString& serviceName, const QString& objectPath) const;
+    void setApplicationMenuPaths(QString const& serviceName, QString const& objectPath) const;
 
     /**
      * FIXME: still relevant with new desktops? Eike says yes in libtaskmanager code.
@@ -103,8 +103,8 @@ public:
     QHash<Surface*, QRect> minimizedGeometries() const;
 
     void setParentWindow(PlasmaWindow* parentWindow);
-    void setGeometry(const QRect& geometry);
-    void setIcon(const QIcon& icon);
+    void setGeometry(QRect const& geometry);
+    void setIcon(QIcon const& icon);
 
     void addPlasmaVirtualDesktop(std::string const& id);
     void removePlasmaVirtualDesktop(std::string const& id);
@@ -134,9 +134,9 @@ Q_SIGNALS:
     void resizableRequested(bool set);
     void virtualDesktopChangeableRequested(bool set);
 
-    void enterPlasmaVirtualDesktopRequested(const QString& desktop);
+    void enterPlasmaVirtualDesktopRequested(QString const& desktop);
     void enterNewPlasmaVirtualDesktopRequested();
-    void leavePlasmaVirtualDesktopRequested(const QString& desktop);
+    void leavePlasmaVirtualDesktopRequested(QString const& desktop);
 
 private:
     friend class PlasmaWindowManager;

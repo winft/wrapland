@@ -46,9 +46,9 @@ void PlasmaShell::Private::createSurfaceCallback(PlasmaShellBind* bind,
 
 void PlasmaShell::Private::createSurface(PlasmaShellBind* bind, uint32_t id, Surface* surface)
 {
-    auto it = std::find_if(surfaces.constBegin(),
-                           surfaces.constEnd(),
-                           [surface](PlasmaShellSurface* s) { return surface == s->surface(); });
+    auto it = std::find_if(surfaces.constBegin(), surfaces.constEnd(), [surface](auto pss) {
+        return surface == pss->surface();
+    });
     if (it != surfaces.constEnd()) {
         surface->d_ptr->postError(WL_DISPLAY_ERROR_INVALID_OBJECT,
                                   "PlasmaShellSurface already created");
@@ -119,14 +119,14 @@ void PlasmaShellSurface::Private::setOutputCallback([[maybe_unused]] wl_client* 
 
 void PlasmaShellSurface::Private::setPositionCallback([[maybe_unused]] wl_client* wlClient,
                                                       wl_resource* wlResource,
-                                                      int32_t x,
-                                                      int32_t y)
+                                                      int32_t pos_x,
+                                                      int32_t pos_y)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->setPosition(QPoint(x, y));
+    priv->setPosition(QPoint(pos_x, pos_y));
 }
 
-void PlasmaShellSurface::Private::setPosition(const QPoint& globalPos)
+void PlasmaShellSurface::Private::setPosition(QPoint const& globalPos)
 {
     if (m_globalPos == globalPos && m_positionSet) {
         return;
@@ -146,35 +146,35 @@ void PlasmaShellSurface::Private::setRoleCallback([[maybe_unused]] wl_client* wl
 
 void PlasmaShellSurface::Private::setRole(uint32_t role)
 {
-    Role r = Role::Normal;
+    auto val = Role::Normal;
     switch (role) {
     case ORG_KDE_PLASMA_SURFACE_ROLE_DESKTOP:
-        r = Role::Desktop;
+        val = Role::Desktop;
         break;
     case ORG_KDE_PLASMA_SURFACE_ROLE_PANEL:
-        r = Role::Panel;
+        val = Role::Panel;
         break;
     case ORG_KDE_PLASMA_SURFACE_ROLE_ONSCREENDISPLAY:
-        r = Role::OnScreenDisplay;
+        val = Role::OnScreenDisplay;
         break;
     case ORG_KDE_PLASMA_SURFACE_ROLE_NOTIFICATION:
-        r = Role::Notification;
+        val = Role::Notification;
         break;
     case ORG_KDE_PLASMA_SURFACE_ROLE_TOOLTIP:
-        r = Role::ToolTip;
+        val = Role::ToolTip;
         break;
     case ORG_KDE_PLASMA_SURFACE_ROLE_CRITICALNOTIFICATION:
-        r = Role::CriticalNotification;
+        val = Role::CriticalNotification;
         break;
     case ORG_KDE_PLASMA_SURFACE_ROLE_NORMAL:
     default:
-        r = Role::Normal;
+        val = Role::Normal;
         break;
     }
-    if (r == m_role) {
+    if (val == m_role) {
         return;
     }
-    m_role = r;
+    m_role = val;
     Q_EMIT handle->roleChanged();
 }
 
@@ -183,7 +183,7 @@ void PlasmaShellSurface::Private::setPanelBehaviorCallback([[maybe_unused]] wl_c
                                                            uint32_t flag)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->setPanelBehavior(org_kde_plasma_surface_panel_behavior(flag));
+    priv->setPanelBehavior(static_cast<org_kde_plasma_surface_panel_behavior>(flag));
 }
 
 void PlasmaShellSurface::Private::setSkipTaskbarCallback([[maybe_unused]] wl_client* wlClient,

@@ -49,6 +49,9 @@ BreakBeforeBraces: Linux
 # CrlInstruction *a;
 PointerAlignment: Left
 
+# East const
+QualifierAlignment: Right
+
 # Horizontally aligns arguments after an open bracket.
 AlignAfterOpenBracket: Align
 

@@ -167,7 +167,7 @@ void TestSubCompositor::testCast()
     c.setup(wlSubComp);
     QCOMPARE((wl_subcompositor*)c, wlSubComp);
 
-    const SubCompositor& c2(c);
+    SubCompositor const& c2(c);
     QCOMPARE((wl_subcompositor*)c2, wlSubComp);
 }
 

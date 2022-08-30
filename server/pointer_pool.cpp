@@ -31,7 +31,7 @@ enum class button_state {
 uint32_t qtToWaylandButton(Qt::MouseButton button)
 {
 #if HAVE_LINUX_INPUT_H
-    static const QHash<Qt::MouseButton, uint32_t> s_buttons({
+    static QHash<Qt::MouseButton, uint32_t> const s_buttons({
         {Qt::LeftButton, BTN_LEFT},
         {Qt::RightButton, BTN_RIGHT},
         {Qt::MiddleButton, BTN_MIDDLE},
@@ -125,7 +125,7 @@ QPointF pointer_pool::get_position() const
     return pos;
 }
 
-void pointer_pool::set_position(const QPointF& position)
+void pointer_pool::set_position(QPointF const& position)
 {
     if (pos != position) {
         pos = position;
@@ -137,18 +137,19 @@ void pointer_pool::set_position(const QPointF& position)
     }
 }
 
-void pointer_pool::set_focused_surface(Surface* surface, const QPointF& surfacePosition)
+void pointer_pool::set_focused_surface(Surface* surface, QPointF const& surfacePosition)
 {
-    QMatrix4x4 m;
-    m.translate(-static_cast<float>(surfacePosition.x()), -static_cast<float>(surfacePosition.y()));
-    set_focused_surface(surface, m);
+    QMatrix4x4 transformation;
+    transformation.translate(-static_cast<float>(surfacePosition.x()),
+                             -static_cast<float>(surfacePosition.y()));
+    set_focused_surface(surface, transformation);
 
     if (focus.surface) {
         focus.offset = surfacePosition;
     }
 }
 
-void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& transformation)
+void pointer_pool::set_focused_surface(Surface* surface, QMatrix4x4 const& transformation)
 {
     if (seat->drags().is_pointer_drag()) {
         // ignore
@@ -206,7 +207,7 @@ void pointer_pool::set_focused_surface(Surface* surface, const QMatrix4x4& trans
     }
 }
 
-void pointer_pool::set_focused_surface_position(const QPointF& surfacePosition)
+void pointer_pool::set_focused_surface_position(QPointF const& surfacePosition)
 {
     if (focus.surface) {
         focus.offset = surfacePosition;
@@ -216,7 +217,7 @@ void pointer_pool::set_focused_surface_position(const QPointF& surfacePosition)
     }
 }
 
-void pointer_pool::set_focused_surface_transformation(const QMatrix4x4& transformation)
+void pointer_pool::set_focused_surface_transformation(QMatrix4x4 const& transformation)
 {
 
     if (focus.surface) {
@@ -346,8 +347,8 @@ bool pointer_pool::has_implicit_grab(uint32_t serial) const
     return false;
 }
 
-void pointer_pool::relative_motion(const QSizeF& delta,
-                                   const QSizeF& deltaNonAccelerated,
+void pointer_pool::relative_motion(QSizeF const& delta,
+                                   QSizeF const& deltaNonAccelerated,
                                    uint64_t microseconds) const
 {
     if (focus.surface) {
@@ -367,18 +368,18 @@ void pointer_pool::start_swipe_gesture(uint32_t fingerCount)
         return;
     }
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gestureSurface.data(), devices, [serial, fingerCount](Pointer* p) {
-        p->d_ptr->startSwipeGesture(serial, fingerCount);
+    forEachInterface(gestureSurface.data(), devices, [serial, fingerCount](auto pointer) {
+        pointer->d_ptr->startSwipeGesture(serial, fingerCount);
     });
 }
 
-void pointer_pool::update_swipe_gesture(const QSizeF& delta) const
+void pointer_pool::update_swipe_gesture(QSizeF const& delta) const
 {
     if (gestureSurface.isNull()) {
         return;
     }
-    forEachInterface(gestureSurface.data(), devices, [delta](Pointer* p) {
-        p->d_ptr->updateSwipeGesture(delta);
+    forEachInterface(gestureSurface.data(), devices, [delta](auto pointer) {
+        pointer->d_ptr->updateSwipeGesture(delta);
     });
 }
 
@@ -388,8 +389,8 @@ void pointer_pool::end_swipe_gesture()
         return;
     }
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gestureSurface.data(), devices, [serial](Pointer* p) {
-        p->d_ptr->endSwipeGesture(serial);
+    forEachInterface(gestureSurface.data(), devices, [serial](auto pointer) {
+        pointer->d_ptr->endSwipeGesture(serial);
     });
     gestureSurface.clear();
 }
@@ -400,8 +401,8 @@ void pointer_pool::cancel_swipe_gesture()
         return;
     }
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gestureSurface.data(), devices, [serial](Pointer* p) {
-        p->d_ptr->cancelSwipeGesture(serial);
+    forEachInterface(gestureSurface.data(), devices, [serial](auto pointer) {
+        pointer->d_ptr->cancelSwipeGesture(serial);
     });
     gestureSurface.clear();
 }
@@ -416,18 +417,18 @@ void pointer_pool::start_pinch_gesture(uint32_t fingerCount)
         return;
     }
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gestureSurface.data(), devices, [serial, fingerCount](Pointer* p) {
-        p->d_ptr->startPinchGesture(serial, fingerCount);
+    forEachInterface(gestureSurface.data(), devices, [serial, fingerCount](auto pointer) {
+        pointer->d_ptr->startPinchGesture(serial, fingerCount);
     });
 }
 
-void pointer_pool::update_pinch_gesture(const QSizeF& delta, qreal scale, qreal rotation) const
+void pointer_pool::update_pinch_gesture(QSizeF const& delta, qreal scale, qreal rotation) const
 {
     if (gestureSurface.isNull()) {
         return;
     }
-    forEachInterface(gestureSurface.data(), devices, [delta, scale, rotation](Pointer* p) {
-        p->d_ptr->updatePinchGesture(delta, scale, rotation);
+    forEachInterface(gestureSurface.data(), devices, [delta, scale, rotation](auto pointer) {
+        pointer->d_ptr->updatePinchGesture(delta, scale, rotation);
     });
 }
 
@@ -437,8 +438,8 @@ void pointer_pool::end_pinch_gesture()
         return;
     }
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gestureSurface.data(), devices, [serial](Pointer* p) {
-        p->d_ptr->endPinchGesture(serial);
+    forEachInterface(gestureSurface.data(), devices, [serial](auto pointer) {
+        pointer->d_ptr->endPinchGesture(serial);
     });
     gestureSurface.clear();
 }
@@ -449,8 +450,8 @@ void pointer_pool::cancel_pinch_gesture()
         return;
     }
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gestureSurface.data(), devices, [serial](Pointer* p) {
-        p->d_ptr->cancelPinchGesture(serial);
+    forEachInterface(gestureSurface.data(), devices, [serial](auto pointer) {
+        pointer->d_ptr->cancelPinchGesture(serial);
     });
     gestureSurface.clear();
 }

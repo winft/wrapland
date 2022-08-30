@@ -101,7 +101,7 @@ public:
 
     void surfaceCreated(Wrapland::Server::XdgShellToplevel* surface);
 
-    void setSeat(const QPointer<Wrapland::Server::Seat>& seat);
+    void setSeat(QPointer<Wrapland::Server::Seat> const& seat);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -169,7 +169,7 @@ void CompositorWindow::updateFocus()
     m_seat->setFocusedKeyboardSurface((*it)->surface()->surface());
 }
 
-void CompositorWindow::setSeat(const QPointer<Wrapland::Server::Seat>& seat)
+void CompositorWindow::setSeat(QPointer<Wrapland::Server::Seat> const& seat)
 {
     m_seat = seat;
 }
@@ -242,7 +242,7 @@ void CompositorWindow::wheelEvent(QWheelEvent* event)
 {
     QWidget::wheelEvent(event);
     m_seat->setTimestamp(event->timestamp());
-    const QPoint& angle = event->angleDelta() / (8 * 15);
+    QPoint const& angle = event->angleDelta() / (8 * 15);
     if (angle.x() != 0) {
         m_seat->pointers().send_axis(Qt::Horizontal, angle.x());
     }
@@ -295,7 +295,7 @@ int main(int argc, char** argv)
     // start XWayland
     if (parser.isSet(xwaylandOption)) {
         // starts XWayland by forking and opening a pipe
-        const int pipe = startXServer();
+        int const pipe = startXServer();
         if (pipe == -1) {
             exit(1);
         }

@@ -14,14 +14,14 @@ namespace Wrapland::Client
 {
 
 template<typename PrivateDevice, typename WlOffer>
-void offer_callback(void* data, WlOffer* dataOffer, const char* mimeType)
+void offer_callback(void* data, WlOffer* dataOffer, char const* mimeType)
 {
     auto d = reinterpret_cast<PrivateDevice*>(data);
     Q_ASSERT(d->dataOffer == dataOffer);
     auto mime = QString::fromUtf8(mimeType);
 
     QMimeDatabase db;
-    const auto& m = db.mimeTypeForName(mime);
+    auto const& m = db.mimeTypeForName(mime);
     if (m.isValid()) {
         d->mimeTypes << m;
         Q_EMIT d->q->mimeTypeOffered(m.name());

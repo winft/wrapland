@@ -36,8 +36,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-PointerGesturesV1::Private::Private(PointerGesturesV1* q, Display* display)
-    : Wayland::Global<PointerGesturesV1>(q,
+PointerGesturesV1::Private::Private(PointerGesturesV1* q_ptr, Display* display)
+    : Wayland::Global<PointerGesturesV1>(q_ptr,
                                          display,
                                          &zwp_pointer_gestures_v1_interface,
                                          &s_interface)
@@ -92,13 +92,13 @@ PointerSwipeGestureV1::Private::Private(Client* client,
                                         uint32_t version,
                                         uint32_t id,
                                         Pointer* _pointer,
-                                        PointerSwipeGestureV1* q)
+                                        PointerSwipeGestureV1* q_ptr)
     : Wayland::Resource<PointerSwipeGestureV1>(client,
                                                version,
                                                id,
                                                &zwp_pointer_gesture_swipe_v1_interface,
                                                &s_interface,
-                                               q)
+                                               q_ptr)
     , pointer(_pointer)
 {
 }
@@ -118,7 +118,7 @@ void PointerSwipeGestureV1::start(quint32 serial, quint32 fingerCount)
         fingerCount);
 }
 
-void PointerSwipeGestureV1::update(const QSizeF& delta)
+void PointerSwipeGestureV1::update(QSizeF const& delta)
 {
     auto seat = d_ptr->pointer->seat();
 
@@ -131,7 +131,8 @@ void PointerSwipeGestureV1::end(quint32 serial, bool cancel)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send<zwp_pointer_gesture_swipe_v1_send_end>(serial, seat->timestamp(), uint32_t(cancel));
+    d_ptr->send<zwp_pointer_gesture_swipe_v1_send_end>(
+        serial, seat->timestamp(), static_cast<uint32_t>(cancel));
 }
 
 void PointerSwipeGestureV1::cancel(quint32 serial)
@@ -151,13 +152,13 @@ PointerPinchGestureV1::Private::Private(Client* client,
                                         uint32_t version,
                                         uint32_t id,
                                         Pointer* _pointer,
-                                        PointerPinchGestureV1* q)
+                                        PointerPinchGestureV1* q_ptr)
     : Wayland::Resource<PointerPinchGestureV1>(client,
                                                version,
                                                id,
                                                &zwp_pointer_gesture_pinch_v1_interface,
                                                &s_interface,
-                                               q)
+                                               q_ptr)
     , pointer(_pointer)
 {
 }
@@ -185,7 +186,7 @@ void PointerPinchGestureV1::start(quint32 serial, quint32 fingerCount)
         fingerCount);
 }
 
-void PointerPinchGestureV1::update(const QSizeF& delta, qreal scale, qreal rotation)
+void PointerPinchGestureV1::update(QSizeF const& delta, qreal scale, qreal rotation)
 {
     auto seat = d_ptr->pointer->seat();
 
@@ -200,7 +201,8 @@ void PointerPinchGestureV1::end(quint32 serial, bool cancel)
 {
     auto seat = d_ptr->pointer->seat();
 
-    d_ptr->send<zwp_pointer_gesture_pinch_v1_send_end>(serial, seat->timestamp(), uint32_t(cancel));
+    d_ptr->send<zwp_pointer_gesture_pinch_v1_send_end>(
+        serial, seat->timestamp(), static_cast<uint32_t>(cancel));
 }
 
 void PointerPinchGestureV1::cancel(quint32 serial)

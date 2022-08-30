@@ -40,7 +40,7 @@ using XdgDecorationManagerBind = Wayland::Bind<XdgDecorationManagerGlobal>;
 class XdgDecorationManager::Private : public XdgDecorationManagerGlobal
 {
 public:
-    Private(XdgDecorationManager* q, Display* display, XdgShell* shell);
+    Private(XdgDecorationManager* q_ptr, Display* display, XdgShell* shell);
 
     std::map<XdgShellToplevel*, XdgDecoration*> m_decorations;
 
@@ -54,8 +54,10 @@ private:
     static const struct zxdg_decoration_manager_v1_interface s_interface;
 };
 
-XdgDecorationManager::Private::Private(XdgDecorationManager* q, Display* display, XdgShell* shell)
-    : Wayland::Global<XdgDecorationManager>(q,
+XdgDecorationManager::Private::Private(XdgDecorationManager* q_ptr,
+                                       Display* display,
+                                       XdgShell* shell)
+    : Wayland::Global<XdgDecorationManager>(q_ptr,
                                             display,
                                             &zxdg_decoration_manager_v1_interface,
                                             &s_interface)
@@ -110,7 +112,7 @@ public:
             uint32_t version,
             uint32_t id,
             XdgShellToplevel* toplevel,
-            XdgDecoration* q);
+            XdgDecoration* q_ptr);
 
     XdgDecoration::Mode m_requestedMode = XdgDecoration::Mode::Undefined;
     XdgShellToplevel* toplevel;
@@ -126,13 +128,13 @@ XdgDecoration::Private::Private(Client* client,
                                 uint32_t version,
                                 uint32_t id,
                                 XdgShellToplevel* toplevel,
-                                XdgDecoration* q)
+                                XdgDecoration* q_ptr)
     : Wayland::Resource<XdgDecoration>(client,
                                        version,
                                        id,
                                        &zxdg_toplevel_decoration_v1_interface,
                                        &s_interface,
-                                       q)
+                                       q_ptr)
     , toplevel{toplevel}
 {
 }

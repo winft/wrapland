@@ -163,7 +163,7 @@ void ShadowTest::setupShadow()
 
 void ShadowTest::render()
 {
-    const QSize& size = m_shellSurface->size().isValid() ? m_shellSurface->size() : QSize(300, 200);
+    QSize const& size = m_shellSurface->size().isValid() ? m_shellSurface->size() : QSize(300, 200);
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(

@@ -42,7 +42,7 @@ using ContrastManagerBind = Wayland::Bind<ContrastManagerGlobal>;
 class ContrastManager::Private : public ContrastManagerGlobal
 {
 public:
-    Private(Display* display, ContrastManager* q);
+    Private(Display* display, ContrastManager* q_ptr);
     ~Private() override;
 
 private:
@@ -55,7 +55,7 @@ private:
 class Contrast::Private : public Wayland::Resource<Contrast>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, Contrast* q);
+    Private(Client* client, uint32_t version, uint32_t id, Contrast* q_ptr);
     ~Private() override;
 
     QRegion pendingRegion;

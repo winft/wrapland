@@ -49,7 +49,7 @@ using XdgOutputManagerBind = Wayland::Bind<XdgOutputManagerGlobal>;
 class XdgOutputManager::Private : public XdgOutputManagerGlobal
 {
 public:
-    Private(Display* display, XdgOutputManager* qptr);
+    Private(Display* display, XdgOutputManager* q_ptr);
 
     std::map<Output*, XdgOutput*> outputs;
 
@@ -61,7 +61,7 @@ private:
 class XdgOutput::Private
 {
 public:
-    Private(Output* output, Display* display, XdgOutput* q);
+    Private(Output* output, Display* display, XdgOutput* q_ptr);
 
     bool broadcast();
     void done();
@@ -98,7 +98,7 @@ Q_SIGNALS:
 class XdgOutputV1::Private : public Wayland::Resource<XdgOutputV1>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q);
+    Private(Client* client, uint32_t version, uint32_t id, XdgOutputV1* q_ptr);
 
 private:
     static const struct zxdg_output_v1_interface s_interface;

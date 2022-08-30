@@ -141,7 +141,7 @@ bool Shadow::isValid() const
     return d->shadow.isValid();
 }
 
-void Shadow::setOffsets(const QMarginsF& margins)
+void Shadow::setOffsets(QMarginsF const& margins)
 {
     Q_ASSERT(isValid());
     org_kde_kwin_shadow_set_left_offset(d->shadow, wl_fixed_from_double(margins.left()));

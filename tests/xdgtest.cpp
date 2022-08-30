@@ -193,7 +193,7 @@ void XdgTest::createPopup()
 
 void XdgTest::render()
 {
-    const QSize& size
+    QSize const& size
         = xdg_shell_toplevel->size().isValid() ? xdg_shell_toplevel->size() : QSize(500, 500);
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);

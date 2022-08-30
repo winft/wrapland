@@ -38,11 +38,11 @@ Q_SIGNALS:
     void resourceDestroyed();
 
 private:
-    void down(qint32 id, quint32 serial, const QPointF& localPos);
+    void down(qint32 id, quint32 serial, QPointF const& localPos);
     void up(qint32 id, quint32 serial);
     void frame();
     void cancel();
-    void move(qint32 id, const QPointF& localPos);
+    void move(qint32 id, QPointF const& localPos);
 
     friend class Seat;
     friend class touch_pool;

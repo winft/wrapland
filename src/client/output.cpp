@@ -67,8 +67,8 @@ private:
                                  int32_t physicalWidth,
                                  int32_t physicalHeight,
                                  int32_t subPixel,
-                                 const char* make,
-                                 const char* model,
+                                 char const* make,
+                                 char const* model,
                                  int32_t transform);
     static void modeCallback(void* data,
                              wl_output* output,
@@ -78,10 +78,10 @@ private:
                              int32_t refresh);
     static void doneCallback(void* data, wl_output* output);
     static void scaleCallback(void* data, wl_output* output, int32_t scale);
-    void setPhysicalSize(const QSize& size);
-    void setGlobalPosition(const QPoint& pos);
-    void setManufacturer(const QString& manufacturer);
-    void setModel(const QString& model);
+    void setPhysicalSize(QSize const& size);
+    void setGlobalPosition(QPoint const& pos);
+    void setManufacturer(QString const& manufacturer);
+    void setModel(QString const& model);
     void setScale(int scale);
     void setSubPixel(SubPixel subPixel);
     void setTransform(Transform transform);
@@ -126,7 +126,7 @@ void Output::Private::setup(wl_output* o)
     wl_output_add_listener(output, &s_outputListener, this);
 }
 
-bool Output::Mode::operator==(const Output::Mode& m) const
+bool Output::Mode::operator==(Output::Mode const& m) const
 {
     return size == m.size && refreshRate == m.refreshRate && flags == m.flags && output == m.output;
 }
@@ -156,8 +156,8 @@ void Output::Private::geometryCallback(void* data,
                                        int32_t physicalWidth,
                                        int32_t physicalHeight,
                                        int32_t subPixel,
-                                       const char* make,
-                                       const char* model,
+                                       char const* make,
+                                       char const* model,
                                        int32_t transform)
 {
     Q_UNUSED(transform)
@@ -288,22 +288,22 @@ void Output::setEventQueue(EventQueue* queue)
     d->queue = queue;
 }
 
-void Output::Private::setGlobalPosition(const QPoint& pos)
+void Output::Private::setGlobalPosition(QPoint const& pos)
 {
     globalPosition = pos;
 }
 
-void Output::Private::setManufacturer(const QString& m)
+void Output::Private::setManufacturer(QString const& m)
 {
     manufacturer = m;
 }
 
-void Output::Private::setModel(const QString& m)
+void Output::Private::setModel(QString const& m)
 {
     model = m;
 }
 
-void Output::Private::setPhysicalSize(const QSize& size)
+void Output::Private::setPhysicalSize(QSize const& size)
 {
     physicalSize = size;
 }

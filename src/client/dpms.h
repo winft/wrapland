@@ -221,7 +221,7 @@ Q_SIGNALS:
 
 private:
     friend class DpmsManager;
-    explicit Dpms(const QPointer<Output>& o, QObject* parent = nullptr);
+    explicit Dpms(QPointer<Output> const& o, QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };

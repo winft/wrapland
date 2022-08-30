@@ -114,17 +114,17 @@ public:
      * @param applicationName A human readable description of the application
      * @param reason A human readable explanation why this application wants to send fake requests
      **/
-    void authenticate(const QString& applicationName, const QString& reason);
+    void authenticate(QString const& applicationName, QString const& reason);
     /**
      * Request a relative pointer motion of @p delta pixels.
      **/
-    void requestPointerMove(const QSizeF& delta);
+    void requestPointerMove(QSizeF const& delta);
     /**
      * Request an absolute pointer motion to @p pos position.
      *
      * @since 0.0.554
      **/
-    void requestPointerMoveAbsolute(const QPointF& pos);
+    void requestPointerMoveAbsolute(QPointF const& pos);
     /**
      * Convenience overload.
      * @see requestPointerButtonPress(quint32)
@@ -169,7 +169,7 @@ public:
      * @see requestTouchUp
      * @since 0.0.523
      **/
-    void requestTouchDown(quint32 id, const QPointF& pos);
+    void requestTouchDown(quint32 id, QPointF const& pos);
     /**
      * Request a move of the touch point identified by @p id to new global @p pos.
      * @param id The id to identify the touch point
@@ -177,7 +177,7 @@ public:
      * @see requestTouchDown
      * @since 0.0.523
      **/
-    void requestTouchMotion(quint32 id, const QPointF& pos);
+    void requestTouchMotion(quint32 id, QPointF const& pos);
     /**
      * Requests a touch up of the touch point identified by @p id.
      * @param id The id to identify the touch point

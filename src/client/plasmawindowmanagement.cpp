@@ -108,14 +108,14 @@ public:
     } application_menu;
 
 private:
-    static void titleChangedCallback(void* data, org_kde_plasma_window* window, const char* title);
-    static void appIdChangedCallback(void* data, org_kde_plasma_window* window, const char* app_id);
+    static void titleChangedCallback(void* data, org_kde_plasma_window* window, char const* title);
+    static void appIdChangedCallback(void* data, org_kde_plasma_window* window, char const* app_id);
     static void pidChangedCallback(void* data, org_kde_plasma_window* window, uint32_t pid);
     static void stateChangedCallback(void* data, org_kde_plasma_window* window, uint32_t state);
     static void
     virtualDesktopChangedCallback(void* data, org_kde_plasma_window* window, int32_t number);
     static void
-    themedIconNameChangedCallback(void* data, org_kde_plasma_window* window, const char* name);
+    themedIconNameChangedCallback(void* data, org_kde_plasma_window* window, char const* name);
     static void unmappedCallback(void* data, org_kde_plasma_window* window);
     static void initialStateCallback(void* data, org_kde_plasma_window* window);
     static void
@@ -129,10 +129,10 @@ private:
     static void iconChangedCallback(void* data, org_kde_plasma_window* org_kde_plasma_window);
     static void virtualDesktopEnteredCallback(void* data,
                                               org_kde_plasma_window* org_kde_plasma_window,
-                                              const char* id);
+                                              char const* id);
     static void virtualDesktopLeftCallback(void* data,
                                            org_kde_plasma_window* org_kde_plasma_window,
-                                           const char* id);
+                                           char const* id);
     static void appmenuChangedCallback(void* data,
                                        org_kde_plasma_window* org_kde_plasma_window,
                                        char const* service_name,
@@ -386,10 +386,10 @@ void PlasmaWindow::Private::parentWindowCallback(void* data,
 {
     Q_UNUSED(window)
     Private* p = cast(data);
-    const auto windows = p->wm->windows();
+    auto const windows = p->wm->windows();
     auto it = std::find_if(windows.constBegin(),
                            windows.constEnd(),
-                           [parent](const PlasmaWindow* w) { return *w == parent; });
+                           [parent](PlasmaWindow const* w) { return *w == parent; });
     p->setParentWindow(it != windows.constEnd() ? *it : nullptr);
 }
 
@@ -412,7 +412,7 @@ void PlasmaWindow::Private::windowGeometryCallback(void* data,
 
 void PlasmaWindow::Private::setParentWindow(PlasmaWindow* parent)
 {
-    const auto old = parentWindow;
+    auto const old = parentWindow;
     QObject::disconnect(parentWindowUnmappedConnection);
     if (parent && !parent->d->unmapped) {
         parentWindow = QPointer<PlasmaWindow>(parent);
@@ -438,7 +438,7 @@ void PlasmaWindow::Private::initialStateCallback(void* data, org_kde_plasma_wind
 
 void PlasmaWindow::Private::titleChangedCallback(void* data,
                                                  org_kde_plasma_window* window,
-                                                 const char* title)
+                                                 char const* title)
 {
     Q_UNUSED(window)
     Private* p = cast(data);
@@ -452,7 +452,7 @@ void PlasmaWindow::Private::titleChangedCallback(void* data,
 
 void PlasmaWindow::Private::appIdChangedCallback(void* data,
                                                  org_kde_plasma_window* window,
-                                                 const char* appId)
+                                                 char const* appId)
 {
     Q_UNUSED(window)
     Private* p = cast(data);
@@ -511,7 +511,7 @@ void PlasmaWindow::Private::unmappedCallback(void* data, org_kde_plasma_window* 
 
 void PlasmaWindow::Private::virtualDesktopEnteredCallback(void* data,
                                                           org_kde_plasma_window* window,
-                                                          const char* id)
+                                                          char const* id)
 {
     auto p = cast(data);
     Q_UNUSED(window);
@@ -525,7 +525,7 @@ void PlasmaWindow::Private::virtualDesktopEnteredCallback(void* data,
 
 void PlasmaWindow::Private::virtualDesktopLeftCallback(void* data,
                                                        org_kde_plasma_window* window,
-                                                       const char* id)
+                                                       char const* id)
 {
     auto p = cast(data);
     Q_UNUSED(window);
@@ -567,7 +567,7 @@ void PlasmaWindow::Private::stateChangedCallback(void* data,
 
 void PlasmaWindow::Private::themedIconNameChangedCallback(void* data,
                                                           org_kde_plasma_window* window,
-                                                          const char* name)
+                                                          char const* name)
 {
     auto p = cast(data);
     Q_UNUSED(window);
@@ -612,7 +612,7 @@ void PlasmaWindow::Private::iconChangedCallback(void* data, org_kde_plasma_windo
     }
     org_kde_plasma_window_get_icon(p->window, pipeFds[1]);
     close(pipeFds[1]);
-    const int pipeFd = pipeFds[0];
+    int const pipeFd = pipeFds[0];
     auto readIcon = [pipeFd]() -> QIcon {
         QByteArray content;
         if (readData(pipeFd, content) != 0) {
@@ -1051,7 +1051,7 @@ void PlasmaWindow::requestToggleMaximized()
     }
 }
 
-void PlasmaWindow::setMinimizedGeometry(Surface* panel, const QRect& geom)
+void PlasmaWindow::setMinimizedGeometry(Surface* panel, QRect const& geom)
 {
     org_kde_plasma_window_set_minimized_geometry(
         d->window, *panel, geom.x(), geom.y(), geom.width(), geom.height());
@@ -1089,7 +1089,7 @@ QRect PlasmaWindow::geometry() const
     return d->geometry;
 }
 
-void PlasmaWindow::requestEnterVirtualDesktop(const QString& id)
+void PlasmaWindow::requestEnterVirtualDesktop(QString const& id)
 {
     org_kde_plasma_window_request_enter_virtual_desktop(d->window, id.toUtf8());
 }
@@ -1099,7 +1099,7 @@ void PlasmaWindow::requestEnterNewVirtualDesktop()
     org_kde_plasma_window_request_enter_new_virtual_desktop(d->window);
 }
 
-void PlasmaWindow::requestLeaveVirtualDesktop(const QString& id)
+void PlasmaWindow::requestLeaveVirtualDesktop(QString const& id)
 {
     org_kde_plasma_window_request_leave_virtual_desktop(d->window, id.toUtf8());
 }

@@ -37,7 +37,7 @@ using RelativePointerManagerV1Bind = Wayland::Bind<RelativePointerManagerV1Globa
 class RelativePointerManagerV1::Private : public RelativePointerManagerV1Global
 {
 public:
-    Private(RelativePointerManagerV1* q, Display* display);
+    Private(RelativePointerManagerV1* q_ptr, Display* display);
 
 private:
     static void relativePointerCallback(RelativePointerManagerV1Bind* bind,
@@ -54,7 +54,7 @@ public:
     explicit RelativePointerV1(Client* client, uint32_t version, uint32_t id);
 
     void
-    relativeMotion(quint64 microseconds, const QSizeF& delta, const QSizeF& deltaNonAccelerated);
+    relativeMotion(quint64 microseconds, QSizeF const& delta, QSizeF const& deltaNonAccelerated);
 
 Q_SIGNALS:
     void resourceDestroyed();
@@ -67,7 +67,7 @@ private:
 class RelativePointerV1::Private : public Wayland::Resource<RelativePointerV1>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, RelativePointerV1* q);
+    Private(Client* client, uint32_t version, uint32_t id, RelativePointerV1* q_ptr);
 
 private:
     static const struct zwp_relative_pointer_v1_interface s_interface;

@@ -37,8 +37,8 @@ const struct org_kde_plasma_virtual_desktop_management_interface
         requestRemoveVirtualDesktopCallback,
 };
 
-PlasmaVirtualDesktopManager::Private::Private(Display* display, PlasmaVirtualDesktopManager* q)
-    : PlasmaVirtualDesktopManagerGlobal(q,
+PlasmaVirtualDesktopManager::Private::Private(Display* display, PlasmaVirtualDesktopManager* q_ptr)
+    : PlasmaVirtualDesktopManagerGlobal(q_ptr,
                                         display,
                                         &org_kde_plasma_virtual_desktop_management_interface,
                                         &s_interface)
@@ -56,7 +56,7 @@ void PlasmaVirtualDesktopManager::Private::getVirtualDesktopCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource,
     uint32_t serial,
-    const char* id)
+    char const* id)
 {
     auto priv = get_handle(wlResource)->d_ptr.get();
     auto bind = priv->getBind(wlResource);
@@ -69,7 +69,7 @@ void PlasmaVirtualDesktopManager::Private::getVirtualDesktopCallback(
 void PlasmaVirtualDesktopManager::Private::requestCreateVirtualDesktopCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource,
-    const char* name,
+    char const* name,
     uint32_t position)
 {
     auto manager = get_handle(wlResource);
@@ -80,7 +80,7 @@ void PlasmaVirtualDesktopManager::Private::requestCreateVirtualDesktopCallback(
 void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
     [[maybe_unused]] wl_client* wlClient,
     wl_resource* wlResource,
-    const char* id)
+    char const* id)
 {
     auto manager = get_handle(wlResource);
     Q_EMIT manager->desktopRemoveRequested(id);
@@ -88,10 +88,10 @@ void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
 
 void PlasmaVirtualDesktopManager::Private::bindInit(PlasmaVirtualDesktopManagerBind* bind)
 {
-    uint32_t i = 0;
+    uint32_t position = 0;
     for (auto& desktop : desktops) {
         bind->send<org_kde_plasma_virtual_desktop_management_send_desktop_created>(
-            desktop->id().c_str(), i++);
+            desktop->id().c_str(), position++);
     }
 
     bind->send<org_kde_plasma_virtual_desktop_management_send_rows,
@@ -189,10 +189,10 @@ void PlasmaVirtualDesktopManager::sendDone()
 
 /////////////////////////// Plasma Virtual Desktop ///////////////////////////
 
-PlasmaVirtualDesktop::Private::Private(PlasmaVirtualDesktop* q,
+PlasmaVirtualDesktop::Private::Private(PlasmaVirtualDesktop* q_ptr,
                                        PlasmaVirtualDesktopManager* manager)
     : manager(manager)
-    , q_ptr(q)
+    , q_ptr{q_ptr}
 {
 }
 
@@ -295,13 +295,13 @@ PlasmaVirtualDesktopRes::Private::Private(Client* client,
                                           uint32_t version,
                                           uint32_t id,
                                           PlasmaVirtualDesktop* virtualDesktop,
-                                          PlasmaVirtualDesktopRes* q)
+                                          PlasmaVirtualDesktopRes* q_ptr)
     : Wayland::Resource<PlasmaVirtualDesktopRes>(client,
                                                  version,
                                                  id,
                                                  &org_kde_plasma_virtual_desktop_interface,
                                                  &s_interface,
-                                                 q)
+                                                 q_ptr)
     , virtualDesktop(virtualDesktop)
 {
 }

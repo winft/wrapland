@@ -8,6 +8,7 @@
 #include "input_method_v2_p.h"
 
 #include "display.h"
+#include "logging.h"
 #include "seat_p.h"
 #include "surface_p.h"
 #include "text_input_v3_p.h"
@@ -45,8 +46,8 @@ void input_method_manager_v2::Private::get_input_method_callback(input_method_ma
     Q_EMIT seat->input_method_v2_changed();
 }
 
-input_method_manager_v2::Private::Private(Display* display, input_method_manager_v2* q)
-    : input_method_manager_v2_global(q,
+input_method_manager_v2::Private::Private(Display* display, input_method_manager_v2* q_ptr)
+    : input_method_manager_v2_global(q_ptr,
                                      display,
                                      &zwp_input_method_manager_v2_interface,
                                      &s_interface)
@@ -163,14 +164,17 @@ void input_method_v2::Private::grab_keyboard_callback([[maybe_unused]] wl_client
     Q_EMIT priv->q_ptr->keyboard_grabbed(grab);
 }
 
-input_method_v2::Private::Private(Client* client, uint32_t version, uint32_t id, input_method_v2* q)
+input_method_v2::Private::Private(Client* client,
+                                  uint32_t version,
+                                  uint32_t id,
+                                  input_method_v2* q_ptr)
     : Wayland::Resource<input_method_v2>(client,
                                          version,
                                          id,
                                          &zwp_input_method_v2_interface,
                                          &s_interface,
-                                         q)
-    , q_ptr{q}
+                                         q_ptr)
+    , q_ptr{q_ptr}
 {
 }
 
@@ -233,13 +237,13 @@ input_method_keyboard_grab_v2::Private::Private(Client* client,
                                                 uint32_t version,
                                                 uint32_t id,
                                                 Seat* seat,
-                                                input_method_keyboard_grab_v2* q)
+                                                input_method_keyboard_grab_v2* q_ptr)
     : Wayland::Resource<input_method_keyboard_grab_v2>(client,
                                                        version,
                                                        id,
                                                        &zwp_input_method_keyboard_grab_v2_interface,
                                                        &s_interface,
-                                                       q)
+                                                       q_ptr)
     , seat{seat}
 {
 }
@@ -257,9 +261,12 @@ void input_method_keyboard_grab_v2::set_keymap(std::string const& content)
 {
     auto tmpf = std::tmpfile();
 
-    std::fputs(content.data(), tmpf);
-    std::rewind(tmpf);
+    if (auto rc = std::fputs(content.data(), tmpf); rc < 0) {
+        qCWarning(WRAPLAND_SERVER, "Failed to set input-method keymap with %d.", rc);
+        // TODO(romangg): Handle error by closing file here and returning?
+    }
 
+    std::rewind(tmpf);
     d_ptr->send<zwp_input_method_keyboard_grab_v2_send_keymap>(
         WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, fileno(tmpf), content.size());
     d_ptr->keymap = file_wrap(tmpf);
@@ -300,13 +307,13 @@ input_method_popup_surface_v2::Private::Private(Client* client,
                                                 uint32_t version,
                                                 uint32_t id,
                                                 Surface* surface,
-                                                input_method_popup_surface_v2* q)
+                                                input_method_popup_surface_v2* q_ptr)
     : Wayland::Resource<input_method_popup_surface_v2>(client,
                                                        version,
                                                        id,
                                                        &zwp_input_popup_surface_v2_interface,
                                                        &s_interface,
-                                                       q)
+                                                       q_ptr)
     , surface{surface}
 {
 }

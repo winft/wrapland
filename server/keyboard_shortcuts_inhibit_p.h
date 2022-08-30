@@ -40,7 +40,7 @@ using KeyboardShortcutsInhibitManagerV1Bind
 class KeyboardShortcutsInhibitManagerV1::Private : public KeyboardShortcutsInhibitManagerV1Global
 {
 public:
-    Private(Display* display, KeyboardShortcutsInhibitManagerV1* q);
+    Private(Display* display, KeyboardShortcutsInhibitManagerV1* q_ptr);
 
     static void inhibitShortcutsCallback(KeyboardShortcutsInhibitManagerV1Bind* bind,
                                          uint32_t id,
@@ -64,11 +64,11 @@ public:
             uint32_t id,
             Surface* surface,
             Seat* seat,
-            KeyboardShortcutsInhibitorV1* q);
+            KeyboardShortcutsInhibitorV1* q_ptr);
 
     Surface* m_surface;
     Seat* m_seat;
-    bool m_active;
+    bool m_active{false};
 
 private:
     static const struct zwp_keyboard_shortcuts_inhibitor_v1_interface s_interface;

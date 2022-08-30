@@ -41,7 +41,7 @@ namespace Wrapland::Tools
 
 static QMap<QString, QString> s_clientClassNameMapping;
 
-static QString toQtInterfaceName(const QString& wlInterface)
+static QString toQtInterfaceName(QString const& wlInterface)
 {
     auto it = s_clientClassNameMapping.constFind(wlInterface);
     if (it != s_clientClassNameMapping.constEnd()) {
@@ -52,7 +52,7 @@ static QString toQtInterfaceName(const QString& wlInterface)
     return wlInterface;
 }
 
-static QString toCamelCase(const QString& underscoreName)
+static QString toCamelCase(QString const& underscoreName)
 {
     const QStringList parts = underscoreName.split(QStringLiteral("_"));
     if (parts.count() < 2) {
@@ -72,7 +72,7 @@ Argument::Argument()
 {
 }
 
-Argument::Argument(const QXmlStreamAttributes& attributes)
+Argument::Argument(QXmlStreamAttributes const& attributes)
     : m_name(attributes.value(QStringLiteral("name")).toString())
     , m_type(parseType(attributes.value(QStringLiteral("type"))))
     , m_allowNull(attributes.hasAttribute(QStringLiteral("allow-null")))
@@ -82,7 +82,7 @@ Argument::Argument(const QXmlStreamAttributes& attributes)
 
 Argument::~Argument() = default;
 
-Argument::Type Argument::parseType(const QStringRef& type)
+Argument::Type Argument::parseType(QStringRef const& type)
 {
     if (type.compare(QLatin1String("new_id")) == 0) {
         return Type::NewId;
@@ -166,7 +166,7 @@ Request::Request()
 {
 }
 
-Request::Request(const QString& name)
+Request::Request(QString const& name)
     : m_name(name)
 {
 }
@@ -175,7 +175,7 @@ Request::~Request() = default;
 
 bool Request::isFactory() const
 {
-    for (const auto a : m_arguments) {
+    for (auto const a : m_arguments) {
         if (a.type() == Argument::Type::NewId) {
             return true;
         }
@@ -187,7 +187,7 @@ Event::Event()
 {
 }
 
-Event::Event(const QString& name)
+Event::Event(QString const& name)
     : m_name(name)
 {
 }
@@ -196,7 +196,7 @@ Event::~Event() = default;
 
 Interface::Interface() = default;
 
-Interface::Interface(const QXmlStreamAttributes& attributes)
+Interface::Interface(QXmlStreamAttributes const& attributes)
     : m_name(attributes.value(QStringLiteral("name")).toString())
     , m_version(attributes.value(QStringLiteral("version")).toUInt())
     , m_factory(nullptr)
@@ -284,7 +284,7 @@ void Generator::startParseXml()
 
 void Generator::parseProtocol()
 {
-    const auto attributes = m_xmlReader.attributes();
+    auto const attributes = m_xmlReader.attributes();
     const QString protocolName = attributes.value(QStringLiteral("name")).toString();
 
     if (m_baseFileName.isEmpty()) {
@@ -326,7 +326,7 @@ Interface Generator::parseInterface()
 
 Request Generator::parseRequest()
 {
-    const auto attributes = m_xmlReader.attributes();
+    auto const attributes = m_xmlReader.attributes();
     Request request(attributes.value(QStringLiteral("name")).toString());
     if (attributes.value(QStringLiteral("type")).toString().compare(QLatin1String("destructor"))
         == 0) {
@@ -348,7 +348,7 @@ Request Generator::parseRequest()
 
 Event Generator::parseEvent()
 {
-    const auto attributes = m_xmlReader.attributes();
+    auto const attributes = m_xmlReader.attributes();
     Event event(attributes.value(QStringLiteral("name")).toString());
     while (!m_xmlReader.atEnd()) {
         if (!m_xmlReader.readNextStartElement()) {
@@ -639,7 +639,7 @@ void Generator::generateCppIncludes()
     }
 }
 
-void Generator::generateClass(const Interface& interface)
+void Generator::generateClass(Interface const& interface)
 {
     switch (m_project.localData()) {
     case Project::Client:
@@ -661,7 +661,7 @@ void Generator::generateClass(const Interface& interface)
     }
 }
 
-void Generator::generateClientGlobalClass(const Interface& interface)
+void Generator::generateClientGlobalClass(Interface const& interface)
 {
     generateClientGlobalClassDoxy(interface);
     generateClientClassQObjectDerived(interface);
@@ -676,7 +676,7 @@ void Generator::generateClientGlobalClass(const Interface& interface)
     generateClientGlobalClassEnd(interface);
 }
 
-void Generator::generateClientResourceClass(const Interface& interface)
+void Generator::generateClientResourceClass(Interface const& interface)
 {
     generateClientClassQObjectDerived(interface);
     generateClientClassDtor(interface);
@@ -687,7 +687,7 @@ void Generator::generateClientResourceClass(const Interface& interface)
     generateClientResourceClassEnd(interface);
 }
 
-void Generator::generateServerGlobalClass(const Interface& interface)
+void Generator::generateServerGlobalClass(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "class WRAPLANDSERVER_EXPORT %1 : public QObject\n"
@@ -706,7 +706,7 @@ void Generator::generateServerGlobalClass(const Interface& interface)
     *m_stream.localData() << templateString.arg(interface.wraplandServerName());
 }
 
-void Generator::generateServerResourceClass(const Interface& interface)
+void Generator::generateServerResourceClass(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "class WRAPLANDSERVER_EXPORT %1 : public QObject\n"
@@ -729,7 +729,7 @@ void Generator::generateServerResourceClass(const Interface& interface)
                                  .arg(interface.factory()->wraplandServerName());
 }
 
-void Generator::generatePrivateClass(const Interface& interface)
+void Generator::generatePrivateClass(Interface const& interface)
 {
     switch (m_project.localData()) {
     case Project::Client:
@@ -754,7 +754,7 @@ void Generator::generatePrivateClass(const Interface& interface)
     }
 }
 
-void Generator::generateServerPrivateHeaderGlobalClass(const Interface& interface)
+void Generator::generateServerPrivateHeaderGlobalClass(Interface const& interface)
 {
     QString templateString = QStringLiteral(
         "constexpr uint32_t %1Version = %2;\n"
@@ -778,23 +778,23 @@ void Generator::generateServerPrivateHeaderGlobalClass(const Interface& interfac
     *m_stream.localData() << templateString.arg(interface.name());
 }
 
-void Generator::generateServerPrivateGlobalFunction(const Interface& interface)
+void Generator::generateServerPrivateGlobalFunction(Interface const& interface)
 {
     generateServerPrivateInterfaceClass(interface);
     generateServerPrivateCallbackImpl(interface);
     generateServerPrivateGlobalConstructor(interface);
 }
 
-void Generator::generateServerPrivateCallbackDefinitions(const Interface& interface)
+void Generator::generateServerPrivateCallbackDefinitions(Interface const& interface)
 {
-    for (const auto& r : interface.requests()) {
+    for (auto const& r : interface.requests()) {
         if (r.isDestructor()) {
             return;
         }
         *m_stream.localData()
             << QStringLiteral("    static void %1Callback(wl_client *client, wl_resource *resource")
                    .arg(toCamelCase(r.name()));
-        for (const auto& a : r.arguments()) {
+        for (auto const& a : r.arguments()) {
             *m_stream.localData()
                 << QStringLiteral(", %1 %2").arg(a.typeAsServerWl()).arg(a.name());
         }
@@ -803,9 +803,9 @@ void Generator::generateServerPrivateCallbackDefinitions(const Interface& interf
     *m_stream.localData() << QStringLiteral("\n");
 }
 
-void Generator::generateServerPrivateCallbackImpl(const Interface& interface)
+void Generator::generateServerPrivateCallbackImpl(Interface const& interface)
 {
-    for (const auto& r : interface.requests()) {
+    for (auto const& r : interface.requests()) {
         if (r.isDestructor()) {
             return;
         }
@@ -814,7 +814,7 @@ void Generator::generateServerPrivateCallbackImpl(const Interface& interface)
                    "void %2::Private::%1Callback(wl_client *client, wl_resource *resource")
                    .arg(toCamelCase(r.name()))
                    .arg(interface.wraplandServerName());
-        for (const auto& a : r.arguments()) {
+        for (auto const& a : r.arguments()) {
             *m_stream.localData()
                 << QStringLiteral(", %1 %2").arg(a.typeAsServerWl()).arg(a.name());
         }
@@ -830,7 +830,7 @@ void Generator::generateServerPrivateCallbackImpl(const Interface& interface)
     }
 }
 
-void Generator::generateServerPrivateGlobalConstructor(const Interface& interface)
+void Generator::generateServerPrivateGlobalConstructor(Interface const& interface)
 {
     QString templateString = QStringLiteral(
         "%1::Private::Private(Display *display, %1 *q)\n"
@@ -855,7 +855,7 @@ void Generator::generateServerPrivateGlobalConstructor(const Interface& interfac
     *m_stream.localData() << templateString.arg(interface.wraplandServerName());
 }
 
-void Generator::generateServerPrivateHeaderResourceClass(const Interface& interface)
+void Generator::generateServerPrivateHeaderResourceClass(Interface const& interface)
 {
     QString templateString = QStringLiteral(
         "class %1::Private : public Wayland::Resource<%1>\n"
@@ -877,14 +877,14 @@ void Generator::generateServerPrivateHeaderResourceClass(const Interface& interf
     *m_stream.localData() << templateString.arg(interface.name());
 }
 
-void Generator::generateServerPrivateResourceFunction(const Interface& interface)
+void Generator::generateServerPrivateResourceFunction(Interface const& interface)
 {
     generateServerPrivateInterfaceClass(interface);
     generateServerPrivateCallbackImpl(interface);
     generateServerPrivateResourceCtorDtorClass(interface);
 }
 
-void Generator::generateServerPrivateInterfaceClass(const Interface& interface)
+void Generator::generateServerPrivateInterfaceClass(Interface const& interface)
 {
     *m_stream.localData() << QStringLiteral(
                                  "const struct %2_interface %1::Private::s_interface = {\n")
@@ -903,7 +903,7 @@ void Generator::generateServerPrivateInterfaceClass(const Interface& interface)
     *m_stream.localData() << QStringLiteral("}\n\n");
 }
 
-void Generator::generateServerPrivateResourceCtorDtorClass(const Interface& interface)
+void Generator::generateServerPrivateResourceCtorDtorClass(Interface const& interface)
 {
     QString templateString = QStringLiteral(
         "%1::Private::Private(Client* client, uint32_t version, uint32_t id, %1* qptr)\n"
@@ -927,7 +927,7 @@ void Generator::generateServerPrivateResourceCtorDtorClass(const Interface& inte
     *m_stream.localData() << templateString.arg(interface.wraplandServerName());
 }
 
-void Generator::generateClientPrivateClass(const Interface& interface)
+void Generator::generateClientPrivateClass(Interface const& interface)
 {
     if (interface.isGlobal()) {
         generateClientPrivateGlobalClass(interface);
@@ -935,7 +935,7 @@ void Generator::generateClientPrivateClass(const Interface& interface)
         generateClientPrivateResourceClass(interface);
     }
 
-    const auto events = interface.events();
+    auto const events = interface.events();
     if (!events.isEmpty()) {
         *m_stream.localData() << QStringLiteral("\nprivate:\n");
         // generate the callbacks
@@ -943,7 +943,7 @@ void Generator::generateClientPrivateClass(const Interface& interface)
             const QString templateString
                 = QStringLiteral("    static void %1Callback(void *data, %2 *%2");
             *m_stream.localData() << templateString.arg(event.name()).arg(interface.name());
-            const auto arguments = event.arguments();
+            auto const arguments = event.arguments();
             for (auto argument : arguments) {
                 if (argument.interface().isNull()) {
                     *m_stream.localData() << QStringLiteral(", %1 %2")
@@ -964,7 +964,7 @@ void Generator::generateClientPrivateClass(const Interface& interface)
     *m_stream.localData() << QStringLiteral("};\n\n");
 }
 
-void Generator::generateClientPrivateResourceClass(const Interface& interface)
+void Generator::generateClientPrivateResourceClass(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "class %1::Private\n"
@@ -984,7 +984,7 @@ void Generator::generateClientPrivateResourceClass(const Interface& interface)
                                  .arg(interface.wraplandClientName().toLower());
 }
 
-void Generator::generateClientPrivateGlobalClass(const Interface& interface)
+void Generator::generateClientPrivateGlobalClass(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "class %1::Private\n"
@@ -1002,10 +1002,10 @@ void Generator::generateClientPrivateGlobalClass(const Interface& interface)
                                  .arg(interface.wraplandClientName().toLower());
 }
 
-void Generator::generateClientCpp(const Interface& interface)
+void Generator::generateClientCpp(Interface const& interface)
 {
     // TODO: generate listener and callbacks
-    const auto events = interface.events();
+    auto const events = interface.events();
     if (!events.isEmpty()) {
         // listener
         *m_stream.localData() << QStringLiteral("const %1_listener %2::Private::s_listener = {\n")
@@ -1029,7 +1029,7 @@ void Generator::generateClientCpp(const Interface& interface)
                                          .arg(event.name())
                                          .arg(interface.name());
 
-            const auto arguments = event.arguments();
+            auto const arguments = event.arguments();
             for (auto argument : arguments) {
                 if (argument.interface().isNull()) {
                     *m_stream.localData() << QStringLiteral(", %1 %2")
@@ -1153,7 +1153,7 @@ void Generator::generateClientCpp(const Interface& interface)
     }
 }
 
-void Generator::generateClientGlobalClassDoxy(const Interface& interface)
+void Generator::generateClientGlobalClassDoxy(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "/**\n"
@@ -1183,7 +1183,7 @@ void Generator::generateClientGlobalClassDoxy(const Interface& interface)
         << templateString.arg(interface.wraplandClientName()).arg(interface.name());
 }
 
-void Generator::generateClientClassQObjectDerived(const Interface& interface)
+void Generator::generateClientClassQObjectDerived(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "class WRAPLANDCLIENT_EXPORT %1 : public QObject\n"
@@ -1193,7 +1193,7 @@ void Generator::generateClientClassQObjectDerived(const Interface& interface)
     *m_stream.localData() << templateString.arg(interface.wraplandClientName());
 }
 
-void Generator::generateClientGlobalClassCtor(const Interface& interface)
+void Generator::generateClientGlobalClassCtor(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "    /**\n"
@@ -1206,13 +1206,13 @@ void Generator::generateClientGlobalClassCtor(const Interface& interface)
     *m_stream.localData() << templateString.arg(interface.wraplandClientName());
 }
 
-void Generator::generateClientClassDtor(const Interface& interface)
+void Generator::generateClientClassDtor(Interface const& interface)
 {
     *m_stream.localData()
         << QStringLiteral("    virtual ~%1();\n\n").arg(interface.wraplandClientName());
 }
 
-void Generator::generateClientClassReleaseDestroy(const Interface& interface)
+void Generator::generateClientClassReleaseDestroy(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "    /**\n"
@@ -1248,7 +1248,7 @@ void Generator::generateClientClassReleaseDestroy(const Interface& interface)
                                  .arg(interface.wraplandClientName().toLower());
 }
 
-void Generator::generateClientGlobalClassSetup(const Interface& interface)
+void Generator::generateClientGlobalClassSetup(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "    /**\n"
@@ -1262,7 +1262,7 @@ void Generator::generateClientGlobalClassSetup(const Interface& interface)
                                  .arg(interface.wraplandClientName().toLower());
 }
 
-void Generator::generateClientResourceClassSetup(const Interface& interface)
+void Generator::generateClientResourceClassSetup(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "    /**\n"
@@ -1277,7 +1277,7 @@ void Generator::generateClientResourceClassSetup(const Interface& interface)
                                  .arg(interface.factory()->wraplandClientName());
 }
 
-void Generator::generateClientClassStart(const Interface& interface)
+void Generator::generateClientClassStart(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "    /**\n"
@@ -1291,19 +1291,19 @@ void Generator::generateClientClassStart(const Interface& interface)
     *m_stream.localData() << templateString.arg(interface.wraplandClientName());
 }
 
-void Generator::generateClientClassRequests(const Interface& interface)
+void Generator::generateClientClassRequests(Interface const& interface)
 {
-    const auto requests = interface.requests();
+    auto const requests = interface.requests();
     const QString templateString = QStringLiteral("    void %1(%2);\n\n");
     const QString factoryTemplateString = QStringLiteral("    %1 *%2(%3);\n\n");
-    for (const auto& r : requests) {
+    for (auto const& r : requests) {
         if (r.isDestructor()) {
             continue;
         }
         QString arguments;
         bool first = true;
         QString factored;
-        for (const auto& a : r.arguments()) {
+        for (auto const& a : r.arguments()) {
             if (a.type() == Argument::Type::NewId) {
                 factored = a.interface();
                 continue;
@@ -1335,9 +1335,9 @@ void Generator::generateClientClassRequests(const Interface& interface)
     }
 }
 
-void Generator::generateClientCppRequests(const Interface& interface)
+void Generator::generateClientCppRequests(Interface const& interface)
 {
-    const auto requests = interface.requests();
+    auto const requests = interface.requests();
     const QString templateString = QStringLiteral(
         "void %1::%2(%3)\n"
         "{\n"
@@ -1356,7 +1356,7 @@ void Generator::generateClientCppRequests(const Interface& interface)
         "    p->setup(w);\n"
         "    return p;\n"
         "}\n\n");
-    for (const auto& r : requests) {
+    for (auto const& r : requests) {
         if (r.isDestructor()) {
             continue;
         }
@@ -1364,7 +1364,7 @@ void Generator::generateClientCppRequests(const Interface& interface)
         QString requestArguments;
         bool first = true;
         QString factored;
-        for (const auto& a : r.arguments()) {
+        for (auto const& a : r.arguments()) {
             if (a.type() == Argument::Type::NewId) {
                 factored = a.interface();
                 continue;
@@ -1413,7 +1413,7 @@ void Generator::generateClientCppRequests(const Interface& interface)
     }
 }
 
-void Generator::generateClientClassCasts(const Interface& interface)
+void Generator::generateClientClassCasts(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "    operator %1*();\n"
@@ -1421,7 +1421,7 @@ void Generator::generateClientClassCasts(const Interface& interface)
     *m_stream.localData() << templateString.arg(interface.name());
 }
 
-void Generator::generateClientGlobalClassEnd(const Interface& interface)
+void Generator::generateClientGlobalClassEnd(Interface const& interface)
 {
     Q_UNUSED(interface)
     *m_stream.localData() << QStringLiteral("private:\n");
@@ -1429,7 +1429,7 @@ void Generator::generateClientGlobalClassEnd(const Interface& interface)
     *m_stream.localData() << QStringLiteral("};\n\n");
 }
 
-void Generator::generateClientClassDptr(const Interface& interface)
+void Generator::generateClientClassDptr(Interface const& interface)
 {
     Q_UNUSED(interface)
     *m_stream.localData() << QStringLiteral(
@@ -1437,7 +1437,7 @@ void Generator::generateClientClassDptr(const Interface& interface)
         "    QScopedPointer<Private> d;\n");
 }
 
-void Generator::generateClientResourceClassEnd(const Interface& interface)
+void Generator::generateClientResourceClassEnd(Interface const& interface)
 {
     *m_stream.localData() << QStringLiteral(
                                  "private:\n"
@@ -1461,20 +1461,20 @@ void Generator::generateNamespaceForwardDeclarations()
 {
     QSet<QString> referencedObjects;
     for (auto it = m_interfaces.constBegin(); it != m_interfaces.constEnd(); ++it) {
-        const auto events = (*it).events();
-        const auto requests = (*it).requests();
-        for (const auto& e : events) {
-            const auto args = e.arguments();
-            for (const auto& a : args) {
+        auto const events = (*it).events();
+        auto const requests = (*it).requests();
+        for (auto const& e : events) {
+            auto const args = e.arguments();
+            for (auto const& a : args) {
                 if (a.type() != Argument::Type::Object && a.type() != Argument::Type::NewId) {
                     continue;
                 }
                 referencedObjects << a.interface();
             }
         }
-        for (const auto& r : requests) {
-            const auto args = r.arguments();
-            for (const auto& a : args) {
+        for (auto const& r : requests) {
+            auto const args = r.arguments();
+            for (auto const& a : args) {
                 if (a.type() != Argument::Type::Object && a.type() != Argument::Type::NewId) {
                     continue;
                 }
@@ -1486,7 +1486,7 @@ void Generator::generateNamespaceForwardDeclarations()
     switch (m_project.localData()) {
     case Project::Client:
         *m_stream.localData() << QStringLiteral("class EventQueue;\n");
-        for (const auto& o : referencedObjects) {
+        for (auto const& o : referencedObjects) {
             auto it = s_clientClassNameMapping.constFind(o);
             if (it != s_clientClassNameMapping.constEnd()) {
                 *m_stream.localData() << QStringLiteral("class %1;\n").arg(it.value());
@@ -1506,7 +1506,7 @@ void Generator::generateNamespaceForwardDeclarations()
     }
 }
 
-void Generator::generateClientClassSignals(const Interface& interface)
+void Generator::generateClientClassSignals(Interface const& interface)
 {
     const QString templateString = QStringLiteral(
         "Q_SIGNALS:\n"

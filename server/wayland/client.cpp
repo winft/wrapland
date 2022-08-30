@@ -94,7 +94,7 @@ void Client::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] voi
 }
 
 wl_resource*
-Client::createResource(const wl_interface* interface, uint32_t version, uint32_t id) const
+Client::createResource(wl_interface const* interface, uint32_t version, uint32_t id) const
 {
     if (!native) {
         return nullptr;

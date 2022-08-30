@@ -48,7 +48,7 @@ public:
 
     XdgShellToplevel* transientFor() const;
 
-    uint32_t configure(XdgShellSurface::States states, const QSize& size = QSize(0, 0));
+    uint32_t configure(XdgShellSurface::States states, QSize const& size = QSize(0, 0));
     bool configurePending() const;
 
     QSize minimumSize() const;
@@ -59,12 +59,12 @@ public:
 Q_SIGNALS:
     void titleChanged(std::string title);
     void appIdChanged(std::string appId);
-    void minSizeChanged(const QSize& size);
-    void maxSizeChanged(const QSize& size);
+    void minSizeChanged(QSize const& size);
+    void maxSizeChanged(QSize const& size);
     void moveRequested(Seat* seat, uint32_t serial);
     void maximizedChanged(bool maximized);
     void fullscreenChanged(bool fullscreen, Wrapland::Server::Output* output);
-    void windowMenuRequested(Seat* seat, uint32_t serial, const QPoint& position);
+    void windowMenuRequested(Seat* seat, uint32_t serial, QPoint const& position);
     void resizeRequested(Seat* seat, uint32_t serial, Qt::Edges edges);
     void minimizeRequested();
     void configureAcknowledged(uint32_t serial);

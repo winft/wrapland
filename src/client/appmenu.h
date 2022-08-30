@@ -150,7 +150,7 @@ public:
      * Sets the appmenu address. The DBus object should be registered before making this call
      * Strings should be valid DBus formatted names, in latin1.
      */
-    void setAddress(const QString& serviceName, const QString& objectPath);
+    void setAddress(QString const& serviceName, QString const& objectPath);
 
     operator org_kde_kwin_appmenu*();
     operator org_kde_kwin_appmenu*() const;

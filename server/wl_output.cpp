@@ -30,8 +30,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-WlOutput::Private::Private(Output* output, Display* display, WlOutput* q)
-    : WlOutputGlobal(q, display, &wl_output_interface, &s_interface)
+WlOutput::Private::Private(Output* output, Display* display, WlOutput* q_ptr)
+    : WlOutputGlobal(q_ptr, display, &wl_output_interface, &s_interface)
     , displayHandle(display)
     , output(output)
 {
@@ -59,7 +59,7 @@ int32_t to_subpixel(Output::Subpixel subpixel)
     abort();
 }
 
-std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, const char*, const char*, int32_t>
+std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, char const*, char const*, int32_t>
 WlOutput::Private::geometry_args(OutputState const& state)
 {
     auto const position = state.geometry.topLeft();

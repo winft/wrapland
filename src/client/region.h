@@ -49,7 +49,7 @@ class WRAPLANDCLIENT_EXPORT Region : public QObject
 {
     Q_OBJECT
 public:
-    explicit Region(const QRegion& region, QObject* parent = nullptr);
+    explicit Region(QRegion const& region, QObject* parent = nullptr);
     virtual ~Region();
 
     /**
@@ -73,19 +73,19 @@ public:
     /**
      * Adds the @p rect to this Region.
      **/
-    void add(const QRect& rect);
+    void add(QRect const& rect);
     /**
      * Adds the @p region to this Rregion.
      **/
-    void add(const QRegion& region);
+    void add(QRegion const& region);
     /**
      * Subtracts @p rect from this Region.
      **/
-    void subtract(const QRect& rect);
+    void subtract(QRect const& rect);
     /**
      * Subtracts @p region from this Region.
      **/
-    void subtract(const QRegion& region);
+    void subtract(QRegion const& region);
 
     /**
      * The geometry of this Region.

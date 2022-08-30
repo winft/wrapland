@@ -53,7 +53,7 @@ using SeatBind = Wayland::Bind<SeatGlobal>;
 class Seat::Private : public SeatGlobal
 {
 public:
-    Private(Seat* q, Display* d);
+    Private(Seat* q_ptr, Display* display);
 
     void bindInit(SeatBind* bind) override;
 

@@ -42,7 +42,7 @@ using KeyStateBind = Wayland::Bind<KeyStateGlobal>;
 class KeyState::Private : public KeyStateGlobal
 {
 public:
-    Private(Display* d, KeyState* q);
+    Private(Display* display, KeyState* q_ptr);
     ~Private() override;
     static void fetchStatesCallback(KeyStateBind* bind);
 

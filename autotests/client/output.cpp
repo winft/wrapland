@@ -214,7 +214,7 @@ void TestOutput::testRegistry()
 void TestOutput::testModeChanges()
 {
     // verify the server modes
-    const auto serverModes = server.output->modes();
+    auto const serverModes = server.output->modes();
     QCOMPARE(serverModes.size(), 3);
     QCOMPARE(serverModes.at(0).size, QSize(800, 600));
     QCOMPARE(serverModes.at(1).size, QSize(1024, 768));
@@ -263,7 +263,7 @@ void TestOutput::testModeChanges()
     QCOMPARE(modeAddedSpy.at(2).first().value<Output::Mode>().flags,
              Output::Mode::Flags(Output::Mode::Flag::Current));
     QCOMPARE(modeAddedSpy.at(2).first().value<Output::Mode>().output, QPointer<Output>(&output));
-    const QList<Output::Mode>& modes = output.modes();
+    QList<Output::Mode> const& modes = output.modes();
     QCOMPARE(modes.size(), 3);
     QCOMPARE(modes.at(0), modeAddedSpy.at(0).first().value<Output::Mode>());
     QCOMPARE(modes.at(1), modeAddedSpy.at(1).first().value<Output::Mode>());
@@ -302,7 +302,7 @@ void TestOutput::testModeChanges()
              Output::Mode::Flags(Output::Mode::Flag::Current | Output::Mode::Flag::Preferred));
     QVERIFY(!outputChanged.isEmpty());
     QCOMPARE(output.pixelSize(), QSize(800, 600));
-    const QList<Output::Mode>& modes2 = output.modes();
+    QList<Output::Mode> const& modes2 = output.modes();
     QCOMPARE(modes2.at(0).size, QSize(1280, 1024));
     QCOMPARE(modes2.at(0).refreshRate, 90000);
     QCOMPARE(modes2.at(0).flags, Output::Mode::Flag::None);

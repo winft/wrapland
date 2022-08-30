@@ -40,7 +40,7 @@ using PresentationManagerBind = Wayland::Bind<PresentationManagerGlobal>;
 class PresentationManager::Private : public PresentationManagerGlobal
 {
 public:
-    Private(PresentationManager* q, Display* display);
+    Private(PresentationManager* q_ptr, Display* display);
 
     void bindInit(PresentationManagerBind* bind) override;
 
@@ -56,8 +56,8 @@ private:
 
 const uint32_t PresentationManager::Private::s_version = 1;
 
-PresentationManager::Private::Private(PresentationManager* q, Display* display)
-    : PresentationManagerGlobal(q, display, &wp_presentation_interface, &s_interface)
+PresentationManager::Private::Private(PresentationManager* q_ptr, Display* display)
+    : PresentationManagerGlobal(q_ptr, display, &wp_presentation_interface, &s_interface)
 {
 }
 
@@ -105,19 +105,19 @@ void PresentationManager::setClockId(clockid_t clockId)
 class PresentationFeedback::Private : public Wayland::Resource<PresentationFeedback>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, PresentationFeedback* q);
+    Private(Client* client, uint32_t version, uint32_t id, PresentationFeedback* q_ptr);
 };
 
 PresentationFeedback::Private::Private(Client* client,
                                        uint32_t version,
                                        uint32_t id,
-                                       PresentationFeedback* q)
+                                       PresentationFeedback* q_ptr)
     : Wayland::Resource<PresentationFeedback>(client,
                                               version,
                                               id,
                                               &wp_presentation_feedback_interface,
                                               nullptr,
-                                              q)
+                                              q_ptr)
 {
 }
 

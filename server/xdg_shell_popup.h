@@ -45,7 +45,7 @@ public:
     XdgShellSurface* surface() const;
     Client* client() const;
 
-    uint32_t configure(const QRect& rect);
+    uint32_t configure(QRect const& rect);
 
     XdgShellSurface* transientFor() const;
     QPoint transientOffset() const;

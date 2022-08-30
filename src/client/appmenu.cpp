@@ -167,7 +167,7 @@ bool AppMenu::isValid() const
     return d->appmenu.isValid();
 }
 
-void AppMenu::setAddress(const QString& serviceName, const QString& objectPath)
+void AppMenu::setAddress(QString const& serviceName, QString const& objectPath)
 {
     Q_ASSERT(isValid());
     org_kde_kwin_appmenu_set_address(d->appmenu, serviceName.toLatin1(), objectPath.toLatin1());

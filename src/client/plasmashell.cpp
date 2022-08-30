@@ -242,7 +242,7 @@ PlasmaShellSurface::operator org_kde_plasma_surface*() const
     return d->surface;
 }
 
-void PlasmaShellSurface::setPosition(const QPoint& point)
+void PlasmaShellSurface::setPosition(QPoint const& point)
 {
     Q_ASSERT(isValid());
     org_kde_plasma_surface_set_position(d->surface, point.x(), point.y());

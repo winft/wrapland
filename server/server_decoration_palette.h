@@ -57,7 +57,7 @@ public:
     Surface* surface() const;
 
 Q_SIGNALS:
-    void paletteChanged(const QString& palette);
+    void paletteChanged(QString const& palette);
     void resourceDestroyed();
 
 private:

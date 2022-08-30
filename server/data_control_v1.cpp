@@ -29,8 +29,8 @@ struct zwlr_data_control_manager_v1_interface const data_control_manager_v1::Pri
         resourceDestroyCallback,
 };
 
-data_control_manager_v1::Private::Private(data_control_manager_v1* q, Display* display)
-    : device_manager<data_control_manager_v1_global>(q,
+data_control_manager_v1::Private::Private(data_control_manager_v1* q_ptr, Display* display)
+    : device_manager<data_control_manager_v1_global>(q_ptr,
                                                      display,
                                                      &zwlr_data_control_manager_v1_interface,
                                                      &s_interface)

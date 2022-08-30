@@ -133,7 +133,7 @@ public:
      * @param region The region to install on the newly created Region
      * @returns The new created Region
      **/
-    Region* createRegion(const QRegion& region, QObject* parent);
+    Region* createRegion(QRegion const& region, QObject* parent);
     /**
      * Creates and setup a new Region with @p region installed.
      *
@@ -151,7 +151,7 @@ public:
      * @param region The region to install on the newly created Region
      * @returns The new created Region
      **/
-    std::unique_ptr<Region> createRegion(const QRegion& region);
+    std::unique_ptr<Region> createRegion(QRegion const& region);
 
     operator wl_compositor*();
     operator wl_compositor*() const;

@@ -20,8 +20,8 @@ const struct xdg_activation_v1_interface XdgActivationV1::Private::s_interface =
     cb<activateCallback>,
 };
 
-XdgActivationV1::Private::Private(Display* display, XdgActivationV1* qptr)
-    : XdgActivationV1Global(qptr, display, &xdg_activation_v1_interface, &s_interface)
+XdgActivationV1::Private::Private(Display* display, XdgActivationV1* q_ptr)
+    : XdgActivationV1Global(q_ptr, display, &xdg_activation_v1_interface, &s_interface)
 {
     create();
 }
@@ -67,13 +67,13 @@ XdgActivationTokenV1::Private::Private(Client* client,
                                        uint32_t version,
                                        uint32_t id,
                                        XdgActivationV1* device,
-                                       XdgActivationTokenV1* qptr)
+                                       XdgActivationTokenV1* q_ptr)
     : Wayland::Resource<XdgActivationTokenV1>(client,
                                               version,
                                               id,
                                               &xdg_activation_token_v1_interface,
                                               &s_interface,
-                                              qptr)
+                                              q_ptr)
     , device{device}
 {
 }

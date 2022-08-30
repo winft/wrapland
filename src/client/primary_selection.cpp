@@ -59,7 +59,7 @@ void PrimarySelectionDevice::setup(zwp_primary_selection_device_v1* dataDevice)
 
 namespace
 {
-zwp_primary_selection_source_v1* dataSource(const PrimarySelectionSource* source)
+zwp_primary_selection_source_v1* dataSource(PrimarySelectionSource const* source)
 {
     if (!source) {
         return nullptr;
@@ -200,12 +200,12 @@ QList<QMimeType> PrimarySelectionOffer::offeredMimeTypes() const
     return d_ptr->mimeTypes;
 }
 
-void PrimarySelectionOffer::receive(const QMimeType& mimeType, qint32 fd)
+void PrimarySelectionOffer::receive(QMimeType const& mimeType, qint32 fd)
 {
     receive(mimeType.name(), fd);
 }
 
-void PrimarySelectionOffer::receive(const QString& mimeType, qint32 fd)
+void PrimarySelectionOffer::receive(QString const& mimeType, qint32 fd)
 {
     Q_ASSERT(isValid());
     zwp_primary_selection_offer_v1_receive(d_ptr->dataOffer, mimeType.toUtf8().constData(), fd);
@@ -265,12 +265,12 @@ void PrimarySelectionSource::setup(zwp_primary_selection_source_v1* dataSource)
     d_ptr->setup(dataSource);
 }
 
-void PrimarySelectionSource::offer(const QString& mimeType)
+void PrimarySelectionSource::offer(QString const& mimeType)
 {
     zwp_primary_selection_source_v1_offer(d_ptr->source, mimeType.toUtf8().constData());
 }
 
-void PrimarySelectionSource::offer(const QMimeType& mimeType)
+void PrimarySelectionSource::offer(QMimeType const& mimeType)
 {
     if (!mimeType.isValid()) {
         return;

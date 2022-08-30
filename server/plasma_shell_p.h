@@ -78,7 +78,8 @@ public:
 
 private:
     static void setOutputCallback(wl_client* client, wl_resource* resource, wl_resource* output);
-    static void setPositionCallback(wl_client* client, wl_resource* resource, int32_t x, int32_t y);
+    static void
+    setPositionCallback(wl_client* client, wl_resource* resource, int32_t pos_x, int32_t pos_y);
     static void setRoleCallback(wl_client* client, wl_resource* resource, uint32_t role);
     static void setPanelBehaviorCallback(wl_client* client, wl_resource* resource, uint32_t flag);
     static void setSkipTaskbarCallback(wl_client* client, wl_resource* resource, uint32_t skip);
@@ -88,7 +89,7 @@ private:
     static void
     panelTakesFocusCallback(wl_client* client, wl_resource* resource, uint32_t takesFocus);
 
-    void setPosition(const QPoint& globalPos);
+    void setPosition(QPoint const& globalPos);
     void setRole(uint32_t role);
     void setPanelBehavior(org_kde_plasma_surface_panel_behavior behavior);
 

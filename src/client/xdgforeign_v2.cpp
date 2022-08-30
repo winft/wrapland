@@ -99,7 +99,7 @@ class Q_DECL_HIDDEN XdgImporterUnstableV2::Private : public XdgImporter::Private
 public:
     Private();
 
-    XdgImported* importTopLevelV2(const QString& handle, QObject* parent) override;
+    XdgImported* importTopLevelV2(QString const& handle, QObject* parent) override;
     void setupV2(zxdg_importer_v2* arg) override;
     zxdg_importer_v2* importerV2() override;
 
@@ -130,7 +130,7 @@ bool XdgImporterUnstableV2::Private::isValid()
     return importer.isValid();
 }
 
-XdgImported* XdgImporterUnstableV2::Private::importTopLevelV2(const QString& handle,
+XdgImported* XdgImporterUnstableV2::Private::importTopLevelV2(QString const& handle,
                                                               QObject* parent)
 {
     Q_ASSERT(isValid());
@@ -173,7 +173,7 @@ public:
     WaylandPointer<zxdg_exported_v2, zxdg_exported_v2_destroy> exported;
 
 private:
-    static void handleCallback(void* data, zxdg_exported_v2* zxdg_exported_v2, const char* handle);
+    static void handleCallback(void* data, zxdg_exported_v2* zxdg_exported_v2, char const* handle);
 
     static const zxdg_exported_v2_listener s_listener;
 };
@@ -199,7 +199,7 @@ const zxdg_exported_v2_listener XdgExportedUnstableV2::Private::s_listener = {
 
 void XdgExportedUnstableV2::Private::handleCallback(void* data,
                                                     zxdg_exported_v2* zxdg_exported_v2,
-                                                    const char* handle)
+                                                    char const* handle)
 {
     auto p = reinterpret_cast<XdgExportedUnstableV2::Private*>(data);
     Q_ASSERT(p->exported == zxdg_exported_v2);

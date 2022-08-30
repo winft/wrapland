@@ -230,7 +230,7 @@ public:
     /**
      * Requests to position this PlasmaShellSurface at @p point in global coordinates.
      **/
-    void setPosition(const QPoint& point);
+    void setPosition(QPoint const& point);
 
     /**
      * Describes how a PlasmaShellSurface with role @c Role::Panel should behave.

@@ -135,12 +135,12 @@ namespace
 struct SuppertedInterfaceData {
     quint32 maxVersion;
     QByteArray name;
-    const wl_interface* interface;
+    wl_interface const* interface;
     void (Registry::*announcedSignal)(quint32, quint32);
     void (Registry::*removedSignal)(quint32);
 };
 
-static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
+static QMap<Registry::Interface, SuppertedInterfaceData> const s_interfaces = {
     {
         Registry::Interface::Compositor,
         {
@@ -601,7 +601,7 @@ static const QMap<Registry::Interface, SuppertedInterfaceData> s_interfaces = {
     },
 };
 
-static quint32 maxVersion(const Registry::Interface& interface)
+static quint32 maxVersion(Registry::Interface const& interface)
 {
     auto it = s_interfaces.find(interface);
     if (it != s_interfaces.end()) {
@@ -634,13 +634,13 @@ public:
     EventQueue* queue = nullptr;
 
 private:
-    void handleAnnounce(uint32_t name, const char* interface, uint32_t version);
+    void handleAnnounce(uint32_t name, char const* interface, uint32_t version);
     void handleRemove(uint32_t name);
     void handleGlobalSync();
     static void globalAnnounce(void* data,
                                struct wl_registry* registry,
                                uint32_t name,
-                               const char* interface,
+                               char const* interface,
                                uint32_t version);
     static void globalRemove(void* data, struct wl_registry* registry, uint32_t name);
     static void globalSync(void* data, struct wl_callback* callback, uint32_t serial);
@@ -743,7 +743,7 @@ const struct wl_callback_listener Registry::Private::s_callbackListener = {globa
 void Registry::Private::globalAnnounce(void* data,
                                        wl_registry* registry,
                                        uint32_t name,
-                                       const char* interface,
+                                       char const* interface,
                                        uint32_t version)
 {
     auto r = reinterpret_cast<Registry::Private*>(data);
@@ -774,7 +774,7 @@ void Registry::Private::handleGlobalSync()
 
 namespace
 {
-static Registry::Interface nameToInterface(const char* interface)
+static Registry::Interface nameToInterface(char const* interface)
 {
     for (auto it = s_interfaces.constBegin(); it != s_interfaces.constEnd(); ++it) {
         if (qstrcmp(interface, it.value().name) == 0) {
@@ -785,7 +785,7 @@ static Registry::Interface nameToInterface(const char* interface)
 }
 }
 
-void Registry::Private::handleAnnounce(uint32_t name, const char* interface, uint32_t version)
+void Registry::Private::handleAnnounce(uint32_t name, char const* interface, uint32_t version)
 {
     Interface i = nameToInterface(interface);
     emit q->interfaceAnnounced(QByteArray(interface), name, version);
@@ -806,7 +806,7 @@ void Registry::Private::handleRemove(uint32_t name)
 {
     auto it = std::find_if(m_interfaces.begin(),
                            m_interfaces.end(),
-                           [name](const InterfaceData& data) { return data.name == name; });
+                           [name](InterfaceData const& data) { return data.name == name; });
     if (it != m_interfaces.end()) {
         InterfaceData data = *(it);
         m_interfaces.erase(it);
@@ -821,7 +821,7 @@ void Registry::Private::handleRemove(uint32_t name)
 bool Registry::Private::hasInterface(Registry::Interface interface) const
 {
     auto it = std::find_if(
-        m_interfaces.constBegin(), m_interfaces.constEnd(), [interface](const InterfaceData& data) {
+        m_interfaces.constBegin(), m_interfaces.constEnd(), [interface](InterfaceData const& data) {
             return data.interface == interface;
         });
     return it != m_interfaces.constEnd();
@@ -831,7 +831,7 @@ QVector<Registry::AnnouncedInterface> Registry::Private::interfaces(Interface in
 {
     QVector<Registry::AnnouncedInterface> retVal;
     for (auto it = m_interfaces.constBegin(); it != m_interfaces.constEnd(); ++it) {
-        const auto& data = *it;
+        auto const& data = *it;
         if (data.interface == interface) {
             retVal << AnnouncedInterface{data.name, data.version};
         }
@@ -841,7 +841,7 @@ QVector<Registry::AnnouncedInterface> Registry::Private::interfaces(Interface in
 
 Registry::AnnouncedInterface Registry::Private::interface(Interface interface) const
 {
-    const auto all = interfaces(interface);
+    auto const all = interfaces(interface);
     if (!all.isEmpty()) {
         return all.last();
     }
@@ -852,7 +852,7 @@ Registry::Interface Registry::Private::interfaceForName(quint32 name) const
 {
     auto it = std::find_if(m_interfaces.constBegin(),
                            m_interfaces.constEnd(),
-                           [name](const InterfaceData& data) { return data.name == name; });
+                           [name](InterfaceData const& data) { return data.name == name; });
     if (it == m_interfaces.constEnd()) {
         return Interface::Unknown;
     }
@@ -1147,7 +1147,7 @@ LinuxDmabufV1* Registry::createLinuxDmabufV1(quint32 name, quint32 version, QObj
 
 namespace
 {
-static const wl_interface* wlInterface(Registry::Interface interface)
+static wl_interface const* wlInterface(Registry::Interface interface)
 {
     auto it = s_interfaces.find(interface);
     if (it != s_interfaces.end()) {
@@ -1161,7 +1161,7 @@ template<typename T>
 T* Registry::Private::bind(Registry::Interface interface, uint32_t name, uint32_t version) const
 {
     auto it = std::find_if(
-        m_interfaces.constBegin(), m_interfaces.constEnd(), [=](const InterfaceData& data) {
+        m_interfaces.constBegin(), m_interfaces.constEnd(), [=](InterfaceData const& data) {
             return data.interface == interface && data.name == name && data.version >= version;
         });
     if (it == m_interfaces.constEnd()) {

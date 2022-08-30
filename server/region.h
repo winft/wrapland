@@ -37,7 +37,7 @@ public:
     Client* client() const;
 
 Q_SIGNALS:
-    void regionChanged(const QRegion&);
+    void regionChanged(QRegion const&);
     void resourceDestroyed();
 
 private:

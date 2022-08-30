@@ -67,7 +67,7 @@ void drag_pool::end()
     target = {};
 }
 
-void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransformation)
+void drag_pool::set_target(Surface* new_surface, QMatrix4x4 const& inputTransformation)
 {
     if (source.mode == drag_mode::pointer) {
         set_target(new_surface, seat->pointers().get_position(), inputTransformation);
@@ -79,8 +79,8 @@ void drag_pool::set_target(Surface* new_surface, const QMatrix4x4& inputTransfor
 }
 
 void drag_pool::set_target(Surface* new_surface,
-                           const QPointF& globalPosition,
-                           const QMatrix4x4& inputTransformation)
+                           QPointF const& globalPosition,
+                           QMatrix4x4 const& inputTransformation)
 {
     if (new_surface == target.surface) {
         // no change

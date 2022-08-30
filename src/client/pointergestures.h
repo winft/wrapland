@@ -216,7 +216,7 @@ Q_SIGNALS:
      * @see ended
      * @see cancelled
      **/
-    void updated(const QSizeF& delta, quint32 time);
+    void updated(QSizeF const& delta, quint32 time);
 
     /**
      * A gesture ended.
@@ -331,7 +331,7 @@ Q_SIGNALS:
      * @see ended
      * @see cancelled
      **/
-    void updated(const QSizeF& delta, qreal scale, qreal rotation, quint32 time);
+    void updated(QSizeF const& delta, qreal scale, qreal rotation, quint32 time);
 
     /**
      * A gesture ended.

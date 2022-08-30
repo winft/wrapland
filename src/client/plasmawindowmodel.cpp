@@ -52,7 +52,7 @@ void PlasmaWindowModel::Private::addWindow(PlasmaWindow* window)
         return;
     }
 
-    const int count = windows.count();
+    int const count = windows.count();
     q->beginInsertRows(QModelIndex(), count, count);
     windows.append(window);
     q->endInsertRows();
@@ -215,13 +215,13 @@ QHash<int, QByteArray> PlasmaWindowModel::roleNames() const
     return roles;
 }
 
-QVariant PlasmaWindowModel::data(const QModelIndex& index, int role) const
+QVariant PlasmaWindowModel::data(QModelIndex const& index, int role) const
 {
     if (!index.isValid() || index.row() >= d->windows.count()) {
         return QVariant();
     }
 
-    const PlasmaWindow* window = d->windows.at(index.row());
+    PlasmaWindow const* window = d->windows.at(index.row());
 
     if (role == Qt::DisplayRole) {
         return window->title();
@@ -278,12 +278,12 @@ QVariant PlasmaWindowModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-int PlasmaWindowModel::rowCount(const QModelIndex& parent) const
+int PlasmaWindowModel::rowCount(QModelIndex const& parent) const
 {
     return parent.isValid() ? 0 : d->windows.count();
 }
 
-QModelIndex PlasmaWindowModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex PlasmaWindowModel::index(int row, int column, QModelIndex const& parent) const
 {
     return hasIndex(row, column, parent) ? createIndex(row, column, d->windows.at(row))
                                          : QModelIndex();
@@ -345,7 +345,7 @@ Q_INVOKABLE void PlasmaWindowModel::requestToggleMaximized(int row)
     }
 }
 
-Q_INVOKABLE void PlasmaWindowModel::setMinimizedGeometry(int row, Surface* panel, const QRect& geom)
+Q_INVOKABLE void PlasmaWindowModel::setMinimizedGeometry(int row, Surface* panel, QRect const& geom)
 {
     if (row >= 0 && row < d->windows.count()) {
         d->windows.at(row)->setMinimizedGeometry(panel, geom);

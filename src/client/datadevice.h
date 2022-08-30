@@ -107,7 +107,7 @@ Q_SIGNALS:
      * @see dragMotion
      * @since 0.0.522
      **/
-    void dragEntered(quint32 serial, const QPointF& relativeToSurface);
+    void dragEntered(quint32 serial, QPointF const& relativeToSurface);
     /**
      * Notification that the drag'n'drop operation left the Surface on this DataDevice.
      *
@@ -125,7 +125,7 @@ Q_SIGNALS:
      * @see dragEntered
      * @since 0.0.522
      **/
-    void dragMotion(const QPointF& relativeToSurface, quint32 time);
+    void dragMotion(QPointF const& relativeToSurface, quint32 time);
     /**
      * Emitted when the implicit grab is removed and the drag'n'drop operation ended on this
      * DataDevice.

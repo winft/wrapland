@@ -44,7 +44,7 @@ Q_DECLARE_METATYPE(ClientWindowSignal)
 typedef void (Srv::PlasmaWindow::*ServerWindowBoolSetter)(bool);
 Q_DECLARE_METATYPE(ServerWindowBoolSetter)
 
-typedef void (Srv::PlasmaWindow::*ServerWindowStringSetter)(const QString&);
+typedef void (Srv::PlasmaWindow::*ServerWindowStringSetter)(QString const&);
 Q_DECLARE_METATYPE(ServerWindowStringSetter)
 
 typedef void (Srv::PlasmaWindow::*ServerWindowQuint32Setter)(quint32);
@@ -53,7 +53,7 @@ Q_DECLARE_METATYPE(ServerWindowQuint32Setter)
 typedef void (Srv::PlasmaWindow::*ServerWindowVoidSetter)();
 Q_DECLARE_METATYPE(ServerWindowVoidSetter)
 
-typedef void (Srv::PlasmaWindow::*ServerWindowIconSetter)(const QIcon&);
+typedef void (Srv::PlasmaWindow::*ServerWindowIconSetter)(QIcon const&);
 Q_DECLARE_METATYPE(ServerWindowIconSetter)
 
 class PlasmaWindowModelTest : public QObject
@@ -328,7 +328,7 @@ void PlasmaWindowModelTest::testRoleNames()
     auto* model = m_pw->createWindowModel();
     QVERIFY(model);
 
-    const QHash<int, QByteArray> roles = model->roleNames();
+    QHash<int, QByteArray> const roles = model->roleNames();
 
     QFETCH(int, role);
     auto it = roles.find(role);
@@ -575,7 +575,7 @@ void PlasmaWindowModelTest::testGeometry()
 
     // The icon is received with QtConcurrent in the beginning. So it can arrive before or after
     // the geometry.
-    const bool last
+    bool const last
         = dataChangedSpy[0].last().value<QVector<int>>() == QVector<int>{int(Qt::DecorationRole)};
 
     QCOMPARE(dataChangedSpy[last ? 1 : 0].last().value<QVector<int>>(),
@@ -615,7 +615,7 @@ void PlasmaWindowModelTest::testTitle()
 
     // The icon is received with QtConcurrent in the beginning. So it can arrive before or after
     // the title.
-    const bool last
+    bool const last
         = dataChangedSpy[0].last().value<QVector<int>>() == QVector<int>{int(Qt::DecorationRole)};
 
     QCOMPARE(dataChangedSpy[last ? 1 : 0].last().value<QVector<int>>(),
@@ -654,7 +654,7 @@ void PlasmaWindowModelTest::testAppId()
 
     // The icon is received with QtConcurrent in the beginning. So it can arrive before or after
     // the app id.
-    const bool last
+    bool const last
         = dataChangedSpy[0].last().value<QVector<int>>() == QVector<int>{int(Qt::DecorationRole)};
 
     QCOMPARE(dataChangedSpy[last ? 1 : 0].last().value<QVector<int>>(),
@@ -715,7 +715,7 @@ void PlasmaWindowModelTest::testVirtualDesktops()
 
     // The icon is received with QtConcurrent in the beginning. So it can arrive before or after
     // the virtual desktop.
-    const bool last
+    bool const last
         = dataChangedSpy[0].last().value<QVector<int>>() == QVector<int>{int(Qt::DecorationRole)};
 
     QCOMPARE(dataChangedSpy[last ? 1 : 0].last().value<QVector<int>>(),

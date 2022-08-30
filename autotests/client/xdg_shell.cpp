@@ -575,23 +575,23 @@ void XdgShellTest::testConfigureStates_data()
     QTest::addColumn<Server::XdgShellSurface::States>("serverStates");
     QTest::addColumn<Client::XdgShellToplevel::States>("clientStates");
 
-    const auto sa = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Activated);
-    const auto sm = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Maximized);
-    const auto sf = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Fullscreen);
-    const auto sr = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Resizing);
-    const auto stl = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledLeft);
-    const auto str = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledRight);
-    const auto stt = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledTop);
-    const auto stb = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledBottom);
+    auto const sa = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Activated);
+    auto const sm = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Maximized);
+    auto const sf = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Fullscreen);
+    auto const sr = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Resizing);
+    auto const stl = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledLeft);
+    auto const str = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledRight);
+    auto const stt = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledTop);
+    auto const stb = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledBottom);
 
-    const auto ca = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Activated);
-    const auto cm = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Maximized);
-    const auto cf = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Fullscreen);
-    const auto cr = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Resizing);
-    const auto ctl = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledLeft);
-    const auto ctr = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledRight);
-    const auto ctt = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledTop);
-    const auto ctb = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledBottom);
+    auto const ca = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Activated);
+    auto const cm = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Maximized);
+    auto const cf = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Fullscreen);
+    auto const cr = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Resizing);
+    auto const ctl = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledLeft);
+    auto const ctr = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledRight);
+    auto const ctt = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledTop);
+    auto const ctb = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledBottom);
 
     QTest::newRow("none") << Server::XdgShellSurface::States()
                           << Client::XdgShellToplevel::States();

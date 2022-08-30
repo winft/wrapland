@@ -123,7 +123,7 @@ void OutputConfigurationV1::setEnabled(OutputDeviceV1* outputDevice,
     zkwinft_output_configuration_v1_enable(d->outputConfiguration, od, _enable);
 }
 
-void OutputConfigurationV1::setMode(OutputDeviceV1* outputDevice, const int modeId)
+void OutputConfigurationV1::setMode(OutputDeviceV1* outputDevice, int const modeId)
 {
     zkwinft_output_device_v1* od = outputDevice->output();
     zkwinft_output_configuration_v1_mode(d->outputConfiguration, od, modeId);
@@ -157,7 +157,7 @@ void OutputConfigurationV1::setTransform(OutputDeviceV1* outputDevice,
     zkwinft_output_configuration_v1_transform(d->outputConfiguration, od, toTransform());
 }
 
-void OutputConfigurationV1::setGeometry(OutputDeviceV1* outputDevice, const QRectF& geo)
+void OutputConfigurationV1::setGeometry(OutputDeviceV1* outputDevice, QRectF const& geo)
 {
     zkwinft_output_device_v1* od = outputDevice->output();
     zkwinft_output_configuration_v1_geometry(d->outputConfiguration,

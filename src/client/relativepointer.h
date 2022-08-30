@@ -190,7 +190,7 @@ Q_SIGNALS:
      * @param deltaNonAccelerated non-accelerated motion vector
      * @param microseconds timestamp with microseconds granularity
      **/
-    void relativeMotion(const QSizeF& delta, const QSizeF& deltaNonAccelerated, quint64 timestamp);
+    void relativeMotion(QSizeF const& delta, QSizeF const& deltaNonAccelerated, quint64 timestamp);
 
 private:
     friend class RelativePointerManager;

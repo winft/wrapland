@@ -117,7 +117,7 @@ public:
          **/
         QPointer<Output> output;
 
-        bool operator==(const Mode& m) const;
+        bool operator==(Mode const& m) const;
     };
     explicit Output(QObject* parent = nullptr);
     virtual ~Output();
@@ -227,13 +227,13 @@ Q_SIGNALS:
      * @param mode The newly added Mode.
      * @see modeChanged
      **/
-    void modeAdded(const Wrapland::Client::Output::Mode& mode);
+    void modeAdded(Wrapland::Client::Output::Mode const& mode);
     /**
      * Emitted whenever a Mode changes.
      * This normally means that the @c Mode::Flag::Current is added or removed.
      * @param mode The changed Mode
      **/
-    void modeChanged(const Wrapland::Client::Output::Mode& mode);
+    void modeChanged(Wrapland::Client::Output::Mode const& mode);
 
     /**
      * The corresponding global for this interface on the Registry got removed.

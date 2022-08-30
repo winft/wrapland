@@ -122,14 +122,14 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    QVariant data(QModelIndex const& index, int role = Qt::DisplayRole) const override;
+    int rowCount(QModelIndex const& parent = QModelIndex()) const override;
 
     /**
      * Returns an index with internalPointer() pointing to a PlasmaWindow instance.
      **/
     QModelIndex
-    index(int row, int column = 0, const QModelIndex& parent = QModelIndex()) const override;
+    index(int row, int column = 0, QModelIndex const& parent = QModelIndex()) const override;
 
     /**
      * Request the window at this model row index be activated.
@@ -180,7 +180,7 @@ public:
      * relative to a panel in particular. QRectF, intended for use from QML
      * @since 5.5
      */
-    Q_INVOKABLE void setMinimizedGeometry(int row, Surface* panel, const QRect& geom);
+    Q_INVOKABLE void setMinimizedGeometry(int row, Surface* panel, QRect const& geom);
 
     /**
      * Requests the window at this model row index have its shaded state toggled.

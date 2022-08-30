@@ -206,7 +206,7 @@ public:
     operator zwlr_data_control_offer_v1*() const;
 
 Q_SIGNALS:
-    void mimeTypeOffered(const QString&);
+    void mimeTypeOffered(QString const&);
 
 private:
     class Private;
@@ -247,8 +247,8 @@ public:
      **/
     bool isValid() const;
 
-    void offer(const QString& mimeType);
-    void offer(const QMimeType& mimeType);
+    void offer(QString const& mimeType);
+    void offer(QMimeType const& mimeType);
 
     operator zwlr_data_control_source_v1*();
     operator zwlr_data_control_source_v1*() const;
@@ -258,13 +258,13 @@ Q_SIGNALS:
      * Emitted when a target accepts pointer_focus or motion events. If
      * a target does not accept any of the offered types, @p mimeType is empty.
      **/
-    void targetAccepts(const QString& mimeType);
+    void targetAccepts(QString const& mimeType);
     /**
      * Request for data from the client. Send the data as the
      * specified @p mimeType over the passed file descriptor @p fd, then close
      * it.
      **/
-    void sendDataRequested(const QString& mimeType, int32_t fd);
+    void sendDataRequested(QString const& mimeType, int32_t fd);
     /**
      * This data_control_source_v1 has been replaced by another data_control_source_v1.
      * The client should clean up and destroy this data_control_source_v1.

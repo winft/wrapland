@@ -81,9 +81,9 @@ public:
     drag_target const& get_target() const;
 
     void set_target(Surface* new_surface,
-                    const QPointF& globalPosition,
-                    const QMatrix4x4& inputTransformation);
-    void set_target(Surface* new_surface, const QMatrix4x4& inputTransformation = QMatrix4x4());
+                    QPointF const& globalPosition,
+                    QMatrix4x4 const& inputTransformation);
+    void set_target(Surface* new_surface, QMatrix4x4 const& inputTransformation = QMatrix4x4());
     void set_source_client_movement_blocked(bool block);
 
     bool is_in_progress() const;

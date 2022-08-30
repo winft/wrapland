@@ -34,9 +34,9 @@ namespace Wrapland::Server
 class XdgShellToplevel::Private : public Wayland::Resource<XdgShellToplevel>
 {
 public:
-    Private(uint32_t version, uint32_t id, XdgShellSurface* surface, XdgShellToplevel* q);
+    Private(uint32_t version, uint32_t id, XdgShellSurface* surface, XdgShellToplevel* q_ptr);
 
-    void setWindowGeometry(const QRect& rect);
+    void setWindowGeometry(QRect const& rect);
 
     QSize minimumSize() const;
     QSize maximumSize() const;
@@ -44,7 +44,7 @@ public:
     void close();
     void commit();
 
-    uint32_t configure(XdgShellSurface::States states, const QSize& size);
+    uint32_t configure(XdgShellSurface::States states, QSize const& size);
     void ackConfigure(uint32_t serial);
 
     XdgShellSurface* shellSurface;
@@ -64,8 +64,8 @@ private:
                                wl_resource* wlSeat,
                                uint32_t serial,
                                uint32_t edges);
-    static void setTitleCallback(wl_client* wlClient, wl_resource* wlResource, const char* title);
-    static void setAppIdCallback(wl_client* wlClient, wl_resource* wlResource, const char* app_id);
+    static void setTitleCallback(wl_client* wlClient, wl_resource* wlResource, char const* title);
+    static void setAppIdCallback(wl_client* wlClient, wl_resource* wlResource, char const* app_id);
 
     static void
     setParentCallback(wl_client* wlClient, wl_resource* wlResource, wl_resource* wlParent);
@@ -73,8 +73,8 @@ private:
                                        wl_resource* wlResource,
                                        wl_resource* wlSeat,
                                        uint32_t serial,
-                                       int32_t x,
-                                       int32_t y);
+                                       int32_t pos_x,
+                                       int32_t pos_y);
     static void
     setMaxSizeCallback(wl_client* wlClient, wl_resource* wlResource, int32_t width, int32_t height);
     static void

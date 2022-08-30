@@ -50,9 +50,9 @@ private:
     void setHasPointer(bool has);
     void setHasTouch(bool has);
     void capabilitiesChanged(uint32_t capabilities);
-    void setName(const QString& name);
+    void setName(QString const& name);
     static void capabilitiesCallback(void* data, wl_seat* seat, uint32_t capabilities);
-    static void nameCallback(void* data, wl_seat* wl_seat, const char* name);
+    static void nameCallback(void* data, wl_seat* wl_seat, char const* name);
 
     Seat* q;
     static const wl_seat_listener s_listener;
@@ -154,7 +154,7 @@ void Seat::Private::capabilitiesCallback(void* data, wl_seat* seat, uint32_t cap
     s->capabilitiesChanged(capabilities);
 }
 
-void Seat::Private::nameCallback(void* data, wl_seat* seat, const char* name)
+void Seat::Private::nameCallback(void* data, wl_seat* seat, char const* name)
 {
     auto s = reinterpret_cast<Seat::Private*>(data);
     Q_ASSERT(s->seat == seat);
@@ -210,7 +210,7 @@ Touch* Seat::createTouch(QObject* parent)
     return t;
 }
 
-void Seat::Private::setName(const QString& n)
+void Seat::Private::setName(QString const& n)
 {
     if (name == n) {
         return;

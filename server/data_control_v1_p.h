@@ -26,7 +26,7 @@ using data_control_manager_v1_global
 class data_control_manager_v1::Private : public device_manager<data_control_manager_v1_global>
 {
 public:
-    Private(data_control_manager_v1* q, Display* display);
+    Private(data_control_manager_v1* q_ptr, Display* display);
 
 private:
     static struct zwlr_data_control_manager_v1_interface const s_interface;
@@ -104,7 +104,7 @@ Q_SIGNALS:
 class data_control_source_v1_res::res_impl : public Wayland::Resource<data_control_source_v1_res>
 {
 public:
-    res_impl(Client* client, uint32_t version, uint32_t id, data_control_source_v1_res* q);
+    res_impl(Client* client, uint32_t version, uint32_t id, data_control_source_v1_res* q_ptr);
 
     data_control_source_v1_res* q_ptr;
 

@@ -37,7 +37,7 @@ using DpmsManagerBind = Wayland::Bind<DpmsManagerGlobal>;
 class DpmsManager::Private : public Wayland::Global<DpmsManager>
 {
 public:
-    Private(Display* display, DpmsManager* q);
+    Private(Display* display, DpmsManager* q_ptr);
 
 private:
     static void getDpmsCallback(DpmsManagerBind* bind, uint32_t id, wl_resource* output);
@@ -68,7 +68,7 @@ private:
 class Dpms::Private : public Wayland::Resource<Dpms>
 {
 public:
-    Private(Client* client, uint32_t version, uint32_t id, WlOutput* output, Dpms* q);
+    Private(Client* client, uint32_t version, uint32_t id, WlOutput* output, Dpms* q_ptr);
 
     WlOutput* output;
 

@@ -38,12 +38,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-PointerConstraintsV1::Private::Private(PointerConstraintsV1* q, Display* display)
-    : Wayland::Global<PointerConstraintsV1>(q,
+PointerConstraintsV1::Private::Private(PointerConstraintsV1* q_ptr, Display* display)
+    : Wayland::Global<PointerConstraintsV1>(q_ptr,
                                             display,
                                             &zwp_pointer_constraints_v1_interface,
                                             &s_interface)
-    , q_ptr(q)
+    , q_ptr{q_ptr}
 {
 }
 
@@ -128,14 +128,17 @@ PointerConstraintsV1::PointerConstraintsV1(Display* display)
 
 PointerConstraintsV1::~PointerConstraintsV1() = default;
 
-LockedPointerV1::Private::Private(Client* client, uint32_t version, uint32_t id, LockedPointerV1* q)
+LockedPointerV1::Private::Private(Client* client,
+                                  uint32_t version,
+                                  uint32_t id,
+                                  LockedPointerV1* q_ptr)
     : Wayland::Resource<LockedPointerV1>(client,
                                          version,
                                          id,
                                          &zwp_locked_pointer_v1_interface,
                                          &s_interface,
-                                         q)
-    , q_ptr(q)
+                                         q_ptr)
+    , q_ptr{q_ptr}
 {
 }
 
@@ -237,14 +240,14 @@ void LockedPointerV1::setLocked(bool locked)
 ConfinedPointerV1::Private::Private(Client* client,
                                     uint32_t version,
                                     uint32_t id,
-                                    ConfinedPointerV1* q)
+                                    ConfinedPointerV1* q_ptr)
     : Wayland::Resource<ConfinedPointerV1>(client,
                                            version,
                                            id,
                                            &zwp_confined_pointer_v1_interface,
                                            &s_interface,
-                                           q)
-    , q_ptr(q)
+                                           q_ptr)
+    , q_ptr{q_ptr}
 {
 }
 

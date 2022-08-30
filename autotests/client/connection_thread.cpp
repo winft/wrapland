@@ -118,7 +118,7 @@ void TestWaylandConnectionThread::testConnectionFailure()
 static void registryHandleGlobal(void* data,
                                  struct wl_registry* registry,
                                  uint32_t name,
-                                 const char* interface,
+                                 char const* interface,
                                  uint32_t version)
 {
     Q_UNUSED(data)

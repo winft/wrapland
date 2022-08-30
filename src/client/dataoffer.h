@@ -67,8 +67,8 @@ public:
 
     QList<QMimeType> offeredMimeTypes() const;
 
-    void receive(const QMimeType& mimeType, qint32 fd);
-    void receive(const QString& mimeType, qint32 fd);
+    void receive(QMimeType const& mimeType, qint32 fd);
+    void receive(QString const& mimeType, qint32 fd);
 
     /**
      * Notifies the compositor that the drag destination successfully
@@ -105,7 +105,7 @@ public:
     operator wl_data_offer*() const;
 
 Q_SIGNALS:
-    void mimeTypeOffered(const QString&);
+    void mimeTypeOffered(QString const&);
     /**
      * Emitted whenever the @link{sourceDragAndDropActions} changed, e.g. on enter or when
      * the DataSource changes the supported actions.

@@ -51,7 +51,7 @@ public:
     virtual ~Client();
 
     void flush() const;
-    wl_resource* createResource(const wl_interface* interface, uint32_t version, uint32_t id) const;
+    wl_resource* createResource(wl_interface const* interface, uint32_t version, uint32_t id) const;
     wl_resource* getResource(uint32_t id) const;
 
     Display* display() const;

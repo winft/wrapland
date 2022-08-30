@@ -57,8 +57,8 @@ public:
 
     Q_DECLARE_FLAGS(Constraints, Constraint)
 
-    XdgPositioner(const QSize& initialSize = QSize(), const QRect& anchor = QRect());
-    XdgPositioner(const XdgPositioner& other);
+    XdgPositioner(QSize const& initialSize = QSize(), QRect const& anchor = QRect());
+    XdgPositioner(XdgPositioner const& other);
     ~XdgPositioner();
 
     /**
@@ -84,13 +84,13 @@ public:
      * The area this popup should be positioned around
      */
     QRect anchorRect() const;
-    void setAnchorRect(const QRect& anchor);
+    void setAnchorRect(QRect const& anchor);
 
     /**
      * The size of the surface that is to be positioned.
      */
     QSize initialSize() const;
-    void setInitialSize(const QSize& size);
+    void setInitialSize(QSize const& size);
 
     /**
      * Specifies how the compositor should position the popup if it does not fit in the requested
@@ -103,7 +103,7 @@ public:
      * An additional offset that should be applied from the anchor.
      */
     QPoint anchorOffset() const;
-    void setAnchorOffset(const QPoint& offset);
+    void setAnchorOffset(QPoint const& offset);
 
 private:
     class Private;

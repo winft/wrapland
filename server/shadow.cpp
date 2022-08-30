@@ -37,8 +37,8 @@ const struct org_kde_kwin_shadow_manager_interface ShadowManager::Private::s_int
     resourceDestroyCallback,
 };
 
-ShadowManager::Private::Private(Display* display, ShadowManager* qptr)
-    : ShadowManagerGlobal(qptr, display, &org_kde_kwin_shadow_manager_interface, &s_interface)
+ShadowManager::Private::Private(Display* display, ShadowManager* q_ptr)
+    : ShadowManagerGlobal(q_ptr, display, &org_kde_kwin_shadow_manager_interface, &s_interface)
 {
     create();
 }
@@ -128,13 +128,13 @@ void Shadow::Private::attachConnect(AttachSide side, Buffer* buffer)
     });
 }
 
-Shadow::Private::Private(Client* client, uint32_t version, uint32_t id, Shadow* q)
+Shadow::Private::Private(Client* client, uint32_t version, uint32_t id, Shadow* q_ptr)
     : Wayland::Resource<Shadow>(client,
                                 version,
                                 id,
                                 &org_kde_kwin_shadow_interface,
                                 &s_interface,
-                                q)
+                                q_ptr)
 {
 }
 

@@ -36,7 +36,7 @@ public:
         : m_pointer(p)
     {
     }
-    WaylandPointer(const WaylandPointer& other) = delete;
+    WaylandPointer(WaylandPointer const& other) = delete;
     virtual ~WaylandPointer()
     {
         release();

@@ -62,13 +62,17 @@ void Pointer::Private::setCursorCallback([[maybe_unused]] wl_client* wlClient,
     priv->setCursor(serial, surface, QPoint(hotspot_x, hotspot_y));
 }
 
-Pointer::Private::Private(Client* client, uint32_t version, uint32_t id, Seat* _seat, Pointer* q)
-    : Wayland::Resource<Pointer>(client, version, id, &wl_pointer_interface, &s_interface, q)
+Pointer::Private::Private(Client* client,
+                          uint32_t version,
+                          uint32_t id,
+                          Seat* _seat,
+                          Pointer* q_ptr)
+    : Wayland::Resource<Pointer>(client, version, id, &wl_pointer_interface, &s_interface, q_ptr)
     , seat{_seat}
 {
 }
 
-void Pointer::Private::setCursor(quint32 serial, Surface* surface, const QPoint& hotspot)
+void Pointer::Private::setCursor(quint32 serial, Surface* surface, QPoint const& hotspot)
 {
     if (!cursor) {
         cursor.reset(new Cursor(handle));
@@ -96,7 +100,7 @@ void Pointer::Private::sendLeave(quint32 serial, Surface* surface)
     send<wl_pointer_send_leave>(serial, surface->d_ptr->resource);
 }
 
-void Pointer::Private::sendMotion(const QPointF& position)
+void Pointer::Private::sendMotion(QPointF const& position)
 {
     send<wl_pointer_send_motion>(
         seat->timestamp(), wl_fixed_from_double(position.x()), wl_fixed_from_double(position.y()));
@@ -147,7 +151,7 @@ void Pointer::Private::startSwipeGesture(quint32 serial, quint32 fingerCount)
     }
 }
 
-void Pointer::Private::updateSwipeGesture(const QSizeF& delta)
+void Pointer::Private::updateSwipeGesture(QSizeF const& delta)
 {
     if (swipeGestures.empty()) {
         return;
@@ -187,7 +191,7 @@ void Pointer::Private::startPinchGesture(quint32 serial, quint32 fingerCount)
     }
 }
 
-void Pointer::Private::updatePinchGesture(const QSizeF& delta, qreal scale, qreal rotation)
+void Pointer::Private::updatePinchGesture(QSizeF const& delta, qreal scale, qreal rotation)
 {
     if (pinchGestures.empty()) {
         return;
@@ -279,7 +283,7 @@ void Pointer::axis(Qt::Orientation orientation,
 {
     Q_ASSERT(d_ptr->focusedSurface);
 
-    const auto wlOrientation = (orientation == Qt::Vertical) ? WL_POINTER_AXIS_VERTICAL_SCROLL
+    auto const wlOrientation = (orientation == Qt::Vertical) ? WL_POINTER_AXIS_VERTICAL_SCROLL
                                                              : WL_POINTER_AXIS_HORIZONTAL_SCROLL;
 
     auto getWlSource = [source] {
@@ -369,8 +373,8 @@ void Pointer::motion(QPointF const& position)
     d_ptr->sendMotion(position);
 }
 
-void Pointer::relativeMotion(const QSizeF& delta,
-                             const QSizeF& deltaNonAccelerated,
+void Pointer::relativeMotion(QSizeF const& delta,
+                             QSizeF const& deltaNonAccelerated,
                              quint64 microseconds)
 {
     if (d_ptr->relativePointers.empty()) {
@@ -386,13 +390,15 @@ void Pointer::frame()
     d_ptr->sendFrame();
 }
 
-Cursor::Private::Private(Cursor* q, Pointer* _pointer)
+Cursor::Private::Private(Cursor* q_ptr, Pointer* _pointer)
     : pointer(_pointer)
-    , q_ptr(q)
+    , q_ptr{q_ptr}
 {
 }
 
-void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const QPoint& _hotspot)
+void Cursor::Private::update(QPointer<Surface> const& surface,
+                             quint32 serial,
+                             QPoint const& _hotspot)
 {
     bool emitChanged = false;
     if (enteredSerial != serial) {
@@ -405,14 +411,15 @@ void Cursor::Private::update(const QPointer<Surface>& s, quint32 serial, const Q
         emitChanged = true;
         Q_EMIT q_ptr->hotspotChanged();
     }
-    if (surface != s) {
+    if (this->surface != surface) {
         if (!surface.isNull()) {
             QObject::disconnect(surface.data(), &Surface::committed, q_ptr, nullptr);
         }
-        surface = s;
+
+        this->surface = surface;
         if (!surface.isNull()) {
             QObject::connect(surface.data(), &Surface::committed, q_ptr, [this] {
-                if (!surface->state().damage.isEmpty()) {
+                if (!this->surface->state().damage.isEmpty()) {
                     Q_EMIT q_ptr->changed();
                 }
             });

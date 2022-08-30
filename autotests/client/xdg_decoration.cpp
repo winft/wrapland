@@ -177,10 +177,10 @@ void TestXdgDecoration::testDecoration_data()
     QTest::addColumn<Wrapland::Client::XdgDecoration::Mode>("setMode");
     QTest::addColumn<Wrapland::Server::XdgDecoration::Mode>("setModeExp");
 
-    const auto serverClient = Server::XdgDecoration::Mode::ClientSide;
-    const auto serverServer = Server::XdgDecoration::Mode::ServerSide;
-    const auto clientClient = Client::XdgDecoration::Mode::ClientSide;
-    const auto clientServer = Client::XdgDecoration::Mode::ServerSide;
+    auto const serverClient = Server::XdgDecoration::Mode::ClientSide;
+    auto const serverServer = Server::XdgDecoration::Mode::ServerSide;
+    auto const clientClient = Client::XdgDecoration::Mode::ClientSide;
+    auto const clientServer = Client::XdgDecoration::Mode::ServerSide;
 
     QTest::newRow("client->client") << serverClient << clientClient << clientClient << serverClient;
     QTest::newRow("client->server") << serverClient << clientClient << clientServer << serverServer;
