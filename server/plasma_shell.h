@@ -67,6 +67,7 @@ public:
         Notification,
         ToolTip,
         CriticalNotification,
+        AppletPopup,
     };
 
     Role role() const;

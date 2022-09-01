@@ -164,6 +164,9 @@ void PlasmaShellSurface::Private::setRole(uint32_t role)
     case ORG_KDE_PLASMA_SURFACE_ROLE_TOOLTIP:
         val = Role::ToolTip;
         break;
+    case ORG_KDE_PLASMA_SURFACE_ROLE_APPLETPOPUP:
+        val = Role::AppletPopup;
+        break;
     case ORG_KDE_PLASMA_SURFACE_ROLE_CRITICALNOTIFICATION:
         val = Role::CriticalNotification;
         break;

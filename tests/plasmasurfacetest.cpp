@@ -194,6 +194,8 @@ int main(int argc, char** argv)
     parser.process(app);
     QCommandLineOption skipSwitcherOption(QStringLiteral("skipSwitcher"));
     parser.addOption(skipSwitcherOption);
+    QCommandLineOption appletPopupOption(QStringLiteral("appletPopup"));
+    parser.addOption(appletPopupOption);
     parser.process(app);
 
     PlasmaSurfaceTest client;
@@ -210,6 +212,8 @@ int main(int argc, char** argv)
         client.setRole(PlasmaShellSurface::Role::OnScreenDisplay);
     } else if (parser.isSet(tooltipOption)) {
         client.setRole(PlasmaShellSurface::Role::ToolTip);
+    } else if (parser.isSet(appletPopupOption)) {
+        client.setRole(PlasmaShellSurface::Role::AppletPopup);
     }
     client.setSkipTaskbar(parser.isSet(skipTaskbarOption));
     client.setSkipSwitcher(parser.isSet(skipSwitcherOption));

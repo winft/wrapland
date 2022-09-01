@@ -167,6 +167,8 @@ void TestPlasmaShell::testRole_data()
     QTest::newRow("criticalnotification")
         << Wrapland::Client::PlasmaShellSurface::Role::CriticalNotification
         << Wrapland::Server::PlasmaShellSurface::Role::CriticalNotification;
+    QTest::newRow("appletpopup") << Wrapland::Client::PlasmaShellSurface::Role::AppletPopup
+                                 << Wrapland::Server::PlasmaShellSurface::Role::AppletPopup;
 }
 
 void TestPlasmaShell::testRole()
