@@ -48,6 +48,7 @@ private Q_SLOTS:
     void testPanelBehavior();
     void testAutoHidePanel();
     void testPanelTakesFocus();
+    void test_open_under_cursor();
     void testDisconnect();
     void testWhileDestroying();
 
@@ -166,6 +167,8 @@ void TestPlasmaShell::testRole_data()
     QTest::newRow("criticalnotification")
         << Wrapland::Client::PlasmaShellSurface::Role::CriticalNotification
         << Wrapland::Server::PlasmaShellSurface::Role::CriticalNotification;
+    QTest::newRow("appletpopup") << Wrapland::Client::PlasmaShellSurface::Role::AppletPopup
+                                 << Wrapland::Server::PlasmaShellSurface::Role::AppletPopup;
 }
 
 void TestPlasmaShell::testRole()
@@ -494,6 +497,35 @@ void TestPlasmaShell::testPanelTakesFocus()
     QVERIFY(plasmaSurfaceTakesFocusSpy.wait());
     QCOMPARE(plasmaSurfaceTakesFocusSpy.count(), 2);
     QCOMPARE(sps->panelTakesFocus(), false);
+}
+
+void TestPlasmaShell::test_open_under_cursor()
+{
+    // Verifies that whether a window wants to open under cursor is passed through
+    QSignalSpy plasmaSurfaceCreatedSpy(server.globals.plasma_shell.get(),
+                                       &Wrapland::Server::PlasmaShell::surfaceCreated);
+    QVERIFY(plasmaSurfaceCreatedSpy.isValid());
+
+    auto surface = std::unique_ptr<Wrapland::Client::Surface>(m_compositor->createSurface());
+    auto pss = std::unique_ptr<Wrapland::Client::PlasmaShellSurface>(
+        m_plasmaShell->createSurface(surface.get()));
+    QVERIFY(plasmaSurfaceCreatedSpy.wait());
+    QCOMPARE(plasmaSurfaceCreatedSpy.count(), 1);
+
+    auto spss
+        = plasmaSurfaceCreatedSpy.first().first().value<Wrapland::Server::PlasmaShellSurface*>();
+    QVERIFY(spss);
+
+    QSignalSpy open_under_cursor_spy(
+        spss, &Wrapland::Server::PlasmaShellSurface::open_under_cursor_requested);
+    QVERIFY(open_under_cursor_spy.isValid());
+
+    QVERIFY(!spss->open_under_cursor());
+
+    pss->request_open_under_cursor();
+    QVERIFY(open_under_cursor_spy.wait());
+    QCOMPARE(open_under_cursor_spy.count(), 1);
+    QVERIFY(spss->open_under_cursor());
 }
 
 void TestPlasmaShell::testDisconnect()

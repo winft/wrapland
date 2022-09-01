@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <protocol name="plasma_shell">
   <copyright><![CDATA[
-    Copyright (C) 2013-2014 Pier Luigi Fiorini
+    SPDX-FileCopyrightText: 2013-2014 Pier Luigi Fiorini
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 2.1 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    SPDX-License-Identifier: LGPL-2.1-or-later
   ]]></copyright>
 
-  <interface name="org_kde_plasma_shell" version="6">
+  <interface name="org_kde_plasma_shell" version="7">
     <description summary="create shell windows and helpers">
       This interface is used by KF5 powered Wayland shells to communicate with
       the compositor and can only be bound one time.
@@ -27,10 +16,10 @@
 
     <request name="get_surface">
       <description summary="create a shell surface from a surface">
-	Create a shell surface for an existing surface.
+        Create a shell surface for an existing surface.
 
-	Only one shell surface can be associated with a given
-	surface.
+        Only one shell surface can be associated with a given
+        surface.
       </description>
       <arg name="id" type="new_id" interface="org_kde_plasma_surface"/>
       <arg name="surface" type="object" interface="wl_surface"/>
@@ -69,10 +58,10 @@
 
     <event name="prepare_lock_surfaces">
       <description summary="tell the shell to create lock surfaces">
-	Tell the shell we want it to create lock surfaces and set their role.
+        Tell the shell we want it to create lock surfaces and set their role.
         See org_kde_plasma_shell.set_lock_role for more details.
 
-	Whether or not the shell actually implements locking, it MUST send the
+        Whether or not the shell actually implements locking, it MUST send the
         org_kde_plasma_shell.unlock request to let the normal desktop resume.
       </description>
     </event>
@@ -93,14 +82,14 @@
 
     <request name="desktop_ready">
       <description summary="desktop is ready to be shown">
-	Tell the compositor, that enough desktop elements have been drawn
-	to make the desktop look ready for use.
+        Tell the compositor, that enough desktop elements have been drawn
+        to make the desktop look ready for use.
 
         During start-up, the compositor can wait for this request with a
         black screen and fade the desktop in when this request is called.
 
         If the shell surfaces take a long time to initialize, we avoid
-	showing temporary garbage.
+        showing temporary garbage.
 
         See also the splash role in org_kde_plasma_surface.set_role.
       </description>
@@ -130,7 +119,7 @@
     -->
   </interface>
 
-  <interface name="org_kde_plasma_surface" version="6">
+  <interface name="org_kde_plasma_surface" version="7">
     <description summary="metadata interface">
       An interface that may be implemented by a wl_surface, for
       implementations that provide the shell user interface.
@@ -191,6 +180,7 @@
       <entry name="notification" value="4"/>
       <entry name="tooltip" value="5"/>
       <entry name="criticalnotification" value="6" since="6"/>
+      <entry name="appletpopup" value="7" since="7"/>
 <!--
       <entry name="splash" value="1"/>
       <entry name="dashboard" value="3"/>
@@ -400,5 +390,11 @@
         <arg name="skip" type="uint" summary="Boolean value that sets whether to skip the window switcher."/>
      </request>
 
+    <request name="open_under_cursor" since="7">
+      <description summary="open under cursor">
+        Request the initial position of this surface to be under the current
+        cursor position. Has to be called before attaching any buffer to this surface.
+      </description>
+    </request>
   </interface>
 </protocol>

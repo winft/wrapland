@@ -88,6 +88,7 @@ const struct org_kde_plasma_surface_interface PlasmaShellSurface::Private::s_int
     panelAutoHideShowCallback,
     panelTakesFocusCallback,
     setSkipSwitcherCallback,
+    open_under_cursor_callback,
 };
 
 PlasmaShellSurface::Private::Private(Client* client,
@@ -162,6 +163,9 @@ void PlasmaShellSurface::Private::setRole(uint32_t role)
         break;
     case ORG_KDE_PLASMA_SURFACE_ROLE_TOOLTIP:
         val = Role::ToolTip;
+        break;
+    case ORG_KDE_PLASMA_SURFACE_ROLE_APPLETPOPUP:
+        val = Role::AppletPopup;
         break;
     case ORG_KDE_PLASMA_SURFACE_ROLE_CRITICALNOTIFICATION:
         val = Role::CriticalNotification;
@@ -238,6 +242,14 @@ void PlasmaShellSurface::Private::panelTakesFocusCallback([[maybe_unused]] wl_cl
     }
     priv->panelTakesFocus = takesFocus;
     Q_EMIT priv->handle->panelTakesFocusChanged();
+}
+
+void PlasmaShellSurface::Private::open_under_cursor_callback(wl_client* /*wlClient*/,
+                                                             wl_resource* wlResource)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->open_under_cursor = true;
+    Q_EMIT priv->handle->open_under_cursor_requested();
 }
 
 void PlasmaShellSurface::Private::setPanelBehavior(org_kde_plasma_surface_panel_behavior behavior)
@@ -340,6 +352,11 @@ void PlasmaShellSurface::showAutoHidingPanel()
 bool PlasmaShellSurface::panelTakesFocus() const
 {
     return d_ptr->panelTakesFocus;
+}
+
+bool PlasmaShellSurface::open_under_cursor() const
+{
+    return d_ptr->open_under_cursor;
 }
 
 PlasmaShellSurface* PlasmaShellSurface::get(wl_resource* native)
