@@ -342,5 +342,10 @@ void PlasmaShellSurface::setPanelTakesFocus(bool takesFocus)
     org_kde_plasma_surface_set_panel_takes_focus(d->surface, takesFocus);
 }
 
+void PlasmaShellSurface::request_open_under_cursor()
+{
+    org_kde_plasma_surface_open_under_cursor(d->surface);
+}
+
 }
 }

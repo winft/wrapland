@@ -302,6 +302,7 @@ public:
      **/
     // KF6 TODO rename to make it generic
     void setPanelTakesFocus(bool takesFocus);
+    void request_open_under_cursor();
 
 Q_SIGNALS:
     /**
