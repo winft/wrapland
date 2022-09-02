@@ -40,7 +40,7 @@ class Surface;
 class PlasmaVirtualDesktopManager;
 class PlasmaWindowRes;
 
-constexpr uint32_t PlasmaWindowManagerVersion = 15;
+constexpr uint32_t PlasmaWindowManagerVersion = 16;
 using PlasmaWindowManagerGlobal = Wayland::Global<PlasmaWindowManager, PlasmaWindowManagerVersion>;
 using PlasmaWindowManagerBind = Wayland::Bind<PlasmaWindowManagerGlobal>;
 

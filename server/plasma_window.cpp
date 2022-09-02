@@ -547,7 +547,9 @@ void PlasmaWindow::Private::set_resource_name(std::string const& resource_name)
     this->resource_name = resource_name;
 
     for (auto const res : resources) {
-        res->d_ptr->send<org_kde_plasma_window_send_resource_name_changed, 0>(resource_name.data());
+        res->d_ptr->send<org_kde_plasma_window_send_resource_name_changed,
+                         ORG_KDE_PLASMA_WINDOW_RESOURCE_NAME_CHANGED_SINCE_VERSION>(
+            resource_name.data());
     }
 }
 
