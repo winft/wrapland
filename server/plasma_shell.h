@@ -67,6 +67,7 @@ public:
         Notification,
         ToolTip,
         CriticalNotification,
+        AppletPopup,
     };
 
     Role role() const;
@@ -86,11 +87,13 @@ public:
 
     // TODO(unknown author): KF6 rename to something generic
     bool panelTakesFocus() const;
+    bool open_under_cursor() const;
 
     static PlasmaShellSurface* get(wl_resource* native);
 
 Q_SIGNALS:
     void positionChanged();
+    void open_under_cursor_requested();
     void roleChanged();
     void panelBehaviorChanged();
     void skipTaskbarChanged();

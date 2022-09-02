@@ -280,6 +280,9 @@ void PlasmaShellSurface::setRole(PlasmaShellSurface::Role role)
             wlRole = ORG_KDE_PLASMA_SURFACE_ROLE_CRITICALNOTIFICATION;
         }
         break;
+    case Role::AppletPopup:
+        wlRole = ORG_KDE_PLASMA_SURFACE_ROLE_APPLETPOPUP;
+        break;
     default:
         Q_UNREACHABLE();
         break;
@@ -340,6 +343,11 @@ void PlasmaShellSurface::requestShowAutoHidingPanel()
 void PlasmaShellSurface::setPanelTakesFocus(bool takesFocus)
 {
     org_kde_plasma_surface_set_panel_takes_focus(d->surface, takesFocus);
+}
+
+void PlasmaShellSurface::request_open_under_cursor()
+{
+    org_kde_plasma_surface_open_under_cursor(d->surface);
 }
 
 }

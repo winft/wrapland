@@ -36,7 +36,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-constexpr uint32_t PlasmaShellVersion = 6;
+constexpr uint32_t PlasmaShellVersion = 7;
 using PlasmaShellGlobal = Wayland::Global<PlasmaShell, PlasmaShellVersion>;
 using PlasmaShellBind = Wayland::Bind<PlasmaShellGlobal>;
 
@@ -75,6 +75,7 @@ public:
     bool m_skipTaskbar = false;
     bool m_skipSwitcher = false;
     bool panelTakesFocus = false;
+    bool open_under_cursor{false};
 
 private:
     static void setOutputCallback(wl_client* client, wl_resource* resource, wl_resource* output);
@@ -88,6 +89,7 @@ private:
     static void panelAutoHideShowCallback(wl_client* client, wl_resource* resource);
     static void
     panelTakesFocusCallback(wl_client* client, wl_resource* resource, uint32_t takesFocus);
+    static void open_under_cursor_callback(wl_client* client, wl_resource* resource);
 
     void setPosition(QPoint const& globalPos);
     void setRole(uint32_t role);
