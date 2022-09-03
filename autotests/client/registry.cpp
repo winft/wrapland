@@ -38,6 +38,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/event_queue.h"
 #include "../../src/client/idleinhibit.h"
 #include "../../src/client/output.h"
+#include "../../src/client/plasma_activation_feedback.h"
 #include "../../src/client/pointerconstraints.h"
 #include "../../src/client/pointergestures.h"
 #include "../../src/client/presentation_time.h"
@@ -60,6 +61,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/linux_dmabuf_v1.h"
 #include "../../server/output_device_v1.h"
 #include "../../server/output_management_v1.h"
+#include "../../server/plasma_activation_feedback.h"
 #include "../../server/presentation_time.h"
 #include "../../server/primary_selection.h"
 #include "../../server/slide.h"
@@ -76,6 +78,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
 #include <wayland-input-method-v2-client-protocol.h>
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
+#include <wayland-plasma-window-management-client-protocol.h>
 #include <wayland-pointer-constraints-unstable-v1-client-protocol.h>
 #include <wayland-pointer-gestures-unstable-v1-client-protocol.h>
 #include <wayland-presentation-time-client-protocol.h>
@@ -110,6 +113,7 @@ private Q_SLOTS:
     void testBindDrmLeaseDeviceV1();
     void testBindBlurManager();
     void testBindContrastManager();
+    void testBindPlasmaActivationFeedback();
     void testBindSlideManager();
     void testBindDpmsManager();
     void testBindInputMethodManagerV2();
@@ -179,6 +183,8 @@ void TestWaylandRegistry::init()
         = std::make_unique<Wrapland::Server::DpmsManager>(server.display.get());
     server.globals.input_method_manager_v2
         = std::make_unique<Wrapland::Server::input_method_manager_v2>(server.display.get());
+    server.globals.plasma_activation_feedback
+        = std::make_unique<Wrapland::Server::plasma_activation_feedback>(server.display.get());
     server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
     server.globals.xdg_decoration_manager
         = std::make_unique<Wrapland::Server::XdgDecorationManager>(server.display.get(),
@@ -362,6 +368,14 @@ void TestWaylandRegistry::testBindContrastManager()
               SIGNAL(contrastAnnounced(quint32, quint32)),
               bindContrastManager,
               org_kde_kwin_contrast_manager_destroy)
+}
+
+void TestWaylandRegistry::testBindPlasmaActivationFeedback()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::PlasmaActivationFeedback,
+              SIGNAL(plasmaActivationFeedbackAnnounced(quint32, quint32)),
+              bindPlasmaActivationFeedback,
+              org_kde_plasma_activation_feedback_destroy)
 }
 
 void TestWaylandRegistry::testBindSlideManager()

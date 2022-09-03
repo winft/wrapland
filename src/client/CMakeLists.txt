@@ -37,6 +37,7 @@ set(CLIENT_LIB_SRCS
     pointer.cpp
     pointerconstraints.cpp
     pointergestures.cpp
+    plasma_activation_feedback.cpp
     plasmashell.cpp
     plasmavirtualdesktop.cpp
     plasmawindowmanagement.cpp
@@ -362,6 +363,7 @@ set(CLIENT_LIB_HEADERS
     wlr_output_manager_v1.h
     pointer.h
     pointerconstraints.h
+    plasma_activation_feedback.h
     plasmashell.h
     plasmavirtualdesktop.h
     plasmawindowmanagement.h

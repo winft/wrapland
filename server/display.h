@@ -59,6 +59,7 @@ class LayerShellV1;
 class linux_dmabuf_v1;
 class Output;
 class OutputManagementV1;
+class plasma_activation_feedback;
 class PlasmaShell;
 class PlasmaVirtualDesktopManager;
 class PlasmaWindowManager;
@@ -132,6 +133,7 @@ public:
     std::unique_ptr<data_device_manager> createDataDeviceManager();
 
     std::unique_ptr<OutputManagementV1> createOutputManagementV1();
+    std::unique_ptr<plasma_activation_feedback> create_plasma_activation_feedback();
     std::unique_ptr<PlasmaShell> createPlasmaShell();
     std::unique_ptr<PlasmaWindowManager> createPlasmaWindowManager();
     std::unique_ptr<primary_selection_device_manager> createPrimarySelectionDeviceManager();

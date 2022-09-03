@@ -44,6 +44,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_configuration_v1.h"
 #include "output_device_v1_p.h"
 #include "output_management_v1.h"
+#include "plasma_activation_feedback.h"
 #include "plasma_shell.h"
 #include "plasma_virtual_desktop.h"
 #include "plasma_window.h"
@@ -234,6 +235,11 @@ std::unique_ptr<data_device_manager> Display::createDataDeviceManager()
 std::unique_ptr<primary_selection_device_manager> Display::createPrimarySelectionDeviceManager()
 {
     return std::make_unique<primary_selection_device_manager>(this);
+}
+
+std::unique_ptr<plasma_activation_feedback> Display::create_plasma_activation_feedback()
+{
+    return std::make_unique<plasma_activation_feedback>(this);
 }
 
 std::unique_ptr<PlasmaShell> Display::createPlasmaShell()

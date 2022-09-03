@@ -51,6 +51,7 @@ struct org_kde_kwin_shadow_manager;
 struct org_kde_kwin_blur_manager;
 struct org_kde_kwin_contrast_manager;
 struct org_kde_kwin_slide_manager;
+struct org_kde_plasma_activation_feedback;
 struct org_kde_plasma_shell;
 struct org_kde_plasma_virtual_desktop_management;
 struct org_kde_plasma_window_management;
@@ -104,6 +105,7 @@ class Keystate;
 class LayerShellV1;
 class RemoteAccessManager;
 class Output;
+class plasma_activation_feedback;
 class PlasmaShell;
 class PlasmaVirtualDesktopManagement;
 class PlasmaWindowManagement;
@@ -181,6 +183,7 @@ public:
         LayerShellV1,                     ///< Refers to zwlr_layer_shell_v1 interface
         SubCompositor,                    ///< Refers to the wl_subcompositor interface;
         DataDeviceManager,                ///< Refers to the wl_data_device_manager interface
+        PlasmaActivationFeedback,         ///<
         PlasmaShell,                      ///< Refers to org_kde_plasma_shell interface
         PlasmaWindowManagement,           ///< Refers to org_kde_plasma_window_management interface
         Idle,                             ///< Refers to org_kde_kwin_idle_interface interface
@@ -440,6 +443,16 @@ public:
      * @since 0.523.0
      **/
     zwp_input_method_manager_v2* bindInputMethodManagerV2(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the org_kde_plasma_activation_feedback with @p name and @p version.
+     * If the @p name does not exist or is not for the Plasma activation feedback interface,
+     * @c null will be returned.
+     *
+     * Prefer using createPlasmaActivationFeedback instead.
+     * @see createPlasmaActivationFeedback
+     **/
+    org_kde_plasma_activation_feedback* bindPlasmaActivationFeedback(uint32_t name,
+                                                                     uint32_t version) const;
     /**
      * Binds the org_kde_plasma_shell with @p name and @p version.
      * If the @p name does not exist or is not for the Plasma shell interface,
@@ -1015,6 +1028,22 @@ public:
      **/
     drm_lease_device_v1*
     createDrmLeaseDeviceV1(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
+     * Creates a plasma_activation_feedback and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the org_kde_plasma_activation_feedback
+     * interface, the returned plasma_activation_feedback will not be valid. Therefore it's
+     * recommended to call isValid on the created instance.
+     *
+     * @param name The name of the org_kde_plasma_activation_feedback interface to bind
+     * @param version The version or the org_kde_plasma_activation_feedback interface to use
+     * @param parent The parent for plasma_activation_feedback
+     *
+     * @returns The created plasma_activation_feedback.
+     **/
+    plasma_activation_feedback*
+    createPlasmaActivationFeedback(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a PlasmaShell and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1717,6 +1746,13 @@ Q_SIGNALS:
     void wlrOutputManagerV1Announced(quint32 name, quint32 version);
 
     /**
+     * Emitted whenever a org_kde_plasma_activation_feedback interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     **/
+    void plasmaActivationFeedbackAnnounced(quint32 name, quint32 version);
+
+    /**
      * Emitted whenever a org_kde_plasma_shell interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -2023,6 +2059,12 @@ Q_SIGNALS:
      * @param name The name for the removed interface
      **/
     void wlrOutputManagerV1Removed(quint32 name);
+
+    /**
+     * Emitted whenever a org_kde_plasma_activation_feedback interface gets removed.
+     * @param name The name for the removed interface
+     **/
+    void plasmaActivationFeedbackRemoved(quint32 name);
 
     /**
      * Emitted whenever a org_kde_plasma_shell interface gets removed.
