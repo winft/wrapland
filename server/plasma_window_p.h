@@ -114,7 +114,6 @@ private:
         QString serviceName;
         QString objectPath;
     } m_applicationMenu;
-    wl_listener listener;
 };
 
 class PlasmaWindowRes : public QObject
