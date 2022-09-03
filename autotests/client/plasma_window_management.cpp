@@ -170,7 +170,7 @@ void TestWindowManagement::init()
 
     QSignalSpy windowSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowSpy.isValid());
-    server.plasma_window = server.globals.plasma_window_manager->createWindow(this);
+    server.plasma_window = server.globals.plasma_window_manager->createWindow();
     server.plasma_window->setPid(1337);
 
     QVERIFY(windowSpy.wait());
@@ -263,7 +263,7 @@ void TestWindowManagement::testUseAfterUnmap()
     QSignalSpy serverDestroyedSpy(server.plasma_window, &QObject::destroyed);
     QVERIFY(serverDestroyedSpy.isValid());
 
-    server.plasma_window->unmap();
+    delete server.plasma_window;
     server.plasma_window = nullptr;
     QCOMPARE(serverDestroyedSpy.count(), 1);
     m_window->requestClose();
@@ -280,8 +280,8 @@ void TestWindowManagement::testCreateAfterUnmap()
 
     // Create and unmap in one go.
     // Client will first handle the create, the unmap will be sent once the server side is bound.
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(this);
-    serverWindow->unmap();
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
+    delete serverWindow;
 
     QCOMPARE(server.globals.plasma_window_manager->children().count(), 0);
     QCoreApplication::processEvents();
@@ -324,7 +324,7 @@ void TestWindowManagement::testActiveWindowOnUnmapped()
     QSignalSpy serverDestroyedSpy(server.plasma_window, &QObject::destroyed);
     QVERIFY(serverDestroyedSpy.isValid());
 
-    server.globals.plasma_window_manager->unmapWindow(server.plasma_window);
+    delete server.plasma_window;
     server.plasma_window = nullptr;
     QCOMPARE(serverDestroyedSpy.count(), 1);
     QVERIFY(activeWindowChangedSpy.wait());
@@ -574,7 +574,7 @@ void TestWindowManagement::testParentWindow()
     // Now let's create a second window.
     QSignalSpy windowAddedSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowAddedSpy.isValid());
-    auto serverTransient = server.globals.plasma_window_manager->createWindow(this);
+    auto serverTransient = server.globals.plasma_window_manager->createWindow();
     serverTransient->setParentWindow(server.plasma_window);
     QVERIFY(windowAddedSpy.wait());
     auto transient = windowAddedSpy.first().first().value<Clt::PlasmaWindow*>();
@@ -593,7 +593,7 @@ void TestWindowManagement::testParentWindow()
     QCOMPARE(transient->parentWindow().data(), parentWindow);
 
     // Now let's try to unmap the parent.
-    server.plasma_window->unmap();
+    delete server.plasma_window;
     m_window = nullptr;
     server.plasma_window = nullptr;
     QVERIFY(parentWindowChangedSpy.wait());
@@ -711,7 +711,7 @@ void TestWindowManagement::testPid()
 
     // Test server not setting a PID for whatever reason.
     std::unique_ptr<Srv::PlasmaWindow> newWindowInterface(
-        server.globals.plasma_window_manager->createWindow(this));
+        server.globals.plasma_window_manager->createWindow());
 
     QSignalSpy windowSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowSpy.wait());

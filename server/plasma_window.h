@@ -47,7 +47,7 @@ public:
     enum class ShowingDesktopState { Disabled, Enabled };
     void setShowingDesktopState(ShowingDesktopState state);
 
-    PlasmaWindow* createWindow(QObject* parent = nullptr);
+    PlasmaWindow* createWindow();
     std::vector<PlasmaWindow*> const& windows() const;
 
     void unmapWindow(PlasmaWindow* window);
@@ -60,6 +60,7 @@ Q_SIGNALS:
     void requestChangeShowingDesktop(ShowingDesktopState requestedState);
 
 private:
+    friend class PlasmaWindow;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
@@ -97,8 +98,6 @@ public:
      * FIXME: still relevant with new desktops? Eike says yes in libtaskmanager code.
      */
     void setVirtualDesktopChangeable(bool set);
-
-    void unmap();
 
     QHash<Surface*, QRect> minimizedGeometries() const;
 
@@ -141,7 +140,7 @@ Q_SIGNALS:
 private:
     friend class PlasmaWindowManager;
     friend class PlasmaWindowRes;
-    explicit PlasmaWindow(PlasmaWindowManager* manager, QObject* parent = nullptr);
+    explicit PlasmaWindow(PlasmaWindowManager* manager);
 
     class Private;
     const std::unique_ptr<Private> d_ptr;

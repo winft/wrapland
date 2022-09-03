@@ -64,7 +64,12 @@ PlasmaWindowManager::PlasmaWindowManager(Display* display)
     signal(SIGPIPE, SIG_IGN); // NOLINT
 }
 
-PlasmaWindowManager::~PlasmaWindowManager() = default;
+PlasmaWindowManager::~PlasmaWindowManager()
+{
+    while (!d_ptr->windows.empty()) {
+        delete d_ptr->windows.back();
+    }
+}
 
 void PlasmaWindowManager::Private::bindInit(PlasmaWindowManagerBind* bind)
 {
@@ -140,9 +145,9 @@ void PlasmaWindowManager::setShowingDesktopState(ShowingDesktopState desktopStat
     d_ptr->sendShowingDesktopState();
 }
 
-PlasmaWindow* PlasmaWindowManager::createWindow(QObject* parent)
+PlasmaWindow* PlasmaWindowManager::createWindow()
 {
-    auto window = new PlasmaWindow(this, parent);
+    auto window = new PlasmaWindow(this);
 
     // TODO(unknown author): improve window ids so that it cannot wrap around
     window->d_ptr->windowId = ++d_ptr->windowIdCounter;
@@ -159,19 +164,6 @@ PlasmaWindow* PlasmaWindowManager::createWindow(QObject* parent)
 std::vector<PlasmaWindow*> const& PlasmaWindowManager::windows() const
 {
     return d_ptr->windows;
-}
-
-void PlasmaWindowManager::unmapWindow(PlasmaWindow* window)
-{
-    if (!window) {
-        return;
-    }
-
-    remove_one(d_ptr->windows, window);
-    assert(!contains(d_ptr->windows, window));
-
-    window->d_ptr->unmap();
-    delete window;
 }
 
 void PlasmaWindowManager::setVirtualDesktopManager(PlasmaVirtualDesktopManager* manager)
@@ -321,13 +313,6 @@ void PlasmaWindow::Private::setTitle(QString const& title)
     }
 }
 
-void PlasmaWindow::Private::unmap() const
-{
-    for (auto&& res : resources) {
-        res->unmap();
-    }
-}
-
 void PlasmaWindow::Private::setState(org_kde_plasma_window_management_state flag, bool set)
 {
     uint32_t newState = m_desktopState;
@@ -425,13 +410,16 @@ void PlasmaWindow::Private::setApplicationMenuPaths(QString const& serviceName,
     }
 }
 
-PlasmaWindow::PlasmaWindow(PlasmaWindowManager* manager, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(manager, this))
+PlasmaWindow::PlasmaWindow(PlasmaWindowManager* manager)
+    : d_ptr(new Private(manager, this))
 {
 }
 
-PlasmaWindow::~PlasmaWindow() = default;
+PlasmaWindow::~PlasmaWindow()
+{
+    remove_one(d_ptr->manager->d_ptr->windows, this);
+    assert(!contains(d_ptr->manager->d_ptr->windows, this));
+}
 
 void PlasmaWindow::setAppId(QString const& appId)
 {
@@ -446,11 +434,6 @@ void PlasmaWindow::setPid(uint32_t pid)
 void PlasmaWindow::setTitle(QString const& title)
 {
     d_ptr->setTitle(title);
-}
-
-void PlasmaWindow::unmap()
-{
-    d_ptr->manager->unmapWindow(this);
 }
 
 QHash<Surface*, QRect> PlasmaWindow::minimizedGeometries() const
@@ -929,13 +912,6 @@ void PlasmaWindowRes::Private::unsetMinimizedGeometryCallback([[maybe_unused]] w
     Q_EMIT priv->window->minimizedGeometriesChanged();
 }
 
-void PlasmaWindowRes::Private::unmap()
-{
-    window = nullptr;
-    send<org_kde_plasma_window_send_unmapped>();
-    client->flush();
-}
-
 PlasmaWindowRes::PlasmaWindowRes(Wayland::Client* client,
                                  uint32_t version,
                                  uint32_t id,
@@ -947,7 +923,9 @@ PlasmaWindowRes::PlasmaWindowRes(Wayland::Client* client,
 
 void PlasmaWindowRes::unmap()
 {
-    d_ptr->unmap();
+    d_ptr->window = nullptr;
+    d_ptr->send<org_kde_plasma_window_send_unmapped>();
+    d_ptr->client->flush();
 }
 
 }
