@@ -50,9 +50,6 @@ Q_DECLARE_METATYPE(ServerWindowStringSetter)
 typedef void (Srv::PlasmaWindow::*ServerWindowQuint32Setter)(quint32);
 Q_DECLARE_METATYPE(ServerWindowQuint32Setter)
 
-typedef void (Srv::PlasmaWindow::*ServerWindowVoidSetter)();
-Q_DECLARE_METATYPE(ServerWindowVoidSetter)
-
 typedef void (Srv::PlasmaWindow::*ServerWindowIconSetter)(QIcon const&);
 Q_DECLARE_METATYPE(ServerWindowIconSetter)
 
@@ -222,8 +219,7 @@ bool PlasmaWindowModelTest::testBooleanData(Clt::PlasmaWindowModel::AdditionalRo
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     VERIFY(dataChangedSpy.isValid());
 
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     VERIFY(serverWindow);
 
     COMPARE(dataChangedSpy.count(), 0);
@@ -350,8 +346,7 @@ void PlasmaWindowModelTest::testAddRemoveRows()
     QVERIFY(rowInsertedSpy.isValid());
 
     // This happens by creating a PlasmaWindow on server side.
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     QVERIFY(serverWindow);
 
     QVERIFY(rowInsertedSpy.wait());
@@ -377,7 +372,7 @@ void PlasmaWindowModelTest::testAddRemoveRows()
     QSignalSpy windowDestroyedSpy(serverWindow, &QObject::destroyed);
     QVERIFY(windowDestroyedSpy.isValid());
 
-    serverWindow->unmap();
+    delete serverWindow;
     QVERIFY(rowRemovedSpy.wait());
     QCOMPARE(rowRemovedSpy.count(), 1);
     QVERIFY(!rowRemovedSpy.first().at(0).toModelIndex().isValid());
@@ -436,8 +431,7 @@ void PlasmaWindowModelTest::testDefaultData()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
@@ -552,8 +546,7 @@ void PlasmaWindowModelTest::testGeometry()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
@@ -592,8 +585,7 @@ void PlasmaWindowModelTest::testTitle()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
@@ -631,8 +623,7 @@ void PlasmaWindowModelTest::testAppId()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
@@ -671,8 +662,7 @@ void PlasmaWindowModelTest::testPid()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     serverWindow->setPid(1337);
     QVERIFY(serverWindow);
 
@@ -692,8 +682,7 @@ void PlasmaWindowModelTest::testVirtualDesktops()
 
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
@@ -766,8 +755,7 @@ void PlasmaWindowModelTest::testRequests()
     QSignalSpy rowInsertedSpy(model, &Clt::PlasmaWindowModel::rowsInserted);
     QVERIFY(rowInsertedSpy.isValid());
 
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
@@ -972,8 +960,7 @@ void PlasmaWindowModelTest::testCreateWithUnmappedWindow()
     QSignalSpy windowCreatedSpy(m_pw, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowCreatedSpy.isValid());
 
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     QVERIFY(serverWindow);
     QVERIFY(windowCreatedSpy.wait());
 
@@ -989,7 +976,7 @@ void PlasmaWindowModelTest::testCreateWithUnmappedWindow()
     QVERIFY(destroyedSpy.isValid());
 
     // Unmap should be triggered, but not yet the destroyed.
-    serverWindow->unmap();
+    delete serverWindow;
     QVERIFY(unmappedSpy.wait());
     QVERIFY(destroyedSpy.isEmpty());
 
@@ -1080,8 +1067,7 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy_data()
             << QVariant::fromValue(QIcon::fromTheme(QStringLiteral("foo")));
 #endif
 
-    QTest::newRow("unmapped") << &Clt::PlasmaWindow::unmapped
-                              << QVariant::fromValue(&Srv::PlasmaWindow::unmap) << QVariant();
+    QTest::newRow("unmapped") << &Clt::PlasmaWindow::unmapped << QVariant() << QVariant();
 }
 
 void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy()
@@ -1093,8 +1079,7 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy()
     QSignalSpy windowCreatedSpy(m_pw, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowCreatedSpy.isValid());
 
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(
-        server.globals.plasma_window_manager.get());
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
     QVERIFY(windowCreatedSpy.wait());
     Clt::PlasmaWindow* window = windowCreatedSpy.first().first().value<Clt::PlasmaWindow*>();
 
@@ -1118,7 +1103,7 @@ void PlasmaWindowModelTest::testChangeWindowAfterModelDestroy()
     } else if (QMetaType::Type(value.type()) == QMetaType::UInt) {
         (serverWindow->*(setter.value<ServerWindowQuint32Setter>()))(value.toUInt());
     } else if (!value.isValid()) {
-        (serverWindow->*(setter.value<ServerWindowVoidSetter>()))();
+        delete serverWindow;
     }
 
     QVERIFY(changedSpy.wait());
@@ -1135,7 +1120,7 @@ void PlasmaWindowModelTest::testCreateWindowAfterModelDestroy()
     QSignalSpy windowCreatedSpy(m_pw, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowCreatedSpy.isValid());
 
-    server.globals.plasma_window_manager->createWindow(server.globals.plasma_window_manager.get());
+    server.globals.plasma_window_manager->createWindow();
     QVERIFY(windowCreatedSpy.wait());
 }
 

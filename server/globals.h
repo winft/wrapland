@@ -22,6 +22,7 @@
 #include "layer_shell_v1.h"
 #include "linux_dmabuf_v1.h"
 #include "output_management_v1.h"
+#include "plasma_activation_feedback.h"
 #include "plasma_shell.h"
 #include "plasma_virtual_desktop.h"
 #include "plasma_window.h"
@@ -108,6 +109,7 @@ struct globals {
 
     /// Global windowing control
     std::unique_ptr<Server::LayerShellV1> layer_shell_v1;
+    std::unique_ptr<Server::plasma_activation_feedback> plasma_activation_feedback;
     std::unique_ptr<Server::PlasmaVirtualDesktopManager> plasma_virtual_desktop_manager;
     std::unique_ptr<Server::PlasmaShell> plasma_shell;
     std::unique_ptr<Server::PlasmaWindowManager> plasma_window_manager;

@@ -43,6 +43,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_configuration_v1.h"
 #include "output_device_v1.h"
 #include "output_management_v1.h"
+#include "plasma_activation_feedback.h"
 #include "plasmashell.h"
 #include "plasmavirtualdesktop.h"
 #include "plasmawindowmanagement.h"
@@ -240,6 +241,16 @@ static QMap<Registry::Interface, SuppertedInterfaceData> const s_interfaces = {
         },
     },
     {
+        Registry::Interface::PlasmaActivationFeedback,
+        {
+            1,
+            QByteArrayLiteral("org_kde_plasma_activation_feedback"),
+            &org_kde_plasma_activation_feedback_interface,
+            &Registry::plasmaActivationFeedbackAnnounced,
+            &Registry::plasmaActivationFeedbackRemoved,
+        },
+    },
+    {
         Registry::Interface::PlasmaShell,
         {
             7,
@@ -262,7 +273,7 @@ static QMap<Registry::Interface, SuppertedInterfaceData> const s_interfaces = {
     {
         Registry::Interface::PlasmaWindowManagement,
         {
-            10,
+            16,
             QByteArrayLiteral("org_kde_plasma_window_management"),
             &org_kde_plasma_window_management_interface,
             &Registry::plasmaWindowManagementAnnounced,
@@ -893,6 +904,7 @@ BIND(FullscreenShell, _wl_fullscreen_shell)
 BIND(DataControlManagerV1, zwlr_data_control_manager_v1)
 BIND(DataDeviceManager, wl_data_device_manager)
 BIND(DrmLeaseDeviceV1, wp_drm_lease_device_v1)
+BIND(PlasmaActivationFeedback, org_kde_plasma_activation_feedback)
 BIND(PlasmaShell, org_kde_plasma_shell)
 BIND(PlasmaVirtualDesktopManagement, org_kde_plasma_virtual_desktop_management)
 BIND(PlasmaWindowManagement, org_kde_plasma_window_management)
@@ -1038,6 +1050,13 @@ Registry::createInputMethodManagerV2(quint32 name, quint32 version, QObject* par
         name, version, parent, &Registry::bindInputMethodManagerV2);
 }
 
+text_input_manager_v3*
+Registry::createTextInputManagerV3(quint32 name, quint32 version, QObject* parent)
+{
+    return d->create<text_input_manager_v3>(
+        name, version, parent, &Registry::bindTextInputManagerV3);
+}
+
 TextInputManagerV2*
 Registry::createTextInputManagerV2(quint32 name, quint32 version, QObject* parent)
 {
@@ -1051,11 +1070,11 @@ Registry::createDataControlManagerV1(quint32 name, quint32 version, QObject* par
         name, version, parent, &Registry::bindDataControlManagerV1);
 }
 
-text_input_manager_v3*
-Registry::createTextInputManagerV3(quint32 name, quint32 version, QObject* parent)
+plasma_activation_feedback*
+Registry::createPlasmaActivationFeedback(quint32 name, quint32 version, QObject* parent)
 {
-    return d->create<text_input_manager_v3>(
-        name, version, parent, &Registry::bindTextInputManagerV3);
+    return d->create<plasma_activation_feedback>(
+        name, version, parent, &Registry::bindPlasmaActivationFeedback);
 }
 
 RelativePointerManager*

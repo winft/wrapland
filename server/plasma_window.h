@@ -33,6 +33,7 @@ namespace Wrapland::Server
 {
 
 class Display;
+class Output;
 class PlasmaWindow;
 class Surface;
 class PlasmaVirtualDesktopManager;
@@ -47,19 +48,26 @@ public:
     enum class ShowingDesktopState { Disabled, Enabled };
     void setShowingDesktopState(ShowingDesktopState state);
 
-    PlasmaWindow* createWindow(QObject* parent = nullptr);
-    std::vector<PlasmaWindow*> const& windows() const;
+    /// Create a window with random uuid.
+    PlasmaWindow* createWindow();
 
-    void unmapWindow(PlasmaWindow* window);
+    /// Create a window with specific uuid.
+    PlasmaWindow* createWindow(std::string const& uuid);
+
+    std::vector<PlasmaWindow*> const& windows() const;
 
     void setVirtualDesktopManager(PlasmaVirtualDesktopManager* manager);
 
     PlasmaVirtualDesktopManager* virtualDesktopManager() const;
 
+    void set_stacking_order(std::vector<uint32_t> const& stack);
+    void set_stacking_order_uuids(std::vector<std::string> const& stack);
+
 Q_SIGNALS:
     void requestChangeShowingDesktop(ShowingDesktopState requestedState);
 
 private:
+    friend class PlasmaWindow;
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
@@ -98,8 +106,6 @@ public:
      */
     void setVirtualDesktopChangeable(bool set);
 
-    void unmap();
-
     QHash<Surface*, QRect> minimizedGeometries() const;
 
     void setParentWindow(PlasmaWindow* parentWindow);
@@ -109,6 +115,21 @@ public:
     void addPlasmaVirtualDesktop(std::string const& id);
     void removePlasmaVirtualDesktop(std::string const& id);
     std::vector<std::string> const& plasmaVirtualDesktops() const;
+
+    /**
+     * @return unique number which identifies the window in the stacking order
+     */
+    std::uint32_t const& id() const;
+
+    /**
+     * @return unique string which identifies the window in the uuid stacking order
+     */
+    std::string const& uuid() const;
+
+    /**
+     * Inform the client the X11 resource name has changed (XWayland windows only).
+     **/
+    void set_resource_name(std::string const& resource_name) const;
 
 Q_SIGNALS:
     void closeRequested();
@@ -138,10 +159,13 @@ Q_SIGNALS:
     void enterNewPlasmaVirtualDesktopRequested();
     void leavePlasmaVirtualDesktopRequested(QString const& desktop);
 
+    /// Client asked for this window to be displayed on @p output
+    void sendToOutputRequested(Wrapland::Server::Output* output);
+
 private:
     friend class PlasmaWindowManager;
     friend class PlasmaWindowRes;
-    explicit PlasmaWindow(PlasmaWindowManager* manager, QObject* parent = nullptr);
+    explicit PlasmaWindow(PlasmaWindowManager* manager);
 
     class Private;
     const std::unique_ptr<Private> d_ptr;
