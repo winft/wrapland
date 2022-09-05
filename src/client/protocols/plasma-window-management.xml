@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <protocol name="plasma_window_management">
   <copyright><![CDATA[
-    Copyright (C) 2013-2014 Pier Luigi Fiorini
+    SPDX-FileCopyrightText: 2013-2014 Pier Luigi Fiorini
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 2.1 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    SPDX-License-Identifier: LGPL-2.1-or-later
   ]]></copyright>
 
-  <interface name="org_kde_plasma_window_management" version="10">
+  <interface name="org_kde_plasma_window_management" version="16">
     <description summary="application windows management">
       This interface manages application windows.
       It provides requests to show and hide the desktop and emits
@@ -62,8 +51,14 @@
     </request>
 
     <request name="get_window">
+        <description summary="deprecated">Deprecated: use get_window_by_uuid</description>
         <arg name="id" type="new_id" interface="org_kde_plasma_window"/>
         <arg name="internal_window_id" type="uint" summary="The internal window id of the window to create"/>
+    </request>
+
+    <request name="get_window_by_uuid" since="12">
+        <arg name="id" type="new_id" interface="org_kde_plasma_window"/>
+        <arg name="internal_window_uuid" type="string" summary="The internal window uuiid of the window to create"/>
     </request>
 
     <event name="show_desktop_changed">
@@ -80,11 +75,33 @@
       <description summary="notify the client that a window was mapped">
         This event will be sent immediately after a window is mapped.
       </description>
-      <arg name="id" type="uint" summary="internal window Id"/>
+      <arg name="id" type="uint" summary="Deprecated: internal window Id"/>
+    </event>
+
+    <event name="stacking_order_changed" since="11">
+      <description summary="notify the client when stacking order changed">
+        This event will be sent when stacking order changed and on bind
+      </description>
+      <arg name="ids" type="array" summary="internal windows id array"/>
+    </event>
+
+    <event name="stacking_order_uuid_changed" since="12">
+      <description summary="notify the client when stacking order changed">
+        This event will be sent when stacking order changed and on bind
+      </description>
+      <arg name="uuids" type="string" summary="internal windows id ;-separated"/>
+    </event>
+
+    <event name="window_with_uuid" since="13">
+      <description summary="notify the client that a window was mapped">
+        This event will be sent immediately after a window is mapped.
+      </description>
+      <arg name="id" type="uint" summary="Deprecated: internal window Id"/>
+      <arg name="uuid" type="string" summary="internal window uuid"/>
     </event>
   </interface>
 
-  <interface name="org_kde_plasma_window" version="10">
+  <interface name="org_kde_plasma_window" version="16">
     <description summary="interface to control application windows">
       Manages and control an application window.
 
@@ -318,7 +335,91 @@
       </description>
       <arg name="service_name" type="string" />
       <arg name="object_path" type="string" />
-  </event>
+    </event>
 
+    <request name="request_enter_activity" since="14">
+      <description summary="map window on an activity">
+        Make the window enter an activity. A window can enter more activity. If the id is empty or invalid, no action will be performed.
+      </description>
+      <arg name="id" type="string" summary="activity id"/>
+    </request>
+
+    <request name="request_leave_activity" since="14">
+      <description summary="remove a window from an activity">
+        Make the window exit a an activity. If it exits all activities it will be considered on all of them.
+      </description>
+      <arg name="id" type="string" summary="activity id"/>
+    </request>
+
+    <event name="activity_entered" since="14">
+      <description summary="the window entered an activity">
+        This event will be sent when the window has entered an activity. The window can be on more than one activity, or none: then is considered on all of them.
+      </description>
+      <arg name="id" type="string" summary="activity id"/>
+    </event>
+
+    <event name="activity_left" since="14">
+      <description summary="the window left an activity">
+        This event will be sent when the window left an activity. If the window leaves all activities, it will be considered on all.
+        If the window gets manually added on all activities, the server has to send activity_left for every previous activity it was in for the window to be really considered on all activities.
+      </description>
+      <arg name="id" type="string" summary="activity id"/>
+    </event>
+
+    <request name="send_to_output" since="15">
+     <description summary="send window to specified output">
+        Requests this window to be displayed in a specific output.
+      </description>
+      <arg name="output" type="object" interface="wl_output"/>
+    </request>
+
+    <event name="resource_name_changed" since="16">
+      <description summary="X11 resource name has changed">
+        This event will be sent when the X11 resource name of the window has changed.
+        This is only set for XWayland windows.
+      </description>
+      <arg name="resource_name" type="string" summary="resource name"/>
+    </event>
+  </interface>
+
+  <interface name="org_kde_plasma_activation_feedback" version="1">
+    <description summary="activation feedback">
+      The activation manager interface provides a way to get notified
+      when an application is about to be activated.
+    </description>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the activation manager object">
+        Destroy the activation manager object. The activation objects introduced
+        by this manager object will be unaffected.
+      </description>
+    </request>
+
+    <event name="activation">
+      <description summary="notify that an app is starting">
+        Will be issued when an app is set to be activated. It offers
+        an instance of org_kde_plasma_activation that will tell us the app_id
+        and the extent of the activation.
+      </description>
+      <arg name="id" type="new_id" interface="org_kde_plasma_activation"/>
+    </event>
+  </interface>
+
+  <interface name="org_kde_plasma_activation" version="1">
+    <request name="destroy" type="destructor">
+      <description summary="destroy the org_kde_plasma_activation object">
+        Notify the compositor that the org_kde_plasma_activation object will no
+        longer be used.
+      </description>
+    </request>
+
+    <event name="app_id">
+      <description summary="Offers the app_id"></description>
+      <arg name="app_id" type="string" summary="application id, as described in xdg_activation_v1"/>
+    </event>
+
+    <event name="finished">
+        <description summary="Notifies about activation finished, either by activation or because it got invalidated"></description>
+    </event>
   </interface>
 </protocol>

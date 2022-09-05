@@ -441,6 +441,21 @@ add_test(NAME wrapland-test_input_method_v2 COMMAND test_input_method_v2)
 ecm_mark_as_test(test_input_method_v2)
 
 # ##################################################################################################
+# Test org_kde_plasma_activation_feedback
+# ##################################################################################################
+set(plasma_activation_feedback_test_SRCS plasma_activation_feedback.cpp)
+add_executable(plasma-activation-feedback-test ${plasma_activation_feedback_test_SRCS})
+target_link_libraries(plasma-activation-feedback-test
+  Qt5::Test
+  Qt5::Gui
+  Wrapland::Client
+  Wrapland::Server
+  Wayland::Client
+)
+add_test(NAME wrapland-test-plasma-activation-feedback COMMAND plasma-activation-feedback-test)
+ecm_mark_as_test(plasma-activation-feedback-test)
+
+# ##################################################################################################
 # Test PlasmaShell
 # ##################################################################################################
 set(testPlasmaShell_SRCS plasma_shell.cpp)

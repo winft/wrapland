@@ -40,7 +40,7 @@ class Surface;
 class PlasmaVirtualDesktopManager;
 class PlasmaWindowRes;
 
-constexpr uint32_t PlasmaWindowManagerVersion = 10;
+constexpr uint32_t PlasmaWindowManagerVersion = 16;
 using PlasmaWindowManagerGlobal = Wayland::Global<PlasmaWindowManager, PlasmaWindowManagerVersion>;
 using PlasmaWindowManagerBind = Wayland::Bind<PlasmaWindowManagerGlobal>;
 
@@ -49,11 +49,17 @@ class PlasmaWindowManager::Private : public PlasmaWindowManagerGlobal
 public:
     Private(Display* display, PlasmaWindowManager* q_ptr);
     void sendShowingDesktopState();
+    void send_stacking_order_changed();
+    void send_stacking_order_changed(PlasmaWindowManagerBind* bind);
+    void send_stacking_order_uuid_changed();
+    void send_stacking_order_uuid_changed(PlasmaWindowManagerBind* bind);
 
     void bindInit(PlasmaWindowManagerBind* bind) override;
 
     ShowingDesktopState desktopState = ShowingDesktopState::Disabled;
     std::vector<PlasmaWindow*> windows;
+    std::vector<uint32_t> id_stack;
+    std::vector<std::string> uuid_stack;
     PlasmaVirtualDesktopManager* virtualDesktopManager = nullptr;
     uint32_t windowIdCounter = 0;
 
@@ -64,6 +70,10 @@ private:
                                   wl_resource* resource,
                                   uint32_t id,
                                   uint32_t internalWindowId);
+    static void get_window_by_uuid_callback(wl_client* client,
+                                            wl_resource* resource,
+                                            uint32_t id,
+                                            char const* uuid);
 
     static const struct org_kde_plasma_window_management_interface s_interface;
 };
@@ -80,16 +90,17 @@ public:
     void setPid(uint32_t pid);
     void setThemedIconName(QString const& iconName);
     void setIcon(QIcon const& icon);
-    void unmap() const;
     void setState(org_kde_plasma_window_management_state flag, bool set);
     void setParentWindow(PlasmaWindow* window);
     void setGeometry(QRect const& geometry);
     void setApplicationMenuPaths(QString const& serviceName, QString const& objectPath);
+    void set_resource_name(std::string const& resource_name);
 
     // TODO(romangg): Might make sense to have this as a non-static member function instead.
     static PlasmaWindowRes* getResourceOfParent(PlasmaWindow* parent, PlasmaWindowRes* childRes);
 
     std::vector<PlasmaWindowRes*> resources;
+    std::string uuid;
     uint32_t windowId = 0;
     QHash<Surface*, QRect> minimizedGeometries;
     PlasmaWindowManager* manager;
@@ -103,6 +114,7 @@ private:
     friend class PlasmaWindowRes;
 
     PlasmaWindow* q_ptr;
+
     QString m_title;
     QString m_appId;
     uint32_t m_pid = 0;
@@ -114,7 +126,7 @@ private:
         QString serviceName;
         QString objectPath;
     } m_applicationMenu;
-    wl_listener listener;
+    std::string resource_name;
 };
 
 class PlasmaWindowRes : public QObject
@@ -143,7 +155,7 @@ public:
             PlasmaWindow* window,
             PlasmaWindowRes* q_ptr);
 
-    void unmap();
+    PlasmaWindow* window;
 
 private:
     static void setStateCallback(wl_client* client,
@@ -170,8 +182,13 @@ private:
     static void requestEnterNewVirtualDesktopCallback(wl_client* client, wl_resource* resource);
     static void
     requestLeaveVirtualDesktopCallback(wl_client* client, wl_resource* resource, char const* id);
+    static void
+    request_enter_activity_callback(wl_client* client, wl_resource* resource, char const* id);
+    static void
+    request_leave_activity_callback(wl_client* client, wl_resource* resource, char const* id);
+    static void
+    send_to_output_callback(wl_client* client, wl_resource* resource, wl_resource* output);
 
-    PlasmaWindow* window;
     static const struct org_kde_plasma_window_interface s_interface;
 };
 

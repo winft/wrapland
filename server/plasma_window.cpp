@@ -20,15 +20,18 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "plasma_window_p.h"
 
 #include "display.h"
+#include "output.h"
 #include "plasma_virtual_desktop.h"
 #include "surface.h"
 #include "utils.h"
+#include "wl_output_p.h"
 
 #include <QFile>
 #include <QHash>
 #include <QIcon>
 #include <QList>
 #include <QRect>
+#include <QUuid>
 #include <QVector>
 #include <QtConcurrentRun>
 
@@ -43,6 +46,7 @@ const struct org_kde_plasma_window_management_interface PlasmaWindowManager::Pri
     = {
         showDesktopCallback,
         getWindowCallback,
+        get_window_by_uuid_callback,
 };
 
 PlasmaWindowManager::Private::Private(Display* display, PlasmaWindowManager* q_ptr)
@@ -64,13 +68,26 @@ PlasmaWindowManager::PlasmaWindowManager(Display* display)
     signal(SIGPIPE, SIG_IGN); // NOLINT
 }
 
-PlasmaWindowManager::~PlasmaWindowManager() = default;
+PlasmaWindowManager::~PlasmaWindowManager()
+{
+    while (!d_ptr->windows.empty()) {
+        delete d_ptr->windows.back();
+    }
+}
 
 void PlasmaWindowManager::Private::bindInit(PlasmaWindowManagerBind* bind)
 {
     for (auto&& window : windows) {
-        send<org_kde_plasma_window_management_send_window>(bind, window->d_ptr->windowId);
+        if (bind->version >= ORG_KDE_PLASMA_WINDOW_MANAGEMENT_WINDOW_WITH_UUID_SINCE_VERSION) {
+            send<org_kde_plasma_window_management_send_window_with_uuid>(
+                bind, window->d_ptr->windowId, window->d_ptr->uuid.data());
+        } else {
+            send<org_kde_plasma_window_management_send_window>(bind, window->d_ptr->windowId);
+        }
     }
+
+    send_stacking_order_changed(bind);
+    send_stacking_order_uuid_changed(bind);
 }
 
 void PlasmaWindowManager::Private::sendShowingDesktopState()
@@ -88,6 +105,55 @@ void PlasmaWindowManager::Private::sendShowingDesktopState()
         break;
     }
     send<org_kde_plasma_window_management_send_show_desktop_changed>(state);
+}
+
+void PlasmaWindowManager::Private::send_stacking_order_changed()
+{
+    for (auto const bind : getBinds()) {
+        send_stacking_order_changed(bind);
+    }
+}
+
+void PlasmaWindowManager::Private::send_stacking_order_changed(PlasmaWindowManagerBind* bind)
+{
+    if (bind->version < ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STACKING_ORDER_CHANGED_SINCE_VERSION) {
+        return;
+    }
+
+    wl_array ids;
+    wl_array_init(&ids);
+    for (auto const id : id_stack) {
+        auto key = static_cast<uint32_t*>(wl_array_add(&ids, sizeof(uint32_t)));
+        *key = id;
+    }
+
+    send<org_kde_plasma_window_management_send_stacking_order_changed>(bind, &ids);
+    wl_array_release(&ids);
+}
+
+void PlasmaWindowManager::Private::send_stacking_order_uuid_changed()
+{
+    for (auto const bind : getBinds()) {
+        send_stacking_order_uuid_changed(bind);
+    }
+}
+
+void PlasmaWindowManager::Private::send_stacking_order_uuid_changed(PlasmaWindowManagerBind* bind)
+{
+    if (bind->version
+        < ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STACKING_ORDER_UUID_CHANGED_SINCE_VERSION) {
+        return;
+    }
+
+    std::string uuids;
+    if (!uuid_stack.empty()) {
+        // Concatenate all uuids using ';' as a separator
+        auto concatenate = [](auto sum, auto const& cur) { return std::move(sum) + ';' + cur; };
+        uuids = std::accumulate(
+            std::next(uuid_stack.begin()), uuid_stack.end(), uuid_stack[0], concatenate);
+    }
+
+    send<org_kde_plasma_window_management_send_stacking_order_uuid_changed>(bind, uuids.data());
 }
 
 void PlasmaWindowManager::Private::showDesktopCallback([[maybe_unused]] wl_client* wlClient,
@@ -128,6 +194,31 @@ void PlasmaWindowManager::Private::getWindowCallback([[maybe_unused]] wl_client*
         window->d_ptr->createResource(bind->version, id, bind->client, true);
         return;
     }
+
+    (*it)->d_ptr->createResource(bind->version, id, bind->client, false);
+}
+
+void PlasmaWindowManager::Private::get_window_by_uuid_callback([[maybe_unused]] wl_client* wlClient,
+                                                               wl_resource* wlResource,
+                                                               uint32_t id,
+                                                               char const* uuid)
+{
+    assert(uuid != nullptr);
+
+    auto priv = get_handle(wlResource)->d_ptr.get();
+    auto bind = priv->getBind(wlResource);
+
+    auto it = std::find_if(priv->windows.cbegin(), priv->windows.cend(), [uuid](auto window) {
+        return window->d_ptr->uuid == uuid;
+    });
+
+    if (it == priv->windows.cend()) {
+        // Create a temp window just for the resource and directly send unmapped.
+        auto window = std::unique_ptr<PlasmaWindow>(new PlasmaWindow(priv->handle));
+        window->d_ptr->createResource(bind->version, id, bind->client, true);
+        return;
+    }
+
     (*it)->d_ptr->createResource(bind->version, id, bind->client, false);
 }
 
@@ -140,14 +231,29 @@ void PlasmaWindowManager::setShowingDesktopState(ShowingDesktopState desktopStat
     d_ptr->sendShowingDesktopState();
 }
 
-PlasmaWindow* PlasmaWindowManager::createWindow(QObject* parent)
+PlasmaWindow* PlasmaWindowManager::createWindow()
 {
-    auto window = new PlasmaWindow(this, parent);
+    auto uuid = QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString();
+    return createWindow(uuid);
+}
+
+PlasmaWindow* PlasmaWindowManager::createWindow(std::string const& uuid)
+{
+    auto window = new PlasmaWindow(this);
 
     // TODO(unknown author): improve window ids so that it cannot wrap around
     window->d_ptr->windowId = ++d_ptr->windowIdCounter;
+    window->d_ptr->uuid = uuid;
 
-    d_ptr->send<org_kde_plasma_window_management_send_window>(window->d_ptr->windowId);
+    for (auto bind : d_ptr->getBinds()) {
+        if (bind->version < ORG_KDE_PLASMA_WINDOW_MANAGEMENT_WINDOW_WITH_UUID_SINCE_VERSION) {
+            bind->send<org_kde_plasma_window_management_send_window>(window->d_ptr->windowId);
+            continue;
+        }
+
+        bind->send<org_kde_plasma_window_management_send_window_with_uuid>(window->d_ptr->windowId,
+                                                                           uuid.data());
+    }
 
     d_ptr->windows.push_back(window);
     connect(
@@ -161,17 +267,26 @@ std::vector<PlasmaWindow*> const& PlasmaWindowManager::windows() const
     return d_ptr->windows;
 }
 
-void PlasmaWindowManager::unmapWindow(PlasmaWindow* window)
+void PlasmaWindowManager::set_stacking_order(std::vector<uint32_t> const& stack)
 {
-    if (!window) {
+    // TODO(romangg): This check is expensive. Instead let consumers ensure it (can optimize).
+    if (d_ptr->id_stack == stack) {
         return;
     }
 
-    remove_one(d_ptr->windows, window);
-    assert(!contains(d_ptr->windows, window));
+    d_ptr->id_stack = stack;
+    d_ptr->send_stacking_order_changed();
+}
 
-    window->d_ptr->unmap();
-    delete window;
+void PlasmaWindowManager::set_stacking_order_uuids(std::vector<std::string> const& stack)
+{
+    // TODO(romangg): This check is expensive. Instead let consumers ensure it (can optimize).
+    if (d_ptr->uuid_stack == stack) {
+        return;
+    }
+
+    d_ptr->uuid_stack = stack;
+    d_ptr->send_stacking_order_uuid_changed();
 }
 
 void PlasmaWindowManager::setVirtualDesktopManager(PlasmaVirtualDesktopManager* manager)
@@ -184,7 +299,7 @@ PlasmaVirtualDesktopManager* PlasmaWindowManager::virtualDesktopManager() const
     return d_ptr->virtualDesktopManager;
 }
 
-/////////////////////////// Plasma Window ///////////////////////////
+/////////////////////////// Plasma Window Private ////////////////////////////
 
 PlasmaWindow::Private::Private(PlasmaWindowManager* manager, PlasmaWindow* q_ptr)
     : manager(manager)
@@ -230,6 +345,11 @@ void PlasmaWindow::Private::createResource(uint32_t version,
         windowRes->d_ptr->send<org_kde_plasma_window_send_application_menu>(
             m_applicationMenu.serviceName.toLatin1().constData(),
             m_applicationMenu.objectPath.toLatin1().constData());
+    }
+    if (!resource_name.empty()) {
+        windowRes->d_ptr->send<org_kde_plasma_window_send_resource_name_changed,
+                               ORG_KDE_PLASMA_WINDOW_RESOURCE_NAME_CHANGED_SINCE_VERSION>(
+            resource_name.data());
     }
     windowRes->d_ptr->send<org_kde_plasma_window_send_state_changed>(m_desktopState);
     if (!m_themedIconName.isEmpty()) {
@@ -318,13 +438,6 @@ void PlasmaWindow::Private::setTitle(QString const& title)
     const QByteArray utf8 = m_title.toUtf8();
     for (auto&& res : resources) {
         res->d_ptr->send<org_kde_plasma_window_send_title_changed>(utf8.constData());
-    }
-}
-
-void PlasmaWindow::Private::unmap() const
-{
-    for (auto&& res : resources) {
-        res->unmap();
     }
 }
 
@@ -425,13 +538,33 @@ void PlasmaWindow::Private::setApplicationMenuPaths(QString const& serviceName,
     }
 }
 
-PlasmaWindow::PlasmaWindow(PlasmaWindowManager* manager, QObject* parent)
-    : QObject(parent)
-    , d_ptr(new Private(manager, this))
+void PlasmaWindow::Private::set_resource_name(std::string const& resource_name)
+{
+    if (this->resource_name == resource_name) {
+        return;
+    }
+
+    this->resource_name = resource_name;
+
+    for (auto const res : resources) {
+        res->d_ptr->send<org_kde_plasma_window_send_resource_name_changed,
+                         ORG_KDE_PLASMA_WINDOW_RESOURCE_NAME_CHANGED_SINCE_VERSION>(
+            resource_name.data());
+    }
+}
+
+/////////////////////////////// Plasma Window ////////////////////////////////
+
+PlasmaWindow::PlasmaWindow(PlasmaWindowManager* manager)
+    : d_ptr(new Private(manager, this))
 {
 }
 
-PlasmaWindow::~PlasmaWindow() = default;
+PlasmaWindow::~PlasmaWindow()
+{
+    remove_one(d_ptr->manager->d_ptr->windows, this);
+    assert(!contains(d_ptr->manager->d_ptr->windows, this));
+}
 
 void PlasmaWindow::setAppId(QString const& appId)
 {
@@ -446,11 +579,6 @@ void PlasmaWindow::setPid(uint32_t pid)
 void PlasmaWindow::setTitle(QString const& title)
 {
     d_ptr->setTitle(title);
-}
-
-void PlasmaWindow::unmap()
-{
-    d_ptr->manager->unmapWindow(this);
 }
 
 QHash<Surface*, QRect> PlasmaWindow::minimizedGeometries() const
@@ -612,6 +740,16 @@ std::vector<std::string> const& PlasmaWindow::plasmaVirtualDesktops() const
     return d_ptr->plasmaVirtualDesktops;
 }
 
+std::uint32_t const& PlasmaWindow::id() const
+{
+    return d_ptr->windowId;
+}
+
+std::string const& PlasmaWindow::uuid() const
+{
+    return d_ptr->uuid;
+}
+
 void PlasmaWindow::setShadeable(bool set)
 {
     d_ptr->setState(ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STATE_SHADEABLE, set);
@@ -653,6 +791,11 @@ void PlasmaWindow::setGeometry(QRect const& geometry)
     d_ptr->setGeometry(geometry);
 }
 
+void PlasmaWindow::set_resource_name(std::string const& resource_name) const
+{
+    d_ptr->set_resource_name(resource_name);
+}
+
 /////////////////////////// Plasma Window Resource ///////////////////////////
 
 PlasmaWindowRes::Private::Private(Wayland::Client* client,
@@ -683,6 +826,9 @@ const struct org_kde_plasma_window_interface PlasmaWindowRes::Private::s_interfa
     requestEnterVirtualDesktopCallback,
     requestEnterNewVirtualDesktopCallback,
     requestLeaveVirtualDesktopCallback,
+    request_enter_activity_callback,
+    request_leave_activity_callback,
+    send_to_output_callback,
 };
 
 void PlasmaWindowRes::Private::getIconCallback([[maybe_unused]] wl_client* wlClient,
@@ -929,11 +1075,35 @@ void PlasmaWindowRes::Private::unsetMinimizedGeometryCallback([[maybe_unused]] w
     Q_EMIT priv->window->minimizedGeometriesChanged();
 }
 
-void PlasmaWindowRes::Private::unmap()
+void PlasmaWindowRes::Private::request_enter_activity_callback(wl_client* /*wlClient*/,
+                                                               wl_resource* /*wlResource*/,
+                                                               char const* /*id*/)
 {
-    window = nullptr;
-    send<org_kde_plasma_window_send_unmapped>();
-    client->flush();
+}
+
+void PlasmaWindowRes::Private::request_leave_activity_callback(wl_client* /*wlClient*/,
+                                                               wl_resource* /*wlResource*/,
+                                                               char const* /*id*/)
+{
+}
+
+void PlasmaWindowRes::Private::send_to_output_callback(wl_client* /*wlClient*/,
+                                                       wl_resource* wlResource,
+                                                       wl_resource* wlOutput)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    if (!priv->window) {
+        return;
+    }
+
+    auto wloutput = WlOutputGlobal::get_handle(wlOutput);
+
+    // Don't emit signal if output has been destroyed server-side, for example being hotplugged.
+    if (wloutput == nullptr) {
+        return;
+    }
+
+    Q_EMIT priv->window->sendToOutputRequested(wloutput->output());
 }
 
 PlasmaWindowRes::PlasmaWindowRes(Wayland::Client* client,
@@ -947,7 +1117,9 @@ PlasmaWindowRes::PlasmaWindowRes(Wayland::Client* client,
 
 void PlasmaWindowRes::unmap()
 {
-    d_ptr->unmap();
+    d_ptr->window = nullptr;
+    d_ptr->send<org_kde_plasma_window_send_unmapped>();
+    d_ptr->client->flush();
 }
 
 }

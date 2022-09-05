@@ -1,5 +1,6 @@
 /********************************************************************
 Copyright 2015 Marco Martin <mart@kde.org>
+Copyright 2022 Francesco Sorrentino <francesco.sorr@gmail.com>
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -22,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/compositor.h"
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
+#include "../../src/client/output.h"
 #include "../../src/client/plasmawindowmanagement.h"
 #include "../../src/client/region.h"
 #include "../../src/client/registry.h"
@@ -34,6 +36,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/surface.h"
 
 #include <wayland-plasma-window-management-client-protocol.h>
+
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -85,6 +91,17 @@ private Q_SLOTS:
     void testPid();
     void testApplicationMenu();
 
+    void testStackingOrder_data();
+    void testStackingOrder();
+    void testStackingOrder_empty();
+
+    void testStackingOrderUuid_data();
+    void testStackingOrderUuid();
+    void testStackingOrderUuid_empty();
+
+    void testSendToOutput();
+    void testResourceNameChanged();
+
 private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
@@ -94,29 +111,27 @@ private:
         Srv::Surface* surface{nullptr};
     } server;
 
-    Clt::Surface* m_surface = nullptr;
-    Clt::ConnectionThread* m_connection;
-    Clt::Compositor* m_compositor;
-    Clt::EventQueue* m_queue;
-    Clt::PlasmaWindowManagement* m_windowManagement;
-    Clt::PlasmaWindow* m_window;
-    QThread* m_thread;
-    Clt::Registry* m_registry;
+    Clt::Surface* m_surface{};
+    Clt::ConnectionThread* m_connection{};
+    Clt::Compositor* m_compositor{};
+    Clt::EventQueue* m_queue{};
+    Clt::PlasmaWindowManagement* m_windowManagement{};
+    Clt::PlasmaWindow* m_window{};
+    QThread* m_thread{};
+    Clt::Registry* m_registry{};
 };
 
 constexpr auto socket_name{"wrapland-test-wayland-windowmanagement-0"};
 
 TestWindowManagement::TestWindowManagement(QObject* parent)
     : QObject(parent)
-    , m_connection(nullptr)
-    , m_compositor(nullptr)
-    , m_queue(nullptr)
-    , m_thread(nullptr)
 {
 }
 
 void TestWindowManagement::init()
 {
+    qRegisterMetaType<std::string const&>();
+    qRegisterMetaType<Wrapland::Server::Output*>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
     qRegisterMetaType<Srv::PlasmaWindowManager::ShowingDesktopState>("ShowingDesktopState");
 
@@ -174,7 +189,7 @@ void TestWindowManagement::init()
 
     QSignalSpy windowSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowSpy.isValid());
-    server.plasma_window = server.globals.plasma_window_manager->createWindow(this);
+    server.plasma_window = server.globals.plasma_window_manager->createWindow();
     server.plasma_window->setPid(1337);
 
     QVERIFY(windowSpy.wait());
@@ -267,7 +282,7 @@ void TestWindowManagement::testUseAfterUnmap()
     QSignalSpy serverDestroyedSpy(server.plasma_window, &QObject::destroyed);
     QVERIFY(serverDestroyedSpy.isValid());
 
-    server.plasma_window->unmap();
+    delete server.plasma_window;
     server.plasma_window = nullptr;
     QCOMPARE(serverDestroyedSpy.count(), 1);
     m_window->requestClose();
@@ -284,12 +299,12 @@ void TestWindowManagement::testCreateAfterUnmap()
 
     // Create and unmap in one go.
     // Client will first handle the create, the unmap will be sent once the server side is bound.
-    auto serverWindow = server.globals.plasma_window_manager->createWindow(this);
-    serverWindow->unmap();
+    auto serverWindow = server.globals.plasma_window_manager->createWindow();
+    delete serverWindow;
 
     QCOMPARE(server.globals.plasma_window_manager->children().count(), 0);
-    QCoreApplication::instance()->processEvents();
-    QCoreApplication::instance()->processEvents(QEventLoop::WaitForMoreEvents);
+    QCoreApplication::processEvents();
+    QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents);
     QTRY_COMPARE(m_windowManagement->children().count(), 2);
 
     auto window = dynamic_cast<Clt::PlasmaWindow*>(m_windowManagement->children().last());
@@ -328,7 +343,7 @@ void TestWindowManagement::testActiveWindowOnUnmapped()
     QSignalSpy serverDestroyedSpy(server.plasma_window, &QObject::destroyed);
     QVERIFY(serverDestroyedSpy.isValid());
 
-    server.globals.plasma_window_manager->unmapWindow(server.plasma_window);
+    delete server.plasma_window;
     server.plasma_window = nullptr;
     QCOMPARE(serverDestroyedSpy.count(), 1);
     QVERIFY(activeWindowChangedSpy.wait());
@@ -578,7 +593,7 @@ void TestWindowManagement::testParentWindow()
     // Now let's create a second window.
     QSignalSpy windowAddedSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowAddedSpy.isValid());
-    auto serverTransient = server.globals.plasma_window_manager->createWindow(this);
+    auto serverTransient = server.globals.plasma_window_manager->createWindow();
     serverTransient->setParentWindow(server.plasma_window);
     QVERIFY(windowAddedSpy.wait());
     auto transient = windowAddedSpy.first().first().value<Clt::PlasmaWindow*>();
@@ -597,7 +612,7 @@ void TestWindowManagement::testParentWindow()
     QCOMPARE(transient->parentWindow().data(), parentWindow);
 
     // Now let's try to unmap the parent.
-    server.plasma_window->unmap();
+    delete server.plasma_window;
     m_window = nullptr;
     server.plasma_window = nullptr;
     QVERIFY(parentWindowChangedSpy.wait());
@@ -715,7 +730,7 @@ void TestWindowManagement::testPid()
 
     // Test server not setting a PID for whatever reason.
     std::unique_ptr<Srv::PlasmaWindow> newWindowInterface(
-        server.globals.plasma_window_manager->createWindow(this));
+        server.globals.plasma_window_manager->createWindow());
 
     QSignalSpy windowSpy(m_windowManagement, &Clt::PlasmaWindowManagement::windowCreated);
     QVERIFY(windowSpy.wait());
@@ -740,6 +755,137 @@ void TestWindowManagement::testApplicationMenu()
 
     QCOMPARE(m_window->applicationMenuServiceName(), serviceName);
     QCOMPARE(m_window->applicationMenuObjectPath(), objectPath);
+}
+
+void TestWindowManagement::testStackingOrder_data()
+{
+    QTest::addColumn<std::vector<uint32_t>>("stack");
+
+    QTest::newRow("0") << std::vector<uint32_t>{};
+    QTest::newRow("1") << std::vector<uint32_t>{42};
+    QTest::newRow("4") << std::vector<uint32_t>{74, 75, 76, 77};
+    QTest::newRow("7") << std::vector<uint32_t>{1121, 1119, 1117, 1115, 1113, 1111, 1109};
+}
+
+void TestWindowManagement::testStackingOrder()
+{
+    QSignalSpy stacking_order_spy(m_windowManagement,
+                                  &Clt::PlasmaWindowManagement::stacking_order_changed);
+    QVERIFY(stacking_order_spy.isValid());
+
+    QFETCH(std::vector<uint32_t>, stack);
+    server.globals.plasma_window_manager->set_stacking_order(stack);
+
+    QVERIFY(stacking_order_spy.wait() || stack.empty());
+    QCOMPARE(m_windowManagement->stacking_order().size(), stack.size());
+    QCOMPARE(m_windowManagement->stacking_order(), stack);
+}
+
+/// First populate the stack, then clear it.
+void TestWindowManagement::testStackingOrder_empty()
+{
+    QSignalSpy stacking_order_spy(m_windowManagement,
+                                  &Clt::PlasmaWindowManagement::stacking_order_changed);
+    QVERIFY(stacking_order_spy.isValid());
+
+    std::vector<uint32_t> stack{1};
+    server.globals.plasma_window_manager->set_stacking_order(stack);
+
+    QVERIFY(stacking_order_spy.wait());
+    QCOMPARE(m_windowManagement->stacking_order().size(), stack.size());
+    QCOMPARE(m_windowManagement->stacking_order(), stack);
+
+    stack.clear();
+    server.globals.plasma_window_manager->set_stacking_order(stack);
+
+    QVERIFY(stacking_order_spy.wait());
+    QCOMPARE(m_windowManagement->stacking_order_uuid().size(), 0);
+}
+
+void TestWindowManagement::testStackingOrderUuid_data()
+{
+    QTest::addColumn<std::vector<std::string>>("stack");
+
+    QTest::newRow("0") << std::vector<std::string>{};
+    QTest::newRow("1") << std::vector<std::string>{"forty-two"};
+    QTest::newRow("4") << std::vector<std::string>{"74", "seventy five", "76___", "77?"};
+    QTest::newRow("7") << std::vector<std::string>{
+        "1'121", "1119.", "hi", "11-15", "1113$", "++1111", "end"};
+}
+
+void TestWindowManagement::testStackingOrderUuid()
+{
+    QSignalSpy stacking_order_spy(m_windowManagement,
+                                  &Clt::PlasmaWindowManagement::stacking_order_uuid_changed);
+    QVERIFY(stacking_order_spy.isValid());
+
+    QFETCH(std::vector<std::string>, stack);
+    server.globals.plasma_window_manager->set_stacking_order_uuids(stack);
+
+    QVERIFY(stacking_order_spy.wait() || stack.empty());
+    QCOMPARE(m_windowManagement->stacking_order_uuid().size(), stack.size());
+    QCOMPARE(m_windowManagement->stacking_order_uuid(), stack);
+}
+
+/// First populate the stack, then clear it.
+void TestWindowManagement::testStackingOrderUuid_empty()
+{
+    QSignalSpy stacking_order_spy(m_windowManagement,
+                                  &Clt::PlasmaWindowManagement::stacking_order_uuid_changed);
+    QVERIFY(stacking_order_spy.isValid());
+
+    std::vector<std::string> stack{"HeLLo", "world!"};
+    server.globals.plasma_window_manager->set_stacking_order_uuids(stack);
+
+    QVERIFY(stacking_order_spy.wait());
+    QCOMPARE(m_windowManagement->stacking_order_uuid().size(), stack.size());
+    QCOMPARE(m_windowManagement->stacking_order_uuid(), stack);
+
+    stack.clear();
+    server.globals.plasma_window_manager->set_stacking_order_uuids(stack);
+
+    QVERIFY(stacking_order_spy.wait());
+    QCOMPARE(m_windowManagement->stacking_order_uuid().size(), 0);
+}
+
+void TestWindowManagement::testSendToOutput()
+{
+    QSignalSpy sendToOutputSpy(server.plasma_window, &Srv::PlasmaWindow::sendToOutputRequested);
+    QVERIFY(sendToOutputSpy.isValid());
+
+    // Create output
+    QSignalSpy outputAnnouncedSpy(m_registry, &Wrapland::Client::Registry::outputAnnounced);
+    QVERIFY(outputAnnouncedSpy.isValid());
+
+    auto srv_output = std::make_unique<Srv::Output>(server.display.get());
+    srv_output->set_enabled(true);
+    srv_output->done();
+
+    QVERIFY(outputAnnouncedSpy.wait());
+    std::unique_ptr<Wrapland::Client::Output> clt_output{
+        m_registry->createOutput(outputAnnouncedSpy.first().first().value<quint32>(),
+                                 outputAnnouncedSpy.first().last().value<quint32>())};
+    QVERIFY(clt_output->isValid());
+
+    // Send window to output
+    m_window->request_send_to_output(clt_output.get());
+    m_connection->flush();
+
+    QVERIFY(sendToOutputSpy.wait());
+    auto actual = sendToOutputSpy.first().first().value<Wrapland::Server::Output*>();
+    QCOMPARE(actual, srv_output.get());
+}
+
+void TestWindowManagement::testResourceNameChanged()
+{
+    QSignalSpy name_spy(m_window, &Clt::PlasmaWindow::resource_name_changed);
+    QVERIFY(name_spy.isValid());
+
+    std::string const resource_name{"Hello, world!"};
+    server.plasma_window->set_resource_name(resource_name);
+
+    QVERIFY(name_spy.wait());
+    QCOMPARE(m_window->resource_name(), resource_name);
 }
 
 QTEST_GUILESS_MAIN(TestWindowManagement)

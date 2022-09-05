@@ -159,7 +159,7 @@ void TestVirtualDesktop::init()
     QSignalSpy windowSpy(m_windowManagement,
                          SIGNAL(windowCreated(Wrapland::Client::PlasmaWindow*)));
     QVERIFY(windowSpy.isValid());
-    server.plasma_window = server.globals.plasma_window_manager->createWindow(this);
+    server.plasma_window = server.globals.plasma_window_manager->createWindow();
     server.plasma_window->setPid(1337);
 
     QVERIFY(windowSpy.wait());
