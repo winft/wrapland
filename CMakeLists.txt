@@ -57,7 +57,6 @@ find_package(EGL)
 set_package_properties(EGL PROPERTIES TYPE REQUIRED)
 
 include(KDEInstallDirs)
-include(KDECompilerSettings NO_POLICY_SCOPE)
 include(KDECMakeSettings)
 include(CheckIncludeFile)
 
