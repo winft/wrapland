@@ -57,8 +57,14 @@ find_package(EGL)
 set_package_properties(EGL PROPERTIES TYPE REQUIRED)
 
 include(KDEInstallDirs)
-include(KDECMakeSettings)
 include(CheckIncludeFile)
+include(CTest)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
+set(CMAKE_LINK_DEPENDS_NO_SHARED ON)
+option(BUILD_SHARED_LIBS "If enabled, shared libs will be built by default, otherwise static libs" ON)
+set(CMAKE_AUTOMOC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
