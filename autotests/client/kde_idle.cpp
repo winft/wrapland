@@ -71,7 +71,7 @@ void IdleTest::init()
     server.display->createShm();
     server.seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
     server.seat->setName("seat0");
-    server.globals.kde_idle = server.display->createIdle();
+    server.globals.kde_idle = server.display->create_kde_idle();
 
     // setup connection
     m_connection = new Clt::ConnectionThread;
@@ -137,7 +137,7 @@ void IdleTest::cleanup()
 void IdleTest::testTimeout()
 {
     // this test verifies the basic functionality of a timeout
-    QSignalSpy timeout_spy(server.globals.kde_idle.get(), &Srv::KdeIdle::timeout_created);
+    QSignalSpy timeout_spy(server.globals.kde_idle.get(), &Srv::kde_idle::timeout_created);
     QVERIFY(timeout_spy.isValid());
 
     std::unique_ptr<Clt::IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
@@ -149,7 +149,7 @@ void IdleTest::testTimeout()
 
     QVERIFY(timeout_spy.wait());
 
-    auto idle_timeout = timeout_spy.front().front().value<Srv::IdleTimeout*>();
+    auto idle_timeout = timeout_spy.front().front().value<Srv::kde_idle_timeout*>();
     QCOMPARE(idle_timeout->duration(), std::chrono::milliseconds(1));
     QCOMPARE(idle_timeout->seat(), server.globals.seats.at(0).get());
 
@@ -163,7 +163,7 @@ void IdleTest::testTimeout()
 void IdleTest::test_simulate_user_activity()
 {
     // this test verifies the basic functionality of a timeout
-    QSignalSpy timeout_spy(server.globals.kde_idle.get(), &Srv::KdeIdle::timeout_created);
+    QSignalSpy timeout_spy(server.globals.kde_idle.get(), &Srv::kde_idle::timeout_created);
     QVERIFY(timeout_spy.isValid());
 
     std::unique_ptr<Clt::IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
@@ -171,9 +171,9 @@ void IdleTest::test_simulate_user_activity()
 
     QVERIFY(timeout_spy.wait());
 
-    auto idle_timeout = timeout_spy.front().front().value<Srv::IdleTimeout*>();
+    auto idle_timeout = timeout_spy.front().front().value<Srv::kde_idle_timeout*>();
 
-    QSignalSpy simulate_spy(idle_timeout, &Srv::IdleTimeout::simulate_user_activity);
+    QSignalSpy simulate_spy(idle_timeout, &Srv::kde_idle_timeout::simulate_user_activity);
     QVERIFY(simulate_spy.isValid());
 
     timeout->simulateUserActivity();

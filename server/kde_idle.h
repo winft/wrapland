@@ -17,29 +17,29 @@ namespace Wrapland::Server
 
 class Client;
 class Display;
-class IdleTimeout;
+class kde_idle_timeout;
 class Seat;
 
-class WRAPLANDSERVER_EXPORT KdeIdle : public QObject
+class WRAPLANDSERVER_EXPORT kde_idle : public QObject
 {
     Q_OBJECT
 public:
-    explicit KdeIdle(Display* display);
-    ~KdeIdle() override;
+    explicit kde_idle(Display* display);
+    ~kde_idle() override;
 
 Q_SIGNALS:
-    void timeout_created(IdleTimeout*);
+    void timeout_created(kde_idle_timeout*);
 
 private:
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
 
-class WRAPLANDSERVER_EXPORT IdleTimeout : public QObject
+class WRAPLANDSERVER_EXPORT kde_idle_timeout : public QObject
 {
     Q_OBJECT
 public:
-    ~IdleTimeout() override;
+    ~kde_idle_timeout() override;
 
     std::chrono::milliseconds duration() const;
     Seat* seat() const;
@@ -52,12 +52,12 @@ Q_SIGNALS:
     void simulate_user_activity();
 
 private:
-    friend class KdeIdle;
-    IdleTimeout(Client* client,
-                uint32_t version,
-                uint32_t id,
-                std::chrono::milliseconds duration,
-                Seat* seat);
+    friend class kde_idle;
+    kde_idle_timeout(Client* client,
+                     uint32_t version,
+                     uint32_t id,
+                     std::chrono::milliseconds duration,
+                     Seat* seat);
 
     class Private;
     Private* d_ptr;

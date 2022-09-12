@@ -11,101 +11,103 @@
 namespace Wrapland::Server
 {
 
-const struct org_kde_kwin_idle_interface KdeIdle::Private::s_interface
-    = {cb<getIdleTimeoutCallback>};
+const struct org_kde_kwin_idle_interface kde_idle::Private::s_interface = {
+    cb<get_idle_timeout_callback>,
+};
 
-KdeIdle::Private::Private(Display* display, KdeIdle* q_ptr)
-    : Wayland::Global<KdeIdle>(q_ptr, display, &org_kde_kwin_idle_interface, &s_interface)
+kde_idle::Private::Private(Display* display, kde_idle* q_ptr)
+    : kde_idle_global(q_ptr, display, &org_kde_kwin_idle_interface, &s_interface)
 {
     create();
 }
 
-KdeIdle::Private::~Private() = default;
+kde_idle::Private::~Private() = default;
 
-void KdeIdle::Private::getIdleTimeoutCallback(KdeIdleBind* bind,
-                                              uint32_t id,
-                                              wl_resource* wlSeat,
-                                              uint32_t timeout)
+void kde_idle::Private::get_idle_timeout_callback(kde_idle_bind* bind,
+                                                  uint32_t id,
+                                                  wl_resource* wlSeat,
+                                                  uint32_t timeout)
 {
     auto priv = bind->global()->handle->d_ptr.get();
     auto seat = SeatGlobal::get_handle(wlSeat);
 
     auto duration = std::max(std::chrono::milliseconds(timeout), std::chrono::milliseconds::zero());
 
-    auto idleTimeout = new IdleTimeout(bind->client->handle, bind->version, id, duration, seat);
-    if (!idleTimeout->d_ptr->resource) {
+    auto idle_timeout
+        = new kde_idle_timeout(bind->client->handle, bind->version, id, duration, seat);
+    if (!idle_timeout->d_ptr->resource) {
         bind->post_no_memory();
-        delete idleTimeout;
+        delete idle_timeout;
         return;
     }
 
-    Q_EMIT priv->handle->timeout_created(idleTimeout);
+    Q_EMIT priv->handle->timeout_created(idle_timeout);
 }
 
-KdeIdle::KdeIdle(Display* display)
+kde_idle::kde_idle(Display* display)
     : d_ptr(new Private(display, this))
 {
 }
 
-KdeIdle::~KdeIdle() = default;
+kde_idle::~kde_idle() = default;
 
-const struct org_kde_kwin_idle_timeout_interface IdleTimeout::Private::s_interface = {
+const struct org_kde_kwin_idle_timeout_interface kde_idle_timeout::Private::s_interface = {
     destroyCallback,
-    simulateUserActivityCallback,
+    simulate_user_activity_callback,
 };
 
-IdleTimeout::Private::Private(Client* client,
-                              uint32_t version,
-                              uint32_t id,
-                              std::chrono::milliseconds duration,
-                              Seat* seat,
-                              IdleTimeout* q_ptr)
-    : Wayland::Resource<IdleTimeout>(client,
-                                     version,
-                                     id,
-                                     &org_kde_kwin_idle_timeout_interface,
-                                     &s_interface,
-                                     q_ptr)
+kde_idle_timeout::Private::Private(Client* client,
+                                   uint32_t version,
+                                   uint32_t id,
+                                   std::chrono::milliseconds duration,
+                                   Seat* seat,
+                                   kde_idle_timeout* q_ptr)
+    : Wayland::Resource<kde_idle_timeout>(client,
+                                          version,
+                                          id,
+                                          &org_kde_kwin_idle_timeout_interface,
+                                          &s_interface,
+                                          q_ptr)
     , duration{duration}
     , seat{seat}
 {
 }
 
-IdleTimeout::Private::~Private() = default;
+kde_idle_timeout::Private::~Private() = default;
 
-void IdleTimeout::Private::simulateUserActivityCallback([[maybe_unused]] wl_client* wlClient,
-                                                        wl_resource* wlResource)
+void kde_idle_timeout::Private::simulate_user_activity_callback(wl_client* /*wlClient*/,
+                                                                wl_resource* wlResource)
 {
     Q_EMIT get_handle(wlResource)->simulate_user_activity();
 }
 
-IdleTimeout::IdleTimeout(Client* client,
-                         uint32_t version,
-                         uint32_t id,
-                         std::chrono::milliseconds duration,
-                         Seat* seat)
+kde_idle_timeout::kde_idle_timeout(Client* client,
+                                   uint32_t version,
+                                   uint32_t id,
+                                   std::chrono::milliseconds duration,
+                                   Seat* seat)
     : d_ptr(new Private(client, version, id, duration, seat, this))
 {
 }
 
-IdleTimeout::~IdleTimeout() = default;
+kde_idle_timeout::~kde_idle_timeout() = default;
 
-std::chrono::milliseconds IdleTimeout::duration() const
+std::chrono::milliseconds kde_idle_timeout::duration() const
 {
     return d_ptr->duration;
 }
 
-Seat* IdleTimeout::seat() const
+Seat* kde_idle_timeout::seat() const
 {
     return d_ptr->seat;
 }
 
-void IdleTimeout::idle()
+void kde_idle_timeout::idle()
 {
     d_ptr->send<org_kde_kwin_idle_timeout_send_idle>();
 }
 
-void IdleTimeout::resume()
+void kde_idle_timeout::resume()
 {
     d_ptr->send<org_kde_kwin_idle_timeout_send_resumed>();
 }

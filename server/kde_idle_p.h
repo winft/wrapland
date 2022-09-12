@@ -16,24 +16,26 @@
 namespace Wrapland::Server
 {
 
-constexpr uint32_t KdeIdleVersion = 1;
-using KdeIdleGlobal = Wayland::Global<KdeIdle, KdeIdleVersion>;
-using KdeIdleBind = Wayland::Bind<KdeIdleGlobal>;
+constexpr uint32_t kde_idle_version = 1;
+using kde_idle_global = Wayland::Global<kde_idle, kde_idle_version>;
+using kde_idle_bind = Wayland::Bind<kde_idle_global>;
 
-class KdeIdle::Private : public KdeIdleGlobal
+class kde_idle::Private : public kde_idle_global
 {
 public:
-    Private(Display* display, KdeIdle* q_ptr);
+    Private(Display* display, kde_idle* q_ptr);
     ~Private() override;
 
 private:
-    static void
-    getIdleTimeoutCallback(KdeIdleBind* bind, uint32_t id, wl_resource* wlSeat, uint32_t timeout);
+    static void get_idle_timeout_callback(kde_idle_bind* bind,
+                                          uint32_t id,
+                                          wl_resource* wlSeat,
+                                          uint32_t timeout);
 
     static const struct org_kde_kwin_idle_interface s_interface;
 };
 
-class IdleTimeout::Private : public Wayland::Resource<IdleTimeout>
+class kde_idle_timeout::Private : public Wayland::Resource<kde_idle_timeout>
 {
 public:
     Private(Client* client,
@@ -41,14 +43,14 @@ public:
             uint32_t id,
             std::chrono::milliseconds duration,
             Seat* seat,
-            IdleTimeout* q_ptr);
+            kde_idle_timeout* q_ptr);
     ~Private() override;
 
     std::chrono::milliseconds duration;
     Seat* seat;
 
 private:
-    static void simulateUserActivityCallback(wl_client* wlClient, wl_resource* wlResource);
+    static void simulate_user_activity_callback(wl_client* wlClient, wl_resource* wlResource);
     static const struct org_kde_kwin_idle_timeout_interface s_interface;
 };
 
