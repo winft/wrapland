@@ -191,7 +191,7 @@ void LockedPointer::Private::lockedCallback(void* data,
 {
     auto p = reinterpret_cast<LockedPointer::Private*>(data);
     Q_ASSERT(p->lockedpointer == zwp_locked_pointer_v1);
-    emit p->q->locked();
+    Q_EMIT p->q->locked();
 }
 
 void LockedPointer::Private::unlockedCallback(void* data,
@@ -199,7 +199,7 @@ void LockedPointer::Private::unlockedCallback(void* data,
 {
     auto p = reinterpret_cast<LockedPointer::Private*>(data);
     Q_ASSERT(p->lockedpointer == zwp_locked_pointer_v1);
-    emit p->q->unlocked();
+    Q_EMIT p->q->unlocked();
 }
 
 LockedPointer::Private::Private(LockedPointer* q)
@@ -298,7 +298,7 @@ void ConfinedPointer::Private::confinedCallback(void* data,
 {
     auto p = reinterpret_cast<ConfinedPointer::Private*>(data);
     Q_ASSERT(p->confinedpointer == zwp_confined_pointer_v1);
-    emit p->q->confined();
+    Q_EMIT p->q->confined();
 }
 
 void ConfinedPointer::Private::unconfinedCallback(void* data,
@@ -306,7 +306,7 @@ void ConfinedPointer::Private::unconfinedCallback(void* data,
 {
     auto p = reinterpret_cast<ConfinedPointer::Private*>(data);
     Q_ASSERT(p->confinedpointer == zwp_confined_pointer_v1);
-    emit p->q->unconfined();
+    Q_EMIT p->q->unconfined();
 }
 
 ConfinedPointer::Private::Private(ConfinedPointer* q)

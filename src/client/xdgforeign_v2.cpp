@@ -205,7 +205,7 @@ void XdgExportedUnstableV2::Private::handleCallback(void* data,
     Q_ASSERT(p->exported == zxdg_exported_v2);
 
     p->handle = handle;
-    emit p->q->done();
+    Q_EMIT p->q->done();
 }
 
 XdgExportedUnstableV2::XdgExportedUnstableV2(QObject* parent)
@@ -287,7 +287,7 @@ void XdgImportedUnstableV2::Private::destroyedCallback(void* data,
     Q_ASSERT(p->imported == zxdg_imported_v2);
 
     p->q->release();
-    emit p->q->importedDestroyed();
+    Q_EMIT p->q->importedDestroyed();
 }
 
 XdgImportedUnstableV2::XdgImportedUnstableV2(QObject* parent)

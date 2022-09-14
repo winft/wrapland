@@ -427,7 +427,7 @@ void XdgShellToplevel::setSize(QSize const& size)
         return;
     }
     d_ptr->size = size;
-    emit sizeChanged(size);
+    Q_EMIT sizeChanged(size);
 }
 
 QSize XdgShellToplevel::size() const

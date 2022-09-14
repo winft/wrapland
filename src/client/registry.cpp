@@ -780,7 +780,7 @@ void Registry::Private::globalSync(void* data, wl_callback* callback, uint32_t s
 
 void Registry::Private::handleGlobalSync()
 {
-    emit q->interfacesAnnounced();
+    Q_EMIT q->interfacesAnnounced();
 }
 
 namespace
@@ -799,7 +799,7 @@ static Registry::Interface nameToInterface(char const* interface)
 void Registry::Private::handleAnnounce(uint32_t name, char const* interface, uint32_t version)
 {
     Interface i = nameToInterface(interface);
-    emit q->interfaceAnnounced(QByteArray(interface), name, version);
+    Q_EMIT q->interfaceAnnounced(QByteArray(interface), name, version);
     if (i == Interface::Unknown) {
         qCDebug(WRAPLAND_CLIENT) << "Unknown interface announced: " << interface << "/" << name
                                  << "/" << version;
@@ -809,7 +809,7 @@ void Registry::Private::handleAnnounce(uint32_t name, char const* interface, uin
     m_interfaces.append({i, name, version});
     auto it = s_interfaces.constFind(i);
     if (it != s_interfaces.end()) {
-        emit(q->*it.value().announcedSignal)(name, version);
+        Q_EMIT(q->*it.value().announcedSignal)(name, version);
     }
 }
 
@@ -823,10 +823,10 @@ void Registry::Private::handleRemove(uint32_t name)
         m_interfaces.erase(it);
         auto sit = s_interfaces.find(data.interface);
         if (sit != s_interfaces.end()) {
-            emit(q->*sit.value().removedSignal)(data.name);
+            Q_EMIT(q->*sit.value().removedSignal)(data.name);
         }
     }
-    emit q->interfaceRemoved(name);
+    Q_EMIT q->interfaceRemoved(name);
 }
 
 bool Registry::Private::hasInterface(Registry::Interface interface) const
@@ -957,7 +957,7 @@ T* Registry::Private::create(quint32 name,
     t->setup((q->*bindMethod)(name, version));
     QObject::connect(q, &Registry::interfaceRemoved, t, [t, name](quint32 removed) {
         if (name == removed) {
-            emit t->removed();
+            Q_EMIT t->removed();
         }
     });
     QObject::connect(q, &Registry::registryReleased, t, &T::release);

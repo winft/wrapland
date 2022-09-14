@@ -319,7 +319,7 @@ target_link_libraries(WraplandClient
 )
 
 set_target_properties(WraplandClient PROPERTIES
-  VERSION ${WRAPLAND_VERSION_STRING}
+  VERSION ${WRAPLAND_VERSION}
   SOVERSION ${WRAPLAND_SOVERSION}
   EXPORT_NAME WraplandClient
 )
