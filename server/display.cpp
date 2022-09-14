@@ -252,9 +252,9 @@ std::unique_ptr<PlasmaWindowManager> Display::createPlasmaWindowManager()
     return std::make_unique<PlasmaWindowManager>(this);
 }
 
-std::unique_ptr<KdeIdle> Display::createIdle()
+std::unique_ptr<kde_idle> Display::create_kde_idle()
 {
-    return std::make_unique<KdeIdle>(this);
+    return std::make_unique<kde_idle>(this);
 }
 
 std::unique_ptr<KeyboardShortcutsInhibitManagerV1> Display::createKeyboardShortcutsInhibitManager()

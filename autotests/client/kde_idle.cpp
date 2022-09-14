@@ -43,10 +43,7 @@ private Q_SLOTS:
     void cleanup();
 
     void testTimeout();
-    void testSimulateUserActivity();
-    void testServerSimulateUserActivity();
-    void testIdleInhibit();
-    void testIdleInhibitBlocksTimeout();
+    void test_simulate_user_activity();
 
 private:
     struct {
@@ -74,7 +71,7 @@ void IdleTest::init()
     server.display->createShm();
     server.seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
     server.seat->setName("seat0");
-    server.globals.kde_idle = server.display->createIdle();
+    server.globals.kde_idle = server.display->create_kde_idle();
 
     // setup connection
     m_connection = new Clt::ConnectionThread;
@@ -139,8 +136,9 @@ void IdleTest::cleanup()
 
 void IdleTest::testTimeout()
 {
-    // this test verifies the basic functionality of a timeout, that it gets fired
-    // and that it resumes from idle, etc.
+    // this test verifies the basic functionality of a timeout
+    QSignalSpy timeout_spy(server.globals.kde_idle.get(), &Srv::kde_idle::timeout_created);
+    QVERIFY(timeout_spy.isValid());
 
     std::unique_ptr<Clt::IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
     QVERIFY(timeout->isValid());
@@ -149,144 +147,38 @@ void IdleTest::testTimeout()
     QSignalSpy resumedFormIdleSpy(timeout.get(), &Clt::IdleTimeout::resumeFromIdle);
     QVERIFY(resumedFormIdleSpy.isValid());
 
-    // we requested a timeout of 1 msec, but the minimum the server sets is 5 sec
-    QVERIFY(!idleSpy.wait(1000));
-    // the default of 5 sec will now pass
+    QVERIFY(timeout_spy.wait());
+
+    auto idle_timeout = timeout_spy.front().front().value<Srv::kde_idle_timeout*>();
+    QCOMPARE(idle_timeout->duration(), std::chrono::milliseconds(1));
+    QCOMPARE(idle_timeout->seat(), server.globals.seats.at(0).get());
+
+    idle_timeout->idle();
     QVERIFY(idleSpy.wait());
 
-    // simulate some activity
-    QVERIFY(resumedFormIdleSpy.isEmpty());
-    server.seat->setTimestamp(1);
+    idle_timeout->resume();
     QVERIFY(resumedFormIdleSpy.wait());
-
-    timeout.reset();
-    m_connection->flush();
-    server.display->dispatchEvents();
 }
 
-void IdleTest::testSimulateUserActivity()
+void IdleTest::test_simulate_user_activity()
 {
-    // this test verifies that simulate user activity doesn't fire the timer
-    std::unique_ptr<Clt::IdleTimeout> timeout(m_idle->getTimeout(6000, m_seat));
-    QVERIFY(timeout->isValid());
-    QSignalSpy idleSpy(timeout.get(), &Clt::IdleTimeout::idle);
-    QVERIFY(idleSpy.isValid());
-    QSignalSpy resumedFormIdleSpy(timeout.get(), &Clt::IdleTimeout::resumeFromIdle);
-    QVERIFY(resumedFormIdleSpy.isValid());
-    m_connection->flush();
-
-    QTest::qWait(4000);
-    timeout->simulateUserActivity();
-    // waiting default five sec should fail
-    QVERIFY(!idleSpy.wait());
-    // another 2 sec should fire
-    QVERIFY(idleSpy.wait(2000));
-
-    // now simulating user activity should emit a resumedFromIdle
-    QVERIFY(resumedFormIdleSpy.isEmpty());
-    timeout->simulateUserActivity();
-    QVERIFY(resumedFormIdleSpy.wait());
-
-    timeout.reset();
-    m_connection->flush();
-    server.display->dispatchEvents();
-}
-
-void IdleTest::testServerSimulateUserActivity()
-{
-    // this test verifies that simulate user activity doesn't fire the timer
-    std::unique_ptr<Clt::IdleTimeout> timeout(m_idle->getTimeout(6000, m_seat));
-    QVERIFY(timeout->isValid());
-    QSignalSpy idleSpy(timeout.get(), &Clt::IdleTimeout::idle);
-    QVERIFY(idleSpy.isValid());
-    QSignalSpy resumedFormIdleSpy(timeout.get(), &Clt::IdleTimeout::resumeFromIdle);
-    QVERIFY(resumedFormIdleSpy.isValid());
-    m_connection->flush();
-
-    QTest::qWait(4000);
-    server.globals.kde_idle->simulateUserActivity();
-    // waiting default five sec should fail
-    QVERIFY(!idleSpy.wait());
-    // another 2 sec should fire
-    QVERIFY(idleSpy.wait(2000));
-
-    // now simulating user activity should emit a resumedFromIdle
-    QVERIFY(resumedFormIdleSpy.isEmpty());
-    server.globals.kde_idle->simulateUserActivity();
-    QVERIFY(resumedFormIdleSpy.wait());
-
-    timeout.reset();
-    m_connection->flush();
-    server.display->dispatchEvents();
-}
-
-void IdleTest::testIdleInhibit()
-{
-    QCOMPARE(server.globals.kde_idle->isInhibited(), false);
-    QSignalSpy idleInhibitedSpy(server.globals.kde_idle.get(),
-                                &Wrapland::Server::KdeIdle::inhibitedChanged);
-    QVERIFY(idleInhibitedSpy.isValid());
-    server.globals.kde_idle->inhibit();
-    QCOMPARE(server.globals.kde_idle->isInhibited(), true);
-    QCOMPARE(idleInhibitedSpy.count(), 1);
-    server.globals.kde_idle->inhibit();
-    QCOMPARE(server.globals.kde_idle->isInhibited(), true);
-    QCOMPARE(idleInhibitedSpy.count(), 1);
-    server.globals.kde_idle->uninhibit();
-    QCOMPARE(server.globals.kde_idle->isInhibited(), true);
-    QCOMPARE(idleInhibitedSpy.count(), 1);
-    server.globals.kde_idle->uninhibit();
-    QCOMPARE(server.globals.kde_idle->isInhibited(), false);
-    QCOMPARE(idleInhibitedSpy.count(), 2);
-}
-
-void IdleTest::testIdleInhibitBlocksTimeout()
-{
-    // this test verifies that a timeout does not fire when the system is inhibited
-
-    // so first inhibit
-    QCOMPARE(server.globals.kde_idle->isInhibited(), false);
-    server.globals.kde_idle->inhibit();
+    // this test verifies the basic functionality of a timeout
+    QSignalSpy timeout_spy(server.globals.kde_idle.get(), &Srv::kde_idle::timeout_created);
+    QVERIFY(timeout_spy.isValid());
 
     std::unique_ptr<Clt::IdleTimeout> timeout(m_idle->getTimeout(1, m_seat));
     QVERIFY(timeout->isValid());
-    QSignalSpy idleSpy(timeout.get(), &Clt::IdleTimeout::idle);
-    QVERIFY(idleSpy.isValid());
-    QSignalSpy resumedFormIdleSpy(timeout.get(), &Clt::IdleTimeout::resumeFromIdle);
-    QVERIFY(resumedFormIdleSpy.isValid());
 
-    // we requested a timeout of 1 msec, but the minimum the server sets is 5 sec
-    QVERIFY(!idleSpy.wait(500));
-    // the default of 5 sec won't pass
-    QVERIFY(!idleSpy.wait());
+    QVERIFY(timeout_spy.wait());
 
-    // simulate some activity
-    QVERIFY(resumedFormIdleSpy.isEmpty());
-    server.seat->setTimestamp(1);
-    // resume from idle should not fire
-    QVERIFY(!resumedFormIdleSpy.wait());
+    auto idle_timeout = timeout_spy.front().front().value<Srv::kde_idle_timeout*>();
 
-    // let's uninhibit
-    server.globals.kde_idle->uninhibit();
-    QCOMPARE(server.globals.kde_idle->isInhibited(), false);
-    // we requested a timeout of 1 msec, but the minimum the server sets is 5 sec
-    QVERIFY(!idleSpy.wait(500));
-    // the default of 5 sec will now pass
-    QVERIFY(idleSpy.wait());
+    QSignalSpy simulate_spy(idle_timeout, &Srv::kde_idle_timeout::simulate_user_activity);
+    QVERIFY(simulate_spy.isValid());
 
-    // if we inhibit now it will trigger a resume from idle
-    QVERIFY(resumedFormIdleSpy.isEmpty());
-    server.globals.kde_idle->inhibit();
-    QVERIFY(resumedFormIdleSpy.wait());
-
-    // let's wait again just to verify that also inhibit for already existing IdleTimeout works
-    QVERIFY(!idleSpy.wait(500));
-    QVERIFY(!idleSpy.wait());
-    QCOMPARE(idleSpy.count(), 1);
-
-    timeout.reset();
-    m_connection->flush();
-    server.display->dispatchEvents();
+    timeout->simulateUserActivity();
+    QVERIFY(simulate_spy.wait());
+    QCOMPARE(simulate_spy.size(), 1);
 }
 
 QTEST_GUILESS_MAIN(IdleTest)

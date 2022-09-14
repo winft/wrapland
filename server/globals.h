@@ -115,7 +115,7 @@ struct globals {
     std::unique_ptr<Server::PlasmaWindowManager> plasma_window_manager;
 
     /// Hardware take-over and blocking
-    std::unique_ptr<Server::KdeIdle> kde_idle;
+    std::unique_ptr<Server::kde_idle> kde_idle;
     std::unique_ptr<Server::drm_lease_device_v1> drm_lease_device_v1;
     std::unique_ptr<Server::IdleInhibitManagerV1> idle_inhibit_manager_v1;
 };

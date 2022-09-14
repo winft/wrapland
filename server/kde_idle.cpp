@@ -1,190 +1,115 @@
-/********************************************************************
-Copyright 2020 Faveraux Adrien <ad1rie3@hotmail.fr>
+/*
+    SPDX-FileCopyrightText: 2020 Faveraux Adrien <ad1rie3@hotmail.fr>
+    SPDX-FileCopyrightText: 2022 Roman Gilg <subdiff@gmail.com>
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) version 3, or any
-later version accepted by the membership of KDE e.V. (or its
-successor approved by the membership of KDE e.V.), which shall
-act as a proxy defined in Section 6 of version 3 of the license.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************/
+    SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only
+*/
 #include "display.h"
 #include "kde_idle_p.h"
 #include "seat_p.h"
 
-#include <QTimer>
-#include <functional>
-
-#include <wayland-idle-server-protocol.h>
-#include <wayland-server.h>
-
 namespace Wrapland::Server
 {
 
-const struct org_kde_kwin_idle_interface KdeIdle::Private::s_interface
-    = {cb<getIdleTimeoutCallback>};
+const struct org_kde_kwin_idle_interface kde_idle::Private::s_interface = {
+    cb<get_idle_timeout_callback>,
+};
 
-KdeIdle::Private::Private(Display* display, KdeIdle* q_ptr)
-    : Wayland::Global<KdeIdle>(q_ptr, display, &org_kde_kwin_idle_interface, &s_interface)
+kde_idle::Private::Private(Display* display, kde_idle* q_ptr)
+    : kde_idle_global(q_ptr, display, &org_kde_kwin_idle_interface, &s_interface)
 {
     create();
 }
-KdeIdle::Private::~Private() = default;
 
-void KdeIdle::Private::getIdleTimeoutCallback(KdeIdleBind* bind,
-                                              uint32_t id,
-                                              wl_resource* wlSeat,
-                                              uint32_t timeout)
+kde_idle::Private::~Private() = default;
+
+void kde_idle::Private::get_idle_timeout_callback(kde_idle_bind* bind,
+                                                  uint32_t id,
+                                                  wl_resource* wlSeat,
+                                                  uint32_t timeout)
 {
     auto priv = bind->global()->handle->d_ptr.get();
     auto seat = SeatGlobal::get_handle(wlSeat);
 
-    auto idleTimeout = new IdleTimeout(bind->client->handle, bind->version, id, seat, priv->handle);
-    if (!idleTimeout->d_ptr->resource) {
+    auto duration = std::max(std::chrono::milliseconds(timeout), std::chrono::milliseconds::zero());
+
+    auto idle_timeout
+        = new kde_idle_timeout(bind->client->handle, bind->version, id, duration, seat);
+    if (!idle_timeout->d_ptr->resource) {
         bind->post_no_memory();
-        delete idleTimeout;
+        delete idle_timeout;
         return;
     }
-    priv->idleTimeouts.push_back(idleTimeout);
-    QObject::connect(
-        idleTimeout, &IdleTimeout::resourceDestroyed, priv->handle, [priv, idleTimeout]() {
-            priv->idleTimeouts.erase(
-                std::remove(priv->idleTimeouts.begin(), priv->idleTimeouts.end(), idleTimeout),
-                priv->idleTimeouts.end());
-        });
 
-    idleTimeout->d_ptr->setup(timeout);
+    Q_EMIT priv->handle->timeout_created(idle_timeout);
 }
 
-KdeIdle::KdeIdle(Display* display)
+kde_idle::kde_idle(Display* display)
     : d_ptr(new Private(display, this))
 {
 }
 
-KdeIdle::~KdeIdle() = default;
+kde_idle::~kde_idle() = default;
 
-void KdeIdle::inhibit()
-{
-    d_ptr->inhibitCount++;
-    if (d_ptr->inhibitCount == 1) {
-        Q_EMIT inhibitedChanged();
-    }
-}
-
-void KdeIdle::uninhibit()
-{
-    d_ptr->inhibitCount--;
-    if (d_ptr->inhibitCount == 0) {
-        Q_EMIT inhibitedChanged();
-    }
-}
-
-bool KdeIdle::isInhibited() const
-{
-    return d_ptr->inhibitCount > 0;
-}
-
-void KdeIdle::simulateUserActivity()
-{
-    for (auto timeout : d_ptr->idleTimeouts) {
-        timeout->d_ptr->simulateUserActivity();
-    }
-}
-
-const struct org_kde_kwin_idle_timeout_interface IdleTimeout::Private::s_interface = {
+const struct org_kde_kwin_idle_timeout_interface kde_idle_timeout::Private::s_interface = {
     destroyCallback,
-    simulateUserActivityCallback,
+    simulate_user_activity_callback,
 };
 
-IdleTimeout::Private::Private(Client* client,
-                              uint32_t version,
-                              uint32_t id,
-                              Seat* seat,
-                              KdeIdle* manager,
-                              IdleTimeout* q_ptr)
-    : Wayland::Resource<IdleTimeout>(client,
-                                     version,
-                                     id,
-                                     &org_kde_kwin_idle_timeout_interface,
-                                     &s_interface,
-                                     q_ptr)
-    , seat(seat)
-    , manager(manager)
+kde_idle_timeout::Private::Private(Client* client,
+                                   uint32_t version,
+                                   uint32_t id,
+                                   std::chrono::milliseconds duration,
+                                   Seat* seat,
+                                   kde_idle_timeout* q_ptr)
+    : Wayland::Resource<kde_idle_timeout>(client,
+                                          version,
+                                          id,
+                                          &org_kde_kwin_idle_timeout_interface,
+                                          &s_interface,
+                                          q_ptr)
+    , duration{duration}
+    , seat{seat}
 {
 }
 
-IdleTimeout::Private::~Private() = default;
+kde_idle_timeout::Private::~Private() = default;
 
-void IdleTimeout::Private::simulateUserActivityCallback([[maybe_unused]] wl_client* wlClient,
-                                                        wl_resource* wlResource)
+void kde_idle_timeout::Private::simulate_user_activity_callback(wl_client* /*wlClient*/,
+                                                                wl_resource* wlResource)
 {
-    get_handle(wlResource)->d_ptr->simulateUserActivity();
+    Q_EMIT get_handle(wlResource)->simulate_user_activity();
 }
 
-void IdleTimeout::Private::simulateUserActivity()
+kde_idle_timeout::kde_idle_timeout(Client* client,
+                                   uint32_t version,
+                                   uint32_t id,
+                                   std::chrono::milliseconds duration,
+                                   Seat* seat)
+    : d_ptr(new Private(client, version, id, duration, seat, this))
 {
-
-    if (manager->isInhibited()) {
-        // ignored while inhibited
-        return;
-    }
-    if (!timer->isActive() && resource) {
-        send<org_kde_kwin_idle_timeout_send_resumed>();
-    }
-    timer->start();
 }
 
-constexpr uint32_t minIdleTime = 5000;
+kde_idle_timeout::~kde_idle_timeout() = default;
 
-void IdleTimeout::Private::setup(uint32_t timeout)
+std::chrono::milliseconds kde_idle_timeout::duration() const
 {
-    if (timer) {
-        return;
-    }
-    timer = new QTimer(handle);
-    timer->setSingleShot(true);
-
-    // less than 5 sec is not idle by definition
-    timer->setInterval(static_cast<int>(std::max(timeout, minIdleTime)));
-    QObject::connect(
-        timer, &QTimer::timeout, handle, [this] { send<org_kde_kwin_idle_timeout_send_idle>(); });
-    if (manager->isInhibited()) {
-        // don't start if inhibited
-        return;
-    }
-    timer->start();
+    return d_ptr->duration;
 }
 
-IdleTimeout::IdleTimeout(Client* client, uint32_t version, uint32_t id, Seat* seat, KdeIdle* parent)
-    : QObject(parent)
-    , d_ptr(new Private(client, version, id, seat, parent, this))
+Seat* kde_idle_timeout::seat() const
 {
-    connect(seat, &Seat::timestampChanged, this, [this] { d_ptr->simulateUserActivity(); });
-    connect(parent, &KdeIdle::inhibitedChanged, this, [this] {
-        if (!d_ptr->timer) {
-            // not yet configured
-            return;
-        }
-        if (d_ptr->manager->isInhibited()) {
-            if (!d_ptr->timer->isActive() && d_ptr->resource) {
-                d_ptr->send<org_kde_kwin_idle_timeout_send_resumed>();
-            }
-            d_ptr->timer->stop();
-        } else {
-            d_ptr->timer->start();
-        }
-    });
+    return d_ptr->seat;
 }
 
-IdleTimeout::~IdleTimeout() = default;
+void kde_idle_timeout::idle()
+{
+    d_ptr->send<org_kde_kwin_idle_timeout_send_idle>();
+}
+
+void kde_idle_timeout::resume()
+{
+    d_ptr->send<org_kde_kwin_idle_timeout_send_resumed>();
+}
 
 }
