@@ -118,7 +118,7 @@ void ConnectionThread::Private::doEstablishConnection()
     }
     if (!display) {
         qCWarning(WRAPLAND_CLIENT) << "Failed connecting to Wayland display";
-        emit q->failed();
+        Q_EMIT q->failed();
         return;
     }
     if (fd != -1) {
@@ -132,7 +132,7 @@ void ConnectionThread::Private::doEstablishConnection()
     setupSocketNotifier();
 
     established = true;
-    emit q->establishedChanged(true);
+    Q_EMIT q->establishedChanged(true);
 }
 
 void ConnectionThread::Private::setupSocketNotifier()
@@ -154,12 +154,12 @@ void ConnectionThread::Private::setupSocketNotifier()
             protocolError = wl_display_get_protocol_error(display, nullptr, nullptr);
 
             established = false;
-            emit q->establishedChanged(false);
+            Q_EMIT q->establishedChanged(false);
             socketNotifier.reset();
             return;
         }
 
-        emit q->eventsRead();
+        Q_EMIT q->eventsRead();
     });
 }
 

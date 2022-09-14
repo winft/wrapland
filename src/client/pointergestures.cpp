@@ -165,7 +165,7 @@ void PointerSwipeGesture::Private::beginCallback(
     Q_ASSERT(p->pointerswipegesture == zwp_pointer_gesture_swipe_v1);
     p->fingerCount = fingers;
     p->surface = QPointer<Surface>(Surface::get(surface));
-    emit p->q->started(serial, time);
+    Q_EMIT p->q->started(serial, time);
 }
 
 void PointerSwipeGesture::Private::updateCallback(
@@ -177,7 +177,7 @@ void PointerSwipeGesture::Private::updateCallback(
 {
     auto p = reinterpret_cast<PointerSwipeGesture::Private*>(data);
     Q_ASSERT(p->pointerswipegesture == zwp_pointer_gesture_swipe_v1);
-    emit p->q->updated(QSizeF(wl_fixed_to_double(dx), wl_fixed_to_double(dy)), time);
+    Q_EMIT p->q->updated(QSizeF(wl_fixed_to_double(dx), wl_fixed_to_double(dy)), time);
 }
 
 void PointerSwipeGesture::Private::endCallback(
@@ -190,9 +190,9 @@ void PointerSwipeGesture::Private::endCallback(
     auto p = reinterpret_cast<PointerSwipeGesture::Private*>(data);
     Q_ASSERT(p->pointerswipegesture == zwp_pointer_gesture_swipe_v1);
     if (cancelled) {
-        emit p->q->cancelled(serial, time);
+        Q_EMIT p->q->cancelled(serial, time);
     } else {
-        emit p->q->ended(serial, time);
+        Q_EMIT p->q->ended(serial, time);
     }
     p->fingerCount = 0;
     p->surface.clear();
@@ -310,7 +310,7 @@ void PointerPinchGesture::Private::beginCallback(void* data,
     Q_ASSERT(p->pointerpinchgesture == pg);
     p->fingerCount = fingers;
     p->surface = QPointer<Surface>(Surface::get(surface));
-    emit p->q->started(serial, time);
+    Q_EMIT p->q->started(serial, time);
 }
 
 void PointerPinchGesture::Private::updateCallback(void* data,
@@ -323,10 +323,10 @@ void PointerPinchGesture::Private::updateCallback(void* data,
 {
     auto p = reinterpret_cast<PointerPinchGesture::Private*>(data);
     Q_ASSERT(p->pointerpinchgesture == pg);
-    emit p->q->updated(QSizeF(wl_fixed_to_double(dx), wl_fixed_to_double(dy)),
-                       wl_fixed_to_double(scale),
-                       wl_fixed_to_double(rotation),
-                       time);
+    Q_EMIT p->q->updated(QSizeF(wl_fixed_to_double(dx), wl_fixed_to_double(dy)),
+                         wl_fixed_to_double(scale),
+                         wl_fixed_to_double(rotation),
+                         time);
 }
 
 void PointerPinchGesture::Private::endCallback(void* data,
@@ -338,9 +338,9 @@ void PointerPinchGesture::Private::endCallback(void* data,
     auto p = reinterpret_cast<PointerPinchGesture::Private*>(data);
     Q_ASSERT(p->pointerpinchgesture == pg);
     if (cancelled) {
-        emit p->q->cancelled(serial, time);
+        Q_EMIT p->q->cancelled(serial, time);
     } else {
-        emit p->q->ended(serial, time);
+        Q_EMIT p->q->ended(serial, time);
     }
     p->fingerCount = 0;
     p->surface.clear();

@@ -183,7 +183,7 @@ void OutputConfigurationV1::Private::appliedCallback(void* data,
 {
     Q_UNUSED(config);
     auto o = reinterpret_cast<OutputConfigurationV1::Private*>(data);
-    emit o->q->applied();
+    Q_EMIT o->q->applied();
 }
 
 void OutputConfigurationV1::Private::failedCallback(void* data,
@@ -191,7 +191,7 @@ void OutputConfigurationV1::Private::failedCallback(void* data,
 {
     Q_UNUSED(config);
     auto o = reinterpret_cast<OutputConfigurationV1::Private*>(data);
-    emit o->q->failed();
+    Q_EMIT o->q->failed();
 }
 
 }

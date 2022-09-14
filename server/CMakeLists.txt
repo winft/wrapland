@@ -354,11 +354,11 @@ target_link_libraries(WraplandServer
 )
 
 set_target_properties(WraplandServer PROPERTIES
-  VERSION ${WRAPLAND_VERSION_STRING}
+  VERSION ${WRAPLAND_VERSION}
   SOVERSION ${WRAPLAND_SOVERSION}
   EXPORT_NAME WraplandServer
 )
-kde_target_enable_exceptions(WraplandServer PUBLIC)
+target_compile_options (WraplandServer PUBLIC -fexceptions)
 
 install(
   TARGETS WraplandServer

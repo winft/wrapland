@@ -153,7 +153,7 @@ void XdgDecoration::Private::configureCallback(
         p->m_mode = XdgDecoration::Mode::ServerSide;
         break;
     }
-    emit p->q->modeChanged(p->m_mode);
+    Q_EMIT p->q->modeChanged(p->m_mode);
 }
 
 XdgDecoration::Private::Private(XdgDecoration* q)

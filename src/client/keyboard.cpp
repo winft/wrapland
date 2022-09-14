@@ -134,7 +134,7 @@ void Keyboard::Private::enter(uint32_t serial, wl_surface* surface, wl_array* ke
 {
     Q_UNUSED(keys)
     enteredSurface = Surface::get(surface);
-    emit q->entered(serial);
+    Q_EMIT q->entered(serial);
 }
 
 void Keyboard::Private::leaveCallback(void* data,
@@ -151,7 +151,7 @@ void Keyboard::Private::leaveCallback(void* data,
 void Keyboard::Private::leave(uint32_t serial)
 {
     enteredSurface.clear();
-    emit q->left(serial);
+    Q_EMIT q->left(serial);
 }
 
 void Keyboard::Private::keyCallback(void* data,
@@ -171,7 +171,7 @@ void Keyboard::Private::keyCallback(void* data,
             return KeyState::Pressed;
         }
     };
-    emit k->q->keyChanged(key, toState(), time);
+    Q_EMIT k->q->keyChanged(key, toState(), time);
 }
 
 void Keyboard::Private::keymapCallback(void* data,
@@ -185,7 +185,7 @@ void Keyboard::Private::keymapCallback(void* data,
     if (format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
         return;
     }
-    emit k->q->keymapChanged(fd, size);
+    Q_EMIT k->q->keymapChanged(fd, size);
 }
 
 void Keyboard::Private::modifiersCallback(void* data,
@@ -199,7 +199,7 @@ void Keyboard::Private::modifiersCallback(void* data,
     Q_UNUSED(serial)
     auto k = reinterpret_cast<Keyboard::Private*>(data);
     Q_ASSERT(k->keyboard == keyboard);
-    emit k->q->modifiersChanged(modsDepressed, modsLatched, modsLocked, group);
+    Q_EMIT k->q->modifiersChanged(modsDepressed, modsLatched, modsLocked, group);
 }
 
 void Keyboard::Private::repeatInfoCallback(void* data,
@@ -211,7 +211,7 @@ void Keyboard::Private::repeatInfoCallback(void* data,
     Q_ASSERT(k->keyboard == keyboard);
     k->repeatInfo.charactersPerSecond = qMax(charactersPerSecond, 0);
     k->repeatInfo.delay = qMax(delay, 0);
-    emit k->q->keyRepeatChanged();
+    Q_EMIT k->q->keyRepeatChanged();
 }
 
 Surface* Keyboard::enteredSurface()

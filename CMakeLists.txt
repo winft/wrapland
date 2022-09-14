@@ -6,7 +6,7 @@ set(PROJECT_VERSION_MAJOR 0)
 
 # ECM setup
 include(FeatureSummary)
-find_package(ECM 5.66.0 NO_MODULE)
+find_package(ECM 5.91.0 NO_MODULE)
 set_package_properties(ECM PROPERTIES
   TYPE REQUIRED
   DESCRIPTION "Extra CMake Modules."
@@ -41,7 +41,8 @@ ecm_setup_version(PROJECT
 )
 
 # Dependencies
-set(REQUIRED_QT_VERSION 5.12.0)
+set(REQUIRED_QT_VERSION 5.15.0)
+set(KDE_COMPILERSETTINGS_LEVEL "5.84")
 find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Concurrent Gui)
 
 find_package(Wayland 1.18 COMPONENTS Client Server)
@@ -56,10 +57,14 @@ find_package(EGL)
 set_package_properties(EGL PROPERTIES TYPE REQUIRED)
 
 include(KDEInstallDirs)
-include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
-include(KDECMakeSettings)
-include(KDECompilerSettings NO_POLICY_SCOPE)
 include(CheckIncludeFile)
+include(CTest)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
+set(CMAKE_LINK_DEPENDS_NO_SHARED ON)
+option(BUILD_SHARED_LIBS "If enabled, shared libs will be built by default, otherwise static libs" ON)
+set(CMAKE_AUTOMOC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
