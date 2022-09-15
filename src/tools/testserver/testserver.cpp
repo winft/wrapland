@@ -80,7 +80,7 @@ void TestServer::init()
     globals.seats.front()->setHasTouch(true);
 
     m_display->createDataDeviceManager();
-    m_display->createIdle();
+    m_display->create_kde_idle();
     m_display->createSubCompositor();
 
     globals.outputs.push_back(std::make_unique<Wrapland::Server::Output>(m_display.get()));
