@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 project(Wrapland)
 set(PROJECT_VERSION "0.525.80")
