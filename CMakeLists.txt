@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 project(Wrapland)
 set(PROJECT_VERSION "0.525.80")
@@ -15,6 +15,7 @@ set_package_properties(ECM PROPERTIES
 feature_summary(WHAT REQUIRED_PACKAGES_NOT_FOUND FATAL_ON_MISSING_REQUIRED_PACKAGES)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
+include(BuildType)
 include(FeatureSummary)
 include(ECMGenerateExportHeader)
 include(CMakePackageConfigHelpers)
