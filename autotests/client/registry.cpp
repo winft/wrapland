@@ -36,6 +36,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/dpms.h"
 #include "../../src/client/drm_lease_v1.h"
 #include "../../src/client/event_queue.h"
+#include "../../src/client/idle_notify_v1.h"
 #include "../../src/client/idleinhibit.h"
 #include "../../src/client/output.h"
 #include "../../src/client/plasma_activation_feedback.h"
@@ -57,6 +58,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/drm_lease_v1.h"
 #include "../../server/globals.h"
 #include "../../server/idle_inhibit_v1.h"
+#include "../../server/idle_notify_v1.h"
 #include "../../server/input_method_v2.h"
 #include "../../server/linux_dmabuf_v1.h"
 #include "../../server/output_device_v1.h"
@@ -75,6 +77,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
 #include <wayland-drm-lease-v1-client-protocol.h>
+#include <wayland-ext-idle-notify-v1-client-protocol.h>
 #include <wayland-idle-inhibit-unstable-v1-client-protocol.h>
 #include <wayland-input-method-v2-client-protocol.h>
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
@@ -127,6 +130,7 @@ private Q_SLOTS:
     void testBindPointerConstraintsUnstableV1();
     void testBindPresentationTime();
     void testBindPrimarySelectionDeviceManager();
+    void testBindIdleNotifierV1();
     void testBindIdleIhibitManagerUnstableV1();
     void testRemoval();
     void testOutOfSyncRemoval();
@@ -204,6 +208,8 @@ void TestWaylandRegistry::init()
     server.globals.primary_selection_device_manager
         = std::make_unique<Wrapland::Server::primary_selection_device_manager>(
             server.display.get());
+    server.globals.idle_notifier_v1
+        = std::make_unique<Wrapland::Server::idle_notifier_v1>(server.display.get());
     server.globals.idle_inhibit_manager_v1
         = std::make_unique<Wrapland::Server::IdleInhibitManagerV1>(server.display.get());
     server.globals.linux_dmabuf_v1 = std::make_unique<Wrapland::Server::linux_dmabuf_v1>(
@@ -482,6 +488,15 @@ void TestWaylandRegistry::testBindPrimarySelectionDeviceManager()
               zwp_primary_selection_device_manager_v1_destroy)
 }
 
+void TestWaylandRegistry::testBindIdleNotifierV1()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::IdleNotifierV1,
+              SIGNAL(idleNotifierV1Announced(quint32, quint32)),
+              bindIdleNotifierV1,
+              ext_idle_notifier_v1_destroy)
+    QTest::qWait(100);
+}
+
 void TestWaylandRegistry::testBindIdleIhibitManagerUnstableV1()
 {
     TEST_BIND(Wrapland::Client::Registry::Interface::IdleInhibitManagerUnstableV1,
@@ -535,6 +550,8 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(xdgDecorationAnnouncedSpy.isValid());
     QSignalSpy blurAnnouncedSpy(&registry, &Registry::blurAnnounced);
     QVERIFY(blurAnnouncedSpy.isValid());
+    QSignalSpy idle_notifier_v1_spy(&registry, &Registry::idleNotifierV1Announced);
+    QVERIFY(idle_notifier_v1_spy.isValid());
     QSignalSpy idleInhibitManagerUnstableV1AnnouncedSpy(
         &registry, &Registry::idleInhibitManagerUnstableV1Announced);
     QVERIFY(idleInhibitManagerUnstableV1AnnouncedSpy.isValid());
@@ -554,6 +571,7 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(!outputManagementAnnouncedSpy.isEmpty());
     QVERIFY(!xdgDecorationAnnouncedSpy.isEmpty());
     QVERIFY(!blurAnnouncedSpy.isEmpty());
+    QVERIFY(!idle_notifier_v1_spy.isEmpty());
     QVERIFY(!idleInhibitManagerUnstableV1AnnouncedSpy.isEmpty());
 
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::Compositor));

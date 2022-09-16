@@ -28,6 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
 
+struct ext_idle_notifier_v1;
 struct wl_compositor;
 struct wl_data_device_manager;
 struct wl_display;
@@ -100,6 +101,7 @@ class OutputDeviceV1;
 class WlrOutputManagerV1;
 class Idle;
 class IdleInhibitManager;
+class idle_notifier_v1;
 class input_method_manager_v2;
 class Keystate;
 class LayerShellV1;
@@ -173,20 +175,21 @@ public:
      * object.
      **/
     enum class Interface {
-        Unknown,                          ///< Refers to an Unknown interface
-        Compositor,                       ///< Refers to the wl_compositor interface
-        Shell,                            ///< Refers to the wl_shell interface
-        Seat,                             ///< Refers to the wl_seat interface
-        Shm,                              ///< Refers to the wl_shm interface
-        Output,                           ///< Refers to the wl_output interface
-        FullscreenShell,                  ///< Refers to the _wl_fullscreen_shell interface
-        LayerShellV1,                     ///< Refers to zwlr_layer_shell_v1 interface
-        SubCompositor,                    ///< Refers to the wl_subcompositor interface;
-        DataDeviceManager,                ///< Refers to the wl_data_device_manager interface
-        PlasmaActivationFeedback,         ///<
-        PlasmaShell,                      ///< Refers to org_kde_plasma_shell interface
-        PlasmaWindowManagement,           ///< Refers to org_kde_plasma_window_management interface
-        Idle,                             ///< Refers to org_kde_kwin_idle_interface interface
+        Unknown,                  ///< Refers to an Unknown interface
+        Compositor,               ///< Refers to the wl_compositor interface
+        Shell,                    ///< Refers to the wl_shell interface
+        Seat,                     ///< Refers to the wl_seat interface
+        Shm,                      ///< Refers to the wl_shm interface
+        Output,                   ///< Refers to the wl_output interface
+        FullscreenShell,          ///< Refers to the _wl_fullscreen_shell interface
+        LayerShellV1,             ///< Refers to zwlr_layer_shell_v1 interface
+        SubCompositor,            ///< Refers to the wl_subcompositor interface;
+        DataDeviceManager,        ///< Refers to the wl_data_device_manager interface
+        PlasmaActivationFeedback, ///<
+        PlasmaShell,              ///< Refers to org_kde_plasma_shell interface
+        PlasmaWindowManagement,   ///< Refers to org_kde_plasma_window_management interface
+        Idle,                     ///< Refers to org_kde_kwin_idle_interface interface
+        IdleNotifierV1,
         InputMethodManagerV2,             ///< Refers to zwp_input_method_manager_v2, @since 0.523.0
         FakeInput,                        ///< Refers to org_kde_kwin_fake_input interface
         Shadow,                           ///< Refers to org_kde_kwin_shadow_manager interface
@@ -485,6 +488,16 @@ public:
      **/
     org_kde_plasma_window_management* bindPlasmaWindowManagement(uint32_t name,
                                                                  uint32_t version) const;
+    /**
+     * Binds the ext_idle_notifier_v1 with @p name and @p version.
+     * If the @p name does not exist or is not for the notifier interface,
+     * @c null will be returned.
+     *
+     * Prefer using createIdle instead.
+     * @see createIdleNotifierV1
+     * @since 5.4
+     **/
+    ext_idle_notifier_v1* bindIdleNotifierV1(uint32_t name, uint32_t version) const;
     /**
      * Binds the org_kde_kwin_idle with @p name and @p version.
      * If the @p name does not exist or is not for the idle interface,
@@ -1110,6 +1123,23 @@ public:
      * @since 5.4
      **/
     Idle* createIdle(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
+     * Creates an idle_notifier_v1 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * Note: in case @p name is invalid or isn't for the ext_idle_notifier_v1 interface,
+     * the returned idle_notifier_v1 will not be valid. Therefore it's recommended to call
+     * isValid on the created instance.
+     *
+     * @param name The name of the ext_idle_notifier_v1 interface to bind
+     * @param version The version or the ext_idle_notifier_v1 interface to use
+     * @param parent The parent for idle_notifier_v1
+     *
+     * @returns The created idle_notifier_v1.
+     * @since 5.4
+     **/
+    idle_notifier_v1*
+    createIdleNotifierV1(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a input_method_manager_v2 and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1780,6 +1810,7 @@ Q_SIGNALS:
      * @since 5.4
      **/
     void idleAnnounced(quint32 name, quint32 version);
+    void idleNotifierV1Announced(quint32 name, quint32 version);
     /**
      * Emitted whenever a zwp_input_method_manager_v2 interface gets announced.
      * @param name The name for the announced interface
@@ -2090,6 +2121,7 @@ Q_SIGNALS:
      * @since 5.4
      **/
     void idleRemoved(quint32 name);
+    void idleNotifierV1Removed(quint32 name);
     /**
      * Emitted whenever a zwp_input_method_manager_v2 interface gets removed.
      * @param name The name for the removed interface

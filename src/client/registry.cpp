@@ -32,6 +32,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "fakeinput.h"
 #include "fullscreen_shell.h"
 #include "idle.h"
+#include "idle_notify_v1.h"
 #include "idleinhibit.h"
 #include "input_method_v2.h"
 #include "keyboard_shortcuts_inhibit.h"
@@ -79,6 +80,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-contrast-client-protocol.h>
 #include <wayland-dpms-client-protocol.h>
 #include <wayland-drm-lease-v1-client-protocol.h>
+#include <wayland-ext-idle-notify-v1-client-protocol.h>
 #include <wayland-fake-input-client-protocol.h>
 #include <wayland-fullscreen-shell-client-protocol.h>
 #include <wayland-idle-client-protocol.h>
@@ -288,6 +290,16 @@ static QMap<Registry::Interface, SuppertedInterfaceData> const s_interfaces = {
             &org_kde_kwin_idle_interface,
             &Registry::idleAnnounced,
             &Registry::idleRemoved,
+        },
+    },
+    {
+        Registry::Interface::IdleNotifierV1,
+        {
+            1,
+            QByteArrayLiteral("ext_idle_notifier_v1"),
+            &ext_idle_notifier_v1_interface,
+            &Registry::idleNotifierV1Announced,
+            &Registry::idleNotifierV1Removed,
         },
     },
     {
@@ -909,6 +921,7 @@ BIND(PlasmaShell, org_kde_plasma_shell)
 BIND(PlasmaVirtualDesktopManagement, org_kde_plasma_virtual_desktop_management)
 BIND(PlasmaWindowManagement, org_kde_plasma_window_management)
 BIND(Idle, org_kde_kwin_idle)
+BIND(IdleNotifierV1, ext_idle_notifier_v1)
 BIND(InputMethodManagerV2, zwp_input_method_manager_v2)
 BIND(FakeInput, org_kde_kwin_fake_input)
 BIND(LayerShellV1, zwlr_layer_shell_v1)
@@ -1041,6 +1054,11 @@ XdgImporter* Registry::createXdgImporter(quint32 name, quint32 version, QObject*
     // only V1 supported for now
     return d->create<XdgImporterUnstableV2>(
         name, version, parent, &Registry::bindXdgImporterUnstableV2);
+}
+
+idle_notifier_v1* Registry::createIdleNotifierV1(quint32 name, quint32 version, QObject* parent)
+{
+    return d->create<idle_notifier_v1>(name, version, parent, &Registry::bindIdleNotifierV1);
 }
 
 input_method_manager_v2*

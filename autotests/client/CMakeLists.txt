@@ -471,6 +471,20 @@ add_test(NAME wrapland-testPlasmaShell COMMAND testPlasmaShell)
 ecm_mark_as_test(testPlasmaShell)
 
 # ##################################################################################################
+# Test idle-notify
+# ##################################################################################################
+set(idle_notify_test_SRCS idle_notify.cpp)
+add_executable(idle-notify-test ${idle_notify_test_SRCS})
+target_link_libraries(idle-notify-test
+  Qt5::Test
+  Qt5::Gui
+  Wrapland::Client
+  Wrapland::Server
+)
+add_test(NAME wrapland-test-idle-notify COMMAND idle-notify-test)
+ecm_mark_as_test(idle-notify-test)
+
+# ##################################################################################################
 # Test KdeIdle
 # ##################################################################################################
 set(testKdeIdle_SRCS kde_idle.cpp)
