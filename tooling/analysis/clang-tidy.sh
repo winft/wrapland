@@ -5,7 +5,7 @@ set -o pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SOURCE_DIR=$(dirname $(dirname ${SCRIPT_DIR}))
-RUN_SCRIPT_URL="https://raw.githubusercontent.com/llvm/llvm-project/release/13.x/\
+RUN_SCRIPT_URL="https://raw.githubusercontent.com/llvm/llvm-project/release/14.x/\
 clang-tools-extra/clang-tidy/tool/run-clang-tidy.py"
 
 if [ $# -eq 0 ] ; then

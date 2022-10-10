@@ -36,7 +36,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-constexpr uint32_t PlasmaShellVersion = 7;
+constexpr uint32_t PlasmaShellVersion = 8;
 using PlasmaShellGlobal = Wayland::Global<PlasmaShell, PlasmaShellVersion>;
 using PlasmaShellBind = Wayland::Bind<PlasmaShellGlobal>;
 
