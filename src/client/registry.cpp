@@ -253,7 +253,7 @@ static QMap<Registry::Interface, SuppertedInterfaceData> const s_interfaces = {
     {
         Registry::Interface::PlasmaShell,
         {
-            7,
+            8,
             QByteArrayLiteral("org_kde_plasma_shell"),
             &org_kde_plasma_shell_interface,
             &Registry::plasmaShellAnnounced,
