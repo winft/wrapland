@@ -1,5 +1,49 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.526.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.525.0-beta.0...wrapland@0.526.0-beta.0) (2022-10-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **server:** KDE idle API changes
+* **server:** create Plasma windows without parent, unmap them via dtor call
+* **client:** dmabuf modifiers in 64 bit only
+* **client:** dmabuf formats in vector
+* **server:** dmabuf modifier set once per buffer, not for each plane
+
+### Features
+
+* implement plasma_shell applet popup role ([86fecaa](https://gitlab.com/kwinft/wrapland/commit/86fecaa4d9e05e6416fc113eb66d5758cdce530e))
+* implement plasma_shell open under cursor request ([5cf1ede](https://gitlab.com/kwinft/wrapland/commit/5cf1edef027878292c57cb940bb19105ab7d1e14))
+* **server:** set one modifier per dmabuf buffer ([c3e8005](https://gitlab.com/kwinft/wrapland/commit/c3e800520e63d149a0cdcb1cc5abf7fd147c1425))
+* **server:** unmap Plasma windows with dtor call ([a910169](https://gitlab.com/kwinft/wrapland/commit/a9101698d38c99d3558f726c933aa98c9f20ad60))
+* support org_kde_plasma_activation_feedback interface ([83a0d38](https://gitlab.com/kwinft/wrapland/commit/83a0d3800f9cb8b1de280fa1924279ed3705fbfa))
+* update to Plasma window management version 15 ([9675128](https://gitlab.com/kwinft/wrapland/commit/9675128d0e25e0a903811355ce182198f9324b6c))
+* update to Plasma window management version 16 ([68e9200](https://gitlab.com/kwinft/wrapland/commit/68e92002e226641f3fc8e735e677cd5ef451c229))
+
+
+### Bug Fixes
+
+* bump org_kde_plasma_window_management version ([8bd1320](https://gitlab.com/kwinft/wrapland/commit/8bd1320311139a3d0857312f5ee776635523e61c))
+* bump Plasma shell protocol version ([5007208](https://gitlab.com/kwinft/wrapland/commit/5007208f411551c99f62ab3d7f103ef61fdaa05c))
+* **client:** remove timer from windowCreated ([421e811](https://gitlab.com/kwinft/wrapland/commit/421e81197a1b2421531773548a97d9fd5a027c21))
+* **client:** silence PlasmaWindowManagement clang warnings ([599da6f](https://gitlab.com/kwinft/wrapland/commit/599da6fea165774ed01aba8f3e2212c392b31210))
+* replace emit with Q_EMIT ([8eb9935](https://gitlab.com/kwinft/wrapland/commit/8eb9935c066c662c805ffeba1f092016d8b94b9f))
+* **server:** check C-function return values ([6ca253a](https://gitlab.com/kwinft/wrapland/commit/6ca253ae00dbae2266c2d581dccd64d02dcb2cc8))
+* **server:** correct typo in Wayland::Global ([bcbf01f](https://gitlab.com/kwinft/wrapland/commit/bcbf01f0c504a2fe196fe03ff8761653067bb178))
+* **server:** make PlasmaVirtualDesktop dtor public ([306bc77](https://gitlab.com/kwinft/wrapland/commit/306bc77ae99c00181f84d8089869bf498004d4f4))
+* **server:** remove duplicate include ([c394f20](https://gitlab.com/kwinft/wrapland/commit/c394f20b91ec7d35b7a7c76ec6404872b0e42db1))
+* **server:** remove unused attribute ([9fcd0cb](https://gitlab.com/kwinft/wrapland/commit/9fcd0cb724fbaec679c19cb9c8e5767ee300a9a8))
+* **server:** use default member initializer ([ef7ff71](https://gitlab.com/kwinft/wrapland/commit/ef7ff71c949c48ca91f8f295adcf6ebf88d68b61))
+
+
+### Refactors
+
+* **client:** have dmabuf modifiers as 64 bit in public API ([6d85ea9](https://gitlab.com/kwinft/wrapland/commit/6d85ea9dc8f7fd4f5768f11c415e7f09d4b49d12))
+* **client:** store DRM formats in vector ([19ab68e](https://gitlab.com/kwinft/wrapland/commit/19ab68e4ad4779bf3c043187d627f4384fb772cf))
+* **server:** publish KDE idle timeout objects ([8b4ee06](https://gitlab.com/kwinft/wrapland/commit/8b4ee06dc0d94cd5a1eb4421a3f77dc152fd2847))
+* **server:** replace C-style casts with static casts ([1664423](https://gitlab.com/kwinft/wrapland/commit/166442372742796de34ad4ab4f7fa144844db837))
+
 ## [0.525.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.525.0-beta.0...wrapland@0.525.0) (2022-06-14)
 
 ## [0.525.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.524.0-beta.0...wrapland@0.525.0-beta.0) (2022-06-12)
