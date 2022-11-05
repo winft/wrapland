@@ -9,92 +9,31 @@
 namespace Wrapland::Client
 {
 
-class XdgPositioner::Private
+class xdg_shell_positioner::Private
 {
 public:
-    QSize initialSize;
-    QRect anchorRect;
-    Qt::Edges gravity;
-    Qt::Edges anchorEdge;
-    XdgPositioner::Constraints constraints;
-    QPoint anchorOffset;
+    xdg_shell_positioner_data data;
 };
 
-XdgPositioner::XdgPositioner(QSize const& initialSize, QRect const& anchor)
+xdg_shell_positioner::xdg_shell_positioner(xdg_shell_positioner_data data)
     : d_ptr(new Private)
 {
-    d_ptr->initialSize = initialSize;
-    d_ptr->anchorRect = anchor;
+    d_ptr->data = std::move(data);
 }
 
-XdgPositioner::XdgPositioner(XdgPositioner const& other)
+xdg_shell_positioner::xdg_shell_positioner(xdg_shell_positioner const& other)
     : d_ptr(new Private)
 {
     *d_ptr = *other.d_ptr;
 }
 
-XdgPositioner::~XdgPositioner()
+xdg_shell_positioner::~xdg_shell_positioner()
 {
 }
 
-void XdgPositioner::setInitialSize(QSize const& size)
+xdg_shell_positioner_data const& xdg_shell_positioner::get_data() const
 {
-    d_ptr->initialSize = size;
-}
-
-QSize XdgPositioner::initialSize() const
-{
-    return d_ptr->initialSize;
-}
-
-void XdgPositioner::setAnchorRect(QRect const& anchor)
-{
-    d_ptr->anchorRect = anchor;
-}
-
-QRect XdgPositioner::anchorRect() const
-{
-    return d_ptr->anchorRect;
-}
-
-void XdgPositioner::setAnchorEdge(Qt::Edges edge)
-{
-    d_ptr->anchorEdge = edge;
-}
-
-Qt::Edges XdgPositioner::anchorEdge() const
-{
-    return d_ptr->anchorEdge;
-}
-
-void XdgPositioner::setAnchorOffset(QPoint const& offset)
-{
-    d_ptr->anchorOffset = offset;
-}
-
-QPoint XdgPositioner::anchorOffset() const
-{
-    return d_ptr->anchorOffset;
-}
-
-void XdgPositioner::setGravity(Qt::Edges edge)
-{
-    d_ptr->gravity = edge;
-}
-
-Qt::Edges XdgPositioner::gravity() const
-{
-    return d_ptr->gravity;
-}
-
-void XdgPositioner::setConstraints(Constraints constraints)
-{
-    d_ptr->constraints = constraints;
-}
-
-XdgPositioner::Constraints XdgPositioner::constraints() const
-{
-    return d_ptr->constraints;
+    return d_ptr->data;
 }
 
 }

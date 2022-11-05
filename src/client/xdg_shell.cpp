@@ -41,7 +41,7 @@ public:
     XdgShellToplevel* getXdgToplevel(Surface* surface, QObject* parent);
     XdgShellPopup* get_xdg_popup(Surface* surface,
                                  xdg_surface* parentSurface,
-                                 XdgPositioner const& positioner,
+                                 xdg_shell_positioner_data const& positioner_data,
                                  QObject* parent);
 
     EventQueue* queue = nullptr;
@@ -104,7 +104,7 @@ XdgShellToplevel* XdgShell::Private::getXdgToplevel(Surface* surface, QObject* p
 
 XdgShellPopup* XdgShell::Private::get_xdg_popup(Surface* surface,
                                                 xdg_surface* parentSurface,
-                                                XdgPositioner const& positioner,
+                                                xdg_shell_positioner_data const& positioner_data,
                                                 QObject* parent)
 {
     Q_ASSERT(isValid());
@@ -115,99 +115,99 @@ XdgShellPopup* XdgShell::Private::get_xdg_popup(Surface* surface,
 
     auto p = xdg_wm_base_create_positioner(xdg_shell_base);
 
-    auto anchorRect = positioner.anchorRect();
+    auto anchorRect = positioner_data.anchor.rect;
     xdg_positioner_set_anchor_rect(
         p, anchorRect.x(), anchorRect.y(), anchorRect.width(), anchorRect.height());
 
-    QSize initialSize = positioner.initialSize();
-    xdg_positioner_set_size(p, initialSize.width(), initialSize.height());
+    xdg_positioner_set_size(p, positioner_data.size.width(), positioner_data.size.height());
 
-    QPoint anchorOffset = positioner.anchorOffset();
-    if (!anchorOffset.isNull()) {
+    if (auto anchorOffset = positioner_data.anchor.offset; !anchorOffset.isNull()) {
         xdg_positioner_set_offset(p, anchorOffset.x(), anchorOffset.y());
     }
 
+    auto const edge_data = positioner_data.anchor.edge;
     uint32_t anchor = XDG_POSITIONER_ANCHOR_NONE;
-    if (positioner.anchorEdge().testFlag(Qt::TopEdge)) {
-        if (positioner.anchorEdge().testFlag(Qt::LeftEdge)
-            && ((positioner.anchorEdge() & ~Qt::LeftEdge) == Qt::TopEdge)) {
+
+    if (edge_data.testFlag(Qt::TopEdge)) {
+        if (edge_data.testFlag(Qt::LeftEdge) && ((edge_data & ~Qt::LeftEdge) == Qt::TopEdge)) {
             anchor = XDG_POSITIONER_ANCHOR_TOP_LEFT;
-        } else if (positioner.anchorEdge().testFlag(Qt::RightEdge)
-                   && ((positioner.anchorEdge() & ~Qt::RightEdge) == Qt::TopEdge)) {
+        } else if (edge_data.testFlag(Qt::RightEdge)
+                   && ((edge_data & ~Qt::RightEdge) == Qt::TopEdge)) {
             anchor = XDG_POSITIONER_ANCHOR_TOP_RIGHT;
-        } else if ((positioner.anchorEdge() & ~Qt::TopEdge) == Qt::Edges()) {
+        } else if ((edge_data & ~Qt::TopEdge) == Qt::Edges()) {
             anchor = XDG_POSITIONER_ANCHOR_TOP;
         }
-    } else if (positioner.anchorEdge().testFlag(Qt::BottomEdge)) {
-        if (positioner.anchorEdge().testFlag(Qt::LeftEdge)
-            && ((positioner.anchorEdge() & ~Qt::LeftEdge) == Qt::BottomEdge)) {
+    } else if (edge_data.testFlag(Qt::BottomEdge)) {
+        if (edge_data.testFlag(Qt::LeftEdge) && ((edge_data & ~Qt::LeftEdge) == Qt::BottomEdge)) {
             anchor = XDG_POSITIONER_ANCHOR_BOTTOM_LEFT;
-        } else if (positioner.anchorEdge().testFlag(Qt::RightEdge)
-                   && ((positioner.anchorEdge() & ~Qt::RightEdge) == Qt::BottomEdge)) {
+        } else if (edge_data.testFlag(Qt::RightEdge)
+                   && ((edge_data & ~Qt::RightEdge) == Qt::BottomEdge)) {
             anchor = XDG_POSITIONER_ANCHOR_BOTTOM_RIGHT;
-        } else if ((positioner.anchorEdge() & ~Qt::BottomEdge) == Qt::Edges()) {
+        } else if ((edge_data & ~Qt::BottomEdge) == Qt::Edges()) {
             anchor = XDG_POSITIONER_ANCHOR_BOTTOM;
         }
-    } else if (positioner.anchorEdge().testFlag(Qt::RightEdge)
-               && ((positioner.anchorEdge() & ~Qt::RightEdge) == Qt::Edges())) {
+    } else if (edge_data.testFlag(Qt::RightEdge) && ((edge_data & ~Qt::RightEdge) == Qt::Edges())) {
         anchor = XDG_POSITIONER_ANCHOR_RIGHT;
-    } else if (positioner.anchorEdge().testFlag(Qt::LeftEdge)
-               && ((positioner.anchorEdge() & ~Qt::LeftEdge) == Qt::Edges())) {
+    } else if (edge_data.testFlag(Qt::LeftEdge) && ((edge_data & ~Qt::LeftEdge) == Qt::Edges())) {
         anchor = XDG_POSITIONER_ANCHOR_LEFT;
     }
     if (anchor != 0) {
         xdg_positioner_set_anchor(p, anchor);
     }
 
+    auto const gravity_data = positioner_data.gravity;
     uint32_t gravity = XDG_POSITIONER_GRAVITY_NONE;
-    if (positioner.gravity().testFlag(Qt::TopEdge)) {
-        if (positioner.gravity().testFlag(Qt::LeftEdge)
-            && ((positioner.gravity() & ~Qt::LeftEdge) == Qt::TopEdge)) {
+
+    if (gravity_data.testFlag(Qt::TopEdge)) {
+        if (gravity_data.testFlag(Qt::LeftEdge)
+            && ((gravity_data & ~Qt::LeftEdge) == Qt::TopEdge)) {
             gravity = XDG_POSITIONER_GRAVITY_TOP_LEFT;
-        } else if (positioner.gravity().testFlag(Qt::RightEdge)
-                   && ((positioner.gravity() & ~Qt::RightEdge) == Qt::TopEdge)) {
+        } else if (gravity_data.testFlag(Qt::RightEdge)
+                   && ((gravity_data & ~Qt::RightEdge) == Qt::TopEdge)) {
             gravity = XDG_POSITIONER_GRAVITY_TOP_RIGHT;
-        } else if ((positioner.gravity() & ~Qt::TopEdge) == Qt::Edges()) {
+        } else if ((gravity_data & ~Qt::TopEdge) == Qt::Edges()) {
             gravity = XDG_POSITIONER_GRAVITY_TOP;
         }
-    } else if (positioner.gravity().testFlag(Qt::BottomEdge)) {
-        if (positioner.gravity().testFlag(Qt::LeftEdge)
-            && ((positioner.gravity() & ~Qt::LeftEdge) == Qt::BottomEdge)) {
+    } else if (gravity_data.testFlag(Qt::BottomEdge)) {
+        if (gravity_data.testFlag(Qt::LeftEdge)
+            && ((gravity_data & ~Qt::LeftEdge) == Qt::BottomEdge)) {
             gravity = XDG_POSITIONER_GRAVITY_BOTTOM_LEFT;
-        } else if (positioner.gravity().testFlag(Qt::RightEdge)
-                   && ((positioner.gravity() & ~Qt::RightEdge) == Qt::BottomEdge)) {
+        } else if (gravity_data.testFlag(Qt::RightEdge)
+                   && ((gravity_data & ~Qt::RightEdge) == Qt::BottomEdge)) {
             gravity = XDG_POSITIONER_GRAVITY_BOTTOM_RIGHT;
-        } else if ((positioner.gravity() & ~Qt::BottomEdge) == Qt::Edges()) {
+        } else if ((gravity_data & ~Qt::BottomEdge) == Qt::Edges()) {
             gravity = XDG_POSITIONER_GRAVITY_BOTTOM;
         }
-    } else if (positioner.gravity().testFlag(Qt::RightEdge)
-               && ((positioner.gravity() & ~Qt::RightEdge) == Qt::Edges())) {
+    } else if (gravity_data.testFlag(Qt::RightEdge)
+               && ((gravity_data & ~Qt::RightEdge) == Qt::Edges())) {
         gravity = XDG_POSITIONER_GRAVITY_RIGHT;
-    } else if (positioner.gravity().testFlag(Qt::LeftEdge)
-               && ((positioner.gravity() & ~Qt::LeftEdge) == Qt::Edges())) {
+    } else if (gravity_data.testFlag(Qt::LeftEdge)
+               && ((gravity_data & ~Qt::LeftEdge) == Qt::Edges())) {
         gravity = XDG_POSITIONER_GRAVITY_LEFT;
     }
     if (gravity != 0) {
         xdg_positioner_set_gravity(p, gravity);
     }
 
+    auto const constraint_data = positioner_data.constraint_adjustments;
     uint32_t constraint = XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_NONE;
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::SlideX)) {
+
+    if (constraint_data.testFlag(xdg_shell_constraint_adjustment::slide_x)) {
         constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_X;
     }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::SlideY)) {
+    if (constraint_data.testFlag(xdg_shell_constraint_adjustment::slide_y)) {
         constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_Y;
     }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::FlipX)) {
+    if (constraint_data.testFlag(xdg_shell_constraint_adjustment::flip_x)) {
         constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_FLIP_X;
     }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::FlipY)) {
+    if (constraint_data.testFlag(xdg_shell_constraint_adjustment::flip_y)) {
         constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_FLIP_Y;
     }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::ResizeX)) {
+    if (constraint_data.testFlag(xdg_shell_constraint_adjustment::resize_x)) {
         constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_RESIZE_X;
     }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::ResizeY)) {
+    if (constraint_data.testFlag(xdg_shell_constraint_adjustment::resize_y)) {
         constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_RESIZE_Y;
     }
     if (constraint != 0) {
@@ -281,24 +281,25 @@ XdgShellToplevel* XdgShell::create_toplevel(Surface* surface, QObject* parent)
 
 XdgShellPopup* XdgShell::create_popup(Surface* surface,
                                       XdgShellToplevel* parentSurface,
-                                      XdgPositioner const& positioner,
+                                      xdg_shell_positioner_data const& positioner_data,
                                       QObject* parent)
 {
-    return d_ptr->get_xdg_popup(surface, *parentSurface, positioner, parent);
+    return d_ptr->get_xdg_popup(surface, *parentSurface, positioner_data, parent);
 }
 
 XdgShellPopup* XdgShell::create_popup(Surface* surface,
                                       XdgShellPopup* parentSurface,
-                                      XdgPositioner const& positioner,
+                                      xdg_shell_positioner_data const& positioner_data,
                                       QObject* parent)
 {
-    return d_ptr->get_xdg_popup(surface, *parentSurface, positioner, parent);
+    return d_ptr->get_xdg_popup(surface, *parentSurface, positioner_data, parent);
 }
 
-XdgShellPopup*
-XdgShell::create_popup(Surface* surface, XdgPositioner const& positioner, QObject* parent)
+XdgShellPopup* XdgShell::create_popup(Surface* surface,
+                                      xdg_shell_positioner_data const& positioner_data,
+                                      QObject* parent)
 {
-    return d_ptr->get_xdg_popup(surface, nullptr, positioner, parent);
+    return d_ptr->get_xdg_popup(surface, nullptr, positioner_data, parent);
 }
 
 }

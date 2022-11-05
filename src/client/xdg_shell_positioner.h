@@ -17,93 +17,44 @@ namespace Wrapland::Client
 {
 
 /**
+ * Flags describing how a popup should be reposition if constrained
+ */
+enum class xdg_shell_constraint_adjustment {
+    slide_x = 1 << 0,
+    slide_y = 1 << 1,
+    flip_x = 1 << 2,
+    flip_y = 1 << 3,
+    resize_x = 1 << 4,
+    resize_y = 1 << 5,
+};
+Q_DECLARE_FLAGS(xdg_shell_constraint_adjustments, xdg_shell_constraint_adjustment)
+
+struct xdg_shell_positioner_data {
+    struct {
+        QRect rect;
+        Qt::Edges edge;
+        QPoint offset;
+    } anchor;
+
+    QSize size;
+    Qt::Edges gravity;
+    xdg_shell_constraint_adjustments constraint_adjustments;
+};
+
+/**
  * Builder class describing how a popup should be positioned
  * when created
  *
  * @since 0.0.539
  */
-class WRAPLANDCLIENT_EXPORT XdgPositioner
+class WRAPLANDCLIENT_EXPORT xdg_shell_positioner
 {
 public:
-    /*
-     * Flags describing how a popup should be reposition if constrained
-     */
-    enum class Constraint {
-        /*
-         * Slide the popup on the X axis until there is room
-         */
-        SlideX = 1 << 0,
-        /*
-         * Slide the popup on the Y axis until there is room
-         */
-        SlideY = 1 << 1,
-        /*
-         * Invert the anchor and gravity on the X axis
-         */
-        FlipX = 1 << 2,
-        /*
-         * Invert the anchor and gravity on the Y axis
-         */
-        FlipY = 1 << 3,
-        /*
-         * Resize the popup in the X axis
-         */
-        ResizeX = 1 << 4,
-        /*
-         * Resize the popup in the Y axis
-         */
-        ResizeY = 1 << 5,
-    };
+    xdg_shell_positioner(xdg_shell_positioner_data data = {});
+    xdg_shell_positioner(xdg_shell_positioner const& other);
+    ~xdg_shell_positioner();
 
-    Q_DECLARE_FLAGS(Constraints, Constraint)
-
-    XdgPositioner(QSize const& initialSize = QSize(), QRect const& anchor = QRect());
-    XdgPositioner(XdgPositioner const& other);
-    ~XdgPositioner();
-
-    /**
-     * Which edge of the anchor should the popup be positioned around
-     */
-    // KF6 TODO use a better data type (enum of 8 options) rather than flags which allow invalid
-    // values
-    Qt::Edges anchorEdge() const;
-    void setAnchorEdge(Qt::Edges edge);
-
-    /**
-     * Specifies in what direction the popup should be positioned around the anchor
-     * i.e if the gravity is "bottom", then then the top of top of the popup will be at the anchor
-     * edge if the gravity is top, then the bottom of the popup will be at the anchor edge
-     *
-     */
-    // KF6 TODO use a better data type (enum of 8 options) rather than flags which allow invalid
-    // values
-    Qt::Edges gravity() const;
-    void setGravity(Qt::Edges edge);
-
-    /**
-     * The area this popup should be positioned around
-     */
-    QRect anchorRect() const;
-    void setAnchorRect(QRect const& anchor);
-
-    /**
-     * The size of the surface that is to be positioned.
-     */
-    QSize initialSize() const;
-    void setInitialSize(QSize const& size);
-
-    /**
-     * Specifies how the compositor should position the popup if it does not fit in the requested
-     * position
-     */
-    Constraints constraints() const;
-    void setConstraints(Constraints constraints);
-
-    /**
-     * An additional offset that should be applied from the anchor.
-     */
-    QPoint anchorOffset() const;
-    void setAnchorOffset(QPoint const& offset);
+    xdg_shell_positioner_data const& get_data() const;
 
 private:
     class Private;
@@ -112,8 +63,9 @@ private:
 
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::XdgPositioner::Constraints)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::xdg_shell_constraint_adjustments)
 
-Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner)
-Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner::Constraint)
-Q_DECLARE_METATYPE(Wrapland::Client::XdgPositioner::Constraints)
+Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_positioner_data)
+Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_positioner)
+Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_constraint_adjustment)
+Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_constraint_adjustments)

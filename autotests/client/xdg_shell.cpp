@@ -779,34 +779,38 @@ void XdgShellTest::testMinSize()
 
 void XdgShellTest::testPopup_data()
 {
-    QTest::addColumn<Client::XdgPositioner>("positioner");
-    Client::XdgPositioner positioner(QSize(10, 10), QRect(100, 100, 50, 50));
-    QTest::newRow("default") << positioner;
+    QTest::addColumn<Client::xdg_shell_positioner_data>("positioner_data");
 
-    Client::XdgPositioner positioner2(QSize(20, 20), QRect(101, 102, 51, 52));
-    QTest::newRow("sizeAndAnchorRect") << positioner2;
+    Client::xdg_shell_positioner_data pos_data;
+    pos_data.size = QSize(10, 10);
+    pos_data.anchor.rect = QRect(100, 100, 50, 50);
 
-    positioner.setAnchorEdge(Qt::TopEdge | Qt::RightEdge);
-    QTest::newRow("anchorEdge") << positioner;
+    QTest::newRow("default") << pos_data;
 
-    positioner.setGravity(Qt::BottomEdge);
-    QTest::newRow("gravity") << positioner;
+    Client::xdg_shell_positioner_data pos_data2;
+    pos_data.size = QSize(20, 20);
+    pos_data.anchor.rect = QRect(101, 102, 51, 52);
+    QTest::newRow("sizeAndAnchorRect") << pos_data2;
 
-    positioner.setGravity(Qt::TopEdge | Qt::RightEdge);
-    QTest::newRow("gravity2") << positioner;
+    pos_data.anchor.edge = Qt::TopEdge | Qt::RightEdge;
+    QTest::newRow("anchorEdge") << pos_data;
 
-    positioner.setConstraints(Client::XdgPositioner::Constraint::SlideX
-                              | Client::XdgPositioner::Constraint::FlipY);
-    QTest::newRow("constraints") << positioner;
+    pos_data.gravity = Qt::BottomEdge;
+    QTest::newRow("gravity") << pos_data;
 
-    positioner.setConstraints(
-        Client::XdgPositioner::Constraint::SlideX | Client::XdgPositioner::Constraint::SlideY
-        | Client::XdgPositioner::Constraint::FlipX | Client::XdgPositioner::Constraint::FlipY
-        | Client::XdgPositioner::Constraint::ResizeX | Client::XdgPositioner::Constraint::ResizeY);
-    QTest::newRow("constraints2") << positioner;
+    pos_data.gravity = Qt::TopEdge | Qt::RightEdge;
+    QTest::newRow("gravity2") << pos_data;
 
-    positioner.setAnchorOffset(QPoint(4, 5));
-    QTest::newRow("offset") << positioner;
+    using constraints = Client::xdg_shell_constraint_adjustment;
+    pos_data.constraint_adjustments = constraints::slide_x | constraints::flip_y;
+    QTest::newRow("constraints") << pos_data;
+
+    pos_data.constraint_adjustments = constraints::slide_x | constraints::slide_y
+        | constraints::flip_x | constraints::flip_y | constraints::resize_x | constraints::resize_y;
+    QTest::newRow("constraints2") << pos_data;
+
+    pos_data.anchor.offset = QPoint(4, 5);
+    QTest::newRow("offset") << pos_data;
 }
 
 void XdgShellTest::testPopup()
@@ -823,24 +827,24 @@ void XdgShellTest::testPopup()
     auto serverXdgTopLevel
         = xdgTopLevelCreatedSpy.first().first().value<Server::XdgShellToplevel*>();
 
-    QFETCH(Client::XdgPositioner, positioner);
+    QFETCH(Client::xdg_shell_positioner_data, positioner_data);
 
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
     std::unique_ptr<Client::XdgShellPopup> xdgSurface(
-        m_xdgShell->create_popup(surface.get(), xdgParentSurface.get(), positioner));
+        m_xdgShell->create_popup(surface.get(), xdgParentSurface.get(), positioner_data));
     QVERIFY(popupCreatedSpy.wait());
     auto serverXdgPopup = popupCreatedSpy.first().first().value<Server::XdgShellPopup*>();
     QVERIFY(serverXdgPopup);
 
-    QCOMPARE(serverXdgPopup->get_positioner().size, positioner.initialSize());
-    QCOMPARE(serverXdgPopup->get_positioner().anchor.rect, positioner.anchorRect());
-    QCOMPARE(serverXdgPopup->get_positioner().anchor.edge, positioner.anchorEdge());
-    QCOMPARE(serverXdgPopup->get_positioner().gravity, positioner.gravity());
-    QCOMPARE(serverXdgPopup->get_positioner().anchor.offset, positioner.anchorOffset());
+    QCOMPARE(serverXdgPopup->get_positioner().size, positioner_data.size);
+    QCOMPARE(serverXdgPopup->get_positioner().anchor.rect, positioner_data.anchor.rect);
+    QCOMPARE(serverXdgPopup->get_positioner().anchor.edge, positioner_data.anchor.edge);
+    QCOMPARE(serverXdgPopup->get_positioner().gravity, positioner_data.gravity);
+    QCOMPARE(serverXdgPopup->get_positioner().anchor.offset, positioner_data.anchor.offset);
 
     // We have different enums for client and server, but they share the same values.
     QCOMPARE((int)serverXdgPopup->get_positioner().constraint_adjustments,
-             (int)positioner.constraints());
+             (int)positioner_data.constraint_adjustments);
 
     QCOMPARE(serverXdgPopup->transientFor(), serverXdgTopLevel->surface());
 }
@@ -1005,11 +1009,14 @@ void XdgShellTest::testWindowGeometry()
     QCOMPARE(server_toplevel->surface()->window_geometry(), QRect(50, 50, 250, 250));
 
     // Add a popup to this toplevel.
-    Client::XdgPositioner positioner(QSize(10, 10), QRect(100, 100, 50, 50));
+    Client::xdg_shell_positioner_data positioner_data;
+    positioner_data.size = QSize(10, 10);
+    positioner_data.anchor.rect = QRect(100, 100, 50, 50);
+
     QSignalSpy popup_created_spy(server.globals.xdg_shell.get(), &Server::XdgShell::popupCreated);
     std::unique_ptr<Client::Surface> popup_surface(m_compositor->createSurface());
     std::unique_ptr<Client::XdgShellPopup> popup(
-        m_xdgShell->create_popup(popup_surface.get(), toplevel.get(), positioner));
+        m_xdgShell->create_popup(popup_surface.get(), toplevel.get(), positioner_data));
     QVERIFY(popup_created_spy.wait());
     auto server_popup = popup_created_spy.first().first().value<Server::XdgShellPopup*>();
     QVERIFY(server_popup);

@@ -182,12 +182,16 @@ void XdgTest::createPopup()
 
     m_popupSurface = m_compositor->createSurface(this);
 
-    XdgPositioner positioner(QSize(200, 200), QRect(50, 50, 400, 400));
-    positioner.setAnchorEdge(Qt::BottomEdge | Qt::RightEdge);
-    positioner.setGravity(Qt::BottomEdge);
-    positioner.setConstraints(XdgPositioner::Constraint::FlipX | XdgPositioner::Constraint::SlideY);
+    xdg_shell_positioner_data pos_data;
+    pos_data.size = QSize(200, 200);
+    pos_data.anchor.rect = QRect(50, 50, 400, 400);
+    pos_data.anchor.edge = Qt::BottomEdge | Qt::RightEdge;
+    pos_data.gravity = Qt::BottomEdge;
+    pos_data.constraint_adjustments
+        = xdg_shell_constraint_adjustment::flip_x | xdg_shell_constraint_adjustment::slide_y;
+
     m_xdgShellPopup
-        = m_xdgShell->create_popup(m_popupSurface, xdg_shell_toplevel, positioner, m_popupSurface);
+        = m_xdgShell->create_popup(m_popupSurface, xdg_shell_toplevel, pos_data, m_popupSurface);
     renderPopup();
 }
 
