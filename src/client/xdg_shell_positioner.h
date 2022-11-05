@@ -13,6 +13,8 @@
 #include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
 
+struct xdg_positioner;
+
 namespace Wrapland::Client
 {
 
@@ -41,22 +43,30 @@ struct xdg_shell_positioner_data {
     xdg_shell_constraint_adjustments constraint_adjustments;
 };
 
-/**
- * Builder class describing how a popup should be positioned
- * when created
- *
- * @since 0.0.539
- */
-class WRAPLANDCLIENT_EXPORT xdg_shell_positioner
+class EventQueue;
+
+class WRAPLANDCLIENT_EXPORT xdg_shell_positioner : public QObject
 {
 public:
-    xdg_shell_positioner(xdg_shell_positioner_data data = {});
-    xdg_shell_positioner(xdg_shell_positioner const& other);
-    ~xdg_shell_positioner();
+    ~xdg_shell_positioner() override;
+
+    void setup(::xdg_positioner* positioner);
+    void release();
+    bool isValid() const;
+
+    EventQueue* eventQueue();
+    void setEventQueue(EventQueue* queue);
 
     xdg_shell_positioner_data const& get_data() const;
+    void set_data(xdg_shell_positioner_data data);
+
+    operator ::xdg_positioner*();
+    operator ::xdg_positioner*() const;
 
 private:
+    explicit xdg_shell_positioner(QObject* parent = nullptr);
+    friend class XdgShell;
+
     class Private;
     std::unique_ptr<Private> d_ptr;
 };
@@ -66,6 +76,5 @@ private:
 Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::xdg_shell_constraint_adjustments)
 
 Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_positioner_data)
-Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_positioner)
 Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_constraint_adjustment)
 Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_constraint_adjustments)

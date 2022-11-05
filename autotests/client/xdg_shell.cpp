@@ -832,6 +832,7 @@ void XdgShellTest::testPopup()
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
     std::unique_ptr<Client::XdgShellPopup> xdgSurface(
         m_xdgShell->create_popup(surface.get(), xdgParentSurface.get(), positioner_data));
+
     QVERIFY(popupCreatedSpy.wait());
     auto serverXdgPopup = popupCreatedSpy.first().first().value<Server::XdgShellPopup*>();
     QVERIFY(serverXdgPopup);
