@@ -35,6 +35,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "drm_lease_v1.h"
 #include "fake_input.h"
 #include "idle_inhibit_v1.h"
+#include "idle_notify_v1.h"
 #include "input_method_v2.h"
 #include "kde_idle.h"
 #include "keyboard_shortcuts_inhibit.h"
@@ -250,6 +251,11 @@ std::unique_ptr<PlasmaShell> Display::createPlasmaShell()
 std::unique_ptr<PlasmaWindowManager> Display::createPlasmaWindowManager()
 {
     return std::make_unique<PlasmaWindowManager>(this);
+}
+
+std::unique_ptr<idle_notifier_v1> Display::create_idle_notifier_v1()
+{
+    return std::make_unique<idle_notifier_v1>(this);
 }
 
 std::unique_ptr<kde_idle> Display::create_kde_idle()

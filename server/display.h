@@ -51,6 +51,7 @@ class DpmsManager;
 class drm_lease_device_v1;
 class FakeInput;
 class IdleInhibitManagerV1;
+class idle_notifier_v1;
 class input_method_manager_v2;
 class kde_idle;
 class KeyboardShortcutsInhibitManagerV1;
@@ -137,6 +138,7 @@ public:
     std::unique_ptr<PlasmaShell> createPlasmaShell();
     std::unique_ptr<PlasmaWindowManager> createPlasmaWindowManager();
     std::unique_ptr<primary_selection_device_manager> createPrimarySelectionDeviceManager();
+    std::unique_ptr<idle_notifier_v1> create_idle_notifier_v1();
     std::unique_ptr<kde_idle> create_kde_idle();
     std::unique_ptr<FakeInput> createFakeInput();
     std::unique_ptr<LayerShellV1> createLayerShellV1();
