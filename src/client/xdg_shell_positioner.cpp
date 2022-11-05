@@ -192,6 +192,16 @@ void xdg_shell_positioner::set_data(xdg_shell_positioner_data data)
     if (constraint != 0) {
         xdg_positioner_set_constraint_adjustment(d_ptr->positioner_ptr, constraint);
     }
+
+    xdg_positioner_set_parent_configure(d_ptr->positioner_ptr, data.parent.serial);
+
+    if (data.is_reactive) {
+        xdg_positioner_set_reactive(d_ptr->positioner_ptr);
+    }
+
+    if (auto psize = data.parent.size; psize.isValid()) {
+        xdg_positioner_set_parent_size(d_ptr->positioner_ptr, psize.width(), psize.height());
+    }
 }
 
 }

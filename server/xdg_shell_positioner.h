@@ -25,6 +25,13 @@ public:
     QSize size;
     Qt::Edges gravity;
     XdgShellSurface::ConstraintAdjustments constraint_adjustments;
+
+    bool is_reactive{false};
+
+    struct {
+        QSize size;
+        uint32_t serial{0};
+    } parent;
 };
 
 }

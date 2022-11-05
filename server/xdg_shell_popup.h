@@ -54,10 +54,12 @@ public:
     xdg_shell_positioner const& get_positioner() const;
 
     void popupDone();
+    void repositioned(uint32_t token);
 
 Q_SIGNALS:
     void configureAcknowledged(uint32_t serial);
     void grabRequested(Seat* seat, uint32_t serial);
+    void reposition(uint32_t token);
     void resourceDestroyed();
 
 private:

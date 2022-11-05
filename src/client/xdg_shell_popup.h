@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "xdg_shell_positioner.h"
+
 #include <QObject>
 #include <QRect>
 #include <QSize>
@@ -86,6 +88,8 @@ public:
      */
     void setWindowGeometry(QRect const& windowGeometry);
 
+    void reposition(xdg_shell_positioner* positioner, uint32_t token);
+
     operator xdg_surface*();
     operator xdg_surface*() const;
     operator xdg_popup*();
@@ -104,6 +108,8 @@ Q_SIGNALS:
      * @since 0.0.539
      **/
     void configureRequested(QRect const& relativePosition, quint32 serial);
+
+    void repositioned(quint32 token);
 
 private:
     explicit XdgShellPopup(QObject* parent = nullptr);

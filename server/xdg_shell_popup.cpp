@@ -17,11 +17,11 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#include "xdg_shell_popup.h"
 #include "xdg_shell_popup_p.h"
 
 #include "display.h"
 #include "seat_p.h"
+#include "xdg_shell_p.h"
 #include "xdg_shell_surface_p.h"
 
 #include "wayland/global.h"
@@ -38,14 +38,14 @@ namespace Wrapland::Server
 const struct xdg_popup_interface XdgShellPopup::Private::s_interface = {
     destroyCallback,
     grabCallback,
-    // TODO(romangg): Update xdg-shell protocol version (currently at 1).
-    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
+    reposition_callback,
 };
 
 XdgShellPopup::Private::Private(uint32_t version,
                                 uint32_t id,
                                 XdgShellSurface* surface,
                                 XdgShellSurface* parent,
+                                positioner_getter_t positioner_getter,
                                 XdgShellPopup* q_ptr)
     : Wayland::Resource<XdgShellPopup>(surface->d_ptr->client,
                                        version,
@@ -55,6 +55,7 @@ XdgShellPopup::Private::Private(uint32_t version,
                                        q_ptr)
     , shellSurface{surface}
     , parent{parent}
+    , positioner_getter{std::move(positioner_getter)}
 {
 }
 
@@ -92,6 +93,23 @@ void XdgShellPopup::Private::grabCallback([[maybe_unused]] wl_client* wlClient,
     priv->handle->grabRequested(seat, serial);
 }
 
+void XdgShellPopup::Private::reposition_callback(wl_client* /*wlClient*/,
+                                                 wl_resource* wlResource,
+                                                 wl_resource* wlPositioner,
+                                                 uint32_t token)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+
+    auto positioner = priv->positioner_getter(wlPositioner);
+    if (!positioner) {
+        priv->postError(XDG_WM_BASE_ERROR_INVALID_POSITIONER, "Invalid positioner");
+        return;
+    }
+
+    priv->positioner = positioner->get_data();
+    Q_EMIT priv->handle->reposition(token);
+}
+
 uint32_t XdgShellPopup::Private::configure(QRect const& rect)
 {
     const uint32_t serial = client->display()->handle->nextSerial();
@@ -116,7 +134,13 @@ XdgShellPopup::XdgShellPopup(uint32_t version,
                              XdgShellSurface* surface,
                              XdgShellSurface* parent)
     : QObject(nullptr)
-    , d_ptr(new Private(version, id, surface, parent, this))
+    , d_ptr(new Private(
+          version,
+          id,
+          surface,
+          parent,
+          [surface](auto res) { return surface->d_ptr->m_shell->d_ptr->getPositioner(res); },
+          this))
 {
 }
 
@@ -174,6 +198,12 @@ void XdgShellPopup::popupDone()
 uint32_t XdgShellPopup::configure(QRect const& rect)
 {
     return d_ptr->configure(rect);
+}
+
+void XdgShellPopup::repositioned(uint32_t token)
+{
+    assert(d_ptr->version >= XDG_POPUP_REPOSITIONED_SINCE_VERSION);
+    d_ptr->send<xdg_popup_send_repositioned>(token);
 }
 
 Client* XdgShellPopup::client() const

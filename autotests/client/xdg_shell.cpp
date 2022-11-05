@@ -74,6 +74,8 @@ private Q_SLOTS:
     void testPopup_data();
     void testPopup();
 
+    void test_popup_reposition();
+
     void testMultipleRoles1();
     void testMultipleRoles2();
     void test_role_after_buffer();
@@ -219,7 +221,7 @@ void XdgShellTest::init()
     QVERIFY(m_seat->isValid());
 
     QCOMPARE(xdgShellAnnouncedSpy.count(), 1);
-    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShell).version, 2);
+    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShell).version, 3);
 
     m_xdgShell
         = registry.createXdgShell(registry.interface(Client::Registry::Interface::XdgShell).name,
@@ -848,6 +850,76 @@ void XdgShellTest::testPopup()
              (int)positioner_data.constraint_adjustments);
 
     QCOMPARE(serverXdgPopup->transientFor(), serverXdgTopLevel->surface());
+}
+
+void XdgShellTest::test_popup_reposition()
+{
+    QSignalSpy toplevel_spy(server.globals.xdg_shell.get(), &Server::XdgShell::toplevelCreated);
+    QSignalSpy popup_spy(server.globals.xdg_shell.get(), &Server::XdgShell::popupCreated);
+    QVERIFY(toplevel_spy.isValid());
+    QVERIFY(popup_spy.isValid());
+
+    std::unique_ptr<Client::Surface> parent_surface(m_compositor->createSurface());
+    std::unique_ptr<Client::XdgShellToplevel> toplevel(
+        m_xdgShell->create_toplevel(parent_surface.get()));
+
+    QVERIFY(toplevel_spy.wait());
+    auto server_toplevel = toplevel_spy.first().first().value<Server::XdgShellToplevel*>();
+
+    Client::xdg_shell_positioner_data pos_data;
+    pos_data.size = QSize(10, 10);
+    pos_data.anchor.rect = QRect(100, 100, 50, 50);
+    pos_data.parent.serial = 1234;
+    pos_data.parent.size = QSize(200, 300);
+
+    std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());
+    std::unique_ptr<Client::XdgShellPopup> popup(
+        m_xdgShell->create_popup(surface.get(), toplevel.get(), pos_data));
+
+    QVERIFY(popup_spy.wait());
+    auto server_popup = popup_spy.first().first().value<Server::XdgShellPopup*>();
+    QVERIFY(server_popup);
+
+    QCOMPARE(server_popup->get_positioner().size, pos_data.size);
+    QCOMPARE(server_popup->get_positioner().anchor.rect, pos_data.anchor.rect);
+    QVERIFY(!pos_data.is_reactive);
+    QCOMPARE(server_popup->get_positioner().is_reactive, pos_data.is_reactive);
+    QCOMPARE(server_popup->get_positioner().parent.serial, pos_data.parent.serial);
+    QCOMPARE(server_popup->get_positioner().parent.size, pos_data.parent.size);
+
+    QCOMPARE(server_popup->transientFor(), server_toplevel->surface());
+
+    uint32_t token = 9000;
+
+    Client::xdg_shell_positioner_data pos_data2;
+    pos_data2.size = QSize(11, 11);
+    pos_data2.anchor.rect = QRect(101, 101, 51, 51);
+    pos_data2.parent.serial = 1235;
+    pos_data2.parent.size = QSize(201, 301);
+    pos_data2.is_reactive = true;
+
+    auto positioner = m_xdgShell->create_positioner(pos_data2);
+
+    QSignalSpy reposition_spy(server_popup, &Server::XdgShellPopup::reposition);
+    QVERIFY(reposition_spy.isValid());
+
+    popup->reposition(positioner, token);
+    delete positioner;
+
+    QVERIFY(reposition_spy.wait());
+    QCOMPARE(reposition_spy.first().first().value<quint32>(), token);
+
+    QCOMPARE(server_popup->get_positioner().size, pos_data2.size);
+    QCOMPARE(server_popup->get_positioner().anchor.rect, pos_data2.anchor.rect);
+    QCOMPARE(server_popup->get_positioner().is_reactive, pos_data2.is_reactive);
+    QCOMPARE(server_popup->get_positioner().parent.serial, pos_data2.parent.serial);
+    QCOMPARE(server_popup->get_positioner().parent.size, pos_data2.parent.size);
+
+    QSignalSpy repositioned_spy(popup.get(), &Client::XdgShellPopup::repositioned);
+    server_popup->repositioned(token);
+
+    QVERIFY(repositioned_spy.wait());
+    QCOMPARE(repositioned_spy.first().first().value<quint32>(), token);
 }
 
 // top level then toplevel

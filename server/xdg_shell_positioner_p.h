@@ -77,6 +77,13 @@ private:
                                                 uint32_t constraint_adjustment);
     static void
     setOffsetCallback(wl_client* wlClient, wl_resource* wlResource, int32_t pos_x, int32_t pos_y);
+    static void set_reactive_callback(wl_client* wlClient, wl_resource* wlResource);
+    static void set_parent_size_callback(wl_client* wlClient,
+                                         wl_resource* wlResource,
+                                         int32_t parent_width,
+                                         int32_t parent_height);
+    static void
+    set_parent_configure_callback(wl_client* wlClient, wl_resource* wlResource, uint32_t serial);
 
     static const struct xdg_positioner_interface s_interface;
 };

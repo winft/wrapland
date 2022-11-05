@@ -41,6 +41,13 @@ struct xdg_shell_positioner_data {
     QSize size;
     Qt::Edges gravity;
     xdg_shell_constraint_adjustments constraint_adjustments;
+
+    bool is_reactive{false};
+
+    struct {
+        QSize size;
+        uint32_t serial;
+    } parent;
 };
 
 class EventQueue;

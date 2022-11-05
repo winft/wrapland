@@ -45,8 +45,9 @@ const struct xdg_positioner_interface XdgShellPositioner::Private::s_interface =
     setGravityCallback,
     setConstraintAdjustmentCallback,
     setOffsetCallback,
-    // TODO(romangg): Update xdg-shell protocol version (currently at 1).
-    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
+    set_reactive_callback,
+    set_parent_size_callback,
+    set_parent_configure_callback,
 };
 
 void XdgShellPositioner::Private::setSizeCallback([[maybe_unused]] wl_client* wlClient,
@@ -190,6 +191,30 @@ void XdgShellPositioner::Private::setOffsetCallback([[maybe_unused]] wl_client* 
 {
     auto priv = get_handle(wlResource)->d_ptr;
     priv->data.anchor.offset = QPoint(pos_x, pos_y);
+}
+
+void XdgShellPositioner::Private::set_reactive_callback(wl_client* /*wlClient*/,
+                                                        wl_resource* wlResource)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->data.is_reactive = true;
+}
+
+void XdgShellPositioner::Private::set_parent_size_callback(wl_client* /*wlClient*/,
+                                                           wl_resource* wlResource,
+                                                           int32_t parent_width,
+                                                           int32_t parent_height)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->data.parent.size = QSize(parent_width, parent_height);
+}
+
+void XdgShellPositioner::Private::set_parent_configure_callback(wl_client* /*wlClient*/,
+                                                                wl_resource* wlResource,
+                                                                uint32_t serial)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->data.parent.serial = serial;
 }
 
 XdgShellPositioner::XdgShellPositioner(Client* client, uint32_t version, uint32_t id)
