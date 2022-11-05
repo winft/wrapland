@@ -45,14 +45,7 @@ public:
 
     void popupDone();
 
-    QSize initialSize;
-    bool has_window_geometry{false};
-
-    QRect anchorRect;
-    Qt::Edges anchorEdge;
-    Qt::Edges gravity;
-    XdgShellSurface::ConstraintAdjustments constraintAdjustments;
-    QPoint anchorOffset;
+    xdg_shell_positioner positioner;
 
     XdgShellSurface* shellSurface;
     XdgShellSurface* parent;

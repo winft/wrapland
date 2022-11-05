@@ -832,14 +832,15 @@ void XdgShellTest::testPopup()
     auto serverXdgPopup = popupCreatedSpy.first().first().value<Server::XdgShellPopup*>();
     QVERIFY(serverXdgPopup);
 
-    QCOMPARE(serverXdgPopup->initialSize(), positioner.initialSize());
-    QCOMPARE(serverXdgPopup->anchorRect(), positioner.anchorRect());
-    QCOMPARE(serverXdgPopup->anchorEdge(), positioner.anchorEdge());
-    QCOMPARE(serverXdgPopup->gravity(), positioner.gravity());
-    QCOMPARE(serverXdgPopup->anchorOffset(), positioner.anchorOffset());
+    QCOMPARE(serverXdgPopup->get_positioner().size, positioner.initialSize());
+    QCOMPARE(serverXdgPopup->get_positioner().anchor.rect, positioner.anchorRect());
+    QCOMPARE(serverXdgPopup->get_positioner().anchor.edge, positioner.anchorEdge());
+    QCOMPARE(serverXdgPopup->get_positioner().gravity, positioner.gravity());
+    QCOMPARE(serverXdgPopup->get_positioner().anchor.offset, positioner.anchorOffset());
 
     // We have different enums for client and server, but they share the same values.
-    QCOMPARE((int)serverXdgPopup->constraintAdjustments(), (int)positioner.constraints());
+    QCOMPARE((int)serverXdgPopup->get_positioner().constraint_adjustments,
+             (int)positioner.constraints());
 
     QCOMPARE(serverXdgPopup->transientFor(), serverXdgTopLevel->surface());
 }

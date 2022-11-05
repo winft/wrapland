@@ -130,20 +130,15 @@ XdgShellSurface* XdgShellPopup::transientFor() const
     return d_ptr->parent;
 }
 
-QSize XdgShellPopup::initialSize() const
-{
-    return d_ptr->initialSize;
-}
-
 QPoint XdgShellPopup::transientOffset() const
 {
-    QRect rect = anchorRect();
+    auto rect = get_positioner().anchor.rect;
     const QPoint center = rect.isEmpty() ? rect.topLeft() : rect.center();
 
     // Compensate for QRect::right + 1.
     rect = rect.adjusted(0, 0, 1, 1);
 
-    switch (anchorEdge()) {
+    switch (get_positioner().anchor.edge) {
     case Qt::TopEdge | Qt::LeftEdge:
         return rect.topLeft();
     case Qt::TopEdge:
@@ -166,29 +161,9 @@ QPoint XdgShellPopup::transientOffset() const
     Q_UNREACHABLE();
 }
 
-QRect XdgShellPopup::anchorRect() const
+xdg_shell_positioner const& XdgShellPopup::get_positioner() const
 {
-    return d_ptr->anchorRect;
-}
-
-Qt::Edges XdgShellPopup::anchorEdge() const
-{
-    return d_ptr->anchorEdge;
-}
-
-Qt::Edges XdgShellPopup::gravity() const
-{
-    return d_ptr->gravity;
-}
-
-QPoint XdgShellPopup::anchorOffset() const
-{
-    return d_ptr->anchorOffset;
-}
-
-XdgShellSurface::ConstraintAdjustments XdgShellPopup::constraintAdjustments() const
-{
-    return d_ptr->constraintAdjustments;
+    return d_ptr->positioner;
 }
 
 void XdgShellPopup::popupDone()
