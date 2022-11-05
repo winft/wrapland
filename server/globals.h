@@ -15,6 +15,7 @@
 #include "drm_lease_v1.h"
 #include "fake_input.h"
 #include "idle_inhibit_v1.h"
+#include "idle_notify_v1.h"
 #include "input_method_v2.h"
 #include "kde_idle.h"
 #include "keyboard_shortcuts_inhibit.h"
@@ -115,6 +116,7 @@ struct globals {
     std::unique_ptr<Server::PlasmaWindowManager> plasma_window_manager;
 
     /// Hardware take-over and blocking
+    std::unique_ptr<Server::idle_notifier_v1> idle_notifier_v1;
     std::unique_ptr<Server::kde_idle> kde_idle;
     std::unique_ptr<Server::drm_lease_device_v1> drm_lease_device_v1;
     std::unique_ptr<Server::IdleInhibitManagerV1> idle_inhibit_manager_v1;

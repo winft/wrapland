@@ -25,6 +25,7 @@ set(CLIENT_LIB_SRCS
     fullscreen_shell.cpp
     idle.cpp
     idleinhibit.cpp
+    idle_notify_v1.cpp
     input_method_v2.cpp
     keyboard.cpp
     keystate.cpp
@@ -201,6 +202,10 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
   BASENAME xdg-foreign-unstable-v2
 )
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/staging/ext-idle-notify/ext-idle-notify-v1.xml
+  BASENAME ext-idle-notify-v1
+)
+ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
   PROTOCOL ${WaylandProtocols_DATADIR}/unstable/idle-inhibit/idle-inhibit-unstable-v1.xml
   BASENAME idle-inhibit-unstable-v1
 )
@@ -259,6 +264,7 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
 
 set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-drm-lease-v1-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-ext-idle-notify-v1-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-fullscreen-shell-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-client-protocol.h
@@ -350,6 +356,7 @@ set(CLIENT_LIB_HEADERS
     fullscreen_shell.h
     idle.h
     idleinhibit.h
+    idle_notify_v1.h
     input_method_v2.h
     keyboard.h
     keystate.h
