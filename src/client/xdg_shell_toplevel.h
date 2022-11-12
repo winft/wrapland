@@ -40,12 +40,15 @@ enum class xdg_shell_toplevel_configure_change {
     none = 0,
     size = 1 << 0,
     states = 1 << 1,
+    bounds = 1 << 2,
 };
 Q_DECLARE_FLAGS(xdg_shell_toplevel_configure_changes, xdg_shell_toplevel_configure_change)
 
 struct xdg_shell_toplevel_configure_data {
     QSize size;
     xdg_shell_states states;
+    QSize bounds;
+
     xdg_shell_toplevel_configure_changes updates{xdg_shell_toplevel_configure_change::none};
 };
 

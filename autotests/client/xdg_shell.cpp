@@ -70,6 +70,7 @@ private Q_SLOTS:
 
     void testMaxSize();
     void testMinSize();
+    void test_bounds();
 
     void testPopup_data();
     void testPopup();
@@ -221,7 +222,7 @@ void XdgShellTest::init()
     QVERIFY(m_seat->isValid());
 
     QCOMPARE(xdgShellAnnouncedSpy.count(), 1);
-    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShell).version, 3);
+    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShell).version, 4);
 
     m_xdgShell
         = registry.createXdgShell(registry.interface(Client::Registry::Interface::XdgShell).name,
@@ -768,6 +769,46 @@ void XdgShellTest::testMinSize()
     QCOMPARE(minSizeSpy.count(), 2);
     QCOMPARE(minSizeSpy.last().at(0).value<QSize>(), QSize(100, 100));
     QCOMPARE(serverXdgSurface->minimumSize(), QSize(100, 100));
+}
+
+void XdgShellTest::test_bounds()
+{
+    SURFACE
+
+    QSignalSpy configure_spy(xdgSurface.get(), &Client::XdgShellToplevel::configured);
+    QVERIFY(configure_spy.isValid());
+
+    serverXdgSurface->configure_bounds(QSize(100, 50));
+    serverXdgSurface->configure(Server::XdgShellSurface::States(), QSize(10, 20));
+
+    QVERIFY(configure_spy.wait());
+    QCOMPARE(xdgSurface->get_configure_data().size, QSize(10, 20));
+    QCOMPARE(xdgSurface->get_configure_data().states, Client::xdg_shell_states());
+    QCOMPARE(xdgSurface->get_configure_data().bounds, QSize(100, 50));
+    QVERIFY(xdgSurface->get_configure_data().updates.testFlag(
+        Client::xdg_shell_toplevel_configure_change::size));
+    QVERIFY(xdgSurface->get_configure_data().updates.testFlag(
+        Client::xdg_shell_toplevel_configure_change::bounds));
+
+    serverXdgSurface->configure_bounds(QSize(200, 150));
+    serverXdgSurface->configure(Server::XdgShellSurface::States(), QSize(10, 20));
+    QVERIFY(configure_spy.wait());
+    QCOMPARE(configure_spy.size(), 2);
+    QCOMPARE(xdgSurface->get_configure_data().bounds, QSize(200, 150));
+    QVERIFY(!xdgSurface->get_configure_data().updates.testFlag(
+        Client::xdg_shell_toplevel_configure_change::size));
+    QVERIFY(xdgSurface->get_configure_data().updates.testFlag(
+        Client::xdg_shell_toplevel_configure_change::bounds));
+
+    serverXdgSurface->unconfigure_bounds();
+    serverXdgSurface->configure(Server::XdgShellSurface::States(), QSize(10, 20));
+    QVERIFY(configure_spy.wait());
+    QCOMPARE(configure_spy.size(), 3);
+    QCOMPARE(xdgSurface->get_configure_data().bounds, QSize(0, 0));
+    QVERIFY(!xdgSurface->get_configure_data().updates.testFlag(
+        Client::xdg_shell_toplevel_configure_change::size));
+    QVERIFY(xdgSurface->get_configure_data().updates.testFlag(
+        Client::xdg_shell_toplevel_configure_change::bounds));
 }
 
 void XdgShellTest::testPopup_data()

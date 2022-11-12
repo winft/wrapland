@@ -48,6 +48,9 @@ public:
 
     XdgShellToplevel* transientFor() const;
 
+    void configure_bounds(QSize const& bounds);
+    void unconfigure_bounds();
+
     uint32_t configure(XdgShellSurface::States states, QSize const& size = QSize(0, 0));
     bool configurePending() const;
 

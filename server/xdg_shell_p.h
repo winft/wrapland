@@ -32,7 +32,7 @@ namespace Wrapland::Server
 {
 class XdgShellPositioner;
 
-constexpr uint32_t XdgShellVersion = 3;
+constexpr uint32_t XdgShellVersion = 4;
 using XdgShellGlobal = Wayland::Global<XdgShell, XdgShellVersion>;
 using XdgShellBind = Wayland::Bind<XdgShellGlobal>;
 

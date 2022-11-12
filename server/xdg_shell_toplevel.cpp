@@ -388,6 +388,18 @@ QSize XdgShellToplevel::maximumSize() const
     return d_ptr->maximumSize();
 }
 
+void XdgShellToplevel::configure_bounds(QSize const& bounds)
+{
+    auto val = bounds.isValid() ? bounds : QSize(0, 0);
+    d_ptr->send<xdg_toplevel_send_configure_bounds, XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION>(
+        val.width(), val.height());
+}
+
+void XdgShellToplevel::unconfigure_bounds()
+{
+    configure_bounds({});
+}
+
 uint32_t XdgShellToplevel::configure(XdgShellSurface::States states, QSize const& size)
 {
     return d_ptr->configure(states, size);

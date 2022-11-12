@@ -74,6 +74,10 @@ private:
                                   int32_t width,
                                   int32_t height,
                                   struct wl_array* state);
+    static void configure_bounds_callback(void* data,
+                                          struct xdg_toplevel* xdg_toplevel,
+                                          int32_t width,
+                                          int32_t height);
     static void closeCallback(void* data, xdg_toplevel* xdg_toplevel);
     static void surfaceConfigureCallback(void* data, xdg_surface* xdg_surface, uint32_t serial);
 
@@ -98,6 +102,7 @@ XdgShellToplevel::Private::~Private() = default;
 struct xdg_toplevel_listener const XdgShellToplevel::Private::s_toplevelListener = {
     configureCallback,
     closeCallback,
+    configure_bounds_callback,
 };
 
 struct xdg_surface_listener const XdgShellToplevel::Private::s_surfaceListener = {
@@ -180,6 +185,20 @@ void XdgShellToplevel::Private::configureCallback(void* data,
     s->set_config_data_updates(
         cfgdata.current.states, states, xdg_shell_toplevel_configure_change::states);
     cfgdata.pending.states = states;
+}
+
+void XdgShellToplevel::Private::configure_bounds_callback(void* data,
+                                                          struct xdg_toplevel* /*xdg_toplevel*/,
+                                                          int32_t width,
+                                                          int32_t height)
+{
+    auto priv = static_cast<Private*>(data);
+    auto& cfgdata = priv->configure_data;
+    auto const bounds = QSize(width, height);
+
+    priv->set_config_data_updates(
+        cfgdata.current.bounds, bounds, xdg_shell_toplevel_configure_change::bounds);
+    cfgdata.pending.bounds = bounds;
 }
 
 void XdgShellToplevel::Private::closeCallback(void* data, xdg_toplevel* xdg_toplevel)
