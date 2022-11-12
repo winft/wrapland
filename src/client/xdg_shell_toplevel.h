@@ -12,6 +12,7 @@
 
 #include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
+#include <set>
 
 struct xdg_surface;
 struct xdg_toplevel;
@@ -36,11 +37,19 @@ enum class xdg_shell_state {
 };
 Q_DECLARE_FLAGS(xdg_shell_states, xdg_shell_state)
 
+enum class xdg_shell_wm_capability {
+    window_menu = 1,
+    maximize,
+    fullscreen,
+    minimize,
+};
+
 enum class xdg_shell_toplevel_configure_change {
     none = 0,
     size = 1 << 0,
     states = 1 << 1,
     bounds = 1 << 2,
+    wm_capabilities = 1 << 3,
 };
 Q_DECLARE_FLAGS(xdg_shell_toplevel_configure_changes, xdg_shell_toplevel_configure_change)
 
@@ -48,6 +57,7 @@ struct xdg_shell_toplevel_configure_data {
     QSize size;
     xdg_shell_states states;
     QSize bounds;
+    std::set<xdg_shell_wm_capability> wm_capabilities;
 
     xdg_shell_toplevel_configure_changes updates{xdg_shell_toplevel_configure_change::none};
 };

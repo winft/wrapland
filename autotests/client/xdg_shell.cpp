@@ -71,6 +71,7 @@ private Q_SLOTS:
     void testMaxSize();
     void testMinSize();
     void test_bounds();
+    void test_capabilities();
 
     void testPopup_data();
     void testPopup();
@@ -222,7 +223,7 @@ void XdgShellTest::init()
     QVERIFY(m_seat->isValid());
 
     QCOMPARE(xdgShellAnnouncedSpy.count(), 1);
-    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShell).version, 4);
+    QCOMPARE(registry.interface(Client::Registry::Interface::XdgShell).version, 5);
 
     m_xdgShell
         = registry.createXdgShell(registry.interface(Client::Registry::Interface::XdgShell).name,
@@ -809,6 +810,45 @@ void XdgShellTest::test_bounds()
         Client::xdg_shell_toplevel_configure_change::size));
     QVERIFY(xdgSurface->get_configure_data().updates.testFlag(
         Client::xdg_shell_toplevel_configure_change::bounds));
+}
+
+void XdgShellTest::test_capabilities()
+{
+    using client_change = Client::xdg_shell_toplevel_configure_change;
+    using client_changes = Client::xdg_shell_toplevel_configure_changes;
+    using server_cap = Server::xdg_shell_wm_capability;
+    using client_cap = Client::xdg_shell_wm_capability;
+
+    SURFACE
+
+    QSignalSpy configure_spy(xdgSurface.get(), &Client::XdgShellToplevel::configured);
+    QVERIFY(configure_spy.isValid());
+
+    serverXdgSurface->set_capabilities({server_cap::minimize, server_cap::maximize});
+    serverXdgSurface->configure(Server::XdgShellSurface::States(), QSize(10, 20));
+
+    QVERIFY(configure_spy.wait());
+    QCOMPARE(xdgSurface->get_configure_data().size, QSize(10, 20));
+    QCOMPARE(xdgSurface->get_configure_data().states, Client::xdg_shell_states());
+    QCOMPARE(xdgSurface->get_configure_data().wm_capabilities,
+             std::set<client_cap>({client_cap::minimize, client_cap::maximize}));
+    QCOMPARE(xdgSurface->get_configure_data().updates,
+             client_changes(client_change::size) | client_change::wm_capabilities);
+
+    serverXdgSurface->set_capabilities({server_cap::minimize, server_cap::fullscreen});
+    serverXdgSurface->configure(Server::XdgShellSurface::States(), QSize(10, 20));
+    QVERIFY(configure_spy.wait());
+    QCOMPARE(configure_spy.size(), 2);
+    QCOMPARE(xdgSurface->get_configure_data().wm_capabilities,
+             std::set<client_cap>({client_cap::minimize, client_cap::fullscreen}));
+    QCOMPARE(xdgSurface->get_configure_data().updates,
+             client_changes(client_change::wm_capabilities));
+
+    serverXdgSurface->configure(Server::XdgShellSurface::States(), QSize(20, 30));
+    QVERIFY(configure_spy.wait());
+    QCOMPARE(configure_spy.size(), 3);
+    QCOMPARE(xdgSurface->get_configure_data().size, QSize(20, 30));
+    QVERIFY(!xdgSurface->get_configure_data().updates.testFlag(client_change::wm_capabilities));
 }
 
 void XdgShellTest::testPopup_data()

@@ -7,6 +7,7 @@
 #include "xdg_shell_toplevel.h"
 
 #include "event_queue.h"
+#include "logging.h"
 #include "output.h"
 #include "seat.h"
 #include "wayland_pointer_p.h"
@@ -78,6 +79,9 @@ private:
                                           struct xdg_toplevel* xdg_toplevel,
                                           int32_t width,
                                           int32_t height);
+    static void wm_capabilities_callback(void* data,
+                                         struct xdg_toplevel* xdg_toplevel,
+                                         struct wl_array* capabilities);
     static void closeCallback(void* data, xdg_toplevel* xdg_toplevel);
     static void surfaceConfigureCallback(void* data, xdg_surface* xdg_surface, uint32_t serial);
 
@@ -103,6 +107,7 @@ struct xdg_toplevel_listener const XdgShellToplevel::Private::s_toplevelListener
     configureCallback,
     closeCallback,
     configure_bounds_callback,
+    wm_capabilities_callback,
 };
 
 struct xdg_surface_listener const XdgShellToplevel::Private::s_surfaceListener = {
@@ -199,6 +204,47 @@ void XdgShellToplevel::Private::configure_bounds_callback(void* data,
     priv->set_config_data_updates(
         cfgdata.current.bounds, bounds, xdg_shell_toplevel_configure_change::bounds);
     cfgdata.pending.bounds = bounds;
+}
+
+void XdgShellToplevel::Private::wm_capabilities_callback(void* data,
+                                                         struct xdg_toplevel* /*xdg_toplevel*/,
+                                                         struct wl_array* capabilities)
+{
+    auto priv = static_cast<Private*>(data);
+    auto& cfgdata = priv->configure_data;
+
+    auto cap_ptr = static_cast<uint32_t*>(capabilities->data);
+    std::set<xdg_shell_wm_capability> caps;
+
+    auto get_cap = [](auto cap) -> xdg_shell_wm_capability {
+        if (cap == XDG_TOPLEVEL_WM_CAPABILITIES_WINDOW_MENU) {
+            return xdg_shell_wm_capability::window_menu;
+        }
+        if (cap == XDG_TOPLEVEL_WM_CAPABILITIES_MAXIMIZE) {
+            return xdg_shell_wm_capability::maximize;
+        }
+        if (cap == XDG_TOPLEVEL_WM_CAPABILITIES_FULLSCREEN) {
+            return xdg_shell_wm_capability::fullscreen;
+        }
+        if (cap == XDG_TOPLEVEL_WM_CAPABILITIES_MINIMIZE) {
+            return xdg_shell_wm_capability::minimize;
+        }
+        throw std::runtime_error("xdg-shell wm cap not defined: " + std::to_string(cap));
+    };
+
+    for (size_t i = 0; i < capabilities->size / sizeof(uint32_t); i++) {
+        try {
+            caps.insert(get_cap(cap_ptr[i]));
+        } catch (std::runtime_error const& exc) {
+            qCWarning(WRAPLAND_CLIENT) << exc.what();
+            continue;
+        }
+    }
+
+    priv->set_config_data_updates(cfgdata.current.wm_capabilities,
+                                  caps,
+                                  xdg_shell_toplevel_configure_change::wm_capabilities);
+    cfgdata.pending.wm_capabilities = caps;
 }
 
 void XdgShellToplevel::Private::closeCallback(void* data, xdg_toplevel* xdg_toplevel)
