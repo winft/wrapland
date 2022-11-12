@@ -24,37 +24,23 @@ class Output;
 class Surface;
 class Seat;
 
+enum class xdg_shell_state {
+    maximized = 1 << 0,
+    fullscreen = 1 << 1,
+    resizing = 1 << 2,
+    activated = 1 << 3,
+    tiled_left = 1 << 4,
+    tiled_right = 1 << 5,
+    tiled_top = 1 << 6,
+    tiled_bottom = 1 << 7,
+};
+Q_DECLARE_FLAGS(xdg_shell_states, xdg_shell_state)
+
 class WRAPLANDCLIENT_EXPORT XdgShellToplevel : public QObject
 {
     Q_OBJECT
 public:
     ~XdgShellToplevel() override;
-    /**
-     * States the Surface can be in
-     **/
-    enum class State {
-        /**
-         * The Surface is maximized.
-         **/
-        Maximized = 1 << 0,
-        /**
-         * The Surface is fullscreen.
-         **/
-        Fullscreen = 1 << 1,
-        /**
-         * The Surface is currently being resized by the Compositor.
-         **/
-        Resizing = 1 << 2,
-        /**
-         * The Surface is considered active. Does not imply keyboard focus.
-         **/
-        Activated = 1 << 3,
-        TiledLeft = 1 << 4,
-        TiledTop = 1 << 5,
-        TiledRight = 1 << 6,
-        TiledBottom = 1 << 7,
-    };
-    Q_DECLARE_FLAGS(States, State)
 
     /**
      * Setup this XdgShellToplevel to manage the @p toplevel on the relevant @p xdgsurface
@@ -204,7 +190,7 @@ Q_SIGNALS:
      * Before the next commit of the surface the @p serial needs to be passed to ackConfigure.
      **/
     void configureRequested(QSize const& size,
-                            Wrapland::Client::XdgShellToplevel::States states,
+                            Wrapland::Client::xdg_shell_states states,
                             quint32 serial);
 
     /**
@@ -227,7 +213,7 @@ private:
 
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::XdgShellToplevel::States)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::xdg_shell_states)
 
-Q_DECLARE_METATYPE(Wrapland::Client::XdgShellToplevel::State)
-Q_DECLARE_METATYPE(Wrapland::Client::XdgShellToplevel::States)
+Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_state)
+Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_states)

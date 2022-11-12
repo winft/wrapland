@@ -66,7 +66,7 @@ private:
     WaylandPointer<xdg_surface, xdg_surface_destroy> xdgsurface;
 
     QSize pendingSize;
-    States pendingState;
+    xdg_shell_states pendingState;
 
     static void configureCallback(void* data,
                                   struct xdg_toplevel* xdg_toplevel,
@@ -120,34 +120,34 @@ void XdgShellToplevel::Private::configureCallback(void* data,
 {
     Q_UNUSED(xdg_toplevel)
     auto s = static_cast<Private*>(data);
-    States states;
+    xdg_shell_states states;
 
     uint32_t* statePtr = static_cast<uint32_t*>(state->data);
     for (size_t i = 0; i < state->size / sizeof(uint32_t); i++) {
         switch (statePtr[i]) {
         case XDG_TOPLEVEL_STATE_MAXIMIZED:
-            states = states | XdgShellToplevel::State::Maximized;
+            states = states | xdg_shell_state::maximized;
             break;
         case XDG_TOPLEVEL_STATE_FULLSCREEN:
-            states = states | XdgShellToplevel::State::Fullscreen;
+            states = states | xdg_shell_state::fullscreen;
             break;
         case XDG_TOPLEVEL_STATE_RESIZING:
-            states = states | XdgShellToplevel::State::Resizing;
+            states = states | xdg_shell_state::resizing;
             break;
         case XDG_TOPLEVEL_STATE_ACTIVATED:
-            states = states | XdgShellToplevel::State::Activated;
+            states = states | xdg_shell_state::activated;
             break;
         case XDG_TOPLEVEL_STATE_TILED_LEFT:
-            states = states | XdgShellToplevel::State::TiledLeft;
+            states = states | xdg_shell_state::tiled_left;
             break;
         case XDG_TOPLEVEL_STATE_TILED_RIGHT:
-            states = states | XdgShellToplevel::State::TiledRight;
+            states = states | xdg_shell_state::tiled_right;
             break;
         case XDG_TOPLEVEL_STATE_TILED_TOP:
-            states = states | XdgShellToplevel::State::TiledTop;
+            states = states | xdg_shell_state::tiled_top;
             break;
         case XDG_TOPLEVEL_STATE_TILED_BOTTOM:
-            states = states | XdgShellToplevel::State::TiledBottom;
+            states = states | xdg_shell_state::tiled_bottom;
             break;
         }
     }

@@ -120,7 +120,7 @@ XdgShellTest::XdgShellTest(QObject* parent)
     qRegisterMetaType<Server::XdgShellPopup*>();
     qRegisterMetaType<Server::Output*>();
     qRegisterMetaType<Server::Seat*>();
-    qRegisterMetaType<Client::XdgShellToplevel::States>();
+    qRegisterMetaType<Client::xdg_shell_states>();
     qRegisterMetaType<std::string>();
     qRegisterMetaType<uint32_t>();
 }
@@ -575,7 +575,7 @@ void XdgShellTest::testClose()
 void XdgShellTest::testConfigureStates_data()
 {
     QTest::addColumn<Server::XdgShellSurface::States>("serverStates");
-    QTest::addColumn<Client::XdgShellToplevel::States>("clientStates");
+    QTest::addColumn<Client::xdg_shell_states>("clientStates");
 
     auto const sa = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Activated);
     auto const sm = Server::XdgShellSurface::States(Server::XdgShellSurface::State::Maximized);
@@ -586,17 +586,16 @@ void XdgShellTest::testConfigureStates_data()
     auto const stt = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledTop);
     auto const stb = Server::XdgShellSurface::States(Server::XdgShellSurface::State::TiledBottom);
 
-    auto const ca = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Activated);
-    auto const cm = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Maximized);
-    auto const cf = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Fullscreen);
-    auto const cr = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::Resizing);
-    auto const ctl = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledLeft);
-    auto const ctr = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledRight);
-    auto const ctt = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledTop);
-    auto const ctb = Client::XdgShellToplevel::States(Client::XdgShellToplevel::State::TiledBottom);
+    auto const ca = Client::xdg_shell_states(Client::xdg_shell_state::activated);
+    auto const cm = Client::xdg_shell_states(Client::xdg_shell_state::maximized);
+    auto const cf = Client::xdg_shell_states(Client::xdg_shell_state::fullscreen);
+    auto const cr = Client::xdg_shell_states(Client::xdg_shell_state::resizing);
+    auto const ctl = Client::xdg_shell_states(Client::xdg_shell_state::tiled_left);
+    auto const ctr = Client::xdg_shell_states(Client::xdg_shell_state::tiled_right);
+    auto const ctt = Client::xdg_shell_states(Client::xdg_shell_state::tiled_top);
+    auto const ctb = Client::xdg_shell_states(Client::xdg_shell_state::tiled_bottom);
 
-    QTest::newRow("none") << Server::XdgShellSurface::States()
-                          << Client::XdgShellToplevel::States();
+    QTest::newRow("none") << Server::XdgShellSurface::States() << Client::xdg_shell_states();
     QTest::newRow("Active") << sa << ca;
     QTest::newRow("Maximize") << sm << cm;
     QTest::newRow("Fullscreen") << sf << cf;
@@ -640,7 +639,7 @@ void XdgShellTest::testConfigureStates()
     QVERIFY(configureSpy.wait());
     QCOMPARE(configureSpy.count(), 1);
     QCOMPARE(configureSpy.first().at(0).toSize(), QSize(0, 0));
-    QTEST(configureSpy.first().at(1).value<Client::XdgShellToplevel::States>(), "clientStates");
+    QTEST(configureSpy.first().at(1).value<Client::xdg_shell_states>(), "clientStates");
     QCOMPARE(configureSpy.first().at(2).value<quint32>(), server.display->serial());
 
     QSignalSpy ackSpy(serverXdgSurface, &Server::XdgShellToplevel::configureAcknowledged);
@@ -680,16 +679,16 @@ void XdgShellTest::testConfigureMultipleAcks()
     QVERIFY(!configureSpy.wait(100));
 
     QCOMPARE(configureSpy.at(0).at(0).toSize(), QSize(10, 20));
-    QCOMPARE(configureSpy.at(0).at(1).value<Client::XdgShellToplevel::States>(),
-             Client::XdgShellToplevel::States());
+    QCOMPARE(configureSpy.at(0).at(1).value<Client::xdg_shell_states>(),
+             Client::xdg_shell_states());
     QCOMPARE(configureSpy.at(0).at(2).value<quint32>(), serial1);
     QCOMPARE(configureSpy.at(1).at(0).toSize(), QSize(20, 30));
-    QCOMPARE(configureSpy.at(1).at(1).value<Client::XdgShellToplevel::States>(),
-             Client::XdgShellToplevel::States());
+    QCOMPARE(configureSpy.at(1).at(1).value<Client::xdg_shell_states>(),
+             Client::xdg_shell_states());
     QCOMPARE(configureSpy.at(1).at(2).value<quint32>(), serial2);
     QCOMPARE(configureSpy.at(2).at(0).toSize(), QSize(30, 40));
-    QCOMPARE(configureSpy.at(2).at(1).value<Client::XdgShellToplevel::States>(),
-             Client::XdgShellToplevel::States());
+    QCOMPARE(configureSpy.at(2).at(1).value<Client::xdg_shell_states>(),
+             Client::xdg_shell_states());
     QCOMPARE(configureSpy.at(2).at(2).value<quint32>(), serial3);
     QCOMPARE(sizeChangedSpy.count(), 3);
     QCOMPARE(sizeChangedSpy.at(0).at(0).toSize(), QSize(10, 20));

@@ -129,11 +129,7 @@ void XdgTest::setupRegistry(Registry* registry)
         connect(xdg_shell_toplevel,
                 &XdgShellToplevel::configureRequested,
                 this,
-                [this](const QSize& size,
-                       Wrapland::Client::XdgShellToplevel::States states,
-                       int serial) {
-                    Q_UNUSED(size);
-                    Q_UNUSED(states);
+                [this](auto const& /*size*/, auto /*states*/, auto serial) {
                     xdg_shell_toplevel->ackConfigure(serial);
                     render();
                 });
