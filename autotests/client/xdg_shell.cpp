@@ -267,7 +267,7 @@ void XdgShellTest::cleanup()
     std::unique_ptr<Client::Surface> surface(m_compositor->createSurface());                       \
     std::unique_ptr<Client::XdgShellToplevel> xdgSurface(                                          \
         m_xdgShell->create_toplevel(surface.get()));                                               \
-    QCOMPARE(xdgSurface->size(), QSize());                                                         \
+    QCOMPARE(xdgSurface->get_configure_data().size, QSize());                                      \
     QVERIFY(xdgSurfaceCreatedSpy.wait());                                                          \
     auto serverXdgSurface                                                                          \
         = xdgSurfaceCreatedSpy.first().first().value<Server::XdgShellToplevel*>();                 \
@@ -631,24 +631,25 @@ void XdgShellTest::testConfigureStates()
     // this test verifies that configure states works
     SURFACE
 
-    QSignalSpy configureSpy(xdgSurface.get(), &Client::XdgShellToplevel::configureRequested);
+    QSignalSpy configureSpy(xdgSurface.get(), &Client::XdgShellToplevel::configured);
     QVERIFY(configureSpy.isValid());
 
     QFETCH(Server::XdgShellSurface::States, serverStates);
     serverXdgSurface->configure(serverStates);
     QVERIFY(configureSpy.wait());
     QCOMPARE(configureSpy.count(), 1);
-    QCOMPARE(configureSpy.first().at(0).toSize(), QSize(0, 0));
-    QTEST(configureSpy.first().at(1).value<Client::xdg_shell_states>(), "clientStates");
-    QCOMPARE(configureSpy.first().at(2).value<quint32>(), server.display->serial());
+    QCOMPARE(xdgSurface->get_configure_data().size, QSize(0, 0));
+    QTEST(xdgSurface->get_configure_data().states, "clientStates");
+    QCOMPARE(configureSpy.front().front().value<quint32>(), server.display->serial());
 
     QSignalSpy ackSpy(serverXdgSurface, &Server::XdgShellToplevel::configureAcknowledged);
     QVERIFY(ackSpy.isValid());
 
-    xdgSurface->ackConfigure(configureSpy.first().at(2).value<quint32>());
+    xdgSurface->ackConfigure(configureSpy.front().front().value<quint32>());
     QVERIFY(ackSpy.wait());
     QCOMPARE(ackSpy.count(), 1);
-    QCOMPARE(ackSpy.first().first().value<quint32>(), configureSpy.first().at(2).value<quint32>());
+    QCOMPARE(ackSpy.front().front().value<quint32>(),
+             configureSpy.front().front().value<quint32>());
 }
 
 void XdgShellTest::testConfigureMultipleAcks()
@@ -657,10 +658,8 @@ void XdgShellTest::testConfigureMultipleAcks()
     // acknowledges all
     SURFACE
 
-    QSignalSpy configureSpy(xdgSurface.get(), &Client::XdgShellToplevel::configureRequested);
+    QSignalSpy configureSpy(xdgSurface.get(), &Client::XdgShellToplevel::configured);
     QVERIFY(configureSpy.isValid());
-    QSignalSpy sizeChangedSpy(xdgSurface.get(), &Client::XdgShellToplevel::sizeChanged);
-    QVERIFY(sizeChangedSpy.isValid());
     QSignalSpy ackSpy(serverXdgSurface, &Server::XdgShellToplevel::configureAcknowledged);
     QVERIFY(ackSpy.isValid());
 
@@ -678,23 +677,14 @@ void XdgShellTest::testConfigureMultipleAcks()
     QTRY_COMPARE(configureSpy.count(), 3);
     QVERIFY(!configureSpy.wait(100));
 
-    QCOMPARE(configureSpy.at(0).at(0).toSize(), QSize(10, 20));
-    QCOMPARE(configureSpy.at(0).at(1).value<Client::xdg_shell_states>(),
-             Client::xdg_shell_states());
-    QCOMPARE(configureSpy.at(0).at(2).value<quint32>(), serial1);
-    QCOMPARE(configureSpy.at(1).at(0).toSize(), QSize(20, 30));
-    QCOMPARE(configureSpy.at(1).at(1).value<Client::xdg_shell_states>(),
-             Client::xdg_shell_states());
-    QCOMPARE(configureSpy.at(1).at(2).value<quint32>(), serial2);
-    QCOMPARE(configureSpy.at(2).at(0).toSize(), QSize(30, 40));
-    QCOMPARE(configureSpy.at(2).at(1).value<Client::xdg_shell_states>(),
-             Client::xdg_shell_states());
-    QCOMPARE(configureSpy.at(2).at(2).value<quint32>(), serial3);
-    QCOMPARE(sizeChangedSpy.count(), 3);
-    QCOMPARE(sizeChangedSpy.at(0).at(0).toSize(), QSize(10, 20));
-    QCOMPARE(sizeChangedSpy.at(1).at(0).toSize(), QSize(20, 30));
-    QCOMPARE(sizeChangedSpy.at(2).at(0).toSize(), QSize(30, 40));
-    QCOMPARE(xdgSurface->size(), QSize(30, 40));
+    QCOMPARE(configureSpy.at(0).at(0).value<quint32>(), serial1);
+    QCOMPARE(configureSpy.at(1).at(0).value<quint32>(), serial2);
+    QCOMPARE(configureSpy.at(2).at(0).value<quint32>(), serial3);
+
+    QCOMPARE(xdgSurface->get_configure_data().size, QSize(30, 40));
+    QCOMPARE(xdgSurface->get_configure_data().states, Client::xdg_shell_states());
+    QCOMPARE(xdgSurface->get_configure_data().updates,
+             Client::xdg_shell_toplevel_configure_change::size);
 
     xdgSurface->ackConfigure(serial3);
     QVERIFY(ackSpy.wait());
@@ -703,13 +693,15 @@ void XdgShellTest::testConfigureMultipleAcks()
     QCOMPARE(ackSpy.at(1).first().value<quint32>(), serial2);
     QCOMPARE(ackSpy.at(2).first().value<quint32>(), serial3);
 
-    // configure once more with a null size
-    serverXdgSurface->configure(Server::XdgShellSurface::States());
+    // configure once more with the same size
+    serverXdgSurface->configure(Server::XdgShellSurface::States(), QSize(30, 40));
+
     // should not change size
     QVERIFY(configureSpy.wait());
     QCOMPARE(configureSpy.count(), 4);
-    QCOMPARE(sizeChangedSpy.count(), 3);
-    QCOMPARE(xdgSurface->size(), QSize(30, 40));
+    QCOMPARE(xdgSurface->get_configure_data().size, QSize(30, 40));
+    QCOMPARE(xdgSurface->get_configure_data().updates,
+             Client::xdg_shell_toplevel_configure_change::none);
 }
 
 void XdgShellTest::testMaxSize()

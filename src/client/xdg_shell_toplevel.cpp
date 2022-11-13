@@ -22,7 +22,6 @@ public:
     Private(XdgShellToplevel* q);
     virtual ~Private();
     EventQueue* queue = nullptr;
-    QSize size;
 
     void setup(xdg_surface* surface, xdg_toplevel* toplevel);
     void release();
@@ -61,12 +60,14 @@ public:
     void setMinSize(QSize const& size);
     void setWindowGeometry(QRect const& windowGeometry);
 
+    struct {
+        xdg_shell_toplevel_configure_data current;
+        xdg_shell_toplevel_configure_data pending;
+    } configure_data;
+
 private:
     WaylandPointer<xdg_toplevel, xdg_toplevel_destroy> xdgtoplevel;
     WaylandPointer<xdg_surface, xdg_surface_destroy> xdgsurface;
-
-    QSize pendingSize;
-    xdg_shell_states pendingState;
 
     static void configureCallback(void* data,
                                   struct xdg_toplevel* xdg_toplevel,
@@ -75,6 +76,11 @@ private:
                                   struct wl_array* state);
     static void closeCallback(void* data, xdg_toplevel* xdg_toplevel);
     static void surfaceConfigureCallback(void* data, xdg_surface* xdg_surface, uint32_t serial);
+
+    template<typename Type>
+    void set_config_data_updates(Type const& cur,
+                                 Type const& val,
+                                 xdg_shell_toplevel_configure_change change);
 
     static struct xdg_toplevel_listener const s_toplevelListener;
     static struct xdg_surface_listener const s_surfaceListener;
@@ -103,16 +109,25 @@ void XdgShellToplevel::Private::surfaceConfigureCallback(void* data,
                                                          uint32_t serial)
 {
     Q_UNUSED(surface)
-    auto s = static_cast<Private*>(data);
-    s->q_ptr->configureRequested(s->pendingSize, s->pendingState, serial);
-    if (!s->pendingSize.isNull()) {
-        if (s->size != s->pendingSize) {
-            s->size = s->pendingSize;
-            Q_EMIT s->q_ptr->sizeChanged(s->size);
-        }
-        s->pendingSize = QSize();
+    auto priv = static_cast<Private*>(data);
+    auto& cfgdata = priv->configure_data;
+
+    cfgdata.current = cfgdata.pending;
+    cfgdata.pending.updates = xdg_shell_toplevel_configure_change::none;
+
+    Q_EMIT priv->q_ptr->configured(serial);
+}
+
+template<typename Type>
+void XdgShellToplevel::Private::set_config_data_updates(Type const& cur,
+                                                        Type const& val,
+                                                        xdg_shell_toplevel_configure_change change)
+{
+    if (cur == val) {
+        configure_data.pending.updates &= ~xdg_shell_toplevel_configure_changes(change);
+    } else {
+        configure_data.pending.updates |= change;
     }
-    s->pendingState = {};
 }
 
 void XdgShellToplevel::Private::configureCallback(void* data,
@@ -123,6 +138,9 @@ void XdgShellToplevel::Private::configureCallback(void* data,
 {
     Q_UNUSED(xdg_toplevel)
     auto s = static_cast<Private*>(data);
+    auto& cfgdata = s->configure_data;
+
+    QSize size(width, height);
     xdg_shell_states states;
 
     uint32_t* statePtr = static_cast<uint32_t*>(state->data);
@@ -154,8 +172,14 @@ void XdgShellToplevel::Private::configureCallback(void* data,
             break;
         }
     }
-    s->pendingSize = QSize(width, height);
-    s->pendingState = states;
+
+    s->set_config_data_updates(
+        cfgdata.current.size, size, xdg_shell_toplevel_configure_change::size);
+    cfgdata.pending.size = size;
+
+    s->set_config_data_updates(
+        cfgdata.current.states, states, xdg_shell_toplevel_configure_change::states);
+    cfgdata.pending.states = states;
 }
 
 void XdgShellToplevel::Private::closeCallback(void* data, xdg_toplevel* xdg_toplevel)
@@ -424,9 +448,9 @@ void XdgShellToplevel::requestMinimize()
     d_ptr->setMinimized();
 }
 
-QSize XdgShellToplevel::size() const
+xdg_shell_toplevel_configure_data const& XdgShellToplevel::get_configure_data() const
 {
-    return d_ptr->size;
+    return d_ptr->configure_data.current;
 }
 
 }

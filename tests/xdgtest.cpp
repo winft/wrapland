@@ -126,13 +126,10 @@ void XdgTest::setupRegistry(Registry* registry)
         Q_ASSERT(m_surface);
         xdg_shell_toplevel = m_xdgShell->create_toplevel(m_surface, this);
         Q_ASSERT(xdg_shell_toplevel);
-        connect(xdg_shell_toplevel,
-                &XdgShellToplevel::configureRequested,
-                this,
-                [this](auto const& /*size*/, auto /*states*/, auto serial) {
-                    xdg_shell_toplevel->ackConfigure(serial);
-                    render();
-                });
+        connect(xdg_shell_toplevel, &XdgShellToplevel::configured, this, [this](auto serial) {
+            xdg_shell_toplevel->ackConfigure(serial);
+            render();
+        });
 
         xdg_shell_toplevel->setTitle(QStringLiteral("Test Window"));
 
@@ -193,8 +190,9 @@ void XdgTest::createPopup()
 
 void XdgTest::render()
 {
-    QSize const& size
-        = xdg_shell_toplevel->size().isValid() ? xdg_shell_toplevel->size() : QSize(500, 500);
+    QSize const& size = xdg_shell_toplevel->get_configure_data().size.isValid()
+        ? xdg_shell_toplevel->get_configure_data().size
+        : QSize(500, 500);
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(

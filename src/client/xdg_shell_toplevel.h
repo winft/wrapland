@@ -36,6 +36,19 @@ enum class xdg_shell_state {
 };
 Q_DECLARE_FLAGS(xdg_shell_states, xdg_shell_state)
 
+enum class xdg_shell_toplevel_configure_change {
+    none = 0,
+    size = 1 << 0,
+    states = 1 << 1,
+};
+Q_DECLARE_FLAGS(xdg_shell_toplevel_configure_changes, xdg_shell_toplevel_configure_change)
+
+struct xdg_shell_toplevel_configure_data {
+    QSize size;
+    xdg_shell_states states;
+    xdg_shell_toplevel_configure_changes updates{xdg_shell_toplevel_configure_change::none};
+};
+
 class WRAPLANDCLIENT_EXPORT XdgShellToplevel : public QObject
 {
     Q_OBJECT
@@ -69,11 +82,7 @@ public:
      **/
     EventQueue* eventQueue();
 
-    /**
-     * The currently configured size.
-     * @see sizeChanged
-     **/
-    QSize size() const;
+    xdg_shell_toplevel_configure_data const& get_configure_data() const;
 
     /**
      * Set this XdgShellToplevel as transient for @p parent.
@@ -118,7 +127,7 @@ public:
      * Surface in response to the configure event, then the client
      * must make an ackConfigure request sometime before the commit
      * request, passing along the @p serial of the configure event.
-     * @see configureRequested
+     * @see configured
      **/
     void ackConfigure(quint32 serial);
 
@@ -177,18 +186,7 @@ Q_SIGNALS:
      * The compositor sent a configure with the new @p size and the @p states.
      * Before the next commit of the surface the @p serial needs to be passed to ackConfigure.
      **/
-    void configureRequested(QSize const& size,
-                            Wrapland::Client::xdg_shell_states states,
-                            quint32 serial);
-
-    /**
-     * Emitted whenever the size of the XdgShellToplevel changes by e.g. receiving a configure
-     * request.
-     *
-     * @see configureRequested
-     * @see size
-     **/
-    void sizeChanged(QSize const&);
+    void configured(quint32 serial);
 
 private:
     explicit XdgShellToplevel(QObject* parent = nullptr);
