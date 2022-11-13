@@ -72,20 +72,8 @@ public:
     /**
      * The currently configured size.
      * @see sizeChanged
-     * @see setSize
      **/
     QSize size() const;
-
-    /**
-     * Sets the size for the XdgShellToplevel to @p size.
-     * This is mostly an internal information. The actual size of the XdgShellToplevel is
-     * determined by the size of the Buffer attached to the XdgShellToplevel's Surface.
-     *
-     * @param size The new size to be used for the XdgShellToplevel
-     * @see size
-     * @see sizeChanged
-     **/
-    void setSize(QSize const& size);
 
     /**
      * Set this XdgShellToplevel as transient for @p parent.
@@ -199,7 +187,6 @@ Q_SIGNALS:
      *
      * @see configureRequested
      * @see size
-     * @see setSize
      **/
     void sizeChanged(QSize const&);
 

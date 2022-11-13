@@ -106,7 +106,10 @@ void XdgShellToplevel::Private::surfaceConfigureCallback(void* data,
     auto s = static_cast<Private*>(data);
     s->q_ptr->configureRequested(s->pendingSize, s->pendingState, serial);
     if (!s->pendingSize.isNull()) {
-        s->q_ptr->setSize(s->pendingSize);
+        if (s->size != s->pendingSize) {
+            s->size = s->pendingSize;
+            Q_EMIT s->q_ptr->sizeChanged(s->size);
+        }
         s->pendingSize = QSize();
     }
     s->pendingState = {};
@@ -419,15 +422,6 @@ void XdgShellToplevel::setWindowGeometry(QRect const& windowGeometry)
 void XdgShellToplevel::requestMinimize()
 {
     d_ptr->setMinimized();
-}
-
-void XdgShellToplevel::setSize(QSize const& size)
-{
-    if (d_ptr->size == size) {
-        return;
-    }
-    d_ptr->size = size;
-    Q_EMIT sizeChanged(size);
 }
 
 QSize XdgShellToplevel::size() const
