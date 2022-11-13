@@ -211,7 +211,8 @@ uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, QS
 
     shellSurface->d_ptr->configureSerials.push_back(serial);
 
-    send<xdg_toplevel_send_configure>(size.width(), size.height(), &configureStates);
+    send<xdg_toplevel_send_configure>(
+        std::max(size.width(), 0), std::max(size.height(), 0), &configureStates);
     shellSurface->d_ptr->send<xdg_surface_send_configure>(serial);
 
     client->flush();
