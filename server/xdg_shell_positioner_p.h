@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
+#include "xdg_shell_positioner.h"
 #include "xdg_shell_surface.h"
 
 #include "wayland/resource.h"
@@ -41,12 +42,7 @@ class XdgShellPositioner : public QObject
 public:
     XdgShellPositioner(Client* client, uint32_t version, uint32_t id);
 
-    QSize initialSize() const;
-    QRect anchorRect() const;
-    Qt::Edges anchorEdge() const;
-    Qt::Edges gravity() const;
-    XdgShellSurface::ConstraintAdjustments constraintAdjustments() const;
-    QPoint anchorOffset() const;
+    xdg_shell_positioner const& get_data() const;
 
 Q_SIGNALS:
     void resourceDestroyed();
@@ -63,12 +59,7 @@ class XdgShellPositioner::Private : public Wayland::Resource<XdgShellPositioner>
 public:
     Private(Client* client, uint32_t version, uint32_t id, XdgShellPositioner* q_ptr);
 
-    QSize initialSize;
-    QRect anchorRect;
-    Qt::Edges anchorEdge;
-    Qt::Edges gravity;
-    XdgShellSurface::ConstraintAdjustments constraintAdjustments;
-    QPoint anchorOffset;
+    xdg_shell_positioner data;
 
 private:
     static void
@@ -86,6 +77,13 @@ private:
                                                 uint32_t constraint_adjustment);
     static void
     setOffsetCallback(wl_client* wlClient, wl_resource* wlResource, int32_t pos_x, int32_t pos_y);
+    static void set_reactive_callback(wl_client* wlClient, wl_resource* wlResource);
+    static void set_parent_size_callback(wl_client* wlClient,
+                                         wl_resource* wlResource,
+                                         int32_t parent_width,
+                                         int32_t parent_height);
+    static void
+    set_parent_configure_callback(wl_client* wlClient, wl_resource* wlResource, uint32_t serial);
 
     static const struct xdg_positioner_interface s_interface;
 };

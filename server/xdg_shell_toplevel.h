@@ -27,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QSize>
+#include <set>
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
@@ -35,6 +36,13 @@ namespace Wrapland::Server
 class Output;
 class Seat;
 class XdgShellSurface;
+
+enum class xdg_shell_wm_capability {
+    window_menu = 1,
+    maximize,
+    fullscreen,
+    minimize,
+};
 
 class WRAPLANDSERVER_EXPORT XdgShellToplevel : public QObject
 {
@@ -48,12 +56,16 @@ public:
 
     XdgShellToplevel* transientFor() const;
 
+    void configure_bounds(QSize const& bounds);
+    void unconfigure_bounds();
+
     uint32_t configure(XdgShellSurface::States states, QSize const& size = QSize(0, 0));
     bool configurePending() const;
 
     QSize minimumSize() const;
     QSize maximumSize() const;
 
+    void set_capabilities(std::set<xdg_shell_wm_capability> const& caps) const;
     void close();
 
 Q_SIGNALS:

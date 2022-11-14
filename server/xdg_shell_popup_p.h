@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "xdg_shell_popup.h"
+#include "xdg_shell_positioner_p.h"
 #include "xdg_shell_surface.h"
 
 #include "wayland/resource.h"
@@ -31,6 +32,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
+using positioner_getter_t = std::function<XdgShellPositioner*(wl_resource*)>;
+
 class XdgShellPopup::Private : public Wayland::Resource<XdgShellPopup>
 {
 public:
@@ -38,6 +41,7 @@ public:
             uint32_t id,
             XdgShellSurface* surface,
             XdgShellSurface* parent,
+            positioner_getter_t positioner_getter,
             XdgShellPopup* q_ptr);
 
     uint32_t configure(QRect const& rect);
@@ -45,23 +49,21 @@ public:
 
     void popupDone();
 
-    QSize initialSize;
-    bool has_window_geometry{false};
-
-    QRect anchorRect;
-    Qt::Edges anchorEdge;
-    Qt::Edges gravity;
-    XdgShellSurface::ConstraintAdjustments constraintAdjustments;
-    QPoint anchorOffset;
-
     XdgShellSurface* shellSurface;
     XdgShellSurface* parent;
+
+    xdg_shell_positioner positioner;
+    positioner_getter_t positioner_getter;
 
 private:
     static void grabCallback(wl_client* wlClient,
                              wl_resource* wlResource,
                              wl_resource* wlSeat,
                              uint32_t serial);
+    static void reposition_callback(wl_client* wlClient,
+                                    wl_resource* wlResource,
+                                    wl_resource* wlPositioner,
+                                    uint32_t token);
 
     static const struct xdg_popup_interface s_interface;
 };

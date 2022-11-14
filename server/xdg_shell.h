@@ -55,6 +55,7 @@ Q_SIGNALS:
     void pingTimeout(uint32_t serial);
 
 private:
+    friend class XdgShellPopup;
     friend class XdgShellSurface;
     friend class XdgDecorationManager;
 

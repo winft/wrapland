@@ -108,12 +108,7 @@ void XdgShellSurface::Private::getPopupCallback([[maybe_unused]] wl_client* wlCl
     auto popup = new XdgShellPopup(priv->version, id, priv->handle, parent);
 
     popup->d_ptr->parent = parent;
-    popup->d_ptr->initialSize = positioner->initialSize();
-    popup->d_ptr->anchorRect = positioner->anchorRect();
-    popup->d_ptr->anchorEdge = positioner->anchorEdge();
-    popup->d_ptr->gravity = positioner->gravity();
-    popup->d_ptr->constraintAdjustments = positioner->constraintAdjustments();
-    popup->d_ptr->anchorOffset = positioner->anchorOffset();
+    popup->d_ptr->positioner = positioner->get_data();
 
     priv->popup = popup;
 

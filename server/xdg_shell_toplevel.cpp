@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "xdg_shell_toplevel_p.h"
 
 #include "display.h"
+#include "logging.h"
 #include "seat_p.h"
 #include "wl_output_p.h"
 #include "xdg_shell_surface.h"
@@ -211,7 +212,8 @@ uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, QS
 
     shellSurface->d_ptr->configureSerials.push_back(serial);
 
-    send<xdg_toplevel_send_configure>(size.width(), size.height(), &configureStates);
+    send<xdg_toplevel_send_configure>(
+        std::max(size.width(), 0), std::max(size.height(), 0), &configureStates);
     shellSurface->d_ptr->send<xdg_surface_send_configure>(serial);
 
     client->flush();
@@ -387,6 +389,18 @@ QSize XdgShellToplevel::maximumSize() const
     return d_ptr->maximumSize();
 }
 
+void XdgShellToplevel::configure_bounds(QSize const& bounds)
+{
+    auto val = bounds.isValid() ? bounds : QSize(0, 0);
+    d_ptr->send<xdg_toplevel_send_configure_bounds, XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION>(
+        val.width(), val.height());
+}
+
+void XdgShellToplevel::unconfigure_bounds()
+{
+    configure_bounds({});
+}
+
 uint32_t XdgShellToplevel::configure(XdgShellSurface::States states, QSize const& size)
 {
     return d_ptr->configure(states, size);
@@ -395,6 +409,35 @@ uint32_t XdgShellToplevel::configure(XdgShellSurface::States states, QSize const
 bool XdgShellToplevel::configurePending() const
 {
     return d_ptr->shellSurface->configurePending();
+}
+
+void XdgShellToplevel::set_capabilities(std::set<xdg_shell_wm_capability> const& caps) const
+{
+    wl_array wlcaps;
+    wl_array_init(&wlcaps);
+
+    auto get_wlcap = [](auto cap) -> xdg_toplevel_wm_capabilities {
+        switch (cap) {
+        case xdg_shell_wm_capability::window_menu:
+            return XDG_TOPLEVEL_WM_CAPABILITIES_WINDOW_MENU;
+        case xdg_shell_wm_capability::maximize:
+            return XDG_TOPLEVEL_WM_CAPABILITIES_MAXIMIZE;
+        case xdg_shell_wm_capability::fullscreen:
+            return XDG_TOPLEVEL_WM_CAPABILITIES_FULLSCREEN;
+        case xdg_shell_wm_capability::minimize:
+            return XDG_TOPLEVEL_WM_CAPABILITIES_MINIMIZE;
+        }
+        assert(false);
+    };
+
+    for (auto cap : caps) {
+        auto state = static_cast<uint32_t*>(wl_array_add(&wlcaps, sizeof(uint32_t)));
+        *state = get_wlcap(cap);
+    }
+
+    d_ptr->send<xdg_toplevel_send_wm_capabilities, XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION>(
+        &wlcaps);
+    wl_array_release(&wlcaps);
 }
 
 void XdgShellToplevel::close()

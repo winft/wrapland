@@ -147,14 +147,24 @@ void XdgForeignTest::setupRegistry(Registry* registry)
         auto parentDeco = m_decoration->getToplevelDecoration(xdg_shell_toplevel, this);
         xdg_shell_toplevel = m_shell->create_toplevel(m_surface, this);
         Q_ASSERT(xdg_shell_toplevel);
-        connect(xdg_shell_toplevel, &XdgShellToplevel::sizeChanged, this, &XdgForeignTest::render);
+        connect(xdg_shell_toplevel, &XdgShellToplevel::configured, this, [this] {
+            if (xdg_shell_toplevel->get_configure_data().updates.testFlag(
+                    xdg_shell_toplevel_configure_change::size)) {
+                render();
+            }
+        });
 
         m_childSurface = m_compositor->createSurface(this);
         Q_ASSERT(m_childSurface);
         auto childDeco = m_decoration->getToplevelDecoration(m_childShellSurface, this);
         m_childShellSurface = m_shell->create_toplevel(m_childSurface, this);
         Q_ASSERT(m_childShellSurface);
-        connect(m_childShellSurface, &XdgShellToplevel::sizeChanged, this, &XdgForeignTest::render);
+        connect(m_childShellSurface, &XdgShellToplevel::configured, this, [this] {
+            if (m_childShellSurface->get_configure_data().updates.testFlag(
+                    xdg_shell_toplevel_configure_change::size)) {
+                render();
+            }
+        });
 
         m_exported = m_exporter->exportTopLevel(m_surface, this);
         Q_ASSERT(m_decoration);
@@ -171,8 +181,9 @@ void XdgForeignTest::setupRegistry(Registry* registry)
 
 void XdgForeignTest::render()
 {
-    QSize size
-        = xdg_shell_toplevel->size().isValid() ? xdg_shell_toplevel->size() : QSize(500, 500);
+    QSize size = xdg_shell_toplevel->get_configure_data().size.isValid()
+        ? xdg_shell_toplevel->get_configure_data().size
+        : QSize(500, 500);
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(
@@ -184,7 +195,9 @@ void XdgForeignTest::render()
     m_surface->commit(Surface::CommitFlag::None);
     buffer->setUsed(false);
 
-    size = m_childShellSurface->size().isValid() ? m_childShellSurface->size() : QSize(200, 200);
+    size = m_childShellSurface->get_configure_data().size.isValid()
+        ? m_childShellSurface->get_configure_data().size
+        : QSize(200, 200);
     buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     image = QImage(
