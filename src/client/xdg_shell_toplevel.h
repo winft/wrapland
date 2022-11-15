@@ -12,6 +12,7 @@
 
 #include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
+#include <set>
 
 struct xdg_surface;
 struct xdg_toplevel;
@@ -24,37 +25,48 @@ class Output;
 class Surface;
 class Seat;
 
+enum class xdg_shell_state {
+    maximized = 1 << 0,
+    fullscreen = 1 << 1,
+    resizing = 1 << 2,
+    activated = 1 << 3,
+    tiled_left = 1 << 4,
+    tiled_right = 1 << 5,
+    tiled_top = 1 << 6,
+    tiled_bottom = 1 << 7,
+};
+Q_DECLARE_FLAGS(xdg_shell_states, xdg_shell_state)
+
+enum class xdg_shell_wm_capability {
+    window_menu = 1,
+    maximize,
+    fullscreen,
+    minimize,
+};
+
+enum class xdg_shell_toplevel_configure_change {
+    none = 0,
+    size = 1 << 0,
+    states = 1 << 1,
+    bounds = 1 << 2,
+    wm_capabilities = 1 << 3,
+};
+Q_DECLARE_FLAGS(xdg_shell_toplevel_configure_changes, xdg_shell_toplevel_configure_change)
+
+struct xdg_shell_toplevel_configure_data {
+    QSize size;
+    xdg_shell_states states;
+    QSize bounds;
+    std::set<xdg_shell_wm_capability> wm_capabilities;
+
+    xdg_shell_toplevel_configure_changes updates{xdg_shell_toplevel_configure_change::none};
+};
+
 class WRAPLANDCLIENT_EXPORT XdgShellToplevel : public QObject
 {
     Q_OBJECT
 public:
     ~XdgShellToplevel() override;
-    /**
-     * States the Surface can be in
-     **/
-    enum class State {
-        /**
-         * The Surface is maximized.
-         **/
-        Maximized = 1 << 0,
-        /**
-         * The Surface is fullscreen.
-         **/
-        Fullscreen = 1 << 1,
-        /**
-         * The Surface is currently being resized by the Compositor.
-         **/
-        Resizing = 1 << 2,
-        /**
-         * The Surface is considered active. Does not imply keyboard focus.
-         **/
-        Activated = 1 << 3,
-        TiledLeft = 1 << 4,
-        TiledTop = 1 << 5,
-        TiledRight = 1 << 6,
-        TiledBottom = 1 << 7,
-    };
-    Q_DECLARE_FLAGS(States, State)
 
     /**
      * Setup this XdgShellToplevel to manage the @p toplevel on the relevant @p xdgsurface
@@ -83,23 +95,7 @@ public:
      **/
     EventQueue* eventQueue();
 
-    /**
-     * The currently configured size.
-     * @see sizeChanged
-     * @see setSize
-     **/
-    QSize size() const;
-
-    /**
-     * Sets the size for the XdgShellToplevel to @p size.
-     * This is mostly an internal information. The actual size of the XdgShellToplevel is
-     * determined by the size of the Buffer attached to the XdgShellToplevel's Surface.
-     *
-     * @param size The new size to be used for the XdgShellToplevel
-     * @see size
-     * @see sizeChanged
-     **/
-    void setSize(QSize const& size);
+    xdg_shell_toplevel_configure_data const& get_configure_data() const;
 
     /**
      * Set this XdgShellToplevel as transient for @p parent.
@@ -144,7 +140,7 @@ public:
      * Surface in response to the configure event, then the client
      * must make an ackConfigure request sometime before the commit
      * request, passing along the @p serial of the configure event.
-     * @see configureRequested
+     * @see configured
      **/
     void ackConfigure(quint32 serial);
 
@@ -203,19 +199,7 @@ Q_SIGNALS:
      * The compositor sent a configure with the new @p size and the @p states.
      * Before the next commit of the surface the @p serial needs to be passed to ackConfigure.
      **/
-    void configureRequested(QSize const& size,
-                            Wrapland::Client::XdgShellToplevel::States states,
-                            quint32 serial);
-
-    /**
-     * Emitted whenever the size of the XdgShellToplevel changes by e.g. receiving a configure
-     * request.
-     *
-     * @see configureRequested
-     * @see size
-     * @see setSize
-     **/
-    void sizeChanged(QSize const&);
+    void configured(quint32 serial);
 
 private:
     explicit XdgShellToplevel(QObject* parent = nullptr);
@@ -227,7 +211,7 @@ private:
 
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::XdgShellToplevel::States)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Wrapland::Client::xdg_shell_states)
 
-Q_DECLARE_METATYPE(Wrapland::Client::XdgShellToplevel::State)
-Q_DECLARE_METATYPE(Wrapland::Client::XdgShellToplevel::States)
+Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_state)
+Q_DECLARE_METATYPE(Wrapland::Client::xdg_shell_states)

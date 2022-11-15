@@ -7,6 +7,7 @@
 #include "xdg_shell_toplevel.h"
 
 #include "event_queue.h"
+#include "logging.h"
 #include "output.h"
 #include "seat.h"
 #include "wayland_pointer_p.h"
@@ -22,7 +23,6 @@ public:
     Private(XdgShellToplevel* q);
     virtual ~Private();
     EventQueue* queue = nullptr;
-    QSize size;
 
     void setup(xdg_surface* surface, xdg_toplevel* toplevel);
     void release();
@@ -61,20 +61,34 @@ public:
     void setMinSize(QSize const& size);
     void setWindowGeometry(QRect const& windowGeometry);
 
+    struct {
+        xdg_shell_toplevel_configure_data current;
+        xdg_shell_toplevel_configure_data pending;
+    } configure_data;
+
 private:
     WaylandPointer<xdg_toplevel, xdg_toplevel_destroy> xdgtoplevel;
     WaylandPointer<xdg_surface, xdg_surface_destroy> xdgsurface;
-
-    QSize pendingSize;
-    States pendingState;
 
     static void configureCallback(void* data,
                                   struct xdg_toplevel* xdg_toplevel,
                                   int32_t width,
                                   int32_t height,
                                   struct wl_array* state);
+    static void configure_bounds_callback(void* data,
+                                          struct xdg_toplevel* xdg_toplevel,
+                                          int32_t width,
+                                          int32_t height);
+    static void wm_capabilities_callback(void* data,
+                                         struct xdg_toplevel* xdg_toplevel,
+                                         struct wl_array* capabilities);
     static void closeCallback(void* data, xdg_toplevel* xdg_toplevel);
     static void surfaceConfigureCallback(void* data, xdg_surface* xdg_surface, uint32_t serial);
+
+    template<typename Type>
+    void set_config_data_updates(Type const& cur,
+                                 Type const& val,
+                                 xdg_shell_toplevel_configure_change change);
 
     static struct xdg_toplevel_listener const s_toplevelListener;
     static struct xdg_surface_listener const s_surfaceListener;
@@ -92,6 +106,8 @@ XdgShellToplevel::Private::~Private() = default;
 struct xdg_toplevel_listener const XdgShellToplevel::Private::s_toplevelListener = {
     configureCallback,
     closeCallback,
+    configure_bounds_callback,
+    wm_capabilities_callback,
 };
 
 struct xdg_surface_listener const XdgShellToplevel::Private::s_surfaceListener = {
@@ -103,13 +119,25 @@ void XdgShellToplevel::Private::surfaceConfigureCallback(void* data,
                                                          uint32_t serial)
 {
     Q_UNUSED(surface)
-    auto s = static_cast<Private*>(data);
-    s->q_ptr->configureRequested(s->pendingSize, s->pendingState, serial);
-    if (!s->pendingSize.isNull()) {
-        s->q_ptr->setSize(s->pendingSize);
-        s->pendingSize = QSize();
+    auto priv = static_cast<Private*>(data);
+    auto& cfgdata = priv->configure_data;
+
+    cfgdata.current = cfgdata.pending;
+    cfgdata.pending.updates = xdg_shell_toplevel_configure_change::none;
+
+    Q_EMIT priv->q_ptr->configured(serial);
+}
+
+template<typename Type>
+void XdgShellToplevel::Private::set_config_data_updates(Type const& cur,
+                                                        Type const& val,
+                                                        xdg_shell_toplevel_configure_change change)
+{
+    if (cur == val) {
+        configure_data.pending.updates &= ~xdg_shell_toplevel_configure_changes(change);
+    } else {
+        configure_data.pending.updates |= change;
     }
-    s->pendingState = {};
 }
 
 void XdgShellToplevel::Private::configureCallback(void* data,
@@ -120,39 +148,103 @@ void XdgShellToplevel::Private::configureCallback(void* data,
 {
     Q_UNUSED(xdg_toplevel)
     auto s = static_cast<Private*>(data);
-    States states;
+    auto& cfgdata = s->configure_data;
+
+    QSize size(width, height);
+    xdg_shell_states states;
 
     uint32_t* statePtr = static_cast<uint32_t*>(state->data);
     for (size_t i = 0; i < state->size / sizeof(uint32_t); i++) {
         switch (statePtr[i]) {
         case XDG_TOPLEVEL_STATE_MAXIMIZED:
-            states = states | XdgShellToplevel::State::Maximized;
+            states = states | xdg_shell_state::maximized;
             break;
         case XDG_TOPLEVEL_STATE_FULLSCREEN:
-            states = states | XdgShellToplevel::State::Fullscreen;
+            states = states | xdg_shell_state::fullscreen;
             break;
         case XDG_TOPLEVEL_STATE_RESIZING:
-            states = states | XdgShellToplevel::State::Resizing;
+            states = states | xdg_shell_state::resizing;
             break;
         case XDG_TOPLEVEL_STATE_ACTIVATED:
-            states = states | XdgShellToplevel::State::Activated;
+            states = states | xdg_shell_state::activated;
             break;
         case XDG_TOPLEVEL_STATE_TILED_LEFT:
-            states = states | XdgShellToplevel::State::TiledLeft;
+            states = states | xdg_shell_state::tiled_left;
             break;
         case XDG_TOPLEVEL_STATE_TILED_RIGHT:
-            states = states | XdgShellToplevel::State::TiledRight;
+            states = states | xdg_shell_state::tiled_right;
             break;
         case XDG_TOPLEVEL_STATE_TILED_TOP:
-            states = states | XdgShellToplevel::State::TiledTop;
+            states = states | xdg_shell_state::tiled_top;
             break;
         case XDG_TOPLEVEL_STATE_TILED_BOTTOM:
-            states = states | XdgShellToplevel::State::TiledBottom;
+            states = states | xdg_shell_state::tiled_bottom;
             break;
         }
     }
-    s->pendingSize = QSize(width, height);
-    s->pendingState = states;
+
+    s->set_config_data_updates(
+        cfgdata.current.size, size, xdg_shell_toplevel_configure_change::size);
+    cfgdata.pending.size = size;
+
+    s->set_config_data_updates(
+        cfgdata.current.states, states, xdg_shell_toplevel_configure_change::states);
+    cfgdata.pending.states = states;
+}
+
+void XdgShellToplevel::Private::configure_bounds_callback(void* data,
+                                                          struct xdg_toplevel* /*xdg_toplevel*/,
+                                                          int32_t width,
+                                                          int32_t height)
+{
+    auto priv = static_cast<Private*>(data);
+    auto& cfgdata = priv->configure_data;
+    auto const bounds = QSize(width, height);
+
+    priv->set_config_data_updates(
+        cfgdata.current.bounds, bounds, xdg_shell_toplevel_configure_change::bounds);
+    cfgdata.pending.bounds = bounds;
+}
+
+void XdgShellToplevel::Private::wm_capabilities_callback(void* data,
+                                                         struct xdg_toplevel* /*xdg_toplevel*/,
+                                                         struct wl_array* capabilities)
+{
+    auto priv = static_cast<Private*>(data);
+    auto& cfgdata = priv->configure_data;
+
+    auto cap_ptr = static_cast<uint32_t*>(capabilities->data);
+    std::set<xdg_shell_wm_capability> caps;
+
+    auto get_cap = [](auto cap) -> xdg_shell_wm_capability {
+        if (cap == XDG_TOPLEVEL_WM_CAPABILITIES_WINDOW_MENU) {
+            return xdg_shell_wm_capability::window_menu;
+        }
+        if (cap == XDG_TOPLEVEL_WM_CAPABILITIES_MAXIMIZE) {
+            return xdg_shell_wm_capability::maximize;
+        }
+        if (cap == XDG_TOPLEVEL_WM_CAPABILITIES_FULLSCREEN) {
+            return xdg_shell_wm_capability::fullscreen;
+        }
+        if (cap == XDG_TOPLEVEL_WM_CAPABILITIES_MINIMIZE) {
+            return xdg_shell_wm_capability::minimize;
+        }
+        throw std::runtime_error("xdg-shell wm cap not defined: " + std::to_string(cap));
+    };
+
+    for (size_t i = 0; i < capabilities->size / sizeof(uint32_t); i++) {
+        try {
+            caps.insert(get_cap(cap_ptr[i]));
+        } catch (std::runtime_error const& exc) {
+            qCWarning(WRAPLAND_CLIENT) << exc.what();
+            continue;
+        }
+    }
+
+    priv->set_config_data_updates(cfgdata.current.wm_capabilities,
+                                  caps,
+                                  xdg_shell_toplevel_configure_change::wm_capabilities);
+    cfgdata.pending.wm_capabilities = caps;
 }
 
 void XdgShellToplevel::Private::closeCallback(void* data, xdg_toplevel* xdg_toplevel)
@@ -421,18 +513,9 @@ void XdgShellToplevel::requestMinimize()
     d_ptr->setMinimized();
 }
 
-void XdgShellToplevel::setSize(QSize const& size)
+xdg_shell_toplevel_configure_data const& XdgShellToplevel::get_configure_data() const
 {
-    if (d_ptr->size == size) {
-        return;
-    }
-    d_ptr->size = size;
-    Q_EMIT sizeChanged(size);
-}
-
-QSize XdgShellToplevel::size() const
-{
-    return d_ptr->size;
+    return d_ptr->configure_data.current;
 }
 
 }

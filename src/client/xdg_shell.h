@@ -100,7 +100,7 @@ public:
      **/
     XdgShellPopup* create_popup(Surface* surface,
                                 XdgShellToplevel* parentSurface,
-                                XdgPositioner const& positioner,
+                                xdg_shell_positioner_data positioner_data,
                                 QObject* parent = nullptr);
 
     /**
@@ -110,7 +110,7 @@ public:
      **/
     XdgShellPopup* create_popup(Surface* surface,
                                 XdgShellPopup* parentSurface,
-                                XdgPositioner const& positioner,
+                                xdg_shell_positioner_data positioner_data,
                                 QObject* parent = nullptr);
 
     /**
@@ -118,8 +118,12 @@ public:
      * with the given @p positioner.
      * @since 0.522.0
      **/
-    XdgShellPopup*
-    create_popup(Surface* surface, XdgPositioner const& positioner, QObject* parent = nullptr);
+    XdgShellPopup* create_popup(Surface* surface,
+                                xdg_shell_positioner_data positioner_data,
+                                QObject* parent = nullptr);
+
+    xdg_shell_positioner* create_positioner(xdg_shell_positioner_data data,
+                                            QObject* parent = nullptr);
 
     operator xdg_wm_base*();
     operator xdg_wm_base*() const;

@@ -24,6 +24,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 // For Qt metatype declaration.
 #include "seat.h"
 #include "xdg_shell.h"
+#include "xdg_shell_positioner.h"
 
 #include <QObject>
 #include <QSize>
@@ -50,19 +51,15 @@ public:
     XdgShellSurface* transientFor() const;
     QPoint transientOffset() const;
 
-    QSize initialSize() const;
-    QRect anchorRect() const;
-    Qt::Edges anchorEdge() const;
-    QPoint anchorOffset() const;
-    Qt::Edges gravity() const;
-
-    XdgShellSurface::ConstraintAdjustments constraintAdjustments() const;
+    xdg_shell_positioner const& get_positioner() const;
 
     void popupDone();
+    void repositioned(uint32_t token);
 
 Q_SIGNALS:
     void configureAcknowledged(uint32_t serial);
     void grabRequested(Seat* seat, uint32_t serial);
+    void reposition(uint32_t token);
     void resourceDestroyed();
 
 private:

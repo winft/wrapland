@@ -415,11 +415,13 @@ void layer_shell_test::test_xdg_popup()
     QVERIFY(popup_created_spy.isValid());
 
     std::unique_ptr<Clt::Surface> popup_surface{compositor->createSurface()};
-    auto positioner = Clt::XdgPositioner(QSize(10, 10), QRect(100, 100, 50, 50));
+    Clt::xdg_shell_positioner_data positioner_data;
+    positioner_data.size = QSize(10, 10);
+    positioner_data.anchor.rect = QRect(100, 100, 50, 50);
 
     // Now create the popup.
     std::unique_ptr<Clt::XdgShellPopup> xdg_popup{
-        xdg_shell->create_popup(popup_surface.get(), positioner)};
+        xdg_shell->create_popup(popup_surface.get(), positioner_data)};
     QVERIFY(popup_created_spy.wait());
 
     auto server_xdg_popup = popup_created_spy.first().first().value<Srv::XdgShellPopup*>();

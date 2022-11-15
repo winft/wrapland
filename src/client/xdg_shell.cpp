@@ -41,8 +41,9 @@ public:
     XdgShellToplevel* getXdgToplevel(Surface* surface, QObject* parent);
     XdgShellPopup* get_xdg_popup(Surface* surface,
                                  xdg_surface* parentSurface,
-                                 XdgPositioner const& positioner,
+                                 xdg_shell_positioner_data positioner_data,
                                  QObject* parent);
+    xdg_shell_positioner* get_xdg_positioner(xdg_shell_positioner_data data, QObject* parent);
 
     EventQueue* queue = nullptr;
 
@@ -104,7 +105,7 @@ XdgShellToplevel* XdgShell::Private::getXdgToplevel(Surface* surface, QObject* p
 
 XdgShellPopup* XdgShell::Private::get_xdg_popup(Surface* surface,
                                                 xdg_surface* parentSurface,
-                                                XdgPositioner const& positioner,
+                                                xdg_shell_positioner_data positioner_data,
                                                 QObject* parent)
 {
     Q_ASSERT(isValid());
@@ -113,119 +114,29 @@ XdgShellPopup* XdgShell::Private::get_xdg_popup(Surface* surface,
         return nullptr;
     }
 
-    auto p = xdg_wm_base_create_positioner(xdg_shell_base);
-
-    auto anchorRect = positioner.anchorRect();
-    xdg_positioner_set_anchor_rect(
-        p, anchorRect.x(), anchorRect.y(), anchorRect.width(), anchorRect.height());
-
-    QSize initialSize = positioner.initialSize();
-    xdg_positioner_set_size(p, initialSize.width(), initialSize.height());
-
-    QPoint anchorOffset = positioner.anchorOffset();
-    if (!anchorOffset.isNull()) {
-        xdg_positioner_set_offset(p, anchorOffset.x(), anchorOffset.y());
-    }
-
-    uint32_t anchor = XDG_POSITIONER_ANCHOR_NONE;
-    if (positioner.anchorEdge().testFlag(Qt::TopEdge)) {
-        if (positioner.anchorEdge().testFlag(Qt::LeftEdge)
-            && ((positioner.anchorEdge() & ~Qt::LeftEdge) == Qt::TopEdge)) {
-            anchor = XDG_POSITIONER_ANCHOR_TOP_LEFT;
-        } else if (positioner.anchorEdge().testFlag(Qt::RightEdge)
-                   && ((positioner.anchorEdge() & ~Qt::RightEdge) == Qt::TopEdge)) {
-            anchor = XDG_POSITIONER_ANCHOR_TOP_RIGHT;
-        } else if ((positioner.anchorEdge() & ~Qt::TopEdge) == Qt::Edges()) {
-            anchor = XDG_POSITIONER_ANCHOR_TOP;
-        }
-    } else if (positioner.anchorEdge().testFlag(Qt::BottomEdge)) {
-        if (positioner.anchorEdge().testFlag(Qt::LeftEdge)
-            && ((positioner.anchorEdge() & ~Qt::LeftEdge) == Qt::BottomEdge)) {
-            anchor = XDG_POSITIONER_ANCHOR_BOTTOM_LEFT;
-        } else if (positioner.anchorEdge().testFlag(Qt::RightEdge)
-                   && ((positioner.anchorEdge() & ~Qt::RightEdge) == Qt::BottomEdge)) {
-            anchor = XDG_POSITIONER_ANCHOR_BOTTOM_RIGHT;
-        } else if ((positioner.anchorEdge() & ~Qt::BottomEdge) == Qt::Edges()) {
-            anchor = XDG_POSITIONER_ANCHOR_BOTTOM;
-        }
-    } else if (positioner.anchorEdge().testFlag(Qt::RightEdge)
-               && ((positioner.anchorEdge() & ~Qt::RightEdge) == Qt::Edges())) {
-        anchor = XDG_POSITIONER_ANCHOR_RIGHT;
-    } else if (positioner.anchorEdge().testFlag(Qt::LeftEdge)
-               && ((positioner.anchorEdge() & ~Qt::LeftEdge) == Qt::Edges())) {
-        anchor = XDG_POSITIONER_ANCHOR_LEFT;
-    }
-    if (anchor != 0) {
-        xdg_positioner_set_anchor(p, anchor);
-    }
-
-    uint32_t gravity = XDG_POSITIONER_GRAVITY_NONE;
-    if (positioner.gravity().testFlag(Qt::TopEdge)) {
-        if (positioner.gravity().testFlag(Qt::LeftEdge)
-            && ((positioner.gravity() & ~Qt::LeftEdge) == Qt::TopEdge)) {
-            gravity = XDG_POSITIONER_GRAVITY_TOP_LEFT;
-        } else if (positioner.gravity().testFlag(Qt::RightEdge)
-                   && ((positioner.gravity() & ~Qt::RightEdge) == Qt::TopEdge)) {
-            gravity = XDG_POSITIONER_GRAVITY_TOP_RIGHT;
-        } else if ((positioner.gravity() & ~Qt::TopEdge) == Qt::Edges()) {
-            gravity = XDG_POSITIONER_GRAVITY_TOP;
-        }
-    } else if (positioner.gravity().testFlag(Qt::BottomEdge)) {
-        if (positioner.gravity().testFlag(Qt::LeftEdge)
-            && ((positioner.gravity() & ~Qt::LeftEdge) == Qt::BottomEdge)) {
-            gravity = XDG_POSITIONER_GRAVITY_BOTTOM_LEFT;
-        } else if (positioner.gravity().testFlag(Qt::RightEdge)
-                   && ((positioner.gravity() & ~Qt::RightEdge) == Qt::BottomEdge)) {
-            gravity = XDG_POSITIONER_GRAVITY_BOTTOM_RIGHT;
-        } else if ((positioner.gravity() & ~Qt::BottomEdge) == Qt::Edges()) {
-            gravity = XDG_POSITIONER_GRAVITY_BOTTOM;
-        }
-    } else if (positioner.gravity().testFlag(Qt::RightEdge)
-               && ((positioner.gravity() & ~Qt::RightEdge) == Qt::Edges())) {
-        gravity = XDG_POSITIONER_GRAVITY_RIGHT;
-    } else if (positioner.gravity().testFlag(Qt::LeftEdge)
-               && ((positioner.gravity() & ~Qt::LeftEdge) == Qt::Edges())) {
-        gravity = XDG_POSITIONER_GRAVITY_LEFT;
-    }
-    if (gravity != 0) {
-        xdg_positioner_set_gravity(p, gravity);
-    }
-
-    uint32_t constraint = XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_NONE;
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::SlideX)) {
-        constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_X;
-    }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::SlideY)) {
-        constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_SLIDE_Y;
-    }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::FlipX)) {
-        constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_FLIP_X;
-    }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::FlipY)) {
-        constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_FLIP_Y;
-    }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::ResizeX)) {
-        constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_RESIZE_X;
-    }
-    if (positioner.constraints().testFlag(XdgPositioner::Constraint::ResizeY)) {
-        constraint |= XDG_POSITIONER_CONSTRAINT_ADJUSTMENT_RESIZE_Y;
-    }
-    if (constraint != 0) {
-        xdg_positioner_set_constraint_adjustment(p, constraint);
-    }
-
     XdgShellPopup* s = new XdgShellPopup(parent);
-    auto popup = xdg_surface_get_popup(ss, parentSurface, p);
+    auto positioner = get_xdg_positioner(positioner_data, nullptr);
+    auto popup = xdg_surface_get_popup(ss, parentSurface, *positioner);
     if (queue) {
         // deliberately not adding the positioner because the positioner has no events sent to it
         queue->addProxy(ss);
         queue->addProxy(popup);
     }
     s->setup(ss, popup);
-
-    xdg_positioner_destroy(p);
+    delete positioner;
 
     return s;
+}
+
+xdg_shell_positioner* XdgShell::Private::get_xdg_positioner(xdg_shell_positioner_data data,
+                                                            QObject* parent)
+{
+    auto positioner = new xdg_shell_positioner(parent);
+    positioner->setup(xdg_wm_base_create_positioner(xdg_shell_base));
+    positioner->set_data(std::move(data));
+
+    // Deliberately not adding the positioner to the queue because it has no events sent to it.
+    return positioner;
 }
 
 XdgShell::XdgShell(QObject* parent)
@@ -281,24 +192,29 @@ XdgShellToplevel* XdgShell::create_toplevel(Surface* surface, QObject* parent)
 
 XdgShellPopup* XdgShell::create_popup(Surface* surface,
                                       XdgShellToplevel* parentSurface,
-                                      XdgPositioner const& positioner,
+                                      xdg_shell_positioner_data positioner_data,
                                       QObject* parent)
 {
-    return d_ptr->get_xdg_popup(surface, *parentSurface, positioner, parent);
+    return d_ptr->get_xdg_popup(surface, *parentSurface, std::move(positioner_data), parent);
 }
 
 XdgShellPopup* XdgShell::create_popup(Surface* surface,
                                       XdgShellPopup* parentSurface,
-                                      XdgPositioner const& positioner,
+                                      xdg_shell_positioner_data positioner_data,
                                       QObject* parent)
 {
-    return d_ptr->get_xdg_popup(surface, *parentSurface, positioner, parent);
+    return d_ptr->get_xdg_popup(surface, *parentSurface, std::move(positioner_data), parent);
 }
 
 XdgShellPopup*
-XdgShell::create_popup(Surface* surface, XdgPositioner const& positioner, QObject* parent)
+XdgShell::create_popup(Surface* surface, xdg_shell_positioner_data positioner_data, QObject* parent)
 {
-    return d_ptr->get_xdg_popup(surface, nullptr, positioner, parent);
+    return d_ptr->get_xdg_popup(surface, nullptr, std::move(positioner_data), parent);
+}
+
+xdg_shell_positioner* XdgShell::create_positioner(xdg_shell_positioner_data data, QObject* parent)
+{
+    return d_ptr->get_xdg_positioner(std::move(data), parent);
 }
 
 }

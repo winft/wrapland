@@ -30,6 +30,7 @@ public:
     void requestGrab(Seat* seat, quint32 serial);
     void ackConfigure(quint32 serial);
     void setWindowGeometry(QRect const& windowGeometry);
+    void reposition(xdg_shell_positioner* positioner, uint32_t token);
 
     operator xdg_surface*()
     {
@@ -56,6 +57,7 @@ private:
                                   int32_t width,
                                   int32_t height);
     static void popupDoneCallback(void* data, xdg_popup* xdg_popup);
+    static void repositioned_callback(void* data, xdg_popup* xdg_popup, uint32_t token);
     static void surfaceConfigureCallback(void* data, xdg_surface* xdg_surface, uint32_t serial);
 
     QRect pendingRect;
@@ -72,6 +74,7 @@ private:
 struct xdg_popup_listener const XdgShellPopup::Private::s_popupListener = {
     configureCallback,
     popupDoneCallback,
+    repositioned_callback,
 };
 
 struct xdg_surface_listener const XdgShellPopup::Private::s_surfaceListener = {
@@ -105,6 +108,13 @@ void XdgShellPopup::Private::popupDoneCallback(void* data, xdg_popup* xdg_popup)
     auto s = static_cast<XdgShellPopup::Private*>(data);
     Q_ASSERT(s->xdgpopup == xdg_popup);
     Q_EMIT s->q_ptr->popupDone();
+}
+
+void XdgShellPopup::Private::repositioned_callback(void* data, xdg_popup* xdg_popup, uint32_t token)
+{
+    auto s = static_cast<XdgShellPopup::Private*>(data);
+    Q_ASSERT(s->xdgpopup == xdg_popup);
+    Q_EMIT s->q_ptr->repositioned(token);
 }
 
 XdgShellPopup::Private::Private(XdgShellPopup* q)
@@ -155,6 +165,12 @@ void XdgShellPopup::Private::setWindowGeometry(QRect const& windowGeometry)
                                     windowGeometry.height());
 }
 
+void XdgShellPopup::Private::reposition(xdg_shell_positioner* positioner, uint32_t token)
+{
+    assert(positioner);
+    xdg_popup_reposition(xdgpopup, *positioner, token);
+}
+
 XdgShellPopup::XdgShellPopup(QObject* parent)
     : QObject(parent)
     , d_ptr{new Private(this)}
@@ -199,6 +215,11 @@ void XdgShellPopup::ackConfigure(quint32 serial)
 void XdgShellPopup::setWindowGeometry(QRect const& windowGeometry)
 {
     d_ptr->setWindowGeometry(windowGeometry);
+}
+
+void XdgShellPopup::reposition(xdg_shell_positioner* positioner, uint32_t token)
+{
+    d_ptr->reposition(positioner, token);
 }
 
 XdgShellPopup::operator xdg_surface*()

@@ -126,17 +126,10 @@ void XdgTest::setupRegistry(Registry* registry)
         Q_ASSERT(m_surface);
         xdg_shell_toplevel = m_xdgShell->create_toplevel(m_surface, this);
         Q_ASSERT(xdg_shell_toplevel);
-        connect(xdg_shell_toplevel,
-                &XdgShellToplevel::configureRequested,
-                this,
-                [this](const QSize& size,
-                       Wrapland::Client::XdgShellToplevel::States states,
-                       int serial) {
-                    Q_UNUSED(size);
-                    Q_UNUSED(states);
-                    xdg_shell_toplevel->ackConfigure(serial);
-                    render();
-                });
+        connect(xdg_shell_toplevel, &XdgShellToplevel::configured, this, [this](auto serial) {
+            xdg_shell_toplevel->ackConfigure(serial);
+            render();
+        });
 
         xdg_shell_toplevel->setTitle(QStringLiteral("Test Window"));
 
@@ -182,19 +175,24 @@ void XdgTest::createPopup()
 
     m_popupSurface = m_compositor->createSurface(this);
 
-    XdgPositioner positioner(QSize(200, 200), QRect(50, 50, 400, 400));
-    positioner.setAnchorEdge(Qt::BottomEdge | Qt::RightEdge);
-    positioner.setGravity(Qt::BottomEdge);
-    positioner.setConstraints(XdgPositioner::Constraint::FlipX | XdgPositioner::Constraint::SlideY);
+    xdg_shell_positioner_data pos_data;
+    pos_data.size = QSize(200, 200);
+    pos_data.anchor.rect = QRect(50, 50, 400, 400);
+    pos_data.anchor.edge = Qt::BottomEdge | Qt::RightEdge;
+    pos_data.gravity = Qt::BottomEdge;
+    pos_data.constraint_adjustments
+        = xdg_shell_constraint_adjustment::flip_x | xdg_shell_constraint_adjustment::slide_y;
+
     m_xdgShellPopup
-        = m_xdgShell->create_popup(m_popupSurface, xdg_shell_toplevel, positioner, m_popupSurface);
+        = m_xdgShell->create_popup(m_popupSurface, xdg_shell_toplevel, pos_data, m_popupSurface);
     renderPopup();
 }
 
 void XdgTest::render()
 {
-    QSize const& size
-        = xdg_shell_toplevel->size().isValid() ? xdg_shell_toplevel->size() : QSize(500, 500);
+    QSize const& size = xdg_shell_toplevel->get_configure_data().size.isValid()
+        ? xdg_shell_toplevel->get_configure_data().size
+        : QSize(500, 500);
     auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
     buffer->setUsed(true);
     QImage image(

@@ -45,8 +45,9 @@ const struct xdg_positioner_interface XdgShellPositioner::Private::s_interface =
     setGravityCallback,
     setConstraintAdjustmentCallback,
     setOffsetCallback,
-    // TODO(romangg): Update xdg-shell protocol version (currently at 1).
-    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
+    set_reactive_callback,
+    set_parent_size_callback,
+    set_parent_configure_callback,
 };
 
 void XdgShellPositioner::Private::setSizeCallback([[maybe_unused]] wl_client* wlClient,
@@ -55,7 +56,7 @@ void XdgShellPositioner::Private::setSizeCallback([[maybe_unused]] wl_client* wl
                                                   int32_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->initialSize = QSize(width, height);
+    priv->data.size = QSize(width, height);
 }
 
 void XdgShellPositioner::Private::setAnchorRectCallback([[maybe_unused]] wl_client* wlClient,
@@ -66,7 +67,7 @@ void XdgShellPositioner::Private::setAnchorRectCallback([[maybe_unused]] wl_clie
                                                         int32_t height)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->anchorRect = QRect(pos_x, pos_y, width, height);
+    priv->data.anchor.rect = QRect(pos_x, pos_y, width, height);
 }
 
 void XdgShellPositioner::Private::setAnchorCallback([[maybe_unused]] wl_client* wlClient,
@@ -108,7 +109,7 @@ void XdgShellPositioner::Private::setAnchorCallback([[maybe_unused]] wl_client* 
         break;
     }
 
-    priv->anchorEdge = qtEdges;
+    priv->data.anchor.edge = qtEdges;
 }
 
 void XdgShellPositioner::Private::setGravityCallback([[maybe_unused]] wl_client* wlClient,
@@ -150,7 +151,7 @@ void XdgShellPositioner::Private::setGravityCallback([[maybe_unused]] wl_client*
         break;
     }
 
-    priv->gravity = qtEdges;
+    priv->data.gravity = qtEdges;
 }
 
 void XdgShellPositioner::Private::setConstraintAdjustmentCallback(
@@ -180,7 +181,7 @@ void XdgShellPositioner::Private::setConstraintAdjustmentCallback(
         constraints |= XdgShellSurface::ConstraintAdjustment::ResizeY;
     }
 
-    priv->constraintAdjustments = constraints;
+    priv->data.constraint_adjustments = constraints;
 }
 
 void XdgShellPositioner::Private::setOffsetCallback([[maybe_unused]] wl_client* wlClient,
@@ -189,7 +190,31 @@ void XdgShellPositioner::Private::setOffsetCallback([[maybe_unused]] wl_client* 
                                                     int32_t pos_y)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->anchorOffset = QPoint(pos_x, pos_y);
+    priv->data.anchor.offset = QPoint(pos_x, pos_y);
+}
+
+void XdgShellPositioner::Private::set_reactive_callback(wl_client* /*wlClient*/,
+                                                        wl_resource* wlResource)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->data.is_reactive = true;
+}
+
+void XdgShellPositioner::Private::set_parent_size_callback(wl_client* /*wlClient*/,
+                                                           wl_resource* wlResource,
+                                                           int32_t parent_width,
+                                                           int32_t parent_height)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->data.parent.size = QSize(parent_width, parent_height);
+}
+
+void XdgShellPositioner::Private::set_parent_configure_callback(wl_client* /*wlClient*/,
+                                                                wl_resource* wlResource,
+                                                                uint32_t serial)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->data.parent.serial = serial;
 }
 
 XdgShellPositioner::XdgShellPositioner(Client* client, uint32_t version, uint32_t id)
@@ -198,34 +223,9 @@ XdgShellPositioner::XdgShellPositioner(Client* client, uint32_t version, uint32_
 {
 }
 
-QSize XdgShellPositioner::initialSize() const
+xdg_shell_positioner const& XdgShellPositioner::get_data() const
 {
-    return d_ptr->initialSize;
-}
-
-QRect XdgShellPositioner::anchorRect() const
-{
-    return d_ptr->anchorRect;
-}
-
-Qt::Edges XdgShellPositioner::anchorEdge() const
-{
-    return d_ptr->anchorEdge;
-}
-
-Qt::Edges XdgShellPositioner::gravity() const
-{
-    return d_ptr->gravity;
-}
-
-XdgShellSurface::ConstraintAdjustments XdgShellPositioner::constraintAdjustments() const
-{
-    return d_ptr->constraintAdjustments;
-}
-
-QPoint XdgShellPositioner::anchorOffset() const
-{
-    return d_ptr->anchorOffset;
+    return d_ptr->data;
 }
 
 }

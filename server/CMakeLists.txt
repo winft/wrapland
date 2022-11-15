@@ -440,6 +440,7 @@ set(SERVER_LIB_HEADERS
   xdg_foreign.h
   xdg_shell.h
   xdg_shell_popup.h
+  xdg_shell_positioner.h
   xdg_shell_surface.h
   xdg_shell_toplevel.h
 )
