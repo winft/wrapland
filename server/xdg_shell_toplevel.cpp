@@ -427,7 +427,10 @@ void XdgShellToplevel::set_capabilities(std::set<xdg_shell_wm_capability> const&
         case xdg_shell_wm_capability::minimize:
             return XDG_TOPLEVEL_WM_CAPABILITIES_MINIMIZE;
         }
+
+        // Should never reach. Return some value so it builds in release config.
         assert(false);
+        return XDG_TOPLEVEL_WM_CAPABILITIES_MINIMIZE;
     };
 
     for (auto cap : caps) {
