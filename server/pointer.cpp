@@ -411,8 +411,8 @@ void Cursor::Private::update(QPointer<Surface> const& surface,
         Q_EMIT q_ptr->hotspotChanged();
     }
     if (this->surface != surface) {
-        if (!surface.isNull()) {
-            QObject::disconnect(surface.data(), &Surface::committed, q_ptr, nullptr);
+        if (!this->surface.isNull()) {
+            QObject::disconnect(this->surface.data(), &Surface::committed, q_ptr, nullptr);
         }
 
         this->surface = surface;
