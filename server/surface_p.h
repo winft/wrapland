@@ -24,7 +24,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/resource.h"
 
 #include <QHash>
-#include <QPointer>
 #include <QVector>
 
 #include <deque>
@@ -121,8 +120,8 @@ public:
     uint32_t feedbackId = 0;
     std::unordered_map<uint32_t, std::unique_ptr<Feedbacks>> waitingFeedbacks;
 
-    QPointer<LockedPointerV1> lockedPointer;
-    QPointer<ConfinedPointerV1> confinedPointer;
+    LockedPointerV1* lockedPointer{nullptr};
+    ConfinedPointerV1* confinedPointer{nullptr};
     Viewport* viewport{nullptr};
     QHash<WlOutput*, QMetaObject::Connection> outputDestroyedConnections;
     QVector<IdleInhibitor*> idleInhibitors;

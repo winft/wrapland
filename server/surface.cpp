@@ -272,12 +272,12 @@ void Surface::Private::addPresentationFeedback(PresentationFeedback* feedback) c
 
 void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
 {
-    Q_ASSERT(lockedPointer.isNull());
-    Q_ASSERT(confinedPointer.isNull());
+    assert(!lockedPointer);
+    assert(!confinedPointer);
     lockedPointer = lock;
 
     auto cleanUp = [this]() {
-        lockedPointer.clear();
+        lockedPointer = nullptr;
         disconnect(constrainsOneShotConnection);
         constrainsOneShotConnection = QMetaObject::Connection();
         disconnect(constrainsUnboundConnection);
@@ -288,14 +288,14 @@ void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
     if (lock->lifeTime() == LockedPointerV1::LifeTime::OneShot) {
         constrainsOneShotConnection
             = QObject::connect(lock, &LockedPointerV1::lockedChanged, handle, [this, cleanUp] {
-                  if (!lockedPointer.isNull() && !lockedPointer->isLocked()) {
+                  if (lockedPointer && !lockedPointer->isLocked()) {
                       cleanUp();
                   }
               });
     }
     constrainsUnboundConnection
         = QObject::connect(lock, &LockedPointerV1::resourceDestroyed, handle, [this, cleanUp] {
-              if (!lockedPointer.isNull()) {
+              if (lockedPointer) {
                   cleanUp();
               }
           });
@@ -304,12 +304,12 @@ void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
 
 void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
 {
-    Q_ASSERT(lockedPointer.isNull());
-    Q_ASSERT(confinedPointer.isNull());
+    assert(!lockedPointer);
+    assert(!confinedPointer);
     confinedPointer = confinement;
 
     auto cleanUp = [this]() {
-        confinedPointer.clear();
+        confinedPointer = nullptr;
         disconnect(constrainsOneShotConnection);
         constrainsOneShotConnection = QMetaObject::Connection();
         disconnect(constrainsUnboundConnection);
@@ -320,14 +320,14 @@ void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
     if (confinement->lifeTime() == ConfinedPointerV1::LifeTime::OneShot) {
         constrainsOneShotConnection = QObject::connect(
             confinement, &ConfinedPointerV1::confinedChanged, handle, [this, cleanUp] {
-                if (!confinedPointer.isNull() && !confinedPointer->isConfined()) {
+                if (confinedPointer && !confinedPointer->isConfined()) {
                     cleanUp();
                 }
             });
     }
     constrainsUnboundConnection = QObject::connect(
         confinement, &ConfinedPointerV1::resourceDestroyed, handle, [this, cleanUp] {
-            if (!confinedPointer.isNull()) {
+            if (confinedPointer) {
                 cleanUp();
             }
         });
@@ -651,10 +651,10 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
                                current.pub.scale,
                                current.pub.source_rectangle);
 
-    if (!lockedPointer.isNull()) {
+    if (lockedPointer) {
         lockedPointer->d_ptr->commit();
     }
-    if (!confinedPointer.isNull()) {
+    if (confinedPointer) {
         confinedPointer->d_ptr->commit();
     }
 
