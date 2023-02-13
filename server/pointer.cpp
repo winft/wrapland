@@ -408,22 +408,31 @@ void Cursor::Private::update(Surface* surface, quint32 serial, QPoint const& _ho
         emitChanged = true;
         Q_EMIT q_ptr->hotspotChanged();
     }
+
     if (this->surface != surface) {
-        if (this->surface) {
-            QObject::disconnect(this->surface, &Surface::committed, q_ptr, nullptr);
-        }
+        QObject::disconnect(surface_notifiers.commit);
+        QObject::disconnect(surface_notifiers.destroy);
 
         this->surface = surface;
+
         if (surface) {
-            QObject::connect(surface, &Surface::committed, q_ptr, [this] {
-                if (!this->surface->state().damage.isEmpty()) {
-                    Q_EMIT q_ptr->changed();
-                }
-            });
+            surface_notifiers.commit
+                = QObject::connect(surface, &Surface::committed, q_ptr, [this] {
+                      if (!this->surface->state().damage.isEmpty()) {
+                          Q_EMIT q_ptr->changed();
+                      }
+                  });
+            surface_notifiers.destroy
+                = QObject::connect(surface, &Surface::resourceDestroyed, q_ptr, [this] {
+                      // TODO(romangg): Call update instead?
+                      this->surface = nullptr;
+                  });
         }
+
         emitChanged = true;
         Q_EMIT q_ptr->surfaceChanged();
     }
+
     if (emitChanged) {
         Q_EMIT q_ptr->changed();
     }
@@ -452,7 +461,7 @@ Pointer* Cursor::pointer() const
     return d_ptr->pointer;
 }
 
-QPointer<Surface> Cursor::surface() const
+Surface* Cursor::surface() const
 {
     return d_ptr->surface;
 }
