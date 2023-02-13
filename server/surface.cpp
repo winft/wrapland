@@ -549,18 +549,55 @@ void Surface::Private::copy_to_current(SurfaceState const& source, bool& resized
         current.pub.updates |= surface_change::frame;
     }
 
-    if (source.pub.updates & surface_change::shadow) {
-        current.pub.shadow = source.pub.shadow;
-    }
-    if (source.pub.updates & surface_change::blur) {
-        current.pub.blur = source.pub.blur;
-    }
-    if (source.pub.updates & surface_change::contrast) {
-        current.pub.contrast = source.pub.contrast;
-    }
-    if (source.pub.updates & surface_change::slide) {
-        current.pub.slide = source.pub.slide;
-    }
+    move_state_resource(
+        source,
+        surface_change::shadow,
+        current.pub.shadow,
+        source.pub.shadow,
+        destroy_notifiers.shadow,
+        {[this](auto shadow) {
+            if (needs_resource_reset(
+                    current.pub.shadow, pending.pub.shadow, shadow, surface_change::shadow)) {
+                setShadow(nullptr);
+            }
+        }});
+    move_state_resource(
+        source,
+        surface_change::blur,
+        current.pub.blur,
+        source.pub.blur,
+        destroy_notifiers.blur,
+        {[this](auto blur) {
+            if (needs_resource_reset(
+                    current.pub.blur, pending.pub.blur, blur, surface_change::blur)) {
+                setBlur(nullptr);
+            }
+        }});
+    move_state_resource(
+        source,
+        surface_change::contrast,
+        current.pub.contrast,
+        source.pub.contrast,
+        destroy_notifiers.contrast,
+        {[this](auto ctrst) {
+            if (needs_resource_reset(
+                    current.pub.contrast, pending.pub.contrast, ctrst, surface_change::contrast)) {
+                setContrast(nullptr);
+            }
+        }});
+    move_state_resource(
+        source,
+        surface_change::slide,
+        current.pub.slide,
+        source.pub.slide,
+        destroy_notifiers.slide,
+        {[this](auto slide) {
+            if (needs_resource_reset(
+                    current.pub.slide, pending.pub.slide, slide, surface_change::slide)) {
+                setSlide(nullptr);
+            }
+        }});
+
     if (source.pub.updates & surface_change::input) {
         current.pub.input = source.pub.input;
         current.pub.input_is_infinite = source.pub.input_is_infinite;

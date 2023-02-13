@@ -188,7 +188,7 @@ void TestContrast::testCreate()
              wl_fixed_from_double(1.7));
 
     // And destroy.
-    QSignalSpy destroyedSpy(serverSurface->state().contrast.data(), &QObject::destroyed);
+    QSignalSpy destroyedSpy(serverSurface->state().contrast, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     delete contrast;
     QVERIFY(destroyedSpy.wait());
@@ -220,7 +220,7 @@ void TestContrast::testSurfaceDestroy()
     // destroy the parent surface
     QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
     QVERIFY(surfaceDestroyedSpy.isValid());
-    QSignalSpy contrastDestroyedSpy(serverSurface->state().contrast.data(), &QObject::destroyed);
+    QSignalSpy contrastDestroyedSpy(serverSurface->state().contrast, &QObject::destroyed);
     QVERIFY(contrastDestroyedSpy.isValid());
     surface.reset();
     QVERIFY(surfaceDestroyedSpy.wait());
