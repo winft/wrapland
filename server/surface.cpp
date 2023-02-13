@@ -959,12 +959,12 @@ void Surface::setOutputs(std::vector<WlOutput*> const& outputs)
     d_ptr->outputs = outputs;
 }
 
-QPointer<LockedPointerV1> Surface::lockedPointer() const
+LockedPointerV1* Surface::lockedPointer() const
 {
     return d_ptr->lockedPointer;
 }
 
-QPointer<ConfinedPointerV1> Surface::confinedPointer() const
+ConfinedPointerV1* Surface::confinedPointer() const
 {
     return d_ptr->confinedPointer;
 }

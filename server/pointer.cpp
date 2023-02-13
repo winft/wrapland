@@ -365,8 +365,7 @@ void Pointer::motion(QPointF const& position)
         }
     }
 
-    if (!d_ptr->focusedSurface->lockedPointer().isNull()
-        && d_ptr->focusedSurface->lockedPointer()->isLocked()) {
+    if (auto lock = d_ptr->focusedSurface->lockedPointer(); lock && lock->isLocked()) {
         return;
     }
 

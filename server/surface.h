@@ -131,8 +131,8 @@ public:
     void setOutputs(std::vector<WlOutput*> const& outputs);
     std::vector<WlOutput*> outputs() const;
 
-    QPointer<ConfinedPointerV1> confinedPointer() const;
-    QPointer<LockedPointerV1> lockedPointer() const;
+    ConfinedPointerV1* confinedPointer() const;
+    LockedPointerV1* lockedPointer() const;
 
     bool inhibitsIdle() const;
 
