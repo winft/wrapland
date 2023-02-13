@@ -98,11 +98,21 @@ void text_input_v2::Private::sync(text_input_v2_state const& old)
 
 void text_input_v2::Private::enable(Surface* surface)
 {
-    auto changed = this->surface.data() != surface || !state.enabled;
+    assert(surface);
+
+    auto changed = this->surface != surface || !state.enabled;
     auto const old = state;
+
+    QObject::disconnect(destroy_notifiers.surface);
 
     this->surface = surface;
     state.enabled = true;
+
+    destroy_notifiers.surface
+        = QObject::connect(surface, &Surface::resourceDestroyed, handle, [this] {
+              // TODO(romangg): Instead call disable?
+              this->surface = nullptr;
+          });
 
     if (changed) {
         sync(old);
@@ -114,7 +124,7 @@ void text_input_v2::Private::disable()
     auto changed = state.enabled;
     auto const old = state;
 
-    surface.clear();
+    surface = nullptr;
     state.enabled = false;
 
     if (changed) {
@@ -436,7 +446,7 @@ void text_input_v2::set_language(std::string const& language_tag)
     d_ptr->send<zwp_text_input_v2_send_language>(language_tag.c_str());
 }
 
-QPointer<Surface> text_input_v2::surface() const
+Surface* text_input_v2::surface() const
 {
     return d_ptr->surface;
 }

@@ -20,7 +20,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include "text_input_v2.h"
 
-#include <QPointer>
 #include <QRect>
 #include <QVector>
 #include <vector>
@@ -59,7 +58,7 @@ public:
     text_input_v2_state state;
 
     Seat* seat{nullptr};
-    QPointer<Surface> surface;
+    Surface* surface{nullptr};
 
     bool input_panel_visible{false};
     QRect overlapped_surface_area;
@@ -99,6 +98,10 @@ private:
 
     void enable(Surface* surface);
     void disable();
+
+    struct {
+        QMetaObject::Connection surface;
+    } destroy_notifiers;
 
     text_input_v2* q_ptr;
 };
