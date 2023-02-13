@@ -360,100 +360,123 @@ void pointer_pool::relative_motion(QSizeF const& delta,
 
 void pointer_pool::start_swipe_gesture(uint32_t fingerCount)
 {
-    if (!gesture.surface.isNull()) {
+    if (gesture.surface) {
         return;
     }
+
     gesture.surface = focus.surface;
-    if (gesture.surface.isNull()) {
+    if (!gesture.surface) {
         return;
     }
+
+    gesture.surface_destroy_notifier = QObject::connect(
+        gesture.surface, &Surface::resourceDestroyed, seat, [this] { cleanup_gesture(); });
+
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gesture.surface.data(), devices, [serial, fingerCount](auto pointer) {
+    forEachInterface(gesture.surface, devices, [serial, fingerCount](auto pointer) {
         pointer->d_ptr->startSwipeGesture(serial, fingerCount);
     });
 }
 
 void pointer_pool::update_swipe_gesture(QSizeF const& delta) const
 {
-    if (gesture.surface.isNull()) {
+    if (!gesture.surface) {
         return;
     }
-    forEachInterface(gesture.surface.data(), devices, [delta](auto pointer) {
+
+    forEachInterface(gesture.surface, devices, [delta](auto pointer) {
         pointer->d_ptr->updateSwipeGesture(delta);
     });
 }
 
 void pointer_pool::end_swipe_gesture()
 {
-    if (gesture.surface.isNull()) {
+    if (!gesture.surface) {
         return;
     }
+
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gesture.surface.data(), devices, [serial](auto pointer) {
+    forEachInterface(gesture.surface, devices, [serial](auto pointer) {
         pointer->d_ptr->endSwipeGesture(serial);
     });
-    gesture.surface.clear();
+
+    cleanup_gesture();
 }
 
 void pointer_pool::cancel_swipe_gesture()
 {
-    if (gesture.surface.isNull()) {
+    if (!gesture.surface) {
         return;
     }
+
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gesture.surface.data(), devices, [serial](auto pointer) {
+    forEachInterface(gesture.surface, devices, [serial](auto pointer) {
         pointer->d_ptr->cancelSwipeGesture(serial);
     });
-    gesture.surface.clear();
+
+    cleanup_gesture();
 }
 
 void pointer_pool::start_pinch_gesture(uint32_t fingerCount)
 {
-    if (!gesture.surface.isNull()) {
+    if (gesture.surface) {
         return;
     }
+
     gesture.surface = focus.surface;
-    if (gesture.surface.isNull()) {
+    if (!gesture.surface) {
         return;
     }
+
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gesture.surface.data(), devices, [serial, fingerCount](auto pointer) {
+    forEachInterface(gesture.surface, devices, [serial, fingerCount](auto pointer) {
         pointer->d_ptr->startPinchGesture(serial, fingerCount);
     });
 }
 
 void pointer_pool::update_pinch_gesture(QSizeF const& delta, qreal scale, qreal rotation) const
 {
-    if (gesture.surface.isNull()) {
+    if (!gesture.surface) {
         return;
     }
-    forEachInterface(gesture.surface.data(), devices, [delta, scale, rotation](auto pointer) {
+
+    forEachInterface(gesture.surface, devices, [delta, scale, rotation](auto pointer) {
         pointer->d_ptr->updatePinchGesture(delta, scale, rotation);
     });
 }
 
 void pointer_pool::end_pinch_gesture()
 {
-    if (gesture.surface.isNull()) {
+    if (!gesture.surface) {
         return;
     }
+
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gesture.surface.data(), devices, [serial](auto pointer) {
+    forEachInterface(gesture.surface, devices, [serial](auto pointer) {
         pointer->d_ptr->endPinchGesture(serial);
     });
-    gesture.surface.clear();
+
+    cleanup_gesture();
 }
 
 void pointer_pool::cancel_pinch_gesture()
 {
-    if (gesture.surface.isNull()) {
+    if (!gesture.surface) {
         return;
     }
+
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    forEachInterface(gesture.surface.data(), devices, [serial](auto pointer) {
+    forEachInterface(gesture.surface, devices, [serial](auto pointer) {
         pointer->d_ptr->cancelPinchGesture(serial);
     });
-    gesture.surface.clear();
+
+    cleanup_gesture();
+}
+
+void pointer_pool::cleanup_gesture()
+{
+    QObject::disconnect(gesture.surface_destroy_notifier);
+    gesture.surface = nullptr;
 }
 
 void pointer_pool::frame() const
