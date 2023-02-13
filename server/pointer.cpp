@@ -76,11 +76,11 @@ void Pointer::Private::setCursor(quint32 serial, Surface* surface, QPoint const&
 {
     if (!cursor) {
         cursor.reset(new Cursor(handle));
-        cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
+        cursor->d_ptr->update(surface, serial, hotspot);
         QObject::connect(cursor.get(), &Cursor::changed, handle, &Pointer::cursorChanged);
         Q_EMIT handle->cursorChanged();
     } else {
-        cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
+        cursor->d_ptr->update(surface, serial, hotspot);
     }
 }
 
@@ -365,8 +365,7 @@ void Pointer::motion(QPointF const& position)
         }
     }
 
-    if (!d_ptr->focusedSurface->lockedPointer().isNull()
-        && d_ptr->focusedSurface->lockedPointer()->isLocked()) {
+    if (auto lock = d_ptr->focusedSurface->lockedPointer(); lock && lock->isLocked()) {
         return;
     }
 
@@ -396,9 +395,7 @@ Cursor::Private::Private(Cursor* q_ptr, Pointer* _pointer)
 {
 }
 
-void Cursor::Private::update(QPointer<Surface> const& surface,
-                             quint32 serial,
-                             QPoint const& _hotspot)
+void Cursor::Private::update(Surface* surface, quint32 serial, QPoint const& _hotspot)
 {
     bool emitChanged = false;
     if (enteredSerial != serial) {
@@ -411,22 +408,31 @@ void Cursor::Private::update(QPointer<Surface> const& surface,
         emitChanged = true;
         Q_EMIT q_ptr->hotspotChanged();
     }
+
     if (this->surface != surface) {
-        if (!surface.isNull()) {
-            QObject::disconnect(surface.data(), &Surface::committed, q_ptr, nullptr);
-        }
+        QObject::disconnect(surface_notifiers.commit);
+        QObject::disconnect(surface_notifiers.destroy);
 
         this->surface = surface;
-        if (!surface.isNull()) {
-            QObject::connect(surface.data(), &Surface::committed, q_ptr, [this] {
-                if (!this->surface->state().damage.isEmpty()) {
-                    Q_EMIT q_ptr->changed();
-                }
-            });
+
+        if (surface) {
+            surface_notifiers.commit
+                = QObject::connect(surface, &Surface::committed, q_ptr, [this] {
+                      if (!this->surface->state().damage.isEmpty()) {
+                          Q_EMIT q_ptr->changed();
+                      }
+                  });
+            surface_notifiers.destroy
+                = QObject::connect(surface, &Surface::resourceDestroyed, q_ptr, [this] {
+                      // TODO(romangg): Call update instead?
+                      this->surface = nullptr;
+                  });
         }
+
         emitChanged = true;
         Q_EMIT q_ptr->surfaceChanged();
     }
+
     if (emitChanged) {
         Q_EMIT q_ptr->changed();
     }
@@ -455,7 +461,7 @@ Pointer* Cursor::pointer() const
     return d_ptr->pointer;
 }
 
-QPointer<Surface> Cursor::surface() const
+Surface* Cursor::surface() const
 {
     return d_ptr->surface;
 }

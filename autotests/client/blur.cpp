@@ -176,7 +176,7 @@ void TestBlur::testCreate()
     QCOMPARE(serverSurface->state().blur->region(), QRegion(0, 0, 10, 20));
 
     // and destroy
-    QSignalSpy destroyedSpy(serverSurface->state().blur.data(), &QObject::destroyed);
+    QSignalSpy destroyedSpy(serverSurface->state().blur, &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     delete blur;
     QVERIFY(destroyedSpy.wait());
@@ -207,7 +207,7 @@ void TestBlur::testSurfaceDestroy()
     // destroy the parent surface
     QSignalSpy surfaceDestroyedSpy(serverSurface, &QObject::destroyed);
     QVERIFY(surfaceDestroyedSpy.isValid());
-    QSignalSpy blurDestroyedSpy(serverSurface->state().blur.data(), &QObject::destroyed);
+    QSignalSpy blurDestroyedSpy(serverSurface->state().blur, &QObject::destroyed);
     QVERIFY(blurDestroyedSpy.isValid());
     surface.reset();
     QVERIFY(surfaceDestroyedSpy.wait());

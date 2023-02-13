@@ -24,7 +24,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/resource.h"
 
 #include <QPoint>
-#include <QPointer>
 
 namespace Wrapland::Server
 {
@@ -40,11 +39,16 @@ public:
     Pointer* pointer;
     quint32 enteredSerial = 0;
     QPoint hotspot;
-    QPointer<Surface> surface;
+    Surface* surface{nullptr};
 
-    void update(QPointer<Surface> const& surface, quint32 serial, QPoint const& _hotspot);
+    void update(Surface* surface, quint32 serial, QPoint const& _hotspot);
 
 private:
+    struct {
+        QMetaObject::Connection commit;
+        QMetaObject::Connection destroy;
+    } surface_notifiers;
+
     Cursor* q_ptr;
 };
 

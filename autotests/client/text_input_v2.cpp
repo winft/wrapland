@@ -246,7 +246,7 @@ void text_input_v2_test::test_enter_leave()
         QVERIFY(enabledChangedSpy.wait());
         enabledChangedSpy.clear();
     }
-    QCOMPARE(serverTextInput->surface().data(), serverSurface);
+    QCOMPARE(serverTextInput->surface(), serverSurface);
     QVERIFY(serverTextInput->state().enabled);
 
     // and trigger an enter

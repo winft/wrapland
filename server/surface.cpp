@@ -23,8 +23,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "buffer.h"
 
+#include "blur.h"
 #include "client.h"
 #include "compositor.h"
+#include "contrast.h"
 #include "idle_inhibit_v1.h"
 #include "idle_inhibit_v1_p.h"
 #include "layer_shell_v1_p.h"
@@ -32,6 +34,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "pointer_constraints_v1_p.h"
 #include "presentation_time.h"
 #include "region.h"
+#include "shadow.h"
+#include "slide.h"
 #include "subcompositor.h"
 #include "subsurface_p.h"
 #include "viewporter_p.h"
@@ -207,25 +211,25 @@ bool Surface::Private::lowerChild(Subsurface* subsurface, Surface* sibling)
     return true;
 }
 
-void Surface::Private::setShadow(QPointer<Shadow> const& shadow)
+void Surface::Private::setShadow(Shadow* shadow)
 {
     pending.pub.shadow = shadow;
     pending.pub.updates |= surface_change::shadow;
 }
 
-void Surface::Private::setBlur(QPointer<Blur> const& blur)
+void Surface::Private::setBlur(Blur* blur)
 {
     pending.pub.blur = blur;
     pending.pub.updates |= surface_change::blur;
 }
 
-void Surface::Private::setSlide(QPointer<Slide> const& slide)
+void Surface::Private::setSlide(Slide* slide)
 {
     pending.pub.slide = slide;
     pending.pub.updates |= surface_change::slide;
 }
 
-void Surface::Private::setContrast(QPointer<Contrast> const& contrast)
+void Surface::Private::setContrast(Contrast* contrast)
 {
     pending.pub.contrast = contrast;
     pending.pub.updates |= surface_change::contrast;
@@ -245,8 +249,9 @@ void Surface::Private::setDestinationSize(QSize const& dest)
 
 void Surface::Private::installViewport(Viewport* vp)
 {
-    Q_ASSERT(viewport.isNull());
-    viewport = QPointer<Viewport>(vp);
+    assert(!viewport);
+    viewport = vp;
+
     connect(viewport, &Viewport::destinationSizeSet, handle, [this](QSize const& size) {
         setDestinationSize(size);
     });
@@ -254,6 +259,7 @@ void Surface::Private::installViewport(Viewport* vp)
         setSourceRectangle(rect);
     });
     connect(viewport, &Viewport::resourceDestroyed, handle, [this] {
+        viewport = nullptr;
         setDestinationSize(QSize());
         setSourceRectangle(QRectF());
     });
@@ -266,12 +272,12 @@ void Surface::Private::addPresentationFeedback(PresentationFeedback* feedback) c
 
 void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
 {
-    Q_ASSERT(lockedPointer.isNull());
-    Q_ASSERT(confinedPointer.isNull());
-    lockedPointer = QPointer<LockedPointerV1>(lock);
+    assert(!lockedPointer);
+    assert(!confinedPointer);
+    lockedPointer = lock;
 
     auto cleanUp = [this]() {
-        lockedPointer.clear();
+        lockedPointer = nullptr;
         disconnect(constrainsOneShotConnection);
         constrainsOneShotConnection = QMetaObject::Connection();
         disconnect(constrainsUnboundConnection);
@@ -282,30 +288,28 @@ void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
     if (lock->lifeTime() == LockedPointerV1::LifeTime::OneShot) {
         constrainsOneShotConnection
             = QObject::connect(lock, &LockedPointerV1::lockedChanged, handle, [this, cleanUp] {
-                  if (lockedPointer.isNull() || lockedPointer->isLocked()) {
-                      return;
+                  if (lockedPointer && !lockedPointer->isLocked()) {
+                      cleanUp();
                   }
-                  cleanUp();
               });
     }
     constrainsUnboundConnection
         = QObject::connect(lock, &LockedPointerV1::resourceDestroyed, handle, [this, cleanUp] {
-              if (lockedPointer.isNull()) {
-                  return;
+              if (lockedPointer) {
+                  cleanUp();
               }
-              cleanUp();
           });
     Q_EMIT handle->pointerConstraintsChanged();
 }
 
 void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
 {
-    Q_ASSERT(lockedPointer.isNull());
-    Q_ASSERT(confinedPointer.isNull());
-    confinedPointer = QPointer<ConfinedPointerV1>(confinement);
+    assert(!lockedPointer);
+    assert(!confinedPointer);
+    confinedPointer = confinement;
 
     auto cleanUp = [this]() {
-        confinedPointer.clear();
+        confinedPointer = nullptr;
         disconnect(constrainsOneShotConnection);
         constrainsOneShotConnection = QMetaObject::Connection();
         disconnect(constrainsUnboundConnection);
@@ -316,18 +320,16 @@ void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
     if (confinement->lifeTime() == ConfinedPointerV1::LifeTime::OneShot) {
         constrainsOneShotConnection = QObject::connect(
             confinement, &ConfinedPointerV1::confinedChanged, handle, [this, cleanUp] {
-                if (confinedPointer.isNull() || confinedPointer->isConfined()) {
-                    return;
+                if (confinedPointer && !confinedPointer->isConfined()) {
+                    cleanUp();
                 }
-                cleanUp();
             });
     }
     constrainsUnboundConnection = QObject::connect(
         confinement, &ConfinedPointerV1::resourceDestroyed, handle, [this, cleanUp] {
-            if (confinedPointer.isNull()) {
-                return;
+            if (confinedPointer) {
+                cleanUp();
             }
-            cleanUp();
         });
     Q_EMIT handle->pointerConstraintsChanged();
 }
@@ -545,18 +547,55 @@ void Surface::Private::copy_to_current(SurfaceState const& source, bool& resized
         current.pub.updates |= surface_change::frame;
     }
 
-    if (source.pub.updates & surface_change::shadow) {
-        current.pub.shadow = source.pub.shadow;
-    }
-    if (source.pub.updates & surface_change::blur) {
-        current.pub.blur = source.pub.blur;
-    }
-    if (source.pub.updates & surface_change::contrast) {
-        current.pub.contrast = source.pub.contrast;
-    }
-    if (source.pub.updates & surface_change::slide) {
-        current.pub.slide = source.pub.slide;
-    }
+    move_state_resource(
+        source,
+        surface_change::shadow,
+        current.pub.shadow,
+        source.pub.shadow,
+        destroy_notifiers.shadow,
+        {[this](auto shadow) {
+            if (needs_resource_reset(
+                    current.pub.shadow, pending.pub.shadow, shadow, surface_change::shadow)) {
+                setShadow(nullptr);
+            }
+        }});
+    move_state_resource(
+        source,
+        surface_change::blur,
+        current.pub.blur,
+        source.pub.blur,
+        destroy_notifiers.blur,
+        {[this](auto blur) {
+            if (needs_resource_reset(
+                    current.pub.blur, pending.pub.blur, blur, surface_change::blur)) {
+                setBlur(nullptr);
+            }
+        }});
+    move_state_resource(
+        source,
+        surface_change::contrast,
+        current.pub.contrast,
+        source.pub.contrast,
+        destroy_notifiers.contrast,
+        {[this](auto ctrst) {
+            if (needs_resource_reset(
+                    current.pub.contrast, pending.pub.contrast, ctrst, surface_change::contrast)) {
+                setContrast(nullptr);
+            }
+        }});
+    move_state_resource(
+        source,
+        surface_change::slide,
+        current.pub.slide,
+        source.pub.slide,
+        destroy_notifiers.slide,
+        {[this](auto slide) {
+            if (needs_resource_reset(
+                    current.pub.slide, pending.pub.slide, slide, surface_change::slide)) {
+                setSlide(nullptr);
+            }
+        }});
+
     if (source.pub.updates & surface_change::input) {
         current.pub.input = source.pub.input;
         current.pub.input_is_infinite = source.pub.input_is_infinite;
@@ -612,10 +651,10 @@ void Surface::Private::updateCurrentState(SurfaceState& source, bool forceChildr
                                current.pub.scale,
                                current.pub.source_rectangle);
 
-    if (!lockedPointer.isNull()) {
+    if (lockedPointer) {
         lockedPointer->d_ptr->commit();
     }
-    if (!confinedPointer.isNull()) {
+    if (confinedPointer) {
         confinedPointer->d_ptr->commit();
     }
 
@@ -955,12 +994,12 @@ void Surface::setOutputs(std::vector<WlOutput*> const& outputs)
     d_ptr->outputs = outputs;
 }
 
-QPointer<LockedPointerV1> Surface::lockedPointer() const
+LockedPointerV1* Surface::lockedPointer() const
 {
     return d_ptr->lockedPointer;
 }
 
-QPointer<ConfinedPointerV1> Surface::confinedPointer() const
+ConfinedPointerV1* Surface::confinedPointer() const
 {
     return d_ptr->confinedPointer;
 }

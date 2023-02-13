@@ -85,8 +85,7 @@ public:
     quint32 enteredSerial() const;
 
     Pointer* pointer() const;
-
-    QPointer<Surface> surface() const;
+    Surface* surface() const;
 
 Q_SIGNALS:
     void hotspotChanged();

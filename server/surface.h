@@ -22,7 +22,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output.h"
 
 #include <QObject>
-#include <QPointer>
 #include <QRegion>
 
 #include <Wrapland/Server/wraplandserver_export.h>
@@ -89,10 +88,10 @@ struct surface_state {
     // Stacking order: bottom (first) -> top (last).
     std::vector<Subsurface*> children;
 
-    QPointer<Shadow> shadow;
-    QPointer<Blur> blur;
-    QPointer<Slide> slide;
-    QPointer<Contrast> contrast;
+    Shadow* shadow{nullptr};
+    Blur* blur{nullptr};
+    Slide* slide{nullptr};
+    Contrast* contrast{nullptr};
 
     surface_changes updates{surface_change::none};
 };
@@ -131,8 +130,8 @@ public:
     void setOutputs(std::vector<WlOutput*> const& outputs);
     std::vector<WlOutput*> outputs() const;
 
-    QPointer<ConfinedPointerV1> confinedPointer() const;
-    QPointer<LockedPointerV1> lockedPointer() const;
+    ConfinedPointerV1* confinedPointer() const;
+    LockedPointerV1* lockedPointer() const;
 
     bool inhibitsIdle() const;
 

@@ -61,7 +61,7 @@ void Viewporter::Private::getViewport(ViewporterBind* bind, uint32_t id, wl_reso
         return;
     }
 
-    if (!surface->d_ptr->viewport.isNull()) {
+    if (surface->d_ptr->viewport) {
         // Surface already has a viewport. That's a protocol error.
         bind->post_error(WP_VIEWPORTER_ERROR_VIEWPORT_EXISTS, "Surface already has viewport");
         return;
@@ -73,8 +73,8 @@ void Viewporter::Private::getViewport(ViewporterBind* bind, uint32_t id, wl_reso
         delete viewport;
         return;
     }
-    surface->d_ptr->installViewport(viewport);
 
+    surface->d_ptr->installViewport(viewport);
     Q_EMIT handle->viewportCreated(viewport);
 }
 

@@ -196,7 +196,7 @@ void Display::installSocketNotifier(QObject* parent)
         return;
     }
 
-    int fd = wl_event_loop_get_fd(m_loop);
+    auto const fd = wl_event_loop_get_fd(m_loop);
     if (fd == -1) {
         qCWarning(WRAPLAND_SERVER, "Did not get the file descriptor for the event loop");
         return;
