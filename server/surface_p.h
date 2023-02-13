@@ -123,7 +123,7 @@ public:
 
     QPointer<LockedPointerV1> lockedPointer;
     QPointer<ConfinedPointerV1> confinedPointer;
-    QPointer<Viewport> viewport;
+    Viewport* viewport{nullptr};
     QHash<WlOutput*, QMetaObject::Connection> outputDestroyedConnections;
     QVector<IdleInhibitor*> idleInhibitors;
 

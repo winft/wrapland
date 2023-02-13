@@ -249,8 +249,9 @@ void Surface::Private::setDestinationSize(QSize const& dest)
 
 void Surface::Private::installViewport(Viewport* vp)
 {
-    Q_ASSERT(viewport.isNull());
+    assert(!viewport);
     viewport = vp;
+
     connect(viewport, &Viewport::destinationSizeSet, handle, [this](QSize const& size) {
         setDestinationSize(size);
     });
@@ -258,6 +259,7 @@ void Surface::Private::installViewport(Viewport* vp)
         setSourceRectangle(rect);
     });
     connect(viewport, &Viewport::resourceDestroyed, handle, [this] {
+        viewport = nullptr;
         setDestinationSize(QSize());
         setSourceRectangle(QRectF());
     });
