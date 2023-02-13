@@ -103,9 +103,11 @@ private:
     std::unordered_map<uint32_t, button_state> buttonStates;
 
     pointer_focus focus;
-
     QPointF pos;
-    QPointer<Surface> gestureSurface;
+
+    struct {
+        QPointer<Surface> surface;
+    } gesture;
 
     std::vector<Pointer*> devices;
     Seat* seat;
