@@ -288,18 +288,16 @@ void Surface::Private::installPointerConstraint(LockedPointerV1* lock)
     if (lock->lifeTime() == LockedPointerV1::LifeTime::OneShot) {
         constrainsOneShotConnection
             = QObject::connect(lock, &LockedPointerV1::lockedChanged, handle, [this, cleanUp] {
-                  if (lockedPointer.isNull() || lockedPointer->isLocked()) {
-                      return;
+                  if (!lockedPointer.isNull() && !lockedPointer->isLocked()) {
+                      cleanUp();
                   }
-                  cleanUp();
               });
     }
     constrainsUnboundConnection
         = QObject::connect(lock, &LockedPointerV1::resourceDestroyed, handle, [this, cleanUp] {
-              if (lockedPointer.isNull()) {
-                  return;
+              if (!lockedPointer.isNull()) {
+                  cleanUp();
               }
-              cleanUp();
           });
     Q_EMIT handle->pointerConstraintsChanged();
 }
@@ -322,18 +320,16 @@ void Surface::Private::installPointerConstraint(ConfinedPointerV1* confinement)
     if (confinement->lifeTime() == ConfinedPointerV1::LifeTime::OneShot) {
         constrainsOneShotConnection = QObject::connect(
             confinement, &ConfinedPointerV1::confinedChanged, handle, [this, cleanUp] {
-                if (confinedPointer.isNull() || confinedPointer->isConfined()) {
-                    return;
+                if (!confinedPointer.isNull() && !confinedPointer->isConfined()) {
+                    cleanUp();
                 }
-                cleanUp();
             });
     }
     constrainsUnboundConnection = QObject::connect(
         confinement, &ConfinedPointerV1::resourceDestroyed, handle, [this, cleanUp] {
-            if (confinedPointer.isNull()) {
-                return;
+            if (!confinedPointer.isNull()) {
+                cleanUp();
             }
-            cleanUp();
         });
     Q_EMIT handle->pointerConstraintsChanged();
 }
