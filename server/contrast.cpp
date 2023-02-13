@@ -61,7 +61,7 @@ void ContrastManager::Private::createCallback(ContrastManagerBind* bind,
         return;
     }
 
-    surface->d_ptr->setContrast(QPointer<Contrast>(contrast));
+    surface->d_ptr->setContrast(contrast);
 }
 
 void ContrastManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClient,
@@ -69,7 +69,7 @@ void ContrastManager::Private::unsetCallback([[maybe_unused]] wl_client* wlClien
                                              wl_resource* wlSurface)
 {
     auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
-    surface->d_ptr->setContrast(QPointer<Contrast>());
+    surface->d_ptr->setContrast(nullptr);
 }
 
 ContrastManager::ContrastManager(Display* display)

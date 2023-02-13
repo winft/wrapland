@@ -101,7 +101,7 @@ void text_input_v2::Private::enable(Surface* surface)
     auto changed = this->surface.data() != surface || !state.enabled;
     auto const old = state;
 
-    this->surface = QPointer<Surface>(surface);
+    this->surface = surface;
     state.enabled = true;
 
     if (changed) {

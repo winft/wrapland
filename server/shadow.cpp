@@ -55,14 +55,14 @@ void ShadowManager::Private::createCallback(ShadowManagerBind* bind,
         delete shadow;
         return;
     }
-    surface->d_ptr->setShadow(QPointer<Shadow>(shadow));
+    surface->d_ptr->setShadow(shadow);
 }
 
 void ShadowManager::Private::unsetCallback([[maybe_unused]] ShadowManagerBind* bind,
                                            wl_resource* wlSurface)
 {
     auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
-    surface->d_ptr->setShadow(QPointer<Shadow>());
+    surface->d_ptr->setShadow(nullptr);
 }
 
 ShadowManager::ShadowManager(Display* display)

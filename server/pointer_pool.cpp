@@ -363,7 +363,7 @@ void pointer_pool::start_swipe_gesture(uint32_t fingerCount)
     if (!gestureSurface.isNull()) {
         return;
     }
-    gestureSurface = QPointer<Surface>(focus.surface);
+    gestureSurface = focus.surface;
     if (gestureSurface.isNull()) {
         return;
     }
@@ -412,7 +412,7 @@ void pointer_pool::start_pinch_gesture(uint32_t fingerCount)
     if (!gestureSurface.isNull()) {
         return;
     }
-    gestureSurface = QPointer<Surface>(focus.surface);
+    gestureSurface = focus.surface;
     if (gestureSurface.isNull()) {
         return;
     }

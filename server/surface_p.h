@@ -76,10 +76,10 @@ public:
     bool raiseChild(Subsurface* subsurface, Surface* sibling);
     bool lowerChild(Subsurface* subsurface, Surface* sibling);
 
-    void setShadow(QPointer<Shadow> const& shadow);
-    void setBlur(QPointer<Blur> const& blur);
-    void setSlide(QPointer<Slide> const& slide);
-    void setContrast(QPointer<Contrast> const& contrast);
+    void setShadow(Shadow* shadow);
+    void setBlur(Blur* blur);
+    void setSlide(Slide* slide);
+    void setContrast(Contrast* contrast);
 
     void setSourceRectangle(QRectF const& source);
     void setDestinationSize(QSize const& dest);
