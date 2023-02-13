@@ -76,11 +76,11 @@ void Pointer::Private::setCursor(quint32 serial, Surface* surface, QPoint const&
 {
     if (!cursor) {
         cursor.reset(new Cursor(handle));
-        cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
+        cursor->d_ptr->update(surface, serial, hotspot);
         QObject::connect(cursor.get(), &Cursor::changed, handle, &Pointer::cursorChanged);
         Q_EMIT handle->cursorChanged();
     } else {
-        cursor->d_ptr->update(QPointer<Surface>(surface), serial, hotspot);
+        cursor->d_ptr->update(surface, serial, hotspot);
     }
 }
 
@@ -395,9 +395,7 @@ Cursor::Private::Private(Cursor* q_ptr, Pointer* _pointer)
 {
 }
 
-void Cursor::Private::update(QPointer<Surface> const& surface,
-                             quint32 serial,
-                             QPoint const& _hotspot)
+void Cursor::Private::update(Surface* surface, quint32 serial, QPoint const& _hotspot)
 {
     bool emitChanged = false;
     if (enteredSerial != serial) {
@@ -411,13 +409,13 @@ void Cursor::Private::update(QPointer<Surface> const& surface,
         Q_EMIT q_ptr->hotspotChanged();
     }
     if (this->surface != surface) {
-        if (!this->surface.isNull()) {
-            QObject::disconnect(this->surface.data(), &Surface::committed, q_ptr, nullptr);
+        if (this->surface) {
+            QObject::disconnect(this->surface, &Surface::committed, q_ptr, nullptr);
         }
 
         this->surface = surface;
-        if (!surface.isNull()) {
-            QObject::connect(surface.data(), &Surface::committed, q_ptr, [this] {
+        if (surface) {
+            QObject::connect(surface, &Surface::committed, q_ptr, [this] {
                 if (!this->surface->state().damage.isEmpty()) {
                     Q_EMIT q_ptr->changed();
                 }

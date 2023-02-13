@@ -42,7 +42,7 @@ public:
     QPoint hotspot;
     QPointer<Surface> surface;
 
-    void update(QPointer<Surface> const& surface, quint32 serial, QPoint const& _hotspot);
+    void update(Surface* surface, quint32 serial, QPoint const& _hotspot);
 
 private:
     Cursor* q_ptr;
