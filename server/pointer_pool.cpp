@@ -360,17 +360,9 @@ void pointer_pool::relative_motion(QSizeF const& delta,
 
 void pointer_pool::start_swipe_gesture(uint32_t fingerCount)
 {
-    if (gesture.surface) {
+    if (!setup_gesture_surface()) {
         return;
     }
-
-    gesture.surface = focus.surface;
-    if (!gesture.surface) {
-        return;
-    }
-
-    gesture.surface_destroy_notifier = QObject::connect(
-        gesture.surface, &Surface::resourceDestroyed, seat, [this] { cleanup_gesture(); });
 
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
     forEachInterface(gesture.surface, devices, [serial, fingerCount](auto pointer) {
@@ -419,12 +411,7 @@ void pointer_pool::cancel_swipe_gesture()
 
 void pointer_pool::start_pinch_gesture(uint32_t fingerCount)
 {
-    if (gesture.surface) {
-        return;
-    }
-
-    gesture.surface = focus.surface;
-    if (!gesture.surface) {
+    if (!setup_gesture_surface()) {
         return;
     }
 
@@ -471,6 +458,19 @@ void pointer_pool::cancel_pinch_gesture()
     });
 
     cleanup_gesture();
+}
+
+bool pointer_pool::setup_gesture_surface()
+{
+    if (gesture.surface || !focus.surface) {
+        return false;
+    }
+
+    gesture.surface = focus.surface;
+    gesture.surface_destroy_notifier = QObject::connect(
+        gesture.surface, &Surface::resourceDestroyed, seat, [this] { cleanup_gesture(); });
+
+    return true;
 }
 
 void pointer_pool::cleanup_gesture()
