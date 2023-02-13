@@ -111,18 +111,27 @@ void Seat::setHasTouch(bool has)
 pointer_pool& Seat::pointers() const
 {
     assert(hasPointer());
+
+    // We already check with the assert.
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     return *d_ptr->pointers;
 }
 
 keyboard_pool& Seat::keyboards() const
 {
     assert(hasKeyboard());
+
+    // We already check with the assert.
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     return *d_ptr->keyboards;
 }
 
 touch_pool& Seat::touches() const
 {
     assert(hasTouch());
+
+    // We already check with the assert.
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     return *d_ptr->touches;
 }
 
@@ -228,7 +237,11 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
 {
     assert(hasKeyboard());
 
-    if (surface == d_ptr->keyboards.value().get_focus().surface) {
+    // We already check with the assert.
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+    auto& keys = d_ptr->keyboards.value();
+
+    if (surface == keys.get_focus().surface) {
         return;
     }
 
@@ -236,7 +249,7 @@ void Seat::setFocusedKeyboardSurface(Surface* surface)
     d_ptr->data_devices.set_focused_surface(surface);
     d_ptr->primary_selection_devices.set_focused_surface(surface);
 
-    d_ptr->keyboards.value().set_focused_surface(surface);
+    keys.set_focused_surface(surface);
 
     // Focused text input surface follows keyboard.
     d_ptr->text_inputs.set_focused_surface(surface);
