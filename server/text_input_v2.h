@@ -99,7 +99,7 @@ public:
     text_input_v2_state const& state() const;
 
     Client* client() const;
-    QPointer<Surface> surface() const;
+    Surface* surface() const;
 
     void set_preedit_string(std::string const& text, std::string const& commit);
     void commit(std::string const& text);

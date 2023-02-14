@@ -57,14 +57,14 @@ void SlideManager::Private::createCallback(SlideManagerBind* bind,
         return;
     }
 
-    surface->d_ptr->setSlide(QPointer<Slide>(slide));
+    surface->d_ptr->setSlide(slide);
 }
 
 void SlideManager::Private::unsetCallback([[maybe_unused]] SlideManagerBind* bind,
                                           wl_resource* wlSurface)
 {
     auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
-    surface->d_ptr->setSlide(QPointer<Slide>());
+    surface->d_ptr->setSlide(nullptr);
 }
 
 SlideManager::SlideManager(Display* display)

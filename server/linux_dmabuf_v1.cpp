@@ -325,7 +325,7 @@ bool linux_dmabuf_params_v1_impl::validate_params(QSize const& size)
 
         // Don't report an error as it might be caused by the kernel not supporting seeking on
         // dmabuf
-        off_t size = ::lseek(plane.fd, 0, SEEK_END);
+        auto const size = ::lseek(plane.fd, 0, SEEK_END);
         if (size == -1) {
             continue;
         }

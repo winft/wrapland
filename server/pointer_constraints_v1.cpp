@@ -96,7 +96,7 @@ void PointerConstraintsV1::Private::createConstraint(wl_resource* wlResource,
     auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
     // auto pointer = Wayland::Resource<Pointer>::handle(wlPointer);
 
-    if (!surface->lockedPointer().isNull() || !surface->confinedPointer().isNull()) {
+    if (surface->lockedPointer() || surface->confinedPointer()) {
         surface->d_ptr->postError(ZWP_POINTER_CONSTRAINTS_V1_ERROR_ALREADY_CONSTRAINED,
                                   "Surface already constrained");
         return;

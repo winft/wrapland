@@ -14,7 +14,6 @@
 #include <QMatrix4x4>
 #include <QObject>
 #include <QPoint>
-#include <QPointer>
 
 #include <cstdint>
 #include <unordered_map>
@@ -99,13 +98,19 @@ private:
     void update_button_serial(uint32_t button, uint32_t serial);
     void update_button_state(uint32_t button, button_state state);
 
+    bool setup_gesture_surface();
+    void cleanup_gesture();
+
     std::unordered_map<uint32_t, uint32_t> buttonSerials;
     std::unordered_map<uint32_t, button_state> buttonStates;
 
     pointer_focus focus;
-
     QPointF pos;
-    QPointer<Surface> gestureSurface;
+
+    struct {
+        Surface* surface{nullptr};
+        QMetaObject::Connection surface_destroy_notifier;
+    } gesture;
 
     std::vector<Pointer*> devices;
     Seat* seat;

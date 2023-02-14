@@ -27,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 
 #include <deque>
+#include <functional>
 #include <unordered_map>
 #include <wayland-server.h>
 
@@ -76,10 +77,10 @@ public:
     bool raiseChild(Subsurface* subsurface, Surface* sibling);
     bool lowerChild(Subsurface* subsurface, Surface* sibling);
 
-    void setShadow(QPointer<Shadow> const& shadow);
-    void setBlur(QPointer<Blur> const& blur);
-    void setSlide(QPointer<Slide> const& slide);
-    void setContrast(QPointer<Contrast> const& contrast);
+    void setShadow(Shadow* shadow);
+    void setBlur(Blur* blur);
+    void setSlide(Slide* slide);
+    void setContrast(Contrast* contrast);
 
     void setSourceRectangle(QRectF const& source);
     void setDestinationSize(QSize const& dest);
@@ -119,9 +120,9 @@ public:
     uint32_t feedbackId = 0;
     std::unordered_map<uint32_t, std::unique_ptr<Feedbacks>> waitingFeedbacks;
 
-    QPointer<LockedPointerV1> lockedPointer;
-    QPointer<ConfinedPointerV1> confinedPointer;
-    QPointer<Viewport> viewport;
+    LockedPointerV1* lockedPointer{nullptr};
+    ConfinedPointerV1* confinedPointer{nullptr};
+    Viewport* viewport{nullptr};
     QHash<WlOutput*, QMetaObject::Connection> outputDestroyedConnections;
     QVector<IdleInhibitor*> idleInhibitors;
 
@@ -190,10 +191,59 @@ private:
                                      int32_t width,
                                      int32_t height);
 
+    template<typename Obj>
+    bool needs_resource_reset(Obj const& current,
+                              Obj const& pending,
+                              Obj const& obj,
+                              surface_change change) const
+    {
+        auto const is_current = current == obj;
+        auto const is_pending_set = this->pending.pub.updates & change;
+        auto const obj_is_pending = pending == obj;
+
+        if (is_pending_set && obj_is_pending) {
+            // The object is pending. Needs to be changed in any case.
+            return true;
+        }
+
+        // Needs reset if the object is current and there is no other pending object.
+        return is_current || !is_pending_set;
+    }
+
+    template<typename Obj>
+    void move_state_resource(SurfaceState const& source,
+                             surface_change change,
+                             Obj*& current,
+                             Obj* const& pending,
+                             QMetaObject::Connection& destroy_notifier,
+                             std::function<void(Obj*)> resetter) const
+    {
+        if (!(source.pub.updates & change)) {
+            return;
+        }
+
+        QObject::disconnect(destroy_notifier);
+        current = pending;
+
+        if (!current) {
+            return;
+        }
+
+        destroy_notifier = QObject::connect(
+            current, &Obj::resourceDestroyed, handle, [resetter, current] { resetter(current); });
+    }
+
     static const struct wl_surface_interface s_interface;
 
     QMetaObject::Connection constrainsOneShotConnection;
     QMetaObject::Connection constrainsUnboundConnection;
+
+    struct {
+        QMetaObject::Connection blur;
+        QMetaObject::Connection contrast;
+        QMetaObject::Connection shadow;
+        QMetaObject::Connection slide;
+    } destroy_notifiers;
 
     Surface* q_ptr;
 };
