@@ -38,6 +38,8 @@ private Q_SLOTS:
     void test_pointer_swipe_gesture();
     void test_pointer_pinch_gesture_data();
     void test_pointer_pinch_gesture();
+    void test_pointer_hold_gesture_data();
+    void test_pointer_hold_gesture();
 
 private:
     struct {
@@ -405,6 +407,113 @@ void pointer_gestures_test::test_pointer_pinch_gesture()
         server_pointers.cancel_pinch_gesture();
     } else {
         server_pointers.end_pinch_gesture();
+    }
+
+    QVERIFY(spy->wait());
+}
+
+void pointer_gestures_test::test_pointer_hold_gesture_data()
+{
+    QTest::addColumn<bool>("cancel");
+    QTest::addColumn<int>("expectedEndCount");
+    QTest::addColumn<int>("expectedCancelCount");
+
+    QTest::newRow("end") << false << 1 << 0;
+    QTest::newRow("cancel") << true << 0 << 1;
+}
+
+void pointer_gestures_test::test_pointer_hold_gesture()
+{
+    // First create the pointer and pointer swipe gesture.
+    QSignalSpy hasPointerChangedSpy(client.seat, &Clt::Seat::hasPointerChanged);
+    QVERIFY(hasPointerChangedSpy.isValid());
+    server.seat->setHasPointer(true);
+
+    QVERIFY(hasPointerChangedSpy.wait());
+    QScopedPointer<Clt::Pointer> pointer(client.seat->createPointer());
+    QScopedPointer<Clt::pointer_hold_gesture> gesture(
+        client.gestures->create_hold_gesture(pointer.data()));
+    QVERIFY(gesture);
+    QVERIFY(gesture->isValid());
+    QVERIFY(gesture->surface().isNull());
+    QCOMPARE(gesture->fingerCount(), 0u);
+
+    QSignalSpy startSpy(gesture.data(), &Clt::pointer_hold_gesture::started);
+    QVERIFY(startSpy.isValid());
+    QSignalSpy endSpy(gesture.data(), &Clt::pointer_hold_gesture::ended);
+    QVERIFY(endSpy.isValid());
+    QSignalSpy cancelledSpy(gesture.data(), &Clt::pointer_hold_gesture::cancelled);
+    QVERIFY(cancelledSpy.isValid());
+
+    // Now create a surface.
+    QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(), &Srv::Compositor::surfaceCreated);
+    QVERIFY(surfaceCreatedSpy.isValid());
+    QScopedPointer<Clt::Surface> surface(client.compositor->createSurface());
+
+    QVERIFY(surfaceCreatedSpy.wait());
+    auto serverSurface = surfaceCreatedSpy.first().first().value<Srv::Surface*>();
+    QVERIFY(serverSurface);
+
+    auto& server_pointers = server.seat->pointers();
+    server_pointers.set_focused_surface(serverSurface);
+    QCOMPARE(server_pointers.get_focus().surface, serverSurface);
+    QVERIFY(server_pointers.get_focus().devices.front());
+
+    // Send in the start.
+    quint32 timestamp = 1;
+    server.seat->setTimestamp(timestamp++);
+    server_pointers.start_hold_gesture(3);
+
+    QVERIFY(startSpy.wait());
+    QCOMPARE(startSpy.count(), 1);
+    QCOMPARE(startSpy.first().at(0).value<quint32>(), server.display->serial());
+    QCOMPARE(startSpy.first().at(1).value<quint32>(), 1u);
+    QCOMPARE(gesture->fingerCount(), 3u);
+    QCOMPARE(gesture->surface().data(), surface.data());
+
+    // Another start should not be possible.
+    server_pointers.start_hold_gesture(3);
+    QVERIFY(!startSpy.wait(200));
+
+    // Now end or cancel.
+    QFETCH(bool, cancel);
+    QSignalSpy* spy;
+
+    server.seat->setTimestamp(timestamp++);
+    if (cancel) {
+        server_pointers.cancel_hold_gesture();
+        spy = &cancelledSpy;
+    } else {
+        server_pointers.end_hold_gesture();
+        spy = &endSpy;
+    }
+
+    QVERIFY(spy->wait());
+    QTEST(endSpy.count(), "expectedEndCount");
+    QTEST(cancelledSpy.count(), "expectedCancelCount");
+    QCOMPARE(spy->count(), 1);
+    QCOMPARE(spy->first().at(0).value<quint32>(), server.display->serial());
+    QCOMPARE(spy->first().at(1).value<quint32>(), 2u);
+
+    QCOMPARE(gesture->fingerCount(), 0u);
+    QVERIFY(gesture->surface().isNull());
+
+    // Now a start should be possible again.
+    server.seat->setTimestamp(timestamp++);
+    server_pointers.start_hold_gesture(3);
+    QVERIFY(startSpy.wait());
+
+    // Unsetting the focused pointer surface should not change anything.
+    server_pointers.set_focused_surface(nullptr);
+    server.seat->setTimestamp(timestamp++);
+
+    // And end.
+    server.seat->setTimestamp(timestamp++);
+
+    if (cancel) {
+        server_pointers.cancel_hold_gesture();
+    } else {
+        server_pointers.end_hold_gesture();
     }
 
     QVERIFY(spy->wait());
