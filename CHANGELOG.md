@@ -1,5 +1,57 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.527.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.526.0-beta.0...wrapland@0.527.0-beta.0) (2023-02-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **server:** cursor surface is provided as raw pointer
+* **server:** text-input v2 surface returns raw pointer
+* **server:** custom surface interfaces provided as raw pointers
+* **server:** surface API to get confined pointers changes
+* **client:** xdg-toplevel configure data retrieved via single getter
+* **client:** xdg-toplevel state enum renamed
+* **client:** xdg-shell positioner API uses a separate data object
+* **server:** xdg-shell popup API uses a positioner object
+
+### Features
+
+* **client:** provide xdg-toplevel configure data struct ([054aaa8](https://gitlab.com/kwinft/wrapland/commit/054aaa8c665d4cfade4bcdfaf8a2dfff16c7e2bc))
+* implement ext_idle_notify_v1 ([2cd9117](https://gitlab.com/kwinft/wrapland/commit/2cd911738accae50d32c8896a18e11b888ea8962))
+* **server:** provide xdg-shell positioner class ([e8196d7](https://gitlab.com/kwinft/wrapland/commit/e8196d7b140af56d9bbf5294476d3f86860f1f3d))
+* support xdg-shell version 3 ([7f0e80f](https://gitlab.com/kwinft/wrapland/commit/7f0e80f1fb408f2d6670ffa742d9c11625177360))
+* support xdg-shell version 4 ([23f7e95](https://gitlab.com/kwinft/wrapland/commit/23f7e95fbe02919c73da65a02a36559e827d8281))
+* support xdg-shell version 5 ([8b1cb2d](https://gitlab.com/kwinft/wrapland/commit/8b1cb2dc155adb3c399e4ad07e348d683d58667c))
+
+
+### Bug Fixes
+
+* **client:** remove size setter from public API ([294926c](https://gitlab.com/kwinft/wrapland/commit/294926ceb7222671a24ea0f08aeed62fc2dfe724))
+* **server:** constify local variables ([6214bbc](https://gitlab.com/kwinft/wrapland/commit/6214bbce70b5f2e1b81f3e7847423d2c0699a5cd))
+* **server:** disconnect the previous surface on cursor updates ([18a635a](https://gitlab.com/kwinft/wrapland/commit/18a635a4875538d25fde3989d37a2a70a24d21a1))
+* **server:** ensure xdg-toplevel configure size is not negative ([14a9bff](https://gitlab.com/kwinft/wrapland/commit/14a9bff544a36028c1eecba4705e956a23605916))
+* **server:** no-lint unchecked optional access ([64c50a1](https://gitlab.com/kwinft/wrapland/commit/64c50a1e294f30d0e33057ae9e5e15d0a593acf1))
+* **server:** provide confined pointers as raw pointers ([b957049](https://gitlab.com/kwinft/wrapland/commit/b9570495b6c9b41dd12e7dd880fbbc8aa67c31d0))
+* **server:** provide surface objects as raw pointer ([87e59db](https://gitlab.com/kwinft/wrapland/commit/87e59dbb4defafadd8025b177da70b7d53f60d35))
+* **server:** return value at end of function ([2e6f680](https://gitlab.com/kwinft/wrapland/commit/2e6f6805003927d0b715ecafce625a54781aa724))
+
+
+### Refactors
+
+* **client:** move xdg-toplevel state enum out of class ([d97f5e2](https://gitlab.com/kwinft/wrapland/commit/d97f5e238244a8daa4d78964f02f5a666231b26c))
+* **client:** provide xdg-shell positioner resource class ([bb2b749](https://gitlab.com/kwinft/wrapland/commit/bb2b749ff8e59c0e65d90a893ba6e9d98093d948))
+* **client:** split out xdg-shell positioner data ([900cb5d](https://gitlab.com/kwinft/wrapland/commit/900cb5d0f1501368c4d11f705eef5b17ff751bc7))
+* **server:** check positively to cleanup pointer confinements ([8371c4c](https://gitlab.com/kwinft/wrapland/commit/8371c4c7162007cf11015d6b277c64c4b76060a6))
+* **server:** provide custom surface interfaces as raw pointers ([0bf193e](https://gitlab.com/kwinft/wrapland/commit/0bf193eb169eb7e7be4f3c0437bbd0a633fe451b))
+* **server:** setup gesture surface in separate function ([13cce0d](https://gitlab.com/kwinft/wrapland/commit/13cce0d3eb96aa54ff1b1bee247eb00aa2338770))
+* **server:** store cursor surface as raw pointer ([834210e](https://gitlab.com/kwinft/wrapland/commit/834210e6aff9a981a7a284c4fe91d5ad7ab238bd))
+* **server:** store gesture surface as raw pointer ([e80b14e](https://gitlab.com/kwinft/wrapland/commit/e80b14ef21625ed9cb18fc711c62bb108e19bac6))
+* **server:** store gesture surface in struct ([0cc7ca7](https://gitlab.com/kwinft/wrapland/commit/0cc7ca7303e5cfc5500a22439e550b1fbca7b03c))
+* **server:** store pointer confinements as raw pointer ([338e568](https://gitlab.com/kwinft/wrapland/commit/338e5683af29b33225891cc2824c2b0f89b6e855))
+* **server:** store text input surface as raw pointer ([779fa85](https://gitlab.com/kwinft/wrapland/commit/779fa854b84046251a89b37235c63fc397e9284a))
+* **server:** store viewport as raw pointer ([614d3a6](https://gitlab.com/kwinft/wrapland/commit/614d3a6213169c18677743dd3baa13876f25e192))
+* **server:** update cursor with raw surface ([3585014](https://gitlab.com/kwinft/wrapland/commit/3585014d64aef3c9496adde659ebd8929177c5c5))
+
 ## [0.526.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.526.0-beta.0...wrapland@0.526.0) (2022-10-11)
 
 ## [0.526.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.525.0-beta.0...wrapland@0.526.0-beta.0) (2022-10-10)
