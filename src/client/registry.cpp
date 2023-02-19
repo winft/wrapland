@@ -475,7 +475,7 @@ static QMap<Registry::Interface, SuppertedInterfaceData> const s_interfaces = {
     {
         Registry::Interface::PointerGesturesUnstableV1,
         {
-            1,
+            3,
             QByteArrayLiteral("zwp_pointer_gestures_v1"),
             &zwp_pointer_gestures_v1_interface,
             &Registry::pointerGesturesUnstableV1Announced,

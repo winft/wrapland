@@ -460,6 +460,46 @@ void pointer_pool::cancel_pinch_gesture()
     cleanup_gesture();
 }
 
+void pointer_pool::start_hold_gesture(uint32_t fingerCount)
+{
+    if (!setup_gesture_surface()) {
+        return;
+    }
+
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
+    forEachInterface(gesture.surface, devices, [serial, fingerCount](auto pointer) {
+        pointer->d_ptr->startHoldGesture(serial, fingerCount);
+    });
+}
+
+void pointer_pool::end_hold_gesture()
+{
+    if (!gesture.surface) {
+        return;
+    }
+
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
+    forEachInterface(gesture.surface, devices, [serial](auto pointer) {
+        pointer->d_ptr->endHoldGesture(serial);
+    });
+
+    cleanup_gesture();
+}
+
+void pointer_pool::cancel_hold_gesture()
+{
+    if (!gesture.surface) {
+        return;
+    }
+
+    auto const serial = seat->d_ptr->display()->handle->nextSerial();
+    forEachInterface(gesture.surface, devices, [serial](auto pointer) {
+        pointer->d_ptr->cancelHoldGesture(serial);
+    });
+
+    cleanup_gesture();
+}
+
 bool pointer_pool::setup_gesture_surface()
 {
     if (gesture.surface || !focus.surface) {

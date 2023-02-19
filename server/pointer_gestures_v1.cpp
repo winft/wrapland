@@ -37,10 +37,11 @@ namespace Wrapland::Server
 {
 
 PointerGesturesV1::Private::Private(PointerGesturesV1* q_ptr, Display* display)
-    : Wayland::Global<PointerGesturesV1>(q_ptr,
-                                         display,
-                                         &zwp_pointer_gestures_v1_interface,
-                                         &s_interface)
+    : Wayland::Global<PointerGesturesV1, PointerGesturesV1Version>(
+        q_ptr,
+        display,
+        &zwp_pointer_gestures_v1_interface,
+        &s_interface)
 {
 }
 
@@ -48,8 +49,7 @@ const struct zwp_pointer_gestures_v1_interface PointerGesturesV1::Private::s_int
     cb<swipeGestureCallback>,
     cb<pinchGestureCallback>,
     resourceDestroyCallback,
-    // TODO(romangg): Add get_hold_gesture field (version 3).
-    // NOLINTNEXTLINE(clang-diagnostic-missing-field-initializers)
+    cb<holdGestureCallback>,
 };
 
 void PointerGesturesV1::Private::swipeGestureCallback(PointerGesturesV1Bind* bind,
@@ -78,6 +78,20 @@ void PointerGesturesV1::Private::pinchGestureCallback(PointerGesturesV1Bind* bin
     }
 
     pointer->d_ptr->registerPinchGesture(pincher);
+}
+
+void PointerGesturesV1::Private::holdGestureCallback(PointerGesturesV1Bind* bind,
+                                                     uint32_t id,
+                                                     wl_resource* wlPointer)
+{
+    auto pointer = Wayland::Resource<Pointer>::get_handle(wlPointer);
+
+    auto holder = new PointerHoldGestureV1(bind->client->handle, bind->version, id, pointer);
+    if (!holder) {
+        return;
+    }
+
+    pointer->d_ptr->registerHoldGesture(holder);
 }
 
 PointerGesturesV1::PointerGesturesV1(Display* display)
@@ -206,6 +220,57 @@ void PointerPinchGestureV1::end(quint32 serial, bool cancel)
 }
 
 void PointerPinchGestureV1::cancel(quint32 serial)
+{
+    end(serial, true);
+}
+
+PointerHoldGestureV1::Private::Private(Client* client,
+                                       uint32_t version,
+                                       uint32_t id,
+                                       Pointer* _pointer,
+                                       PointerHoldGestureV1* q_ptr)
+    : Wayland::Resource<PointerHoldGestureV1>(client,
+                                              version,
+                                              id,
+                                              &zwp_pointer_gesture_hold_v1_interface,
+                                              &s_interface,
+                                              q_ptr)
+    , pointer(_pointer)
+{
+}
+
+const struct zwp_pointer_gesture_hold_v1_interface PointerHoldGestureV1::Private::s_interface = {
+    destroyCallback,
+};
+
+PointerHoldGestureV1::PointerHoldGestureV1(Client* client,
+                                           uint32_t version,
+                                           uint32_t id,
+                                           Pointer* pointer)
+    : d_ptr(new Private(client, version, id, pointer, this))
+{
+}
+
+void PointerHoldGestureV1::start(quint32 serial, quint32 fingerCount)
+{
+    auto seat = d_ptr->pointer->seat();
+
+    d_ptr->send<zwp_pointer_gesture_hold_v1_send_begin>(
+        serial,
+        seat->timestamp(),
+        seat->pointers().get_focus().surface->d_ptr->resource,
+        fingerCount);
+}
+
+void PointerHoldGestureV1::end(quint32 serial, bool cancel)
+{
+    auto seat = d_ptr->pointer->seat();
+
+    d_ptr->send<zwp_pointer_gesture_hold_v1_send_end>(
+        serial, seat->timestamp(), static_cast<uint32_t>(cancel));
+}
+
+void PointerHoldGestureV1::cancel(quint32 serial)
 {
     end(serial, true);
 }

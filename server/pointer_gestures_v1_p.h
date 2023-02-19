@@ -30,7 +30,7 @@ namespace Wrapland::Server
 
 class Pointer;
 
-constexpr uint32_t PointerGesturesV1Version = 1;
+constexpr uint32_t PointerGesturesV1Version = 3;
 using PointerGesturesV1Global = Wayland::Global<PointerGesturesV1, PointerGesturesV1Version>;
 using PointerGesturesV1Bind = Wayland::Bind<PointerGesturesV1Global>;
 
@@ -44,6 +44,8 @@ private:
     swipeGestureCallback(PointerGesturesV1Bind* bind, uint32_t id, wl_resource* wlPointer);
     static void
     pinchGestureCallback(PointerGesturesV1Bind* bind, uint32_t id, wl_resource* wlPointer);
+    static void
+    holdGestureCallback(PointerGesturesV1Bind* bind, uint32_t id, wl_resource* wlPointer);
 
     static const struct zwp_pointer_gestures_v1_interface s_interface;
 };
@@ -81,15 +83,6 @@ public:
     Pointer* pointer;
 
 private:
-    static void swipeGestureCallback(wl_client* wlClient,
-                                     wl_resource* wlResource,
-                                     uint32_t id,
-                                     wl_resource* wlPointer);
-    static void pinchGestureCallback(wl_client* wlClient,
-                                     wl_resource* wlResource,
-                                     uint32_t id,
-                                     wl_resource* wlPointer);
-
     static const struct zwp_pointer_gesture_swipe_v1_interface s_interface;
 };
 
@@ -125,6 +118,39 @@ public:
 
 private:
     static const struct zwp_pointer_gesture_pinch_v1_interface s_interface;
+};
+
+class PointerHoldGestureV1 : public QObject
+{
+    Q_OBJECT
+public:
+    PointerHoldGestureV1(Client* client, uint32_t version, uint32_t id, Pointer* pointer);
+
+    void start(quint32 serial, quint32 fingerCount);
+    void end(quint32 serial, bool cancel = false);
+    void cancel(quint32 serial);
+
+Q_SIGNALS:
+    void resourceDestroyed();
+
+private:
+    class Private;
+    Private* d_ptr;
+};
+
+class PointerHoldGestureV1::Private : public Wayland::Resource<PointerHoldGestureV1>
+{
+public:
+    Private(Client* client,
+            uint32_t version,
+            uint32_t id,
+            Pointer* pointer,
+            PointerHoldGestureV1* q_ptr);
+
+    Pointer* pointer;
+
+private:
+    static const struct zwp_pointer_gesture_hold_v1_interface s_interface;
 };
 
 }
