@@ -141,6 +141,15 @@ void Pointer::Private::registerPinchGesture(PointerPinchGestureV1* gesture)
     });
 }
 
+void Pointer::Private::registerHoldGesture(PointerHoldGestureV1* gesture)
+{
+    holdGestures.push_back(gesture);
+    QObject::connect(gesture, &PointerHoldGestureV1::resourceDestroyed, handle, [this, gesture] {
+        holdGestures.erase(std::remove(holdGestures.begin(), holdGestures.end(), gesture),
+                           holdGestures.end());
+    });
+}
+
 void Pointer::Private::startSwipeGesture(quint32 serial, quint32 fingerCount)
 {
     if (swipeGestures.empty()) {
@@ -217,6 +226,36 @@ void Pointer::Private::cancelPinchGesture(quint32 serial)
         return;
     }
     for (auto gesture : pinchGestures) {
+        gesture->cancel(serial);
+    }
+}
+
+void Pointer::Private::startHoldGesture(quint32 serial, quint32 fingerCount)
+{
+    if (holdGestures.empty()) {
+        return;
+    }
+    for (auto gesture : holdGestures) {
+        gesture->start(serial, fingerCount);
+    }
+}
+
+void Pointer::Private::endHoldGesture(quint32 serial)
+{
+    if (holdGestures.empty()) {
+        return;
+    }
+    for (auto gesture : holdGestures) {
+        gesture->end(serial);
+    }
+}
+
+void Pointer::Private::cancelHoldGesture(quint32 serial)
+{
+    if (holdGestures.empty()) {
+        return;
+    }
+    for (auto gesture : holdGestures) {
         gesture->cancel(serial);
     }
 }

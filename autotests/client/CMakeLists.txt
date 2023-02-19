@@ -559,6 +559,20 @@ if(HAVE_LINUX_INPUT_H)
 endif()
 
 # ##################################################################################################
+# Test pointer-gestures v1
+# ##################################################################################################
+set(test_pointer_gestures_v1_SRCS pointer_gestures_v1.cpp)
+add_executable(test-pointer-gestures-v1 ${test_pointer_gestures_v1_SRCS})
+target_link_libraries(test-pointer-gestures-v1
+  Qt5::Test
+  Qt5::Gui
+  Wrapland::Client
+  Wrapland::Server
+)
+add_test(NAME wrapland-test-pointer-gestures-v1 COMMAND test-pointer-gestures-v1)
+ecm_mark_as_test(test-pointer-gestures-v1)
+
+# ##################################################################################################
 # Test TextInput
 # ##################################################################################################
 set(test_text_input_v2_SRCS text_input_v2.cpp)

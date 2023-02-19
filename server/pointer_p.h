@@ -29,6 +29,7 @@ namespace Wrapland::Server
 {
 class PointerPinchGestureV1;
 class PointerSwipeGestureV1;
+class PointerHoldGestureV1;
 class RelativePointerV1;
 
 class Cursor::Private
@@ -67,6 +68,7 @@ public:
     std::vector<RelativePointerV1*> relativePointers;
     std::vector<PointerSwipeGestureV1*> swipeGestures;
     std::vector<PointerPinchGestureV1*> pinchGestures;
+    std::vector<PointerHoldGestureV1*> holdGestures;
 
     void sendEnter(quint32 serial, Surface* surface, QPointF const& pos);
     void sendLeave(quint32 serial, Surface* surface);
@@ -76,6 +78,7 @@ public:
     void registerRelativePointer(RelativePointerV1* relativePointer);
     void registerSwipeGesture(PointerSwipeGestureV1* gesture);
     void registerPinchGesture(PointerPinchGestureV1* gesture);
+    void registerHoldGesture(PointerHoldGestureV1* gesture);
 
     void startSwipeGesture(quint32 serial, quint32 fingerCount);
     void updateSwipeGesture(QSizeF const& delta);
@@ -86,6 +89,10 @@ public:
     void updatePinchGesture(QSizeF const& delta, qreal scale, qreal rotation);
     void endPinchGesture(quint32 serial);
     void cancelPinchGesture(quint32 serial);
+
+    void startHoldGesture(quint32 serial, quint32 fingerCount);
+    void endHoldGesture(quint32 serial);
+    void cancelHoldGesture(quint32 serial);
 
     void setFocusedSurface(quint32 serial, Surface* surface);
 

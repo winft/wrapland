@@ -83,6 +83,9 @@ public:
     void update_pinch_gesture(QSizeF const& delta, qreal scale, qreal rotation) const;
     void end_pinch_gesture();
     void cancel_pinch_gesture();
+    void start_hold_gesture(uint32_t fingerCount);
+    void end_hold_gesture();
+    void cancel_hold_gesture();
     void frame() const;
 
     bool is_button_pressed(uint32_t button) const;

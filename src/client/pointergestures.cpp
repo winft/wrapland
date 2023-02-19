@@ -113,6 +113,18 @@ PointerPinchGesture* PointerGestures::createPinchGesture(Pointer* pointer, QObje
     return p;
 }
 
+pointer_hold_gesture* PointerGestures::create_hold_gesture(Pointer* pointer, QObject* parent)
+{
+    Q_ASSERT(isValid());
+    auto gesture = new pointer_hold_gesture(parent);
+    auto w = zwp_pointer_gestures_v1_get_hold_gesture(d->pointergestures, *pointer);
+    if (d->queue) {
+        d->queue->addProxy(w);
+    }
+    gesture->setup(w);
+    return gesture;
+}
+
 class Q_DECL_HIDDEN PointerSwipeGesture::Private
 {
 public:
@@ -405,5 +417,129 @@ QPointer<Surface> PointerPinchGesture::surface() const
     return d->surface;
 }
 
+class Q_DECL_HIDDEN pointer_hold_gesture::Private
+{
+public:
+    Private(pointer_hold_gesture* q);
+
+    void setup(zwp_pointer_gesture_hold_v1* pg);
+
+    WaylandPointer<zwp_pointer_gesture_hold_v1, zwp_pointer_gesture_hold_v1_destroy> native;
+    quint32 fingerCount = 0;
+    QPointer<Surface> surface;
+
+private:
+    static void begin_callback(void* data,
+                               zwp_pointer_gesture_hold_v1* zwp_pointer_gesture_hold_v1,
+                               uint32_t serial,
+                               uint32_t time,
+                               wl_surface* surface,
+                               uint32_t fingers);
+    static void end_callback(void* data,
+                             zwp_pointer_gesture_hold_v1* zwp_pointer_gesture_hold_v1,
+                             uint32_t serial,
+                             uint32_t time,
+                             int32_t cancelled);
+
+    pointer_hold_gesture* q;
+    static const zwp_pointer_gesture_hold_v1_listener s_listener;
+};
+
+const zwp_pointer_gesture_hold_v1_listener pointer_hold_gesture::Private::s_listener = {
+    begin_callback,
+    end_callback,
+};
+
+void pointer_hold_gesture::Private::begin_callback(void* data,
+                                                   zwp_pointer_gesture_hold_v1* pg,
+                                                   uint32_t serial,
+                                                   uint32_t time,
+                                                   wl_surface* surface,
+                                                   uint32_t fingers)
+{
+    auto p = reinterpret_cast<pointer_hold_gesture::Private*>(data);
+    Q_ASSERT(p->native == pg);
+    p->fingerCount = fingers;
+    p->surface = QPointer<Surface>(Surface::get(surface));
+    Q_EMIT p->q->started(serial, time);
 }
+
+void pointer_hold_gesture::Private::end_callback(void* data,
+                                                 zwp_pointer_gesture_hold_v1* pg,
+                                                 uint32_t serial,
+                                                 uint32_t time,
+                                                 int32_t cancelled)
+{
+    auto p = reinterpret_cast<pointer_hold_gesture::Private*>(data);
+    Q_ASSERT(p->native == pg);
+    if (cancelled) {
+        Q_EMIT p->q->cancelled(serial, time);
+    } else {
+        Q_EMIT p->q->ended(serial, time);
+    }
+    p->fingerCount = 0;
+    p->surface.clear();
+}
+
+pointer_hold_gesture::Private::Private(pointer_hold_gesture* q)
+    : q(q)
+{
+}
+
+pointer_hold_gesture::pointer_hold_gesture(QObject* parent)
+    : QObject(parent)
+    , d(new Private(this))
+{
+}
+
+pointer_hold_gesture::~pointer_hold_gesture()
+{
+    release();
+}
+
+void pointer_hold_gesture::Private::setup(zwp_pointer_gesture_hold_v1* pg)
+{
+    Q_ASSERT(pg);
+    Q_ASSERT(!native);
+    native.setup(pg);
+    zwp_pointer_gesture_hold_v1_add_listener(native, &s_listener, this);
+}
+
+void pointer_hold_gesture::setup(zwp_pointer_gesture_hold_v1* gesture)
+{
+    d->setup(gesture);
+}
+
+void pointer_hold_gesture::release()
+{
+    d->native.release();
+}
+
+pointer_hold_gesture::operator zwp_pointer_gesture_hold_v1*()
+{
+    return d->native;
+}
+
+pointer_hold_gesture::operator zwp_pointer_gesture_hold_v1*() const
+{
+    return d->native;
+}
+
+bool pointer_hold_gesture::isValid() const
+{
+    return d->native.isValid();
+}
+
+quint32 pointer_hold_gesture::fingerCount() const
+{
+    return d->fingerCount;
+}
+
+QPointer<Surface> pointer_hold_gesture::surface() const
+{
+    return d->surface;
+}
+
+}
+
 }

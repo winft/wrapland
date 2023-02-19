@@ -174,6 +174,7 @@ private:
     friend class PointerConstraintsV1;
     friend class PointerPinchGestureV1;
     friend class PointerSwipeGestureV1;
+    friend class PointerHoldGestureV1;
     friend class PresentationManager;
     friend class Seat;
     friend class ShadowManager;

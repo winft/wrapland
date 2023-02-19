@@ -29,6 +29,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 struct zwp_pointer_gestures_v1;
 struct zwp_pointer_gesture_swipe_v1;
 struct zwp_pointer_gesture_pinch_v1;
+struct zwp_pointer_gesture_hold_v1;
 
 class QSizeF;
 
@@ -42,6 +43,7 @@ class PointerPinchGesture;
 class Pointer;
 class Surface;
 class PointerSwipeGesture;
+class pointer_hold_gesture;
 
 /**
  * @short Wrapper for the zwp_pointer_gestures_v1 interface.
@@ -117,6 +119,7 @@ public:
      * Creates a PointerPinchGesture for the given @p pointer with the @p parent.
      **/
     PointerPinchGesture* createPinchGesture(Pointer* pointer, QObject* parent = nullptr);
+    pointer_hold_gesture* create_hold_gesture(Pointer* pointer, QObject* parent = nullptr);
 
     operator zwp_pointer_gestures_v1*();
     operator zwp_pointer_gestures_v1*() const;
@@ -358,6 +361,56 @@ Q_SIGNALS:
 private:
     friend class PointerGestures;
     explicit PointerPinchGesture(QObject* parent = nullptr);
+    class Private;
+    std::unique_ptr<Private> d;
+};
+
+class WRAPLANDCLIENT_EXPORT pointer_hold_gesture : public QObject
+{
+    Q_OBJECT
+public:
+    virtual ~pointer_hold_gesture();
+
+    /**
+     * Setup this pointer_hold_gesture to manage the @p gesture.
+     * When using PointerGestures::create_hold_gesture there is no need to call this
+     * method.
+     **/
+    void setup(zwp_pointer_gesture_hold_v1* gesture);
+    /**
+     * @returns @c true if managing a zwp_pointer_gesture_hold_v1.
+     **/
+    bool isValid() const;
+    /**
+     * Releases the zwp_pointer_gesture_hold_v1 interface.
+     * After the interface has been released the pointer_hold_gesture instance is no
+     * longer valid and can be setup with another zwp_pointer_gesture_hold_v1 interface.
+     **/
+    void release();
+
+    /**
+     * The number of fingers taking part in this gesture.
+     * If no gesture is in progress @c 0 is returned.
+     **/
+    quint32 fingerCount() const;
+
+    /**
+     * The Surface on which this gesture is performed.
+     * If no gesture is in progress the returned pointer is null.
+     **/
+    QPointer<Surface> surface() const;
+
+    operator zwp_pointer_gesture_hold_v1*();
+    operator zwp_pointer_gesture_hold_v1*() const;
+
+Q_SIGNALS:
+    void started(quint32 serial, quint32 time);
+    void ended(quint32 serial, quint32 time);
+    void cancelled(quint32 serial, quint32 time);
+
+private:
+    friend class PointerGestures;
+    explicit pointer_hold_gesture(QObject* parent = nullptr);
     class Private;
     std::unique_ptr<Private> d;
 };
