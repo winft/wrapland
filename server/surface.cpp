@@ -418,7 +418,7 @@ void Surface::Private::soureRectangleIntegerCheck(QSize const& destinationSize,
 }
 
 void Surface::Private::soureRectangleContainCheck(Buffer const* buffer,
-                                                  Output::Transform transform,
+                                                  output_transform transform,
                                                   qint32 scale,
                                                   QRectF const& sourceRectangle) const
 {
@@ -427,9 +427,9 @@ void Surface::Private::soureRectangleContainCheck(Buffer const* buffer,
     }
     QSizeF bufferSize = buffer->size() / scale;
 
-    if (transform == Output::Transform::Rotated90 || transform == Output::Transform::Rotated270
-        || transform == Output::Transform::Flipped90
-        || transform == Output::Transform::Flipped270) {
+    using ot = output_transform;
+    if (transform == ot::rotated_90 || transform == ot::rotated_270 || transform == ot::flipped_90
+        || transform == ot::flipped_270) {
         bufferSize.transpose();
     }
 
@@ -507,9 +507,9 @@ void Surface::Private::update_buffer(SurfaceState const& source, bool& resized)
         auto const tr = current.pub.transform;
         auto const sc = current.pub.scale;
 
-        using Tr = Output::Transform;
-        if (tr == Tr::Rotated90 || tr == Tr::Rotated270 || tr == Tr::Flipped90
-            || tr == Tr::Flipped270) {
+        using ot = output_transform;
+        if (tr == ot::rotated_90 || tr == ot::rotated_270 || tr == ot::flipped_90
+            || tr == ot::flipped_270) {
 
             // Calculate transformed + scaled buffer damage.
             for (auto const& rect : current.bufferDamage) {
@@ -713,7 +713,7 @@ void Surface::Private::setScale(qint32 scale)
     pending.pub.updates |= surface_change::scale;
 }
 
-void Surface::Private::setTransform(Output::Transform transform)
+void Surface::Private::setTransform(output_transform transform)
 {
     pending.pub.transform = transform;
 }
@@ -862,7 +862,7 @@ void Surface::Private::bufferTransformCallback([[maybe_unused]] wl_client* wlCli
                                                int32_t transform)
 {
     auto priv = get_handle(wlResource)->d_ptr;
-    priv->setTransform(static_cast<Output::Transform>(transform));
+    priv->setTransform(static_cast<output_transform>(transform));
 }
 
 void Surface::Private::bufferScaleCallback([[maybe_unused]] wl_client* wlClient,

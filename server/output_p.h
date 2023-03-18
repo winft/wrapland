@@ -32,26 +32,6 @@ class XdgOutput;
 
 class Display;
 
-struct OutputState {
-    struct Info {
-        std::string name = "Unknown";
-        std::string description;
-        std::string make;
-        std::string model;
-        std::string serial_number;
-        QSize physical_size;
-    } info;
-
-    bool enabled{false};
-
-    Output::Mode mode;
-    Output::Subpixel subpixel = Output::Subpixel::Unknown;
-
-    Output::Transform transform = Output::Transform::Normal;
-    QRectF geometry;
-    int client_scale = 1;
-};
-
 class Output::Private
 {
 public:
@@ -65,21 +45,21 @@ public:
      */
     void done_wl(Client* client) const;
 
-    static int32_t get_mode_flags(Output::Mode const& mode, OutputState const& state);
-    static int32_t to_transform(Output::Transform transform);
+    static int32_t get_mode_flags(output_mode const& mode, output_state const& state);
+    static int32_t to_transform(output_transform transform);
 
     Display* display_handle;
 
     int connector_id{0};
-    std::vector<Mode> modes;
+    std::vector<output_mode> modes;
 
     struct {
-        DpmsMode mode = DpmsMode::Off;
         bool supported = false;
+        output_dpms_mode mode{output_dpms_mode::off};
     } dpms;
 
-    OutputState pending;
-    OutputState published;
+    output_state pending;
+    output_state published;
 
     std::unique_ptr<OutputDeviceV1> device;
     std::unique_ptr<WlOutput> wayland_output;

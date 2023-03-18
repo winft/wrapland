@@ -274,7 +274,7 @@ int main(int argc, char** argv)
     auto output = std::make_unique<Wrapland::Server::Output>(&display);
     output->set_physical_size(QSize(269, 202));
     const QSize windowSize(1024, 768);
-    output->add_mode(Output::Mode{windowSize});
+    output->add_mode(output_mode{windowSize});
 
     auto seat = display.createSeat();
     seat->setHasKeyboard(true);

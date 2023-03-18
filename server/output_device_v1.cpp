@@ -38,7 +38,7 @@ OutputDeviceV1::Private::Private(Output* output, Display* display, OutputDeviceV
 }
 
 std::tuple<char const*, char const*, char const*, char const*, char const*, int32_t, int32_t>
-info_args(OutputState const& state)
+info_args(output_state const& state)
 {
     return std::make_tuple(state.info.name.c_str(),
                            state.info.description.c_str(),
@@ -49,7 +49,7 @@ info_args(OutputState const& state)
                            state.info.physical_size.height());
 }
 
-std::tuple<wl_fixed_t, wl_fixed_t, wl_fixed_t, wl_fixed_t> geometry_args(OutputState const& state)
+std::tuple<wl_fixed_t, wl_fixed_t, wl_fixed_t, wl_fixed_t> geometry_args(output_state const& state)
 {
     auto const geo = state.geometry;
 
@@ -81,7 +81,7 @@ void OutputDeviceV1::Private::bindInit(OutputDeviceV1Bind* bind)
     bind->client->flush();
 }
 
-void OutputDeviceV1::Private::sendMode(OutputDeviceV1Bind* bind, Output::Mode const& mode)
+void OutputDeviceV1::Private::sendMode(OutputDeviceV1Bind* bind, output_mode const& mode)
 {
     auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->published);
 
@@ -89,7 +89,7 @@ void OutputDeviceV1::Private::sendMode(OutputDeviceV1Bind* bind, Output::Mode co
         bind, flags, mode.size.width(), mode.size.height(), mode.refresh_rate, mode.id);
 }
 
-void OutputDeviceV1::Private::sendMode(Output::Mode const& mode)
+void OutputDeviceV1::Private::sendMode(output_mode const& mode)
 {
     // Only called on update. In this case we want to send the pending mode.
     auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->pending);

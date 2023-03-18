@@ -93,18 +93,18 @@ void TestOutputDevice::init()
         std::make_unique<Wrapland::Server::Output>(server.display.get()));
     server.output = server.globals.outputs.back().get();
 
-    Srv::Output::Mode m0;
+    Srv::output_mode m0;
     m0.id = 0;
     m0.size = QSize(800, 600);
     m0.preferred = true;
     server.output->add_mode(m0);
 
-    Srv::Output::Mode m1;
+    Srv::output_mode m1;
     m1.id = 1;
     m1.size = QSize(1024, 768);
     server.output->add_mode(m1);
 
-    Srv::Output::Mode m2;
+    Srv::output_mode m2;
     m2.id = 2;
     m2.size = QSize(1280, 1024);
     m2.refresh_rate = 90000;
@@ -318,29 +318,29 @@ void TestOutputDevice::testModeChanges()
 void TestOutputDevice::testTransform_data()
 {
     QTest::addColumn<Clt::OutputDeviceV1::Transform>("expected");
-    QTest::addColumn<Srv::Output::Transform>("actual");
+    QTest::addColumn<Srv::output_transform>("actual");
 
     QTest::newRow("90") << Clt::OutputDeviceV1::Transform::Rotated90
-                        << Srv::Output::Transform::Rotated90;
+                        << Srv::output_transform::rotated_90;
     QTest::newRow("180") << Clt::OutputDeviceV1::Transform::Rotated180
-                         << Srv::Output::Transform::Rotated180;
+                         << Srv::output_transform::rotated_180;
     QTest::newRow("270") << Clt::OutputDeviceV1::Transform::Rotated270
-                         << Srv::Output::Transform::Rotated270;
+                         << Srv::output_transform::rotated_270;
     QTest::newRow("Flipped") << Clt::OutputDeviceV1::Transform::Flipped
-                             << Srv::Output::Transform::Flipped;
+                             << Srv::output_transform::flipped;
     QTest::newRow("Flipped 90") << Clt::OutputDeviceV1::Transform::Flipped90
-                                << Srv::Output::Transform::Flipped90;
+                                << Srv::output_transform::flipped_90;
     QTest::newRow("Flipped 180") << Clt::OutputDeviceV1::Transform::Flipped180
-                                 << Srv::Output::Transform::Flipped180;
+                                 << Srv::output_transform::flipped_180;
     QTest::newRow("Flipped 280") << Clt::OutputDeviceV1::Transform::Flipped270
-                                 << Srv::Output::Transform::Flipped270;
+                                 << Srv::output_transform::flipped_270;
 }
 
 void TestOutputDevice::testTransform()
 {
     using namespace Wrapland::Client;
     using namespace Wrapland::Server;
-    QFETCH(Srv::Output::Transform, actual);
+    QFETCH(Srv::output_transform, actual);
     server.output->set_transform(actual);
     server.output->done();
 
@@ -368,7 +368,7 @@ void TestOutputDevice::testTransform()
 
     // change back to normal
     outputChanged.clear();
-    server.output->set_transform(Srv::Output::Transform::Normal);
+    server.output->set_transform(Srv::output_transform::normal);
     server.output->done();
     QVERIFY(outputChanged.wait());
     QCOMPARE(output->transform(), Clt::OutputDeviceV1::Transform::Normal);

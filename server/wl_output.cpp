@@ -40,27 +40,27 @@ WlOutput::Private::Private(Output* output, Display* display, WlOutput* q_ptr)
 
 const struct wl_output_interface WlOutput::Private::s_interface = {resourceDestroyCallback};
 
-int32_t to_subpixel(Output::Subpixel subpixel)
+int32_t to_subpixel(output_subpixel subpixel)
 {
     switch (subpixel) {
-    case Output::Subpixel::Unknown:
+    case output_subpixel::unknown:
         return WL_OUTPUT_SUBPIXEL_UNKNOWN;
-    case Output::Subpixel::None:
+    case output_subpixel::none:
         return WL_OUTPUT_SUBPIXEL_NONE;
-    case Output::Subpixel::HorizontalRGB:
+    case output_subpixel::horizontal_rgb:
         return WL_OUTPUT_SUBPIXEL_HORIZONTAL_RGB;
-    case Output::Subpixel::HorizontalBGR:
+    case output_subpixel::horizontal_bgr:
         return WL_OUTPUT_SUBPIXEL_HORIZONTAL_BGR;
-    case Output::Subpixel::VerticalRGB:
+    case output_subpixel::vertical_rgb:
         return WL_OUTPUT_SUBPIXEL_VERTICAL_RGB;
-    case Output::Subpixel::VerticalBGR:
+    case output_subpixel::vertical_bgr:
         return WL_OUTPUT_SUBPIXEL_VERTICAL_BGR;
     }
     abort();
 }
 
 std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, char const*, char const*, int32_t>
-WlOutput::Private::geometry_args(OutputState const& state)
+WlOutput::Private::geometry_args(output_state const& state)
 {
     auto const position = state.geometry.topLeft();
 
@@ -92,7 +92,7 @@ void WlOutput::Private::bindInit(WlOutputBind* bind)
     bind->client->flush();
 }
 
-void WlOutput::Private::sendMode(WlOutputBind* bind, Output::Mode const& mode)
+void WlOutput::Private::sendMode(WlOutputBind* bind, output_mode const& mode)
 {
     // Only called on bind. In this case we want to send the currently published mode.
     auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->published);
@@ -101,7 +101,7 @@ void WlOutput::Private::sendMode(WlOutputBind* bind, Output::Mode const& mode)
         bind, flags, mode.size.width(), mode.size.height(), mode.refresh_rate);
 }
 
-void WlOutput::Private::sendMode(Output::Mode const& mode)
+void WlOutput::Private::sendMode(output_mode const& mode)
 {
     // Only called on update. In this case we want to send the pending mode.
     auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->pending);

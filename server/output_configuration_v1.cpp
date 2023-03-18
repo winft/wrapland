@@ -102,22 +102,22 @@ void OutputConfigurationV1::Private::transformCallback([[maybe_unused]] wl_clien
     auto toTransform = [](int32_t wlTransform) {
         switch (wlTransform) {
         case WL_OUTPUT_TRANSFORM_90:
-            return Output::Transform::Rotated90;
+            return output_transform::rotated_90;
         case WL_OUTPUT_TRANSFORM_180:
-            return Output::Transform::Rotated180;
+            return output_transform::rotated_180;
         case WL_OUTPUT_TRANSFORM_270:
-            return Output::Transform::Rotated270;
+            return output_transform::rotated_270;
         case WL_OUTPUT_TRANSFORM_FLIPPED:
-            return Output::Transform::Flipped;
+            return output_transform::flipped;
         case WL_OUTPUT_TRANSFORM_FLIPPED_90:
-            return Output::Transform::Flipped90;
+            return output_transform::flipped_90;
         case WL_OUTPUT_TRANSFORM_FLIPPED_180:
-            return Output::Transform::Flipped180;
+            return output_transform::flipped_180;
         case WL_OUTPUT_TRANSFORM_FLIPPED_270:
-            return Output::Transform::Flipped270;
+            return output_transform::flipped_270;
         case WL_OUTPUT_TRANSFORM_NORMAL:
         default:
-            return Output::Transform::Normal;
+            return output_transform::normal;
         }
     };
 

@@ -36,7 +36,7 @@ public:
 
     bool enabled;
     int modeId;
-    Output::Transform transform;
+    output_transform transform;
     QRectF geometry;
 
     OutputChangesetV1* q_ptr;

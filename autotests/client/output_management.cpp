@@ -79,7 +79,7 @@ private:
     Clt::OutputManagementV1* m_outputManagement = nullptr;
     Clt::OutputConfigurationV1* m_outputConfiguration = nullptr;
     QList<Clt::OutputDeviceV1*> m_clientOutputs;
-    QList<Srv::Output::Mode> m_modes;
+    QList<Srv::output_mode> m_modes;
 
     Clt::ConnectionThread* m_connection = nullptr;
     Clt::EventQueue* m_queue = nullptr;
@@ -116,24 +116,24 @@ void TestOutputManagement::init()
     auto server_output
         = server.globals.outputs.emplace_back(std::make_unique<Srv::Output>(server.display.get()))
               .get();
-    Srv::Output::Mode m0;
+    Srv::output_mode m0;
     m0.id = 0;
     m0.size = QSize(800, 600);
     m0.preferred = true;
     server_output->add_mode(m0);
 
-    Srv::Output::Mode m1;
+    Srv::output_mode m1;
     m1.id = 1;
     m1.size = QSize(1024, 768);
     server_output->add_mode(m1);
 
-    Srv::Output::Mode m2;
+    Srv::output_mode m2;
     m2.id = 2;
     m2.size = QSize(1280, 1024);
     m2.refresh_rate = 90000;
     server_output->add_mode(m2);
 
-    Srv::Output::Mode m3;
+    Srv::output_mode m3;
     m3.id = 3;
     m3.size = QSize(1920, 1080);
     m3.refresh_rate = 100000;

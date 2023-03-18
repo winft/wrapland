@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 
     auto output = std::make_unique<Wrapland::Server::Output>(&display);
     output->set_physical_size(QSize(10, 10));
-    output->add_mode(Wrapland::Server::Output::Mode{QSize(1024, 768)});
+    output->add_mode(Wrapland::Server::output_mode{QSize(1024, 768)});
 
     // starts XWayland by forking and opening a pipe
     int const pipe = startXServer();

@@ -79,7 +79,7 @@ void Output::Private::done_wl(Client* client) const
     }
 }
 
-int32_t Output::Private::get_mode_flags(Output::Mode const& mode, OutputState const& state)
+int32_t Output::Private::get_mode_flags(output_mode const& mode, output_state const& state)
 {
     int32_t flags = 0;
 
@@ -92,24 +92,24 @@ int32_t Output::Private::get_mode_flags(Output::Mode const& mode, OutputState co
     return flags;
 }
 
-int32_t Output::Private::to_transform(Output::Transform transform)
+int32_t Output::Private::to_transform(output_transform transform)
 {
     switch (transform) {
-    case Output::Transform::Normal:
+    case output_transform::normal:
         return WL_OUTPUT_TRANSFORM_NORMAL;
-    case Output::Transform::Rotated90:
+    case output_transform::rotated_90:
         return WL_OUTPUT_TRANSFORM_90;
-    case Output::Transform::Rotated180:
+    case output_transform::rotated_180:
         return WL_OUTPUT_TRANSFORM_180;
-    case Output::Transform::Rotated270:
+    case output_transform::rotated_270:
         return WL_OUTPUT_TRANSFORM_270;
-    case Output::Transform::Flipped:
+    case output_transform::flipped:
         return WL_OUTPUT_TRANSFORM_FLIPPED;
-    case Output::Transform::Flipped90:
+    case output_transform::flipped_90:
         return WL_OUTPUT_TRANSFORM_FLIPPED_90;
-    case Output::Transform::Flipped180:
+    case output_transform::flipped_180:
         return WL_OUTPUT_TRANSFORM_FLIPPED_180;
-    case Output::Transform::Flipped270:
+    case output_transform::flipped_270:
         return WL_OUTPUT_TRANSFORM_FLIPPED_270;
     }
     abort();
@@ -132,12 +132,12 @@ void Output::Private::update_client_scale()
     pending.client_scale = std::ceil(std::max(width_ratio, height_ratio));
 }
 
-bool Output::Mode::operator==(Mode const& mode) const
+bool output_mode::operator==(output_mode const& mode) const
 {
     return size == mode.size && refresh_rate == mode.refresh_rate && id == mode.id;
 }
 
-bool Output::Mode::operator!=(Mode const& mode) const
+bool output_mode::operator!=(output_mode const& mode) const
 {
     return !(*this == mode);
 }
@@ -154,17 +154,17 @@ void Output::done()
     d_ptr->done();
 }
 
-Output::Subpixel Output::subpixel() const
+output_subpixel Output::subpixel() const
 {
     return d_ptr->pending.subpixel;
 }
 
-void Output::set_subpixel(Subpixel subpixel)
+void Output::set_subpixel(output_subpixel subpixel)
 {
     d_ptr->pending.subpixel = subpixel;
 }
 
-Output::Transform Output::transform() const
+output_transform Output::transform() const
 {
     return d_ptr->pending.transform;
 }
@@ -269,7 +269,7 @@ int Output::connector_id() const
     return d_ptr->connector_id;
 }
 
-std::vector<Output::Mode> Output::modes() const
+std::vector<output_mode> Output::modes() const
 {
     return d_ptr->modes;
 }
@@ -289,7 +289,7 @@ int Output::refresh_rate() const
     return d_ptr->pending.mode.refresh_rate;
 }
 
-void Output::add_mode(Mode const& mode)
+void Output::add_mode(output_mode const& mode)
 {
     d_ptr->pending.mode = mode;
 
@@ -314,7 +314,7 @@ bool Output::set_mode(int id)
     return false;
 }
 
-bool Output::set_mode(Mode const& mode)
+bool Output::set_mode(output_mode const& mode)
 {
     for (auto const& cmp : d_ptr->modes) {
         if (cmp == mode) {
@@ -343,7 +343,7 @@ QRectF Output::geometry() const
     return d_ptr->pending.geometry;
 }
 
-void Output::set_transform(Transform transform)
+void Output::set_transform(output_transform transform)
 {
     d_ptr->pending.transform = transform;
 }
@@ -373,7 +373,7 @@ bool Output::dpms_supported() const
     return d_ptr->dpms.supported;
 }
 
-void Output::set_dpms_mode(Output::DpmsMode mode)
+void Output::set_dpms_mode(output_dpms_mode mode)
 {
     if (d_ptr->dpms.mode == mode) {
         return;
@@ -382,7 +382,7 @@ void Output::set_dpms_mode(Output::DpmsMode mode)
     Q_EMIT dpms_mode_changed();
 }
 
-Output::DpmsMode Output::dpms_mode() const
+output_dpms_mode Output::dpms_mode() const
 {
     return d_ptr->dpms.mode;
 }

@@ -19,21 +19,79 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QObject>
-#include <QSize>
-
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <QObject>
+#include <QRectF>
+#include <QSize>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace Wrapland::Server
 {
+
 class Display;
 class OutputDeviceV1;
 class WlOutput;
 class XdgOutput;
+
+enum class output_dpms_mode {
+    on,
+    standby,
+    suspend,
+    off,
+};
+
+enum class output_subpixel {
+    unknown,
+    none,
+    horizontal_rgb,
+    horizontal_bgr,
+    vertical_rgb,
+    vertical_bgr,
+};
+
+enum class output_transform {
+    normal,
+    rotated_90,
+    rotated_180,
+    rotated_270,
+    flipped,
+    flipped_90,
+    flipped_180,
+    flipped_270,
+};
+
+struct output_mode {
+    bool operator==(output_mode const& mode) const;
+    bool operator!=(output_mode const& mode) const;
+    QSize size;
+    static constexpr int defaultRefreshRate = 60000;
+    int refresh_rate{defaultRefreshRate};
+    bool preferred{false};
+    int id{-1};
+};
+
+struct output_state {
+    struct {
+        std::string name{"Unknown"};
+        std::string description;
+        std::string make;
+        std::string model;
+        std::string serial_number;
+        QSize physical_size;
+    } info;
+
+    bool enabled{false};
+
+    output_mode mode;
+    output_subpixel subpixel{output_subpixel::unknown};
+
+    output_transform transform{output_transform::normal};
+    QRectF geometry;
+    int client_scale = 1;
+};
 
 /**
  * Central class for outputs in Wrapland. Manages and forwards all required information to and from
@@ -44,46 +102,6 @@ class WRAPLANDSERVER_EXPORT Output : public QObject
 {
     Q_OBJECT
 public:
-    enum class DpmsMode {
-        On,
-        Standby,
-        Suspend,
-        Off,
-    };
-    Q_ENUM(DpmsMode)
-
-    enum class Subpixel {
-        Unknown,
-        None,
-        HorizontalRGB,
-        HorizontalBGR,
-        VerticalRGB,
-        VerticalBGR,
-    };
-    Q_ENUM(Subpixel)
-
-    enum class Transform {
-        Normal,
-        Rotated90,
-        Rotated180,
-        Rotated270,
-        Flipped,
-        Flipped90,
-        Flipped180,
-        Flipped270,
-    };
-    Q_ENUM(Transform)
-
-    struct Mode {
-        bool operator==(Mode const& mode) const;
-        bool operator!=(Mode const& mode) const;
-        QSize size;
-        static constexpr int defaultRefreshRate = 60000;
-        int refresh_rate{defaultRefreshRate};
-        bool preferred{false};
-        int id{-1};
-    };
-
     explicit Output(Display* display);
     ~Output() override;
 
@@ -113,33 +131,33 @@ public:
     bool enabled() const;
     void set_enabled(bool enabled);
 
-    std::vector<Mode> modes() const;
+    std::vector<output_mode> modes() const;
     int mode_id() const;
     QSize mode_size() const;
     int refresh_rate() const;
 
-    void add_mode(Mode const& mode);
+    void add_mode(output_mode const& mode);
 
     bool set_mode(int id);
-    bool set_mode(Mode const& mode);
+    bool set_mode(output_mode const& mode);
     bool set_mode(QSize const& size, int refresh_rate);
 
-    Transform transform() const;
+    output_transform transform() const;
     QRectF geometry() const;
 
-    void set_transform(Transform transform);
+    void set_transform(output_transform transform);
     void set_geometry(QRectF const& geometry);
 
     int client_scale() const;
 
-    Subpixel subpixel() const;
-    void set_subpixel(Subpixel subpixel);
+    output_subpixel subpixel() const;
+    void set_subpixel(output_subpixel subpixel);
 
     bool dpms_supported() const;
     void set_dpms_supported(bool supported);
 
-    DpmsMode dpms_mode() const;
-    void set_dpms_mode(DpmsMode mode);
+    output_dpms_mode dpms_mode() const;
+    void set_dpms_mode(output_dpms_mode mode);
 
     /**
      * Sends all pending changes out to connected clients. Must only be called when all atomic
@@ -154,7 +172,7 @@ public:
 Q_SIGNALS:
     void dpms_mode_changed();
     void dpms_supported_changed();
-    void dpms_mode_requested(Wrapland::Server::Output::DpmsMode mode);
+    void dpms_mode_requested(Wrapland::Server::output_dpms_mode mode);
 
 private:
     friend class OutputDeviceV1;
@@ -167,6 +185,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::Output::Subpixel)
-Q_DECLARE_METATYPE(Wrapland::Server::Output::Transform)
-Q_DECLARE_METATYPE(Wrapland::Server::Output::DpmsMode)
+Q_DECLARE_METATYPE(Wrapland::Server::output_subpixel)
+Q_DECLARE_METATYPE(Wrapland::Server::output_transform)
+Q_DECLARE_METATYPE(Wrapland::Server::output_dpms_mode)

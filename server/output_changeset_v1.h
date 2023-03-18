@@ -42,7 +42,7 @@ public:
     bool geometryChanged() const;
     bool enabled() const;
     int mode() const;
-    Output::Transform transform() const;
+    output_transform transform() const;
     QRectF geometry() const;
 
 private:

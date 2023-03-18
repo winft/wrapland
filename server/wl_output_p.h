@@ -49,10 +49,10 @@ private:
 
     static std::
         tuple<int32_t, int32_t, int32_t, int32_t, int32_t, char const*, char const*, int32_t>
-        geometry_args(OutputState const& state);
+        geometry_args(output_state const& state);
 
-    void sendMode(WlOutputBind* bind, Output::Mode const& mode);
-    void sendMode(Output::Mode const& mode);
+    void sendMode(WlOutputBind* bind, output_mode const& mode);
+    void sendMode(output_mode const& mode);
 
     static const struct wl_output_interface s_interface;
 };

@@ -65,7 +65,7 @@ bool OutputChangesetV1::transformChanged() const
     return d_ptr->transform != d_ptr->device->output()->transform();
 }
 
-Output::Transform OutputChangesetV1::transform() const
+output_transform OutputChangesetV1::transform() const
 {
     return d_ptr->transform;
 }

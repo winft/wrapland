@@ -48,8 +48,8 @@ public:
 private:
     void bindInit(OutputDeviceV1Bind* bind) override;
 
-    void sendMode(OutputDeviceV1Bind* bind, Output::Mode const& mode);
-    void sendMode(Output::Mode const& mode);
+    void sendMode(OutputDeviceV1Bind* bind, output_mode const& mode);
+    void sendMode(output_mode const& mode);
 };
 
 }

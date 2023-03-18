@@ -87,7 +87,7 @@ void TestServer::init()
     const QSize size(1280, 1024);
     globals.outputs.back()->set_geometry(QRectF(QPoint(0, 0), size));
     globals.outputs.back()->set_physical_size(size / 3.8);
-    globals.outputs.back()->add_mode(Output::Mode{size});
+    globals.outputs.back()->add_mode(output_mode{size});
 
     globals.fake_input = m_display->createFakeInput();
     connect(

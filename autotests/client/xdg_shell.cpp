@@ -143,14 +143,14 @@ void XdgShellTest::init()
     server.globals.outputs.push_back(
         std::make_unique<Wrapland::Server::Output>(server.display.get()));
     server.output1 = server.globals.outputs.back().get();
-    server.output1->add_mode(Server::Output::Mode{QSize(1024, 768)});
+    server.output1->add_mode(Server::output_mode{QSize(1024, 768)});
     server.output1->set_enabled(true);
     server.output1->done();
 
     server.globals.outputs.push_back(
         std::make_unique<Wrapland::Server::Output>(server.display.get()));
     server.output2 = server.globals.outputs.back().get();
-    server.output2->add_mode(Server::Output::Mode{QSize(1024, 768)});
+    server.output2->add_mode(Server::output_mode{QSize(1024, 768)});
     server.output2->set_enabled(true);
     server.output2->done();
 

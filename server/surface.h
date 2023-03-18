@@ -77,7 +77,7 @@ struct surface_state {
     QRegion opaque;
 
     int32_t scale{1};
-    Output::Transform transform{Output::Transform::Normal};
+    output_transform transform{output_transform::normal};
     QPoint offset;
 
     QRectF source_rectangle;
