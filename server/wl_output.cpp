@@ -66,11 +66,11 @@ WlOutput::Private::geometry_args(output_state const& state)
 
     return std::make_tuple(position.x(),
                            position.y(),
-                           state.info.physical_size.width(),
-                           state.info.physical_size.height(),
+                           state.meta.physical_size.width(),
+                           state.meta.physical_size.height(),
                            to_subpixel(state.subpixel),
-                           state.info.make.c_str(),
-                           state.info.model.c_str(),
+                           state.meta.make.c_str(),
+                           state.meta.model.c_str(),
                            Output::Private::to_transform(state.transform));
 }
 
@@ -117,9 +117,9 @@ bool WlOutput::Private::broadcast()
     bool changed = false;
 
     if (published.geometry.topLeft() != pending.geometry.topLeft()
-        || published.info.physical_size != pending.info.physical_size
-        || published.subpixel != pending.subpixel || published.info.make != pending.info.make
-        || published.info.model != pending.info.model || published.transform != pending.transform) {
+        || published.meta.physical_size != pending.meta.physical_size
+        || published.subpixel != pending.subpixel || published.meta.make != pending.meta.make
+        || published.meta.model != pending.meta.model || published.transform != pending.transform) {
         send<wl_output_send_geometry>(geometry_args(pending));
         changed = true;
     }

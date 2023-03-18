@@ -171,57 +171,57 @@ output_transform Output::transform() const
 
 std::string Output::name() const
 {
-    return d_ptr->pending.info.name;
+    return d_ptr->pending.meta.name;
 }
 
 std::string Output::description() const
 {
-    return d_ptr->pending.info.description;
+    return d_ptr->pending.meta.description;
 }
 
 std::string Output::serial_mumber() const
 {
-    return d_ptr->pending.info.serial_number;
+    return d_ptr->pending.meta.serial_number;
 }
 
 std::string Output::make() const
 {
-    return d_ptr->pending.info.make;
+    return d_ptr->pending.meta.make;
 }
 
 std::string Output::model() const
 {
-    return d_ptr->pending.info.model;
+    return d_ptr->pending.meta.model;
 }
 
 void Output::set_name(std::string const& name)
 {
-    d_ptr->pending.info.name = name;
+    d_ptr->pending.meta.name = name;
 }
 
 void Output::set_description(std::string const& description)
 {
-    d_ptr->pending.info.description = description;
+    d_ptr->pending.meta.description = description;
 }
 
 void Output::set_make(std::string const& make)
 {
-    d_ptr->pending.info.make = make;
+    d_ptr->pending.meta.make = make;
 }
 
 void Output::set_model(std::string const& model)
 {
-    d_ptr->pending.info.model = model;
+    d_ptr->pending.meta.model = model;
 }
 
 void Output::set_serial_number(std::string const& serial_number)
 {
-    d_ptr->pending.info.serial_number = serial_number;
+    d_ptr->pending.meta.serial_number = serial_number;
 }
 
 void Output::set_physical_size(QSize const& size)
 {
-    d_ptr->pending.info.physical_size = size;
+    d_ptr->pending.meta.physical_size = size;
 }
 
 void Output::set_connector_id(int id)
@@ -231,22 +231,22 @@ void Output::set_connector_id(int id)
 
 void Output::generate_description()
 {
-    auto& info = d_ptr->pending.info;
+    auto& meta = d_ptr->pending.meta;
     std::string descr;
-    if (!info.make.empty()) {
-        descr = info.make;
+    if (!meta.make.empty()) {
+        descr = meta.make;
     }
-    if (!info.model.empty()) {
-        descr = (descr.empty() ? "" : descr + " ") + info.model;
+    if (!meta.model.empty()) {
+        descr = (descr.empty() ? "" : descr + " ") + meta.model;
     }
-    if (!info.name.empty()) {
+    if (!meta.name.empty()) {
         if (descr.empty()) {
-            descr = info.name;
+            descr = meta.name;
         } else {
-            descr += " (" + info.name + ")";
+            descr += " (" + meta.name + ")";
         }
     }
-    info.description = descr;
+    meta.description = descr;
 }
 
 bool Output::enabled() const
@@ -261,7 +261,7 @@ void Output::set_enabled(bool enabled)
 
 QSize Output::physical_size() const
 {
-    return d_ptr->pending.info.physical_size;
+    return d_ptr->pending.meta.physical_size;
 }
 
 int Output::connector_id() const

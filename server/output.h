@@ -81,7 +81,7 @@ struct output_state {
         std::string model;
         std::string serial_number;
         QSize physical_size;
-    } info;
+    } meta;
 
     bool enabled{false};
 

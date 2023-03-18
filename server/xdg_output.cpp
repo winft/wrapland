@@ -107,17 +107,17 @@ bool XdgOutput::Private::broadcast()
         sent_once = true;
         changed = true;
         for (auto resource : resources) {
-            resource->send_name(pending.info.name);
+            resource->send_name(pending.meta.name);
             if (resource->d_ptr->version < 3) {
-                resource->send_description(pending.info.description);
+                resource->send_description(pending.meta.description);
             }
         }
     }
 
-    if (published.info.description != pending.info.description) {
+    if (published.meta.description != pending.meta.description) {
         for (auto resource : resources) {
             if (resource->d_ptr->version >= 3) {
-                resource->send_description(pending.info.description);
+                resource->send_description(pending.meta.description);
             }
         }
         changed = true;
@@ -141,8 +141,8 @@ void XdgOutput::Private::resourceConnected(XdgOutputV1* resource)
     resource->send_logical_position(geo.topLeft());
     resource->send_logical_size(geo.size());
 
-    resource->send_name(state.info.name);
-    resource->send_description(state.info.description);
+    resource->send_name(state.meta.name);
+    resource->send_description(state.meta.description);
 
     if (resource->d_ptr->version < 3) {
         resource->done();

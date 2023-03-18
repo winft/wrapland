@@ -40,13 +40,13 @@ OutputDeviceV1::Private::Private(Output* output, Display* display, OutputDeviceV
 std::tuple<char const*, char const*, char const*, char const*, char const*, int32_t, int32_t>
 info_args(output_state const& state)
 {
-    return std::make_tuple(state.info.name.c_str(),
-                           state.info.description.c_str(),
-                           state.info.make.c_str(),
-                           state.info.model.c_str(),
-                           state.info.serial_number.c_str(),
-                           state.info.physical_size.width(),
-                           state.info.physical_size.height());
+    return std::make_tuple(state.meta.name.c_str(),
+                           state.meta.description.c_str(),
+                           state.meta.make.c_str(),
+                           state.meta.model.c_str(),
+                           state.meta.serial_number.c_str(),
+                           state.meta.physical_size.width(),
+                           state.meta.physical_size.height());
 }
 
 std::tuple<wl_fixed_t, wl_fixed_t, wl_fixed_t, wl_fixed_t> geometry_args(output_state const& state)
@@ -105,11 +105,11 @@ bool OutputDeviceV1::Private::broadcast()
 
     bool changed = false;
 
-    if (published.info.name != pending.info.name
-        || published.info.description != pending.info.description
-        || published.info.make != pending.info.make || published.info.model != pending.info.model
-        || published.info.serial_number != pending.info.serial_number
-        || published.info.physical_size != pending.info.physical_size) {
+    if (published.meta.name != pending.meta.name
+        || published.meta.description != pending.meta.description
+        || published.meta.make != pending.meta.make || published.meta.model != pending.meta.model
+        || published.meta.serial_number != pending.meta.serial_number
+        || published.meta.physical_size != pending.meta.physical_size) {
         send<zkwinft_output_device_v1_send_info>(info_args(pending));
         changed = true;
     }
