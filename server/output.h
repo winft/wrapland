@@ -73,16 +73,17 @@ struct output_mode {
     int id{-1};
 };
 
-struct output_state {
-    struct {
-        std::string name{"Unknown"};
-        std::string description;
-        std::string make;
-        std::string model;
-        std::string serial_number;
-        QSize physical_size;
-    } meta;
+struct output_metadata {
+    std::string name{"Unknown"};
+    std::string description;
+    std::string make;
+    std::string model;
+    std::string serial_number;
+    QSize physical_size;
+};
 
+struct output_state {
+    output_metadata meta;
     bool enabled{false};
 
     output_mode mode;
