@@ -106,20 +106,10 @@ public:
     explicit output(Display* display);
     ~output() override;
 
-    std::string name() const;
-    std::string description() const;
-    std::string make() const;
-    std::string model() const;
-    std::string serial_mumber() const;
-    QSize physical_size() const;
+    output_metadata const& get_metadata() const;
     int connector_id() const;
 
-    void set_name(std::string const& name);
-    void set_description(std::string const& description);
-    void set_make(std::string const& make);
-    void set_model(std::string const& model);
-    void set_serial_number(std::string const& serial_number);
-    void set_physical_size(QSize const& size);
+    void set_metadata(output_metadata const& data);
     void set_connector_id(int id);
 
     /**

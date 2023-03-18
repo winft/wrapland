@@ -169,59 +169,14 @@ output_transform output::transform() const
     return d_ptr->pending.transform;
 }
 
-std::string output::name() const
+output_metadata const& output::get_metadata() const
 {
-    return d_ptr->pending.meta.name;
+    return d_ptr->pending.meta;
 }
 
-std::string output::description() const
+void output::set_metadata(output_metadata const& data)
 {
-    return d_ptr->pending.meta.description;
-}
-
-std::string output::serial_mumber() const
-{
-    return d_ptr->pending.meta.serial_number;
-}
-
-std::string output::make() const
-{
-    return d_ptr->pending.meta.make;
-}
-
-std::string output::model() const
-{
-    return d_ptr->pending.meta.model;
-}
-
-void output::set_name(std::string const& name)
-{
-    d_ptr->pending.meta.name = name;
-}
-
-void output::set_description(std::string const& description)
-{
-    d_ptr->pending.meta.description = description;
-}
-
-void output::set_make(std::string const& make)
-{
-    d_ptr->pending.meta.make = make;
-}
-
-void output::set_model(std::string const& model)
-{
-    d_ptr->pending.meta.model = model;
-}
-
-void output::set_serial_number(std::string const& serial_number)
-{
-    d_ptr->pending.meta.serial_number = serial_number;
-}
-
-void output::set_physical_size(QSize const& size)
-{
-    d_ptr->pending.meta.physical_size = size;
+    d_ptr->pending.meta = data;
 }
 
 void output::set_connector_id(int id)
@@ -257,11 +212,6 @@ bool output::enabled() const
 void output::set_enabled(bool enabled)
 {
     d_ptr->pending.enabled = enabled;
-}
-
-QSize output::physical_size() const
-{
-    return d_ptr->pending.meta.physical_size;
 }
 
 int output::connector_id() const

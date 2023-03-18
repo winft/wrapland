@@ -86,7 +86,9 @@ void TestServer::init()
     globals.outputs.push_back(std::make_unique<Wrapland::Server::output>(m_display.get()));
     const QSize size(1280, 1024);
     globals.outputs.back()->set_geometry(QRectF(QPoint(0, 0), size));
-    globals.outputs.back()->set_physical_size(size / 3.8);
+
+    output_metadata meta{.physical_size = size / 3.8};
+    globals.outputs.back()->set_metadata(meta);
     globals.outputs.back()->add_mode(output_mode{size});
 
     globals.fake_input = m_display->createFakeInput();

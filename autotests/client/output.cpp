@@ -103,9 +103,8 @@ void TestOutput::init()
 
     QCOMPARE(server.output->mode_size(), QSize(1280, 1024));
 
-    server.output->set_name("HDMI-A");
-    server.output->set_make("Foocorp");
-    server.output->set_model("Barmodel");
+    Srv::output_metadata meta{.name = "HDMI-A", .make = "Foocorp", .model = "Barmodel"};
+    server.output->set_metadata(meta);
 
     server.output->set_mode(mode);
     QCOMPARE(server.output->mode_size(), QSize(1024, 768));
@@ -160,9 +159,12 @@ void TestOutput::testRegistry()
     server.output->set_geometry(QRectF(QPoint(100, 50), QSize()));
     QCOMPARE(server.output->geometry().topLeft(), QPoint(100, 50));
 
-    QCOMPARE(server.output->physical_size(), QSize());
-    server.output->set_physical_size(QSize(200, 100));
-    QCOMPARE(server.output->physical_size(), QSize(200, 100));
+    auto metadata = server.output->get_metadata();
+    QCOMPARE(metadata.physical_size, QSize());
+
+    metadata.physical_size = {200, 100};
+    server.output->set_metadata(metadata);
+    QCOMPARE(server.output->get_metadata().physical_size, QSize(200, 100));
     server.output->done();
 
     Clt::Registry registry;

@@ -80,12 +80,11 @@ void TestXdgOutput::init()
     server_output->set_mode(1);
     server_output->set_enabled(true);
 
-    server_output->set_name(m_name);
-    server_output->set_make(m_make);
-    server_output->set_model(m_model);
+    Wrapland::Server::output_metadata meta{.name = m_name, .make = m_make, .model = m_model};
+    server_output->set_metadata(meta);
 
     server_output->generate_description();
-    m_description = server_output->description();
+    m_description = server_output->get_metadata().description;
 
     // Not a sensible position for one monitor but works for this test. And a 1.5 scale factor.
     server_output->set_geometry(QRectF(QPoint(11, 12), QSize(1280, 720)));
@@ -192,7 +191,9 @@ void TestXdgOutput::testChanges()
     server.globals.outputs.back()->set_geometry(QRectF(QPoint(1000, 2000), QSize(100, 200)));
 
     std::string updated_description = "Updated xdg-output description";
-    server.globals.outputs.back()->set_description(updated_description);
+    auto metadata = server.globals.outputs.back()->get_metadata();
+    metadata.description = updated_description;
+    server.globals.outputs.back()->set_metadata(metadata);
     server.globals.outputs.back()->done();
 
     QVERIFY(xdgOutputChanged.wait());

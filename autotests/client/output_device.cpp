@@ -65,7 +65,7 @@ private:
     std::string m_make = "Foocorp";
     std::string m_model = "Barmodel";
     std::string m_description;
-    QString m_serialNumber;
+    std::string m_serialNumber = "23498723948723";
 
     Wrapland::Client::ConnectionThread* m_connection;
     Wrapland::Client::EventQueue* m_queue;
@@ -112,16 +112,16 @@ void TestOutputDevice::init()
 
     server.output->set_mode(1);
 
-    server.output->set_name(m_name);
-    server.output->set_make(m_make);
-    server.output->set_model(m_model);
+    Srv::output_metadata meta{.name = m_name,
+                              .make = m_make,
+                              .model = m_model,
+                              .serial_number = m_serialNumber,
+                              .physical_size = {200, 100}};
+    server.output->set_metadata(meta);
 
     server.output->generate_description();
-    m_description = server.output->description();
+    m_description = server.output->get_metadata().description;
     QCOMPARE(m_description, m_make + " " + m_model + " (" + m_name + ")");
-
-    m_serialNumber = "23498723948723";
-    server.output->set_serial_number(m_serialNumber.toStdString());
 
     server.output->set_enabled(true);
     server.output->done();
@@ -166,7 +166,6 @@ void TestOutputDevice::cleanup()
 void TestOutputDevice::testRegistry()
 {
     server.output->set_geometry(QRectF(QPointF(100, 50), QSizeF(400, 200)));
-    server.output->set_physical_size(QSize(200, 100));
     server.output->done();
 
     Wrapland::Client::Registry registry;
@@ -212,7 +211,7 @@ void TestOutputDevice::testRegistry()
     QCOMPARE(output.make(), QString::fromStdString(m_make));
     QCOMPARE(output.model(), QString::fromStdString(m_model));
     QCOMPARE(output.description(), QString::fromStdString(m_description));
-    QCOMPARE(output.serialNumber(), m_serialNumber);
+    QCOMPARE(output.serialNumber(), QString::fromStdString(m_serialNumber));
 }
 
 void TestOutputDevice::testModeChanges()

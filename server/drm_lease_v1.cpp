@@ -169,7 +169,10 @@ drm_lease_connector_v1::drm_lease_connector_v1(std::string const& name,
 }
 
 drm_lease_connector_v1::drm_lease_connector_v1(Server::output* output, drm_lease_device_v1* device)
-    : drm_lease_connector_v1(output->name(), output->description(), output->connector_id(), device)
+    : drm_lease_connector_v1(output->get_metadata().name,
+                             output->get_metadata().description,
+                             output->connector_id(),
+                             device)
 {
     d_ptr->output = output;
 }
