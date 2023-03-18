@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Display;
-class Output;
+class output;
 
 constexpr uint32_t OutputDeviceV1Version = 1;
 using OutputDeviceV1Global = Wayland::Global<OutputDeviceV1, OutputDeviceV1Version>;
@@ -37,13 +37,13 @@ using OutputDeviceV1Bind = Wayland::Bind<OutputDeviceV1Global>;
 class OutputDeviceV1::Private : public OutputDeviceV1Global
 {
 public:
-    Private(Output* output, Display* display, OutputDeviceV1* q_ptr);
+    Private(Server::output* output, Display* display, OutputDeviceV1* q_ptr);
 
     bool broadcast();
     void done();
 
     Display* displayHandle;
-    Output* output;
+    Server::output* output;
 
 private:
     void bindInit(OutputDeviceV1Bind* bind) override;

@@ -58,7 +58,7 @@ private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
         Wrapland::Server::globals globals;
-        Wrapland::Server::Output* output{nullptr};
+        Wrapland::Server::output* output{nullptr};
     } server;
 
     std::string m_name = "HDMI-A";
@@ -90,7 +90,7 @@ void TestOutputDevice::init()
     QVERIFY(server.display->running());
 
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(server.display.get()));
     server.output = server.globals.outputs.back().get();
 
     Srv::output_mode m0;

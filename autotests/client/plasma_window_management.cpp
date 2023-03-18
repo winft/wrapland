@@ -131,7 +131,7 @@ TestWindowManagement::TestWindowManagement(QObject* parent)
 void TestWindowManagement::init()
 {
     qRegisterMetaType<std::string const&>();
-    qRegisterMetaType<Wrapland::Server::Output*>();
+    qRegisterMetaType<Wrapland::Server::output*>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
     qRegisterMetaType<Srv::PlasmaWindowManager::ShowingDesktopState>("ShowingDesktopState");
 
@@ -857,7 +857,7 @@ void TestWindowManagement::testSendToOutput()
     QSignalSpy outputAnnouncedSpy(m_registry, &Wrapland::Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto srv_output = std::make_unique<Srv::Output>(server.display.get());
+    auto srv_output = std::make_unique<Srv::output>(server.display.get());
     srv_output->set_enabled(true);
     srv_output->done();
 
@@ -872,7 +872,7 @@ void TestWindowManagement::testSendToOutput()
     m_connection->flush();
 
     QVERIFY(sendToOutputSpy.wait());
-    auto actual = sendToOutputSpy.first().first().value<Wrapland::Server::Output*>();
+    auto actual = sendToOutputSpy.first().first().value<Wrapland::Server::output*>();
     QCOMPARE(actual, srv_output.get());
 }
 

@@ -101,11 +101,11 @@ Dpms::Dpms(Client* client, uint32_t version, uint32_t id, WlOutput* output)
     : d_ptr(new Private(client, version, id, output, this))
 {
     auto master_output = output->output();
-    connect(master_output, &Output::dpms_supported_changed, this, [this] {
+    connect(master_output, &output::dpms_supported_changed, this, [this] {
         sendSupported();
         sendDone();
     });
-    connect(master_output, &Output::dpms_mode_changed, this, [this] {
+    connect(master_output, &output::dpms_mode_changed, this, [this] {
         sendMode();
         sendDone();
     });

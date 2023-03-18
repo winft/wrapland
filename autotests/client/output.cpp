@@ -63,7 +63,7 @@ private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
         Wrapland::Server::globals globals;
-        Wrapland::Server::Output* output{nullptr};
+        Wrapland::Server::output* output{nullptr};
     } server;
 
     Clt::ConnectionThread* m_connection;
@@ -88,7 +88,7 @@ void TestOutput::init()
     QVERIFY(server.display->running());
 
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(server.display.get()));
     server.output = server.globals.outputs.back().get();
 
     QCOMPARE(server.output->mode_size(), QSize());
@@ -530,7 +530,7 @@ void TestOutput::testDpms()
     std::unique_ptr<Srv::DpmsManager> serverDpmsManager{server.display->createDpmsManager()};
 
     // set Dpms on the Output
-    QSignalSpy serverDpmsSupportedChangedSpy(server.output, &Srv::Output::dpms_supported_changed);
+    QSignalSpy serverDpmsSupportedChangedSpy(server.output, &Srv::output::dpms_supported_changed);
     QVERIFY(serverDpmsSupportedChangedSpy.isValid());
     QCOMPARE(server.output->dpms_supported(), false);
     server.output->set_dpms_supported(true);
@@ -577,7 +577,7 @@ void TestOutput::testDpms()
     QCOMPARE(dpms->isSupported(), true);
 
     // and let's change to suspend
-    QSignalSpy serverDpmsModeChangedSpy(server.output, &Srv::Output::dpms_mode_changed);
+    QSignalSpy serverDpmsModeChangedSpy(server.output, &Srv::output::dpms_mode_changed);
     QVERIFY(serverDpmsModeChangedSpy.isValid());
     QSignalSpy clientDpmsModeChangedSpy(dpms, &Clt::Dpms::modeChanged);
     QVERIFY(clientDpmsModeChangedSpy.isValid());
@@ -631,7 +631,7 @@ void TestOutput::testDpmsRequestMode()
     std::unique_ptr<Srv::DpmsManager> serverDpmsManager{server.display->createDpmsManager()};
 
     // set Dpms on the Output
-    QSignalSpy serverDpmsSupportedChangedSpy(server.output, &Srv::Output::dpms_supported_changed);
+    QSignalSpy serverDpmsSupportedChangedSpy(server.output, &Srv::output::dpms_supported_changed);
     QVERIFY(serverDpmsSupportedChangedSpy.isValid());
     QCOMPARE(server.output->dpms_supported(), false);
     server.output->set_dpms_supported(true);
@@ -664,7 +664,7 @@ void TestOutput::testDpmsRequestMode()
 
     auto* dpms = dpmsManager->getDpms(output, &registry);
     // and test request mode
-    QSignalSpy modeRequestedSpy(server.output, &Srv::Output::dpms_mode_requested);
+    QSignalSpy modeRequestedSpy(server.output, &Srv::output::dpms_mode_requested);
     QVERIFY(modeRequestedSpy.isValid());
 
     QFETCH(Clt::Dpms::Mode, client_mode);

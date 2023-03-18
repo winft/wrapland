@@ -165,7 +165,7 @@ void TestWaylandRegistry::init()
     server.globals.compositor
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(server.display.get()));
     server.globals.seats.push_back(server.display->createSeat());
     server.globals.subcompositor
         = std::make_unique<Wrapland::Server::Subcompositor>(server.display.get());
@@ -1024,8 +1024,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QSignalSpy outputAnnouncedSpy(&registry, &Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    std::unique_ptr<Wrapland::Server::Output> output1{
-        new Wrapland::Server::Output(server.display.get())};
+    auto output1 = std::make_unique<Wrapland::Server::output>(server.display.get());
     output1->set_enabled(true);
     output1->done();
     QVERIFY(outputAnnouncedSpy.wait());
@@ -1039,8 +1038,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QCOMPARE(registry.interface(Registry::Interface::Output).version,
              outputAnnouncedSpy.first().last().value<quint32>());
 
-    std::unique_ptr<Wrapland::Server::Output> output2{
-        new Wrapland::Server::Output(server.display.get())};
+    auto output2 = std::make_unique<Wrapland::Server::output>(server.display.get());
     output2->set_enabled(true);
     output2->done();
     QVERIFY(outputAnnouncedSpy.wait());
@@ -1107,8 +1105,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QSignalSpy outputDeviceAnnouncedSpy(&registry, &Registry::outputDeviceV1Announced);
     QVERIFY(outputDeviceAnnouncedSpy.isValid());
 
-    std::unique_ptr<Wrapland::Server::Output> device1{
-        new Wrapland::Server::Output(server.display.get())};
+    auto device1 = std::make_unique<Wrapland::Server::output>(server.display.get());
     QVERIFY(outputDeviceAnnouncedSpy.wait());
 
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 2);
@@ -1121,8 +1118,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).version,
              outputDeviceAnnouncedSpy.first().last().value<quint32>());
 
-    std::unique_ptr<Wrapland::Server::Output> device2{
-        new Wrapland::Server::Output(server.display.get())};
+    auto device2 = std::make_unique<Wrapland::Server::output>(server.display.get());
     QVERIFY(outputDeviceAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 3);
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().name,

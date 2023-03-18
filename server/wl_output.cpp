@@ -30,7 +30,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-WlOutput::Private::Private(Output* output, Display* display, WlOutput* q_ptr)
+WlOutput::Private::Private(Server::output* output, Display* display, WlOutput* q_ptr)
     : WlOutputGlobal(q_ptr, display, &wl_output_interface, &s_interface)
     , displayHandle(display)
     , output(output)
@@ -71,7 +71,7 @@ WlOutput::Private::geometry_args(output_state const& state)
                            to_subpixel(state.subpixel),
                            state.meta.make.c_str(),
                            state.meta.model.c_str(),
-                           Output::Private::to_transform(state.transform));
+                           output::Private::to_transform(state.transform));
 }
 
 void WlOutput::Private::bindInit(WlOutputBind* bind)
@@ -95,7 +95,7 @@ void WlOutput::Private::bindInit(WlOutputBind* bind)
 void WlOutput::Private::sendMode(WlOutputBind* bind, output_mode const& mode)
 {
     // Only called on bind. In this case we want to send the currently published mode.
-    auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->published);
+    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->published);
 
     send<wl_output_send_mode>(
         bind, flags, mode.size.width(), mode.size.height(), mode.refresh_rate);
@@ -104,7 +104,7 @@ void WlOutput::Private::sendMode(WlOutputBind* bind, output_mode const& mode)
 void WlOutput::Private::sendMode(output_mode const& mode)
 {
     // Only called on update. In this case we want to send the pending mode.
-    auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->pending);
+    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->pending);
 
     send<wl_output_send_mode>(flags, mode.size.width(), mode.size.height(), mode.refresh_rate);
 }
@@ -147,7 +147,7 @@ void WlOutput::Private::done(WlOutputBind* bind)
     send<wl_output_send_done, WL_OUTPUT_DONE_SINCE_VERSION>(bind);
 }
 
-WlOutput::WlOutput(Output* output, Display* display)
+WlOutput::WlOutput(Server::output* output, Display* display)
     : QObject(nullptr)
     , d_ptr(new Private(output, display, this))
 {
@@ -163,7 +163,7 @@ WlOutput::~WlOutput()
     }
 }
 
-Output* WlOutput::output() const
+Server::output* WlOutput::output() const
 {
     return d_ptr->output;
 }

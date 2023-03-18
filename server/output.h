@@ -99,12 +99,12 @@ struct output_state {
  * other output related classes such that compositors only need to interact with the Output class
  * under normal circumstances.
  */
-class WRAPLANDSERVER_EXPORT Output : public QObject
+class WRAPLANDSERVER_EXPORT output : public QObject
 {
     Q_OBJECT
 public:
-    explicit Output(Display* display);
-    ~Output() override;
+    explicit output(Display* display);
+    ~output() override;
 
     std::string name() const;
     std::string description() const;

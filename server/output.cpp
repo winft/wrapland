@@ -35,14 +35,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Output::Private::Private(Display* display, Output* q_ptr)
+output::Private::Private(Display* display, output* q_ptr)
     : display_handle(display)
     , device{new OutputDeviceV1(q_ptr, display)}
     , q_ptr{q_ptr}
 {
 }
 
-void Output::Private::done()
+void output::Private::done()
 {
     if (published.enabled != pending.enabled) {
         if (pending.enabled) {
@@ -67,7 +67,7 @@ void Output::Private::done()
     published = pending;
 }
 
-void Output::Private::done_wl(Client* client) const
+void output::Private::done_wl(Client* client) const
 {
     if (!wayland_output) {
         return;
@@ -79,7 +79,7 @@ void Output::Private::done_wl(Client* client) const
     }
 }
 
-int32_t Output::Private::get_mode_flags(output_mode const& mode, output_state const& state)
+int32_t output::Private::get_mode_flags(output_mode const& mode, output_state const& state)
 {
     int32_t flags = 0;
 
@@ -92,7 +92,7 @@ int32_t Output::Private::get_mode_flags(output_mode const& mode, output_state co
     return flags;
 }
 
-int32_t Output::Private::to_transform(output_transform transform)
+int32_t output::Private::to_transform(output_transform transform)
 {
     switch (transform) {
     case output_transform::normal:
@@ -115,7 +115,7 @@ int32_t Output::Private::to_transform(output_transform transform)
     abort();
 }
 
-void Output::Private::update_client_scale()
+void output::Private::update_client_scale()
 {
     auto logical_size = pending.geometry.size();
     auto mode_size = pending.mode.size;
@@ -142,94 +142,94 @@ bool output_mode::operator!=(output_mode const& mode) const
     return !(*this == mode);
 }
 
-Output::Output(Display* display)
+output::output(Display* display)
     : d_ptr(new Private(display, this))
 {
 }
 
-Output::~Output() = default;
+output::~output() = default;
 
-void Output::done()
+void output::done()
 {
     d_ptr->done();
 }
 
-output_subpixel Output::subpixel() const
+output_subpixel output::subpixel() const
 {
     return d_ptr->pending.subpixel;
 }
 
-void Output::set_subpixel(output_subpixel subpixel)
+void output::set_subpixel(output_subpixel subpixel)
 {
     d_ptr->pending.subpixel = subpixel;
 }
 
-output_transform Output::transform() const
+output_transform output::transform() const
 {
     return d_ptr->pending.transform;
 }
 
-std::string Output::name() const
+std::string output::name() const
 {
     return d_ptr->pending.meta.name;
 }
 
-std::string Output::description() const
+std::string output::description() const
 {
     return d_ptr->pending.meta.description;
 }
 
-std::string Output::serial_mumber() const
+std::string output::serial_mumber() const
 {
     return d_ptr->pending.meta.serial_number;
 }
 
-std::string Output::make() const
+std::string output::make() const
 {
     return d_ptr->pending.meta.make;
 }
 
-std::string Output::model() const
+std::string output::model() const
 {
     return d_ptr->pending.meta.model;
 }
 
-void Output::set_name(std::string const& name)
+void output::set_name(std::string const& name)
 {
     d_ptr->pending.meta.name = name;
 }
 
-void Output::set_description(std::string const& description)
+void output::set_description(std::string const& description)
 {
     d_ptr->pending.meta.description = description;
 }
 
-void Output::set_make(std::string const& make)
+void output::set_make(std::string const& make)
 {
     d_ptr->pending.meta.make = make;
 }
 
-void Output::set_model(std::string const& model)
+void output::set_model(std::string const& model)
 {
     d_ptr->pending.meta.model = model;
 }
 
-void Output::set_serial_number(std::string const& serial_number)
+void output::set_serial_number(std::string const& serial_number)
 {
     d_ptr->pending.meta.serial_number = serial_number;
 }
 
-void Output::set_physical_size(QSize const& size)
+void output::set_physical_size(QSize const& size)
 {
     d_ptr->pending.meta.physical_size = size;
 }
 
-void Output::set_connector_id(int id)
+void output::set_connector_id(int id)
 {
     d_ptr->connector_id = id;
 }
 
-void Output::generate_description()
+void output::generate_description()
 {
     auto& meta = d_ptr->pending.meta;
     std::string descr;
@@ -249,47 +249,47 @@ void Output::generate_description()
     meta.description = descr;
 }
 
-bool Output::enabled() const
+bool output::enabled() const
 {
     return d_ptr->pending.enabled;
 }
 
-void Output::set_enabled(bool enabled)
+void output::set_enabled(bool enabled)
 {
     d_ptr->pending.enabled = enabled;
 }
 
-QSize Output::physical_size() const
+QSize output::physical_size() const
 {
     return d_ptr->pending.meta.physical_size;
 }
 
-int Output::connector_id() const
+int output::connector_id() const
 {
     return d_ptr->connector_id;
 }
 
-std::vector<output_mode> Output::modes() const
+std::vector<output_mode> output::modes() const
 {
     return d_ptr->modes;
 }
 
-int Output::mode_id() const
+int output::mode_id() const
 {
     return d_ptr->pending.mode.id;
 }
 
-QSize Output::mode_size() const
+QSize output::mode_size() const
 {
     return d_ptr->pending.mode.size;
 }
 
-int Output::refresh_rate() const
+int output::refresh_rate() const
 {
     return d_ptr->pending.mode.refresh_rate;
 }
 
-void Output::add_mode(output_mode const& mode)
+void output::add_mode(output_mode const& mode)
 {
     d_ptr->pending.mode = mode;
 
@@ -302,7 +302,7 @@ void Output::add_mode(output_mode const& mode)
     }
 }
 
-bool Output::set_mode(int id)
+bool output::set_mode(int id)
 {
     for (auto const& mode : d_ptr->modes) {
         if (mode.id == id) {
@@ -314,7 +314,7 @@ bool Output::set_mode(int id)
     return false;
 }
 
-bool Output::set_mode(output_mode const& mode)
+bool output::set_mode(output_mode const& mode)
 {
     for (auto const& cmp : d_ptr->modes) {
         if (cmp == mode) {
@@ -326,7 +326,7 @@ bool Output::set_mode(output_mode const& mode)
     return false;
 }
 
-bool Output::set_mode(QSize const& size, int refresh_rate)
+bool output::set_mode(QSize const& size, int refresh_rate)
 {
     for (auto const& mode : d_ptr->modes) {
         if (mode.size == size && mode.refresh_rate == refresh_rate) {
@@ -338,28 +338,28 @@ bool Output::set_mode(QSize const& size, int refresh_rate)
     return false;
 }
 
-QRectF Output::geometry() const
+QRectF output::geometry() const
 {
     return d_ptr->pending.geometry;
 }
 
-void Output::set_transform(output_transform transform)
+void output::set_transform(output_transform transform)
 {
     d_ptr->pending.transform = transform;
 }
 
-void Output::set_geometry(QRectF const& geometry)
+void output::set_geometry(QRectF const& geometry)
 {
     d_ptr->pending.geometry = geometry;
     d_ptr->update_client_scale();
 }
 
-int Output::client_scale() const
+int output::client_scale() const
 {
     return d_ptr->pending.client_scale;
 }
 
-void Output::set_dpms_supported(bool supported)
+void output::set_dpms_supported(bool supported)
 {
     if (d_ptr->dpms.supported == supported) {
         return;
@@ -368,12 +368,12 @@ void Output::set_dpms_supported(bool supported)
     Q_EMIT dpms_supported_changed();
 }
 
-bool Output::dpms_supported() const
+bool output::dpms_supported() const
 {
     return d_ptr->dpms.supported;
 }
 
-void Output::set_dpms_mode(output_dpms_mode mode)
+void output::set_dpms_mode(output_dpms_mode mode)
 {
     if (d_ptr->dpms.mode == mode) {
         return;
@@ -382,22 +382,22 @@ void Output::set_dpms_mode(output_dpms_mode mode)
     Q_EMIT dpms_mode_changed();
 }
 
-output_dpms_mode Output::dpms_mode() const
+output_dpms_mode output::dpms_mode() const
 {
     return d_ptr->dpms.mode;
 }
 
-OutputDeviceV1* Output::output_device_v1() const
+OutputDeviceV1* output::output_device_v1() const
 {
     return d_ptr->device.get();
 }
 
-WlOutput* Output::wayland_output() const
+WlOutput* output::wayland_output() const
 {
     return d_ptr->wayland_output.get();
 }
 
-XdgOutput* Output::xdg_output() const
+XdgOutput* output::xdg_output() const
 {
     return d_ptr->xdg_output.get();
 }

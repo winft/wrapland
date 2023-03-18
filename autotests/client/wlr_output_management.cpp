@@ -88,7 +88,7 @@ void TestWlrOutputManagement::init()
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.globals.outputs.push_back(std::make_unique<Srv::Output>(server.display.get()));
+    server.globals.outputs.push_back(std::make_unique<Srv::output>(server.display.get()));
     auto server_output = server.globals.outputs.back().get();
 
     Srv::output_mode m0;

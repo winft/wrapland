@@ -90,8 +90,8 @@ private:
         Wrapland::Server::globals globals;
 
         Wrapland::Server::Seat* seat{nullptr};
-        Server::Output* output1{nullptr};
-        Server::Output* output2{nullptr};
+        Server::output* output1{nullptr};
+        Server::output* output2{nullptr};
     } server;
 
     Client::ConnectionThread* m_connection;
@@ -120,7 +120,7 @@ XdgShellTest::XdgShellTest(QObject* parent)
     qRegisterMetaType<Server::Surface*>();
     qRegisterMetaType<Server::XdgShellToplevel*>();
     qRegisterMetaType<Server::XdgShellPopup*>();
-    qRegisterMetaType<Server::Output*>();
+    qRegisterMetaType<Server::output*>();
     qRegisterMetaType<Server::Seat*>();
     qRegisterMetaType<Client::xdg_shell_states>();
     qRegisterMetaType<std::string>();
@@ -141,14 +141,14 @@ void XdgShellTest::init()
     server.globals.xdg_shell = server.display->createXdgShell();
 
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(server.display.get()));
     server.output1 = server.globals.outputs.back().get();
     server.output1->add_mode(Server::output_mode{QSize(1024, 768)});
     server.output1->set_enabled(true);
     server.output1->done();
 
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(server.display.get()));
     server.output2 = server.globals.outputs.back().get();
     server.output2->add_mode(Server::output_mode{QSize(1024, 768)});
     server.output2->set_enabled(true);
@@ -407,28 +407,28 @@ void XdgShellTest::testFullscreen()
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 1);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QVERIFY(!fullscreenSpy.last().at(1).value<Server::Output*>());
+    QVERIFY(!fullscreenSpy.last().at(1).value<Server::output*>());
 
     // unset
     xdgSurface->setFullscreen(false);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 2);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), false);
-    QVERIFY(!fullscreenSpy.last().at(1).value<Server::Output*>());
+    QVERIFY(!fullscreenSpy.last().at(1).value<Server::output*>());
 
     // with outputs
     xdgSurface->setFullscreen(true, m_output1);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 3);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), server.output1);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::output*>(), server.output1);
 
     // now other output
     xdgSurface->setFullscreen(true, m_output2);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 4);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), server.output2);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::output*>(), server.output2);
 }
 
 void XdgShellTest::testShowWindowMenu()

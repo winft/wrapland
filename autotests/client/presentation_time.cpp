@@ -89,7 +89,7 @@ void TestPresentationTime::init()
     server.globals.compositor = server.display->createCompositor();
     server.globals.presentation_manager = server.display->createPresentationManager();
 
-    server.globals.outputs.push_back(std::make_unique<Server::Output>(server.display.get()));
+    server.globals.outputs.push_back(std::make_unique<Server::output>(server.display.get()));
     server.globals.outputs.back()->set_enabled(true);
     server.globals.outputs.back()->done();
 

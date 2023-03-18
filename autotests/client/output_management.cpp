@@ -114,7 +114,7 @@ void TestOutputManagement::init()
     server.globals.compositor = server.display->createCompositor();
 
     auto server_output
-        = server.globals.outputs.emplace_back(std::make_unique<Srv::Output>(server.display.get()))
+        = server.globals.outputs.emplace_back(std::make_unique<Srv::output>(server.display.get()))
               .get();
     Srv::output_mode m0;
     m0.id = 0;

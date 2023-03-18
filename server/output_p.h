@@ -32,10 +32,10 @@ class XdgOutput;
 
 class Display;
 
-class Output::Private
+class output::Private
 {
 public:
-    Private(Display* display, Output* q_ptr);
+    Private(Display* display, output* q_ptr);
 
     void update_client_scale();
     void done();
@@ -65,7 +65,7 @@ public:
     std::unique_ptr<WlOutput> wayland_output;
     std::unique_ptr<XdgOutput> xdg_output;
 
-    Output* q_ptr;
+    output* q_ptr;
 
 private:
     int32_t toTransform() const;

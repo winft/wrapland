@@ -75,7 +75,7 @@ void layer_shell_test::init()
     server.globals.xdg_shell = server.display->createXdgShell();
 
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(server.display.get()));
     server.globals.outputs.back()->set_enabled(true);
     server.globals.outputs.back()->done();
 

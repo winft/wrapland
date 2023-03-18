@@ -83,7 +83,7 @@ void TestServer::init()
     m_display->create_kde_idle();
     m_display->createSubCompositor();
 
-    globals.outputs.push_back(std::make_unique<Wrapland::Server::Output>(m_display.get()));
+    globals.outputs.push_back(std::make_unique<Wrapland::Server::output>(m_display.get()));
     const QSize size(1280, 1024);
     globals.outputs.back()->set_geometry(QRectF(QPoint(0, 0), size));
     globals.outputs.back()->set_physical_size(size / 3.8);

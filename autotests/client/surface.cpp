@@ -1122,7 +1122,7 @@ void TestSurface::testOutput()
     QSignalSpy outputAnnouncedSpy(&registry, &Wrapland::Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto serverOutput = new Wrapland::Server::Output(server.display.get());
+    auto serverOutput = new Wrapland::Server::output(server.display.get());
     serverOutput->set_enabled(true);
     serverOutput->done();
 
@@ -1145,10 +1145,10 @@ void TestSurface::testOutput()
     QCOMPARE(s->outputs(), QVector<Wrapland::Client::Output*>{clientOutput.get()});
 
     // Adding to same should not trigger.
-    serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>{serverOutput});
+    serverSurface->setOutputs(std::vector<Wrapland::Server::output*>{serverOutput});
 
     // leave again
-    serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>());
+    serverSurface->setOutputs(std::vector<Wrapland::Server::output*>());
     QCOMPARE(serverSurface->outputs(), std::vector<Wrapland::Server::WlOutput*>());
     QVERIFY(leftSpy.wait());
     QCOMPARE(enteredSpy.count(), 1);
@@ -1157,10 +1157,10 @@ void TestSurface::testOutput()
     QCOMPARE(s->outputs(), QVector<Wrapland::Client::Output*>());
 
     // Leave again should not trigger.
-    serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>());
+    serverSurface->setOutputs(std::vector<Wrapland::Server::output*>());
 
     // and enter again, just to verify
-    serverSurface->setOutputs(std::vector<Wrapland::Server::Output*>{serverOutput});
+    serverSurface->setOutputs(std::vector<Wrapland::Server::output*>{serverOutput});
     QCOMPARE(serverSurface->outputs(), {serverOutput->wayland_output()});
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.count(), 2);

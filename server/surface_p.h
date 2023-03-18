@@ -257,7 +257,7 @@ public:
 
     bool active();
     void add(PresentationFeedback* feedback);
-    void setOutput(Output* output);
+    void setOutput(Server::output* output);
     void handleOutputRemoval();
 
     void presented(uint32_t tvSecHi,
@@ -271,7 +271,7 @@ public:
 
 private:
     std::vector<PresentationFeedback*> m_feedbacks;
-    Output* m_output = nullptr;
+    Server::output* m_output = nullptr;
 };
 
 }

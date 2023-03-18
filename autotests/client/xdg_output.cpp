@@ -74,7 +74,7 @@ void TestXdgOutput::init()
     QVERIFY(server.display->running());
 
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(server.display.get()));
     auto&& server_output = server.globals.outputs.back();
     server_output->add_mode(Wrapland::Server::output_mode{QSize(1920, 1080), 60000, true, 1});
     server_output->set_mode(1);

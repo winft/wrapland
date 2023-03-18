@@ -271,7 +271,7 @@ int main(int argc, char** argv)
     auto shell = display.createXdgShell();
     display.createShm();
 
-    auto output = std::make_unique<Wrapland::Server::Output>(&display);
+    auto output = std::make_unique<Wrapland::Server::output>(&display);
     output->set_physical_size(QSize(269, 202));
     const QSize windowSize(1024, 768);
     output->add_mode(output_mode{windowSize});

@@ -69,7 +69,7 @@ struct globals {
     std::unique_ptr<Server::ContrastManager> contrast_manager;
 
     /// Graphical outputs and their management
-    std::vector<std::unique_ptr<Server::Output>> outputs;
+    std::vector<std::unique_ptr<output>> outputs;
     std::unique_ptr<Server::XdgOutputManager> xdg_output_manager;
     std::unique_ptr<Server::DpmsManager> dpms_manager;
     std::unique_ptr<Server::OutputManagementV1> output_management_v1;

@@ -89,7 +89,7 @@ void TestServerDisplay::testAddRemoveOutput()
     display.set_socket_name(std::string("kwin-wayland-server-display-test-output-0"));
     display.start();
 
-    std::unique_ptr<Output> output1{new Wrapland::Server::Output(&display)};
+    auto output1 = std::make_unique<Wrapland::Server::output>(&display);
     output1->set_enabled(true);
     output1->done();
 
@@ -97,7 +97,7 @@ void TestServerDisplay::testAddRemoveOutput()
     QCOMPARE(display.outputs()[0], output1->wayland_output());
 
     // create a second output
-    std::unique_ptr<Output> output2{new Wrapland::Server::Output(&display)};
+    auto output2 = std::make_unique<Wrapland::Server::output>(&display);
     output2->set_enabled(true);
     output2->done();
 

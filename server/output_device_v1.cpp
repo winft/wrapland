@@ -28,7 +28,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-OutputDeviceV1::Private::Private(Output* output, Display* display, OutputDeviceV1* q_ptr)
+OutputDeviceV1::Private::Private(Server::output* output, Display* display, OutputDeviceV1* q_ptr)
     : OutputDeviceV1Global(q_ptr, display, &zkwinft_output_device_v1_interface, nullptr)
     , displayHandle{display}
     , output(output)
@@ -74,7 +74,7 @@ void OutputDeviceV1::Private::bindInit(OutputDeviceV1Bind* bind)
     sendMode(bind, output->d_ptr->published.mode);
 
     send<zkwinft_output_device_v1_send_transform>(bind,
-                                                  Output::Private::to_transform(state.transform));
+                                                  output::Private::to_transform(state.transform));
     send<zkwinft_output_device_v1_send_geometry>(bind, geometry_args(state));
 
     send<zkwinft_output_device_v1_send_done>(bind);
@@ -83,7 +83,7 @@ void OutputDeviceV1::Private::bindInit(OutputDeviceV1Bind* bind)
 
 void OutputDeviceV1::Private::sendMode(OutputDeviceV1Bind* bind, output_mode const& mode)
 {
-    auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->published);
+    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->published);
 
     send<zkwinft_output_device_v1_send_mode>(
         bind, flags, mode.size.width(), mode.size.height(), mode.refresh_rate, mode.id);
@@ -92,7 +92,7 @@ void OutputDeviceV1::Private::sendMode(OutputDeviceV1Bind* bind, output_mode con
 void OutputDeviceV1::Private::sendMode(output_mode const& mode)
 {
     // Only called on update. In this case we want to send the pending mode.
-    auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->pending);
+    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->pending);
 
     send<zkwinft_output_device_v1_send_mode>(
         flags, mode.size.width(), mode.size.height(), mode.refresh_rate, mode.id);
@@ -126,7 +126,7 @@ bool OutputDeviceV1::Private::broadcast()
 
     if (published.transform != pending.transform) {
         send<zkwinft_output_device_v1_send_transform>(
-            Output::Private::to_transform(pending.transform));
+            output::Private::to_transform(pending.transform));
         changed = true;
     }
 
@@ -143,7 +143,7 @@ void OutputDeviceV1::Private::done()
     send<zkwinft_output_device_v1_send_done>();
 }
 
-OutputDeviceV1::OutputDeviceV1(Output* output, Display* display)
+OutputDeviceV1::OutputDeviceV1(Server::output* output, Display* display)
     : d_ptr(new Private(output, display, this))
 {
 }
@@ -155,7 +155,7 @@ OutputDeviceV1::~OutputDeviceV1()
     }
 }
 
-Output* OutputDeviceV1::output() const
+Server::output* OutputDeviceV1::output() const
 {
     return d_ptr->output;
 }

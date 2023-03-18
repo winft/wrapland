@@ -74,7 +74,7 @@ void XdgOutputManager::Private::getXdgOutputCallback(XdgOutputManagerBind* bind,
     });
 }
 
-XdgOutput::Private::Private(Output* output, Display* display, XdgOutput* q_ptr)
+XdgOutput::Private::Private(Server::output* output, Display* display, XdgOutput* q_ptr)
     : output{output}
     , manager{display->xdgOutputManager()}
 {
@@ -157,7 +157,7 @@ void XdgOutput::Private::resourceDisconnected(XdgOutputV1* resource)
     resources.erase(std::remove(resources.begin(), resources.end(), resource), resources.end());
 }
 
-XdgOutput::XdgOutput(Output* output, Display* display)
+XdgOutput::XdgOutput(Server::output* output, Display* display)
     : QObject(nullptr)
     , d_ptr(new XdgOutput::Private(output, display, this))
 {

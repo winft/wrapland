@@ -29,7 +29,7 @@ class QRectF;
 namespace Wrapland::Server
 {
 class Display;
-class Output;
+class output;
 
 class WRAPLANDSERVER_EXPORT OutputDeviceV1 : public QObject
 {
@@ -37,13 +37,13 @@ class WRAPLANDSERVER_EXPORT OutputDeviceV1 : public QObject
 public:
     ~OutputDeviceV1() override;
 
-    Output* output() const;
+    Server::output* output() const;
 
 private:
-    explicit OutputDeviceV1(Output* output, Display* display);
+    explicit OutputDeviceV1(Server::output* output, Display* display);
 
     friend class Display;
-    friend class Output;
+    friend class output;
 
     class Private;
     std::unique_ptr<Private> d_ptr;

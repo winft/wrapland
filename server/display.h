@@ -58,7 +58,6 @@ class KeyboardShortcutsInhibitManagerV1;
 class KeyState;
 class LayerShellV1;
 class linux_dmabuf_v1;
-class Output;
 class OutputManagementV1;
 class plasma_activation_feedback;
 class PlasmaShell;

@@ -203,10 +203,10 @@ void drm_lease_v1_test::test_connectors()
 {
     // This test verifies that connectors are advertised correctly.
 
-    std::vector<std::unique_ptr<Wrapland::Server::Output>> server_outputs;
+    std::vector<std::unique_ptr<Wrapland::Server::output>> server_outputs;
     auto add_output = [&server_outputs, this] {
         server_outputs.emplace_back(
-            std::make_unique<Wrapland::Server::Output>(server.display.get()));
+            std::make_unique<Wrapland::Server::output>(server.display.get()));
     };
 
     add_output();
@@ -283,10 +283,10 @@ void drm_lease_v1_test::test_lease()
 {
     // This test verifies that leases are communicated correctly.
 
-    std::vector<std::unique_ptr<Wrapland::Server::Output>> server_outputs;
+    std::vector<std::unique_ptr<Wrapland::Server::output>> server_outputs;
     auto add_output = [&server_outputs, this] {
         server_outputs.emplace_back(
-            std::make_unique<Wrapland::Server::Output>(server.display.get()));
+            std::make_unique<Wrapland::Server::output>(server.display.get()));
     };
 
     add_output();

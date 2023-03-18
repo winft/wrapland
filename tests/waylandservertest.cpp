@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 
     auto xdg_shell = display.createXdgShell();
 
-    auto output = std::make_unique<Wrapland::Server::Output>(&display);
+    auto output = std::make_unique<Wrapland::Server::output>(&display);
     output->set_physical_size(QSize(10, 10));
     output->add_mode(Wrapland::Server::output_mode{QSize(1024, 768)});
 

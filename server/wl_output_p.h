@@ -35,14 +35,14 @@ using WlOutputBind = Wayland::Bind<WlOutputGlobal>;
 class WlOutput::Private : public WlOutputGlobal
 {
 public:
-    Private(Output* output, Display* display, WlOutput* q_ptr);
+    Private(Server::output* output, Display* display, WlOutput* q_ptr);
 
     bool broadcast();
     void done();
     void done(WlOutputBind* bind);
 
     Display* displayHandle;
-    Output* output;
+    Server::output* output;
 
 private:
     void bindInit(WlOutputBind* bind) override;

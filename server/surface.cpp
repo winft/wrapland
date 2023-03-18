@@ -929,7 +929,7 @@ std::vector<WlOutput*> Surface::outputs() const
     return d_ptr->outputs;
 }
 
-void Surface::setOutputs(std::vector<Output*> const& outputs)
+void Surface::setOutputs(std::vector<Server::output*> const& outputs)
 {
     std::vector<WlOutput*> wayland_outputs;
     wayland_outputs.reserve(outputs.size());
@@ -1024,7 +1024,7 @@ uint32_t Surface::id() const
     return d_ptr->id();
 }
 
-uint32_t Surface::lockPresentation(Output* output)
+uint32_t Surface::lockPresentation(Server::output* output)
 {
     if (!d_ptr->current.feedbacks) {
         return 0;
@@ -1088,7 +1088,7 @@ void Feedbacks::add(PresentationFeedback* feedback)
     m_feedbacks.push_back(feedback);
 }
 
-void Feedbacks::setOutput(Output* output)
+void Feedbacks::setOutput(Server::output* output)
 {
     assert(!m_output);
     m_output = output;

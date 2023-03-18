@@ -20,7 +20,7 @@ class Client;
 class Display;
 class drm_lease_connector_v1;
 class drm_lease_v1;
-class Output;
+class output;
 
 class WRAPLANDSERVER_EXPORT drm_lease_device_v1 : public QObject
 {
@@ -32,7 +32,7 @@ public:
     void update_fd(int fd);
     drm_lease_connector_v1*
     create_connector(std::string const& name, std::string const& description, int id);
-    drm_lease_connector_v1* create_connector(Output* output);
+    drm_lease_connector_v1* create_connector(Server::output* output);
 
 Q_SIGNALS:
     void needs_new_client_fd();
@@ -52,14 +52,14 @@ public:
     ~drm_lease_connector_v1() override;
 
     uint32_t id() const;
-    Output* output() const;
+    Server::output* output() const;
 
 private:
     drm_lease_connector_v1(std::string const& name,
                            std::string const& description,
                            int id,
                            drm_lease_device_v1* device);
-    drm_lease_connector_v1(Output* output, drm_lease_device_v1* device);
+    drm_lease_connector_v1(Server::output* output, drm_lease_device_v1* device);
     friend class drm_lease_connector_v1_res;
     friend class drm_lease_device_v1;
     friend class drm_lease_request_v1;
