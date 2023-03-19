@@ -16,9 +16,11 @@
 #include "../../server/buffer.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
 #include "../../server/xdg_activation_v1.h"
+
+#include "../../tests/globals.h"
 
 using namespace Wrapland;
 
@@ -71,11 +73,12 @@ void TestXdgActivation::init()
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.globals.compositor = server.display->createCompositor();
-
-    server.globals.seats.emplace_back(server.display->createSeat());
-
-    server.globals.xdg_activation_v1 = server.display->createXdgActivationV1();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
+    server.globals.xdg_activation_v1
+        = std::make_unique<Wrapland::Server::XdgActivationV1>(server.display.get());
 
     create_client(client1);
 }

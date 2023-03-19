@@ -26,13 +26,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/output.h"
 #include "../../server/output_configuration_v1.h"
 #include "../../server/output_management_v1.h"
 
-#include <QtTest>
+#include "../../tests/globals.h"
 
+#include <QtTest>
 #include <wayland-client-protocol.h>
 
 namespace Clt = Wrapland::Client;
@@ -51,6 +51,7 @@ private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
         Wrapland::Server::globals globals;
+        std::unique_ptr<Wrapland::Server::output> output;
     } server;
 
     Clt::Registry* m_registry = nullptr;
@@ -88,38 +89,38 @@ void TestWlrOutputManagement::init()
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.globals.outputs.push_back(std::make_unique<Srv::output>(server.display.get()));
-    auto server_output = server.globals.outputs.back().get();
+    server.output = std::make_unique<Wrapland::Server::output>(server.display.get());
 
     Srv::output_mode m0;
     m0.id = 0;
     m0.size = QSize(800, 600);
     m0.preferred = true;
-    server_output->add_mode(m0);
+    server.output->add_mode(m0);
 
     Srv::output_mode m1;
     m1.id = 1;
     m1.size = QSize(1024, 768);
-    server_output->add_mode(m1);
+    server.output->add_mode(m1);
 
     Srv::output_mode m2;
     m2.id = 2;
     m2.size = QSize(1280, 1024);
     m2.refresh_rate = 90000;
-    server_output->add_mode(m2);
+    server.output->add_mode(m2);
 
     Srv::output_mode m3;
     m3.id = 3;
     m3.size = QSize(1920, 1080);
     m3.refresh_rate = 100000;
-    server_output->add_mode(m3);
+    server.output->add_mode(m3);
 
     m_modes << m0 << m1 << m2 << m3;
 
-    server_output->set_mode(1);
-    server_output->set_geometry(QRectF(QPointF(0, 1920), QSizeF(1024, 768)));
+    server.output->set_mode(1);
+    server.output->set_geometry(QRectF(QPointF(0, 1920), QSizeF(1024, 768)));
 
-    server.globals.output_management_v1 = server.display->createOutputManagementV1();
+    server.globals.output_management_v1
+        = std::make_unique<Wrapland::Server::OutputManagementV1>(server.display.get());
 
     // setup connection
     m_connection = new Clt::ConnectionThread;

@@ -16,10 +16,13 @@
 #include "../../src/client/surface.h"
 #include "../../src/client/virtual_keyboard_v1.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
 #include "../../server/virtual_keyboard_v1.h"
+
+#include "../../tests/globals.h"
 
 #include <linux/input.h>
 
@@ -66,13 +69,14 @@ void setup_server(Server& server)
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.push_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasKeyboard(true);
 
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     server.globals.virtual_keyboard_manager_v1
-        = server.display->create_virtual_keyboard_manager_v1();
+        = std::make_unique<Wrapland::Server::virtual_keyboard_manager_v1>(server.display.get());
 }
 
 template<typename Client>

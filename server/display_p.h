@@ -35,12 +35,6 @@ public:
 
     Client* createClientHandle(wl_client* wlClient);
     Wayland::Client* castClientImpl(Server::Client* client) override;
-
-    std::vector<WlOutput*> outputs;
-    std::vector<OutputDeviceV1*> outputDevices;
-    std::vector<Seat*> seats;
-
-    std::unique_ptr<XdgOutputManager> xdg_output_manager;
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
 
     static Private* castDisplay(Server::Display* display);

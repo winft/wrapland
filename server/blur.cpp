@@ -46,8 +46,6 @@ BlurManager::Private::Private(Display* display, BlurManager* qptr)
     create();
 }
 
-BlurManager::Private::~Private() = default;
-
 void BlurManager::Private::createCallback(BlurManagerBind* bind,
                                           uint32_t id,
                                           wl_resource* wlSurface)

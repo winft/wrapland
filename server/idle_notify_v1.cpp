@@ -21,8 +21,6 @@ idle_notifier_v1::Private::Private(Display* display, idle_notifier_v1* q_ptr)
     create();
 }
 
-idle_notifier_v1::Private::~Private() = default;
-
 void idle_notifier_v1::Private::get_idle_notification_callback(idle_notifier_v1_bind* bind,
                                                                uint32_t id,
                                                                uint32_t timeout,

@@ -32,7 +32,6 @@ namespace Wrapland::Server
 
 WlOutput::Private::Private(Server::output* output, Display* display, WlOutput* q_ptr)
     : WlOutputGlobal(q_ptr, display, &wl_output_interface, &s_interface)
-    , displayHandle(display)
     , output(output)
 {
     create();
@@ -151,16 +150,11 @@ WlOutput::WlOutput(Server::output* output, Display* display)
     : QObject(nullptr)
     , d_ptr(new Private(output, display, this))
 {
-    display->add_wl_output(this);
 }
 
 WlOutput::~WlOutput()
 {
     Q_EMIT removed();
-
-    if (d_ptr->displayHandle) {
-        d_ptr->displayHandle->removeOutput(this);
-    }
 }
 
 Server::output* WlOutput::output() const

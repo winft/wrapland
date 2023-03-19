@@ -25,7 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 
 #include "../../server/display.h"
-#include "../../server/globals.h"
+#include "../../server/output.h"
 
 #include <wayland-client-protocol.h>
 
@@ -57,8 +57,7 @@ private Q_SLOTS:
 private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
-        Wrapland::Server::globals globals;
-        Wrapland::Server::output* output{nullptr};
+        std::unique_ptr<Wrapland::Server::output> output;
     } server;
 
     std::string m_name = "HDMI-A";
@@ -94,9 +93,7 @@ void TestOutputDevice::init()
                               .model = m_model,
                               .serial_number = m_serialNumber,
                               .physical_size = {200, 100}};
-    server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::output>(meta, server.display.get()));
-    server.output = server.globals.outputs.back().get();
+    server.output = std::make_unique<Wrapland::Server::output>(meta, server.display.get());
 
     Srv::output_mode m0;
     m0.id = 0;

@@ -21,8 +21,6 @@ kde_idle::Private::Private(Display* display, kde_idle* q_ptr)
     create();
 }
 
-kde_idle::Private::~Private() = default;
-
 void kde_idle::Private::get_idle_timeout_callback(kde_idle_bind* bind,
                                                   uint32_t id,
                                                   wl_resource* wlSeat,

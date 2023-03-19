@@ -31,11 +31,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/xdg_shell.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/surface.h"
 #include "../../server/xdg_shell_popup.h"
 #include "../../server/xdg_shell_toplevel.h"
+
+#include "../../tests/globals.h"
 
 #include <wayland-xdg-shell-client-protocol.h>
 
@@ -90,8 +92,6 @@ private:
         Wrapland::Server::globals globals;
 
         Wrapland::Server::Seat* seat{nullptr};
-        Server::output* output1{nullptr};
-        Server::output* output2{nullptr};
     } server;
 
     Client::ConnectionThread* m_connection;
@@ -137,24 +137,24 @@ void XdgShellTest::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.xdg_shell = server.display->createXdgShell();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
 
     server.globals.outputs.push_back(
         std::make_unique<Wrapland::Server::output>(server.display.get()));
-    server.output1 = server.globals.outputs.back().get();
-    server.output1->add_mode(Server::output_mode{QSize(1024, 768)});
-    server.output1->set_enabled(true);
-    server.output1->done();
+    server.globals.outputs.back()->add_mode(Server::output_mode{QSize(1024, 768)});
+    server.globals.outputs.back()->set_enabled(true);
+    server.globals.outputs.back()->done();
 
     server.globals.outputs.push_back(
         std::make_unique<Wrapland::Server::output>(server.display.get()));
-    server.output2 = server.globals.outputs.back().get();
-    server.output2->add_mode(Server::output_mode{QSize(1024, 768)});
-    server.output2->set_enabled(true);
-    server.output2->done();
+    server.globals.outputs.back()->add_mode(Server::output_mode{QSize(1024, 768)});
+    server.globals.outputs.back()->set_enabled(true);
+    server.globals.outputs.back()->done();
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasKeyboard(true);
     server.seat->setHasPointer(true);
@@ -421,14 +421,16 @@ void XdgShellTest::testFullscreen()
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 3);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::output*>(), server.output1);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::output*>(),
+             server.globals.outputs.at(0).get());
 
     // now other output
     xdgSurface->setFullscreen(true, m_output2);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 4);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::output*>(), server.output2);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::output*>(),
+             server.globals.outputs.at(1).get());
 }
 
 void XdgShellTest::testShowWindowMenu()

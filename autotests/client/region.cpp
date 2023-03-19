@@ -27,9 +27,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 
 #include "../../server/client.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/region.h"
+
+#include "../../tests/globals.h"
 
 class TestRegion : public QObject
 {
@@ -109,7 +111,8 @@ void TestRegion::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),

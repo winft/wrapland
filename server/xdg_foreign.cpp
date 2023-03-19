@@ -30,7 +30,10 @@ namespace Wrapland::Server
 {
 
 XdgForeign::Private::Private(Display* display, XdgForeign* q_ptr)
+    : q_ptr{q_ptr}
 {
+    display->globals.xdg_foreign = q_ptr;
+
     exporter = std::make_unique<XdgExporterV2>(display);
     importer = std::make_unique<XdgImporterV2>(display);
     importer->setExporter(exporter.get());
@@ -38,15 +41,21 @@ XdgForeign::Private::Private(Display* display, XdgForeign* q_ptr)
     connect(importer.get(), &XdgImporterV2::parentChanged, q_ptr, &XdgForeign::parentChanged);
 }
 
+XdgForeign::Private::~Private()
+{
+    if (exporter && exporter->d_ptr->display()) {
+        if (auto& ptr = exporter->d_ptr->display()->handle->globals.xdg_foreign; ptr == q_ptr) {
+            ptr = nullptr;
+        }
+    }
+}
+
 XdgForeign::XdgForeign(Display* display)
     : d_ptr(new Private(display, this))
 {
 }
 
-XdgForeign::~XdgForeign()
-{
-    delete d_ptr;
-}
+XdgForeign::~XdgForeign() = default;
 
 Surface* XdgForeign::parentOf(Surface* surface)
 {

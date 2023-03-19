@@ -19,11 +19,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "output_p.h"
 
+#include "display.h"
 #include "output_device_v1_p.h"
+#include "utils.h"
 #include "wl_output_p.h"
 #include "xdg_output_p.h"
-
-#include "display.h"
 
 #include "wayland/client.h"
 #include "wayland/display.h"
@@ -45,6 +45,21 @@ output::Private::Private(output_metadata metadata, Display* display, output* q_p
     }
     pending.meta = std::move(metadata);
     published.meta = pending.meta;
+
+    display->globals.outputs.push_back(q_ptr);
+    QObject::connect(display, &Display::destroyed, q_ptr, [this] {
+        device.reset();
+        xdg_output.reset();
+        wayland_output.reset();
+        display_handle = nullptr;
+    });
+}
+
+output::Private::~Private()
+{
+    if (display_handle) {
+        remove_all(display_handle->globals.outputs, q_ptr);
+    }
 }
 
 void output::Private::done()
@@ -52,7 +67,9 @@ void output::Private::done()
     if (published.enabled != pending.enabled) {
         if (pending.enabled) {
             wayland_output.reset(new WlOutput(q_ptr, display_handle));
-            xdg_output.reset(new XdgOutput(q_ptr, display_handle));
+            if (display_handle->globals.xdg_output_manager) {
+                xdg_output.reset(new XdgOutput(q_ptr, display_handle));
+            }
         } else {
             wayland_output.reset();
             xdg_output.reset();
@@ -60,10 +77,12 @@ void output::Private::done()
     }
     if (pending.enabled) {
         auto wayland_change = wayland_output->d_ptr->broadcast();
-        auto xdg_change = xdg_output->d_ptr->broadcast();
+        auto xdg_change = xdg_output ? xdg_output->d_ptr->broadcast() : false;
         if (wayland_change || xdg_change) {
             wayland_output->d_ptr->done();
-            xdg_output->d_ptr->done();
+            if (xdg_output) {
+                xdg_output->d_ptr->done();
+            }
         }
     }
     if (device->d_ptr->broadcast()) {

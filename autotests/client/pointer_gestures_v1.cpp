@@ -15,11 +15,16 @@
 #include "../../src/client/surface.h"
 
 #include "../../server/client.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/pointer_gestures_v1.h"
 #include "../../server/pointer_pool.h"
+#include "../../server/relative_pointer_v1.h"
+#include "../../server/seat.h"
+#include "../../server/subcompositor.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -44,7 +49,7 @@ private Q_SLOTS:
 private:
     struct {
         std::unique_ptr<Srv::Display> display;
-        Srv::globals globals;
+        Wrapland::Server::globals globals;
         Srv::Seat* seat{nullptr};
     } server;
 
@@ -74,10 +79,14 @@ void pointer_gestures_test::init()
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.subcompositor = server.display->createSubCompositor();
-    server.globals.relative_pointer_manager_v1 = server.display->createRelativePointerManager();
-    server.globals.pointer_gestures_v1 = server.display->createPointerGestures();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.subcompositor
+        = std::make_unique<Wrapland::Server::Subcompositor>(server.display.get());
+    server.globals.relative_pointer_manager_v1
+        = std::make_unique<Wrapland::Server::RelativePointerManagerV1>(server.display.get());
+    server.globals.pointer_gestures_v1
+        = std::make_unique<Wrapland::Server::PointerGesturesV1>(server.display.get());
 
     // Setup connection.
     client.connection = new Clt::ConnectionThread;
@@ -105,7 +114,7 @@ void pointer_gestures_test::init()
     registry.setup();
     QVERIFY(compositorSpy.wait());
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.push_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setName("seat0");
 

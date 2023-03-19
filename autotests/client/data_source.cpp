@@ -30,7 +30,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
+
+#include "../../tests/globals.h"
 
 #include <wayland-client.h>
 
@@ -104,7 +105,8 @@ void TestDataSource::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.data_device_manager = server.display->createDataDeviceManager();
+    server.globals.data_device_manager
+        = std::make_unique<Wrapland::Server::data_device_manager>(server.display.get());
 
     QVERIFY(device_manager_spy.wait());
     m_device_manager

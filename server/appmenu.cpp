@@ -43,8 +43,6 @@ AppmenuManager::Private::Private(Display* display, AppmenuManager* qptr)
     create();
 }
 
-AppmenuManager::Private::~Private() = default;
-
 AppmenuManager::AppmenuManager(Display* display)
     : d_ptr(new Private(display, this))
 {

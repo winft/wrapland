@@ -12,7 +12,9 @@
 
 #include "../../server/display.h"
 #include "../../server/drm_lease_v1.h"
-#include "../../server/globals.h"
+#include "../../server/output.h"
+
+#include "../../tests/globals.h"
 
 #include <deque>
 
@@ -77,7 +79,8 @@ void drm_lease_v1_test::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.drm_lease_device_v1 = server.display->createDrmLeaseDeviceV1();
+    server.globals.drm_lease_device_v1
+        = std::make_unique<Wrapland::Server::drm_lease_device_v1>(server.display.get());
     server.lease_device = server.globals.drm_lease_device_v1.get();
 
     create_client(client1);

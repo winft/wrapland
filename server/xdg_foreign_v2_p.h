@@ -20,6 +20,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
+#include "wayland/global.h"
+
+#include "wayland-xdg-foreign-unstable-v2-server-protocol.h"
+
 #include <QObject>
 #include <memory>
 
@@ -35,7 +39,9 @@ class Q_DECL_HIDDEN XdgForeign::Private
 {
 public:
     Private(Display* display, XdgForeign* q_ptr);
+    ~Private();
 
+    XdgForeign* q_ptr;
     std::unique_ptr<XdgExporterV2> exporter;
     std::unique_ptr<XdgImporterV2> importer;
 };
@@ -49,9 +55,27 @@ public:
 
     XdgExportedV2* exportedSurface(QString const& handle) const;
 
-private:
     class Private;
     Private* d_ptr;
+};
+
+constexpr uint32_t XdgExporterV2Version = 1;
+using XdgExporterV2Global = Wayland::Global<XdgExporterV2, XdgExporterV2Version>;
+using XdgExporterV2Bind = Wayland::Bind<XdgExporterV2Global>;
+
+class Q_DECL_HIDDEN XdgExporterV2::Private
+    : public Wayland::Global<XdgExporterV2, XdgExporterV2Version>
+{
+public:
+    Private(XdgExporterV2* q_ptr, Display* display);
+
+    QHash<QString, XdgExportedV2*> exportedSurfaces;
+
+private:
+    static void
+    exportToplevelCallback(XdgExporterV2Bind* bind, uint32_t id, wl_resource* wlSurface);
+
+    static const struct zxdg_exporter_v2_interface s_interface;
 };
 
 class Q_DECL_HIDDEN XdgImporterV2 : public QObject
@@ -64,12 +88,11 @@ public:
 
     Surface* parentOf(Surface* surface) const;
 
-Q_SIGNALS:
-    void parentChanged(Wrapland::Server::Surface* parent, Wrapland::Server::Surface* child);
-
-private:
     class Private;
     Private* d_ptr;
+
+Q_SIGNALS:
+    void parentChanged(Wrapland::Server::Surface* parent, Wrapland::Server::Surface* child);
 };
 
 class Q_DECL_HIDDEN XdgExportedV2 : public QObject

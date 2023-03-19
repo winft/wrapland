@@ -76,7 +76,7 @@ void XdgOutputManager::Private::getXdgOutputCallback(XdgOutputManagerBind* bind,
 
 XdgOutput::Private::Private(Server::output* output, Display* display, XdgOutput* q_ptr)
     : output{output}
-    , manager{display->xdgOutputManager()}
+    , manager{display->globals.xdg_output_manager}
 {
     assert(manager->d_ptr->outputs.find(output) == manager->d_ptr->outputs.end());
     manager->d_ptr->outputs[output] = q_ptr;
@@ -161,7 +161,7 @@ XdgOutput::XdgOutput(Server::output* output, Display* display)
     : QObject(nullptr)
     , d_ptr(new XdgOutput::Private(output, display, this))
 {
-    auto manager = display->xdgOutputManager();
+    auto manager = display->globals.xdg_output_manager;
     connect(this, &QObject::destroyed, manager, [manager, output]() {
         manager->d_ptr->outputs.erase(output);
     });

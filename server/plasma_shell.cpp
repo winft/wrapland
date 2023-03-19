@@ -34,8 +34,6 @@ PlasmaShell::Private::Private(Display* display, PlasmaShell* qptr)
     create();
 }
 
-PlasmaShell::Private::~Private() = default;
-
 void PlasmaShell::Private::createSurfaceCallback(PlasmaShellBind* bind,
                                                  uint32_t id,
                                                  wl_resource* surface)

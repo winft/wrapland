@@ -17,13 +17,17 @@
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/data_control_v1.h"
 #include "../../server/data_device.h"
+#include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/primary_selection.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 class data_control_test : public QObject
 {
@@ -100,15 +104,18 @@ void data_control_test::init()
 
     server.display->createShm();
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.push_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.globals.seats.back()->setHasKeyboard(true);
 
-    server.globals.compositor = server.display->createCompositor();
-
-    server.globals.data_device_manager = server.display->createDataDeviceManager();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.data_device_manager
+        = std::make_unique<Wrapland::Server::data_device_manager>(server.display.get());
     server.globals.primary_selection_device_manager
-        = server.display->createPrimarySelectionDeviceManager();
-    server.globals.data_control_manager_v1 = server.display->create_data_control_manager_v1();
+        = std::make_unique<Wrapland::Server::primary_selection_device_manager>(
+            server.display.get());
+    server.globals.data_control_manager_v1
+        = std::make_unique<Wrapland::Server::data_control_manager_v1>(server.display.get());
 
     client1.connection = new Wrapland::Client::ConnectionThread;
     QSignalSpy connectedSpy(client1.connection,

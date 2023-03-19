@@ -35,7 +35,6 @@ IdleInhibitManagerV1::Private::Private(Display* display, IdleInhibitManagerV1* q
 {
     create();
 }
-IdleInhibitManagerV1::Private::~Private() = default;
 
 void IdleInhibitManagerV1::Private::createInhibitorCallback(IdleInhibitManagerV1Bind* bind,
                                                             uint32_t id,

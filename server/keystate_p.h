@@ -43,7 +43,7 @@ class KeyState::Private : public KeyStateGlobal
 {
 public:
     Private(Display* display, KeyState* q_ptr);
-    ~Private() override;
+
     static void fetchStatesCallback(KeyStateBind* bind);
 
     std::array<State, 3> key_states{Unlocked};

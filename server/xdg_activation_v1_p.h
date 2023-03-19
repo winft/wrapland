@@ -29,7 +29,6 @@ class XdgActivationV1::Private : public XdgActivationV1Global
 {
 public:
     Private(Display* display, XdgActivationV1* q_ptr);
-    ~Private() override;
 
 private:
     static void getActivationTokenCallback(XdgActivationV1Bind* bind, uint32_t id);

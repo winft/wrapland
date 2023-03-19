@@ -33,11 +33,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/buffer.h"
 #include "../../server/client.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/idle_inhibit_v1.h"
 #include "../../server/surface.h"
 
+#include "../../tests/globals.h"
 #include "../../tests/helpers.h"
 
 #include <wayland-client-protocol.h>
@@ -103,8 +104,10 @@ void TestSurface::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.idle_inhibit_manager_v1 = server.display->createIdleInhibitManager();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.idle_inhibit_manager_v1
+        = std::make_unique<Wrapland::Server::IdleInhibitManagerV1>(server.display.get());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;

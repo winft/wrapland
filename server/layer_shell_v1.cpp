@@ -24,8 +24,6 @@ LayerShellV1::Private::Private(Display* display, LayerShellV1* qptr)
     create();
 }
 
-LayerShellV1::Private::~Private() = default;
-
 LayerSurfaceV1::Layer get_layer(uint32_t layer)
 {
     switch (layer) {

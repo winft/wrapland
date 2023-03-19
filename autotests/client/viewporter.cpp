@@ -27,18 +27,19 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/surface.h"
 #include "../../server/viewporter.h"
 #include "../../server/wayland/client.h"
 
-#include <wayland-client-protocol.h>
-#include <wayland-viewporter-client-protocol.h>
+#include "../../tests/globals.h"
 
 #include <QImage>
 #include <QPainter>
 #include <QtTest>
+#include <wayland-client-protocol.h>
+#include <wayland-viewporter-client-protocol.h>
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -97,8 +98,10 @@ void TestViewporter::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.viewporter = server.display->createViewporter();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.viewporter
+        = std::make_unique<Wrapland::Server::Viewporter>(server.display.get());
 
     // setup connection
     m_connection = new Clt::ConnectionThread;

@@ -42,7 +42,6 @@ public:
     bool broadcast();
     void done();
 
-    Display* displayHandle;
     Server::output* output;
 
 private:

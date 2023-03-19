@@ -36,6 +36,7 @@ class output::Private
 {
 public:
     Private(output_metadata metadata, Display* display, output* q_ptr);
+    ~Private();
 
     void update_client_scale();
     void done();

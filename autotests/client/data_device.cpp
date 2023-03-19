@@ -30,17 +30,20 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/data_device.h"
+#include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
 #include "../../server/drag_pool.h"
-#include "../../server/globals.h"
 #include "../../server/pointer_pool.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
 
-#include <wayland-client.h>
+#include "../../tests/globals.h"
 
 #include <QtTest>
+#include <wayland-client.h>
 
 class TestDataDevice : public QObject
 {
@@ -119,15 +122,16 @@ void TestDataDevice::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.data_device_manager = server.display->createDataDeviceManager();
-
+    server.globals.data_device_manager
+        = std::make_unique<Wrapland::Server::data_device_manager>(server.display.get());
     QVERIFY(device_manager_spy.wait());
     m_device_manager
         = registry.createDataDeviceManager(device_manager_spy.first().first().value<quint32>(),
                                            device_manager_spy.first().last().value<quint32>(),
                                            this);
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasPointer(true);
 
@@ -139,7 +143,8 @@ void TestDataDevice::init()
     QVERIFY(pointer_changed_spy.isValid());
     QVERIFY(pointer_changed_spy.wait());
 
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
     QVERIFY(compositor_spy.wait());
     m_compositor = registry.createCompositor(compositor_spy.first().first().value<quint32>(),

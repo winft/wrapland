@@ -31,7 +31,6 @@ class LayerShellV1::Private : public LayerShellV1Global
 {
 public:
     Private(Display* display, LayerShellV1* qptr);
-    ~Private() override;
 
 private:
     static void getCallback(LayerShellV1Bind* bind,

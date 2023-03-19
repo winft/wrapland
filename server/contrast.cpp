@@ -43,10 +43,9 @@ const struct org_kde_kwin_contrast_manager_interface ContrastManager::Private::s
 ContrastManager::Private::Private(Display* display, ContrastManager* q_ptr)
     : ContrastManagerGlobal(q_ptr, display, &org_kde_kwin_contrast_manager_interface, &s_interface)
 {
+    display->globals.contrast_manager = q_ptr;
     create();
 }
-
-ContrastManager::Private::~Private() = default;
 
 void ContrastManager::Private::createCallback(ContrastManagerBind* bind,
                                               uint32_t id,

@@ -31,9 +31,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
+#include "../../server/data_device_manager.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 class SelectionTest : public QObject
 {
@@ -79,12 +83,15 @@ void SelectionTest::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasKeyboard(true);
-    server.globals.data_device_manager = server.display->createDataDeviceManager();
+    server.globals.data_device_manager
+        = std::make_unique<Wrapland::Server::data_device_manager>(server.display.get());
 
     // setup connection
     setupConnection(&m_client1);

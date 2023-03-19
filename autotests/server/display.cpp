@@ -93,26 +93,26 @@ void TestServerDisplay::testAddRemoveOutput()
     output1->set_enabled(true);
     output1->done();
 
-    QCOMPARE(display.outputs().size(), 1);
-    QCOMPARE(display.outputs()[0], output1->wayland_output());
+    QCOMPARE(display.globals.outputs.size(), 1);
+    QCOMPARE(display.globals.outputs[0]->wayland_output(), output1->wayland_output());
 
     // create a second output
     auto output2 = std::make_unique<Wrapland::Server::output>(&display);
     output2->set_enabled(true);
     output2->done();
 
-    QCOMPARE(display.outputs().size(), 2);
-    QCOMPARE(display.outputs()[0], output1->wayland_output());
-    QCOMPARE(display.outputs()[1], output2->wayland_output());
+    QCOMPARE(display.globals.outputs.size(), 2);
+    QCOMPARE(display.globals.outputs[0]->wayland_output(), output1->wayland_output());
+    QCOMPARE(display.globals.outputs[1]->wayland_output(), output2->wayland_output());
 
     // remove the first output
     output1.reset();
-    QCOMPARE(display.outputs().size(), 1);
-    QCOMPARE(display.outputs()[0], output2->wayland_output());
+    QCOMPARE(display.globals.outputs.size(), 1);
+    QCOMPARE(display.globals.outputs[0]->wayland_output(), output2->wayland_output());
 
     // and delete the second
     output2.reset();
-    QVERIFY(display.outputs().empty());
+    QVERIFY(display.globals.outputs.empty());
 }
 
 void TestServerDisplay::testClientConnection()
@@ -222,7 +222,7 @@ void TestServerDisplay::testOutputManagement()
     Display display;
     display.set_socket_name(std::string("wrapland-test-0"));
     display.start();
-    auto output_management = display.createOutputManagementV1();
+    auto output_management = std::make_unique<Wrapland::Server::OutputManagementV1>(&display);
 }
 
 void TestServerDisplay::testAutoSocketName()

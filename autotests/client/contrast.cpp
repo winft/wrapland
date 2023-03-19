@@ -28,11 +28,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/contrast.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 #include <wayland-util.h>
 
@@ -113,15 +115,15 @@ void TestContrast::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.compositor = server.display->createCompositor();
-
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
                                              compositorSpy.first().last().value<quint32>(),
                                              this);
 
-    server.globals.contrast_manager = server.display->createContrastManager();
-
+    server.globals.contrast_manager
+        = std::make_unique<Wrapland::Server::ContrastManager>(server.display.get());
     QVERIFY(contrastSpy.wait());
     m_contrastManager = registry.createContrastManager(contrastSpy.first().first().value<quint32>(),
                                                        contrastSpy.first().last().value<quint32>(),

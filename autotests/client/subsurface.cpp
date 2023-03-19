@@ -30,11 +30,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/subcompositor.h"
 #include "../../server/surface.h"
 
+#include "../../tests/globals.h"
 #include "../../tests/helpers.h"
 
 #include <wayland-client.h>
@@ -132,8 +133,10 @@ void TestSubsurface::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.subcompositor = server.display->createSubCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.subcompositor
+        = std::make_unique<Wrapland::Server::Subcompositor>(server.display.get());
 
     QVERIFY(subCompositorSpy.wait());
     m_subCompositor
@@ -188,7 +191,7 @@ void TestSubsurface::cleanup()
 void TestSubsurface::testCreate()
 {
     QSignalSpy surfaceCreatedSpy(server.globals.compositor.get(),
-                                 SIGNAL(surfaceCreated(Wrapland::Server::Surface*)));
+                                 &Wrapland::Server::Compositor::surfaceCreated);
     QVERIFY(surfaceCreatedSpy.isValid());
 
     // create two Surfaces
@@ -205,7 +208,7 @@ void TestSubsurface::testCreate()
     QVERIFY(serverParentSurface);
 
     QSignalSpy subsurfaceCreatedSpy(server.globals.subcompositor.get(),
-                                    SIGNAL(subsurfaceCreated(Wrapland::Server::Subsurface*)));
+                                    &Wrapland::Server::Subcompositor::subsurfaceCreated);
     QVERIFY(subsurfaceCreatedSpy.isValid());
 
     // create subsurface for surface of parent

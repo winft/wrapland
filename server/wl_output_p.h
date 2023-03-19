@@ -41,7 +41,6 @@ public:
     void done();
     void done(WlOutputBind* bind);
 
-    Display* displayHandle;
     Server::output* output;
 
 private:

@@ -13,10 +13,13 @@
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/input_method_v2.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 #include <linux/input.h>
 
@@ -71,13 +74,16 @@ void input_method_v2_test::init()
 
     server.display->createShm();
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.push_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasKeyboard(true);
 
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.text_input_manager_v3 = server.display->createTextInputManagerV3();
-    server.globals.input_method_manager_v2 = server.display->createInputMethodManagerV2();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.text_input_manager_v3
+        = std::make_unique<Wrapland::Server::text_input_manager_v3>(server.display.get());
+    server.globals.input_method_manager_v2
+        = std::make_unique<Wrapland::Server::input_method_manager_v2>(server.display.get());
 
     // setup connection
     client1.connection = new Wrapland::Client::ConnectionThread;

@@ -392,7 +392,6 @@ set(SERVER_LIB_HEADERS
   drm_lease_v1.h
   fake_input.h
   filtered_display.h
-  globals.h
   idle_notify_v1.h
   idle_inhibit_v1.h
   input_method_v2.h

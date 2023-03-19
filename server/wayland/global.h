@@ -19,8 +19,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QDebug>
-
 #include "bind.h"
 #include "display.h"
 #include "nucleus.h"
@@ -36,12 +34,134 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
+
 class Client;
 class Display;
 
 namespace Wayland
 {
+
 class Client;
+
+template<typename Global>
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+auto& global_get_display_ref(Global& global)
+{
+    using Handle = decltype(global.handle);
+    auto& globals = global.display()->handle->globals;
+
+    if constexpr (std::is_same_v<Handle, decltype(globals.compositor)>) {
+        return globals.compositor;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.subcompositor)>) {
+        return globals.subcompositor;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.linux_dmabuf_v1)>) {
+        return globals.linux_dmabuf_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.viewporter)>) {
+        return globals.viewporter;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.presentation_manager)>) {
+        return globals.presentation_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.shadow_manager)>) {
+        return globals.shadow_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.blur_manager)>) {
+        return globals.blur_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.slide_manager)>) {
+        return globals.slide_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.contrast_manager)>) {
+        return globals.contrast_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.xdg_output_manager)>) {
+        return globals.xdg_output_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.dpms_manager)>) {
+        return globals.dpms_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.output_management_v1)>) {
+        return globals.output_management_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.relative_pointer_manager_v1)>) {
+        return globals.relative_pointer_manager_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.pointer_gestures_v1)>) {
+        return globals.pointer_gestures_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.pointer_constraints_v1)>) {
+        return globals.pointer_constraints_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.text_input_manager_v2)>) {
+        return globals.text_input_manager_v2;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.text_input_manager_v3)>) {
+        return globals.text_input_manager_v3;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.input_method_manager_v2)>) {
+        return globals.input_method_manager_v2;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.key_state)>) {
+        return globals.key_state;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.fake_input)>) {
+        return globals.fake_input;
+    } else if constexpr (std::is_same_v<Handle,
+                                        decltype(globals.keyboard_shortcuts_inhibit_manager_v1)>) {
+        return globals.keyboard_shortcuts_inhibit_manager_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.virtual_keyboard_manager_v1)>) {
+        return globals.virtual_keyboard_manager_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.data_device_manager)>) {
+        return globals.data_device_manager;
+    } else if constexpr (std::is_same_v<Handle,
+                                        decltype(globals.primary_selection_device_manager)>) {
+        return globals.primary_selection_device_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.data_control_manager_v1)>) {
+        return globals.data_control_manager_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.xdg_shell)>) {
+        return globals.xdg_shell;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.xdg_foreign)>) {
+        return globals.xdg_foreign;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.xdg_activation_v1)>) {
+        return globals.xdg_activation_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.appmenu_manager)>) {
+        return globals.appmenu_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.xdg_decoration_manager)>) {
+        return globals.xdg_decoration_manager;
+    } else if constexpr (std::is_same_v<Handle,
+                                        decltype(globals.server_side_decoration_palette_manager)>) {
+        return globals.server_side_decoration_palette_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.layer_shell_v1)>) {
+        return globals.layer_shell_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.plasma_activation_feedback)>) {
+        return globals.plasma_activation_feedback;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.plasma_virtual_desktop_manager)>) {
+        return globals.plasma_virtual_desktop_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.plasma_shell)>) {
+        return globals.plasma_shell;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.plasma_window_manager)>) {
+        return globals.plasma_window_manager;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.idle_notifier_v1)>) {
+        return globals.idle_notifier_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.kde_idle)>) {
+        return globals.kde_idle;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.drm_lease_device_v1)>) {
+        return globals.drm_lease_device_v1;
+    } else if constexpr (std::is_same_v<Handle, decltype(globals.idle_inhibit_manager_v1)>) {
+        return globals.idle_inhibit_manager_v1;
+    } else {
+        // Return a nonsensical reference for exclusion with concepts.
+        return global;
+    }
+}
+
+template<typename Global>
+void global_register_display(Global& global)
+{
+    if constexpr (std::same_as<std::remove_reference_t<decltype(global_get_display_ref(global))>,
+                               decltype(global.handle)>) {
+        global_get_display_ref(global) = global.handle;
+    }
+}
+
+template<typename Global>
+void global_unregister_display(Global& global)
+{
+    if (!global.display()) {
+        return;
+    }
+
+    if constexpr (std::same_as<std::remove_reference_t<decltype(global_get_display_ref(global))>,
+                               decltype(global.handle)>) {
+        if (auto& ptr = global_get_display_ref(global); ptr == global.handle) {
+            ptr = nullptr;
+        }
+    }
+}
 
 template<typename Handle, int Version = 1>
 class Global
@@ -57,6 +177,7 @@ public:
 
     virtual ~Global()
     {
+        global_unregister_display(*this);
         nucleus->remove();
     }
 
@@ -152,6 +273,7 @@ protected:
         : handle{handle}
         , nucleus{new Nucleus<type>(this, display, interface, implementation)}
     {
+        global_register_display(*this);
         // TODO(romangg): allow to create and destroy Globals while keeping the object existing (but
         //                always create on ctor call?).
     }

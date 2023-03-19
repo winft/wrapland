@@ -54,9 +54,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/xdgdecoration.h"
 
 #include "../../server/blur.h"
+#include "../../server/compositor.h"
 #include "../../server/contrast.h"
+#include "../../server/data_device_manager.h"
 #include "../../server/drm_lease_v1.h"
-#include "../../server/globals.h"
 #include "../../server/idle_inhibit_v1.h"
 #include "../../server/idle_notify_v1.h"
 #include "../../server/input_method_v2.h"
@@ -66,11 +67,15 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/plasma_activation_feedback.h"
 #include "../../server/presentation_time.h"
 #include "../../server/primary_selection.h"
+#include "../../server/seat.h"
 #include "../../server/slide.h"
 #include "../../server/text_input_v2.h"
 #include "../../server/text_input_v3.h"
 #include "../../server/virtual_keyboard_v1.h"
 #include "../../server/xdg_decoration.h"
+#include "../../server/xdg_shell.h"
+
+#include "../../tests/globals.h"
 
 #include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
@@ -164,9 +169,10 @@ void TestWaylandRegistry::init()
 
     server.globals.compositor
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
-    server.globals.outputs.push_back(
+    server.globals.outputs.emplace_back(
         std::make_unique<Wrapland::Server::output>(server.display.get()));
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.globals.subcompositor
         = std::make_unique<Wrapland::Server::Subcompositor>(server.display.get());
     server.globals.data_device_manager

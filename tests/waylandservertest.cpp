@@ -86,9 +86,9 @@ int main(int argc, char** argv)
     Wrapland::Server::Display display;
     display.start();
     display.createShm();
-    auto compositor = display.createCompositor();
 
-    auto xdg_shell = display.createXdgShell();
+    auto compositor = std::make_unique<Wrapland::Server::Compositor>(&display);
+    auto xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(&display);
 
     Wrapland::Server::output_metadata meta{.physical_size = {10, 10}};
     auto output = std::make_unique<Wrapland::Server::output>(meta, &display);
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 
     QGuiApplication app(argc, argv);
 
-    auto seat = display.createSeat();
+    auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     seat->setName("testSeat0");
 
     return app.exec();
