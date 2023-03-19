@@ -35,11 +35,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-output::Private::Private(Display* display, output* q_ptr)
+output::Private::Private(output_metadata metadata, Display* display, output* q_ptr)
     : display_handle(display)
     , device{new OutputDeviceV1(q_ptr, display)}
     , q_ptr{q_ptr}
 {
+    if (metadata.description.empty()) {
+        metadata.description = output_generate_description(metadata);
+    }
+    pending.meta = std::move(metadata);
+    published.meta = pending.meta;
 }
 
 void output::Private::done()
@@ -143,7 +148,12 @@ bool output_mode::operator!=(output_mode const& mode) const
 }
 
 output::output(Display* display)
-    : d_ptr(new Private(display, this))
+    : output(output_metadata(), display)
+{
+}
+
+output::output(output_metadata metadata, Display* display)
+    : d_ptr(new Private(std::move(metadata), display, this))
 {
 }
 
@@ -184,24 +194,25 @@ void output::set_connector_id(int id)
     d_ptr->connector_id = id;
 }
 
-void output::generate_description()
+std::string output_generate_description(output_metadata const& data)
 {
-    auto& meta = d_ptr->pending.meta;
     std::string descr;
-    if (!meta.make.empty()) {
-        descr = meta.make;
+
+    if (!data.make.empty()) {
+        descr = data.make;
     }
-    if (!meta.model.empty()) {
-        descr = (descr.empty() ? "" : descr + " ") + meta.model;
+    if (!data.model.empty()) {
+        descr = (descr.empty() ? "" : descr + " ") + data.model;
     }
-    if (!meta.name.empty()) {
+    if (!data.name.empty()) {
         if (descr.empty()) {
-            descr = meta.name;
+            descr = data.name;
         } else {
-            descr += " (" + meta.name + ")";
+            descr += " (" + data.name + ")";
         }
     }
-    meta.description = descr;
+
+    return descr;
 }
 
 bool output::enabled() const

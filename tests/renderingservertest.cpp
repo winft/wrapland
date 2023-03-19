@@ -271,9 +271,8 @@ int main(int argc, char** argv)
     auto shell = display.createXdgShell();
     display.createShm();
 
-    auto output = std::make_unique<Wrapland::Server::output>(&display);
     Wrapland::Server::output_metadata meta{.physical_size = {269, 202}};
-    output->set_metadata(meta);
+    auto output = std::make_unique<Wrapland::Server::output>(meta, &display);
     const QSize windowSize(1024, 768);
     output->add_mode(output_mode{windowSize});
 

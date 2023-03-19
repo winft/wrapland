@@ -95,6 +95,13 @@ struct output_state {
 };
 
 /**
+ * Produces a description from available data. The pattern will be:
+ * - if make or model available: "<make> <model> (<name>)"
+ * - otherwise: "<name>"
+ */
+WRAPLANDSERVER_EXPORT std::string output_generate_description(output_metadata const& data);
+
+/**
  * Central class for outputs in Wrapland. Manages and forwards all required information to and from
  * other output related classes such that compositors only need to interact with the Output class
  * under normal circumstances.
@@ -104,20 +111,19 @@ class WRAPLANDSERVER_EXPORT output : public QObject
     Q_OBJECT
 public:
     explicit output(Display* display);
+    output(output_metadata metadata, Display* display);
     ~output() override;
 
     output_metadata const& get_metadata() const;
-    int connector_id() const;
-
-    void set_metadata(output_metadata const& data);
-    void set_connector_id(int id);
 
     /**
-     * Produces a description from available data. The pattern will be:
-     * - if make or model available: "<make> <model> (<name>)"
-     * - otherwise: "<name>"
+     * Override of metadata. Prefer setting metadata through the ctor. Not all metadata may be
+     * updated on all protocol objects.
      */
-    void generate_description();
+    void set_metadata(output_metadata const& data);
+
+    int connector_id() const;
+    void set_connector_id(int id);
 
     bool enabled() const;
     void set_enabled(bool enabled);

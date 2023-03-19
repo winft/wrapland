@@ -73,17 +73,14 @@ void TestXdgOutput::init()
     server.display->start();
     QVERIFY(server.display->running());
 
+    Wrapland::Server::output_metadata meta{.name = m_name, .make = m_make, .model = m_model};
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(meta, server.display.get()));
+
     auto&& server_output = server.globals.outputs.back();
     server_output->add_mode(Wrapland::Server::output_mode{QSize(1920, 1080), 60000, true, 1});
     server_output->set_mode(1);
     server_output->set_enabled(true);
-
-    Wrapland::Server::output_metadata meta{.name = m_name, .make = m_make, .model = m_model};
-    server_output->set_metadata(meta);
-
-    server_output->generate_description();
     m_description = server_output->get_metadata().description;
 
     // Not a sensible position for one monitor but works for this test. And a 1.5 scale factor.

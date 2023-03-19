@@ -90,9 +90,8 @@ int main(int argc, char** argv)
 
     auto xdg_shell = display.createXdgShell();
 
-    auto output = std::make_unique<Wrapland::Server::output>(&display);
     Wrapland::Server::output_metadata meta{.physical_size = {10, 10}};
-    output->set_metadata(meta);
+    auto output = std::make_unique<Wrapland::Server::output>(meta, &display);
     output->add_mode(Wrapland::Server::output_mode{QSize(1024, 768)});
 
     // starts XWayland by forking and opening a pipe

@@ -89,8 +89,13 @@ void TestOutputDevice::init()
     server.display->start();
     QVERIFY(server.display->running());
 
+    Srv::output_metadata meta{.name = m_name,
+                              .make = m_make,
+                              .model = m_model,
+                              .serial_number = m_serialNumber,
+                              .physical_size = {200, 100}};
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(meta, server.display.get()));
     server.output = server.globals.outputs.back().get();
 
     Srv::output_mode m0;
@@ -112,14 +117,6 @@ void TestOutputDevice::init()
 
     server.output->set_mode(1);
 
-    Srv::output_metadata meta{.name = m_name,
-                              .make = m_make,
-                              .model = m_model,
-                              .serial_number = m_serialNumber,
-                              .physical_size = {200, 100}};
-    server.output->set_metadata(meta);
-
-    server.output->generate_description();
     m_description = server.output->get_metadata().description;
     QCOMPARE(m_description, m_make + " " + m_model + " (" + m_name + ")");
 

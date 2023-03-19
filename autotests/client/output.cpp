@@ -87,8 +87,9 @@ void TestOutput::init()
     server.display->start();
     QVERIFY(server.display->running());
 
+    Srv::output_metadata meta{.name = "HDMI-A", .make = "Foocorp", .model = "Barmodel"};
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(meta, server.display.get()));
     server.output = server.globals.outputs.back().get();
 
     QCOMPARE(server.output->mode_size(), QSize());
@@ -100,11 +101,7 @@ void TestOutput::init()
     server.output->add_mode(mode);
 
     server.output->add_mode(Srv::output_mode{QSize(1280, 1024), 90000});
-
     QCOMPARE(server.output->mode_size(), QSize(1280, 1024));
-
-    Srv::output_metadata meta{.name = "HDMI-A", .make = "Foocorp", .model = "Barmodel"};
-    server.output->set_metadata(meta);
 
     server.output->set_mode(mode);
     QCOMPARE(server.output->mode_size(), QSize(1024, 768));
