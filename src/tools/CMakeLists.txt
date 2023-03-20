@@ -1,5 +1,3 @@
-add_subdirectory(testserver)
-
 include(ECMMarkAsTest)
 
 set(scannerSRCS generator.cpp)
