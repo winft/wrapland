@@ -66,7 +66,7 @@ const struct zxdg_exporter_v2_interface XdgExporterV2::Private::s_interface = {
     cb<exportToplevelCallback>,
 };
 
-XdgExportedV2* XdgExporterV2::exportedSurface(QString const& handle)
+XdgExportedV2* XdgExporterV2::exportedSurface(QString const& handle) const
 {
     auto it = d_ptr->exportedSurfaces.constFind(handle);
     if (it != d_ptr->exportedSurfaces.constEnd()) {
@@ -205,12 +205,12 @@ XdgImporterV2::~XdgImporterV2()
     delete d_ptr;
 }
 
-void XdgImporterV2::setExporter(XdgExporterV2* exporter)
+void XdgImporterV2::setExporter(XdgExporterV2* exporter) const
 {
     d_ptr->exporter = exporter;
 }
 
-Surface* XdgImporterV2::parentOf(Surface* surface)
+Surface* XdgImporterV2::parentOf(Surface* surface) const
 {
     if (!d_ptr->parents.contains(surface)) {
         return nullptr;

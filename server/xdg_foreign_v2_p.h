@@ -47,7 +47,7 @@ public:
     explicit XdgExporterV2(Display* display);
     ~XdgExporterV2() override;
 
-    XdgExportedV2* exportedSurface(QString const& handle);
+    XdgExportedV2* exportedSurface(QString const& handle) const;
 
 private:
     class Private;
@@ -60,9 +60,9 @@ class Q_DECL_HIDDEN XdgImporterV2 : public QObject
 public:
     explicit XdgImporterV2(Display* display);
     ~XdgImporterV2() override;
-    void setExporter(XdgExporterV2* exporter);
+    void setExporter(XdgExporterV2* exporter) const;
 
-    Surface* parentOf(Surface* surface);
+    Surface* parentOf(Surface* surface) const;
 
 Q_SIGNALS:
     void parentChanged(Wrapland::Server::Surface* parent, Wrapland::Server::Surface* child);
