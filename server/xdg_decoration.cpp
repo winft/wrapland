@@ -81,7 +81,7 @@ void XdgDecorationManager::Private::getToplevelDecorationCallback(XdgDecorationM
         bind->post_error(ZXDG_TOPLEVEL_DECORATION_V1_ERROR_ORPHANED, "No xdg-toplevel found.");
         return;
     }
-    if (priv->m_decorations.count(toplevel) > 0) {
+    if (priv->m_decorations.contains(toplevel)) {
         bind->post_error(ZXDG_TOPLEVEL_DECORATION_V1_ERROR_ALREADY_CONSTRUCTED,
                          "xdg decoration already created for this xdg-toplevel.");
         return;
