@@ -174,6 +174,8 @@ Q_SIGNALS:
 private:
     friend class OutputDeviceV1;
     friend class WlOutput;
+    friend class wlr_output_configuration_head_v1;
+    friend class wlr_output_head_v1;
     friend class XdgOutput;
 
     class Private;

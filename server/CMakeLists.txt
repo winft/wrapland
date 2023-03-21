@@ -61,6 +61,11 @@ set(SERVER_LIB_SRCS
   wayland/client.cpp
   wayland/display.cpp
   wl_output.cpp
+  wlr_output_configuration_head_v1.cpp
+  wlr_output_configuration_v1.cpp
+  wlr_output_head_v1.cpp
+  wlr_output_manager_v1.cpp
+  wlr_output_mode_v1.cpp
   xdg_activation_v1.cpp
   xdg_decoration.cpp
   xdg_foreign.cpp
@@ -235,6 +240,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-output-management-unstable-v1.xml
+  BASENAME wlr-output-management-v1
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
   PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-output/xdg-output-unstable-v1.xml
   BASENAME xdg-output
 )
@@ -326,6 +336,8 @@ set(SERVER_GENERATED_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-virtual-keyboard-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-server-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-output-management-v1-unstable-v1-client-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-output-management-v1-unstable-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-activation-v1-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-activation-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-client-protocol.h
@@ -435,6 +447,9 @@ set(SERVER_LIB_HEADERS
   viewporter.h
   virtual_keyboard_v1.h
   wl_output.h
+  wlr_output_configuration_head_v1.h
+  wlr_output_configuration_v1.h
+  wlr_output_manager_v1.h
   xdg_activation_v1.h
   xdg_decoration.h
   xdg_output.h

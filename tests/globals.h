@@ -43,12 +43,14 @@
 #include "../../server/text_input_v3.h"
 #include "../../server/viewporter.h"
 #include "../../server/virtual_keyboard_v1.h"
+#include "../../server/wlr_output_manager_v1.h"
 #include "../../server/xdg_activation_v1.h"
 #include "../../server/xdg_decoration.h"
 #include "../../server/xdg_foreign.h"
 #include "../../server/xdg_output.h"
 #include "../../server/xdg_shell.h"
 
+#include <deque>
 #include <memory>
 #include <vector>
 
@@ -76,7 +78,7 @@ struct globals {
     std::unique_ptr<Server::ContrastManager> contrast_manager;
 
     /// Graphical outputs and their management
-    std::vector<std::unique_ptr<output>> outputs;
+    std::deque<std::unique_ptr<output>> outputs;
     std::unique_ptr<Server::output_manager> output_manager;
     std::unique_ptr<Server::DpmsManager> dpms_manager;
 

@@ -70,7 +70,7 @@ WlOutput::Private::geometry_args(output_state const& state)
                            to_subpixel(state.subpixel),
                            state.meta.make.c_str(),
                            state.meta.model.c_str(),
-                           output::Private::to_transform(state.transform));
+                           output_to_transform(state.transform));
 }
 
 void WlOutput::Private::bindInit(WlOutputBind* bind)

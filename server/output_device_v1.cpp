@@ -71,8 +71,7 @@ void OutputDeviceV1::Private::bindInit(OutputDeviceV1Bind* bind)
     }
     sendMode(bind, output->d_ptr->published.mode);
 
-    send<zkwinft_output_device_v1_send_transform>(bind,
-                                                  output::Private::to_transform(state.transform));
+    send<zkwinft_output_device_v1_send_transform>(bind, output_to_transform(state.transform));
     send<zkwinft_output_device_v1_send_geometry>(bind, geometry_args(state));
 
     send<zkwinft_output_device_v1_send_done>(bind);
@@ -123,8 +122,7 @@ bool OutputDeviceV1::Private::broadcast()
     }
 
     if (published.transform != pending.transform) {
-        send<zkwinft_output_device_v1_send_transform>(
-            output::Private::to_transform(pending.transform));
+        send<zkwinft_output_device_v1_send_transform>(output_to_transform(pending.transform));
         changed = true;
     }
 

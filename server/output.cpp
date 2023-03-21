@@ -24,17 +24,64 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_manager.h"
 #include "utils.h"
 #include "wl_output_p.h"
+#include "wlr_output_head_v1_p.h"
 #include "xdg_output_p.h"
 
 #include "wayland/client.h"
 #include "wayland/display.h"
 
+#include <QRectF>
 #include <cassert>
 #include <functional>
-#include <wayland-server.h>
 
 namespace Wrapland::Server
 {
+
+wl_output_transform output_to_transform(output_transform transform)
+{
+    switch (transform) {
+    case output_transform::normal:
+        return WL_OUTPUT_TRANSFORM_NORMAL;
+    case output_transform::rotated_90:
+        return WL_OUTPUT_TRANSFORM_90;
+    case output_transform::rotated_180:
+        return WL_OUTPUT_TRANSFORM_180;
+    case output_transform::rotated_270:
+        return WL_OUTPUT_TRANSFORM_270;
+    case output_transform::flipped:
+        return WL_OUTPUT_TRANSFORM_FLIPPED;
+    case output_transform::flipped_90:
+        return WL_OUTPUT_TRANSFORM_FLIPPED_90;
+    case output_transform::flipped_180:
+        return WL_OUTPUT_TRANSFORM_FLIPPED_180;
+    case output_transform::flipped_270:
+        return WL_OUTPUT_TRANSFORM_FLIPPED_270;
+    }
+    abort();
+}
+
+output_transform transform_to_output(wl_output_transform transform)
+{
+    switch (transform) {
+    case WL_OUTPUT_TRANSFORM_NORMAL:
+        return output_transform::normal;
+    case WL_OUTPUT_TRANSFORM_90:
+        return output_transform::rotated_90;
+    case WL_OUTPUT_TRANSFORM_180:
+        return output_transform::rotated_180;
+    case WL_OUTPUT_TRANSFORM_270:
+        return output_transform::rotated_270;
+    case WL_OUTPUT_TRANSFORM_FLIPPED:
+        return output_transform::flipped;
+    case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+        return output_transform::flipped_90;
+    case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+        return output_transform::flipped_180;
+    case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+        return output_transform::flipped_270;
+    }
+    abort();
+}
 
 output::Private::Private(output_metadata metadata, output_manager& manager, output* q_ptr)
     : manager{manager}
@@ -83,6 +130,13 @@ void output::Private::done()
             }
         }
     }
+    if (auto& wlr_man = manager.wlr_manager_v1) {
+        if (wlr_head_v1) {
+            wlr_head_v1->broadcast();
+        } else {
+            wlr_head_v1 = std::make_unique<wlr_output_head_v1>(*q_ptr, *wlr_man);
+        }
+    }
     if (device->d_ptr->broadcast()) {
         device->d_ptr->done();
     }
@@ -112,29 +166,6 @@ int32_t output::Private::get_mode_flags(output_mode const& mode, output_state co
         flags |= WL_OUTPUT_MODE_PREFERRED;
     }
     return flags;
-}
-
-int32_t output::Private::to_transform(output_transform transform)
-{
-    switch (transform) {
-    case output_transform::normal:
-        return WL_OUTPUT_TRANSFORM_NORMAL;
-    case output_transform::rotated_90:
-        return WL_OUTPUT_TRANSFORM_90;
-    case output_transform::rotated_180:
-        return WL_OUTPUT_TRANSFORM_180;
-    case output_transform::rotated_270:
-        return WL_OUTPUT_TRANSFORM_270;
-    case output_transform::flipped:
-        return WL_OUTPUT_TRANSFORM_FLIPPED;
-    case output_transform::flipped_90:
-        return WL_OUTPUT_TRANSFORM_FLIPPED_90;
-    case output_transform::flipped_180:
-        return WL_OUTPUT_TRANSFORM_FLIPPED_180;
-    case output_transform::flipped_270:
-        return WL_OUTPUT_TRANSFORM_FLIPPED_270;
-    }
-    abort();
 }
 
 void output::Private::update_client_scale()

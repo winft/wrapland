@@ -16,6 +16,7 @@ namespace Wrapland::Server
 class output;
 class Display;
 class OutputManagementV1;
+class wlr_output_manager_v1;
 class XdgOutputManager;
 
 class WRAPLANDSERVER_EXPORT output_manager
@@ -24,14 +25,18 @@ public:
     explicit output_manager(Display& display);
     virtual ~output_manager();
 
+    void commit_changes() const;
+
     XdgOutputManager& create_xdg_manager();
     OutputManagementV1& create_management_v1();
+    wlr_output_manager_v1& create_wlr_manager_v1();
 
     Display& display;
     std::vector<output*> outputs;
 
     std::unique_ptr<XdgOutputManager> xdg_manager;
     std::unique_ptr<OutputManagementV1> management_v1;
+    std::unique_ptr<Server::wlr_output_manager_v1> wlr_manager_v1;
 };
 
 }

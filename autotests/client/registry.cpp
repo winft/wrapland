@@ -97,6 +97,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-text-input-v3-client-protocol.h>
 #include <wayland-virtual-keyboard-v1-client-protocol.h>
 #include <wayland-wlr-data-control-v1-client-protocol.h>
+#include <wayland-wlr-output-management-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-xdg-shell-client-protocol.h>
 
@@ -137,6 +138,7 @@ private Q_SLOTS:
     void testBindPrimarySelectionDeviceManager();
     void testBindIdleNotifierV1();
     void testBindIdleIhibitManagerUnstableV1();
+    void testBindWlrOutputManagerUnstableV1();
     void testRemoval();
     void testOutOfSyncRemoval();
     void testDestroy();
@@ -184,6 +186,7 @@ void TestWaylandRegistry::init()
         = std::make_unique<Wrapland::Server::drm_lease_device_v1>(server.display.get());
     server.globals.output_manager->create_management_v1();
     server.globals.output_manager->create_xdg_manager();
+    server.globals.output_manager->create_wlr_manager_v1();
     server.globals.blur_manager
         = std::make_unique<Wrapland::Server::BlurManager>(server.display.get());
     server.globals.contrast_manager
@@ -511,6 +514,15 @@ void TestWaylandRegistry::testBindIdleIhibitManagerUnstableV1()
               SIGNAL(idleInhibitManagerUnstableV1Announced(quint32, quint32)),
               bindIdleInhibitManagerUnstableV1,
               zwp_idle_inhibit_manager_v1_destroy)
+    QTest::qWait(100);
+}
+
+void TestWaylandRegistry::testBindWlrOutputManagerUnstableV1()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::WlrOutputManagerV1,
+              SIGNAL(wlrOutputManagerV1Announced(quint32, quint32)),
+              bindWlrOutputManagerV1,
+              zwlr_output_manager_v1_destroy)
     QTest::qWait(100);
 }
 

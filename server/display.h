@@ -75,6 +75,7 @@ class text_input_manager_v2;
 class text_input_manager_v3;
 class Viewporter;
 class virtual_keyboard_manager_v1;
+class wlr_output_manager_v1;
 class XdgActivationV1;
 class XdgDecorationManager;
 class XdgForeign;
@@ -141,6 +142,7 @@ public:
         Server::XdgOutputManager* xdg_output_manager{nullptr};
         Server::DpmsManager* dpms_manager{nullptr};
         Server::OutputManagementV1* output_management_v1{nullptr};
+        Server::wlr_output_manager_v1* wlr_output_manager_v1{nullptr};
 
         /// Basic input
         std::vector<Server::Seat*> seats;

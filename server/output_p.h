@@ -21,16 +21,20 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "output.h"
 
-#include <QRectF>
+#include <wayland-server.h>
 
 namespace Wrapland::Server
 {
 class Client;
 class OutputDeviceV1;
 class WlOutput;
+class wlr_output_head_v1;
 class XdgOutput;
 
 class Display;
+
+wl_output_transform output_to_transform(output_transform transform);
+output_transform transform_to_output(wl_output_transform transform);
 
 class output::Private
 {
@@ -47,7 +51,6 @@ public:
     void done_wl(Client* client) const;
 
     static int32_t get_mode_flags(output_mode const& mode, output_state const& state);
-    static int32_t to_transform(output_transform transform);
 
     output_manager& manager;
 
@@ -65,6 +68,7 @@ public:
     std::unique_ptr<OutputDeviceV1> device;
     std::unique_ptr<WlOutput> wayland_output;
     std::unique_ptr<XdgOutput> xdg_output;
+    std::unique_ptr<wlr_output_head_v1> wlr_head_v1;
 
     output* q_ptr;
 
