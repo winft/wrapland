@@ -35,7 +35,7 @@ class Display;
 class output::Private
 {
 public:
-    Private(output_metadata metadata, Display* display, output* q_ptr);
+    Private(output_metadata metadata, output_manager& manager, output* q_ptr);
     ~Private();
 
     void update_client_scale();
@@ -49,7 +49,7 @@ public:
     static int32_t get_mode_flags(output_mode const& mode, output_state const& state);
     static int32_t to_transform(output_transform transform);
 
-    Display* display_handle;
+    output_manager& manager;
 
     int connector_id{0};
     std::vector<output_mode> modes;

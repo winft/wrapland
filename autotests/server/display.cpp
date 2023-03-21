@@ -23,6 +23,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/display.h"
 #include "../../server/output.h"
 #include "../../server/output_management_v1.h"
+#include "../../server/output_manager.h"
 #include "../../server/wl_output.h"
 
 #include <sys/socket.h>
@@ -89,30 +90,31 @@ void TestServerDisplay::testAddRemoveOutput()
     display.set_socket_name(std::string("kwin-wayland-server-display-test-output-0"));
     display.start();
 
-    auto output1 = std::make_unique<Wrapland::Server::output>(&display);
+    auto output_manager = Wrapland::Server::output_manager(display);
+    auto output1 = std::make_unique<Wrapland::Server::output>(output_manager);
     output1->set_enabled(true);
     output1->done();
 
-    QCOMPARE(display.globals.outputs.size(), 1);
-    QCOMPARE(display.globals.outputs[0]->wayland_output(), output1->wayland_output());
+    QCOMPARE(output_manager.outputs.size(), 1);
+    QCOMPARE(output_manager.outputs[0]->wayland_output(), output1->wayland_output());
 
     // create a second output
-    auto output2 = std::make_unique<Wrapland::Server::output>(&display);
+    auto output2 = std::make_unique<Wrapland::Server::output>(output_manager);
     output2->set_enabled(true);
     output2->done();
 
-    QCOMPARE(display.globals.outputs.size(), 2);
-    QCOMPARE(display.globals.outputs[0]->wayland_output(), output1->wayland_output());
-    QCOMPARE(display.globals.outputs[1]->wayland_output(), output2->wayland_output());
+    QCOMPARE(output_manager.outputs.size(), 2);
+    QCOMPARE(output_manager.outputs[0]->wayland_output(), output1->wayland_output());
+    QCOMPARE(output_manager.outputs[1]->wayland_output(), output2->wayland_output());
 
     // remove the first output
     output1.reset();
-    QCOMPARE(display.globals.outputs.size(), 1);
-    QCOMPARE(display.globals.outputs[0]->wayland_output(), output2->wayland_output());
+    QCOMPARE(output_manager.outputs.size(), 1);
+    QCOMPARE(output_manager.outputs[0]->wayland_output(), output2->wayland_output());
 
     // and delete the second
     output2.reset();
-    QVERIFY(display.globals.outputs.empty());
+    QVERIFY(output_manager.outputs.empty());
 }
 
 void TestServerDisplay::testClientConnection()

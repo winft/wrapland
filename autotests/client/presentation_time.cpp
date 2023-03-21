@@ -54,8 +54,8 @@ private Q_SLOTS:
 private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
-        Wrapland::Server::globals globals;
         std::unique_ptr<Wrapland::Server::output> output;
+        Wrapland::Server::globals globals;
     } server;
 
     Client::ConnectionThread* m_connection;
@@ -89,12 +89,14 @@ void TestPresentationTime::init()
 
     server.display->createShm();
 
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.globals.compositor
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     server.globals.presentation_manager
         = std::make_unique<Wrapland::Server::PresentationManager>(server.display.get());
 
-    server.output = std::make_unique<Wrapland::Server::output>(server.display.get());
+    server.output = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
     server.output->set_enabled(true);
     server.output->done();
 

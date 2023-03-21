@@ -27,6 +27,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/display.h"
 #include "../../server/dpms.h"
+#include "../../server/output_manager.h"
 
 #include <wayland-client-protocol.h>
 
@@ -62,6 +63,7 @@ private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
         std::unique_ptr<Wrapland::Server::output> output;
+        std::unique_ptr<Wrapland::Server::output_manager> output_manager;
     } server;
 
     Clt::ConnectionThread* m_connection;
@@ -85,8 +87,9 @@ void TestOutput::init()
     server.display->start();
     QVERIFY(server.display->running());
 
+    server.output_manager = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     Srv::output_metadata meta{.name = "HDMI-A", .make = "Foocorp", .model = "Barmodel"};
-    server.output = std::make_unique<Wrapland::Server::output>(meta, server.display.get());
+    server.output = std::make_unique<Wrapland::Server::output>(meta, *server.output_manager);
 
     QCOMPARE(server.output->mode_size(), QSize());
     QCOMPARE(server.output->refresh_rate(), 60000);

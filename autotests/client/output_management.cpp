@@ -72,8 +72,8 @@ private:
 
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
-        Wrapland::Server::globals globals;
         std::unique_ptr<Wrapland::Server::output> output;
+        Wrapland::Server::globals globals;
     } server;
 
     Clt::Registry* m_registry = nullptr;
@@ -113,9 +113,11 @@ void TestOutputManagement::init()
     server.display->start();
     QVERIFY(server.display->running());
 
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.globals.compositor
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
-    server.output = std::make_unique<Wrapland::Server::output>(server.display.get());
+    server.output = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
 
     Srv::output_mode m0;
     m0.id = 0;
@@ -147,7 +149,7 @@ void TestOutputManagement::init()
     server.output->set_enabled(true);
     server.output->done();
 
-    server.globals.output_management_v1
+    server.globals.output_manager->management_v1
         = std::make_unique<Wrapland::Server::OutputManagementV1>(server.display.get());
 
     // setup connection
@@ -292,10 +294,10 @@ void TestOutputManagement::testBasicMemoryManagement()
 {
     createConfig();
 
-    QSignalSpy serverApplySpy(server.globals.output_management_v1.get(),
+    QSignalSpy serverApplySpy(server.globals.output_manager->management_v1.get(),
                               &Srv::OutputManagementV1::configurationChangeRequested);
     Srv::OutputConfigurationV1* configurationInterface = nullptr;
-    connect(server.globals.output_management_v1.get(),
+    connect(server.globals.output_manager->management_v1.get(),
             &Srv::OutputManagementV1::configurationChangeRequested,
             [=, &configurationInterface](Srv::OutputConfigurationV1* c) {
                 configurationInterface = c;
@@ -319,7 +321,7 @@ void TestOutputManagement::testRemoval()
     QSignalSpy outputManagementRemovedSpy(m_registry, &Clt::Registry::outputManagementV1Removed);
     QVERIFY(outputManagementRemovedSpy.isValid());
 
-    server.globals.output_management_v1.reset();
+    server.globals.output_manager->management_v1.reset();
     QVERIFY(outputManagementRemovedSpy.wait(200));
     QCOMPARE(outputManagementRemovedSpy.first().first(), m_announcedSpy->first().first());
     QVERIFY(!m_registry->hasInterface(Clt::Registry::Interface::OutputManagementV1));
@@ -332,7 +334,7 @@ void TestOutputManagement::testApplied()
     QVERIFY(m_outputConfiguration->isValid());
     QSignalSpy appliedSpy(m_outputConfiguration, &Clt::OutputConfigurationV1::applied);
 
-    connect(server.globals.output_management_v1.get(),
+    connect(server.globals.output_manager->management_v1.get(),
             &Srv::OutputManagementV1::configurationChangeRequested,
             [=](Srv::OutputConfigurationV1* configurationInterface) {
                 configurationInterface->setApplied();
@@ -348,7 +350,7 @@ void TestOutputManagement::testFailed()
     QVERIFY(m_outputConfiguration->isValid());
     QSignalSpy failedSpy(m_outputConfiguration, &Clt::OutputConfigurationV1::failed);
 
-    connect(server.globals.output_management_v1.get(),
+    connect(server.globals.output_manager->management_v1.get(),
             &Srv::OutputManagementV1::configurationChangeRequested,
             [=](Srv::OutputConfigurationV1* configurationInterface) {
                 configurationInterface->setFailed();
@@ -391,13 +393,13 @@ void TestOutputManagement::testMultipleSettings()
     QSignalSpy outputChangedSpy(output, &Clt::OutputDeviceV1::changed);
 
     Srv::OutputConfigurationV1* configurationInterface;
-    connect(server.globals.output_management_v1.get(),
+    connect(server.globals.output_manager->management_v1.get(),
             &Srv::OutputManagementV1::configurationChangeRequested,
             [=, &configurationInterface](Srv::OutputConfigurationV1* c) {
                 applyPendingChanges(c);
                 configurationInterface = c;
             });
-    QSignalSpy serverApplySpy(server.globals.output_management_v1.get(),
+    QSignalSpy serverApplySpy(server.globals.output_manager->management_v1.get(),
                               &Srv::OutputManagementV1::configurationChangeRequested);
     QVERIFY(serverApplySpy.isValid());
 
@@ -443,7 +445,7 @@ void TestOutputManagement::testConfigFailed()
     QVERIFY(config->isValid());
     QVERIFY(output->isValid());
 
-    QSignalSpy serverApplySpy(server.globals.output_management_v1.get(),
+    QSignalSpy serverApplySpy(server.globals.output_manager->management_v1.get(),
                               &Srv::OutputManagementV1::configurationChangeRequested);
     QVERIFY(serverApplySpy.isValid());
     QSignalSpy outputChangedSpy(output, &Clt::OutputDeviceV1::changed);
@@ -459,7 +461,7 @@ void TestOutputManagement::testConfigFailed()
 
     config->apply();
 
-    connect(server.globals.output_management_v1.get(),
+    connect(server.globals.output_manager->management_v1.get(),
             &Srv::OutputManagementV1::configurationChangeRequested,
             [=](Srv::OutputConfigurationV1* c) { c->setFailed(); });
 
@@ -483,7 +485,7 @@ void TestOutputManagement::testExampleConfig()
     // config->setGeometry(output, QRectF(QPoint(-1, -1), output->geometry().size()));
 
     QSignalSpy configAppliedSpy(config, &Clt::OutputConfigurationV1::applied);
-    connect(server.globals.output_management_v1.get(),
+    connect(server.globals.output_manager->management_v1.get(),
             &Srv::OutputManagementV1::configurationChangeRequested,
             [=](Srv::OutputConfigurationV1* c) { c->setApplied(); });
     config->apply();
@@ -503,7 +505,7 @@ void TestOutputManagement::testScale()
     config->apply();
 
     QSignalSpy configAppliedSpy(config, &OutputConfiguration::applied);
-    connect(server.globals.output_management_v1.get(), &Srv::OutputManagementV1::configurationChangeRequested, [=](Srv::OutputConfigurationV1 *c) {
+    connect(server.globals.output_manager->management_v1.get(), &Srv::OutputManagementV1::configurationChangeRequested, [=](Srv::OutputConfigurationV1 *c) {
         applyPendingChanges(c);
         c->setApplied();
     });

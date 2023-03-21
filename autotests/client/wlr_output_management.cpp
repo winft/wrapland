@@ -89,7 +89,9 @@ void TestWlrOutputManagement::init()
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.output = std::make_unique<Wrapland::Server::output>(server.display.get());
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
+    server.output = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
 
     Srv::output_mode m0;
     m0.id = 0;
@@ -119,8 +121,7 @@ void TestWlrOutputManagement::init()
     server.output->set_mode(1);
     server.output->set_geometry(QRectF(QPointF(0, 1920), QSizeF(1024, 768)));
 
-    server.globals.output_management_v1
-        = std::make_unique<Wrapland::Server::OutputManagementV1>(server.display.get());
+    server.globals.output_manager->create_management_v1();
 
     // setup connection
     m_connection = new Clt::ConnectionThread;

@@ -103,6 +103,8 @@ void TestSurface::init()
     server.display->start();
     QVERIFY(server.display->running());
 
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.display->createShm();
     server.globals.compositor
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
@@ -1125,7 +1127,7 @@ void TestSurface::testOutput()
     QSignalSpy outputAnnouncedSpy(&registry, &Wrapland::Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto serverOutput = new Wrapland::Server::output(server.display.get());
+    auto serverOutput = new Wrapland::Server::output(*server.globals.output_manager);
     serverOutput->set_enabled(true);
     serverOutput->done();
 

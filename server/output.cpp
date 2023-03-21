@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "display.h"
 #include "output_device_v1_p.h"
+#include "output_manager.h"
 #include "utils.h"
 #include "wl_output_p.h"
 #include "xdg_output_p.h"
@@ -35,9 +36,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-output::Private::Private(output_metadata metadata, Display* display, output* q_ptr)
-    : display_handle(display)
-    , device{new OutputDeviceV1(q_ptr, display)}
+output::Private::Private(output_metadata metadata, output_manager& manager, output* q_ptr)
+    : manager{manager}
+    , device{new OutputDeviceV1(q_ptr, &manager.display)}
     , q_ptr{q_ptr}
 {
     if (metadata.description.empty()) {
@@ -46,29 +47,26 @@ output::Private::Private(output_metadata metadata, Display* display, output* q_p
     pending.meta = std::move(metadata);
     published.meta = pending.meta;
 
-    display->globals.outputs.push_back(q_ptr);
-    QObject::connect(display, &Display::destroyed, q_ptr, [this] {
+    manager.outputs.push_back(q_ptr);
+    QObject::connect(&manager.display, &Display::destroyed, q_ptr, [this] {
         device.reset();
         xdg_output.reset();
         wayland_output.reset();
-        display_handle = nullptr;
     });
 }
 
 output::Private::~Private()
 {
-    if (display_handle) {
-        remove_all(display_handle->globals.outputs, q_ptr);
-    }
+    remove_all(manager.outputs, q_ptr);
 }
 
 void output::Private::done()
 {
     if (published.enabled != pending.enabled) {
         if (pending.enabled) {
-            wayland_output.reset(new WlOutput(q_ptr, display_handle));
-            if (display_handle->globals.xdg_output_manager) {
-                xdg_output.reset(new XdgOutput(q_ptr, display_handle));
+            wayland_output.reset(new WlOutput(q_ptr, &manager.display));
+            if (manager.xdg_manager) {
+                xdg_output.reset(new XdgOutput(q_ptr, &manager.display));
             }
         } else {
             wayland_output.reset();
@@ -166,13 +164,13 @@ bool output_mode::operator!=(output_mode const& mode) const
     return !(*this == mode);
 }
 
-output::output(Display* display)
-    : output(output_metadata(), display)
+output::output(output_manager& manager)
+    : output(output_metadata(), manager)
 {
 }
 
-output::output(output_metadata metadata, Display* display)
-    : d_ptr(new Private(std::move(metadata), display, this))
+output::output(output_metadata metadata, output_manager& manager)
+    : d_ptr(new Private(std::move(metadata), manager, this))
 {
 }
 

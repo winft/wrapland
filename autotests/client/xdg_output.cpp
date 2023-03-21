@@ -46,8 +46,8 @@ private Q_SLOTS:
 private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
-        Wrapland::Server::globals globals;
         std::unique_ptr<Wrapland::Server::output> output;
+        Wrapland::Server::globals globals;
     } server;
 
     std::string m_name = "HDMI-A";
@@ -76,11 +76,13 @@ void TestXdgOutput::init()
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.globals.xdg_output_manager
-        = std::make_unique<Wrapland::Server::XdgOutputManager>(server.display.get());
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
+    server.globals.output_manager->create_xdg_manager();
 
     Wrapland::Server::output_metadata meta{.name = m_name, .make = m_make, .model = m_model};
-    server.output = std::make_unique<Wrapland::Server::output>(meta, server.display.get());
+    server.output
+        = std::make_unique<Wrapland::Server::output>(meta, *server.globals.output_manager);
     server.output->add_mode(Wrapland::Server::output_mode{QSize(1920, 1080), 60000, true, 1});
     server.output->set_mode(1);
     server.output->set_enabled(true);

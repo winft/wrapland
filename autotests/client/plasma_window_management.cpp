@@ -173,6 +173,8 @@ void TestWindowManagement::init()
     QVERIFY(m_registry->isValid());
     m_registry->setup();
 
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.globals.compositor
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     QVERIFY(compositorSpy.wait());
@@ -859,7 +861,7 @@ void TestWindowManagement::testSendToOutput()
     QSignalSpy outputAnnouncedSpy(m_registry, &Wrapland::Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto srv_output = std::make_unique<Srv::output>(server.display.get());
+    auto srv_output = std::make_unique<Srv::output>(*server.globals.output_manager);
     srv_output->set_enabled(true);
     srv_output->done();
 

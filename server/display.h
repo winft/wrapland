@@ -137,8 +137,7 @@ public:
         Server::SlideManager* slide_manager{nullptr};
         Server::ContrastManager* contrast_manager{nullptr};
 
-        /// Graphical outputs and their management
-        std::vector<output*> outputs;
+        /// Graphical output management
         Server::XdgOutputManager* xdg_output_manager{nullptr};
         Server::DpmsManager* dpms_manager{nullptr};
         Server::OutputManagementV1* output_management_v1{nullptr};

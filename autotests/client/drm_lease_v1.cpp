@@ -78,6 +78,8 @@ void drm_lease_v1_test::init()
     server.display->start();
     QVERIFY(server.display->running());
 
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.display->createShm();
     server.globals.drm_lease_device_v1
         = std::make_unique<Wrapland::Server::drm_lease_device_v1>(server.display.get());
@@ -209,7 +211,7 @@ void drm_lease_v1_test::test_connectors()
     std::vector<std::unique_ptr<Wrapland::Server::output>> server_outputs;
     auto add_output = [&server_outputs, this] {
         server_outputs.emplace_back(
-            std::make_unique<Wrapland::Server::output>(server.display.get()));
+            std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
     };
 
     add_output();
@@ -289,7 +291,7 @@ void drm_lease_v1_test::test_lease()
     std::vector<std::unique_ptr<Wrapland::Server::output>> server_outputs;
     auto add_output = [&server_outputs, this] {
         server_outputs.emplace_back(
-            std::make_unique<Wrapland::Server::output>(server.display.get()));
+            std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
     };
 
     add_output();

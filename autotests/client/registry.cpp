@@ -166,11 +166,12 @@ void TestWaylandRegistry::init()
     server.display->start();
 
     server.display->createShm();
-
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.globals.compositor
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     server.globals.outputs.emplace_back(
-        std::make_unique<Wrapland::Server::output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
     server.globals.seats.emplace_back(
         std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.globals.subcompositor
@@ -181,8 +182,8 @@ void TestWaylandRegistry::init()
         = std::make_unique<Wrapland::Server::data_control_manager_v1>(server.display.get());
     server.globals.drm_lease_device_v1
         = std::make_unique<Wrapland::Server::drm_lease_device_v1>(server.display.get());
-    server.globals.output_management_v1
-        = std::make_unique<Wrapland::Server::OutputManagementV1>(server.display.get());
+    server.globals.output_manager->create_management_v1();
+    server.globals.output_manager->create_xdg_manager();
     server.globals.blur_manager
         = std::make_unique<Wrapland::Server::BlurManager>(server.display.get());
     server.globals.contrast_manager
@@ -229,6 +230,7 @@ void TestWaylandRegistry::init()
 
 void TestWaylandRegistry::cleanup()
 {
+    server = {};
 }
 
 void TestWaylandRegistry::testCreate()
@@ -728,7 +730,7 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy outputManagementRemovedSpy(&registry, SIGNAL(outputManagementV1Removed(quint32)));
     QVERIFY(outputManagementRemovedSpy.isValid());
 
-    server.globals.output_management_v1.reset();
+    server.globals.output_manager->management_v1.reset();
     QVERIFY(outputManagementRemovedSpy.wait());
     QCOMPARE(outputManagementRemovedSpy.first().first(),
              outputManagementAnnouncedSpy.first().first());
@@ -1030,7 +1032,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QSignalSpy outputAnnouncedSpy(&registry, &Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto output1 = std::make_unique<Wrapland::Server::output>(server.display.get());
+    auto output1 = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
     output1->set_enabled(true);
     output1->done();
     QVERIFY(outputAnnouncedSpy.wait());
@@ -1044,7 +1046,7 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QCOMPARE(registry.interface(Registry::Interface::Output).version,
              outputAnnouncedSpy.first().last().value<quint32>());
 
-    auto output2 = std::make_unique<Wrapland::Server::output>(server.display.get());
+    auto output2 = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
     output2->set_enabled(true);
     output2->done();
     QVERIFY(outputAnnouncedSpy.wait());
@@ -1111,7 +1113,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QSignalSpy outputDeviceAnnouncedSpy(&registry, &Registry::outputDeviceV1Announced);
     QVERIFY(outputDeviceAnnouncedSpy.isValid());
 
-    auto device1 = std::make_unique<Wrapland::Server::output>(server.display.get());
+    auto device1 = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
     QVERIFY(outputDeviceAnnouncedSpy.wait());
 
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 2);
@@ -1124,7 +1126,7 @@ void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
     QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).version,
              outputDeviceAnnouncedSpy.first().last().value<quint32>());
 
-    auto device2 = std::make_unique<Wrapland::Server::output>(server.display.get());
+    auto device2 = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
     QVERIFY(outputDeviceAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 3);
     QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().name,

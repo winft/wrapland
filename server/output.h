@@ -31,8 +31,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class Display;
 class OutputDeviceV1;
+class output_manager;
 class WlOutput;
 class XdgOutput;
 
@@ -110,8 +110,8 @@ class WRAPLANDSERVER_EXPORT output : public QObject
 {
     Q_OBJECT
 public:
-    explicit output(Display* display);
-    output(output_metadata metadata, Display* display);
+    explicit output(output_manager& manager);
+    output(output_metadata metadata, output_manager& manager);
     ~output() override;
 
     output_metadata const& get_metadata() const;

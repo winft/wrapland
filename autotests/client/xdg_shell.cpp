@@ -137,18 +137,20 @@ void XdgShellTest::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.globals.compositor
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
 
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
     server.globals.outputs.back()->add_mode(Server::output_mode{QSize(1024, 768)});
     server.globals.outputs.back()->set_enabled(true);
     server.globals.outputs.back()->done();
 
     server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::output>(server.display.get()));
+        std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
     server.globals.outputs.back()->add_mode(Server::output_mode{QSize(1024, 768)});
     server.globals.outputs.back()->set_enabled(true);
     server.globals.outputs.back()->done();

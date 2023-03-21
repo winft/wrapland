@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/display.h"
 #include "../../server/output.h"
+#include "../../server/output_manager.h"
 
 #include <wayland-client-protocol.h>
 
@@ -58,6 +59,7 @@ private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
         std::unique_ptr<Wrapland::Server::output> output;
+        std::unique_ptr<Wrapland::Server::output_manager> output_manager;
     } server;
 
     std::string m_name = "HDMI-A";
@@ -84,6 +86,8 @@ TestOutputDevice::TestOutputDevice(QObject* parent)
 void TestOutputDevice::init()
 {
     server.display = std::make_unique<Wrapland::Server::Display>();
+    server.output_manager = std::make_unique<Wrapland::Server::output_manager>(*server.display);
+
     server.display->set_socket_name(std::string(socket_name));
     server.display->start();
     QVERIFY(server.display->running());
@@ -93,7 +97,7 @@ void TestOutputDevice::init()
                               .model = m_model,
                               .serial_number = m_serialNumber,
                               .physical_size = {200, 100}};
-    server.output = std::make_unique<Wrapland::Server::output>(meta, server.display.get());
+    server.output = std::make_unique<Wrapland::Server::output>(meta, *server.output_manager);
 
     Srv::output_mode m0;
     m0.id = 0;

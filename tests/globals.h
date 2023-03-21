@@ -23,6 +23,7 @@
 #include "../../server/layer_shell_v1.h"
 #include "../../server/linux_dmabuf_v1.h"
 #include "../../server/output_management_v1.h"
+#include "../../server/output_manager.h"
 #include "../../server/plasma_activation_feedback.h"
 #include "../../server/plasma_shell.h"
 #include "../../server/plasma_virtual_desktop.h"
@@ -76,9 +77,8 @@ struct globals {
 
     /// Graphical outputs and their management
     std::vector<std::unique_ptr<output>> outputs;
-    std::unique_ptr<Server::XdgOutputManager> xdg_output_manager;
+    std::unique_ptr<Server::output_manager> output_manager;
     std::unique_ptr<Server::DpmsManager> dpms_manager;
-    std::unique_ptr<Server::OutputManagementV1> output_management_v1;
 
     /// Basic input
     std::vector<std::unique_ptr<Server::Seat>> seats;

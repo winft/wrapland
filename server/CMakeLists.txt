@@ -31,6 +31,7 @@ set(SERVER_LIB_SRCS
   output_configuration_v1.cpp
   output_device_v1.cpp
   output_management_v1.cpp
+  output_manager.cpp
   plasma_activation_feedback.cpp
   plasma_shell.cpp
   plasma_virtual_desktop.cpp
@@ -407,6 +408,7 @@ set(SERVER_LIB_HEADERS
   output_configuration_v1.h
   output_device_v1.h
   output_management_v1.h
+  output_manager.h
   plasma_activation_feedback.h
   plasma_shell.h
   plasma_virtual_desktop.h
