@@ -92,6 +92,7 @@ struct output_state {
 
     // Automatically calculated on setter call.
     int client_scale = 1;
+    bool adaptive_sync{false};
 };
 
 /**

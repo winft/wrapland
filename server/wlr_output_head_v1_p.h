@@ -55,6 +55,7 @@ public:
     void send_position(QPoint const& pos) const;
     void send_transform(output_transform transform) const;
     void send_scale(double scale) const;
+    void send_adaptive_sync(bool is_adaptive) const;
 
     class Private;
     Private* d_ptr;

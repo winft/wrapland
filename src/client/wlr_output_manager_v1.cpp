@@ -285,6 +285,7 @@ public:
     static void modelCallback(void* data, zwlr_output_head_v1* head, char const* model);
     static void
     serialNumberCallback(void* data, zwlr_output_head_v1* head, char const* serialNumber);
+    static void adaptive_sync_callback(void* data, zwlr_output_head_v1* head, uint32_t state);
 
     WlrOutputHeadV1* q;
     static const struct zwlr_output_head_v1_listener s_listener;
@@ -296,6 +297,7 @@ public:
     Transform transform{Transform::Normal};
     bool enabled{false};
     double scale{1.};
+    bool adapt_sync{false};
 
     QString make;
     QString model;
@@ -322,6 +324,7 @@ const zwlr_output_head_v1_listener WlrOutputHeadV1::Private::s_listener = {
     makeCallback,
     modelCallback,
     serialNumberCallback,
+    adaptive_sync_callback,
 };
 
 void WlrOutputHeadV1::Private::nameCallback(void* data, zwlr_output_head_v1* head, char const* name)
@@ -514,6 +517,17 @@ void WlrOutputHeadV1::Private::serialNumberCallback(void* data,
     Q_EMIT d->q->changed();
 }
 
+void WlrOutputHeadV1::Private::adaptive_sync_callback(void* data,
+                                                      zwlr_output_head_v1* head,
+                                                      uint32_t state)
+{
+    auto d = reinterpret_cast<Private*>(data);
+    Q_ASSERT(d->outputHead == head);
+
+    d->adapt_sync = state == ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED;
+    Q_EMIT d->q->changed();
+}
+
 WlrOutputHeadV1::Private::Private(WlrOutputHeadV1* q, zwlr_output_head_v1* head)
     : q(q)
 {
@@ -577,6 +591,11 @@ bool WlrOutputHeadV1::enabled() const
 double WlrOutputHeadV1::scale() const
 {
     return d->scale;
+}
+
+bool WlrOutputHeadV1::adaptive_sync() const
+{
+    return d->adapt_sync;
 }
 
 QVector<WlrOutputModeV1*> WlrOutputHeadV1::modes() const

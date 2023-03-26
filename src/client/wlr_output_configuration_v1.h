@@ -185,6 +185,8 @@ public:
      */
     void setScale(WlrOutputHeadV1* head, double scale);
 
+    void set_adaptive_sync(WlrOutputHeadV1* head, bool enable);
+
     /**
      * Check if current configuration is valid. Either succeeded() or failed() will be emitted
      * later on as a result of this call.

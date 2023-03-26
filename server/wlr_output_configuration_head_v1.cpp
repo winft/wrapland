@@ -24,6 +24,7 @@ struct zwlr_output_configuration_head_v1_interface const
         set_position_callback,
         set_transform_callback,
         set_scale_callback,
+        set_adaptive_sync_callback,
 };
 
 bool is_portrait_transform(output_transform tr)
@@ -128,6 +129,21 @@ void wlr_output_configuration_head_v1::Private::set_scale_callback(wl_client* /*
 
     priv->scale = wl_fixed_to_double(wlScale);
     priv->state.geometry.setSize(estimate_logical_size(priv->state, priv->scale));
+}
+
+void wlr_output_configuration_head_v1::Private::set_adaptive_sync_callback(wl_client* /*wlClient*/,
+                                                                           wl_resource* wlResource,
+                                                                           uint32_t wlState)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    if (wlState != ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_DISABLED
+        && wlState != ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED) {
+        priv->postError(ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_ADAPTIVE_SYNC_STATE,
+                        "adaptive sync state out of range");
+        return;
+    }
+
+    priv->state.adaptive_sync = wlState == ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED;
 }
 
 wlr_output_configuration_head_v1::wlr_output_configuration_head_v1(

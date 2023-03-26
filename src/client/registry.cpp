@@ -330,7 +330,7 @@ static QMap<Registry::Interface, SuppertedInterfaceData> const s_interfaces = {
     {
         Registry::Interface::WlrOutputManagerV1,
         {
-            3,
+            4,
             QByteArrayLiteral("zwlr_output_manager_v1"),
             &zwlr_output_manager_v1_interface,
             &Registry::wlrOutputManagerV1Announced,

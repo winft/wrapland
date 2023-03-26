@@ -49,6 +49,8 @@ private:
     set_transform_callback(wl_client* wlClient, wl_resource* wlResource, int32_t wlTransform);
     static void
     set_scale_callback(wl_client* wlClient, wl_resource* wlResource, wl_fixed_t wlScale);
+    static void
+    set_adaptive_sync_callback(wl_client* wlClient, wl_resource* wlResource, uint32_t wlState);
 
     static const struct zwlr_output_configuration_head_v1_interface s_interface;
 };

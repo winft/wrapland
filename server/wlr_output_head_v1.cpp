@@ -108,6 +108,13 @@ void wlr_output_head_v1::broadcast()
         current_scale = scale;
         manager.d_ptr->changed = true;
     }
+
+    if (published.state.adaptive_sync != pending.state.adaptive_sync || !published.state.enabled) {
+        for (auto res : resources) {
+            res->send_adaptive_sync(pending.state.adaptive_sync);
+        }
+        manager.d_ptr->changed = true;
+    }
 }
 
 wlr_output_head_v1_res::Private::Private(Client* client,
@@ -172,6 +179,7 @@ void wlr_output_head_v1_res::send_mutable_data(output_state const& data) const
     send_position(data.geometry.topLeft().toPoint());
     send_transform(data.transform);
     send_scale(estimate_scale(data));
+    send_adaptive_sync(data.adaptive_sync);
 }
 
 void wlr_output_head_v1_res::send_enabled(bool enabled) const
@@ -201,6 +209,16 @@ void wlr_output_head_v1_res::send_transform(output_transform transform) const
 void wlr_output_head_v1_res::send_scale(double scale) const
 {
     d_ptr->send<zwlr_output_head_v1_send_scale>(wl_fixed_from_double(scale));
+}
+
+void wlr_output_head_v1_res::send_adaptive_sync(bool is_adaptive) const
+{
+    if (d_ptr->version < ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_SINCE_VERSION) {
+        return;
+    }
+    d_ptr->send<zwlr_output_head_v1_send_adaptive_sync>(
+        is_adaptive ? ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED
+                    : ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_DISABLED);
 }
 
 }

@@ -167,6 +167,7 @@ void TestWlrOutputManagement::init()
     auto state = first_output->get_state();
     state.mode = m1;
     state.geometry = QRectF(QPointF(0, 1920), QSizeF(1024, 768));
+    state.adaptive_sync = true;
     first_output->set_state(state);
     server.globals.outputs.push_back(std::move(first_output));
     server.globals.output_manager->commit_changes();
@@ -222,7 +223,7 @@ void TestWlrOutputManagement::test_add_remove_output()
     QCOMPARE(client.wl_output_spy->size(), 1);
 
     // The wlr head receives the changed properties. Client-side no atomic changes at the moment.
-    QTRY_COMPARE(head_changed_spy.size(), 5);
+    QTRY_COMPARE(head_changed_spy.size(), 6);
 
     // Add one more output which is already enabled.
     server.globals.outputs.emplace_back(
@@ -282,6 +283,7 @@ void TestWlrOutputManagement::test_properties()
     QCOMPARE(wlr_head1->position(), QPoint(0, 0));
     QCOMPARE(wlr_head1->transform(), Clt::WlrOutputHeadV1::Transform::Normal);
     QCOMPARE(wlr_head1->scale(), 1);
+    QVERIFY(!wlr_head1->adaptive_sync());
 
     // The first output is not yet enabled. Do this now. All data is sent.
     auto state = server.globals.outputs.front()->get_state();
@@ -306,6 +308,7 @@ void TestWlrOutputManagement::test_properties()
     QCOMPARE(wlr_head1->position(), QPoint(0, 1920));
     QCOMPARE(wlr_head1->transform(), Clt::WlrOutputHeadV1::Transform::Normal);
     QCOMPARE(wlr_head1->scale(), 1);
+    QVERIFY(wlr_head1->adaptive_sync());
 
     // Add one more output which is already enabled.
     Srv::output_metadata meta{
@@ -322,6 +325,7 @@ void TestWlrOutputManagement::test_properties()
     state.enabled = true;
     state.geometry = QRectF(QPointF(1920, 1920), QSizeF(400, 300));
     state.transform = Srv::output_transform::flipped_180;
+    state.adaptive_sync = true;
     server_output->set_state(state);
     server.globals.output_manager->commit_changes();
 
@@ -347,6 +351,7 @@ void TestWlrOutputManagement::test_properties()
     QCOMPARE(wlr_head2->position(), QPoint(1920, 1920));
     QCOMPARE(wlr_head2->transform(), Clt::WlrOutputHeadV1::Transform::Flipped180);
     QCOMPARE(wlr_head2->scale(), 2);
+    QVERIFY(wlr_head2->adaptive_sync());
 }
 
 void TestWlrOutputManagement::test_configuration()
@@ -399,6 +404,7 @@ void TestWlrOutputManagement::test_configuration()
     QCOMPARE(wlr_head2->position(), QPoint(1920, 1920));
     QCOMPARE(wlr_head2->transform(), Clt::WlrOutputHeadV1::Transform::Flipped180);
     QCOMPARE(wlr_head2->scale(), 2);
+    QVERIFY(!wlr_head2->adaptive_sync());
 
     auto config = std::unique_ptr<Clt::WlrOutputConfigurationV1>{
         client.output_manager->createConfiguration()};
@@ -411,6 +417,7 @@ void TestWlrOutputManagement::test_configuration()
     config->setPosition(wlr_head2, QPoint(0, 0));
     config->setTransform(wlr_head2, Clt::WlrOutputHeadV1::Transform::Rotated90);
     config->setScale(wlr_head2, 1);
+    config->set_adaptive_sync(wlr_head2, true);
     config->apply();
 
     QSignalSpy config_apply_spy(server.globals.output_manager->wlr_manager_v1.get(),
@@ -429,6 +436,7 @@ void TestWlrOutputManagement::test_configuration()
     QCOMPARE(config_head->get_state().mode, server.modes.at(1));
     QCOMPARE(config_head->get_state().geometry, QRect(QPoint(0, 0), QSize(768, 1024)));
     QCOMPARE(config_head->get_state().transform, Srv::output_transform::rotated_90);
+    QVERIFY(config_head->get_state().adaptive_sync);
 
     server_config->send_succeeded();
 
