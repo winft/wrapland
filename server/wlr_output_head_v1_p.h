@@ -74,6 +74,9 @@ public:
 
     std::vector<wlr_output_mode_v1*> modes;
     wlr_output_head_v1* head;
+
+private:
+    static struct zwlr_output_head_v1_interface const s_interface;
 };
 
 }

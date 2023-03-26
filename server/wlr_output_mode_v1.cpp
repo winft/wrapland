@@ -9,8 +9,6 @@
 #include "utils.h"
 #include "wayland/global.h"
 
-#include "wayland-wlr-output-management-v1-server-protocol.h"
-
 namespace Wrapland::Server
 {
 
@@ -22,7 +20,7 @@ wlr_output_mode_v1::Private::Private(Client* client,
                                             version,
                                             0,
                                             &zwlr_output_mode_v1_interface,
-                                            nullptr,
+                                            &s_interface,
                                             &q_ptr)
     , mode{mode}
 {
@@ -36,6 +34,10 @@ void wlr_output_mode_v1::Private::send_data()
         send<zwlr_output_mode_v1_send_preferred>();
     }
 }
+
+struct zwlr_output_mode_v1_interface const wlr_output_mode_v1::Private::s_interface = {
+    destroyCallback,
+};
 
 wlr_output_mode_v1::wlr_output_mode_v1(Client* client, uint32_t version, output_mode const& mode)
     : d_ptr{new Private(client, version, mode, *this)}

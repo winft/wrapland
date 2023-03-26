@@ -168,7 +168,8 @@ public:
     Private(WlrOutputModeV1* q, zwlr_output_mode_v1* mode);
     ~Private() = default;
 
-    WaylandPointer<zwlr_output_mode_v1, zwlr_output_mode_v1_destroy> outputMode;
+    // TODO(romangg): release request only available starting version 3.
+    WaylandPointer<zwlr_output_mode_v1, zwlr_output_mode_v1_release> outputMode;
     EventQueue* queue = nullptr;
 
     void name(QString const& name);
@@ -264,7 +265,8 @@ public:
     Private(WlrOutputHeadV1* q, zwlr_output_head_v1* head);
     ~Private() = default;
 
-    WaylandPointer<zwlr_output_head_v1, zwlr_output_head_v1_destroy> outputHead;
+    // TODO(romangg): release request only available starting version 3.
+    WaylandPointer<zwlr_output_head_v1, zwlr_output_head_v1_release> outputHead;
     EventQueue* queue = nullptr;
 
     static void nameCallback(void* data, zwlr_output_head_v1* head, char const* name);

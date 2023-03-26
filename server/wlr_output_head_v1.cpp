@@ -116,7 +116,7 @@ wlr_output_head_v1_res::Private::Private(Client* client,
                                                 version,
                                                 0,
                                                 &zwlr_output_head_v1_interface,
-                                                nullptr,
+                                                &s_interface,
                                                 &q_ptr)
     , head{&head}
 {
@@ -127,6 +127,10 @@ wlr_output_head_v1_res::Private::~Private()
         remove_all(head->resources, handle);
     }
 }
+
+struct zwlr_output_head_v1_interface const wlr_output_head_v1_res::Private::s_interface = {
+    destroyCallback,
+};
 
 wlr_output_head_v1_res::wlr_output_head_v1_res(Client* client,
                                                uint32_t version,

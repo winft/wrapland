@@ -8,6 +8,8 @@
 #include "output_p.h"
 #include "wayland/resource.h"
 
+#include "wayland-wlr-output-management-v1-server-protocol.h"
+
 #include <QObject>
 
 namespace Wrapland::Server
@@ -35,6 +37,9 @@ public:
     void send_data();
 
     output_mode mode;
+
+private:
+    static struct zwlr_output_mode_v1_interface const s_interface;
 };
 
 }

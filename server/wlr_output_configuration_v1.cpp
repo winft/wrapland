@@ -205,6 +205,7 @@ struct zwlr_output_configuration_v1_interface const
         disable_head_callback,
         apply_callback,
         test_callback,
+        destroyCallback,
 };
 
 wlr_output_configuration_v1_res::wlr_output_configuration_v1_res(Client* client,
