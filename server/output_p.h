@@ -26,7 +26,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 class Client;
-class OutputDeviceV1;
 class WlOutput;
 class wlr_output_head_v1;
 class XdgOutput;
@@ -65,7 +64,6 @@ public:
     output_state pending;
     output_state published;
 
-    std::unique_ptr<OutputDeviceV1> device;
     std::unique_ptr<WlOutput> wayland_output;
     std::unique_ptr<XdgOutput> xdg_output;
     std::unique_ptr<wlr_output_head_v1> wlr_head_v1;

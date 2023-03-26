@@ -22,7 +22,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/client.h"
 #include "../../server/display.h"
 #include "../../server/output.h"
-#include "../../server/output_management_v1.h"
 #include "../../server/output_manager.h"
 #include "../../server/wl_output.h"
 
@@ -43,7 +42,6 @@ private Q_SLOTS:
     void testAddRemoveOutput();
     void testClientConnection();
     void testConnectNoSocket();
-    void testOutputManagement();
     void testAutoSocketName();
 };
 
@@ -217,14 +215,6 @@ void TestServerDisplay::testConnectNoSocket()
     wl_client_destroy(client->native());
     close(sv[0]);
     close(sv[1]);
-}
-
-void TestServerDisplay::testOutputManagement()
-{
-    Display display;
-    display.set_socket_name(std::string("wrapland-test-0"));
-    display.start();
-    auto output_management = std::make_unique<Wrapland::Server::OutputManagementV1>(&display);
 }
 
 void TestServerDisplay::testAutoSocketName()

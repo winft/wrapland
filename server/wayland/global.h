@@ -72,8 +72,6 @@ auto& global_get_display_ref(Global& global)
         return globals.xdg_output_manager;
     } else if constexpr (std::is_same_v<Handle, decltype(globals.dpms_manager)>) {
         return globals.dpms_manager;
-    } else if constexpr (std::is_same_v<Handle, decltype(globals.output_management_v1)>) {
-        return globals.output_management_v1;
     } else if constexpr (std::is_same_v<Handle, decltype(globals.relative_pointer_manager_v1)>) {
         return globals.relative_pointer_manager_v1;
     } else if constexpr (std::is_same_v<Handle, decltype(globals.pointer_gestures_v1)>) {

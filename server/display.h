@@ -35,7 +35,6 @@ namespace Wrapland::Server
 
 class Client;
 class Private;
-class OutputDeviceV1;
 class WlOutput;
 
 class AppmenuManager;
@@ -56,7 +55,6 @@ class KeyState;
 class LayerShellV1;
 class linux_dmabuf_v1;
 class output;
-class OutputManagementV1;
 class plasma_activation_feedback;
 class PlasmaShell;
 class PlasmaVirtualDesktopManager;
@@ -141,7 +139,6 @@ public:
         /// Graphical output management
         Server::XdgOutputManager* xdg_output_manager{nullptr};
         Server::DpmsManager* dpms_manager{nullptr};
-        Server::OutputManagementV1* output_management_v1{nullptr};
         Server::wlr_output_manager_v1* wlr_output_manager_v1{nullptr};
 
         /// Basic input

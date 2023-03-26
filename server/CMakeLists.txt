@@ -27,10 +27,6 @@ set(SERVER_LIB_SRCS
   layer_shell_v1.cpp
   linux_dmabuf_v1.cpp
   output.cpp
-  output_changeset_v1.cpp
-  output_configuration_v1.cpp
-  output_device_v1.cpp
-  output_management_v1.cpp
   output_manager.cpp
   plasma_activation_feedback.cpp
   plasma_shell.cpp
@@ -83,16 +79,6 @@ ecm_qt_declare_logging_category(SERVER_LIB_SRCS
   IDENTIFIER WRAPLAND_SERVER
   CATEGORY_NAME wrapland-server
   DEFAULT_SEVERITY Critical
-)
-
-ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-management-unstable-v1.xml
-  BASENAME output-management-v1
-)
-
-ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-device-unstable-v1.xml
-  BASENAME output-device-v1
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
@@ -297,10 +283,6 @@ set(SERVER_GENERATED_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-inhibit-unstable-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-linux-dmabuf-unstable-v1-server-protocol.h
-  ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-client-protocol.h
-  ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-server-protocol.h
-  ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-client-protocol.h
-  ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-server-protocol.h
@@ -416,10 +398,6 @@ set(SERVER_LIB_HEADERS
   layer_shell_v1.h
   linux_dmabuf_v1.h
   output.h
-  output_changeset_v1.h
-  output_configuration_v1.h
-  output_device_v1.h
-  output_management_v1.h
   output_manager.h
   plasma_activation_feedback.h
   plasma_shell.h

@@ -160,36 +160,6 @@ add_test(NAME wrapland-testShmPool COMMAND testShmPool)
 ecm_mark_as_test(testShmPool)
 
 # ##################################################################################################
-# Test KWin OutputManagement
-# ##################################################################################################
-set(testOutputManagement_SRCS output_management.cpp)
-add_executable(testOutputManagement ${testOutputManagement_SRCS})
-target_link_libraries(testOutputManagement
-  Qt5::Test
-  Qt5::Gui
-  Wrapland::Client
-  Wrapland::Server
-  Wayland::Client
-)
-add_test(NAME wrapland-testOutputManagement COMMAND testOutputManagement)
-ecm_mark_as_test(testOutputManagement)
-
-# ##################################################################################################
-# Test KWin OutputDevice
-# ##################################################################################################
-set(testOutputDevice_SRCS output_device.cpp)
-add_executable(testOutputDevice ${testOutputDevice_SRCS})
-target_link_libraries(testOutputDevice
-  Qt5::Test
-  Qt5::Gui
-  Wrapland::Client
-  Wrapland::Server
-  Wayland::Client
-)
-add_test(NAME wrapland-testOutputDevice COMMAND testOutputDevice)
-ecm_mark_as_test(testOutputDevice)
-
-# ##################################################################################################
 # Test wlroots based OutputManagement
 # ##################################################################################################
 set(testWlrOutputManagement_SRCS wlr_output_management.cpp)

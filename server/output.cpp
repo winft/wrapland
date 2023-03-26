@@ -20,7 +20,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "output_p.h"
 
 #include "display.h"
-#include "output_device_v1_p.h"
 #include "output_manager.h"
 #include "utils.h"
 #include "wl_output_p.h"
@@ -85,7 +84,6 @@ output_transform transform_to_output(wl_output_transform transform)
 
 output::Private::Private(output_metadata metadata, output_manager& manager, output* q_ptr)
     : manager{manager}
-    , device{new OutputDeviceV1(q_ptr, &manager.display)}
     , q_ptr{q_ptr}
 {
     if (metadata.description.empty()) {
@@ -96,7 +94,6 @@ output::Private::Private(output_metadata metadata, output_manager& manager, outp
 
     manager.outputs.push_back(q_ptr);
     QObject::connect(&manager.display, &Display::destroyed, q_ptr, [this] {
-        device.reset();
         xdg_output.reset();
         wayland_output.reset();
     });
@@ -136,9 +133,6 @@ void output::Private::done()
         } else {
             wlr_head_v1 = std::make_unique<wlr_output_head_v1>(*q_ptr, *wlr_man);
         }
-    }
-    if (device->d_ptr->broadcast()) {
-        device->d_ptr->done();
     }
     published = pending;
 }
@@ -394,11 +388,6 @@ void output::set_dpms_mode(output_dpms_mode mode)
 output_dpms_mode output::dpms_mode() const
 {
     return d_ptr->dpms.mode;
-}
-
-OutputDeviceV1* output::output_device_v1() const
-{
-    return d_ptr->device.get();
 }
 
 WlOutput* output::wayland_output() const

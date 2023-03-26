@@ -31,7 +31,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-class OutputDeviceV1;
 class output_manager;
 class WlOutput;
 class XdgOutput;
@@ -162,7 +161,6 @@ public:
      */
     void done();
 
-    OutputDeviceV1* output_device_v1() const;
     WlOutput* wayland_output() const;
     XdgOutput* xdg_output() const;
 
@@ -172,7 +170,6 @@ Q_SIGNALS:
     void dpms_mode_requested(Wrapland::Server::output_dpms_mode mode);
 
 private:
-    friend class OutputDeviceV1;
     friend class WlOutput;
     friend class wlr_output_configuration_head_v1;
     friend class wlr_output_head_v1;

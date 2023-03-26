@@ -22,7 +22,6 @@
 #include "../../server/keystate.h"
 #include "../../server/layer_shell_v1.h"
 #include "../../server/linux_dmabuf_v1.h"
-#include "../../server/output_management_v1.h"
 #include "../../server/output_manager.h"
 #include "../../server/plasma_activation_feedback.h"
 #include "../../server/plasma_shell.h"
