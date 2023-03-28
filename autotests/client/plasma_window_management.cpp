@@ -862,7 +862,10 @@ void TestWindowManagement::testSendToOutput()
     QVERIFY(outputAnnouncedSpy.isValid());
 
     auto srv_output = std::make_unique<Srv::output>(*server.globals.output_manager);
-    srv_output->set_enabled(true);
+    srv_output->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = srv_output->get_state();
+    state.enabled = true;
+    srv_output->set_state(state);
     srv_output->done();
 
     QVERIFY(outputAnnouncedSpy.wait());

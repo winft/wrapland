@@ -59,34 +59,34 @@ int32_t to_subpixel(output_subpixel subpixel)
 }
 
 std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, char const*, char const*, int32_t>
-WlOutput::Private::geometry_args(output_state const& state)
+WlOutput::Private::geometry_args(output_data const& data)
 {
-    auto const position = state.geometry.topLeft();
+    auto const position = data.state.geometry.topLeft();
 
     return std::make_tuple(position.x(),
                            position.y(),
-                           state.meta.physical_size.width(),
-                           state.meta.physical_size.height(),
-                           to_subpixel(state.subpixel),
-                           state.meta.make.c_str(),
-                           state.meta.model.c_str(),
-                           output_to_transform(state.transform));
+                           data.meta.physical_size.width(),
+                           data.meta.physical_size.height(),
+                           to_subpixel(data.state.subpixel),
+                           data.meta.make.c_str(),
+                           data.meta.model.c_str(),
+                           output_to_transform(data.state.transform));
 }
 
 void WlOutput::Private::bindInit(WlOutputBind* bind)
 {
-    auto const state = output->d_ptr->published;
+    auto const data = output->d_ptr->published;
 
-    send<wl_output_send_geometry>(bind, geometry_args(state));
+    send<wl_output_send_geometry>(bind, geometry_args(data));
 
     for (auto const& mode : output->d_ptr->modes) {
-        if (mode != output->d_ptr->published.mode) {
+        if (mode != data.state.mode) {
             sendMode(bind, mode);
         }
     }
-    sendMode(bind, output->d_ptr->published.mode);
+    sendMode(bind, data.state.mode);
 
-    send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(bind, state.client_scale);
+    send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(bind, data.state.client_scale);
     done(bind);
     bind->client->flush();
 }
@@ -94,7 +94,7 @@ void WlOutput::Private::bindInit(WlOutputBind* bind)
 void WlOutput::Private::sendMode(WlOutputBind* bind, output_mode const& mode)
 {
     // Only called on bind. In this case we want to send the currently published mode.
-    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->published);
+    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->published.state);
 
     send<wl_output_send_mode>(
         bind, flags, mode.size.width(), mode.size.height(), mode.refresh_rate);
@@ -103,7 +103,7 @@ void WlOutput::Private::sendMode(WlOutputBind* bind, output_mode const& mode)
 void WlOutput::Private::sendMode(output_mode const& mode)
 {
     // Only called on update. In this case we want to send the pending mode.
-    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->pending);
+    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->pending.state);
 
     send<wl_output_send_mode>(flags, mode.size.width(), mode.size.height(), mode.refresh_rate);
 }
@@ -115,21 +115,22 @@ bool WlOutput::Private::broadcast()
 
     bool changed = false;
 
-    if (published.geometry.topLeft() != pending.geometry.topLeft()
+    if (published.state.geometry.topLeft() != pending.state.geometry.topLeft()
         || published.meta.physical_size != pending.meta.physical_size
-        || published.subpixel != pending.subpixel || published.meta.make != pending.meta.make
-        || published.meta.model != pending.meta.model || published.transform != pending.transform) {
+        || published.state.subpixel != pending.state.subpixel
+        || published.meta.make != pending.meta.make || published.meta.model != pending.meta.model
+        || published.state.transform != pending.state.transform) {
         send<wl_output_send_geometry>(geometry_args(pending));
         changed = true;
     }
 
-    if (published.client_scale != pending.client_scale) {
-        send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(pending.client_scale);
+    if (published.state.client_scale != pending.state.client_scale) {
+        send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(pending.state.client_scale);
         changed = true;
     }
 
-    if (published.mode != pending.mode) {
-        sendMode(pending.mode);
+    if (published.state.mode != pending.state.mode) {
+        sendMode(pending.state.mode);
         changed = true;
     }
 

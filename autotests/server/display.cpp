@@ -90,7 +90,9 @@ void TestServerDisplay::testAddRemoveOutput()
 
     auto output_manager = Wrapland::Server::output_manager(display);
     auto output1 = std::make_unique<Wrapland::Server::output>(output_manager);
-    output1->set_enabled(true);
+    auto state = output1->get_state();
+    state.enabled = true;
+    output1->set_state(state);
     output1->done();
 
     QCOMPARE(output_manager.outputs.size(), 1);
@@ -98,7 +100,9 @@ void TestServerDisplay::testAddRemoveOutput()
 
     // create a second output
     auto output2 = std::make_unique<Wrapland::Server::output>(output_manager);
-    output2->set_enabled(true);
+    state = output2->get_state();
+    state.enabled = true;
+    output1->set_state(state);
     output2->done();
 
     QCOMPARE(output_manager.outputs.size(), 2);

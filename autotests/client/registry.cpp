@@ -223,8 +223,12 @@ void TestWaylandRegistry::init()
     server.globals.virtual_keyboard_manager_v1
         = std::make_unique<Wrapland::Server::virtual_keyboard_manager_v1>(server.display.get());
 
-    server.globals.outputs.back()->set_enabled(true);
-    server.globals.outputs.back()->done();
+    auto& output = server.globals.outputs.back();
+    output->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = output->get_state();
+    state.enabled = true;
+    output->set_state(state);
+    output->done();
 }
 
 void TestWaylandRegistry::cleanup()
@@ -1007,7 +1011,10 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QVERIFY(outputAnnouncedSpy.isValid());
 
     auto output1 = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
-    output1->set_enabled(true);
+    output1->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = output1->get_state();
+    state.enabled = true;
+    output1->set_state(state);
     output1->done();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 2);
@@ -1021,7 +1028,10 @@ void TestWaylandRegistry::testAnnounceMultiple()
              outputAnnouncedSpy.first().last().value<quint32>());
 
     auto output2 = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
-    output2->set_enabled(true);
+    output2->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    state = output2->get_state();
+    state.enabled = true;
+    output2->set_state(state);
     output2->done();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 3);

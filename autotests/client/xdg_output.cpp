@@ -83,13 +83,15 @@ void TestXdgOutput::init()
     Wrapland::Server::output_metadata meta{.name = m_name, .make = m_make, .model = m_model};
     server.output
         = std::make_unique<Wrapland::Server::output>(meta, *server.globals.output_manager);
-    server.output->add_mode(Wrapland::Server::output_mode{QSize(1920, 1080), 60000, true, 1});
-    server.output->set_mode(1);
-    server.output->set_enabled(true);
     m_description = server.output->get_metadata().description;
+    server.output->add_mode(Wrapland::Server::output_mode{QSize(1920, 1080), 60000, true, 1});
+
+    auto state = server.output->get_state();
+    state.enabled = true;
 
     // Not a sensible position for one monitor but works for this test. And a 1.5 scale factor.
-    server.output->set_geometry(QRectF(QPoint(11, 12), QSize(1280, 720)));
+    state.geometry = QRectF(QPoint(11, 12), QSize(1280, 720));
+    server.output->set_state(state);
     server.output->done();
 
     // setup connection
@@ -190,7 +192,9 @@ void TestXdgOutput::testChanges()
     }
 
     // dynamic updates
-    server.output->set_geometry(QRectF(QPoint(1000, 2000), QSize(100, 200)));
+    auto state = server.output->get_state();
+    state.geometry = QRectF(QPoint(1000, 2000), QSize(100, 200));
+    server.output->set_state(state);
 
     std::string updated_description = "Updated xdg-output description";
     auto metadata = server.output->get_metadata();

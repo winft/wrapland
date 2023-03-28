@@ -143,17 +143,18 @@ void XdgShellTest::init()
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
 
-    server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
-    server.globals.outputs.back()->add_mode(Server::output_mode{QSize(1024, 768)});
-    server.globals.outputs.back()->set_enabled(true);
-    server.globals.outputs.back()->done();
-
-    server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
-    server.globals.outputs.back()->add_mode(Server::output_mode{QSize(1024, 768)});
-    server.globals.outputs.back()->set_enabled(true);
-    server.globals.outputs.back()->done();
+    auto add_output = [this] {
+        server.globals.outputs.push_back(
+            std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
+        auto& output = server.globals.outputs.back();
+        output->add_mode(Server::output_mode{QSize(1024, 768)});
+        auto state = output->get_state();
+        state.enabled = true;
+        output->set_state(state);
+        output->done();
+    };
+    add_output();
+    add_output();
 
     server.globals.seats.emplace_back(
         std::make_unique<Wrapland::Server::Seat>(server.display.get()));

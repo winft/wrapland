@@ -1128,7 +1128,10 @@ void TestSurface::testOutput()
     QVERIFY(outputAnnouncedSpy.isValid());
 
     auto serverOutput = new Wrapland::Server::output(*server.globals.output_manager);
-    serverOutput->set_enabled(true);
+    serverOutput->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = serverOutput->get_state();
+    state.enabled = true;
+    serverOutput->set_state(state);
     serverOutput->done();
 
     QVERIFY(outputAnnouncedSpy.wait());

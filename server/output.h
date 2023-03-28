@@ -82,7 +82,6 @@ struct output_metadata {
 };
 
 struct output_state {
-    output_metadata meta;
     bool enabled{false};
 
     output_mode mode;
@@ -90,6 +89,8 @@ struct output_state {
 
     output_transform transform{output_transform::normal};
     QRectF geometry;
+
+    // Automatically calculated on setter call.
     int client_scale = 1;
 };
 
@@ -121,33 +122,14 @@ public:
      */
     void set_metadata(output_metadata const& data);
 
-    int connector_id() const;
-    void set_connector_id(int id);
-
-    bool enabled() const;
-    void set_enabled(bool enabled);
-
     std::vector<output_mode> modes() const;
-    int mode_id() const;
-    QSize mode_size() const;
-    int refresh_rate() const;
-
     void add_mode(output_mode const& mode);
 
-    bool set_mode(int id);
-    bool set_mode(output_mode const& mode);
-    bool set_mode(QSize const& size, int refresh_rate);
+    output_state const& get_state() const;
+    void set_state(output_state const& data);
 
-    output_transform transform() const;
-    QRectF geometry() const;
-
-    void set_transform(output_transform transform);
-    void set_geometry(QRectF const& geometry);
-
-    int client_scale() const;
-
-    output_subpixel subpixel() const;
-    void set_subpixel(output_subpixel subpixel);
+    int connector_id() const;
+    void set_connector_id(int id);
 
     bool dpms_supported() const;
     void set_dpms_supported(bool supported);

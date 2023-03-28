@@ -89,16 +89,16 @@ bool XdgOutput::Private::broadcast()
 
     bool changed = false;
 
-    if (published.geometry.topLeft() != pending.geometry.topLeft()) {
+    if (published.state.geometry.topLeft() != pending.state.geometry.topLeft()) {
         for (auto resource : resources) {
-            resource->send_logical_position(pending.geometry.topLeft());
+            resource->send_logical_position(pending.state.geometry.topLeft());
         }
         changed = true;
     }
 
-    if (published.geometry.size() != pending.geometry.size()) {
+    if (published.state.geometry.size() != pending.state.geometry.size()) {
         for (auto resource : resources) {
-            resource->send_logical_size(pending.geometry.size());
+            resource->send_logical_size(pending.state.geometry.size());
         }
         changed = true;
     }
@@ -137,7 +137,7 @@ void XdgOutput::Private::resourceConnected(XdgOutputV1* resource)
 {
     auto const& state = output->d_ptr->published;
 
-    auto const geo = state.geometry;
+    auto const geo = state.state.geometry;
     resource->send_logical_position(geo.topLeft());
     resource->send_logical_size(geo.size());
 

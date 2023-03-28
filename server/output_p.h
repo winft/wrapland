@@ -35,6 +35,11 @@ class Display;
 wl_output_transform output_to_transform(output_transform transform);
 output_transform transform_to_output(wl_output_transform transform);
 
+struct output_data {
+    output_metadata meta;
+    output_state state;
+};
+
 class output::Private
 {
 public:
@@ -61,8 +66,8 @@ public:
         output_dpms_mode mode{output_dpms_mode::off};
     } dpms;
 
-    output_state pending;
-    output_state published;
+    output_data pending;
+    output_data published;
 
     std::unique_ptr<WlOutput> wayland_output;
     std::unique_ptr<XdgOutput> xdg_output;

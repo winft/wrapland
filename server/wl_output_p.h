@@ -48,7 +48,7 @@ private:
 
     static std::
         tuple<int32_t, int32_t, int32_t, int32_t, int32_t, char const*, char const*, int32_t>
-        geometry_args(output_state const& state);
+        geometry_args(output_data const& data);
 
     void sendMode(WlOutputBind* bind, output_mode const& mode);
     void sendMode(output_mode const& mode);

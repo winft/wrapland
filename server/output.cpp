@@ -106,8 +106,8 @@ output::Private::~Private()
 
 void output::Private::done()
 {
-    if (published.enabled != pending.enabled) {
-        if (pending.enabled) {
+    if (published.state.enabled != pending.state.enabled) {
+        if (pending.state.enabled) {
             wayland_output.reset(new WlOutput(q_ptr, &manager.display));
             if (manager.xdg_manager) {
                 xdg_output.reset(new XdgOutput(q_ptr, &manager.display));
@@ -117,7 +117,7 @@ void output::Private::done()
             xdg_output.reset();
         }
     }
-    if (pending.enabled) {
+    if (pending.state.enabled) {
         auto wayland_change = wayland_output->d_ptr->broadcast();
         auto xdg_change = xdg_output ? xdg_output->d_ptr->broadcast() : false;
         if (wayland_change || xdg_change) {
@@ -164,19 +164,19 @@ int32_t output::Private::get_mode_flags(output_mode const& mode, output_state co
 
 void output::Private::update_client_scale()
 {
-    auto logical_size = pending.geometry.size();
-    auto mode_size = pending.mode.size;
+    auto logical_size = pending.state.geometry.size();
+    auto mode_size = pending.state.mode.size;
 
     if (logical_size.width() <= 0 || logical_size.height() <= 0 || mode_size.width() <= 0
         || mode_size.height() <= 0) {
-        pending.client_scale = 1;
+        pending.state.client_scale = 1;
         return;
     }
 
     auto width_ratio = mode_size.width() / logical_size.width();
     auto height_ratio = mode_size.height() / logical_size.height();
 
-    pending.client_scale = std::ceil(std::max(width_ratio, height_ratio));
+    pending.state.client_scale = std::ceil(std::max(width_ratio, height_ratio));
 }
 
 bool output_mode::operator==(output_mode const& mode) const
@@ -204,21 +204,6 @@ output::~output() = default;
 void output::done()
 {
     d_ptr->done();
-}
-
-output_subpixel output::subpixel() const
-{
-    return d_ptr->pending.subpixel;
-}
-
-void output::set_subpixel(output_subpixel subpixel)
-{
-    d_ptr->pending.subpixel = subpixel;
-}
-
-output_transform output::transform() const
-{
-    return d_ptr->pending.transform;
 }
 
 output_metadata const& output::get_metadata() const
@@ -257,14 +242,19 @@ std::string output_generate_description(output_metadata const& data)
     return descr;
 }
 
-bool output::enabled() const
+output_state const& output::get_state() const
 {
-    return d_ptr->pending.enabled;
+    return d_ptr->pending.state;
 }
 
-void output::set_enabled(bool enabled)
+void output::set_state(output_state const& data)
 {
-    d_ptr->pending.enabled = enabled;
+    if (!contains(d_ptr->modes, data.mode)) {
+        // TODO(romangg): Allow custom modes?
+        return;
+    }
+    d_ptr->pending.state = data;
+    d_ptr->update_client_scale();
 }
 
 int output::connector_id() const
@@ -277,24 +267,9 @@ std::vector<output_mode> output::modes() const
     return d_ptr->modes;
 }
 
-int output::mode_id() const
-{
-    return d_ptr->pending.mode.id;
-}
-
-QSize output::mode_size() const
-{
-    return d_ptr->pending.mode.size;
-}
-
-int output::refresh_rate() const
-{
-    return d_ptr->pending.mode.refresh_rate;
-}
-
 void output::add_mode(output_mode const& mode)
 {
-    d_ptr->pending.mode = mode;
+    d_ptr->pending.state.mode = mode;
 
     auto it = std::find(d_ptr->modes.begin(), d_ptr->modes.end(), mode);
 
@@ -303,63 +278,6 @@ void output::add_mode(output_mode const& mode)
     } else {
         d_ptr->modes.push_back(mode);
     }
-}
-
-bool output::set_mode(int id)
-{
-    for (auto const& mode : d_ptr->modes) {
-        if (mode.id == id) {
-            d_ptr->pending.mode = mode;
-            d_ptr->update_client_scale();
-            return true;
-        }
-    }
-    return false;
-}
-
-bool output::set_mode(output_mode const& mode)
-{
-    for (auto const& cmp : d_ptr->modes) {
-        if (cmp == mode) {
-            d_ptr->pending.mode = cmp;
-            d_ptr->update_client_scale();
-            return true;
-        }
-    }
-    return false;
-}
-
-bool output::set_mode(QSize const& size, int refresh_rate)
-{
-    for (auto const& mode : d_ptr->modes) {
-        if (mode.size == size && mode.refresh_rate == refresh_rate) {
-            d_ptr->pending.mode = mode;
-            d_ptr->update_client_scale();
-            return true;
-        }
-    }
-    return false;
-}
-
-QRectF output::geometry() const
-{
-    return d_ptr->pending.geometry;
-}
-
-void output::set_transform(output_transform transform)
-{
-    d_ptr->pending.transform = transform;
-}
-
-void output::set_geometry(QRectF const& geometry)
-{
-    d_ptr->pending.geometry = geometry;
-    d_ptr->update_client_scale();
-}
-
-int output::client_scale() const
-{
-    return d_ptr->pending.client_scale;
 }
 
 void output::set_dpms_supported(bool supported)

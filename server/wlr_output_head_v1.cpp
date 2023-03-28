@@ -56,7 +56,7 @@ wlr_output_head_v1_res* wlr_output_head_v1::add_bind(wlr_output_manager_v1_bind&
         res->add_mode(*new wlr_output_mode_v1(bind.client->handle, bind.version, mode));
     }
 
-    res->send_mutable_data(output.d_ptr->pending);
+    res->send_mutable_data(output.d_ptr->pending.state);
 
     return res;
 }
@@ -66,40 +66,42 @@ void wlr_output_head_v1::broadcast()
     auto const published = output.d_ptr->published;
     auto const pending = output.d_ptr->pending;
 
-    if (published.enabled != pending.enabled) {
+    if (published.state.enabled != pending.state.enabled) {
         for (auto res : resources) {
-            res->send_enabled(pending.enabled);
+            res->send_enabled(pending.state.enabled);
         }
         manager.d_ptr->changed = true;
     }
 
-    if (!pending.enabled) {
+    if (!pending.state.enabled) {
         return;
     }
 
     // Force resending data when switching from disabled to enabled.
-    if (published.mode != pending.mode || !published.enabled) {
+    if (published.state.mode != pending.state.mode || !published.state.enabled) {
         for (auto res : resources) {
-            res->send_current_mode(pending.mode);
+            res->send_current_mode(pending.state.mode);
         }
         manager.d_ptr->changed = true;
     }
 
-    if (published.geometry.topLeft() != pending.geometry.topLeft() || !published.enabled) {
+    if (published.state.geometry.topLeft() != pending.state.geometry.topLeft()
+        || !published.state.enabled) {
         for (auto res : resources) {
-            res->send_position(pending.geometry.topLeft().toPoint());
+            res->send_position(pending.state.geometry.topLeft().toPoint());
         }
         manager.d_ptr->changed = true;
     }
 
-    if (published.transform != pending.transform || !published.enabled) {
+    if (published.state.transform != pending.state.transform || !published.state.enabled) {
         for (auto res : resources) {
-            res->send_transform(pending.transform);
+            res->send_transform(pending.state.transform);
         }
         manager.d_ptr->changed = true;
     }
 
-    if (auto scale = estimate_scale(pending); scale != current_scale || !published.enabled) {
+    if (auto scale = estimate_scale(pending.state);
+        scale != current_scale || !published.state.enabled) {
         for (auto res : resources) {
             res->send_scale(scale);
         }

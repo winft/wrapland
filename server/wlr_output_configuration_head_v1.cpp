@@ -56,7 +56,7 @@ wlr_output_configuration_head_v1::Private::Private(Client* client,
         &zwlr_output_configuration_head_v1_interface,
         &s_interface,
         &q_ptr)
-    , state{head.d_ptr->head->output.d_ptr->published}
+    , state{head.d_ptr->head->output.d_ptr->published.state}
     , scale{estimate_scale(state)}
     , configuration{configuration}
     , head{&head}

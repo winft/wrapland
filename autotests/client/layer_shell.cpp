@@ -83,7 +83,10 @@ void layer_shell_test::init()
     server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
 
     server.output = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
-    server.output->set_enabled(true);
+    server.output->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = server.output->get_state();
+    state.enabled = true;
+    server.output->set_state(state);
     server.output->done();
 
     // setup connection

@@ -164,8 +164,10 @@ void TestWlrOutputManagement::init()
 
     server.modes = {m0, m1, m2, m3};
 
-    first_output->set_mode(1);
-    first_output->set_geometry(QRectF(QPointF(0, 1920), QSizeF(1024, 768)));
+    auto state = first_output->get_state();
+    state.mode = m1;
+    state.geometry = QRectF(QPointF(0, 1920), QSizeF(1024, 768));
+    first_output->set_state(state);
     server.globals.outputs.push_back(std::move(first_output));
     server.globals.output_manager->commit_changes();
 
@@ -211,7 +213,9 @@ void TestWlrOutputManagement::test_add_remove_output()
     QVERIFY(head_changed_spy.isValid());
 
     // The first output is not yet enabled. Do this now, so a wl_output is created.
-    server.globals.outputs.front()->set_enabled(true);
+    auto state = server.globals.outputs.front()->get_state();
+    state.enabled = true;
+    server.globals.outputs.front()->set_state(state);
     server.globals.output_manager->commit_changes();
 
     QVERIFY(client.wlr_done_spy->wait());
@@ -228,9 +232,11 @@ void TestWlrOutputManagement::test_add_remove_output()
     server_output->add_mode(server.modes.at(0));
     server_output->add_mode(server.modes.at(1));
 
-    server_output->set_mode(0);
-    server_output->set_enabled(true);
-    server_output->set_geometry(QRectF(QPointF(1920, 1920), QSizeF(800, 600)));
+    state = server_output->get_state();
+    state.mode = server.modes.at(0);
+    state.enabled = true;
+    state.geometry = QRectF(QPointF(1920, 1920), QSizeF(800, 600));
+    server_output->set_state(state);
     server.globals.output_manager->commit_changes();
 
     QVERIFY(client.wlr_done_spy->wait());
@@ -278,7 +284,9 @@ void TestWlrOutputManagement::test_properties()
     QCOMPARE(wlr_head1->scale(), 1);
 
     // The first output is not yet enabled. Do this now. All data is sent.
-    server.globals.outputs.front()->set_enabled(true);
+    auto state = server.globals.outputs.front()->get_state();
+    state.enabled = true;
+    server.globals.outputs.front()->set_state(state);
     server.globals.output_manager->commit_changes();
 
     QVERIFY(client.wlr_done_spy->wait());
@@ -309,10 +317,12 @@ void TestWlrOutputManagement::test_properties()
     server_output->add_mode(server.modes.at(0));
     server_output->add_mode(server.modes.at(1));
 
-    server_output->set_mode(0);
-    server_output->set_enabled(true);
-    server_output->set_geometry(QRectF(QPointF(1920, 1920), QSizeF(400, 300)));
-    server_output->set_transform(Srv::output_transform::flipped_180);
+    state = server_output->get_state();
+    state.mode = server.modes.at(0);
+    state.enabled = true;
+    state.geometry = QRectF(QPointF(1920, 1920), QSizeF(400, 300));
+    state.transform = Srv::output_transform::flipped_180;
+    server_output->set_state(state);
     server.globals.output_manager->commit_changes();
 
     QVERIFY(client.wlr_done_spy->wait());
@@ -345,7 +355,9 @@ void TestWlrOutputManagement::test_configuration()
     QVERIFY(wlr_head1);
 
     // The first output is not yet enabled. Do this now. All data is sent.
-    server.globals.outputs.front()->set_enabled(true);
+    auto state = server.globals.outputs.front()->get_state();
+    state.enabled = true;
+    server.globals.outputs.front()->set_state(state);
     server.globals.output_manager->commit_changes();
 
     QVERIFY(client.wlr_done_spy->wait());
@@ -362,10 +374,12 @@ void TestWlrOutputManagement::test_configuration()
     server_output->add_mode(server.modes.at(0));
     server_output->add_mode(server.modes.at(1));
 
-    server_output->set_mode(0);
-    server_output->set_enabled(true);
-    server_output->set_geometry(QRectF(QPointF(1920, 1920), QSizeF(400, 300)));
-    server_output->set_transform(Srv::output_transform::flipped_180);
+    state = server_output->get_state();
+    state.mode = server.modes.at(0);
+    state.enabled = true;
+    state.geometry = QRectF(QPointF(1920, 1920), QSizeF(400, 300));
+    state.transform = Srv::output_transform::flipped_180;
+    server_output->set_state(state);
     server.globals.output_manager->commit_changes();
 
     QVERIFY(client.wlr_done_spy->wait());

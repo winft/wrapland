@@ -91,24 +91,31 @@ void TestOutput::init()
     Srv::output_metadata meta{.name = "HDMI-A", .make = "Foocorp", .model = "Barmodel"};
     server.output = std::make_unique<Wrapland::Server::output>(meta, *server.output_manager);
 
-    QCOMPARE(server.output->mode_size(), QSize());
-    QCOMPARE(server.output->refresh_rate(), 60000);
+    QCOMPARE(server.output->get_state().mode.size, QSize());
+    QCOMPARE(server.output->get_state().mode.refresh_rate, 60000);
     server.output->add_mode(Srv::output_mode{QSize(800, 600), 50000, true});
-    QCOMPARE(server.output->mode_size(), QSize(800, 600));
+    QCOMPARE(server.output->get_state().mode.size, QSize(800, 600));
+    QCOMPARE(server.output->get_state().mode.refresh_rate, 50000);
 
     auto mode = Srv::output_mode{QSize(1024, 768)};
     server.output->add_mode(mode);
 
     server.output->add_mode(Srv::output_mode{QSize(1280, 1024), 90000});
-    QCOMPARE(server.output->mode_size(), QSize(1280, 1024));
+    QCOMPARE(server.output->get_state().mode.size, QSize(1280, 1024));
+    QCOMPARE(server.output->get_state().mode.refresh_rate, 90000);
 
-    server.output->set_mode(mode);
-    QCOMPARE(server.output->mode_size(), QSize(1024, 768));
-    QCOMPARE(server.output->refresh_rate(), 60000);
+    auto state = server.output->get_state();
+    state.mode = mode;
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().mode.size, QSize(1024, 768));
+    QCOMPARE(server.output->get_state().mode.refresh_rate, 60000);
 
     QCOMPARE(server.output->dpms_supported(), false);
     QCOMPARE(server.output->dpms_mode(), Srv::output_dpms_mode::off);
-    server.output->set_enabled(true);
+
+    state = server.output->get_state();
+    state.enabled = true;
+    server.output->set_state(state);
     server.output->done();
 
     // setup connection
@@ -151,9 +158,12 @@ void TestOutput::cleanup()
 
 void TestOutput::testRegistry()
 {
-    QCOMPARE(server.output->geometry().topLeft(), QPoint(0, 0));
-    server.output->set_geometry(QRectF(QPoint(100, 50), QSize()));
-    QCOMPARE(server.output->geometry().topLeft(), QPoint(100, 50));
+    QCOMPARE(server.output->get_state().geometry.topLeft(), QPoint(0, 0));
+
+    auto state = server.output->get_state();
+    state.geometry = QRectF(QPoint(100, 50), QSize());
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().geometry.topLeft(), QPoint(100, 50));
 
     auto metadata = server.output->get_metadata();
     QCOMPARE(metadata.physical_size, QSize());
@@ -221,7 +231,7 @@ void TestOutput::testModeChanges()
     QCOMPARE(serverModes.at(1).refresh_rate, 60000);
     QCOMPARE(serverModes.at(2).refresh_rate, 90000);
     QVERIFY(serverModes.at(0).preferred);
-    QCOMPARE(serverModes.at(1).id, server.output->mode_id());
+    QCOMPARE(serverModes.at(1).id, server.output->get_state().mode.id);
     QVERIFY(!serverModes.at(2).preferred);
 
     using namespace Clt;
@@ -274,14 +284,18 @@ void TestOutput::testModeChanges()
     QSignalSpy modeChangedSpy(&output, &Clt::Output::modeChanged);
     QVERIFY(modeChangedSpy.isValid());
 
-    QCOMPARE(server.output->mode_size(), QSize(1024, 768));
+    QCOMPARE(server.output->get_state().mode.size, QSize(1024, 768));
 
     // Setting a non-existing mode.
-    QVERIFY(!server.output->set_mode(Srv::output_mode{QSize(800, 600)}));
-    QCOMPARE(server.output->mode_size(), QSize(1024, 768));
+    auto state = server.output->get_state();
+    state.mode = Srv::output_mode{QSize(800, 600)};
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().mode.size, QSize(1024, 768));
 
-    QVERIFY(server.output->set_mode(Srv::output_mode{QSize(800, 600), 50000}));
-    QCOMPARE(server.output->mode_size(), QSize(800, 600));
+    state = server.output->get_state();
+    state.mode = serverModes.at(0);
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().mode.size, QSize(800, 600));
     server.output->done();
 
     QVERIFY(modeChangedSpy.wait());
@@ -314,8 +328,10 @@ void TestOutput::testModeChanges()
     // change once more
     outputChanged.clear();
     modeChangedSpy.clear();
-    server.output->set_mode(Srv::output_mode{QSize(1280, 1024), 90000});
-    QCOMPARE(server.output->refresh_rate(), 90000);
+    state = server.output->get_state();
+    state.mode = Srv::output_mode{QSize(1280, 1024), 90000};
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().mode.refresh_rate, 90000);
     server.output->done();
 
     QVERIFY(modeChangedSpy.wait());
@@ -358,41 +374,49 @@ void TestOutput::testScaleChange()
 
     // change the scale
     outputChanged.clear();
-    server.output->set_mode(Srv::output_mode{QSize(1280, 1024), 90000});
-    server.output->set_geometry(QRectF(QPoint(0, 0), QSize(1280, 1024)));
-    QCOMPARE(server.output->client_scale(), 1);
-    server.output->set_geometry(QRectF(QPoint(0, 0), QSize(640, 512)));
-    QCOMPARE(server.output->client_scale(), 2);
+    auto state = server.output->get_state();
+    state.mode = Srv::output_mode{QSize(1280, 1024), 90000};
+    state.geometry = QRectF(QPoint(0, 0), QSize(1280, 1024));
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().client_scale, 1);
+
+    state.geometry = QRectF(QPoint(0, 0), QSize(640, 512));
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().client_scale, 2);
     server.output->done();
 
     QVERIFY(outputChanged.wait());
     QCOMPARE(output.scale(), 2);
 
     // changing to same value should not trigger
-    server.output->set_geometry(QRectF(QPoint(0, 0), QSize(640, 512)));
-    QCOMPARE(server.output->client_scale(), 2);
+    state.geometry = QRectF(QPoint(0, 0), QSize(640, 512));
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().client_scale, 2);
     server.output->done();
     QVERIFY(!outputChanged.wait(500));
     QCOMPARE(output.scale(), 2);
 
     // changing to a different value with same scale should not trigger
-    server.output->set_geometry(QRectF(QPoint(0, 0), QSize(800, 600)));
-    QCOMPARE(server.output->client_scale(), 2);
+    state.geometry = QRectF(QPoint(0, 0), QSize(800, 600));
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().client_scale, 2);
     server.output->done();
     QVERIFY(!outputChanged.wait(500));
     QCOMPARE(output.scale(), 2);
 
     // change once more
     outputChanged.clear();
-    QVERIFY(server.output->set_mode(Srv::output_mode{QSize(800, 600), 50000}));
+    state.mode = Srv::output_mode{QSize(800, 600), 50000};
+    server.output->set_state(state);
     server.output->done();
     QVERIFY(outputChanged.wait());
     QCOMPARE(output.scale(), 1);
 
     // change once more
     outputChanged.clear();
-    QVERIFY(server.output->set_mode(Srv::output_mode{QSize(1280, 1024), 90000}));
-    server.output->set_geometry(QRectF(QPoint(100, 200), QSize(1280, 1025)));
+    state.mode = Srv::output_mode{QSize(1280, 1024), 90000};
+    state.geometry = QRectF(QPoint(100, 200), QSize(1280, 1025));
+    server.output->set_state(state);
     server.output->done();
     QVERIFY(outputChanged.wait());
     QCOMPARE(output.scale(), 1);
@@ -418,9 +442,12 @@ void TestOutput::testSubpixel()
 {
     QFETCH(Srv::output_subpixel, actual);
 
-    QCOMPARE(server.output->subpixel(), Srv::output_subpixel::unknown);
-    server.output->set_subpixel(actual);
-    QCOMPARE(server.output->subpixel(), actual);
+    auto state = server.output->get_state();
+    QCOMPARE(state.subpixel, Srv::output_subpixel::unknown);
+
+    state.subpixel = actual;
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().subpixel, actual);
     server.output->done();
 
     Clt::Registry registry;
@@ -445,8 +472,9 @@ void TestOutput::testSubpixel()
 
     // change back to unknown
     outputChanged.clear();
-    server.output->set_subpixel(Srv::output_subpixel::unknown);
-    QCOMPARE(server.output->subpixel(), Srv::output_subpixel::unknown);
+    state.subpixel = Srv::output_subpixel::unknown;
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().subpixel, Srv::output_subpixel::unknown);
     server.output->done();
 
     if (outputChanged.isEmpty()) {
@@ -477,9 +505,13 @@ void TestOutput::testTransform_data()
 void TestOutput::testTransform()
 {
     QFETCH(Srv::output_transform, actual);
-    QCOMPARE(server.output->transform(), Srv::output_transform::normal);
-    server.output->set_transform(actual);
-    QCOMPARE(server.output->transform(), actual);
+
+    auto state = server.output->get_state();
+    QCOMPARE(state.transform, Srv::output_transform::normal);
+
+    state.transform = actual;
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().transform, actual);
     server.output->done();
 
     Clt::Registry registry;
@@ -504,8 +536,9 @@ void TestOutput::testTransform()
 
     // change back to normal
     outputChanged.clear();
-    server.output->set_transform(Srv::output_transform::normal);
-    QCOMPARE(server.output->transform(), Srv::output_transform::normal);
+    state.transform = Srv::output_transform::normal;
+    server.output->set_state(state);
+    QCOMPARE(server.output->get_state().transform, Srv::output_transform::normal);
     server.output->done();
 
     if (outputChanged.isEmpty()) {
