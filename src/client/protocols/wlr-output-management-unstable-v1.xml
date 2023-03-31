@@ -39,7 +39,7 @@
     interface version number is reset.
   </description>
 
-  <interface name="zwlr_output_manager_v1" version="4">
+  <interface name="zwlr_output_manager_v1" version="5">
     <description summary="output device configuration manager">
       This interface is a manager that allows reading and writing the current
       output device configuration.
@@ -125,7 +125,7 @@
     </event>
   </interface>
 
-  <interface name="zwlr_output_head_v1" version="4">
+  <interface name="zwlr_output_head_v1" version="5">
     <description summary="output device">
       A head is an output device. The difference between a wl_output object and
       a head is that heads are advertised even if they are turned off. A head
@@ -140,6 +140,11 @@
       Properties sent via this interface are applied atomically via the
       wlr_output_manager.done event. No guarantees are made regarding the order
       in which properties are sent.
+
+      The viewport indicates the logical size taken by the output in the global
+      compositor space. If the viewport aspect ratio doesn't match the current
+      mode aspect ratio, the compositor should letter-box the output with black
+      borders.
     </description>
 
     <event name="name">
@@ -225,7 +230,7 @@
 
     <event name="position">
       <description summary="current position">
-        This events describes the position of the head in the global compositor
+        This event describes the position of the head in the global compositor
         space. It is only sent if the output is enabled.
       </description>
       <arg name="x" type="int"
@@ -246,6 +251,9 @@
       <description summary="current scale">
         This events describes the scale of the head in the global compositor
         space. It is only sent if the output is enabled.
+
+        Starting from version 5, this event is deprecated: the viewport event
+        should be used instead.
       </description>
       <arg name="scale" type="fixed"/>
     </event>
@@ -354,9 +362,20 @@
       </description>
       <arg name="state" type="uint" enum="adaptive_sync_state"/>
     </event>
+
+    <!-- Version 5 additions -->
+
+    <event name="viewport" since="5">
+      <description summary="head viewport">
+        This event describes the size of the head in the global compositor
+        space. It is only sent if the output is enabled.
+      </description>
+      <arg name="width" type="int" summary="logical width"/>
+      <arg name="height" type="int" summary="logical height"/>
+    </event>
   </interface>
 
-  <interface name="zwlr_output_mode_v1" version="3">
+  <interface name="zwlr_output_mode_v1" version="5">
     <description summary="output mode">
       This object describes an output mode.
 
@@ -411,7 +430,7 @@
     </request>
   </interface>
 
-  <interface name="zwlr_output_configuration_v1" version="4">
+  <interface name="zwlr_output_configuration_v1" version="5">
     <description summary="output configuration">
       This object is used by the client to describe a full output configuration.
 
@@ -529,7 +548,7 @@
     </request>
   </interface>
 
-  <interface name="zwlr_output_configuration_head_v1" version="4">
+  <interface name="zwlr_output_configuration_head_v1" version="5">
     <description summary="head configuration">
       This object is used by the client to update a single head's configuration.
 
@@ -584,6 +603,9 @@
     <request name="set_scale">
       <description summary="set the scale">
         This request sets the head's scale.
+
+        Starting from version 5, this request is deprecated: clients should use
+        set_viewport instead.
       </description>
       <arg name="scale" type="fixed"/>
     </request>
@@ -596,6 +618,16 @@
         known as Variable Refresh Rate or VRR.
       </description>
       <arg name="state" type="uint" enum="zwlr_output_head_v1.adaptive_sync_state"/>
+    </request>
+
+    <!-- Version 5 additions -->
+
+    <request name="set_viewport" since="5">
+      <description summary="set the viewport">
+        This request sets the head's viewport.
+      </description>
+      <arg name="width" type="int" summary="logical width"/>
+      <arg name="height" type="int" summary="logical height"/>
     </request>
   </interface>
 </protocol>

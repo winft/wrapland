@@ -186,6 +186,7 @@ public:
     void setScale(WlrOutputHeadV1* head, double scale);
 
     void set_adaptive_sync(WlrOutputHeadV1* head, bool enable);
+    void set_viewport(WlrOutputHeadV1* head, QSize const& size);
 
     /**
      * Check if current configuration is valid. Either succeeded() or failed() will be emitted

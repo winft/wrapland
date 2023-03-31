@@ -25,6 +25,7 @@ struct zwlr_output_configuration_head_v1_interface const
         set_transform_callback,
         set_scale_callback,
         set_adaptive_sync_callback,
+        set_viewport_callback,
 };
 
 bool is_portrait_transform(output_transform tr)
@@ -80,7 +81,10 @@ void wlr_output_configuration_head_v1::Private::set_mode_callback(wl_client* /*w
     }
 
     priv->state.mode = (*mode_it)->d_ptr->mode;
-    priv->state.geometry.setSize(estimate_logical_size(priv->state, priv->scale));
+
+    if (priv->version < ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_VIEWPORT_SINCE_VERSION) {
+        priv->state.geometry.setSize(estimate_logical_size(priv->state, priv->scale));
+    }
 }
 
 void wlr_output_configuration_head_v1::Private::set_custom_mode_callback(wl_client* /*wlClient*/,
@@ -113,7 +117,10 @@ void wlr_output_configuration_head_v1::Private::set_transform_callback(wl_client
         return;
     }
     priv->state.transform = transform_to_output(static_cast<wl_output_transform>(wlTransform));
-    priv->state.geometry.setSize(estimate_logical_size(priv->state, priv->scale));
+
+    if (priv->version < ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_VIEWPORT_SINCE_VERSION) {
+        priv->state.geometry.setSize(estimate_logical_size(priv->state, priv->scale));
+    }
 }
 
 void wlr_output_configuration_head_v1::Private::set_scale_callback(wl_client* /*wlClient*/,
@@ -124,6 +131,11 @@ void wlr_output_configuration_head_v1::Private::set_scale_callback(wl_client* /*
     if (wlScale <= 0) {
         priv->postError(ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_SCALE,
                         "scale out of range");
+        return;
+    }
+    if (priv->version >= ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_VIEWPORT_SINCE_VERSION) {
+        // This request should not be used anymore with the viewport being introduced.
+        // TODO(romangg): Post error?
         return;
     }
 
@@ -144,6 +156,15 @@ void wlr_output_configuration_head_v1::Private::set_adaptive_sync_callback(wl_cl
     }
 
     priv->state.adaptive_sync = wlState == ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED;
+}
+
+void wlr_output_configuration_head_v1::Private::set_viewport_callback(wl_client* /*wlClient*/,
+                                                                      wl_resource* wlResource,
+                                                                      int32_t width,
+                                                                      int32_t height)
+{
+    auto priv = get_handle(wlResource)->d_ptr;
+    priv->state.geometry.setSize(QSizeF(width, height));
 }
 
 wlr_output_configuration_head_v1::wlr_output_configuration_head_v1(

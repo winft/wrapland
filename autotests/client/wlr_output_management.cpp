@@ -350,7 +350,8 @@ void TestWlrOutputManagement::test_properties()
     QVERIFY(wlr_head2->currentMode()->preferred());
     QCOMPARE(wlr_head2->position(), QPoint(1920, 1920));
     QCOMPARE(wlr_head2->transform(), Clt::WlrOutputHeadV1::Transform::Flipped180);
-    QCOMPARE(wlr_head2->scale(), 2);
+    QCOMPARE(wlr_head2->scale(), 1);
+    QCOMPARE(wlr_head2->viewport(), QSize(400, 300));
     QVERIFY(wlr_head2->adaptive_sync());
 }
 
@@ -403,7 +404,8 @@ void TestWlrOutputManagement::test_configuration()
     QVERIFY(wlr_head2->currentMode()->preferred());
     QCOMPARE(wlr_head2->position(), QPoint(1920, 1920));
     QCOMPARE(wlr_head2->transform(), Clt::WlrOutputHeadV1::Transform::Flipped180);
-    QCOMPARE(wlr_head2->scale(), 2);
+    QCOMPARE(wlr_head2->scale(), 1);
+    QCOMPARE(wlr_head2->viewport(), QSize(400, 300));
     QVERIFY(!wlr_head2->adaptive_sync());
 
     auto config = std::unique_ptr<Clt::WlrOutputConfigurationV1>{
@@ -416,7 +418,7 @@ void TestWlrOutputManagement::test_configuration()
     config->setMode(wlr_head2, wlr_head2->modes().at(1));
     config->setPosition(wlr_head2, QPoint(0, 0));
     config->setTransform(wlr_head2, Clt::WlrOutputHeadV1::Transform::Rotated90);
-    config->setScale(wlr_head2, 1);
+    config->set_viewport(wlr_head2, QSize(768, 1024));
     config->set_adaptive_sync(wlr_head2, true);
     config->apply();
 

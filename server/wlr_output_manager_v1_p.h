@@ -19,7 +19,7 @@ namespace Wrapland::Server
 class wlr_output_configuration_v1;
 class wlr_output_head_v1;
 
-constexpr uint32_t wlr_output_manager_v1_version = 4;
+constexpr uint32_t wlr_output_manager_v1_version = 5;
 using wlr_output_manager_v1_global
     = Wayland::Global<wlr_output_manager_v1, wlr_output_manager_v1_version>;
 using wlr_output_manager_v1_bind = Wayland::Bind<wlr_output_manager_v1_global>;
