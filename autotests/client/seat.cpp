@@ -38,22 +38,25 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/buffer.h"
 #include "../../server/client.h"
+#include "../../server/compositor.h"
 #include "../../server/data_device.h"
+#include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/keyboard.h"
 #include "../../server/keyboard_pool.h"
 #include "../../server/pointer_gestures_v1.h"
 #include "../../server/pointer_pool.h"
 #include "../../server/relative_pointer_v1.h"
+#include "../../server/seat.h"
 #include "../../server/subcompositor.h"
 #include "../../server/surface.h"
 #include "../../server/touch.h"
 #include "../../server/touch_pool.h"
 
-#include <QtTest>
+#include "../../tests/globals.h"
 
+#include <QtTest>
 #include <fcntl.h>
 #include <linux/input.h>
 #include <unistd.h>
@@ -144,10 +147,14 @@ void TestSeat::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.subcompositor = server.display->createSubCompositor();
-    server.globals.relative_pointer_manager_v1 = server.display->createRelativePointerManager();
-    server.globals.pointer_gestures_v1 = server.display->createPointerGestures();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.subcompositor
+        = std::make_unique<Wrapland::Server::Subcompositor>(server.display.get());
+    server.globals.relative_pointer_manager_v1
+        = std::make_unique<Wrapland::Server::RelativePointerManagerV1>(server.display.get());
+    server.globals.pointer_gestures_v1
+        = std::make_unique<Wrapland::Server::PointerGesturesV1>(server.display.get());
 
     // Setup connection.
     m_connection = new Clt::ConnectionThread;
@@ -176,7 +183,8 @@ void TestSeat::init()
     registry.setup();
     QVERIFY(compositorSpy.wait());
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setName("seat0");
 
@@ -1472,7 +1480,7 @@ void TestSeat::testSelection()
 {
     server.seat->setHasKeyboard(true);
 
-    auto ddmi = server.display->createDataDeviceManager();
+    auto ddmi = std::make_unique<Wrapland::Server::data_device_manager>(server.display.get());
 
     QSignalSpy ddiCreatedSpy(ddmi.get(), &Srv::data_device_manager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
@@ -1620,8 +1628,7 @@ void TestSeat::testSelectionNoDataSource()
     // This test verifies that the server doesn't crash when using setSelection with
     // a DataDevice which doesn't have a DataSource yet.
 
-    // First create the DataDevice.
-    auto ddmi = server.display->createDataDeviceManager();
+    auto ddmi = std::make_unique<Wrapland::Server::data_device_manager>(server.display.get());
     QSignalSpy ddiCreatedSpy(ddmi.get(), &Srv::data_device_manager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 
@@ -1672,8 +1679,7 @@ void TestSeat::testDataDeviceForKeyboardSurface()
     // keyboard surface and the currentSelection does not have a DataSource.
     // To properly test the functionality this test requires a second client.
 
-    // Create the DataDeviceManager.
-    auto ddmi = server.display->createDataDeviceManager();
+    auto ddmi = std::make_unique<Wrapland::Server::data_device_manager>(server.display.get());
     QSignalSpy ddiCreatedSpy(ddmi.get(), &Srv::data_device_manager::device_created);
     QVERIFY(ddiCreatedSpy.isValid());
 

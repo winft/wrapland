@@ -28,7 +28,6 @@ class primary_selection_device_manager::Private
 {
 public:
     Private(Display* display, primary_selection_device_manager* q_ptr);
-    ~Private() override;
 
 private:
     static const struct zwp_primary_selection_device_manager_v1_interface s_interface;

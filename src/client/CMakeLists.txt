@@ -32,9 +32,6 @@ set(CLIENT_LIB_SRCS
     keyboard_shortcuts_inhibit.cpp
     layer_shell_v1.cpp
     output.cpp
-    output_configuration_v1.cpp
-    output_management_v1.cpp
-    output_device_v1.cpp
     pointer.cpp
     pointerconstraints.cpp
     pointergestures.cpp
@@ -92,15 +89,6 @@ ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
   BASENAME fullscreen-shell
 )
 
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-management-unstable-v1.xml
-  BASENAME output-management-v1
-)
-
-ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
-  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-device-unstable-v1.xml
-  BASENAME output-device-v1
-)
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
   PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-data-control-unstable-v1.xml
   BASENAME wlr-data-control-v1
@@ -266,8 +254,6 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-drm-lease-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-ext-idle-notify-v1-server-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-fullscreen-shell-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-client-protocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-data-control-unstable-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-output-management-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
@@ -363,9 +349,6 @@ set(CLIENT_LIB_HEADERS
     keyboard_shortcuts_inhibit.h
     layer_shell_v1.h
     output.h
-    output_configuration_v1.h
-    output_management_v1.h
-    output_device_v1.h
     wlr_output_configuration_v1.h
     wlr_output_manager_v1.h
     pointer.h

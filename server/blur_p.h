@@ -41,7 +41,6 @@ class BlurManager::Private : public BlurManagerGlobal
 {
 public:
     Private(Display* display, BlurManager* qptr);
-    ~Private() override;
 
 private:
     static void createCallback(BlurManagerBind* bind, uint32_t id, wl_resource* wlSurface);

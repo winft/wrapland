@@ -32,8 +32,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/compositor.h"
 #include "../../server/display.h"
 #include "../../server/filtered_display.h"
-#include "../../server/globals.h"
 #include "../../server/region.h"
+
+#include "../../tests/globals.h"
 
 #include <wayland-server.h>
 
@@ -95,8 +96,8 @@ void TestFilter::init()
     m_display->start();
     QVERIFY(m_display->running());
 
-    globals.compositor = m_display->createCompositor();
-    globals.blur_manager = m_display->createBlurManager();
+    globals.compositor = std::make_unique<Wrapland::Server::Compositor>(m_display.get());
+    globals.blur_manager = std::make_unique<Wrapland::Server::BlurManager>(m_display.get());
 }
 
 void TestFilter::cleanup()

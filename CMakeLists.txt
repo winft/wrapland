@@ -67,7 +67,7 @@ set(CMAKE_LINK_DEPENDS_NO_SHARED ON)
 option(BUILD_SHARED_LIBS "If enabled, shared libs will be built by default, otherwise static libs" ON)
 set(CMAKE_AUTOMOC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

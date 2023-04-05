@@ -25,12 +25,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/plasma_virtual_desktop.h"
 #include "../../server/plasma_window.h"
 
-#include <QtTest>
+#include "../../tests/globals.h"
 
+#include <QtTest>
 #include <linux/input.h>
 
 namespace Clt = Wrapland::Client;
@@ -130,9 +130,10 @@ void PlasmaWindowModelTest::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.plasma_window_manager = server.display->createPlasmaWindowManager();
+    server.globals.plasma_window_manager
+        = std::make_unique<Wrapland::Server::PlasmaWindowManager>(server.display.get());
     server.globals.plasma_virtual_desktop_manager
-        = server.display->createPlasmaVirtualDesktopManager();
+        = std::make_unique<Wrapland::Server::PlasmaVirtualDesktopManager>(server.display.get());
 
     server.globals.plasma_virtual_desktop_manager->createDesktop("desktop1");
     server.globals.plasma_virtual_desktop_manager->createDesktop("desktop2");

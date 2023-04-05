@@ -48,6 +48,7 @@ class PlasmaWindowManager::Private : public PlasmaWindowManagerGlobal
 {
 public:
     Private(Display* display, PlasmaWindowManager* q_ptr);
+
     void sendShowingDesktopState();
     void send_stacking_order_changed();
     void send_stacking_order_changed(PlasmaWindowManagerBind* bind);

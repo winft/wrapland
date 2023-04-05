@@ -30,9 +30,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-WlOutput::Private::Private(Output* output, Display* display, WlOutput* q_ptr)
+WlOutput::Private::Private(Server::output* output, Display* display, WlOutput* q_ptr)
     : WlOutputGlobal(q_ptr, display, &wl_output_interface, &s_interface)
-    , displayHandle(display)
     , output(output)
 {
     create();
@@ -40,71 +39,71 @@ WlOutput::Private::Private(Output* output, Display* display, WlOutput* q_ptr)
 
 const struct wl_output_interface WlOutput::Private::s_interface = {resourceDestroyCallback};
 
-int32_t to_subpixel(Output::Subpixel subpixel)
+int32_t to_subpixel(output_subpixel subpixel)
 {
     switch (subpixel) {
-    case Output::Subpixel::Unknown:
+    case output_subpixel::unknown:
         return WL_OUTPUT_SUBPIXEL_UNKNOWN;
-    case Output::Subpixel::None:
+    case output_subpixel::none:
         return WL_OUTPUT_SUBPIXEL_NONE;
-    case Output::Subpixel::HorizontalRGB:
+    case output_subpixel::horizontal_rgb:
         return WL_OUTPUT_SUBPIXEL_HORIZONTAL_RGB;
-    case Output::Subpixel::HorizontalBGR:
+    case output_subpixel::horizontal_bgr:
         return WL_OUTPUT_SUBPIXEL_HORIZONTAL_BGR;
-    case Output::Subpixel::VerticalRGB:
+    case output_subpixel::vertical_rgb:
         return WL_OUTPUT_SUBPIXEL_VERTICAL_RGB;
-    case Output::Subpixel::VerticalBGR:
+    case output_subpixel::vertical_bgr:
         return WL_OUTPUT_SUBPIXEL_VERTICAL_BGR;
     }
     abort();
 }
 
 std::tuple<int32_t, int32_t, int32_t, int32_t, int32_t, char const*, char const*, int32_t>
-WlOutput::Private::geometry_args(OutputState const& state)
+WlOutput::Private::geometry_args(output_data const& data)
 {
-    auto const position = state.geometry.topLeft();
+    auto const position = data.state.geometry.topLeft();
 
     return std::make_tuple(position.x(),
                            position.y(),
-                           state.info.physical_size.width(),
-                           state.info.physical_size.height(),
-                           to_subpixel(state.subpixel),
-                           state.info.make.c_str(),
-                           state.info.model.c_str(),
-                           Output::Private::to_transform(state.transform));
+                           data.meta.physical_size.width(),
+                           data.meta.physical_size.height(),
+                           to_subpixel(data.state.subpixel),
+                           data.meta.make.c_str(),
+                           data.meta.model.c_str(),
+                           output_to_transform(data.state.transform));
 }
 
 void WlOutput::Private::bindInit(WlOutputBind* bind)
 {
-    auto const state = output->d_ptr->published;
+    auto const data = output->d_ptr->published;
 
-    send<wl_output_send_geometry>(bind, geometry_args(state));
+    send<wl_output_send_geometry>(bind, geometry_args(data));
 
     for (auto const& mode : output->d_ptr->modes) {
-        if (mode != output->d_ptr->published.mode) {
+        if (mode != data.state.mode) {
             sendMode(bind, mode);
         }
     }
-    sendMode(bind, output->d_ptr->published.mode);
+    sendMode(bind, data.state.mode);
 
-    send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(bind, state.client_scale);
+    send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(bind, data.state.client_scale);
     done(bind);
     bind->client->flush();
 }
 
-void WlOutput::Private::sendMode(WlOutputBind* bind, Output::Mode const& mode)
+void WlOutput::Private::sendMode(WlOutputBind* bind, output_mode const& mode)
 {
     // Only called on bind. In this case we want to send the currently published mode.
-    auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->published);
+    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->published.state);
 
     send<wl_output_send_mode>(
         bind, flags, mode.size.width(), mode.size.height(), mode.refresh_rate);
 }
 
-void WlOutput::Private::sendMode(Output::Mode const& mode)
+void WlOutput::Private::sendMode(output_mode const& mode)
 {
     // Only called on update. In this case we want to send the pending mode.
-    auto flags = Output::Private::get_mode_flags(mode, output->d_ptr->pending);
+    auto flags = output::Private::get_mode_flags(mode, output->d_ptr->pending.state);
 
     send<wl_output_send_mode>(flags, mode.size.width(), mode.size.height(), mode.refresh_rate);
 }
@@ -116,21 +115,22 @@ bool WlOutput::Private::broadcast()
 
     bool changed = false;
 
-    if (published.geometry.topLeft() != pending.geometry.topLeft()
-        || published.info.physical_size != pending.info.physical_size
-        || published.subpixel != pending.subpixel || published.info.make != pending.info.make
-        || published.info.model != pending.info.model || published.transform != pending.transform) {
+    if (published.state.geometry.topLeft() != pending.state.geometry.topLeft()
+        || published.meta.physical_size != pending.meta.physical_size
+        || published.state.subpixel != pending.state.subpixel
+        || published.meta.make != pending.meta.make || published.meta.model != pending.meta.model
+        || published.state.transform != pending.state.transform) {
         send<wl_output_send_geometry>(geometry_args(pending));
         changed = true;
     }
 
-    if (published.client_scale != pending.client_scale) {
-        send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(pending.client_scale);
+    if (published.state.client_scale != pending.state.client_scale) {
+        send<wl_output_send_scale, WL_OUTPUT_SCALE_SINCE_VERSION>(pending.state.client_scale);
         changed = true;
     }
 
-    if (published.mode != pending.mode) {
-        sendMode(pending.mode);
+    if (published.state.mode != pending.state.mode) {
+        sendMode(pending.state.mode);
         changed = true;
     }
 
@@ -147,23 +147,18 @@ void WlOutput::Private::done(WlOutputBind* bind)
     send<wl_output_send_done, WL_OUTPUT_DONE_SINCE_VERSION>(bind);
 }
 
-WlOutput::WlOutput(Output* output, Display* display)
+WlOutput::WlOutput(Server::output* output, Display* display)
     : QObject(nullptr)
     , d_ptr(new Private(output, display, this))
 {
-    display->add_wl_output(this);
 }
 
 WlOutput::~WlOutput()
 {
     Q_EMIT removed();
-
-    if (d_ptr->displayHandle) {
-        d_ptr->displayHandle->removeOutput(this);
-    }
 }
 
-Output* WlOutput::output() const
+Server::output* WlOutput::output() const
 {
     return d_ptr->output;
 }

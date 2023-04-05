@@ -77,7 +77,7 @@ struct surface_state {
     QRegion opaque;
 
     int32_t scale{1};
-    Output::Transform transform{Output::Transform::Normal};
+    output_transform transform{output_transform::normal};
     QPoint offset;
 
     QRectF source_rectangle;
@@ -126,7 +126,7 @@ public:
     QRegion trackedDamage() const;
     void resetTrackedDamage();
 
-    void setOutputs(std::vector<Output*> const& outputs);
+    void setOutputs(std::vector<output*> const& outputs);
     void setOutputs(std::vector<WlOutput*> const& outputs);
     std::vector<WlOutput*> outputs() const;
 
@@ -138,7 +138,7 @@ public:
     uint32_t id() const;
     Client* client() const;
 
-    uint32_t lockPresentation(Output* output);
+    uint32_t lockPresentation(Server::output* output);
     void presentationFeedback(uint32_t presentationId,
                               uint32_t tvSecHi,
                               uint32_t tvSecLo,

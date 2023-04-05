@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/compositor.h"
 #include "../server/display.h"
 #include "../server/output.h"
+#include "../server/output_manager.h"
 #include "../server/seat.h"
 #include "../server/xdg_shell.h"
 
@@ -86,13 +87,14 @@ int main(int argc, char** argv)
     Wrapland::Server::Display display;
     display.start();
     display.createShm();
-    auto compositor = display.createCompositor();
 
-    auto xdg_shell = display.createXdgShell();
+    auto output_manager = Wrapland::Server::output_manager(display);
+    auto compositor = std::make_unique<Wrapland::Server::Compositor>(&display);
+    auto xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(&display);
 
-    auto output = std::make_unique<Wrapland::Server::Output>(&display);
-    output->set_physical_size(QSize(10, 10));
-    output->add_mode(Wrapland::Server::Output::Mode{QSize(1024, 768)});
+    Wrapland::Server::output_metadata meta{.physical_size = {10, 10}};
+    auto output = std::make_unique<Wrapland::Server::output>(meta, output_manager);
+    output->add_mode(Wrapland::Server::output_mode{QSize(1024, 768)});
 
     // starts XWayland by forking and opening a pipe
     int const pipe = startXServer();
@@ -115,7 +117,7 @@ int main(int argc, char** argv)
 
     QGuiApplication app(argc, argv);
 
-    auto seat = display.createSeat();
+    auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     seat->setName("testSeat0");
 
     return app.exec();

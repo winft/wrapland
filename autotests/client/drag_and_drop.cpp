@@ -33,14 +33,18 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/touch.h"
 
+#include "../../server/compositor.h"
 #include "../../server/data_device.h"
+#include "../../server/data_device_manager.h"
 #include "../../server/data_source.h"
 #include "../../server/display.h"
 #include "../../server/drag_pool.h"
-#include "../../server/globals.h"
 #include "../../server/pointer_pool.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
 #include "../../server/touch_pool.h"
+
+#include "../../tests/globals.h"
 
 class TestDragAndDrop : public QObject
 {
@@ -97,14 +101,17 @@ void TestDragAndDrop::init()
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasPointer(true);
     server.seat->setHasTouch(true);
 
-    server.globals.data_device_manager = server.display->createDataDeviceManager();
+    server.globals.data_device_manager
+        = std::make_unique<Wrapland::Server::data_device_manager>(server.display.get());
     server.display->createShm();
 
     for (auto client : clients) {

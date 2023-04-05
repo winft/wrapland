@@ -28,11 +28,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/text_input_v2.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
 #include "../../server/text_input_pool.h"
 #include "../../server/text_input_v2.h"
+
+#include "../../tests/globals.h"
 
 class text_input_v2_test : public QObject
 {
@@ -90,14 +93,16 @@ void text_input_v2_test::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.push_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasKeyboard(true);
     server.seat->setHasTouch(true);
 
-    server.globals.text_input_manager_v2 = server.display->createTextInputManagerV2();
+    server.globals.text_input_manager_v2
+        = std::make_unique<Wrapland::Server::text_input_manager_v2>(server.display.get());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;

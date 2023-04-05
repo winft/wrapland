@@ -26,9 +26,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/kde_idle.h"
 #include "../../server/seat.h"
+
+#include "../../tests/globals.h"
 
 using namespace Wrapland::Client;
 
@@ -69,9 +70,11 @@ void IdleTest::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
+    server.seat = server.globals.seats
+                      .emplace_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()))
+                      .get();
     server.seat->setName("seat0");
-    server.globals.kde_idle = server.display->create_kde_idle();
+    server.globals.kde_idle = std::make_unique<Wrapland::Server::kde_idle>(server.display.get());
 
     // setup connection
     m_connection = new Clt::ConnectionThread;

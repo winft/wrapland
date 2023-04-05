@@ -18,7 +18,7 @@ namespace Wrapland::Server
 class Client;
 class Display;
 class LayerSurfaceV1;
-class Output;
+class output;
 class Surface;
 class XdgShellPopup;
 
@@ -54,12 +54,12 @@ public:
     };
 
     Surface* surface() const;
-    Output* output() const;
+    Server::output* output() const;
 
     /**
      * Compositor should set a fixed output on first commit if client did not specify one.
      */
-    void set_output(Output* output);
+    void set_output(Server::output* output);
     std::string domain() const;
 
     QSize size() const;
@@ -87,7 +87,7 @@ private:
                    uint32_t version,
                    uint32_t id,
                    Surface* surface,
-                   Output* output,
+                   Server::output* output,
                    Layer layer,
                    std::string domain);
     friend class LayerShellV1;

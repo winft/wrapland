@@ -26,8 +26,6 @@ XdgActivationV1::Private::Private(Display* display, XdgActivationV1* q_ptr)
     create();
 }
 
-XdgActivationV1::Private::~Private() = default;
-
 void XdgActivationV1::Private::getActivationTokenCallback(XdgActivationV1Bind* bind, uint32_t id)
 {
     auto request

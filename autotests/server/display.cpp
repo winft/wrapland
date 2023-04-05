@@ -22,7 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/client.h"
 #include "../../server/display.h"
 #include "../../server/output.h"
-#include "../../server/output_management_v1.h"
+#include "../../server/output_manager.h"
 #include "../../server/wl_output.h"
 
 #include <sys/socket.h>
@@ -42,7 +42,6 @@ private Q_SLOTS:
     void testAddRemoveOutput();
     void testClientConnection();
     void testConnectNoSocket();
-    void testOutputManagement();
     void testAutoSocketName();
 };
 
@@ -89,30 +88,35 @@ void TestServerDisplay::testAddRemoveOutput()
     display.set_socket_name(std::string("kwin-wayland-server-display-test-output-0"));
     display.start();
 
-    std::unique_ptr<Output> output1{new Wrapland::Server::Output(&display)};
-    output1->set_enabled(true);
+    auto output_manager = Wrapland::Server::output_manager(display);
+    auto output1 = std::make_unique<Wrapland::Server::output>(output_manager);
+    auto state = output1->get_state();
+    state.enabled = true;
+    output1->set_state(state);
     output1->done();
 
-    QCOMPARE(display.outputs().size(), 1);
-    QCOMPARE(display.outputs()[0], output1->wayland_output());
+    QCOMPARE(output_manager.outputs.size(), 1);
+    QCOMPARE(output_manager.outputs[0]->wayland_output(), output1->wayland_output());
 
     // create a second output
-    std::unique_ptr<Output> output2{new Wrapland::Server::Output(&display)};
-    output2->set_enabled(true);
+    auto output2 = std::make_unique<Wrapland::Server::output>(output_manager);
+    state = output2->get_state();
+    state.enabled = true;
+    output1->set_state(state);
     output2->done();
 
-    QCOMPARE(display.outputs().size(), 2);
-    QCOMPARE(display.outputs()[0], output1->wayland_output());
-    QCOMPARE(display.outputs()[1], output2->wayland_output());
+    QCOMPARE(output_manager.outputs.size(), 2);
+    QCOMPARE(output_manager.outputs[0]->wayland_output(), output1->wayland_output());
+    QCOMPARE(output_manager.outputs[1]->wayland_output(), output2->wayland_output());
 
     // remove the first output
     output1.reset();
-    QCOMPARE(display.outputs().size(), 1);
-    QCOMPARE(display.outputs()[0], output2->wayland_output());
+    QCOMPARE(output_manager.outputs.size(), 1);
+    QCOMPARE(output_manager.outputs[0]->wayland_output(), output2->wayland_output());
 
     // and delete the second
     output2.reset();
-    QVERIFY(display.outputs().empty());
+    QVERIFY(output_manager.outputs.empty());
 }
 
 void TestServerDisplay::testClientConnection()
@@ -215,14 +219,6 @@ void TestServerDisplay::testConnectNoSocket()
     wl_client_destroy(client->native());
     close(sv[0]);
     close(sv[1]);
-}
-
-void TestServerDisplay::testOutputManagement()
-{
-    Display display;
-    display.set_socket_name(std::string("wrapland-test-0"));
-    display.start();
-    auto output_management = display.createOutputManagementV1();
 }
 
 void TestServerDisplay::testAutoSocketName()

@@ -63,8 +63,6 @@ struct xdg_activation_v1;
 struct xdg_shell;
 struct xdg_wm_base;
 struct zwp_input_method_manager_v2;
-struct zkwinft_output_management_v1;
-struct zkwinft_output_device_v1;
 struct zwlr_data_control_manager_v1;
 struct zwlr_layer_shell_v1;
 struct zwlr_output_manager_v1;
@@ -96,8 +94,6 @@ class drm_lease_device_v1;
 class EventQueue;
 class FakeInput;
 class FullscreenShell;
-class OutputManagementV1;
-class OutputDeviceV1;
 class WlrOutputManagerV1;
 class Idle;
 class IdleInhibitManager;
@@ -197,8 +193,6 @@ public:
         Contrast,                         ///< refers to org_kde_kwin_contrast_manager interface
         Slide,                            ///< refers to org_kde_kwin_slide_manager
         Dpms,                             ///< Refers to org_kde_kwin_dpms_manager interface
-        OutputManagementV1,               ///< Refers to the zkwinft_output_management_v1 interface
-        OutputDeviceV1,                   ///< Refers to the zkwinft_output_device_v1 interface
         WlrOutputManagerV1,               ///< Refers to the zwlr_output_manager_v1 interface
         TextInputManagerV2,               ///< Refers to zwp_text_input_manager_v2, @since 0.0.523
         TextInputManagerV3,               ///< Refers to zwp_text_input_manager_v3, @since 0.523.0
@@ -364,15 +358,6 @@ public:
      **/
     wl_shm* bindShm(uint32_t name, uint32_t version) const;
     /**
-     * Binds the zkwinft_output_management_v1 with @p name and @p version.
-     * If the @p name does not exist or is not for the output management interface,
-     * @c null will be returned.
-     *
-     * Prefer using createOutputManagementV1 instead.
-     * @see createOutputManagementV1
-     **/
-    zkwinft_output_management_v1* bindOutputManagementV1(uint32_t name, uint32_t version) const;
-    /**
      * Binds the zwlr_output_manager_v1 with @p name and @p version.
      * If the @p name does not exist or is not for the output manager interface,
      * @c null will be returned.
@@ -399,16 +384,6 @@ public:
      * @see createSubCompositor
      **/
     wl_subcompositor* bindSubCompositor(uint32_t name, uint32_t version) const;
-    /**
-     * Binds the zkwinft_output_device_v1 with @p name and @p version.
-     * If the @p name does not exist or is not for the output interface,
-     * @c null will be returned.
-     *
-     * Prefer using createOutputDeviceV1 instead.
-     * @see createOutputDeviceV1
-     **/
-    zkwinft_output_device_v1* bindOutputDeviceV1(uint32_t name, uint32_t version) const;
-
     /**
      * Binds the _wl_fullscreen_shell with @p name and @p version.
      * If the @p name does not exist or is not for the fullscreen shell interface,
@@ -925,37 +900,6 @@ public:
      * @returns The created Output.
      **/
     Output* createOutput(quint32 name, quint32 version, QObject* parent = nullptr);
-    /**
-     * Creates an OutputManagementV1 and sets it up to manage the interface identified
-     * by @p name and @p version.
-     *
-     * Note: in case @p name is invalid or isn't for the zkwinft_output_management_v1 interface,
-     * the returned OutputManagementV1 will not be valid. Therefore it's recommended to call
-     * isValid on the created instance.
-     *
-     * @param name The name of the zkwinft_output_management_v1 interface to bind
-     * @param version The version or the zkwinft_output_management_v1 interface to use
-     * @param parent The parent for OutputManagementV1
-     *
-     * @returns The created OutputManagementV1.
-     **/
-    OutputManagementV1*
-    createOutputManagementV1(quint32 name, quint32 version, QObject* parent = nullptr);
-    /**
-     * Creates an OutputDeviceV1 and sets it up to manage the interface identified by
-     * @p name and @p version.
-     *
-     * Note: in case @p name is invalid or isn't for the zkwinft_output_device_v1 interface,
-     * the returned OutputDeviceV1 will not be valid. Therefore it's recommended to call
-     * isValid on the created instance.
-     *
-     * @param name The name of the zkwinft_output_device_v1 interface to bind
-     * @param version The version or the zkwinft_output_device_v1 interface to use
-     * @param parent The parent for OutputDeviceV1
-     *
-     * @returns The created OutputDeviceV1.
-     **/
-    OutputDeviceV1* createOutputDeviceV1(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates an OutputManagementV1 and sets it up to manage the interface identified
      * by @p name and @p version.
@@ -1754,20 +1698,6 @@ Q_SIGNALS:
      * @since 0.522.0
      **/
     void layerShellV1Announced(quint32 name, quint32 version);
-
-    /**
-     * Emitted whenever a zkwinft_output_management_v1 interface gets announced.
-     * @param name The name for the announced interface
-     * @param version The maximum supported version of the announced interface
-     **/
-    void outputManagementV1Announced(quint32 name, quint32 version);
-    /**
-     * Emitted whenever a zkwinft_output_device_v1 interface gets announced.
-     * @param name The name for the announced interface
-     * @param version The maximum supported version of the announced interface
-     **/
-    void outputDeviceV1Announced(quint32 name, quint32 version);
-
     /**
      * Emitted whenever a zwlr_output_manager_v1 interface gets announced.
      * @param name The name for the announced interface
@@ -2074,16 +2004,6 @@ Q_SIGNALS:
      * @since 0.523.0
      **/
     void drmLeaseDeviceV1Removed(quint32 name);
-    /**
-     * Emitted whenever a zkwinft_output_management_v1 interface gets removed.
-     * @param name The name for the removed interface
-     **/
-    void outputManagementV1Removed(quint32 name);
-    /**
-     * Emitted whenever a zkwinft_output_device_v1 interface gets removed.
-     * @param name The name for the removed interface
-     **/
-    void outputDeviceV1Removed(quint32 name);
 
     /**
      * Emitted whenever a zwlr_output_manager_v1 interface gets removed.

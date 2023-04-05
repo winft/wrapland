@@ -29,7 +29,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/buffer.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/surface.h"
 
 class TestShmPool : public QObject
@@ -53,7 +52,6 @@ private Q_SLOTS:
 private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
-        Wrapland::Server::globals globals;
     } server;
 
     Wrapland::Client::ConnectionThread* m_connection;

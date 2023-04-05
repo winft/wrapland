@@ -29,10 +29,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/appmenu.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 Q_DECLARE_METATYPE(Wrapland::Server::Appmenu::InterfaceAddress)
 
@@ -114,15 +116,15 @@ void TestAppmenu::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.compositor = server.display->createCompositor();
-
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
                                              compositorSpy.first().last().value<quint32>(),
                                              this);
 
-    server.globals.appmenu_manager = server.display->createAppmenuManager();
-
+    server.globals.appmenu_manager
+        = std::make_unique<Wrapland::Server::AppmenuManager>(server.display.get());
     QVERIFY(appmenuSpy.wait());
     m_appmenuManager = registry.createAppMenuManager(appmenuSpy.first().first().value<quint32>(),
                                                      appmenuSpy.first().last().value<quint32>(),

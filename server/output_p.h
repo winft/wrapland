@@ -21,41 +21,30 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "output.h"
 
-#include <QRectF>
+#include <wayland-server.h>
 
 namespace Wrapland::Server
 {
 class Client;
-class OutputDeviceV1;
 class WlOutput;
+class wlr_output_head_v1;
 class XdgOutput;
 
 class Display;
 
-struct OutputState {
-    struct Info {
-        std::string name = "Unknown";
-        std::string description;
-        std::string make;
-        std::string model;
-        std::string serial_number;
-        QSize physical_size;
-    } info;
+wl_output_transform output_to_transform(output_transform transform);
+output_transform transform_to_output(wl_output_transform transform);
 
-    bool enabled{false};
-
-    Output::Mode mode;
-    Output::Subpixel subpixel = Output::Subpixel::Unknown;
-
-    Output::Transform transform = Output::Transform::Normal;
-    QRectF geometry;
-    int client_scale = 1;
+struct output_data {
+    output_metadata meta;
+    output_state state;
 };
 
-class Output::Private
+class output::Private
 {
 public:
-    Private(Display* display, Output* q_ptr);
+    Private(output_metadata metadata, output_manager& manager, output* q_ptr);
+    ~Private();
 
     void update_client_scale();
     void done();
@@ -65,27 +54,26 @@ public:
      */
     void done_wl(Client* client) const;
 
-    static int32_t get_mode_flags(Output::Mode const& mode, OutputState const& state);
-    static int32_t to_transform(Output::Transform transform);
+    static int32_t get_mode_flags(output_mode const& mode, output_state const& state);
 
-    Display* display_handle;
+    output_manager& manager;
 
     int connector_id{0};
-    std::vector<Mode> modes;
+    std::vector<output_mode> modes;
 
     struct {
-        DpmsMode mode = DpmsMode::Off;
         bool supported = false;
+        output_dpms_mode mode{output_dpms_mode::off};
     } dpms;
 
-    OutputState pending;
-    OutputState published;
+    output_data pending;
+    output_data published;
 
-    std::unique_ptr<OutputDeviceV1> device;
     std::unique_ptr<WlOutput> wayland_output;
     std::unique_ptr<XdgOutput> xdg_output;
+    std::unique_ptr<wlr_output_head_v1> wlr_head_v1;
 
-    Output* q_ptr;
+    output* q_ptr;
 
 private:
     int32_t toTransform() const;

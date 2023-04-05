@@ -14,15 +14,17 @@
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/primary_selection.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
 
-#include <wayland-client.h>
+#include "../../tests/globals.h"
 
 #include <QThread>
 #include <QtTest>
+#include <wayland-client.h>
 
 class TestPrimarySelection : public QObject
 {
@@ -106,7 +108,8 @@ void TestPrimarySelection::init()
     registry.setup();
 
     server.globals.primary_selection_device_manager
-        = server.display->createPrimarySelectionDeviceManager();
+        = std::make_unique<Wrapland::Server::primary_selection_device_manager>(
+            server.display.get());
 
     QVERIFY(deviceManagerSpy.wait());
     m_deviceManager = registry.createPrimarySelectionDeviceManager(
@@ -114,7 +117,8 @@ void TestPrimarySelection::init()
         deviceManagerSpy.first().last().value<quint32>(),
         this);
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasPointer(true);
 
@@ -126,7 +130,8 @@ void TestPrimarySelection::init()
     QVERIFY(pointerChangedSpy.isValid());
     QVERIFY(pointerChangedSpy.wait());
 
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),

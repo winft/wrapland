@@ -14,12 +14,15 @@
 #include "../../src/client/text_input_v2.h"
 #include "../../src/client/text_input_v3.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
 #include "../../server/text_input_pool.h"
 #include "../../server/text_input_v2.h"
 #include "../../server/text_input_v3.h"
+
+#include "../../tests/globals.h"
 
 class test_text_input_method_version_compat : public QObject
 {
@@ -152,13 +155,18 @@ void test_text_input_method_version_compat::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
-    server.seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
+    server.seat = server.globals.seats
+                      .emplace_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()))
+                      .get();
     server.seat->setHasKeyboard(true);
 
-    server.globals.text_input_manager_v2 = server.display->createTextInputManagerV2();
-    server.globals.text_input_manager_v3 = server.display->createTextInputManagerV3();
+    server.globals.text_input_manager_v2
+        = std::make_unique<Wrapland::Server::text_input_manager_v2>(server.display.get());
+    server.globals.text_input_manager_v3
+        = std::make_unique<Wrapland::Server::text_input_manager_v3>(server.display.get());
 }
 
 void test_text_input_method_version_compat::cleanup()

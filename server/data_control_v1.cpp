@@ -35,6 +35,7 @@ data_control_manager_v1::Private::Private(data_control_manager_v1* q_ptr, Displa
                                                      &zwlr_data_control_manager_v1_interface,
                                                      &s_interface)
 {
+    display->globals.data_control_manager_v1 = q_ptr;
 }
 
 data_control_manager_v1::data_control_manager_v1(Display* display)

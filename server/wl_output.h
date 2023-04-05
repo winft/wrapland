@@ -22,29 +22,28 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <memory>
 
-#include <Wrapland/Server/wraplandserver_export.h>
-
 namespace Wrapland::Server
 {
-class Display;
-class Output;
 
-class WRAPLANDSERVER_EXPORT WlOutput : public QObject
+class Display;
+class output;
+
+class WlOutput : public QObject
 {
     Q_OBJECT
 public:
     ~WlOutput() override;
 
-    Output* output() const;
+    Server::output* output() const;
 
 Q_SIGNALS:
     void removed();
 
 private:
-    explicit WlOutput(Output* output, Display* display);
+    explicit WlOutput(Server::output* output, Display* display);
 
     friend class Display;
-    friend class Output;
+    friend class output;
     friend class RemoteAccessManager;
     friend class Surface;
     friend class PresentationFeedback;

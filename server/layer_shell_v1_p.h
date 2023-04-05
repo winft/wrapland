@@ -31,7 +31,6 @@ class LayerShellV1::Private : public LayerShellV1Global
 {
 public:
     Private(Display* display, LayerShellV1* qptr);
-    ~Private() override;
 
 private:
     static void getCallback(LayerShellV1Bind* bind,
@@ -52,14 +51,14 @@ public:
             uint32_t version,
             uint32_t id,
             Surface* surface,
-            Output* output,
+            Server::output* output,
             Layer layer,
             std::string domain,
             LayerSurfaceV1* qptr);
     ~Private() override;
 
     bool commit();
-    void set_output(Output* output);
+    void set_output(Server::output* output);
 
     struct State {
         // Protocol stipulates that size has zero width/height by default.
@@ -74,7 +73,7 @@ public:
     } pending, current;
 
     Surface* surface{nullptr};
-    Output* output{nullptr};
+    Server::output* output{nullptr};
     std::string domain;
 
     std::deque<uint32_t> configure_serials;

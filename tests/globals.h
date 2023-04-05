@@ -5,49 +5,51 @@
 */
 #pragma once
 
-#include "appmenu.h"
-#include "blur.h"
-#include "compositor.h"
-#include "contrast.h"
-#include "data_control_v1.h"
-#include "data_device_manager.h"
-#include "dpms.h"
-#include "drm_lease_v1.h"
-#include "fake_input.h"
-#include "idle_inhibit_v1.h"
-#include "idle_notify_v1.h"
-#include "input_method_v2.h"
-#include "kde_idle.h"
-#include "keyboard_shortcuts_inhibit.h"
-#include "keystate.h"
-#include "layer_shell_v1.h"
-#include "linux_dmabuf_v1.h"
-#include "output_management_v1.h"
-#include "plasma_activation_feedback.h"
-#include "plasma_shell.h"
-#include "plasma_virtual_desktop.h"
-#include "plasma_window.h"
-#include "pointer.h"
-#include "pointer_constraints_v1.h"
-#include "pointer_gestures_v1.h"
-#include "presentation_time.h"
-#include "primary_selection.h"
-#include "relative_pointer_v1.h"
-#include "seat.h"
-#include "server_decoration_palette.h"
-#include "shadow.h"
-#include "slide.h"
-#include "subcompositor.h"
-#include "text_input_v2.h"
-#include "text_input_v3.h"
-#include "viewporter.h"
-#include "virtual_keyboard_v1.h"
-#include "xdg_activation_v1.h"
-#include "xdg_decoration.h"
-#include "xdg_foreign.h"
-#include "xdg_output.h"
-#include "xdg_shell.h"
+#include "../../server/appmenu.h"
+#include "../../server/blur.h"
+#include "../../server/compositor.h"
+#include "../../server/contrast.h"
+#include "../../server/data_control_v1.h"
+#include "../../server/data_device_manager.h"
+#include "../../server/dpms.h"
+#include "../../server/drm_lease_v1.h"
+#include "../../server/fake_input.h"
+#include "../../server/idle_inhibit_v1.h"
+#include "../../server/idle_notify_v1.h"
+#include "../../server/input_method_v2.h"
+#include "../../server/kde_idle.h"
+#include "../../server/keyboard_shortcuts_inhibit.h"
+#include "../../server/keystate.h"
+#include "../../server/layer_shell_v1.h"
+#include "../../server/linux_dmabuf_v1.h"
+#include "../../server/output_manager.h"
+#include "../../server/plasma_activation_feedback.h"
+#include "../../server/plasma_shell.h"
+#include "../../server/plasma_virtual_desktop.h"
+#include "../../server/plasma_window.h"
+#include "../../server/pointer.h"
+#include "../../server/pointer_constraints_v1.h"
+#include "../../server/pointer_gestures_v1.h"
+#include "../../server/presentation_time.h"
+#include "../../server/primary_selection.h"
+#include "../../server/relative_pointer_v1.h"
+#include "../../server/seat.h"
+#include "../../server/server_decoration_palette.h"
+#include "../../server/shadow.h"
+#include "../../server/slide.h"
+#include "../../server/subcompositor.h"
+#include "../../server/text_input_v2.h"
+#include "../../server/text_input_v3.h"
+#include "../../server/viewporter.h"
+#include "../../server/virtual_keyboard_v1.h"
+#include "../../server/wlr_output_manager_v1.h"
+#include "../../server/xdg_activation_v1.h"
+#include "../../server/xdg_decoration.h"
+#include "../../server/xdg_foreign.h"
+#include "../../server/xdg_output.h"
+#include "../../server/xdg_shell.h"
 
+#include <deque>
 #include <memory>
 #include <vector>
 
@@ -55,6 +57,12 @@ namespace Wrapland::Server
 {
 
 struct globals {
+    globals() = default;
+    globals(globals const&) = delete;
+    globals& operator=(globals const&) = delete;
+    globals(globals&&) noexcept = default;
+    globals& operator=(globals&&) noexcept = default;
+
     /// Basic graphical operations
     std::unique_ptr<Server::Compositor> compositor;
     std::unique_ptr<Server::Subcompositor> subcompositor;
@@ -69,10 +77,9 @@ struct globals {
     std::unique_ptr<Server::ContrastManager> contrast_manager;
 
     /// Graphical outputs and their management
-    std::vector<std::unique_ptr<Server::Output>> outputs;
-    std::unique_ptr<Server::XdgOutputManager> xdg_output_manager;
+    std::deque<std::unique_ptr<output>> outputs;
+    std::unique_ptr<Server::output_manager> output_manager;
     std::unique_ptr<Server::DpmsManager> dpms_manager;
-    std::unique_ptr<Server::OutputManagementV1> output_management_v1;
 
     /// Basic input
     std::vector<std::unique_ptr<Server::Seat>> seats;

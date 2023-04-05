@@ -17,10 +17,13 @@
 
 #include "../../server/buffer.h"
 #include "../../server/client.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/layer_shell_v1.h"
 #include "../../server/surface.h"
+#include "../../server/xdg_shell.h"
+
+#include "../../tests/globals.h"
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -45,6 +48,7 @@ private Q_SLOTS:
 private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
+        std::unique_ptr<Wrapland::Server::output> output;
         Wrapland::Server::globals globals;
     } server;
 
@@ -69,15 +73,21 @@ void layer_shell_test::init()
     server.display->start();
     QVERIFY(server.display->running());
 
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.layer_shell_v1 = server.display->createLayerShellV1();
-    server.globals.xdg_shell = server.display->createXdgShell();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.layer_shell_v1
+        = std::make_unique<Wrapland::Server::LayerShellV1>(server.display.get());
+    server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
 
-    server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
-    server.globals.outputs.back()->set_enabled(true);
-    server.globals.outputs.back()->done();
+    server.output = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
+    server.output->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = server.output->get_state();
+    state.enabled = true;
+    server.output->set_state(state);
+    server.output->done();
 
     // setup connection
     connection = new Clt::ConnectionThread;
@@ -259,7 +269,7 @@ void layer_shell_test::test_data_transfer()
     surface->commit(Clt::Surface::CommitFlag::None);
     QVERIFY(commit_spy.wait());
 
-    QCOMPARE(server_layer_surface->output(), server.globals.outputs.back().get());
+    QCOMPARE(server_layer_surface->output(), server.output.get());
     QCOMPARE(server_layer_surface->anchor(), Qt::LeftEdge);
     QCOMPARE(server_layer_surface->exclusive_zone(), 10);
     QCOMPARE(server_layer_surface->layer(), Srv::LayerSurfaceV1::Layer::Top);
@@ -490,7 +500,7 @@ void layer_shell_test::test_output_removal()
     QVERIFY(closed_spy.isValid());
 
     // Now destroy output.
-    server.globals.outputs.clear();
+    server.output.reset();
 
     QVERIFY(closed_spy.wait());
 

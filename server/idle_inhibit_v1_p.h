@@ -40,7 +40,6 @@ class IdleInhibitManagerV1::Private : public IdleInhibitManagerV1Global
 {
 public:
     Private(Display* display, IdleInhibitManagerV1* q_ptr);
-    ~Private() override;
 
 private:
     static void

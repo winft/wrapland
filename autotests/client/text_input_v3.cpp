@@ -15,11 +15,12 @@
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/seat.h"
 #include "../../server/surface.h"
 #include "../../server/text_input_pool.h"
 #include "../../server/text_input_v3.h"
+
+#include "../../tests/globals.h"
 
 class text_input_v3_test : public QObject
 {
@@ -71,12 +72,16 @@ void text_input_v3_test::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
-    server.seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
+    server.seat = server.globals.seats
+                      .emplace_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()))
+                      .get();
     server.seat->setHasKeyboard(true);
 
-    server.globals.text_input_manager_v3 = server.display->createTextInputManagerV3();
+    server.globals.text_input_manager_v3
+        = std::make_unique<Wrapland::Server::text_input_manager_v3>(server.display.get());
 
     // setup connection
     client1.connection = new Wrapland::Client::ConnectionThread;

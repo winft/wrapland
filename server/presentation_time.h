@@ -28,9 +28,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
+
 class Client;
 class Display;
-class Output;
+class output;
 class Surface;
 
 class WRAPLANDSERVER_EXPORT PresentationManager : public QObject
@@ -62,7 +63,7 @@ public:
 
     ~PresentationFeedback() override;
 
-    void sync(Output* output);
+    void sync(Server::output* output);
     void presented(uint32_t tvSecHi,
                    uint32_t tvSecLo,
                    uint32_t tvNsec,

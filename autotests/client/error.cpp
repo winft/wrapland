@@ -29,13 +29,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/plasma_shell.h"
 #include "../../server/xdg_shell.h"
 
-#include <wayland-client-protocol.h>
+#include "../../tests/globals.h"
 
 #include <errno.h> // For EPROTO
+#include <wayland-client-protocol.h>
 
 class ErrorTest : public QObject
 {
@@ -71,10 +71,11 @@ void ErrorTest::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
-
-    server.globals.xdg_shell = server.display->createXdgShell();
-    server.globals.plasma_shell = server.display->createPlasmaShell();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
+    server.globals.plasma_shell
+        = std::make_unique<Wrapland::Server::PlasmaShell>(server.display.get());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;

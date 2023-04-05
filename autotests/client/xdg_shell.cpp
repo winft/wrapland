@@ -31,11 +31,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 #include "../../src/client/xdg_shell.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/surface.h"
 #include "../../server/xdg_shell_popup.h"
 #include "../../server/xdg_shell_toplevel.h"
+
+#include "../../tests/globals.h"
 
 #include <wayland-xdg-shell-client-protocol.h>
 
@@ -90,8 +92,6 @@ private:
         Wrapland::Server::globals globals;
 
         Wrapland::Server::Seat* seat{nullptr};
-        Server::Output* output1{nullptr};
-        Server::Output* output2{nullptr};
     } server;
 
     Client::ConnectionThread* m_connection;
@@ -120,7 +120,7 @@ XdgShellTest::XdgShellTest(QObject* parent)
     qRegisterMetaType<Server::Surface*>();
     qRegisterMetaType<Server::XdgShellToplevel*>();
     qRegisterMetaType<Server::XdgShellPopup*>();
-    qRegisterMetaType<Server::Output*>();
+    qRegisterMetaType<Server::output*>();
     qRegisterMetaType<Server::Seat*>();
     qRegisterMetaType<Client::xdg_shell_states>();
     qRegisterMetaType<std::string>();
@@ -137,24 +137,27 @@ void XdgShellTest::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.xdg_shell = server.display->createXdgShell();
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
 
-    server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
-    server.output1 = server.globals.outputs.back().get();
-    server.output1->add_mode(Server::Output::Mode{QSize(1024, 768)});
-    server.output1->set_enabled(true);
-    server.output1->done();
+    auto add_output = [this] {
+        server.globals.outputs.push_back(
+            std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
+        auto& output = server.globals.outputs.back();
+        output->add_mode(Server::output_mode{QSize(1024, 768)});
+        auto state = output->get_state();
+        state.enabled = true;
+        output->set_state(state);
+        output->done();
+    };
+    add_output();
+    add_output();
 
-    server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
-    server.output2 = server.globals.outputs.back().get();
-    server.output2->add_mode(Server::Output::Mode{QSize(1024, 768)});
-    server.output2->set_enabled(true);
-    server.output2->done();
-
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasKeyboard(true);
     server.seat->setHasPointer(true);
@@ -407,28 +410,30 @@ void XdgShellTest::testFullscreen()
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 1);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QVERIFY(!fullscreenSpy.last().at(1).value<Server::Output*>());
+    QVERIFY(!fullscreenSpy.last().at(1).value<Server::output*>());
 
     // unset
     xdgSurface->setFullscreen(false);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 2);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), false);
-    QVERIFY(!fullscreenSpy.last().at(1).value<Server::Output*>());
+    QVERIFY(!fullscreenSpy.last().at(1).value<Server::output*>());
 
     // with outputs
     xdgSurface->setFullscreen(true, m_output1);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 3);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), server.output1);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::output*>(),
+             server.globals.outputs.at(0).get());
 
     // now other output
     xdgSurface->setFullscreen(true, m_output2);
     QVERIFY(fullscreenSpy.wait());
     QCOMPARE(fullscreenSpy.count(), 4);
     QCOMPARE(fullscreenSpy.last().at(0).toBool(), true);
-    QCOMPARE(fullscreenSpy.last().at(1).value<Server::Output*>(), server.output2);
+    QCOMPARE(fullscreenSpy.last().at(1).value<Server::output*>(),
+             server.globals.outputs.at(1).get());
 }
 
 void XdgShellTest::testShowWindowMenu()

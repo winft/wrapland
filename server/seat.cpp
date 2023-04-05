@@ -45,6 +45,14 @@ Seat::Private::Private(Seat* q_ptr, Display* display)
     , text_inputs{q_ptr}
     , q_ptr{q_ptr}
 {
+    display->globals.seats.push_back(q_ptr);
+}
+
+Seat::Private::~Private()
+{
+    if (display()) {
+        remove_all(display()->handle->globals.seats, q_ptr);
+    }
 }
 
 const struct wl_seat_interface Seat::Private::s_interface = {

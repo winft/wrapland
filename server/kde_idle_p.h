@@ -24,7 +24,6 @@ class kde_idle::Private : public kde_idle_global
 {
 public:
     Private(Display* display, kde_idle* q_ptr);
-    ~Private() override;
 
 private:
     static void get_idle_timeout_callback(kde_idle_bind* bind,

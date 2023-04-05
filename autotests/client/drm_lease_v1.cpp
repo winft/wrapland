@@ -12,7 +12,9 @@
 
 #include "../../server/display.h"
 #include "../../server/drm_lease_v1.h"
-#include "../../server/globals.h"
+#include "../../server/output.h"
+
+#include "../../tests/globals.h"
 
 #include <deque>
 
@@ -76,8 +78,11 @@ void drm_lease_v1_test::init()
     server.display->start();
     QVERIFY(server.display->running());
 
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.display->createShm();
-    server.globals.drm_lease_device_v1 = server.display->createDrmLeaseDeviceV1();
+    server.globals.drm_lease_device_v1
+        = std::make_unique<Wrapland::Server::drm_lease_device_v1>(server.display.get());
     server.lease_device = server.globals.drm_lease_device_v1.get();
 
     create_client(client1);
@@ -203,10 +208,10 @@ void drm_lease_v1_test::test_connectors()
 {
     // This test verifies that connectors are advertised correctly.
 
-    std::vector<std::unique_ptr<Wrapland::Server::Output>> server_outputs;
+    std::vector<std::unique_ptr<Wrapland::Server::output>> server_outputs;
     auto add_output = [&server_outputs, this] {
         server_outputs.emplace_back(
-            std::make_unique<Wrapland::Server::Output>(server.display.get()));
+            std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
     };
 
     add_output();
@@ -283,10 +288,10 @@ void drm_lease_v1_test::test_lease()
 {
     // This test verifies that leases are communicated correctly.
 
-    std::vector<std::unique_ptr<Wrapland::Server::Output>> server_outputs;
+    std::vector<std::unique_ptr<Wrapland::Server::output>> server_outputs;
     auto add_output = [&server_outputs, this] {
         server_outputs.emplace_back(
-            std::make_unique<Wrapland::Server::Output>(server.display.get()));
+            std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
     };
 
     add_output();

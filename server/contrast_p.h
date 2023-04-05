@@ -43,7 +43,6 @@ class ContrastManager::Private : public ContrastManagerGlobal
 {
 public:
     Private(Display* display, ContrastManager* q_ptr);
-    ~Private() override;
 
 private:
     static void createCallback(ContrastManagerBind* bind, uint32_t id, wl_resource* wlSurface);

@@ -29,10 +29,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/buffer.h"
 #include "../../server/client.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/shadow.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 class ShadowTest : public QObject
 {
@@ -71,8 +73,10 @@ void ShadowTest::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.shadow_manager = server.display->createShadowManager();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.shadow_manager
+        = std::make_unique<Wrapland::Server::ShadowManager>(server.display.get());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;

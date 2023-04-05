@@ -35,24 +35,23 @@ using WlOutputBind = Wayland::Bind<WlOutputGlobal>;
 class WlOutput::Private : public WlOutputGlobal
 {
 public:
-    Private(Output* output, Display* display, WlOutput* q_ptr);
+    Private(Server::output* output, Display* display, WlOutput* q_ptr);
 
     bool broadcast();
     void done();
     void done(WlOutputBind* bind);
 
-    Display* displayHandle;
-    Output* output;
+    Server::output* output;
 
 private:
     void bindInit(WlOutputBind* bind) override;
 
     static std::
         tuple<int32_t, int32_t, int32_t, int32_t, int32_t, char const*, char const*, int32_t>
-        geometry_args(OutputState const& state);
+        geometry_args(output_data const& data);
 
-    void sendMode(WlOutputBind* bind, Output::Mode const& mode);
-    void sendMode(Output::Mode const& mode);
+    void sendMode(WlOutputBind* bind, output_mode const& mode);
+    void sendMode(output_mode const& mode);
 
     static const struct wl_output_interface s_interface;
 };
