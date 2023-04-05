@@ -22,6 +22,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../server/data_device_manager.h"
 #include "../server/display.h"
 #include "../server/keyboard_pool.h"
+#include "../server/output_manager.h"
 #include "../server/pointer_pool.h"
 #include "../server/seat.h"
 #include "../server/surface.h"
@@ -266,17 +267,18 @@ int main(int argc, char** argv)
     Display display;
     display.start();
 
-    auto data_device_manager = display.createDataDeviceManager();
-    auto compositor = display.createCompositor();
-    auto shell = display.createXdgShell();
+    auto output_manager = Wrapland::Server::output_manager(display);
+    auto data_device_manager = std::make_unique<Wrapland::Server::data_device_manager>(&display);
+    auto compositor = std::make_unique<Wrapland::Server::Compositor>(&display);
+    auto shell = std::make_unique<Wrapland::Server::XdgShell>(&display);
     display.createShm();
 
-    auto output = std::make_unique<Wrapland::Server::Output>(&display);
-    output->set_physical_size(QSize(269, 202));
+    Wrapland::Server::output_metadata meta{.physical_size = {269, 202}};
+    auto output = std::make_unique<Wrapland::Server::output>(meta, output_manager);
     const QSize windowSize(1024, 768);
-    output->add_mode(Output::Mode{windowSize});
+    output->add_mode(output_mode{windowSize});
 
-    auto seat = display.createSeat();
+    auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     seat->setHasKeyboard(true);
     seat->setHasPointer(true);
     seat->setName("testSeat0");

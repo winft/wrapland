@@ -23,7 +23,6 @@ class idle_notifier_v1::Private : public idle_notifier_v1_global
 {
 public:
     Private(Display* display, idle_notifier_v1* q_ptr);
-    ~Private() override;
 
 private:
     static void get_idle_notification_callback(idle_notifier_v1_bind* bind,

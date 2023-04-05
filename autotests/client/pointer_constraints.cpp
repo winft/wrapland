@@ -29,11 +29,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/pointer_constraints_v1.h"
 #include "../../server/pointer_pool.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 using namespace Wrapland::Client;
 
@@ -84,12 +87,16 @@ void TestPointerConstraints::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.seat = server.globals.seats.back().get();
     server.seat->setHasPointer(true);
-    server.globals.pointer_constraints_v1 = server.display->createPointerConstraints();
+
+    server.globals.pointer_constraints_v1
+        = std::make_unique<Wrapland::Server::PointerConstraintsV1>(server.display.get());
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;

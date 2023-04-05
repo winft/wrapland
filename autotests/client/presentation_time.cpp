@@ -29,10 +29,12 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/presentation_time.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 using namespace Wrapland;
 
@@ -52,6 +54,7 @@ private Q_SLOTS:
 private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
+        std::unique_ptr<Wrapland::Server::output> output;
         Wrapland::Server::globals globals;
     } server;
 
@@ -86,12 +89,19 @@ void TestPresentationTime::init()
 
     server.display->createShm();
 
-    server.globals.compositor = server.display->createCompositor();
-    server.globals.presentation_manager = server.display->createPresentationManager();
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.presentation_manager
+        = std::make_unique<Wrapland::Server::PresentationManager>(server.display.get());
 
-    server.globals.outputs.push_back(std::make_unique<Server::Output>(server.display.get()));
-    server.globals.outputs.back()->set_enabled(true);
-    server.globals.outputs.back()->done();
+    server.output = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
+    server.output->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = server.output->get_state();
+    state.enabled = true;
+    server.output->set_state(state);
+    server.output->done();
 
     // Setup connection.
     m_connection = new Client::ConnectionThread;
@@ -246,8 +256,8 @@ void TestPresentationTime::testPresented()
     QVERIFY(committedSpy.wait());
     QCOMPARE(committedSpy.count(), 1);
 
-    serverSurface->setOutputs({server.globals.outputs.back().get()});
-    auto id = serverSurface->lockPresentation(server.globals.outputs.back().get());
+    serverSurface->setOutputs({server.output.get()});
+    auto id = serverSurface->lockPresentation(server.output.get());
     QVERIFY(id);
 
     QSignalSpy presentedSpy(feedback, &Client::PresentationFeedback::presented);
@@ -313,8 +323,8 @@ void TestPresentationTime::testDiscarded()
     QVERIFY(committedSpy.wait());
     QCOMPARE(committedSpy.count(), 1);
 
-    serverSurface->setOutputs({server.globals.outputs.back().get()});
-    auto id = serverSurface->lockPresentation(server.globals.outputs.back().get());
+    serverSurface->setOutputs({server.output.get()});
+    auto id = serverSurface->lockPresentation(server.output.get());
     QVERIFY(id);
 
     QSignalSpy presentedSpy(feedback, &Client::PresentationFeedback::presented);

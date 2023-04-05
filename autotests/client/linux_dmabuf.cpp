@@ -33,8 +33,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/linux_dmabuf_v1.h"
+
+#include "../../tests/globals.h"
 
 class TestLinuxDmabuf : public QObject
 {

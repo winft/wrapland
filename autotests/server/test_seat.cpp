@@ -47,7 +47,8 @@ void TestWaylandServerSeat::testCapabilities()
     Display display;
     display.set_socket_name(socket_name);
     display.start();
-    std::unique_ptr<Seat> seat{display.createSeat()};
+
+    auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     QVERIFY(!seat->hasKeyboard());
     QVERIFY(!seat->hasPointer());
     QVERIFY(!seat->hasTouch());
@@ -73,7 +74,8 @@ void TestWaylandServerSeat::testName()
     Display display;
     display.set_socket_name(socket_name);
     display.start();
-    std::unique_ptr<Seat> seat{display.createSeat()};
+
+    auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     QCOMPARE(seat->name().size(), 0);
 
     const std::string name = "foobar";
@@ -86,7 +88,8 @@ void TestWaylandServerSeat::testPointerButton()
     Display display;
     display.set_socket_name(socket_name);
     display.start();
-    std::unique_ptr<Seat> seat{display.createSeat()};
+
+    auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     seat->setHasPointer(true);
 
     QVERIFY(seat->pointers().get_focus().devices.empty());
@@ -118,7 +121,7 @@ void TestWaylandServerSeat::testPointerPos()
     display.set_socket_name(socket_name);
     display.start();
 
-    std::unique_ptr<Seat> seat{display.createSeat()};
+    auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     QSignalSpy seatPosSpy(seat.get(), SIGNAL(pointerPosChanged(QPointF)));
     QVERIFY(seatPosSpy.isValid());
     seat->setHasPointer(true);
@@ -147,7 +150,7 @@ void TestWaylandServerSeat::testDestroyThroughTerminate()
     display.set_socket_name(socket_name);
     display.start();
 
-    std::unique_ptr<Seat> seat{display.createSeat()};
+    auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     QSignalSpy destroyedSpy(seat.get(), &QObject::destroyed);
     QVERIFY(destroyedSpy.isValid());
     display.terminate();
@@ -162,7 +165,7 @@ void TestWaylandServerSeat::testRepeatInfo()
     display.set_socket_name(socket_name);
     display.start();
 
-    std::unique_ptr<Seat> seat{display.createSeat()};
+    auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     seat->setHasKeyboard(true);
     auto& keyboards = seat->keyboards();
 
@@ -183,34 +186,34 @@ void TestWaylandServerSeat::testMultiple()
     Display display;
     display.set_socket_name(socket_name);
     display.start();
-    QVERIFY(display.seats().empty());
+    QVERIFY(display.globals.seats.empty());
 
-    std::unique_ptr<Seat> seat1{display.createSeat()};
-    QCOMPARE(display.seats().size(), 1);
-    QCOMPARE(display.seats().at(0), seat1.get());
+    auto seat1 = std::make_unique<Wrapland::Server::Seat>(&display);
+    QCOMPARE(display.globals.seats.size(), 1);
+    QCOMPARE(display.globals.seats.at(0), seat1.get());
 
-    std::unique_ptr<Seat> seat2{display.createSeat()};
-    QCOMPARE(display.seats().size(), 2);
-    QCOMPARE(display.seats().at(0), seat1.get());
-    QCOMPARE(display.seats().at(1), seat2.get());
+    auto seat2 = std::make_unique<Wrapland::Server::Seat>(&display);
+    QCOMPARE(display.globals.seats.size(), 2);
+    QCOMPARE(display.globals.seats.at(0), seat1.get());
+    QCOMPARE(display.globals.seats.at(1), seat2.get());
 
-    std::unique_ptr<Seat> seat3{display.createSeat()};
-    QCOMPARE(display.seats().size(), 3);
-    QCOMPARE(display.seats().at(0), seat1.get());
-    QCOMPARE(display.seats().at(1), seat2.get());
-    QCOMPARE(display.seats().at(2), seat3.get());
+    auto seat3 = std::make_unique<Wrapland::Server::Seat>(&display);
+    QCOMPARE(display.globals.seats.size(), 3);
+    QCOMPARE(display.globals.seats.at(0), seat1.get());
+    QCOMPARE(display.globals.seats.at(1), seat2.get());
+    QCOMPARE(display.globals.seats.at(2), seat3.get());
 
     seat3.reset();
-    QCOMPARE(display.seats().size(), 2);
-    QCOMPARE(display.seats().at(0), seat1.get());
-    QCOMPARE(display.seats().at(1), seat2.get());
+    QCOMPARE(display.globals.seats.size(), 2);
+    QCOMPARE(display.globals.seats.at(0), seat1.get());
+    QCOMPARE(display.globals.seats.at(1), seat2.get());
 
     seat2.reset();
-    QCOMPARE(display.seats().size(), 1);
-    QCOMPARE(display.seats().at(0), seat1.get());
+    QCOMPARE(display.globals.seats.size(), 1);
+    QCOMPARE(display.globals.seats.at(0), seat1.get());
 
     seat1.reset();
-    QCOMPARE(display.seats().size(), 0);
+    QCOMPARE(display.globals.seats.size(), 0);
 }
 
 QTEST_GUILESS_MAIN(TestWaylandServerSeat)

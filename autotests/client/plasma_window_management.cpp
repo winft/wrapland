@@ -29,17 +29,18 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/plasma_window.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
 
-#include <wayland-plasma-window-management-client-protocol.h>
+#include "../../tests/globals.h"
 
 #include <memory>
 #include <string>
 #include <vector>
+#include <wayland-plasma-window-management-client-protocol.h>
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -131,7 +132,7 @@ TestWindowManagement::TestWindowManagement(QObject* parent)
 void TestWindowManagement::init()
 {
     qRegisterMetaType<std::string const&>();
-    qRegisterMetaType<Wrapland::Server::Output*>();
+    qRegisterMetaType<Wrapland::Server::output*>();
     qRegisterMetaType<Wrapland::Server::Surface*>();
     qRegisterMetaType<Srv::PlasmaWindowManager::ShowingDesktopState>("ShowingDesktopState");
 
@@ -172,14 +173,17 @@ void TestWindowManagement::init()
     QVERIFY(m_registry->isValid());
     m_registry->setup();
 
-    server.globals.compositor = server.display->createCompositor();
-
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     QVERIFY(compositorSpy.wait());
     m_compositor = m_registry->createCompositor(compositorSpy.first().first().value<quint32>(),
                                                 compositorSpy.first().last().value<quint32>(),
                                                 this);
 
-    server.globals.plasma_window_manager = server.display->createPlasmaWindowManager();
+    server.globals.plasma_window_manager
+        = std::make_unique<Wrapland::Server::PlasmaWindowManager>(server.display.get());
 
     QVERIFY(windowManagementSpy.wait());
     m_windowManagement = m_registry->createPlasmaWindowManagement(
@@ -857,8 +861,11 @@ void TestWindowManagement::testSendToOutput()
     QSignalSpy outputAnnouncedSpy(m_registry, &Wrapland::Client::Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    auto srv_output = std::make_unique<Srv::Output>(server.display.get());
-    srv_output->set_enabled(true);
+    auto srv_output = std::make_unique<Srv::output>(*server.globals.output_manager);
+    srv_output->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = srv_output->get_state();
+    state.enabled = true;
+    srv_output->set_state(state);
     srv_output->done();
 
     QVERIFY(outputAnnouncedSpy.wait());
@@ -872,7 +879,7 @@ void TestWindowManagement::testSendToOutput()
     m_connection->flush();
 
     QVERIFY(sendToOutputSpy.wait());
-    auto actual = sendToOutputSpy.first().first().value<Wrapland::Server::Output*>();
+    auto actual = sendToOutputSpy.first().first().value<Wrapland::Server::output*>();
     QCOMPARE(actual, srv_output.get());
 }
 

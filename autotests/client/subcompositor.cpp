@@ -26,8 +26,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/subcompositor.h"
 
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/subcompositor.h"
+
+#include "../../tests/globals.h"
 
 class TestSubCompositor : public QObject
 {
@@ -99,7 +100,8 @@ void TestSubCompositor::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.subcompositor = server.display->createSubCompositor();
+    server.globals.subcompositor
+        = std::make_unique<Wrapland::Server::Subcompositor>(server.display.get());
     QVERIFY(subCompositorSpy.wait());
     m_subCompositor
         = registry.createSubCompositor(subCompositorSpy.first().first().value<quint32>(),

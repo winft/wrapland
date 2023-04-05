@@ -76,19 +76,19 @@ Dpms::Private::Private(Client* client, uint32_t version, uint32_t id, WlOutput* 
 
 void Dpms::Private::setCallback(wl_client* /*client*/, wl_resource* wlResource, uint32_t mode)
 {
-    auto dpmsMode{Output::DpmsMode::On};
+    auto dpmsMode{output_dpms_mode::on};
 
     switch (mode) {
     case ORG_KDE_KWIN_DPMS_MODE_ON:
         break;
     case ORG_KDE_KWIN_DPMS_MODE_STANDBY:
-        dpmsMode = Output::DpmsMode::Standby;
+        dpmsMode = output_dpms_mode::standby;
         break;
     case ORG_KDE_KWIN_DPMS_MODE_SUSPEND:
-        dpmsMode = Output::DpmsMode::Suspend;
+        dpmsMode = output_dpms_mode::suspend;
         break;
     case ORG_KDE_KWIN_DPMS_MODE_OFF:
-        dpmsMode = Output::DpmsMode::Off;
+        dpmsMode = output_dpms_mode::off;
         break;
     default:
         return;
@@ -101,11 +101,11 @@ Dpms::Dpms(Client* client, uint32_t version, uint32_t id, WlOutput* output)
     : d_ptr(new Private(client, version, id, output, this))
 {
     auto master_output = output->output();
-    connect(master_output, &Output::dpms_supported_changed, this, [this] {
+    connect(master_output, &output::dpms_supported_changed, this, [this] {
         sendSupported();
         sendDone();
     });
-    connect(master_output, &Output::dpms_mode_changed, this, [this] {
+    connect(master_output, &output::dpms_mode_changed, this, [this] {
         sendMode();
         sendDone();
     });
@@ -121,16 +121,16 @@ void Dpms::sendMode()
     org_kde_kwin_dpms_mode mode = ORG_KDE_KWIN_DPMS_MODE_ON;
 
     switch (d_ptr->output->output()->dpms_mode()) {
-    case Output::DpmsMode::On:
+    case output_dpms_mode::on:
         mode = ORG_KDE_KWIN_DPMS_MODE_ON;
         break;
-    case Output::DpmsMode::Standby:
+    case output_dpms_mode::standby:
         mode = ORG_KDE_KWIN_DPMS_MODE_STANDBY;
         break;
-    case Output::DpmsMode::Suspend:
+    case output_dpms_mode::suspend:
         mode = ORG_KDE_KWIN_DPMS_MODE_SUSPEND;
         break;
-    case Output::DpmsMode::Off:
+    case output_dpms_mode::off:
         mode = ORG_KDE_KWIN_DPMS_MODE_OFF;
         break;
     default:

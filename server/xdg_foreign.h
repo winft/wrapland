@@ -19,9 +19,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 
-#include <QObject>
-
 #include <Wrapland/Server/wraplandserver_export.h>
+
+#include <QObject>
+#include <memory>
 
 namespace Wrapland::Server
 {
@@ -64,7 +65,7 @@ Q_SIGNALS:
 private:
     friend class Display;
     class Private;
-    Private* d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

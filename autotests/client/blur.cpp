@@ -30,9 +30,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/blur.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/region.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 using namespace Wrapland::Client;
 
@@ -115,14 +116,16 @@ void TestBlur::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
                                              compositorSpy.first().last().value<quint32>(),
                                              this);
 
-    server.globals.blur_manager = server.display->createBlurManager();
+    server.globals.blur_manager
+        = std::make_unique<Wrapland::Server::BlurManager>(server.display.get());
 
     QVERIFY(blurSpy.wait());
     m_blurManager = registry.createBlurManager(

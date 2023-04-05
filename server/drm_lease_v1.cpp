@@ -106,7 +106,7 @@ drm_lease_connector_v1* drm_lease_device_v1::create_connector(std::string const&
     return connector;
 }
 
-drm_lease_connector_v1* drm_lease_device_v1::create_connector(Output* output)
+drm_lease_connector_v1* drm_lease_device_v1::create_connector(Server::output* output)
 {
     auto connector = new drm_lease_connector_v1(output, this);
     d_ptr->add_connector(connector);
@@ -168,8 +168,11 @@ drm_lease_connector_v1::drm_lease_connector_v1(std::string const& name,
 {
 }
 
-drm_lease_connector_v1::drm_lease_connector_v1(Output* output, drm_lease_device_v1* device)
-    : drm_lease_connector_v1(output->name(), output->description(), output->connector_id(), device)
+drm_lease_connector_v1::drm_lease_connector_v1(Server::output* output, drm_lease_device_v1* device)
+    : drm_lease_connector_v1(output->get_metadata().name,
+                             output->get_metadata().description,
+                             output->connector_id(),
+                             device)
 {
     d_ptr->output = output;
 }
@@ -190,7 +193,7 @@ uint32_t drm_lease_connector_v1::id() const
     return d_ptr->connector_id;
 }
 
-Output* drm_lease_connector_v1::output() const
+Server::output* drm_lease_connector_v1::output() const
 {
     return d_ptr->output;
 }

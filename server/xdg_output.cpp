@@ -74,9 +74,9 @@ void XdgOutputManager::Private::getXdgOutputCallback(XdgOutputManagerBind* bind,
     });
 }
 
-XdgOutput::Private::Private(Output* output, Display* display, XdgOutput* q_ptr)
+XdgOutput::Private::Private(Server::output* output, Display* display, XdgOutput* q_ptr)
     : output{output}
-    , manager{display->xdgOutputManager()}
+    , manager{display->globals.xdg_output_manager}
 {
     assert(manager->d_ptr->outputs.find(output) == manager->d_ptr->outputs.end());
     manager->d_ptr->outputs[output] = q_ptr;
@@ -89,16 +89,16 @@ bool XdgOutput::Private::broadcast()
 
     bool changed = false;
 
-    if (published.geometry.topLeft() != pending.geometry.topLeft()) {
+    if (published.state.geometry.topLeft() != pending.state.geometry.topLeft()) {
         for (auto resource : resources) {
-            resource->send_logical_position(pending.geometry.topLeft());
+            resource->send_logical_position(pending.state.geometry.topLeft());
         }
         changed = true;
     }
 
-    if (published.geometry.size() != pending.geometry.size()) {
+    if (published.state.geometry.size() != pending.state.geometry.size()) {
         for (auto resource : resources) {
-            resource->send_logical_size(pending.geometry.size());
+            resource->send_logical_size(pending.state.geometry.size());
         }
         changed = true;
     }
@@ -107,17 +107,17 @@ bool XdgOutput::Private::broadcast()
         sent_once = true;
         changed = true;
         for (auto resource : resources) {
-            resource->send_name(pending.info.name);
+            resource->send_name(pending.meta.name);
             if (resource->d_ptr->version < 3) {
-                resource->send_description(pending.info.description);
+                resource->send_description(pending.meta.description);
             }
         }
     }
 
-    if (published.info.description != pending.info.description) {
+    if (published.meta.description != pending.meta.description) {
         for (auto resource : resources) {
             if (resource->d_ptr->version >= 3) {
-                resource->send_description(pending.info.description);
+                resource->send_description(pending.meta.description);
             }
         }
         changed = true;
@@ -137,12 +137,12 @@ void XdgOutput::Private::resourceConnected(XdgOutputV1* resource)
 {
     auto const& state = output->d_ptr->published;
 
-    auto const geo = state.geometry;
+    auto const geo = state.state.geometry;
     resource->send_logical_position(geo.topLeft());
     resource->send_logical_size(geo.size());
 
-    resource->send_name(state.info.name);
-    resource->send_description(state.info.description);
+    resource->send_name(state.meta.name);
+    resource->send_description(state.meta.description);
 
     if (resource->d_ptr->version < 3) {
         resource->done();
@@ -157,11 +157,11 @@ void XdgOutput::Private::resourceDisconnected(XdgOutputV1* resource)
     resources.erase(std::remove(resources.begin(), resources.end(), resource), resources.end());
 }
 
-XdgOutput::XdgOutput(Output* output, Display* display)
+XdgOutput::XdgOutput(Server::output* output, Display* display)
     : QObject(nullptr)
     , d_ptr(new XdgOutput::Private(output, display, this))
 {
-    auto manager = display->xdgOutputManager();
+    auto manager = display->globals.xdg_output_manager;
     connect(this, &QObject::destroyed, manager, [manager, output]() {
         manager->d_ptr->outputs.erase(output);
     });

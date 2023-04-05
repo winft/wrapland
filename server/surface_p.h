@@ -135,7 +135,7 @@ private:
     void damageBuffer(QRect const& rect);
 
     void setScale(qint32 scale);
-    void setTransform(Output::Transform transform);
+    void setTransform(output_transform transform);
 
     void addFrameCallback(uint32_t callback);
     void attachBuffer(wl_resource* wlBuffer, QPoint const& offset);
@@ -152,7 +152,7 @@ private:
      * Posts Wayland error in case the source rectangle is not contained in surface size.
      */
     void soureRectangleContainCheck(Buffer const* buffer,
-                                    Output::Transform transform,
+                                    output_transform transform,
                                     qint32 scale,
                                     QRectF const& sourceRectangle) const;
 
@@ -257,7 +257,7 @@ public:
 
     bool active();
     void add(PresentationFeedback* feedback);
-    void setOutput(Output* output);
+    void setOutput(Server::output* output);
     void handleOutputRemoval();
 
     void presented(uint32_t tvSecHi,
@@ -271,7 +271,7 @@ public:
 
 private:
     std::vector<PresentationFeedback*> m_feedbacks;
-    Output* m_output = nullptr;
+    Server::output* m_output = nullptr;
 };
 
 }

@@ -41,9 +41,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "linux_dmabuf_v1.h"
 #include "logging.h"
 #include "output.h"
-#include "output_configuration_v1.h"
-#include "output_device_v1.h"
-#include "output_management_v1.h"
 #include "plasma_activation_feedback.h"
 #include "plasmashell.h"
 #include "plasmavirtualdesktop.h"
@@ -89,8 +86,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
 #include <wayland-keystate-client-protocol.h>
 #include <wayland-linux-dmabuf-unstable-v1-client-protocol.h>
-#include <wayland-output-device-v1-client-protocol.h>
-#include <wayland-output-management-v1-client-protocol.h>
 #include <wayland-plasma-shell-client-protocol.h>
 #include <wayland-plasma-virtual-desktop-client-protocol.h>
 #include <wayland-plasma-window-management-client-protocol.h>
@@ -333,29 +328,9 @@ static QMap<Registry::Interface, SuppertedInterfaceData> const s_interfaces = {
         },
     },
     {
-        Registry::Interface::OutputManagementV1,
-        {
-            1,
-            QByteArrayLiteral("zkwinft_output_management_v1"),
-            &zkwinft_output_management_v1_interface,
-            &Registry::outputManagementV1Announced,
-            &Registry::outputManagementV1Removed,
-        },
-    },
-    {
-        Registry::Interface::OutputDeviceV1,
-        {
-            1,
-            QByteArrayLiteral("zkwinft_output_device_v1"),
-            &zkwinft_output_device_v1_interface,
-            &Registry::outputDeviceV1Announced,
-            &Registry::outputDeviceV1Removed,
-        },
-    },
-    {
         Registry::Interface::WlrOutputManagerV1,
         {
-            2,
+            4,
             QByteArrayLiteral("zwlr_output_manager_v1"),
             &zwlr_output_manager_v1_interface,
             &Registry::wlrOutputManagerV1Announced,
@@ -925,8 +900,6 @@ BIND(IdleNotifierV1, ext_idle_notifier_v1)
 BIND(InputMethodManagerV2, zwp_input_method_manager_v2)
 BIND(FakeInput, org_kde_kwin_fake_input)
 BIND(LayerShellV1, zwlr_layer_shell_v1)
-BIND(OutputManagementV1, zkwinft_output_management_v1)
-BIND(OutputDeviceV1, zkwinft_output_device_v1)
 BIND(WlrOutputManagerV1, zwlr_output_manager_v1)
 BIND(TextInputManagerV2, zwp_text_input_manager_v2)
 BIND(TextInputManagerV3, zwp_text_input_manager_v3)
@@ -999,8 +972,6 @@ CREATE(PrimarySelectionDeviceManager)
 CREATE(Idle)
 CREATE(FakeInput)
 CREATE(LayerShellV1)
-CREATE(OutputManagementV1)
-CREATE(OutputDeviceV1)
 CREATE(WlrOutputManagerV1)
 CREATE(ShadowManager)
 CREATE(BlurManager)

@@ -27,10 +27,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/seat.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/keyboard_shortcuts_inhibit.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 #include <wayland-keyboard-shortcuts-inhibit-client-protocol.h>
 
@@ -78,10 +81,14 @@ void TestKeyboardShortcutsInhibitor::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    auto server_seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
+    auto server_seat
+        = server.globals.seats
+              .emplace_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()))
+              .get();
     server_seat->setName("seat0");
     server.globals.keyboard_shortcuts_inhibit_manager_v1
-        = server.display->createKeyboardShortcutsInhibitManager();
+        = std::make_unique<Wrapland::Server::KeyboardShortcutsInhibitManagerV1>(
+            server.display.get());
 
     // setup connection
     m_connection = new Clt::ConnectionThread;
@@ -111,7 +118,8 @@ void TestKeyboardShortcutsInhibitor::init()
     registry.setup();
     QVERIFY(interfacesAnnouncedSpy.wait());
 
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
     connect(server.globals.compositor.get(),
             &Srv::Compositor::surfaceCreated,

@@ -34,8 +34,6 @@ primary_selection_device_manager::Private::Private(Display* display,
     create();
 }
 
-primary_selection_device_manager::Private::~Private() = default;
-
 primary_selection_device_manager::primary_selection_device_manager(Display* display)
     : d_ptr(new Private(display, this))
 {

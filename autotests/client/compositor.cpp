@@ -27,9 +27,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/surface.h"
 
 #include "../../server/buffer.h"
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 class TestCompositor : public QObject
 {
@@ -99,8 +101,8 @@ void TestCompositor::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    // here we need a shm pool
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),

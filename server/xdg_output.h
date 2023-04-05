@@ -25,9 +25,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace Wrapland::Server
 {
+
 class Client;
 class Display;
-class Output;
+class output;
 
 class WRAPLANDSERVER_EXPORT XdgOutputManager : public QObject
 {
@@ -50,9 +51,9 @@ public:
     ~XdgOutput() override;
 
 private:
-    XdgOutput(Output* output, Display* display);
+    XdgOutput(Server::output* output, Display* display);
 
-    friend class Output;
+    friend class output;
     friend class XdgOutputManager;
 
     class Private;

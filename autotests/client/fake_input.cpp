@@ -26,7 +26,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/display.h"
 #include "../../server/fake_input.h"
-#include "../../server/globals.h"
+
+#include "../../tests/globals.h"
 
 #include <linux/input.h>
 
@@ -80,7 +81,7 @@ void FakeInputTest::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.globals.fake_input = server.display->createFakeInput();
+    server.globals.fake_input = std::make_unique<Wrapland::Server::FakeInput>(server.display.get());
 
     QSignalSpy deviceCreatedSpy(server.globals.fake_input.get(), &Srv::FakeInput::deviceCreated);
     QVERIFY(deviceCreatedSpy.isValid());

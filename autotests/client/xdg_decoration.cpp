@@ -28,12 +28,14 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/xdg_shell.h"
 #include "../../src/client/xdgdecoration.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/surface.h"
 #include "../../server/xdg_decoration.h"
 #include "../../server/xdg_shell.h"
 #include "../../server/xdg_shell_toplevel.h"
+
+#include "../../tests/globals.h"
 
 using namespace Wrapland;
 
@@ -112,23 +114,22 @@ void TestXdgDecoration::init()
     QVERIFY(m_registry->isValid());
     m_registry->setup();
 
-    server.globals.compositor = server.display->createCompositor();
-
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     QVERIFY(compositorSpy.wait());
     m_compositor = m_registry->createCompositor(compositorSpy.first().first().value<quint32>(),
                                                 compositorSpy.first().last().value<quint32>(),
                                                 this);
 
-    server.globals.xdg_shell = server.display->createXdgShell();
-
+    server.globals.xdg_shell = std::make_unique<Wrapland::Server::XdgShell>(server.display.get());
     QVERIFY(xdgShellSpy.wait());
     m_xdgShell = m_registry->createXdgShell(xdgShellSpy.first().first().value<quint32>(),
                                             xdgShellSpy.first().last().value<quint32>(),
                                             this);
 
     server.globals.xdg_decoration_manager
-        = server.display->createXdgDecorationManager(server.globals.xdg_shell.get());
-
+        = std::make_unique<Wrapland::Server::XdgDecorationManager>(server.display.get(),
+                                                                   server.globals.xdg_shell.get());
     QVERIFY(xdgDecorationManagerSpy.wait());
     m_xdgDecorationManager = m_registry->createXdgDecorationManager(
         xdgDecorationManagerSpy.first().first().value<quint32>(),

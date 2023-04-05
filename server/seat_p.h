@@ -54,6 +54,7 @@ class Seat::Private : public SeatGlobal
 {
 public:
     Private(Seat* q_ptr, Display* display);
+    ~Private() override;
 
     void bindInit(SeatBind* bind) override;
 

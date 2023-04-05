@@ -50,6 +50,8 @@ struct ConfigurationHead {
     bool transformSet = false;
     double scale = 1.;
     bool scaleSet = false;
+    bool adapt_sync{false};
+    bool adapt_sync_set{false};
 };
 
 class Q_DECL_HIDDEN WlrOutputConfigurationV1::Private
@@ -200,6 +202,13 @@ void WlrOutputConfigurationV1::Private::send()
             zwlr_output_configuration_head_v1_set_scale(head->native,
                                                         wl_fixed_from_double(head->scale));
         }
+
+        if (head->adapt_sync_set) {
+            zwlr_output_configuration_head_v1_set_adaptive_sync(
+                head->native,
+                head->adapt_sync ? ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED
+                                 : ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_DISABLED);
+        }
     }
 }
 
@@ -275,6 +284,18 @@ void WlrOutputConfigurationV1::setScale(WlrOutputHeadV1* head, double scale)
 
     configurationHead->scale = scale;
     configurationHead->scaleSet = true;
+}
+
+void WlrOutputConfigurationV1::set_adaptive_sync(WlrOutputHeadV1* head, bool enable)
+{
+    auto configurationHead = d->getConfigurationHead(head);
+    if (zwlr_output_configuration_head_v1_get_version(configurationHead->native)
+        < ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_ADAPTIVE_SYNC_SINCE_VERSION) {
+        return;
+    }
+
+    configurationHead->adapt_sync = enable;
+    configurationHead->adapt_sync_set = true;
 }
 
 void WlrOutputConfigurationV1::test()

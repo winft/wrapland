@@ -44,7 +44,6 @@ class PlasmaShell::Private : public PlasmaShellGlobal
 {
 public:
     Private(Display* display, PlasmaShell* qptr);
-    ~Private() override;
 
     QList<PlasmaShellSurface*> surfaces;
 

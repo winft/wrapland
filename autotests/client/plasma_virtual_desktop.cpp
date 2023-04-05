@@ -28,12 +28,13 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/registry.h"
 #include "../../src/client/surface.h"
 
+#include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
-#include "../../server/region.h"
-
 #include "../../server/plasma_virtual_desktop.h"
 #include "../../server/plasma_window.h"
+#include "../../server/region.h"
+
+#include "../../tests/globals.h"
 
 class TestVirtualDesktop : public QObject
 {
@@ -130,15 +131,15 @@ void TestVirtualDesktop::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.compositor = server.display->createCompositor();
-
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
                                              compositorSpy.first().last().value<quint32>(),
                                              this);
 
     server.globals.plasma_virtual_desktop_manager
-        = server.display->createPlasmaVirtualDesktopManager();
+        = std::make_unique<Wrapland::Server::PlasmaVirtualDesktopManager>(server.display.get());
     server.plasma_vd = server.globals.plasma_virtual_desktop_manager.get();
 
     QVERIFY(plasmaVirtualDesktopManagementSpy.wait());
@@ -147,7 +148,8 @@ void TestVirtualDesktop::init()
         plasmaVirtualDesktopManagementSpy.first().last().value<quint32>(),
         this);
 
-    server.globals.plasma_window_manager = server.display->createPlasmaWindowManager();
+    server.globals.plasma_window_manager
+        = std::make_unique<Wrapland::Server::PlasmaWindowManager>(server.display.get());
     server.globals.plasma_window_manager->setVirtualDesktopManager(server.plasma_vd);
 
     QVERIFY(windowManagementSpy.wait());

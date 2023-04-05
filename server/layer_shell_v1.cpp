@@ -24,8 +24,6 @@ LayerShellV1::Private::Private(Display* display, LayerShellV1* qptr)
     create();
 }
 
-LayerShellV1::Private::~Private() = default;
-
 LayerSurfaceV1::Layer get_layer(uint32_t layer)
 {
     switch (layer) {
@@ -103,7 +101,7 @@ LayerSurfaceV1::Private::Private(Client* client,
                                  uint32_t version,
                                  uint32_t id,
                                  Surface* surface,
-                                 Output* output,
+                                 Server::output* output,
                                  Layer layer,
                                  std::string domain,
                                  LayerSurfaceV1* qptr)
@@ -273,7 +271,7 @@ void LayerSurfaceV1::Private::setLayerCallback([[maybe_unused]] wl_client* wlCli
     priv->pending.set = true;
 }
 
-void LayerSurfaceV1::Private::set_output(Output* output)
+void LayerSurfaceV1::Private::set_output(Server::output* output)
 {
     assert(output);
     this->output = output;
@@ -318,7 +316,7 @@ LayerSurfaceV1::LayerSurfaceV1(Client* client,
                                uint32_t version,
                                uint32_t id,
                                Surface* surface,
-                               Output* output,
+                               Server::output* output,
                                Layer layer,
                                std::string domain)
     : d_ptr(new Private(client, version, id, surface, output, layer, std::move(domain), this))
@@ -330,12 +328,12 @@ Surface* LayerSurfaceV1::surface() const
     return d_ptr->surface;
 }
 
-Output* LayerSurfaceV1::output() const
+Server::output* LayerSurfaceV1::output() const
 {
     return d_ptr->output;
 }
 
-void LayerSurfaceV1::set_output(Output* output)
+void LayerSurfaceV1::set_output(Server::output* output)
 {
     assert(output);
     assert(!d_ptr->output);

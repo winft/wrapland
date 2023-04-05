@@ -16,9 +16,11 @@
 #include "../../server/buffer.h"
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/plasma_activation_feedback.h"
+#include "../../server/seat.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 using namespace Wrapland;
 
@@ -71,11 +73,12 @@ void test_plasma_activation_feedback::init()
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.globals.compositor = server.display->createCompositor();
-
-    server.globals.seats.emplace_back(server.display->createSeat());
-
-    server.globals.plasma_activation_feedback = server.display->create_plasma_activation_feedback();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
+    server.globals.plasma_activation_feedback
+        = std::make_unique<Wrapland::Server::plasma_activation_feedback>(server.display.get());
 
     create_client(client1);
 }

@@ -54,23 +54,26 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../src/client/xdgdecoration.h"
 
 #include "../../server/blur.h"
+#include "../../server/compositor.h"
 #include "../../server/contrast.h"
+#include "../../server/data_device_manager.h"
 #include "../../server/drm_lease_v1.h"
-#include "../../server/globals.h"
 #include "../../server/idle_inhibit_v1.h"
 #include "../../server/idle_notify_v1.h"
 #include "../../server/input_method_v2.h"
 #include "../../server/linux_dmabuf_v1.h"
-#include "../../server/output_device_v1.h"
-#include "../../server/output_management_v1.h"
 #include "../../server/plasma_activation_feedback.h"
 #include "../../server/presentation_time.h"
 #include "../../server/primary_selection.h"
+#include "../../server/seat.h"
 #include "../../server/slide.h"
 #include "../../server/text_input_v2.h"
 #include "../../server/text_input_v3.h"
 #include "../../server/virtual_keyboard_v1.h"
 #include "../../server/xdg_decoration.h"
+#include "../../server/xdg_shell.h"
+
+#include "../../tests/globals.h"
 
 #include <wayland-blur-client-protocol.h>
 #include <wayland-client-protocol.h>
@@ -92,6 +95,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-text-input-v3-client-protocol.h>
 #include <wayland-virtual-keyboard-v1-client-protocol.h>
 #include <wayland-wlr-data-control-v1-client-protocol.h>
+#include <wayland-wlr-output-management-v1-client-protocol.h>
 #include <wayland-xdg-decoration-unstable-v1-client-protocol.h>
 #include <wayland-xdg-shell-client-protocol.h>
 
@@ -132,13 +136,13 @@ private Q_SLOTS:
     void testBindPrimarySelectionDeviceManager();
     void testBindIdleNotifierV1();
     void testBindIdleIhibitManagerUnstableV1();
+    void testBindWlrOutputManagerUnstableV1();
     void testRemoval();
     void testOutOfSyncRemoval();
     void testDestroy();
     void testGlobalSync();
     void testGlobalSyncThreaded();
     void testAnnounceMultiple();
-    void testAnnounceMultipleOutputDeviceV1s();
 
 private:
     struct {
@@ -161,12 +165,14 @@ void TestWaylandRegistry::init()
     server.display->start();
 
     server.display->createShm();
-
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
     server.globals.compositor
         = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
-    server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
-    server.globals.seats.push_back(server.display->createSeat());
+    server.globals.outputs.emplace_back(
+        std::make_unique<Wrapland::Server::output>(*server.globals.output_manager));
+    server.globals.seats.emplace_back(
+        std::make_unique<Wrapland::Server::Seat>(server.display.get()));
     server.globals.subcompositor
         = std::make_unique<Wrapland::Server::Subcompositor>(server.display.get());
     server.globals.data_device_manager
@@ -175,8 +181,8 @@ void TestWaylandRegistry::init()
         = std::make_unique<Wrapland::Server::data_control_manager_v1>(server.display.get());
     server.globals.drm_lease_device_v1
         = std::make_unique<Wrapland::Server::drm_lease_device_v1>(server.display.get());
-    server.globals.output_management_v1
-        = std::make_unique<Wrapland::Server::OutputManagementV1>(server.display.get());
+    server.globals.output_manager->create_xdg_manager();
+    server.globals.output_manager->create_wlr_manager_v1();
     server.globals.blur_manager
         = std::make_unique<Wrapland::Server::BlurManager>(server.display.get());
     server.globals.contrast_manager
@@ -217,12 +223,17 @@ void TestWaylandRegistry::init()
     server.globals.virtual_keyboard_manager_v1
         = std::make_unique<Wrapland::Server::virtual_keyboard_manager_v1>(server.display.get());
 
-    server.globals.outputs.back()->set_enabled(true);
-    server.globals.outputs.back()->done();
+    auto& output = server.globals.outputs.back();
+    output->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = output->get_state();
+    state.enabled = true;
+    output->set_state(state);
+    output->done();
 }
 
 void TestWaylandRegistry::cleanup()
 {
+    server = {};
 }
 
 void TestWaylandRegistry::testCreate()
@@ -506,6 +517,15 @@ void TestWaylandRegistry::testBindIdleIhibitManagerUnstableV1()
     QTest::qWait(100);
 }
 
+void TestWaylandRegistry::testBindWlrOutputManagerUnstableV1()
+{
+    TEST_BIND(Wrapland::Client::Registry::Interface::WlrOutputManagerV1,
+              SIGNAL(wlrOutputManagerV1Announced(quint32, quint32)),
+              bindWlrOutputManagerV1,
+              zwlr_output_manager_v1_destroy)
+    QTest::qWait(100);
+}
+
 #undef TEST_BIND
 
 void TestWaylandRegistry::testRemoval()
@@ -530,9 +550,6 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(compositorAnnouncedSpy.isValid());
     QSignalSpy outputAnnouncedSpy(&registry, SIGNAL(outputAnnounced(quint32, quint32)));
     QVERIFY(outputAnnouncedSpy.isValid());
-    QSignalSpy outputDeviceAnnouncedSpy(&registry,
-                                        SIGNAL(outputDeviceV1Announced(quint32, quint32)));
-    QVERIFY(outputDeviceAnnouncedSpy.isValid());
     QSignalSpy shellAnnouncedSpy(&registry, SIGNAL(xdgShellAnnounced(quint32, quint32)));
     QVERIFY(shellAnnouncedSpy.isValid());
     QSignalSpy seatAnnouncedSpy(&registry, SIGNAL(seatAnnounced(quint32, quint32)));
@@ -540,9 +557,6 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy subCompositorAnnouncedSpy(&registry,
                                          SIGNAL(subCompositorAnnounced(quint32, quint32)));
     QVERIFY(subCompositorAnnouncedSpy.isValid());
-    QSignalSpy outputManagementAnnouncedSpy(&registry,
-                                            SIGNAL(outputManagementV1Announced(quint32, quint32)));
-    QVERIFY(outputManagementAnnouncedSpy.isValid());
     QSignalSpy presentationAnnouncedSpy(&registry, &Registry::presentationManagerAnnounced);
     QVERIFY(presentationAnnouncedSpy.isValid());
     QSignalSpy xdgDecorationAnnouncedSpy(&registry,
@@ -563,12 +577,10 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(shmAnnouncedSpy.wait());
     QVERIFY(!compositorAnnouncedSpy.isEmpty());
     QVERIFY(!outputAnnouncedSpy.isEmpty());
-    QVERIFY(!outputDeviceAnnouncedSpy.isEmpty());
     QVERIFY(!presentationAnnouncedSpy.isEmpty());
     QVERIFY(!shellAnnouncedSpy.isEmpty());
     QVERIFY(!seatAnnouncedSpy.isEmpty());
     QVERIFY(!subCompositorAnnouncedSpy.isEmpty());
-    QVERIFY(!outputManagementAnnouncedSpy.isEmpty());
     QVERIFY(!xdgDecorationAnnouncedSpy.isEmpty());
     QVERIFY(!blurAnnouncedSpy.isEmpty());
     QVERIFY(!idle_notifier_v1_spy.isEmpty());
@@ -576,14 +588,12 @@ void TestWaylandRegistry::testRemoval()
 
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::Compositor));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::Output));
-    QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::OutputDeviceV1));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::PresentationManager));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::Seat));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::XdgShell));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::Shm));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::SubCompositor));
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::FullscreenShell));
-    QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::OutputManagementV1));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::XdgDecorationUnstableV1));
     QVERIFY(registry.hasInterface(Wrapland::Client::Registry::Interface::Blur));
     QVERIFY(
@@ -591,7 +601,6 @@ void TestWaylandRegistry::testRemoval()
 
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::Compositor).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::Output).isEmpty());
-    QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::OutputDeviceV1).isEmpty());
     QVERIFY(
         !registry.interfaces(Wrapland::Client::Registry::Interface::PresentationManager).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::Seat).isEmpty());
@@ -599,8 +608,6 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::Shm).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::SubCompositor).isEmpty());
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::FullscreenShell).isEmpty());
-    QVERIFY(
-        !registry.interfaces(Wrapland::Client::Registry::Interface::OutputManagementV1).isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::XdgDecorationUnstableV1)
                  .isEmpty());
     QVERIFY(!registry.interfaces(Wrapland::Client::Registry::Interface::Blur).isEmpty());
@@ -682,22 +689,12 @@ void TestWaylandRegistry::testRemoval()
     QSignalSpy outputRemovedSpy(&registry, SIGNAL(outputRemoved(quint32)));
     QVERIFY(outputRemovedSpy.isValid());
 
-    QSignalSpy outputDeviceRemovedSpy(&registry, SIGNAL(outputDeviceV1Removed(quint32)));
-    QVERIFY(outputDeviceRemovedSpy.isValid());
-
     server.globals.outputs.clear();
     QVERIFY(outputRemovedSpy.wait());
     QCOMPARE(outputRemovedSpy.first().first(), outputAnnouncedSpy.first().first());
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::Output));
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::Output).isEmpty());
     QCOMPARE(outputObjectRemovedSpy.count(), 1);
-
-    if (!outputDeviceRemovedSpy.size()) {
-        QVERIFY(outputDeviceRemovedSpy.wait());
-    }
-    QCOMPARE(outputDeviceRemovedSpy.first().first(), outputDeviceAnnouncedSpy.first().first());
-    QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::OutputDeviceV1));
-    QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::OutputDeviceV1).isEmpty());
 
     QSignalSpy compositorRemovedSpy(&registry, SIGNAL(compositorRemoved(quint32)));
     QVERIFY(compositorRemovedSpy.isValid());
@@ -718,17 +715,6 @@ void TestWaylandRegistry::testRemoval()
     QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::SubCompositor));
     QVERIFY(registry.interfaces(Wrapland::Client::Registry::Interface::SubCompositor).isEmpty());
     QCOMPARE(subcompositorObjectRemovedSpy.count(), 1);
-
-    QSignalSpy outputManagementRemovedSpy(&registry, SIGNAL(outputManagementV1Removed(quint32)));
-    QVERIFY(outputManagementRemovedSpy.isValid());
-
-    server.globals.output_management_v1.reset();
-    QVERIFY(outputManagementRemovedSpy.wait());
-    QCOMPARE(outputManagementRemovedSpy.first().first(),
-             outputManagementAnnouncedSpy.first().first());
-    QVERIFY(!registry.hasInterface(Wrapland::Client::Registry::Interface::OutputManagementV1));
-    QVERIFY(
-        registry.interfaces(Wrapland::Client::Registry::Interface::OutputManagementV1).isEmpty());
 
     QSignalSpy xdgDecorationRemovedSpy(&registry, SIGNAL(xdgDecorationRemoved(quint32)));
     QVERIFY(xdgDecorationRemovedSpy.isValid());
@@ -1024,9 +1010,11 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QSignalSpy outputAnnouncedSpy(&registry, &Registry::outputAnnounced);
     QVERIFY(outputAnnouncedSpy.isValid());
 
-    std::unique_ptr<Wrapland::Server::Output> output1{
-        new Wrapland::Server::Output(server.display.get())};
-    output1->set_enabled(true);
+    auto output1 = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
+    output1->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    auto state = output1->get_state();
+    state.enabled = true;
+    output1->set_state(state);
     output1->done();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 2);
@@ -1039,9 +1027,11 @@ void TestWaylandRegistry::testAnnounceMultiple()
     QCOMPARE(registry.interface(Registry::Interface::Output).version,
              outputAnnouncedSpy.first().last().value<quint32>());
 
-    std::unique_ptr<Wrapland::Server::Output> output2{
-        new Wrapland::Server::Output(server.display.get())};
-    output2->set_enabled(true);
+    auto output2 = std::make_unique<Wrapland::Server::output>(*server.globals.output_manager);
+    output2->add_mode({.size = QSize{1920, 1080}, .id = 0});
+    state = output2->get_state();
+    state.enabled = true;
+    output2->set_state(state);
     output2->done();
     QVERIFY(outputAnnouncedSpy.wait());
     QCOMPARE(registry.interfaces(Registry::Interface::Output).count(), 3);
@@ -1070,86 +1060,6 @@ void TestWaylandRegistry::testAnnounceMultiple()
              outputAnnouncedSpy.first().first().value<quint32>());
     QCOMPARE(registry.interface(Registry::Interface::Output).version,
              outputAnnouncedSpy.first().last().value<quint32>());
-
-    registry.release();
-}
-
-void TestWaylandRegistry::testAnnounceMultipleOutputDeviceV1s()
-{
-    using namespace Wrapland::Client;
-    ConnectionThread connection;
-    connection.setSocketName(socket_name);
-    QSignalSpy connectedSpy(&connection, &ConnectionThread::establishedChanged);
-    QVERIFY(connectedSpy.isValid());
-    connection.establishConnection();
-    QVERIFY(connectedSpy.count() || connectedSpy.wait());
-    QCOMPARE(connectedSpy.count(), 1);
-
-    connect(QCoreApplication::eventDispatcher(),
-            &QAbstractEventDispatcher::aboutToBlock,
-            &connection,
-            [&connection] { wl_display_flush(connection.display()); });
-
-    Registry registry;
-    QSignalSpy syncSpy(&registry, &Registry::interfacesAnnounced);
-    QVERIFY(syncSpy.isValid());
-    // Most simple case: don't even use the ConnectionThread,
-    // just its display.
-    registry.create(connection.display());
-    registry.setup();
-
-    QVERIFY(syncSpy.wait());
-    QCOMPARE(syncSpy.count(), 1);
-
-    // we should have one output now
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 1);
-
-    QSignalSpy outputDeviceAnnouncedSpy(&registry, &Registry::outputDeviceV1Announced);
-    QVERIFY(outputDeviceAnnouncedSpy.isValid());
-
-    std::unique_ptr<Wrapland::Server::Output> device1{
-        new Wrapland::Server::Output(server.display.get())};
-    QVERIFY(outputDeviceAnnouncedSpy.wait());
-
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 2);
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().name,
-             outputDeviceAnnouncedSpy.first().first().value<quint32>());
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().version,
-             outputDeviceAnnouncedSpy.first().last().value<quint32>());
-    QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).name,
-             outputDeviceAnnouncedSpy.first().first().value<quint32>());
-    QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).version,
-             outputDeviceAnnouncedSpy.first().last().value<quint32>());
-
-    std::unique_ptr<Wrapland::Server::Output> device2{
-        new Wrapland::Server::Output(server.display.get())};
-    QVERIFY(outputDeviceAnnouncedSpy.wait());
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 3);
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().name,
-             outputDeviceAnnouncedSpy.last().first().value<quint32>());
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().version,
-             outputDeviceAnnouncedSpy.last().last().value<quint32>());
-    QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).name,
-             outputDeviceAnnouncedSpy.last().first().value<quint32>());
-    QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).version,
-             outputDeviceAnnouncedSpy.last().last().value<quint32>());
-
-    QSignalSpy outputDeviceRemovedSpy(&registry, &Registry::outputDeviceV1Removed);
-    QVERIFY(outputDeviceRemovedSpy.isValid());
-
-    device2.reset();
-    QVERIFY(outputDeviceRemovedSpy.wait());
-    QCOMPARE(outputDeviceRemovedSpy.first().first().value<quint32>(),
-             outputDeviceAnnouncedSpy.last().first().value<quint32>());
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).count(), 2);
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().name,
-             outputDeviceAnnouncedSpy.first().first().value<quint32>());
-    QCOMPARE(registry.interfaces(Registry::Interface::OutputDeviceV1).last().version,
-             outputDeviceAnnouncedSpy.first().last().value<quint32>());
-    QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).name,
-             outputDeviceAnnouncedSpy.first().first().value<quint32>());
-    QCOMPARE(registry.interface(Registry::Interface::OutputDeviceV1).version,
-             outputDeviceAnnouncedSpy.first().last().value<quint32>());
 
     registry.release();
 }

@@ -30,10 +30,11 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/compositor.h"
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/region.h"
 #include "../../server/server_decoration_palette.h"
 #include "../../server/surface.h"
+
+#include "../../tests/globals.h"
 
 using namespace Wrapland::Client;
 
@@ -113,7 +114,8 @@ void TestServerSideDecorationPalette::init()
     QVERIFY(registry.isValid());
     registry.setup();
 
-    server.globals.compositor = server.display->createCompositor();
+    server.globals.compositor
+        = std::make_unique<Wrapland::Server::Compositor>(server.display.get());
 
     QVERIFY(compositorSpy.wait());
     m_compositor = registry.createCompositor(compositorSpy.first().first().value<quint32>(),
@@ -121,7 +123,8 @@ void TestServerSideDecorationPalette::init()
                                              this);
 
     server.globals.server_side_decoration_palette_manager
-        = server.display->createServerSideDecorationPaletteManager();
+        = std::make_unique<Wrapland::Server::ServerSideDecorationPaletteManager>(
+            server.display.get());
 
     QVERIFY(registrySpy.wait());
     m_paletteManager = registry.createServerSideDecorationPaletteManager(

@@ -27,10 +27,7 @@ set(SERVER_LIB_SRCS
   layer_shell_v1.cpp
   linux_dmabuf_v1.cpp
   output.cpp
-  output_changeset_v1.cpp
-  output_configuration_v1.cpp
-  output_device_v1.cpp
-  output_management_v1.cpp
+  output_manager.cpp
   plasma_activation_feedback.cpp
   plasma_shell.cpp
   plasma_virtual_desktop.cpp
@@ -60,6 +57,11 @@ set(SERVER_LIB_SRCS
   wayland/client.cpp
   wayland/display.cpp
   wl_output.cpp
+  wlr_output_configuration_head_v1.cpp
+  wlr_output_configuration_v1.cpp
+  wlr_output_head_v1.cpp
+  wlr_output_manager_v1.cpp
+  wlr_output_mode_v1.cpp
   xdg_activation_v1.cpp
   xdg_decoration.cpp
   xdg_foreign.cpp
@@ -77,16 +79,6 @@ ecm_qt_declare_logging_category(SERVER_LIB_SRCS
   IDENTIFIER WRAPLAND_SERVER
   CATEGORY_NAME wrapland-server
   DEFAULT_SEVERITY Critical
-)
-
-ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-management-unstable-v1.xml
-  BASENAME output-management-v1
-)
-
-ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
-  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/kwinft-output-device-unstable-v1.xml
-  BASENAME output-device-v1
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
@@ -234,6 +226,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+  PROTOCOL ${Wrapland_SOURCE_DIR}/src/client/protocols/wlr-output-management-unstable-v1.xml
+  BASENAME wlr-output-management-v1
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
   PROTOCOL ${WaylandProtocols_DATADIR}/unstable/xdg-output/xdg-output-unstable-v1.xml
   BASENAME xdg-output
 )
@@ -286,10 +283,6 @@ set(SERVER_GENERATED_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-inhibit-unstable-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-idle-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-linux-dmabuf-unstable-v1-server-protocol.h
-  ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-client-protocol.h
-  ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-device-v1-server-protocol.h
-  ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-client-protocol.h
-  ${CMAKE_CURRENT_BINARY_DIR}/wayland-output-management-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-plasma-shell-server-protocol.h
@@ -325,6 +318,8 @@ set(SERVER_GENERATED_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-virtual-keyboard-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-layer-shell-unstable-v1-server-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-output-management-v1-unstable-v1-client-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-wlr-output-management-v1-unstable-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-activation-v1-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-activation-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-xdg-decoration-client-protocol.h
@@ -392,7 +387,6 @@ set(SERVER_LIB_HEADERS
   drm_lease_v1.h
   fake_input.h
   filtered_display.h
-  globals.h
   idle_notify_v1.h
   idle_inhibit_v1.h
   input_method_v2.h
@@ -404,10 +398,7 @@ set(SERVER_LIB_HEADERS
   layer_shell_v1.h
   linux_dmabuf_v1.h
   output.h
-  output_changeset_v1.h
-  output_configuration_v1.h
-  output_device_v1.h
-  output_management_v1.h
+  output_manager.h
   plasma_activation_feedback.h
   plasma_shell.h
   plasma_virtual_desktop.h
@@ -434,6 +425,9 @@ set(SERVER_LIB_HEADERS
   viewporter.h
   virtual_keyboard_v1.h
   wl_output.h
+  wlr_output_configuration_head_v1.h
+  wlr_output_configuration_v1.h
+  wlr_output_manager_v1.h
   xdg_activation_v1.h
   xdg_decoration.h
   xdg_output.h

@@ -68,6 +68,9 @@ FilteredDisplay::FilteredDisplay()
     });
 }
 
-FilteredDisplay::~FilteredDisplay() = default;
+FilteredDisplay::~FilteredDisplay()
+{
+    wl_display_set_global_filter(native(), nullptr, nullptr);
+}
 
 }

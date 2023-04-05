@@ -12,9 +12,10 @@
 #include "../../src/client/seat.h"
 
 #include "../../server/display.h"
-#include "../../server/globals.h"
 #include "../../server/idle_notify_v1.h"
 #include "../../server/seat.h"
+
+#include "../../tests/globals.h"
 
 namespace Clt = Wrapland::Client;
 namespace Srv = Wrapland::Server;
@@ -52,9 +53,12 @@ void idle_notify_test::init()
     QVERIFY(server.display->running());
 
     server.display->createShm();
-    server.seat = server.globals.seats.emplace_back(server.display->createSeat()).get();
+    server.seat = server.globals.seats
+                      .emplace_back(std::make_unique<Wrapland::Server::Seat>(server.display.get()))
+                      .get();
     server.seat->setName("seat0");
-    server.globals.idle_notifier_v1 = server.display->create_idle_notifier_v1();
+    server.globals.idle_notifier_v1
+        = std::make_unique<Wrapland::Server::idle_notifier_v1>(server.display.get());
 
     // setup connection
     m_connection = new Clt::ConnectionThread;

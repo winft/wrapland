@@ -57,6 +57,7 @@ data_device_manager::Private::Private(data_device_manager* q_ptr, Display* displ
                                                  &wl_data_device_manager_interface,
                                                  &s_interface)
 {
+    display->globals.data_device_manager = q_ptr;
 }
 
 data_device_manager::data_device_manager(Display* display)

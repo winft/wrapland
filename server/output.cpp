@@ -19,55 +19,125 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "output_p.h"
 
-#include "output_device_v1_p.h"
-#include "wl_output_p.h"
-#include "xdg_output_p.h"
-
 #include "display.h"
+#include "output_manager.h"
+#include "utils.h"
+#include "wl_output_p.h"
+#include "wlr_output_head_v1_p.h"
+#include "xdg_output_p.h"
 
 #include "wayland/client.h"
 #include "wayland/display.h"
 
+#include <QRectF>
 #include <cassert>
 #include <functional>
-#include <wayland-server.h>
 
 namespace Wrapland::Server
 {
 
-Output::Private::Private(Display* display, Output* q_ptr)
-    : display_handle(display)
-    , device{new OutputDeviceV1(q_ptr, display)}
-    , q_ptr{q_ptr}
+wl_output_transform output_to_transform(output_transform transform)
 {
+    switch (transform) {
+    case output_transform::normal:
+        return WL_OUTPUT_TRANSFORM_NORMAL;
+    case output_transform::rotated_90:
+        return WL_OUTPUT_TRANSFORM_90;
+    case output_transform::rotated_180:
+        return WL_OUTPUT_TRANSFORM_180;
+    case output_transform::rotated_270:
+        return WL_OUTPUT_TRANSFORM_270;
+    case output_transform::flipped:
+        return WL_OUTPUT_TRANSFORM_FLIPPED;
+    case output_transform::flipped_90:
+        return WL_OUTPUT_TRANSFORM_FLIPPED_90;
+    case output_transform::flipped_180:
+        return WL_OUTPUT_TRANSFORM_FLIPPED_180;
+    case output_transform::flipped_270:
+        return WL_OUTPUT_TRANSFORM_FLIPPED_270;
+    }
+    abort();
 }
 
-void Output::Private::done()
+output_transform transform_to_output(wl_output_transform transform)
 {
-    if (published.enabled != pending.enabled) {
-        if (pending.enabled) {
-            wayland_output.reset(new WlOutput(q_ptr, display_handle));
-            xdg_output.reset(new XdgOutput(q_ptr, display_handle));
+    switch (transform) {
+    case WL_OUTPUT_TRANSFORM_NORMAL:
+        return output_transform::normal;
+    case WL_OUTPUT_TRANSFORM_90:
+        return output_transform::rotated_90;
+    case WL_OUTPUT_TRANSFORM_180:
+        return output_transform::rotated_180;
+    case WL_OUTPUT_TRANSFORM_270:
+        return output_transform::rotated_270;
+    case WL_OUTPUT_TRANSFORM_FLIPPED:
+        return output_transform::flipped;
+    case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+        return output_transform::flipped_90;
+    case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+        return output_transform::flipped_180;
+    case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+        return output_transform::flipped_270;
+    }
+    abort();
+}
+
+output::Private::Private(output_metadata metadata, output_manager& manager, output* q_ptr)
+    : manager{manager}
+    , q_ptr{q_ptr}
+{
+    if (metadata.description.empty()) {
+        metadata.description = output_generate_description(metadata);
+    }
+    pending.meta = std::move(metadata);
+    published.meta = pending.meta;
+
+    manager.outputs.push_back(q_ptr);
+    QObject::connect(&manager.display, &Display::destroyed, q_ptr, [this] {
+        xdg_output.reset();
+        wayland_output.reset();
+    });
+}
+
+output::Private::~Private()
+{
+    remove_all(manager.outputs, q_ptr);
+}
+
+void output::Private::done()
+{
+    if (published.state.enabled != pending.state.enabled) {
+        if (pending.state.enabled) {
+            wayland_output.reset(new WlOutput(q_ptr, &manager.display));
+            if (manager.xdg_manager) {
+                xdg_output.reset(new XdgOutput(q_ptr, &manager.display));
+            }
         } else {
             wayland_output.reset();
             xdg_output.reset();
         }
     }
-    if (pending.enabled) {
+    if (pending.state.enabled) {
         auto wayland_change = wayland_output->d_ptr->broadcast();
-        auto xdg_change = xdg_output->d_ptr->broadcast();
+        auto xdg_change = xdg_output ? xdg_output->d_ptr->broadcast() : false;
         if (wayland_change || xdg_change) {
             wayland_output->d_ptr->done();
-            xdg_output->d_ptr->done();
+            if (xdg_output) {
+                xdg_output->d_ptr->done();
+            }
         }
     }
-    if (device->d_ptr->broadcast()) {
-        device->d_ptr->done();
+    if (auto& wlr_man = manager.wlr_manager_v1) {
+        if (wlr_head_v1) {
+            wlr_head_v1->broadcast();
+        } else {
+            wlr_head_v1 = std::make_unique<wlr_output_head_v1>(*q_ptr, *wlr_man);
+        }
     }
     published = pending;
 }
 
-void Output::Private::done_wl(Client* client) const
+void output::Private::done_wl(Client* client) const
 {
     if (!wayland_output) {
         return;
@@ -79,7 +149,7 @@ void Output::Private::done_wl(Client* client) const
     }
 }
 
-int32_t Output::Private::get_mode_flags(Output::Mode const& mode, OutputState const& state)
+int32_t output::Private::get_mode_flags(output_mode const& mode, output_state const& state)
 {
     int32_t flags = 0;
 
@@ -92,206 +162,114 @@ int32_t Output::Private::get_mode_flags(Output::Mode const& mode, OutputState co
     return flags;
 }
 
-int32_t Output::Private::to_transform(Output::Transform transform)
+void output::Private::update_client_scale()
 {
-    switch (transform) {
-    case Output::Transform::Normal:
-        return WL_OUTPUT_TRANSFORM_NORMAL;
-    case Output::Transform::Rotated90:
-        return WL_OUTPUT_TRANSFORM_90;
-    case Output::Transform::Rotated180:
-        return WL_OUTPUT_TRANSFORM_180;
-    case Output::Transform::Rotated270:
-        return WL_OUTPUT_TRANSFORM_270;
-    case Output::Transform::Flipped:
-        return WL_OUTPUT_TRANSFORM_FLIPPED;
-    case Output::Transform::Flipped90:
-        return WL_OUTPUT_TRANSFORM_FLIPPED_90;
-    case Output::Transform::Flipped180:
-        return WL_OUTPUT_TRANSFORM_FLIPPED_180;
-    case Output::Transform::Flipped270:
-        return WL_OUTPUT_TRANSFORM_FLIPPED_270;
-    }
-    abort();
-}
-
-void Output::Private::update_client_scale()
-{
-    auto logical_size = pending.geometry.size();
-    auto mode_size = pending.mode.size;
+    auto logical_size = pending.state.geometry.size();
+    auto mode_size = pending.state.mode.size;
 
     if (logical_size.width() <= 0 || logical_size.height() <= 0 || mode_size.width() <= 0
         || mode_size.height() <= 0) {
-        pending.client_scale = 1;
+        pending.state.client_scale = 1;
         return;
     }
 
     auto width_ratio = mode_size.width() / logical_size.width();
     auto height_ratio = mode_size.height() / logical_size.height();
 
-    pending.client_scale = std::ceil(std::max(width_ratio, height_ratio));
+    pending.state.client_scale = std::ceil(std::max(width_ratio, height_ratio));
 }
 
-bool Output::Mode::operator==(Mode const& mode) const
+bool output_mode::operator==(output_mode const& mode) const
 {
     return size == mode.size && refresh_rate == mode.refresh_rate && id == mode.id;
 }
 
-bool Output::Mode::operator!=(Mode const& mode) const
+bool output_mode::operator!=(output_mode const& mode) const
 {
     return !(*this == mode);
 }
 
-Output::Output(Display* display)
-    : d_ptr(new Private(display, this))
+output::output(output_manager& manager)
+    : output(output_metadata(), manager)
 {
 }
 
-Output::~Output() = default;
+output::output(output_metadata metadata, output_manager& manager)
+    : d_ptr(new Private(std::move(metadata), manager, this))
+{
+}
 
-void Output::done()
+output::~output() = default;
+
+void output::done()
 {
     d_ptr->done();
 }
 
-Output::Subpixel Output::subpixel() const
+output_metadata const& output::get_metadata() const
 {
-    return d_ptr->pending.subpixel;
+    return d_ptr->pending.meta;
 }
 
-void Output::set_subpixel(Subpixel subpixel)
+void output::set_metadata(output_metadata const& data)
 {
-    d_ptr->pending.subpixel = subpixel;
+    d_ptr->pending.meta = data;
 }
 
-Output::Transform Output::transform() const
-{
-    return d_ptr->pending.transform;
-}
-
-std::string Output::name() const
-{
-    return d_ptr->pending.info.name;
-}
-
-std::string Output::description() const
-{
-    return d_ptr->pending.info.description;
-}
-
-std::string Output::serial_mumber() const
-{
-    return d_ptr->pending.info.serial_number;
-}
-
-std::string Output::make() const
-{
-    return d_ptr->pending.info.make;
-}
-
-std::string Output::model() const
-{
-    return d_ptr->pending.info.model;
-}
-
-void Output::set_name(std::string const& name)
-{
-    d_ptr->pending.info.name = name;
-}
-
-void Output::set_description(std::string const& description)
-{
-    d_ptr->pending.info.description = description;
-}
-
-void Output::set_make(std::string const& make)
-{
-    d_ptr->pending.info.make = make;
-}
-
-void Output::set_model(std::string const& model)
-{
-    d_ptr->pending.info.model = model;
-}
-
-void Output::set_serial_number(std::string const& serial_number)
-{
-    d_ptr->pending.info.serial_number = serial_number;
-}
-
-void Output::set_physical_size(QSize const& size)
-{
-    d_ptr->pending.info.physical_size = size;
-}
-
-void Output::set_connector_id(int id)
+void output::set_connector_id(int id)
 {
     d_ptr->connector_id = id;
 }
 
-void Output::generate_description()
+std::string output_generate_description(output_metadata const& data)
 {
-    auto& info = d_ptr->pending.info;
     std::string descr;
-    if (!info.make.empty()) {
-        descr = info.make;
+
+    if (!data.make.empty()) {
+        descr = data.make;
     }
-    if (!info.model.empty()) {
-        descr = (descr.empty() ? "" : descr + " ") + info.model;
+    if (!data.model.empty()) {
+        descr = (descr.empty() ? "" : descr + " ") + data.model;
     }
-    if (!info.name.empty()) {
+    if (!data.name.empty()) {
         if (descr.empty()) {
-            descr = info.name;
+            descr = data.name;
         } else {
-            descr += " (" + info.name + ")";
+            descr += " (" + data.name + ")";
         }
     }
-    info.description = descr;
+
+    return descr;
 }
 
-bool Output::enabled() const
+output_state const& output::get_state() const
 {
-    return d_ptr->pending.enabled;
+    return d_ptr->pending.state;
 }
 
-void Output::set_enabled(bool enabled)
+void output::set_state(output_state const& data)
 {
-    d_ptr->pending.enabled = enabled;
+    if (!contains(d_ptr->modes, data.mode)) {
+        // TODO(romangg): Allow custom modes?
+        return;
+    }
+    d_ptr->pending.state = data;
+    d_ptr->update_client_scale();
 }
 
-QSize Output::physical_size() const
-{
-    return d_ptr->pending.info.physical_size;
-}
-
-int Output::connector_id() const
+int output::connector_id() const
 {
     return d_ptr->connector_id;
 }
 
-std::vector<Output::Mode> Output::modes() const
+std::vector<output_mode> output::modes() const
 {
     return d_ptr->modes;
 }
 
-int Output::mode_id() const
+void output::add_mode(output_mode const& mode)
 {
-    return d_ptr->pending.mode.id;
-}
-
-QSize Output::mode_size() const
-{
-    return d_ptr->pending.mode.size;
-}
-
-int Output::refresh_rate() const
-{
-    return d_ptr->pending.mode.refresh_rate;
-}
-
-void Output::add_mode(Mode const& mode)
-{
-    d_ptr->pending.mode = mode;
+    d_ptr->pending.state.mode = mode;
 
     auto it = std::find(d_ptr->modes.begin(), d_ptr->modes.end(), mode);
 
@@ -302,64 +280,7 @@ void Output::add_mode(Mode const& mode)
     }
 }
 
-bool Output::set_mode(int id)
-{
-    for (auto const& mode : d_ptr->modes) {
-        if (mode.id == id) {
-            d_ptr->pending.mode = mode;
-            d_ptr->update_client_scale();
-            return true;
-        }
-    }
-    return false;
-}
-
-bool Output::set_mode(Mode const& mode)
-{
-    for (auto const& cmp : d_ptr->modes) {
-        if (cmp == mode) {
-            d_ptr->pending.mode = cmp;
-            d_ptr->update_client_scale();
-            return true;
-        }
-    }
-    return false;
-}
-
-bool Output::set_mode(QSize const& size, int refresh_rate)
-{
-    for (auto const& mode : d_ptr->modes) {
-        if (mode.size == size && mode.refresh_rate == refresh_rate) {
-            d_ptr->pending.mode = mode;
-            d_ptr->update_client_scale();
-            return true;
-        }
-    }
-    return false;
-}
-
-QRectF Output::geometry() const
-{
-    return d_ptr->pending.geometry;
-}
-
-void Output::set_transform(Transform transform)
-{
-    d_ptr->pending.transform = transform;
-}
-
-void Output::set_geometry(QRectF const& geometry)
-{
-    d_ptr->pending.geometry = geometry;
-    d_ptr->update_client_scale();
-}
-
-int Output::client_scale() const
-{
-    return d_ptr->pending.client_scale;
-}
-
-void Output::set_dpms_supported(bool supported)
+void output::set_dpms_supported(bool supported)
 {
     if (d_ptr->dpms.supported == supported) {
         return;
@@ -368,12 +289,12 @@ void Output::set_dpms_supported(bool supported)
     Q_EMIT dpms_supported_changed();
 }
 
-bool Output::dpms_supported() const
+bool output::dpms_supported() const
 {
     return d_ptr->dpms.supported;
 }
 
-void Output::set_dpms_mode(Output::DpmsMode mode)
+void output::set_dpms_mode(output_dpms_mode mode)
 {
     if (d_ptr->dpms.mode == mode) {
         return;
@@ -382,22 +303,17 @@ void Output::set_dpms_mode(Output::DpmsMode mode)
     Q_EMIT dpms_mode_changed();
 }
 
-Output::DpmsMode Output::dpms_mode() const
+output_dpms_mode output::dpms_mode() const
 {
     return d_ptr->dpms.mode;
 }
 
-OutputDeviceV1* Output::output_device_v1() const
-{
-    return d_ptr->device.get();
-}
-
-WlOutput* Output::wayland_output() const
+WlOutput* output::wayland_output() const
 {
     return d_ptr->wayland_output.get();
 }
 
-XdgOutput* Output::xdg_output() const
+XdgOutput* output::xdg_output() const
 {
     return d_ptr->xdg_output.get();
 }

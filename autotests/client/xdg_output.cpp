@@ -20,14 +20,16 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtTest>
 
 #include "../../server/display.h"
-#include "../../server/globals.h"
-
+#include "../../server/output.h"
 #include "../../server/xdg_output.h"
+
 #include "../../src/client/connection_thread.h"
 #include "../../src/client/event_queue.h"
 #include "../../src/client/output.h"
 #include "../../src/client/registry.h"
 #include "../../src/client/xdgoutput.h"
+
+#include "../../tests/globals.h"
 
 class TestXdgOutput : public QObject
 {
@@ -44,6 +46,7 @@ private Q_SLOTS:
 private:
     struct {
         std::unique_ptr<Wrapland::Server::Display> display;
+        std::unique_ptr<Wrapland::Server::output> output;
         Wrapland::Server::globals globals;
     } server;
 
@@ -73,23 +76,23 @@ void TestXdgOutput::init()
     server.display->start();
     QVERIFY(server.display->running());
 
-    server.globals.outputs.push_back(
-        std::make_unique<Wrapland::Server::Output>(server.display.get()));
-    auto&& server_output = server.globals.outputs.back();
-    server_output->add_mode(Wrapland::Server::Output::Mode{QSize(1920, 1080), 60000, true, 1});
-    server_output->set_mode(1);
-    server_output->set_enabled(true);
+    server.globals.output_manager
+        = std::make_unique<Wrapland::Server::output_manager>(*server.display);
+    server.globals.output_manager->create_xdg_manager();
 
-    server_output->set_name(m_name);
-    server_output->set_make(m_make);
-    server_output->set_model(m_model);
+    Wrapland::Server::output_metadata meta{.name = m_name, .make = m_make, .model = m_model};
+    server.output
+        = std::make_unique<Wrapland::Server::output>(meta, *server.globals.output_manager);
+    m_description = server.output->get_metadata().description;
+    server.output->add_mode(Wrapland::Server::output_mode{QSize(1920, 1080), 60000, true, 1});
 
-    server_output->generate_description();
-    m_description = server_output->description();
+    auto state = server.output->get_state();
+    state.enabled = true;
 
     // Not a sensible position for one monitor but works for this test. And a 1.5 scale factor.
-    server_output->set_geometry(QRectF(QPoint(11, 12), QSize(1280, 720)));
-    server_output->done();
+    state.geometry = QRectF(QPoint(11, 12), QSize(1280, 720));
+    server.output->set_state(state);
+    server.output->done();
 
     // setup connection
     m_connection = new Wrapland::Client::ConnectionThread;
@@ -189,11 +192,15 @@ void TestXdgOutput::testChanges()
     }
 
     // dynamic updates
-    server.globals.outputs.back()->set_geometry(QRectF(QPoint(1000, 2000), QSize(100, 200)));
+    auto state = server.output->get_state();
+    state.geometry = QRectF(QPoint(1000, 2000), QSize(100, 200));
+    server.output->set_state(state);
 
     std::string updated_description = "Updated xdg-output description";
-    server.globals.outputs.back()->set_description(updated_description);
-    server.globals.outputs.back()->done();
+    auto metadata = server.output->get_metadata();
+    metadata.description = updated_description;
+    server.output->set_metadata(metadata);
+    server.output->done();
 
     QVERIFY(xdgOutputChanged.wait());
     QCOMPARE(xdgOutputChanged.count(), 1);

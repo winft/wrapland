@@ -136,7 +136,7 @@ PresentationFeedback::~PresentationFeedback()
     }
 }
 
-void PresentationFeedback::sync(Output* output)
+void PresentationFeedback::sync(Server::output* output)
 {
     auto outputBinds = output->wayland_output()->d_ptr->getBinds(d_ptr->client->handle);
 

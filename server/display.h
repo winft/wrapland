@@ -19,12 +19,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QObject>
-
-#include <QDebug>
-
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <QObject>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -38,7 +35,6 @@ namespace Wrapland::Server
 
 class Client;
 class Private;
-class OutputDeviceV1;
 class WlOutput;
 
 class AppmenuManager;
@@ -58,8 +54,7 @@ class KeyboardShortcutsInhibitManagerV1;
 class KeyState;
 class LayerShellV1;
 class linux_dmabuf_v1;
-class Output;
-class OutputManagementV1;
+class output;
 class plasma_activation_feedback;
 class PlasmaShell;
 class PlasmaVirtualDesktopManager;
@@ -78,6 +73,7 @@ class text_input_manager_v2;
 class text_input_manager_v3;
 class Viewporter;
 class virtual_keyboard_manager_v1;
+class wlr_output_manager_v1;
 class XdgActivationV1;
 class XdgDecorationManager;
 class XdgForeign;
@@ -112,70 +108,9 @@ public:
     wl_display* native() const;
     bool running() const;
 
-    void add_wl_output(WlOutput* output);
-    void removeOutput(WlOutput* output);
-    std::vector<WlOutput*>& outputs() const;
-
-    std::unique_ptr<Seat> createSeat();
-    std::vector<Seat*>& seats() const;
-
     void add_socket_fd(int fd);
 
-    void add_output_device_v1(OutputDeviceV1* output);
-    void removeOutputDevice(OutputDeviceV1* outputDevice);
-    std::vector<OutputDeviceV1*> outputDevices() const;
-
-    std::unique_ptr<Compositor> createCompositor();
     void createShm();
-
-    std::unique_ptr<Subcompositor> createSubCompositor();
-
-    std::unique_ptr<data_control_manager_v1> create_data_control_manager_v1();
-    std::unique_ptr<data_device_manager> createDataDeviceManager();
-
-    std::unique_ptr<OutputManagementV1> createOutputManagementV1();
-    std::unique_ptr<plasma_activation_feedback> create_plasma_activation_feedback();
-    std::unique_ptr<PlasmaShell> createPlasmaShell();
-    std::unique_ptr<PlasmaWindowManager> createPlasmaWindowManager();
-    std::unique_ptr<primary_selection_device_manager> createPrimarySelectionDeviceManager();
-    std::unique_ptr<idle_notifier_v1> create_idle_notifier_v1();
-    std::unique_ptr<kde_idle> create_kde_idle();
-    std::unique_ptr<FakeInput> createFakeInput();
-    std::unique_ptr<LayerShellV1> createLayerShellV1();
-    std::unique_ptr<ShadowManager> createShadowManager();
-    std::unique_ptr<BlurManager> createBlurManager();
-    std::unique_ptr<SlideManager> createSlideManager();
-    std::unique_ptr<ContrastManager> createContrastManager();
-    std::unique_ptr<DpmsManager> createDpmsManager();
-    std::unique_ptr<drm_lease_device_v1> createDrmLeaseDeviceV1();
-
-    std::unique_ptr<KeyState> createKeyState();
-    std::unique_ptr<PresentationManager> createPresentationManager();
-
-    std::unique_ptr<text_input_manager_v2> createTextInputManagerV2();
-    std::unique_ptr<text_input_manager_v3> createTextInputManagerV3();
-    std::unique_ptr<input_method_manager_v2> createInputMethodManagerV2();
-
-    std::unique_ptr<XdgShell> createXdgShell();
-
-    std::unique_ptr<RelativePointerManagerV1> createRelativePointerManager();
-    std::unique_ptr<PointerGesturesV1> createPointerGestures();
-    std::unique_ptr<PointerConstraintsV1> createPointerConstraints();
-
-    std::unique_ptr<XdgForeign> createXdgForeign();
-
-    std::unique_ptr<IdleInhibitManagerV1> createIdleInhibitManager();
-    std::unique_ptr<KeyboardShortcutsInhibitManagerV1> createKeyboardShortcutsInhibitManager();
-    std::unique_ptr<AppmenuManager> createAppmenuManager();
-
-    std::unique_ptr<ServerSideDecorationPaletteManager> createServerSideDecorationPaletteManager();
-    std::unique_ptr<Viewporter> createViewporter();
-    std::unique_ptr<virtual_keyboard_manager_v1> create_virtual_keyboard_manager_v1();
-    XdgOutputManager* xdgOutputManager() const;
-
-    std::unique_ptr<PlasmaVirtualDesktopManager> createPlasmaVirtualDesktopManager();
-    std::unique_ptr<XdgActivationV1> createXdgActivationV1();
-    std::unique_ptr<XdgDecorationManager> createXdgDecorationManager(XdgShell* shell);
 
     void dispatch();
     void flush();
@@ -185,8 +120,72 @@ public:
     std::vector<Client*> clients() const;
 
     void setEglDisplay(void* display);
-
     void* eglDisplay() const;
+
+    struct {
+        /// Basic graphical operations
+        Server::Compositor* compositor{nullptr};
+        Server::Subcompositor* subcompositor{nullptr};
+        Server::linux_dmabuf_v1* linux_dmabuf_v1{nullptr};
+        Server::Viewporter* viewporter{nullptr};
+        Server::PresentationManager* presentation_manager{nullptr};
+
+        /// Additional graphical effects
+        Server::ShadowManager* shadow_manager{nullptr};
+        Server::BlurManager* blur_manager{nullptr};
+        Server::SlideManager* slide_manager{nullptr};
+        Server::ContrastManager* contrast_manager{nullptr};
+
+        /// Graphical output management
+        Server::XdgOutputManager* xdg_output_manager{nullptr};
+        Server::DpmsManager* dpms_manager{nullptr};
+        Server::wlr_output_manager_v1* wlr_output_manager_v1{nullptr};
+
+        /// Basic input
+        std::vector<Server::Seat*> seats;
+        Server::RelativePointerManagerV1* relative_pointer_manager_v1{nullptr};
+        Server::PointerGesturesV1* pointer_gestures_v1{nullptr};
+        Server::PointerConstraintsV1* pointer_constraints_v1{nullptr};
+
+        /// Input method support
+        Server::text_input_manager_v2* text_input_manager_v2{nullptr};
+        Server::text_input_manager_v3* text_input_manager_v3{nullptr};
+        Server::input_method_manager_v2* input_method_manager_v2{nullptr};
+
+        /// Global input state manipulation
+        Server::KeyState* key_state{nullptr};
+        Server::FakeInput* fake_input{nullptr};
+        Server::KeyboardShortcutsInhibitManagerV1* keyboard_shortcuts_inhibit_manager_v1{nullptr};
+        Server::virtual_keyboard_manager_v1* virtual_keyboard_manager_v1{nullptr};
+
+        /// Data sharing between clients
+        Server::data_device_manager* data_device_manager{nullptr};
+        Server::primary_selection_device_manager* primary_selection_device_manager{nullptr};
+        Server::data_control_manager_v1* data_control_manager_v1{nullptr};
+
+        /// Individual windowing control
+        Server::XdgShell* xdg_shell{nullptr};
+        Server::XdgForeign* xdg_foreign{nullptr};
+        Server::XdgActivationV1* xdg_activation_v1{nullptr};
+
+        /// Individual window styling and functionality
+        Server::AppmenuManager* appmenu_manager{nullptr};
+        Server::XdgDecorationManager* xdg_decoration_manager{nullptr};
+        Server::ServerSideDecorationPaletteManager* server_side_decoration_palette_manager{nullptr};
+
+        /// Global windowing control
+        Server::LayerShellV1* layer_shell_v1{nullptr};
+        Server::plasma_activation_feedback* plasma_activation_feedback{nullptr};
+        Server::PlasmaVirtualDesktopManager* plasma_virtual_desktop_manager{nullptr};
+        Server::PlasmaShell* plasma_shell{nullptr};
+        Server::PlasmaWindowManager* plasma_window_manager{nullptr};
+
+        /// Hardware take-over and blocking
+        Server::idle_notifier_v1* idle_notifier_v1{nullptr};
+        Server::kde_idle* kde_idle{nullptr};
+        Server::drm_lease_device_v1* drm_lease_device_v1{nullptr};
+        Server::IdleInhibitManagerV1* idle_inhibit_manager_v1{nullptr};
+    } globals;
 
 Q_SIGNALS:
     void started();

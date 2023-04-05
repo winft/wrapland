@@ -25,33 +25,10 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "display.h"
 #include "surface_p.h"
 
-#include "wayland/global.h"
-
-#include "wayland-xdg-foreign-unstable-v2-server-protocol.h"
-
 #include <QUuid>
 
 namespace Wrapland::Server
 {
-
-constexpr uint32_t XdgExporterV2Version = 1;
-using XdgExporterV2Global = Wayland::Global<XdgExporterV2, XdgExporterV2Version>;
-using XdgExporterV2Bind = Wayland::Bind<XdgExporterV2Global>;
-
-class Q_DECL_HIDDEN XdgExporterV2::Private
-    : public Wayland::Global<XdgExporterV2, XdgExporterV2Version>
-{
-public:
-    Private(XdgExporterV2* q_ptr, Display* display);
-
-    QHash<QString, XdgExportedV2*> exportedSurfaces;
-
-private:
-    static void
-    exportToplevelCallback(XdgExporterV2Bind* bind, uint32_t id, wl_resource* wlSurface);
-
-    static const struct zxdg_exporter_v2_interface s_interface;
-};
 
 XdgExporterV2::Private::Private(XdgExporterV2* q_ptr, Display* display)
     : Wayland::Global<XdgExporterV2, XdgExporterV2Version>(q_ptr,
@@ -66,7 +43,7 @@ const struct zxdg_exporter_v2_interface XdgExporterV2::Private::s_interface = {
     cb<exportToplevelCallback>,
 };
 
-XdgExportedV2* XdgExporterV2::exportedSurface(QString const& handle)
+XdgExportedV2* XdgExporterV2::exportedSurface(QString const& handle) const
 {
     auto it = d_ptr->exportedSurfaces.constFind(handle);
     if (it != d_ptr->exportedSurfaces.constEnd()) {
@@ -205,12 +182,12 @@ XdgImporterV2::~XdgImporterV2()
     delete d_ptr;
 }
 
-void XdgImporterV2::setExporter(XdgExporterV2* exporter)
+void XdgImporterV2::setExporter(XdgExporterV2* exporter) const
 {
     d_ptr->exporter = exporter;
 }
 
-Surface* XdgImporterV2::parentOf(Surface* surface)
+Surface* XdgImporterV2::parentOf(Surface* surface) const
 {
     if (!d_ptr->parents.contains(surface)) {
         return nullptr;

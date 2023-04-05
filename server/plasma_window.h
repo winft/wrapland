@@ -33,7 +33,7 @@ namespace Wrapland::Server
 {
 
 class Display;
-class Output;
+class output;
 class PlasmaWindow;
 class Surface;
 class PlasmaVirtualDesktopManager;
@@ -160,7 +160,7 @@ Q_SIGNALS:
     void leavePlasmaVirtualDesktopRequested(QString const& desktop);
 
     /// Client asked for this window to be displayed on @p output
-    void sendToOutputRequested(Wrapland::Server::Output* output);
+    void sendToOutputRequested(Wrapland::Server::output* output);
 
 private:
     friend class PlasmaWindowManager;

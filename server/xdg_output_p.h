@@ -39,6 +39,7 @@ namespace Wrapland::Server
 {
 
 class Display;
+class output;
 class XdgOutput;
 class XdgOutputV1;
 
@@ -51,7 +52,7 @@ class XdgOutputManager::Private : public XdgOutputManagerGlobal
 public:
     Private(Display* display, XdgOutputManager* q_ptr);
 
-    std::map<Output*, XdgOutput*> outputs;
+    std::map<output*, XdgOutput*> outputs;
 
 private:
     static void getXdgOutputCallback(XdgOutputManagerBind* bind, uint32_t id, wl_resource* output);
@@ -61,7 +62,7 @@ private:
 class XdgOutput::Private
 {
 public:
-    Private(Output* output, Display* display, XdgOutput* q_ptr);
+    Private(Server::output* output, Display* display, XdgOutput* q_ptr);
 
     bool broadcast();
     void done();
@@ -70,7 +71,7 @@ public:
     void resourceDisconnected(XdgOutputV1* resource);
 
 private:
-    Output* output;
+    Server::output* output;
     XdgOutputManager* manager;
     std::vector<XdgOutputV1*> resources;
     bool sent_once{false};

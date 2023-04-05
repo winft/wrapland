@@ -142,7 +142,7 @@ public:
     std::string description;
     int connector_id;
 
-    Output* output{nullptr};
+    Server::output* output{nullptr};
     drm_lease_device_v1* device;
     std::vector<drm_lease_connector_v1_res*> resources;
 

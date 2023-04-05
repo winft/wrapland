@@ -44,7 +44,6 @@ class AppmenuManager::Private : public AppmenuManagerGlobal
 {
 public:
     Private(Display* display, AppmenuManager* qpt);
-    ~Private() override;
 
     std::vector<Appmenu*> appmenus;
 

@@ -19,127 +19,124 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
-#include <QObject>
-#include <QSize>
-
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <QObject>
+#include <QRectF>
+#include <QSize>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace Wrapland::Server
 {
-class Display;
-class OutputDeviceV1;
+
+class output_manager;
 class WlOutput;
 class XdgOutput;
+
+enum class output_dpms_mode {
+    on,
+    standby,
+    suspend,
+    off,
+};
+
+enum class output_subpixel {
+    unknown,
+    none,
+    horizontal_rgb,
+    horizontal_bgr,
+    vertical_rgb,
+    vertical_bgr,
+};
+
+enum class output_transform {
+    normal,
+    rotated_90,
+    rotated_180,
+    rotated_270,
+    flipped,
+    flipped_90,
+    flipped_180,
+    flipped_270,
+};
+
+struct output_mode {
+    bool operator==(output_mode const& mode) const;
+    bool operator!=(output_mode const& mode) const;
+    QSize size;
+    static constexpr int defaultRefreshRate = 60000;
+    int refresh_rate{defaultRefreshRate};
+    bool preferred{false};
+    int id{-1};
+};
+
+struct output_metadata {
+    std::string name{"Unknown"};
+    std::string description;
+    std::string make;
+    std::string model;
+    std::string serial_number;
+    QSize physical_size;
+};
+
+struct output_state {
+    bool enabled{false};
+
+    output_mode mode;
+    output_subpixel subpixel{output_subpixel::unknown};
+
+    output_transform transform{output_transform::normal};
+    QRectF geometry;
+
+    // Automatically calculated on setter call.
+    int client_scale = 1;
+    bool adaptive_sync{false};
+};
+
+/**
+ * Produces a description from available data. The pattern will be:
+ * - if make or model available: "<make> <model> (<name>)"
+ * - otherwise: "<name>"
+ */
+WRAPLANDSERVER_EXPORT std::string output_generate_description(output_metadata const& data);
 
 /**
  * Central class for outputs in Wrapland. Manages and forwards all required information to and from
  * other output related classes such that compositors only need to interact with the Output class
  * under normal circumstances.
  */
-class WRAPLANDSERVER_EXPORT Output : public QObject
+class WRAPLANDSERVER_EXPORT output : public QObject
 {
     Q_OBJECT
 public:
-    enum class DpmsMode {
-        On,
-        Standby,
-        Suspend,
-        Off,
-    };
-    Q_ENUM(DpmsMode)
+    explicit output(output_manager& manager);
+    output(output_metadata metadata, output_manager& manager);
+    ~output() override;
 
-    enum class Subpixel {
-        Unknown,
-        None,
-        HorizontalRGB,
-        HorizontalBGR,
-        VerticalRGB,
-        VerticalBGR,
-    };
-    Q_ENUM(Subpixel)
-
-    enum class Transform {
-        Normal,
-        Rotated90,
-        Rotated180,
-        Rotated270,
-        Flipped,
-        Flipped90,
-        Flipped180,
-        Flipped270,
-    };
-    Q_ENUM(Transform)
-
-    struct Mode {
-        bool operator==(Mode const& mode) const;
-        bool operator!=(Mode const& mode) const;
-        QSize size;
-        static constexpr int defaultRefreshRate = 60000;
-        int refresh_rate{defaultRefreshRate};
-        bool preferred{false};
-        int id{-1};
-    };
-
-    explicit Output(Display* display);
-    ~Output() override;
-
-    std::string name() const;
-    std::string description() const;
-    std::string make() const;
-    std::string model() const;
-    std::string serial_mumber() const;
-    QSize physical_size() const;
-    int connector_id() const;
-
-    void set_name(std::string const& name);
-    void set_description(std::string const& description);
-    void set_make(std::string const& make);
-    void set_model(std::string const& model);
-    void set_serial_number(std::string const& serial_number);
-    void set_physical_size(QSize const& size);
-    void set_connector_id(int id);
+    output_metadata const& get_metadata() const;
 
     /**
-     * Produces a description from available data. The pattern will be:
-     * - if make or model available: "<make> <model> (<name>)"
-     * - otherwise: "<name>"
+     * Override of metadata. Prefer setting metadata through the ctor. Not all metadata may be
+     * updated on all protocol objects.
      */
-    void generate_description();
+    void set_metadata(output_metadata const& data);
 
-    bool enabled() const;
-    void set_enabled(bool enabled);
+    std::vector<output_mode> modes() const;
+    void add_mode(output_mode const& mode);
 
-    std::vector<Mode> modes() const;
-    int mode_id() const;
-    QSize mode_size() const;
-    int refresh_rate() const;
+    output_state const& get_state() const;
+    void set_state(output_state const& data);
 
-    void add_mode(Mode const& mode);
-
-    bool set_mode(int id);
-    bool set_mode(Mode const& mode);
-    bool set_mode(QSize const& size, int refresh_rate);
-
-    Transform transform() const;
-    QRectF geometry() const;
-
-    void set_transform(Transform transform);
-    void set_geometry(QRectF const& geometry);
-
-    int client_scale() const;
-
-    Subpixel subpixel() const;
-    void set_subpixel(Subpixel subpixel);
+    int connector_id() const;
+    void set_connector_id(int id);
 
     bool dpms_supported() const;
     void set_dpms_supported(bool supported);
 
-    DpmsMode dpms_mode() const;
-    void set_dpms_mode(DpmsMode mode);
+    output_dpms_mode dpms_mode() const;
+    void set_dpms_mode(output_dpms_mode mode);
 
     /**
      * Sends all pending changes out to connected clients. Must only be called when all atomic
@@ -147,18 +144,18 @@ public:
      */
     void done();
 
-    OutputDeviceV1* output_device_v1() const;
     WlOutput* wayland_output() const;
     XdgOutput* xdg_output() const;
 
 Q_SIGNALS:
     void dpms_mode_changed();
     void dpms_supported_changed();
-    void dpms_mode_requested(Wrapland::Server::Output::DpmsMode mode);
+    void dpms_mode_requested(Wrapland::Server::output_dpms_mode mode);
 
 private:
-    friend class OutputDeviceV1;
     friend class WlOutput;
+    friend class wlr_output_configuration_head_v1;
+    friend class wlr_output_head_v1;
     friend class XdgOutput;
 
     class Private;
@@ -167,6 +164,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(Wrapland::Server::Output::Subpixel)
-Q_DECLARE_METATYPE(Wrapland::Server::Output::Transform)
-Q_DECLARE_METATYPE(Wrapland::Server::Output::DpmsMode)
+Q_DECLARE_METATYPE(Wrapland::Server::output_subpixel)
+Q_DECLARE_METATYPE(Wrapland::Server::output_transform)
+Q_DECLARE_METATYPE(Wrapland::Server::output_dpms_mode)
