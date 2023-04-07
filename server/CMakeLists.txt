@@ -444,13 +444,3 @@ install(
   DESTINATION ${INCLUDE_INSTALL_DIR}/Wrapland/Server
   COMPONENT Devel
 )
-
-# make available to ecm_add_qch in parent folder
-set(WraplandServer_APIDOX_SRCS
-  ${SERVER_LIB_HEADERS}
-  PARENT_SCOPE
-)
-set(WraplandServer_APIDOX_BUILD_INCLUDE_DIRS
-  ${CMAKE_CURRENT_BINARY_DIR}
-  PARENT_SCOPE
-)
