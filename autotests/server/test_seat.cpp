@@ -25,8 +25,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "../../server/pointer_pool.h"
 #include "../../server/seat.h"
 
-using namespace Wrapland::Server;
-
 class TestWaylandServerSeat : public QObject
 {
     Q_OBJECT
@@ -44,7 +42,7 @@ constexpr auto socket_name{"kwin-wayland-server-seat-test-0"};
 
 void TestWaylandServerSeat::testCapabilities()
 {
-    Display display;
+    Wrapland::Server::Display display;
     display.set_socket_name(socket_name);
     display.start();
 
@@ -71,7 +69,7 @@ void TestWaylandServerSeat::testCapabilities()
 
 void TestWaylandServerSeat::testName()
 {
-    Display display;
+    Wrapland::Server::Display display;
     display.set_socket_name(socket_name);
     display.start();
 
@@ -85,7 +83,7 @@ void TestWaylandServerSeat::testName()
 
 void TestWaylandServerSeat::testPointerButton()
 {
-    Display display;
+    Wrapland::Server::Display display;
     display.set_socket_name(socket_name);
     display.start();
 
@@ -117,7 +115,7 @@ void TestWaylandServerSeat::testPointerButton()
 
 void TestWaylandServerSeat::testPointerPos()
 {
-    Display display;
+    Wrapland::Server::Display display;
     display.set_socket_name(socket_name);
     display.start();
 
@@ -146,7 +144,7 @@ void TestWaylandServerSeat::testPointerPos()
 
 void TestWaylandServerSeat::testDestroyThroughTerminate()
 {
-    Display display;
+    Wrapland::Server::Display display;
     display.set_socket_name(socket_name);
     display.start();
 
@@ -161,7 +159,7 @@ void TestWaylandServerSeat::testDestroyThroughTerminate()
 
 void TestWaylandServerSeat::testRepeatInfo()
 {
-    Display display;
+    Wrapland::Server::Display display;
     display.set_socket_name(socket_name);
     display.start();
 
@@ -183,7 +181,7 @@ void TestWaylandServerSeat::testRepeatInfo()
 
 void TestWaylandServerSeat::testMultiple()
 {
-    Display display;
+    Wrapland::Server::Display display;
     display.set_socket_name(socket_name);
     display.start();
     QVERIFY(display.globals.seats.empty());

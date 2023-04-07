@@ -254,7 +254,6 @@ void CompositorWindow::wheelEvent(QWheelEvent* event)
 
 int main(int argc, char** argv)
 {
-    using namespace Wrapland::Server;
     QApplication app(argc, argv);
 
     QCommandLineParser parser;
@@ -264,7 +263,7 @@ int main(int argc, char** argv)
     parser.addOption(xwaylandOption);
     parser.process(app);
 
-    Display display;
+    Wrapland::Server::Display display;
     display.start();
 
     auto output_manager = Wrapland::Server::output_manager(display);
@@ -276,7 +275,7 @@ int main(int argc, char** argv)
     Wrapland::Server::output_metadata meta{.physical_size = {269, 202}};
     auto output = std::make_unique<Wrapland::Server::output>(meta, output_manager);
     const QSize windowSize(1024, 768);
-    output->add_mode(output_mode{windowSize});
+    output->add_mode(Wrapland::Server::output_mode{windowSize});
 
     auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     seat->setHasKeyboard(true);
@@ -290,7 +289,7 @@ int main(int argc, char** argv)
     compositorWindow.setGeometry(QRect(QPoint(0, 0), windowSize));
     compositorWindow.show();
     QObject::connect(shell.get(),
-                     &XdgShell::toplevelCreated,
+                     &Wrapland::Server::XdgShell::toplevelCreated,
                      &compositorWindow,
                      &CompositorWindow::surfaceCreated);
 

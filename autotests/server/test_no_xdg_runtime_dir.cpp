@@ -21,8 +21,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "../../server/display.h"
 
-using namespace Wrapland::Server;
-
 class NoXdgRuntimeDirTest : public QObject
 {
     Q_OBJECT
@@ -42,7 +40,7 @@ void NoXdgRuntimeDirTest::testCreate()
 {
     // this test verifies that not having an XDG_RUNTIME_DIR is handled gracefully
     // the server cannot start, but should not crash
-    Display display;
+    Wrapland::Server::Display display;
 
     display.set_socket_name(socket_name);
     QVERIFY(!display.running());
