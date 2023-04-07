@@ -5,7 +5,7 @@ stages:
   - Deploy
 
 variables:
-  IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base:latest
+  IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base-qt6:latest
 
 workflow:
   rules:

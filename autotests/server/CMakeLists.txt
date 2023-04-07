@@ -4,8 +4,8 @@
 set(testServerDisplay_SRCS display.cpp)
 add_executable(testServerDisplay ${testServerDisplay_SRCS})
 target_link_libraries(testServerDisplay
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Server
   Wayland::Server
 )
@@ -18,8 +18,8 @@ ecm_mark_as_test(testServerDisplay)
 set(testWaylandServerSeat_SRCS test_seat.cpp)
 add_executable(testWaylandServerSeat ${testWaylandServerSeat_SRCS})
 target_link_libraries(testWaylandServerSeat
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Server
   Wayland::Server
 )
@@ -31,7 +31,7 @@ ecm_mark_as_test(testWaylandServerSeat)
 # ##################################################################################################
 add_executable(testNoXdgRuntimeDir test_no_xdg_runtime_dir.cpp)
 target_link_libraries(testNoXdgRuntimeDir
-  Qt5::Test
+  Qt6::Test
   Wrapland::Server
 )
 add_test(NAME wrapland-testNoXdgRuntimeDir COMMAND testNoXdgRuntimeDir)

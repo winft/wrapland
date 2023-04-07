@@ -65,14 +65,14 @@ public:
     QMetaObject::Connection eventDispatcherConnection;
 
     static QVector<ConnectionThread*> connections;
-    static QMutex mutex;
+    static QRecursiveMutex mutex;
 
 private:
     ConnectionThread* q;
 };
 
 QVector<ConnectionThread*> ConnectionThread::Private::connections = QVector<ConnectionThread*>{};
-QMutex ConnectionThread::Private::mutex{QMutex::Recursive};
+QRecursiveMutex ConnectionThread::Private::mutex;
 
 ConnectionThread::Private::Private(ConnectionThread* q)
     : socketName(QString::fromUtf8(qgetenv("WAYLAND_DISPLAY")))

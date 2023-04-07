@@ -4,8 +4,8 @@
 set(test_drm_lease_v1_SRCS drm_lease_v1.cpp)
 add_executable(test_drm_lease_v1 ${test_drm_lease_v1_SRCS})
 target_link_libraries(test_drm_lease_v1
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -18,8 +18,8 @@ ecm_mark_as_test(test_drm_lease_v1)
 set(testViewporter_SRCS viewporter.cpp)
 add_executable(testViewporter ${testViewporter_SRCS})
 target_link_libraries(testViewporter
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -34,8 +34,8 @@ ecm_mark_as_test(testViewporter)
 set(testConnectionThread_SRCS connection_thread.cpp)
 add_executable(testConnectionThread ${testConnectionThread_SRCS})
 target_link_libraries(testConnectionThread
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -50,8 +50,8 @@ ecm_mark_as_test(testConnectionThread)
 set(testRegistry_SRCS registry.cpp)
 add_executable(testRegistry ${testRegistry_SRCS})
 target_link_libraries(testRegistry
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -69,7 +69,7 @@ if(Wayland_VERSION VERSION_GREATER "1.4.0")
     set(testFullscreenShell_SRCS fullscreen_shell.cpp)
     add_executable(testFullscreenShell ${testFullscreenShell_SRCS})
     target_link_libraries(testFullscreenShell
-      Qt5::Test
+      Qt6::Test
       Wrapland::Client
       Wayland::Client
     )
@@ -86,8 +86,8 @@ endif()
 set(test_layer_shell_SRCS layer_shell.cpp)
 add_executable(testLayerShell ${test_layer_shell_SRCS})
 target_link_libraries(testLayerShell
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -101,8 +101,8 @@ ecm_mark_as_test(testLayerShell)
 set(testOutput_SRCS output.cpp)
 add_executable(testOutput ${testOutput_SRCS})
 target_link_libraries(testOutput
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -117,8 +117,8 @@ ecm_mark_as_test(testOutput)
 set(testSurface_SRCS surface.cpp)
 add_executable(testSurface ${testSurface_SRCS})
 target_link_libraries(testSurface
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -134,8 +134,8 @@ if(HAVE_LINUX_INPUT_H)
   set(testSeat_SRCS seat.cpp)
   add_executable(testSeat ${testSeat_SRCS})
   target_link_libraries(testSeat
-    Qt5::Test
-    Qt5::Gui
+    Qt6::Test
+    Qt6::Gui
     Wrapland::Client
     Wrapland::Server
     Wayland::Client
@@ -151,8 +151,8 @@ endif()
 set(testShmPool_SRCS shm_pool.cpp)
 add_executable(testShmPool ${testShmPool_SRCS})
 target_link_libraries(testShmPool
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -165,8 +165,8 @@ ecm_mark_as_test(testShmPool)
 set(testWlrOutputManagement_SRCS wlr_output_management.cpp)
 add_executable(testWlrOutputManagement ${testWlrOutputManagement_SRCS})
 target_link_libraries(testWlrOutputManagement
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -180,8 +180,8 @@ ecm_mark_as_test(testWlrOutputManagement)
 set(testCompositor_SRCS compositor.cpp)
 add_executable(testCompositor ${testCompositor_SRCS})
 target_link_libraries(testCompositor
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -194,8 +194,8 @@ ecm_mark_as_test(testCompositor)
 set(testSubcompositor_SRCS subcompositor.cpp)
 add_executable(testSubcompositor ${testSubcompositor_SRCS})
 target_link_libraries(testSubcompositor
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -208,8 +208,8 @@ ecm_mark_as_test(testSubcompositor)
 set(testSubsurface_SRCS subsurface.cpp)
 add_executable(testSubsurface ${testSubsurface_SRCS})
 target_link_libraries(testSubsurface
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -223,8 +223,8 @@ ecm_mark_as_test(testSubsurface)
 set(testRegion_SRCS region.cpp)
 add_executable(testRegion ${testRegion_SRCS})
 target_link_libraries(testRegion
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -237,8 +237,8 @@ ecm_mark_as_test(testRegion)
 set(testBlur_SRCS blur.cpp)
 add_executable(testBlur ${testBlur_SRCS})
 target_link_libraries(testBlur
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -252,8 +252,8 @@ ecm_mark_as_test(testBlur)
 set(testLinuxDmabuf_SRCS linux_dmabuf.cpp)
 add_executable(testLinuxDmabuf ${testLinuxDmabuf_SRCS})
 target_link_libraries(testLinuxDmabuf
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -267,8 +267,8 @@ ecm_mark_as_test(testLinuxDmabuf)
 set(testContrast_SRCS contrast.cpp)
 add_executable(testContrast ${testContrast_SRCS})
 target_link_libraries(testContrast
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -282,8 +282,8 @@ ecm_mark_as_test(testContrast)
 set(testSlide_SRCS slide.cpp)
 add_executable(testSlide ${testSlide_SRCS})
 target_link_libraries(testSlide
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -297,8 +297,8 @@ ecm_mark_as_test(testSlide)
 set(testPlasmaWindowManagement_SRCS plasma_window_management.cpp)
 add_executable(testPlasmaWindowManagement ${testPlasmaWindowManagement_SRCS})
 target_link_libraries(testPlasmaWindowManagement
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -312,8 +312,8 @@ ecm_mark_as_test(testPlasmaWindowManagement)
 set(testDataSource_SRCS data_source.cpp)
 add_executable(testDataSource ${testDataSource_SRCS})
 target_link_libraries(testDataSource
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -327,8 +327,8 @@ ecm_mark_as_test(testDataSource)
 set(testDataDevice_SRCS data_device.cpp)
 add_executable(testDataDevice ${testDataDevice_SRCS})
 target_link_libraries(testDataDevice
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -342,8 +342,8 @@ ecm_mark_as_test(testDataDevice)
 set(test_data_control_SRCS data_control.cpp)
 add_executable(test-data-control ${test_data_control_SRCS})
 target_link_libraries(test-data-control
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -357,8 +357,8 @@ ecm_mark_as_test(test-data-control)
 set(testDragAndDrop_SRCS drag_and_drop.cpp)
 add_executable(testDragAndDrop ${testDragAndDrop_SRCS})
 target_link_libraries(testDragAndDrop
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -372,8 +372,8 @@ ecm_mark_as_test(testDragAndDrop)
 set(test_external_sources_SRCS external_sources.cpp)
 add_executable(test-external-sources ${test_external_sources_SRCS})
 target_link_libraries(test-external-sources
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -387,8 +387,8 @@ ecm_mark_as_test(test-external-sources)
 set(testPrimarySelection_SRCS primary_selection.cpp)
 add_executable(testPrimarySelection ${testPrimarySelection_SRCS})
 target_link_libraries(testPrimarySelection
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -402,8 +402,8 @@ ecm_mark_as_test(testPrimarySelection)
 set(test_input_method_v2_SRCS input_method_v2.cpp)
 add_executable(test_input_method_v2 ${test_input_method_v2_SRCS})
 target_link_libraries(test_input_method_v2
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -416,8 +416,8 @@ ecm_mark_as_test(test_input_method_v2)
 set(plasma_activation_feedback_test_SRCS plasma_activation_feedback.cpp)
 add_executable(plasma-activation-feedback-test ${plasma_activation_feedback_test_SRCS})
 target_link_libraries(plasma-activation-feedback-test
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -431,8 +431,8 @@ ecm_mark_as_test(plasma-activation-feedback-test)
 set(testPlasmaShell_SRCS plasma_shell.cpp)
 add_executable(testPlasmaShell ${testPlasmaShell_SRCS})
 target_link_libraries(testPlasmaShell
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -446,8 +446,8 @@ ecm_mark_as_test(testPlasmaShell)
 set(idle_notify_test_SRCS idle_notify.cpp)
 add_executable(idle-notify-test ${idle_notify_test_SRCS})
 target_link_libraries(idle-notify-test
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -460,8 +460,8 @@ ecm_mark_as_test(idle-notify-test)
 set(testKdeIdle_SRCS kde_idle.cpp)
 add_executable(testKdeIdle ${testKdeIdle_SRCS})
 target_link_libraries(testKdeIdle
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -474,10 +474,11 @@ ecm_mark_as_test(testKdeIdle)
 set(testKeyboardShortcutsInhibitor_SRCS keyboard_shortcuts_inhibitor.cpp)
 add_executable(testKeyboardShortcutsInhibitor ${testKeyboardShortcutsInhibitor_SRCS})
 target_link_libraries(testKeyboardShortcutsInhibitor
-  Qt5::Test
-  Qt5::Gui Wrapland::Client
-  Wrapland::Server
+  Qt6::Test
+  Qt6::Gui
   Wayland::Client
+  Wrapland::Client
+  Wrapland::Server
 )
 add_test(NAME wrapland-testKeyboardShortcutsInhibitor COMMAND testKeyboardShortcutsInhibitor)
 ecm_mark_as_test(testKeyboardShortcutsInhibitor)
@@ -488,8 +489,8 @@ ecm_mark_as_test(testKeyboardShortcutsInhibitor)
 set(testShadow_SRCS shadow.cpp)
 add_executable(testShadow ${testShadow_SRCS})
 target_link_libraries(testShadow
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -503,8 +504,8 @@ if(HAVE_LINUX_INPUT_H)
   set(testFakeInput_SRCS fake_input.cpp)
   add_executable(testFakeInput ${testFakeInput_SRCS})
   target_link_libraries(testFakeInput
-    Qt5::Test
-    Qt5::Gui
+    Qt6::Test
+    Qt6::Gui
     Wrapland::Client
     Wrapland::Server
   )
@@ -519,8 +520,8 @@ if(HAVE_LINUX_INPUT_H)
   set(testPlasmaWindowModel_SRCS plasma_window_model.cpp)
   add_executable(testPlasmaWindowModel ${testPlasmaWindowModel_SRCS})
   target_link_libraries(testPlasmaWindowModel
-    Qt5::Test
-    Qt5::Gui
+    Qt6::Test
+    Qt6::Gui
     Wrapland::Client
     Wrapland::Server
   )
@@ -534,8 +535,8 @@ endif()
 set(test_pointer_gestures_v1_SRCS pointer_gestures_v1.cpp)
 add_executable(test-pointer-gestures-v1 ${test_pointer_gestures_v1_SRCS})
 target_link_libraries(test-pointer-gestures-v1
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -548,8 +549,8 @@ ecm_mark_as_test(test-pointer-gestures-v1)
 set(test_text_input_v2_SRCS text_input_v2.cpp)
 add_executable(test-text-input-v2 ${test_text_input_v2_SRCS})
 target_link_libraries(test-text-input-v2
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -562,8 +563,8 @@ ecm_mark_as_test(test-text-input-v2)
 set(test_text_input_v3_SRCS text_input_v3.cpp)
 add_executable(test-text-input-v3 ${test_text_input_v3_SRCS})
 target_link_libraries(test-text-input-v3
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -576,8 +577,8 @@ ecm_mark_as_test(test-text-input-v3)
 set(test_text_input_method_sync_SRCS text_input_method_sync.cpp)
 add_executable(test-text-input-method-sync ${test_text_input_method_sync_SRCS})
 target_link_libraries(test-text-input-method-sync
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -590,8 +591,8 @@ ecm_mark_as_test(test-text-input-method-sync)
 set(test_text_input_method_version_compat_SRCS text_input_method_version_compat.cpp)
 add_executable(test-text-input-method-version-compat ${test_text_input_method_version_compat_SRCS})
 target_link_libraries(test-text-input-method-version-compat
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -605,8 +606,8 @@ ecm_mark_as_test(test-text-input-method-version-compat)
 set(testError_SRCS error.cpp)
 add_executable(testError ${testError_SRCS})
 target_link_libraries(testError
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -620,8 +621,8 @@ ecm_mark_as_test(testError)
 set(testSelection_SRCS selection.cpp)
 add_executable(testSelection ${testSelection_SRCS})
 target_link_libraries(testSelection
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -635,8 +636,8 @@ ecm_mark_as_test(testSelection)
 set(test_virtual_keyboard_v1_SRCS virtual_keyboard_v1.cpp)
 add_executable(test-virtual-keyboard-v1 ${test_virtual_keyboard_v1_SRCS})
 target_link_libraries(test-virtual-keyboard-v1
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -650,8 +651,8 @@ ecm_mark_as_test(test-virtual-keyboard-v1)
 set(testXdgForeign_SRCS xdg_foreign.cpp)
 add_executable(testXdgForeign ${testXdgForeign_SRCS})
 target_link_libraries(testXdgForeign
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Server
   Wrapland::Client
   Wayland::Client
@@ -665,8 +666,8 @@ ecm_mark_as_test(testXdgForeign)
 set(testXdgShell_SRCS xdg_shell.cpp)
 add_executable(testXdgShell ${testXdgShell_SRCS})
 target_link_libraries(testXdgShell
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Server
   Wrapland::Client
   Wayland::Client
@@ -679,8 +680,8 @@ ecm_mark_as_test(testXdgShell)
 # ##################################################################################################
 add_executable(testPointerConstraints pointer_constraints.cpp)
 target_link_libraries(testPointerConstraints
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Server
   Wrapland::Client
   Wayland::Client
@@ -694,8 +695,8 @@ ecm_mark_as_test(testPointerConstraints)
 set(testFilter_SRCS filter.cpp)
 add_executable(testFilter ${testFilter_SRCS})
 target_link_libraries(testFilter
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Server
@@ -709,8 +710,8 @@ ecm_mark_as_test(testFilter)
 set(testAppmenu_SRCS appmenu.cpp)
 add_executable(testAppmenu ${testAppmenu_SRCS})
 target_link_libraries(testAppmenu
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -723,8 +724,8 @@ ecm_mark_as_test(testAppmenu)
 set(testServerSideDecorationPalette_SRCS server_side_decoration_palette.cpp)
 add_executable(testServerSideDecorationPalette ${testServerSideDecorationPalette_SRCS})
 target_link_libraries(testServerSideDecorationPalette
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -737,7 +738,7 @@ ecm_mark_as_test(testServerSideDecorationPalette)
 set(testPresentationTime_SRCS presentation_time.cpp)
 add_executable(testPresentationTime ${testPresentationTime_SRCS})
 target_link_libraries(testPresentationTime
-  Qt5::Test
+  Qt6::Test
   Wrapland::Client
   Wrapland::Server
 )
@@ -750,8 +751,8 @@ ecm_mark_as_test(testPresentationTime)
 set(testPlasmaVirtualDesktop_SRCS plasma_virtual_desktop.cpp)
 add_executable(testPlasmaVirtualDesktop ${testPlasmaVirtualDesktop_SRCS})
 target_link_libraries(testPlasmaVirtualDesktop
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
 )
@@ -764,8 +765,8 @@ ecm_mark_as_test(testPlasmaVirtualDesktop)
 set(testXdgActivation_SRCS xdg_activation.cpp)
 add_executable(testXdgActivation ${testXdgActivation_SRCS})
 target_link_libraries(testXdgActivation
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -780,8 +781,8 @@ ecm_mark_as_test(testXdgActivation)
 set(testXdgOutput_SRCS xdg_output.cpp)
 add_executable(testXdgOutput ${testXdgOutput_SRCS})
 target_link_libraries(testXdgOutput
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client
@@ -796,8 +797,8 @@ ecm_mark_as_test(testXdgOutput)
 set(testXdgdecoration_SRCS xdg_decoration.cpp)
 add_executable(testXdgDecoration ${testXdgdecoration_SRCS})
 target_link_libraries(testXdgDecoration
-  Qt5::Test
-  Qt5::Gui
+  Qt6::Test
+  Qt6::Gui
   Wrapland::Client
   Wrapland::Server
   Wayland::Client

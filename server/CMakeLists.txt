@@ -342,16 +342,16 @@ ecm_generate_export_header(WraplandServer
 )
 
 target_include_directories(WraplandServer
-  INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/Wrapland/Server>"
+  INTERFACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 target_link_libraries(WraplandServer
   PUBLIC
-    Qt5::Gui
+    Qt6::Gui
   PRIVATE
     Wayland::Server
     EGL::EGL
-    Qt5::Concurrent
+    Qt6::Concurrent
     external::external
 )
 
@@ -441,6 +441,6 @@ set(SERVER_LIB_HEADERS
 
 install(
   FILES ${SERVER_LIB_HEADERS}
-  DESTINATION ${INCLUDE_INSTALL_DIR}/Wrapland/Server
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Wrapland/Server
   COMPONENT Devel
 )

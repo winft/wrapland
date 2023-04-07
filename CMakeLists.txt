@@ -33,9 +33,10 @@ ecm_setup_version(PROJECT
 )
 
 # Dependencies
-set(REQUIRED_QT_VERSION 5.15.0)
+set(REQUIRED_QT_VERSION 6.4.0)
 set(KDE_COMPILERSETTINGS_LEVEL "5.84")
-find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Concurrent Gui)
+
+find_package(Qt6 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Concurrent Gui)
 
 find_package(Wayland 1.18 COMPONENTS Client Server)
 set_package_properties(Wayland PROPERTIES TYPE REQUIRED)
@@ -82,7 +83,7 @@ if(BUILD_TESTING)
 endif()
 
 # create a Config.cmake and a ConfigVersion.cmake file and install them
-set(CMAKECONFIG_INSTALL_DIR "${CMAKECONFIG_INSTALL_PREFIX}/Wrapland")
+set(CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/Wrapland")
 
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/WraplandConfig.cmake.in"
@@ -104,7 +105,7 @@ install(
 
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/wrapland_version.h
-  DESTINATION ${INCLUDE_INSTALL_DIR}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT Devel
 )
 

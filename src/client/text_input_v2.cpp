@@ -389,8 +389,8 @@ void TextInputV2::Private::setSurroundingText(QString const& text, quint32 curso
 {
     zwp_text_input_v2_set_surrounding_text(text_input_ptr,
                                            text.toUtf8().constData(),
-                                           text.leftRef(cursor).toUtf8().length(),
-                                           text.leftRef(anchor).toUtf8().length());
+                                           text.left(cursor).toUtf8().length(),
+                                           text.left(anchor).toUtf8().length());
 }
 
 void TextInputV2::Private::reset()
