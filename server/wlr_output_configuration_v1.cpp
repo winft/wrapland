@@ -14,16 +14,33 @@
 namespace Wrapland::Server
 {
 
+wlr_output_configuration_v1::Private::Private(Client* client,
+                                              uint32_t version,
+                                              uint32_t id,
+                                              wlr_output_manager_v1& manager,
+                                              wlr_output_configuration_v1& q_ptr)
+    : manager{&manager}
+    , res{new wlr_output_configuration_v1_res(client, version, id, q_ptr)}
+{
+}
+
 wlr_output_configuration_v1::wlr_output_configuration_v1(Client* client,
                                                          uint32_t version,
                                                          uint32_t id,
                                                          wlr_output_manager_v1& manager)
-    : d_ptr{std::make_unique<Private>()}
+    : d_ptr{std::make_unique<Private>(client, version, id, manager, *this)}
 {
-    d_ptr->res = new wlr_output_configuration_v1_res(client, version, id, manager, *this);
 }
 
-wlr_output_configuration_v1::~wlr_output_configuration_v1() = default;
+wlr_output_configuration_v1::~wlr_output_configuration_v1()
+{
+    if (d_ptr->manager) {
+        remove_all(d_ptr->manager->d_ptr->configurations, this);
+    }
+    if (d_ptr->res) {
+        d_ptr->res->d_ptr->front = nullptr;
+    }
+}
 
 std::vector<wlr_output_configuration_head_v1*> wlr_output_configuration_v1::enabled_heads() const
 {
@@ -33,32 +50,30 @@ std::vector<wlr_output_configuration_head_v1*> wlr_output_configuration_v1::enab
 
 void wlr_output_configuration_v1::send_succeeded()
 {
-    if (!d_ptr->res) {
-        delete this;
-        return;
+    if (d_ptr->res) {
+        d_ptr->res->send_succeeded();
     }
-    d_ptr->res->send_succeeded();
+    delete this;
 }
 
 void wlr_output_configuration_v1::send_failed()
 {
-    if (!d_ptr->res) {
-        delete this;
-        return;
+    if (d_ptr->res) {
+        d_ptr->res->send_failed();
     }
-    d_ptr->res->send_failed();
+    delete this;
 }
 
 void wlr_output_configuration_v1::send_cancelled()
 {
     assert(d_ptr->res);
+    remove_all(d_ptr->manager->d_ptr->configurations, this);
     d_ptr->res->send_cancelled();
 }
 
 wlr_output_configuration_v1_res::Private::Private(Client* client,
                                                   uint32_t version,
                                                   uint32_t id,
-                                                  wlr_output_manager_v1& manager,
                                                   wlr_output_configuration_v1& front,
                                                   wlr_output_configuration_v1_res& q_ptr)
     : Wayland::Resource<wlr_output_configuration_v1_res>(client,
@@ -67,20 +82,18 @@ wlr_output_configuration_v1_res::Private::Private(Client* client,
                                                          &zwlr_output_configuration_v1_interface,
                                                          &s_interface,
                                                          &q_ptr)
-    , manager{&manager}
     , front{&front}
 {
 }
 
 wlr_output_configuration_v1_res::Private::~Private()
 {
-    assert(front);
-    remove_all(manager->d_ptr->configurations, front);
-
-    if (is_used) {
-        front->d_ptr->res = nullptr;
-    } else {
-        delete front;
+    if (front) {
+        if (is_used) {
+            front->d_ptr->res = nullptr;
+        } else {
+            delete front;
+        }
     }
 }
 
@@ -105,7 +118,7 @@ bool wlr_output_configuration_v1_res::Private::check_head_enablement(wlr_output_
 
 bool wlr_output_configuration_v1_res::Private::check_all_heads_configured()
 {
-    for (auto head : manager->d_ptr->heads) {
+    for (auto head : front->d_ptr->manager->d_ptr->heads) {
         if (std::find_if(enabled_heads.begin(),
                          enabled_heads.end(),
                          [head](auto enabled) { return enabled->d_ptr->head->d_ptr->head == head; })
@@ -178,8 +191,12 @@ void wlr_output_configuration_v1_res::Private::apply_callback(wl_client* /*wlCli
     }
 
     priv->is_used = true;
-    remove_all(priv->manager->d_ptr->configurations, priv->front);
-    Q_EMIT priv->manager->apply_config(priv->front);
+
+    assert(priv->front);
+    assert(priv->front->d_ptr->manager);
+    remove_all(priv->front->d_ptr->manager->d_ptr->configurations, priv->front);
+
+    Q_EMIT priv->front->d_ptr->manager->apply_config(priv->front);
 }
 
 void wlr_output_configuration_v1_res::Private::test_callback(wl_client* /*wlClient*/,
@@ -194,8 +211,12 @@ void wlr_output_configuration_v1_res::Private::test_callback(wl_client* /*wlClie
     }
 
     priv->is_used = true;
-    remove_all(priv->manager->d_ptr->configurations, priv->front);
-    Q_EMIT priv->manager->test_config(priv->front);
+
+    assert(priv->front);
+    assert(priv->front->d_ptr->manager);
+    remove_all(priv->front->d_ptr->manager->d_ptr->configurations, priv->front);
+
+    Q_EMIT priv->front->d_ptr->manager->test_config(priv->front);
 }
 
 struct zwlr_output_configuration_v1_interface const
@@ -211,9 +232,8 @@ struct zwlr_output_configuration_v1_interface const
 wlr_output_configuration_v1_res::wlr_output_configuration_v1_res(Client* client,
                                                                  uint32_t version,
                                                                  uint32_t id,
-                                                                 wlr_output_manager_v1& manager,
                                                                  wlr_output_configuration_v1& front)
-    : d_ptr{new Private(client, version, id, manager, front, *this)}
+    : d_ptr{new Private(client, version, id, front, *this)}
 {
 }
 
@@ -243,7 +263,6 @@ void wlr_output_configuration_v1_res::send_cancelled() const
 {
     assert(!d_ptr->is_cancelled);
     d_ptr->is_cancelled = true;
-    remove_all(d_ptr->manager->d_ptr->configurations, d_ptr->front);
     d_ptr->send<zwlr_output_configuration_v1_send_cancelled>();
 }
 

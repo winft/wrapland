@@ -21,7 +21,6 @@ public:
     wlr_output_configuration_v1_res(Client* client,
                                     uint32_t version,
                                     uint32_t id,
-                                    wlr_output_manager_v1& manager,
                                     wlr_output_configuration_v1& front);
 
     ~wlr_output_configuration_v1_res() override;
@@ -46,7 +45,6 @@ public:
     Private(Client* client,
             uint32_t version,
             uint32_t id,
-            wlr_output_manager_v1& manager,
             wlr_output_configuration_v1& front,
             wlr_output_configuration_v1_res& q_ptr);
     ~Private() override;
@@ -54,9 +52,7 @@ public:
     std::vector<wlr_output_configuration_head_v1*> enabled_heads;
     std::vector<wlr_output_head_v1_res*> disabled_heads;
 
-    wlr_output_manager_v1* manager;
     wlr_output_configuration_v1* front;
-
     bool is_cancelled{false};
     bool is_used{false};
 
@@ -80,6 +76,13 @@ private:
 class wlr_output_configuration_v1::Private
 {
 public:
+    Private(Client* client,
+            uint32_t version,
+            uint32_t id,
+            wlr_output_manager_v1& manager,
+            wlr_output_configuration_v1& q_ptr);
+
+    wlr_output_manager_v1* manager;
     wlr_output_configuration_v1_res* res;
 };
 

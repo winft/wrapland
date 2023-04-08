@@ -23,7 +23,7 @@ wlr_output_manager_v1::Private::Private(wlr_output_manager_v1* q_ptr, Display* d
 wlr_output_manager_v1::Private::~Private()
 {
     std::for_each(configurations.cbegin(), configurations.cend(), [](auto config) {
-        config->d_ptr->res->d_ptr->manager = nullptr;
+        config->d_ptr->manager = nullptr;
     });
 
     for (auto bind : getBinds()) {
