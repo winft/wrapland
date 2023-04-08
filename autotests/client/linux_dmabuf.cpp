@@ -226,7 +226,8 @@ void TestLinuxDmabuf::testCreateBufferSucess()
     QVERIFY(CreateBufferSuccessSpy.wait());
 
     wl_buffer* buf = paramV1->getBuffer();
-    free(buf);
+    QVERIFY(buf);
+    wl_buffer_destroy(buf);
     delete paramV1;
 }
 
