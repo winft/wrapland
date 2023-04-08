@@ -122,10 +122,9 @@ void TestLinuxDmabuf::init()
     m_queue->setup(m_connection);
 
     Wrapland::Client::Registry registry;
-    registry.setEventQueue(m_queue);
-
     QSignalSpy dmabufSpy(&registry, &Wrapland::Client::Registry::LinuxDmabufV1Announced);
 
+    registry.setEventQueue(m_queue);
     registry.create(m_connection->display());
     QVERIFY(registry.isValid());
     registry.setup();
@@ -156,11 +155,15 @@ void TestLinuxDmabuf::cleanup()
         m_compositor = nullptr;
     }
 
+    if (m_queue) {
+        delete m_queue;
+        m_queue = nullptr;
+    }
+
     if (m_connection) {
         m_connection->deleteLater();
         m_connection = nullptr;
     }
-    delete m_queue;
     if (m_thread) {
         m_thread->quit();
         m_thread->wait();
