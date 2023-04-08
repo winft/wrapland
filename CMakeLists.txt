@@ -23,6 +23,7 @@ include(ECMSetupVersion)
 include(ECMGenerateHeaders)
 include(CMakeFindFrameworks)
 include(ECMQtDeclareLoggingCategory)
+include(ECMEnableSanitizers)
 
 ecm_setup_version(PROJECT
   VARIABLE_PREFIX WRAPLAND
