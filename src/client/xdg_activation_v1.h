@@ -138,7 +138,7 @@ public:
     void commit();
 
 Q_SIGNALS:
-    void done(std::string const& token);
+    void done(QByteArray const& token);
 
 private:
     friend class XdgActivationV1;
