@@ -76,6 +76,7 @@ Sanitized:
   extends: .common-build
   variables:
     CMAKE_ARGS: -DECM_ENABLE_SANITIZERS='address;leak;undefined'
+                -DCMAKE_C_COMPILER=clang
                 -DCMAKE_CXX_COMPILER=clang++
 
 
