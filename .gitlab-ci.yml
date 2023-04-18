@@ -5,7 +5,7 @@ stages:
   - Deploy
 
 variables:
-  IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base-qt6:latest
+  IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/frameworks-master:latest
 
 workflow:
   rules:
@@ -46,9 +46,6 @@ Coverity Scan:
   image: ${IMAGE_BASE}
   variables:
     PROJECT_NAME: Wrapland
-  script:
-    - pacman -Sy extra-cmake-modules --noconfirm --needed
-    - !reference [.coverity-scan, script]
 
 .common-build:
   variables:
@@ -60,7 +57,6 @@ Coverity Scan:
       when: never
     - when: on_success
   script:
-    - pacman -Sy extra-cmake-modules --noconfirm --needed
     - mkdir build && cd build
     - cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr $CMAKE_ARGS ../
     - make -j$(nproc)
@@ -100,8 +96,6 @@ Clang-Tidy:
 .common-test: &common-test
   stage: Analysis
   image: ${IMAGE_BASE}
-  before_script:
-    - pacman -Sy breeze-icons --noconfirm --needed
 
 Regular Tests:
   extends: .tests-with-coverage
