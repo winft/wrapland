@@ -291,7 +291,10 @@ void TestPointerConstraints::testLockPointer()
     QCOMPARE(serverLockedPointer->cursorPositionHint(), QPointF(-1., -1.));
     QCOMPARE(lockedChangedSpy.count(), 2);
     QTEST(static_cast<bool>(serverSurface->lockedPointer()), "hasConstraintAfterUnlock");
-    QTEST(pointerConstraintsChangedSpy.count(), "pointerChangedCount");
+
+    QFETCH(int, pointerChangedCount);
+    QCOMPARE(pointerConstraintsChangedSpy.count(), pointerChangedCount);
+
     QVERIFY(unlockedSpy.wait());
     QCOMPARE(unlockedSpy.count(), 1);
     QCOMPARE(lockedSpy.count(), 1);
@@ -408,7 +411,10 @@ void TestPointerConstraints::testConfinePointer()
     QCOMPARE(serverConfinedPointer->isConfined(), false);
     QCOMPARE(confinedChangedSpy.count(), 2);
     QTEST(static_cast<bool>(serverSurface->confinedPointer()), "hasConstraintAfterUnlock");
-    QTEST(pointerConstraintsChangedSpy.count(), "pointerChangedCount");
+
+    QFETCH(int, pointerChangedCount);
+    QCOMPARE(pointerConstraintsChangedSpy.count(), pointerChangedCount);
+
     QVERIFY(unconfinedSpy.wait());
     QCOMPARE(unconfinedSpy.count(), 1);
     QCOMPARE(confinedSpy.count(), 1);

@@ -31,9 +31,9 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QIcon>
 #include <QList>
 #include <QRect>
+#include <QThreadPool>
 #include <QUuid>
 #include <QVector>
-#include <QtConcurrentRun>
 
 #include <cassert>
 #include <csignal>
@@ -839,15 +839,13 @@ void PlasmaWindowRes::Private::getIconCallback([[maybe_unused]] wl_client* wlCli
     if (!priv->window) {
         return;
     }
-    QtConcurrent::run(
-        [fd](QIcon const& icon) {
-            QFile file;
-            file.open(fd, QIODevice::WriteOnly, QFileDevice::AutoCloseHandle);
-            QDataStream ds(&file);
-            ds << icon;
-            file.close();
-        },
-        priv->window->d_ptr->m_icon);
+    QThreadPool::globalInstance()->start([fd, icon = priv->window->d_ptr->m_icon] {
+        QFile file;
+        file.open(fd, QIODevice::WriteOnly, QFileDevice::AutoCloseHandle);
+        QDataStream ds(&file);
+        ds << icon;
+        file.close();
+    });
 }
 
 void PlasmaWindowRes::Private::requestEnterVirtualDesktopCallback(

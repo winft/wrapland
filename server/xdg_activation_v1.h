@@ -30,7 +30,7 @@ public:
 
 Q_SIGNALS:
     void token_requested(Wrapland::Server::XdgActivationTokenV1* token);
-    void activate(std::string token, Wrapland::Server::Surface* surface);
+    void activate(QByteArray const& token, Wrapland::Server::Surface* surface);
 
 private:
     class Private;

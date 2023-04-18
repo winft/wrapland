@@ -150,8 +150,7 @@ bool WlrOutputManagerV1::isValid() const
 
 WlrOutputConfigurationV1* WlrOutputManagerV1::createConfiguration(QObject* parent)
 {
-    Q_UNUSED(parent);
-    auto* config = new WlrOutputConfigurationV1(this);
+    auto config = new WlrOutputConfigurationV1(parent);
     auto w = zwlr_output_manager_v1_create_configuration(d->outputManager, d->serial);
 
     if (d->queue) {

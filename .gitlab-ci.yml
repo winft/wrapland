@@ -5,7 +5,7 @@ stages:
   - Deploy
 
 variables:
-  IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/base:latest
+  IMAGE_BASE: ${CI_REGISTRY}/kwinft/ci-images/archlinux/frameworks-master:latest
 
 workflow:
   rules:
@@ -46,9 +46,6 @@ Coverity Scan:
   image: ${IMAGE_BASE}
   variables:
     PROJECT_NAME: Wrapland
-  script:
-    - pacman -Sy extra-cmake-modules --noconfirm --needed
-    - !reference [.coverity-scan, script]
 
 .common-build:
   variables:
@@ -60,7 +57,6 @@ Coverity Scan:
       when: never
     - when: on_success
   script:
-    - pacman -Sy extra-cmake-modules --noconfirm --needed
     - mkdir build && cd build
     - cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr $CMAKE_ARGS ../
     - make -j$(nproc)
@@ -75,11 +71,14 @@ Regular:
   variables:
     CMAKE_ARGS: -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
                 -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage
+                -DCMAKE_C_COMPILER=clang
+                -DCMAKE_CXX_COMPILER=clang++
 
 Sanitized:
   extends: .common-build
   variables:
     CMAKE_ARGS: -DECM_ENABLE_SANITIZERS='address;leak;undefined'
+                -DCMAKE_C_COMPILER=clang
                 -DCMAKE_CXX_COMPILER=clang++
 
 
@@ -100,13 +99,11 @@ Clang-Tidy:
 .common-test: &common-test
   stage: Analysis
   image: ${IMAGE_BASE}
-  before_script:
-    - pacman -Sy breeze-icons --noconfirm --needed
 
 Regular Tests:
   extends: .tests-with-coverage
   variables:
-    GCOVR_ARGS: -e tests
+    GCOVR_ARGS: --gcov-executable '/usr/bin/llvm-cov gcov' -e tests
   <<: *common-test
   needs:
     - job: Regular
@@ -118,6 +115,9 @@ Sanitized Tests:
   needs:
     - job: Sanitized
       artifacts: true
+  script:
+    - export ASAN_OPTIONS=detect_odr_violation=0
+    - !reference [.tests, script]
 
 
 ####################################################################################################

@@ -198,6 +198,3 @@ private:
 };
 
 }
-
-Q_DECLARE_METATYPE(std::string)
-Q_DECLARE_METATYPE(uint32_t)

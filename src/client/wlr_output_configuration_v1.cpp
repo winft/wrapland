@@ -34,6 +34,13 @@ namespace Client
 {
 
 struct ConfigurationHead {
+    ~ConfigurationHead()
+    {
+        if (native) {
+            zwlr_output_configuration_head_v1_destroy(native);
+        }
+    }
+
     WlrOutputHeadV1* head = nullptr;
     zwlr_output_configuration_head_v1* native = nullptr;
 

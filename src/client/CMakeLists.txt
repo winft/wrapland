@@ -3,7 +3,7 @@ remove_definitions(-DQT_NO_CAST_FROM_ASCII)
 remove_definitions(-DQT_NO_CAST_TO_ASCII)
 
 # needed to access QPA
-include_directories(SYSTEM ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
+include_directories(SYSTEM ${QtGui_PRIVATE_INCLUDE_DIRS})
 
 set(CLIENT_LIB_SRCS
     appmenu.cpp
@@ -298,15 +298,16 @@ ecm_generate_export_header(WraplandClient
 )
 
 target_include_directories(WraplandClient
-  INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/Wrapland/Client>"
+  INTERFACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 target_link_libraries(WraplandClient
   PUBLIC
-    Qt5::Gui
+    Qt6::Gui
   PRIVATE
+    Qt6::GuiPrivate
     Wayland::Client
-    Qt5::Concurrent
+    Qt6::Concurrent
     external::external
 )
 
@@ -391,16 +392,6 @@ set(CLIENT_LIB_HEADERS
 
 install(
   FILES ${CLIENT_LIB_HEADERS}
-  DESTINATION ${INCLUDE_INSTALL_DIR}/Wrapland/Client
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Wrapland/Client
   COMPONENT Devel
-)
-
-# make available to ecm_add_qch in parent folder
-set(WraplandClient_APIDOX_SRCS
-    ${CLIENT_LIB_HEADERS}
-    PARENT_SCOPE
-)
-set(WraplandClient_APIDOX_BUILD_INCLUDE_DIRS
-    ${CMAKE_CURRENT_BINARY_DIR}
-    PARENT_SCOPE
 )
