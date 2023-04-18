@@ -71,6 +71,8 @@ Regular:
   variables:
     CMAKE_ARGS: -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
                 -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage
+                -DCMAKE_C_COMPILER=clang
+                -DCMAKE_CXX_COMPILER=clang++
 
 Sanitized:
   extends: .common-build
@@ -101,7 +103,7 @@ Clang-Tidy:
 Regular Tests:
   extends: .tests-with-coverage
   variables:
-    GCOVR_ARGS: -e tests
+    GCOVR_ARGS: --gcov-executable '/usr/bin/llvm-cov gcov' -e tests
   <<: *common-test
   needs:
     - job: Regular
