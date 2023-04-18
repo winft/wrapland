@@ -438,7 +438,14 @@ void PlasmaWindowModelTest::testDefaultData()
 
     QModelIndex index = model->index(0);
     QFETCH(int, role);
-    QTEST(model->data(index, role), "value");
+    QFETCH(QVariant, value);
+
+    QEXPECT_FAIL("decoration", "Null QIcon does not compare", Continue);
+    QCOMPARE(model->data(index, role), value);
+
+    if (value.canConvert<QIcon>()) {
+        QVERIFY(value.value<QIcon>().isNull());
+    }
 }
 
 void PlasmaWindowModelTest::testIsActive()

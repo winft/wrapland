@@ -233,25 +233,28 @@ void Output::Private::addMode(uint32_t flags, int32_t width, int32_t height, int
     if (flags & WL_OUTPUT_MODE_PREFERRED) {
         mode.flags |= Mode::Flag::Preferred;
     }
-    auto currentIt = modes.insert(modes.end(), mode);
+
+    modes.append(mode);
     bool existing = false;
+
     if (flags & WL_OUTPUT_MODE_CURRENT) {
-        auto it = modes.begin();
-        while (it != currentIt) {
-            auto& m = (*it);
+        for (int i = modes.size() - 2; i >= 0; i--) {
+            auto& m = modes[i];
+
             if (m.flags.testFlag(Mode::Flag::Current)) {
                 m.flags &= ~Mode::Flags(Mode::Flag::Current);
                 Q_EMIT q->modeChanged(m);
             }
+
             if (m.refreshRate == mode.refreshRate && m.size == mode.size) {
-                it = modes.erase(it);
+                modes.erase(modes.begin() + i);
                 existing = true;
-            } else {
-                it++;
             }
         }
-        currentMode = currentIt;
+
+        currentMode = modes.end() - 1;
     }
+
     if (existing) {
         Q_EMIT q->modeChanged(mode);
     } else {

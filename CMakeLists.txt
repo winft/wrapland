@@ -23,16 +23,7 @@ include(ECMSetupVersion)
 include(ECMGenerateHeaders)
 include(CMakeFindFrameworks)
 include(ECMQtDeclareLoggingCategory)
-include(ECMPoQmTools)
-include(ECMAddQch)
-
-option(BUILD_QCH
-       "Build API documentation in QCH format (for e.g. Qt Assistant, Qt Creator & KDevelop)" OFF
-)
-add_feature_info(
-  QCH ${BUILD_QCH} "API documentation in QCH format (for e.g. Qt Assistant, Qt Creator & KDevelop)"
-)
-
+include(ECMEnableSanitizers)
 
 ecm_setup_version(PROJECT
   VARIABLE_PREFIX WRAPLAND
@@ -42,9 +33,10 @@ ecm_setup_version(PROJECT
 )
 
 # Dependencies
-set(REQUIRED_QT_VERSION 5.15.0)
+set(REQUIRED_QT_VERSION 6.4.0)
 set(KDE_COMPILERSETTINGS_LEVEL "5.84")
-find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Concurrent Gui)
+
+find_package(Qt6 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Concurrent Gui)
 
 find_package(Wayland 1.18 COMPONENTS Client Server)
 set_package_properties(Wayland PROPERTIES TYPE REQUIRED)
@@ -80,10 +72,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu90")
 
 add_definitions(-DQT_NO_FOREACH)
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050d00)
-# Subdirectories
-if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/po")
-  ecm_install_po_files_as_qm(po)
-endif()
 
 add_subdirectory(extern)
 add_subdirectory(server)
@@ -95,17 +83,7 @@ if(BUILD_TESTING)
 endif()
 
 # create a Config.cmake and a ConfigVersion.cmake file and install them
-set(CMAKECONFIG_INSTALL_DIR "${CMAKECONFIG_INSTALL_PREFIX}/Wrapland")
-
-if(BUILD_QCH)
-  ecm_install_qch_export(
-    TARGETS Wrapland_QCH
-    FILE WraplandQchTargets.cmake
-    DESTINATION "${CMAKECONFIG_INSTALL_DIR}"
-    COMPONENT Devel
-  )
-  set(PACKAGE_INCLUDE_QCHTARGETS "include(\"\${CMAKE_CURRENT_LIST_DIR}/WraplandQchTargets.cmake\")")
-endif()
+set(CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/Wrapland")
 
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/WraplandConfig.cmake.in"
@@ -127,7 +105,7 @@ install(
 
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/wrapland_version.h
-  DESTINATION ${INCLUDE_INSTALL_DIR}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT Devel
 )
 

@@ -1169,7 +1169,8 @@ void TestSurface::testOutput()
 
     // and enter again, just to verify
     serverSurface->setOutputs(std::vector<Wrapland::Server::output*>{serverOutput});
-    QCOMPARE(serverSurface->outputs(), {serverOutput->wayland_output()});
+    QCOMPARE(serverSurface->outputs(),
+             std::vector<Wrapland::Server::WlOutput*>{serverOutput->wayland_output()});
     QVERIFY(enteredSpy.wait());
     QCOMPARE(enteredSpy.count(), 2);
     QCOMPARE(leftSpy.count(), 1);

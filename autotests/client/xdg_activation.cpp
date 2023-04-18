@@ -61,7 +61,6 @@ constexpr auto socket_name{"wrapland-test-xdg-activation-0"};
 TestXdgActivation::TestXdgActivation(QObject* parent)
     : QObject(parent)
 {
-    qRegisterMetaType<std::string>();
 }
 
 void TestXdgActivation::init()
@@ -214,7 +213,7 @@ void TestXdgActivation::test_single_client()
     client1.activation->activate(token_string, surface.get());
     QVERIFY(activate_spy.wait());
 
-    QCOMPARE(activate_spy.first().first().value<std::string>(), token_string);
+    QCOMPARE(activate_spy.first().first().value<QByteArray>(), token_string);
     QCOMPARE(activate_spy.first().last().value<Server::Surface*>(), server_surface);
 }
 
@@ -264,7 +263,7 @@ void TestXdgActivation::test_multi_client()
     client2.activation->activate(token_string, surface.get());
     QVERIFY(activate_spy.wait());
 
-    QCOMPARE(activate_spy.first().first().value<std::string>(), token_string);
+    QCOMPARE(activate_spy.first().first().value<QByteArray>(), token_string);
     QCOMPARE(activate_spy.first().last().value<Server::Surface*>(), server_surface);
 }
 

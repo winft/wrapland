@@ -31,6 +31,7 @@ Q_SIGNALS:
     void test_config(Wrapland::Server::wlr_output_configuration_v1* configuration);
 
 private:
+    friend class wlr_output_configuration_v1;
     friend class wlr_output_configuration_v1_res;
     friend class wlr_output_head_v1;
     class Private;
