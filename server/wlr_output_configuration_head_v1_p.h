@@ -51,6 +51,10 @@ private:
     set_scale_callback(wl_client* wlClient, wl_resource* wlResource, wl_fixed_t wlScale);
     static void
     set_adaptive_sync_callback(wl_client* wlClient, wl_resource* wlResource, uint32_t wlState);
+    static void set_viewport_callback(wl_client* wlClient,
+                                      wl_resource* wlResource,
+                                      int32_t width,
+                                      int32_t height);
 
     static const struct zwlr_output_configuration_head_v1_interface s_interface;
 };

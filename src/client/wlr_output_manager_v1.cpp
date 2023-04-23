@@ -285,6 +285,8 @@ public:
     static void
     serialNumberCallback(void* data, zwlr_output_head_v1* head, char const* serialNumber);
     static void adaptive_sync_callback(void* data, zwlr_output_head_v1* head, uint32_t state);
+    static void
+    viewport_callback(void* data, zwlr_output_head_v1* head, int32_t width, int32_t height);
 
     WlrOutputHeadV1* q;
     static const struct zwlr_output_head_v1_listener s_listener;
@@ -297,6 +299,7 @@ public:
     bool enabled{false};
     double scale{1.};
     bool adapt_sync{false};
+    QSize viewport;
 
     QString make;
     QString model;
@@ -324,6 +327,7 @@ const zwlr_output_head_v1_listener WlrOutputHeadV1::Private::s_listener = {
     modelCallback,
     serialNumberCallback,
     adaptive_sync_callback,
+    viewport_callback,
 };
 
 void WlrOutputHeadV1::Private::nameCallback(void* data, zwlr_output_head_v1* head, char const* name)
@@ -527,6 +531,18 @@ void WlrOutputHeadV1::Private::adaptive_sync_callback(void* data,
     Q_EMIT d->q->changed();
 }
 
+void WlrOutputHeadV1::Private::viewport_callback(void* data,
+                                                 zwlr_output_head_v1* head,
+                                                 int32_t width,
+                                                 int32_t height)
+{
+    auto d = reinterpret_cast<Private*>(data);
+    Q_ASSERT(d->outputHead == head);
+
+    d->viewport = {width, height};
+    Q_EMIT d->q->changed();
+}
+
 WlrOutputHeadV1::Private::Private(WlrOutputHeadV1* q, zwlr_output_head_v1* head)
     : q(q)
 {
@@ -595,6 +611,11 @@ double WlrOutputHeadV1::scale() const
 bool WlrOutputHeadV1::adaptive_sync() const
 {
     return d->adapt_sync;
+}
+
+QSize WlrOutputHeadV1::viewport() const
+{
+    return d->viewport;
 }
 
 QVector<WlrOutputModeV1*> WlrOutputHeadV1::modes() const

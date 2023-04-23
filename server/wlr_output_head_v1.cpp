@@ -61,6 +61,7 @@ wlr_output_head_v1_res* wlr_output_head_v1::add_bind(wlr_output_manager_v1_bind&
     return res;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void wlr_output_head_v1::broadcast()
 {
     auto const published = output.d_ptr->published;
@@ -112,6 +113,14 @@ void wlr_output_head_v1::broadcast()
     if (published.state.adaptive_sync != pending.state.adaptive_sync || !published.state.enabled) {
         for (auto res : resources) {
             res->send_adaptive_sync(pending.state.adaptive_sync);
+        }
+        manager.d_ptr->changed = true;
+    }
+
+    if (published.state.geometry.size().toSize() != pending.state.geometry.size().toSize()
+        || !published.state.enabled) {
+        for (auto res : resources) {
+            res->send_viewport(pending.state.geometry.size().toSize());
         }
         manager.d_ptr->changed = true;
     }
@@ -180,6 +189,7 @@ void wlr_output_head_v1_res::send_mutable_data(output_state const& data) const
     send_transform(data.transform);
     send_scale(estimate_scale(data));
     send_adaptive_sync(data.adaptive_sync);
+    send_viewport(data.geometry.size().toSize());
 }
 
 void wlr_output_head_v1_res::send_enabled(bool enabled) const
@@ -208,6 +218,9 @@ void wlr_output_head_v1_res::send_transform(output_transform transform) const
 
 void wlr_output_head_v1_res::send_scale(double scale) const
 {
+    if (d_ptr->version >= ZWLR_OUTPUT_HEAD_V1_VIEWPORT_SINCE_VERSION) {
+        return;
+    }
     d_ptr->send<zwlr_output_head_v1_send_scale>(wl_fixed_from_double(scale));
 }
 
@@ -219,6 +232,14 @@ void wlr_output_head_v1_res::send_adaptive_sync(bool is_adaptive) const
     d_ptr->send<zwlr_output_head_v1_send_adaptive_sync>(
         is_adaptive ? ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED
                     : ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_DISABLED);
+}
+
+void wlr_output_head_v1_res::send_viewport(QSize const& size) const
+{
+    if (d_ptr->version < ZWLR_OUTPUT_HEAD_V1_VIEWPORT_SINCE_VERSION) {
+        return;
+    }
+    d_ptr->send<zwlr_output_head_v1_send_viewport>(size.width(), size.height());
 }
 
 }

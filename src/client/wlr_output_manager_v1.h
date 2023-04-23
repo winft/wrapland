@@ -194,6 +194,7 @@ public:
     Transform transform() const;
     double scale() const;
     bool adaptive_sync() const;
+    QSize viewport() const;
 
     operator zwlr_output_head_v1*();
     operator zwlr_output_head_v1*() const;

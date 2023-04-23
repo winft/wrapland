@@ -56,6 +56,7 @@ public:
     void send_transform(output_transform transform) const;
     void send_scale(double scale) const;
     void send_adaptive_sync(bool is_adaptive) const;
+    void send_viewport(QSize const& size) const;
 
     class Private;
     Private* d_ptr;

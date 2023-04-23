@@ -59,6 +59,8 @@ struct ConfigurationHead {
     bool scaleSet = false;
     bool adapt_sync{false};
     bool adapt_sync_set{false};
+    QSize viewport;
+    bool viewport_set{false};
 };
 
 class Q_DECL_HIDDEN WlrOutputConfigurationV1::Private
@@ -216,6 +218,11 @@ void WlrOutputConfigurationV1::Private::send()
                 head->adapt_sync ? ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED
                                  : ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_DISABLED);
         }
+
+        if (head->viewport_set) {
+            zwlr_output_configuration_head_v1_set_viewport(
+                head->native, head->viewport.width(), head->viewport.height());
+        }
     }
 }
 
@@ -303,6 +310,18 @@ void WlrOutputConfigurationV1::set_adaptive_sync(WlrOutputHeadV1* head, bool ena
 
     configurationHead->adapt_sync = enable;
     configurationHead->adapt_sync_set = true;
+}
+
+void WlrOutputConfigurationV1::set_viewport(WlrOutputHeadV1* head, QSize const& size)
+{
+    auto configurationHead = d->getConfigurationHead(head);
+    if (zwlr_output_configuration_head_v1_get_version(configurationHead->native)
+        < ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_VIEWPORT_SINCE_VERSION) {
+        return;
+    }
+
+    configurationHead->viewport = size;
+    configurationHead->viewport_set = true;
 }
 
 void WlrOutputConfigurationV1::test()
