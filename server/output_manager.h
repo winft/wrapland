@@ -7,6 +7,7 @@
 
 #include <Wrapland/Server/wraplandserver_export.h>
 
+#include <gsl/pointers>
 #include <memory>
 #include <vector>
 
@@ -29,7 +30,7 @@ public:
     XdgOutputManager& create_xdg_manager();
     wlr_output_manager_v1& create_wlr_manager_v1();
 
-    Display* display;
+    gsl::not_null<Display*> display;
     std::vector<output*> outputs;
 
     std::unique_ptr<XdgOutputManager> xdg_manager;

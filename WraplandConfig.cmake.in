@@ -2,5 +2,6 @@
 
 include(CMakeFindDependencyMacro)
 find_dependency(Qt6Gui @REQUIRED_QT_VERSION@)
+find_dependency(Microsoft.GSL)
 
 include("${CMAKE_CURRENT_LIST_DIR}/WraplandTargets.cmake")
