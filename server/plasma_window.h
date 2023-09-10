@@ -168,7 +168,7 @@ private:
     explicit PlasmaWindow(PlasmaWindowManager* manager);
 
     class Private;
-    const std::unique_ptr<Private> d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }
