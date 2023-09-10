@@ -29,7 +29,7 @@ public:
     XdgOutputManager& create_xdg_manager();
     wlr_output_manager_v1& create_wlr_manager_v1();
 
-    Display& display;
+    Display* display;
     std::vector<output*> outputs;
 
     std::unique_ptr<XdgOutputManager> xdg_manager;

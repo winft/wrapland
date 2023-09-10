@@ -56,7 +56,7 @@ public:
 
     static int32_t get_mode_flags(output_mode const& mode, output_state const& state);
 
-    output_manager& manager;
+    output_manager* manager;
 
     int connector_id{0};
     std::vector<output_mode> modes;

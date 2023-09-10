@@ -33,9 +33,9 @@ public:
     wlr_output_head_v1_res* add_bind(wlr_output_manager_v1_bind& bind);
     void broadcast();
 
-    Server::output& output;
+    Server::output* output;
     std::vector<wlr_output_head_v1_res*> resources;
-    wlr_output_manager_v1& manager;
+    wlr_output_manager_v1* manager;
 
     double current_scale{1.};
 };

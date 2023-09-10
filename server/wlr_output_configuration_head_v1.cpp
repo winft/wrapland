@@ -56,7 +56,7 @@ wlr_output_configuration_head_v1::Private::Private(Client* client,
         &zwlr_output_configuration_head_v1_interface,
         &s_interface,
         &q_ptr)
-    , state{head.d_ptr->head->output.d_ptr->published.state}
+    , state{head.d_ptr->head->output->d_ptr->published.state}
     , scale{estimate_scale(state)}
     , head{&head}
 {
@@ -156,7 +156,7 @@ wlr_output_configuration_head_v1::~wlr_output_configuration_head_v1() = default;
 
 output& wlr_output_configuration_head_v1::get_output() const
 {
-    return d_ptr->head->d_ptr->head->output;
+    return *d_ptr->head->d_ptr->head->output;
 }
 
 output_state const& wlr_output_configuration_head_v1::get_state() const
