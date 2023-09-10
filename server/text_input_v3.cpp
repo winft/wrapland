@@ -95,7 +95,10 @@ uint32_t convert_content_hints(text_input_v3_content_hints hints)
     return ret;
 }
 
-static text_input_v3_content_purpose convert_content_purpose(uint32_t purpose)
+namespace
+{
+
+text_input_v3_content_purpose convert_content_purpose(uint32_t purpose)
 {
     auto const wlPurpose = static_cast<zwp_text_input_v3_content_purpose>(purpose);
 
@@ -128,6 +131,8 @@ static text_input_v3_content_purpose convert_content_purpose(uint32_t purpose)
     default:
         return text_input_v3_content_purpose::normal;
     }
+}
+
 }
 
 uint32_t convert_content_purpose(text_input_v3_content_purpose purpose)
