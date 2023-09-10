@@ -161,8 +161,8 @@ void wlr_output_configuration_v1_res::Private::enable_head_callback(wl_client* /
         return;
     }
 
-    priv->enabled_heads.push_back(new wlr_output_configuration_head_v1(
-        priv->client->handle, priv->version, id, *priv->front, *head));
+    priv->enabled_heads.push_back(
+        new wlr_output_configuration_head_v1(priv->client->handle, priv->version, id, *head));
 }
 
 void wlr_output_configuration_v1_res::Private::disable_head_callback(wl_client* /*wlClient*/,
