@@ -347,6 +347,7 @@ target_include_directories(WraplandServer
 
 target_link_libraries(WraplandServer
   PUBLIC
+    Microsoft.GSL::GSL
     Qt6::Gui
   PRIVATE
     Wayland::Server

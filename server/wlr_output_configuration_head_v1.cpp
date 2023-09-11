@@ -47,7 +47,6 @@ QSize estimate_logical_size(output_state const& state, double scale)
 wlr_output_configuration_head_v1::Private::Private(Client* client,
                                                    uint32_t version,
                                                    uint32_t id,
-                                                   wlr_output_configuration_v1& configuration,
                                                    wlr_output_head_v1_res& head,
                                                    wlr_output_configuration_head_v1& q_ptr)
     : Wayland::Resource<wlr_output_configuration_head_v1>(
@@ -57,9 +56,8 @@ wlr_output_configuration_head_v1::Private::Private(Client* client,
         &zwlr_output_configuration_head_v1_interface,
         &s_interface,
         &q_ptr)
-    , state{head.d_ptr->head->output.d_ptr->published.state}
+    , state{head.d_ptr->head->output->d_ptr->published.state}
     , scale{estimate_scale(state)}
-    , configuration{configuration}
     , head{&head}
 {
 }
@@ -146,13 +144,11 @@ void wlr_output_configuration_head_v1::Private::set_adaptive_sync_callback(wl_cl
     priv->state.adaptive_sync = wlState == ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED;
 }
 
-wlr_output_configuration_head_v1::wlr_output_configuration_head_v1(
-    Client* client,
-    uint32_t version,
-    uint32_t id,
-    wlr_output_configuration_v1& configuration,
-    wlr_output_head_v1_res& head)
-    : d_ptr{new Private(client, version, id, configuration, head, *this)}
+wlr_output_configuration_head_v1::wlr_output_configuration_head_v1(Client* client,
+                                                                   uint32_t version,
+                                                                   uint32_t id,
+                                                                   wlr_output_head_v1_res& head)
+    : d_ptr{new Private(client, version, id, head, *this)}
 {
 }
 
@@ -160,7 +156,7 @@ wlr_output_configuration_head_v1::~wlr_output_configuration_head_v1() = default;
 
 output& wlr_output_configuration_head_v1::get_output() const
 {
-    return d_ptr->head->d_ptr->head->output;
+    return *d_ptr->head->d_ptr->head->output;
 }
 
 output_state const& wlr_output_configuration_head_v1::get_state() const

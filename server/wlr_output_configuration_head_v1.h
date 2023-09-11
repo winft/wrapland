@@ -35,7 +35,6 @@ private:
     wlr_output_configuration_head_v1(Client* client,
                                      uint32_t version,
                                      uint32_t id,
-                                     wlr_output_configuration_v1& configuration,
                                      wlr_output_head_v1_res& head);
     friend class wlr_output_configuration_v1_res;
 

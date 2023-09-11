@@ -83,7 +83,7 @@ output_transform transform_to_output(wl_output_transform transform)
 }
 
 output::Private::Private(output_metadata metadata, output_manager& manager, output* q_ptr)
-    : manager{manager}
+    : manager{&manager}
     , q_ptr{q_ptr}
 {
     if (metadata.description.empty()) {
@@ -93,7 +93,7 @@ output::Private::Private(output_metadata metadata, output_manager& manager, outp
     published.meta = pending.meta;
 
     manager.outputs.push_back(q_ptr);
-    QObject::connect(&manager.display, &Display::destroyed, q_ptr, [this] {
+    QObject::connect(manager.display, &Display::destroyed, q_ptr, [this] {
         xdg_output.reset();
         wayland_output.reset();
     });
@@ -101,16 +101,16 @@ output::Private::Private(output_metadata metadata, output_manager& manager, outp
 
 output::Private::~Private()
 {
-    remove_all(manager.outputs, q_ptr);
+    remove_all(manager->outputs, q_ptr);
 }
 
 void output::Private::done()
 {
     if (published.state.enabled != pending.state.enabled) {
         if (pending.state.enabled) {
-            wayland_output.reset(new WlOutput(q_ptr, &manager.display));
-            if (manager.xdg_manager) {
-                xdg_output.reset(new XdgOutput(q_ptr, &manager.display));
+            wayland_output.reset(new WlOutput(q_ptr, manager->display));
+            if (manager->xdg_manager) {
+                xdg_output.reset(new XdgOutput(q_ptr, manager->display));
             }
         } else {
             wayland_output.reset();
@@ -127,7 +127,7 @@ void output::Private::done()
             }
         }
     }
-    if (auto& wlr_man = manager.wlr_manager_v1) {
+    if (auto& wlr_man = manager->wlr_manager_v1) {
         if (wlr_head_v1) {
             wlr_head_v1->broadcast();
         } else {

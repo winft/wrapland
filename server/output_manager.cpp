@@ -14,7 +14,7 @@ namespace Wrapland::Server
 {
 
 output_manager::output_manager(Display& display)
-    : display{display}
+    : display{&display}
 {
 }
 
@@ -36,14 +36,14 @@ void output_manager::commit_changes() const
 XdgOutputManager& output_manager::create_xdg_manager()
 {
     assert(!xdg_manager);
-    xdg_manager = std::make_unique<XdgOutputManager>(&display);
+    xdg_manager = std::make_unique<XdgOutputManager>(display);
     return *xdg_manager;
 }
 
 wlr_output_manager_v1& output_manager::create_wlr_manager_v1()
 {
     assert(!wlr_manager_v1);
-    wlr_manager_v1 = std::make_unique<wlr_output_manager_v1>(&display);
+    wlr_manager_v1 = std::make_unique<wlr_output_manager_v1>(display);
     return *wlr_manager_v1;
 }
 

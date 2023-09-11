@@ -27,8 +27,8 @@ double estimate_scale(output_state const& data)
 }
 
 wlr_output_head_v1::wlr_output_head_v1(Server::output& output, wlr_output_manager_v1& manager)
-    : output{output}
-    , manager{manager}
+    : output{&output}
+    , manager{&manager}
 {
     manager.d_ptr->add_head(*this);
 }
@@ -40,8 +40,8 @@ wlr_output_head_v1::~wlr_output_head_v1()
         res->d_ptr->head = nullptr;
     }
 
-    manager.d_ptr->changed = true;
-    remove_all(manager.d_ptr->heads, this);
+    manager->d_ptr->changed = true;
+    remove_all(manager->d_ptr->heads, this);
 }
 
 wlr_output_head_v1_res* wlr_output_head_v1::add_bind(wlr_output_manager_v1_bind& bind)
@@ -50,27 +50,27 @@ wlr_output_head_v1_res* wlr_output_head_v1::add_bind(wlr_output_manager_v1_bind&
     bind.send<zwlr_output_manager_v1_send_head>(res->d_ptr->resource);
     resources.push_back(res);
 
-    res->send_static_data(output.d_ptr->pending.meta);
+    res->send_static_data(output->d_ptr->pending.meta);
 
-    for (auto&& mode : output.d_ptr->modes) {
+    for (auto&& mode : output->d_ptr->modes) {
         res->add_mode(*new wlr_output_mode_v1(bind.client->handle, bind.version, mode));
     }
 
-    res->send_mutable_data(output.d_ptr->pending.state);
+    res->send_mutable_data(output->d_ptr->pending.state);
 
     return res;
 }
 
 void wlr_output_head_v1::broadcast()
 {
-    auto const published = output.d_ptr->published;
-    auto const pending = output.d_ptr->pending;
+    auto const published = output->d_ptr->published;
+    auto const pending = output->d_ptr->pending;
 
     if (published.state.enabled != pending.state.enabled) {
         for (auto res : resources) {
             res->send_enabled(pending.state.enabled);
         }
-        manager.d_ptr->changed = true;
+        manager->d_ptr->changed = true;
     }
 
     if (!pending.state.enabled) {
@@ -82,7 +82,7 @@ void wlr_output_head_v1::broadcast()
         for (auto res : resources) {
             res->send_current_mode(pending.state.mode);
         }
-        manager.d_ptr->changed = true;
+        manager->d_ptr->changed = true;
     }
 
     if (published.state.geometry.topLeft() != pending.state.geometry.topLeft()
@@ -90,14 +90,14 @@ void wlr_output_head_v1::broadcast()
         for (auto res : resources) {
             res->send_position(pending.state.geometry.topLeft().toPoint());
         }
-        manager.d_ptr->changed = true;
+        manager->d_ptr->changed = true;
     }
 
     if (published.state.transform != pending.state.transform || !published.state.enabled) {
         for (auto res : resources) {
             res->send_transform(pending.state.transform);
         }
-        manager.d_ptr->changed = true;
+        manager->d_ptr->changed = true;
     }
 
     if (auto scale = estimate_scale(pending.state);
@@ -106,14 +106,14 @@ void wlr_output_head_v1::broadcast()
             res->send_scale(scale);
         }
         current_scale = scale;
-        manager.d_ptr->changed = true;
+        manager->d_ptr->changed = true;
     }
 
     if (published.state.adaptive_sync != pending.state.adaptive_sync || !published.state.enabled) {
         for (auto res : resources) {
             res->send_adaptive_sync(pending.state.adaptive_sync);
         }
-        manager.d_ptr->changed = true;
+        manager->d_ptr->changed = true;
     }
 }
 

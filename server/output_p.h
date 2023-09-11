@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "output.h"
 
+#include <gsl/pointers>
 #include <wayland-server.h>
 
 namespace Wrapland::Server
@@ -56,7 +57,7 @@ public:
 
     static int32_t get_mode_flags(output_mode const& mode, output_state const& state);
 
-    output_manager& manager;
+    gsl::not_null<output_manager*> manager;
 
     int connector_id{0};
     std::vector<output_mode> modes;

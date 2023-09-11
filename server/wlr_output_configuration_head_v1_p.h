@@ -23,14 +23,11 @@ public:
     Private(Client* client,
             uint32_t version,
             uint32_t id,
-            wlr_output_configuration_v1& configuration,
             wlr_output_head_v1_res& head,
             wlr_output_configuration_head_v1& q_ptr);
 
     output_state state;
     double scale;
-
-    wlr_output_configuration_v1& configuration;
     wlr_output_head_v1_res* head;
 
 private:

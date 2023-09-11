@@ -12,6 +12,7 @@
 #include "wayland-wlr-output-management-v1-server-protocol.h"
 
 #include <QObject>
+#include <gsl/pointers>
 #include <memory>
 
 namespace Wrapland::Server
@@ -33,9 +34,9 @@ public:
     wlr_output_head_v1_res* add_bind(wlr_output_manager_v1_bind& bind);
     void broadcast();
 
-    Server::output& output;
+    gsl::not_null<Server::output*> output;
     std::vector<wlr_output_head_v1_res*> resources;
-    wlr_output_manager_v1& manager;
+    gsl::not_null<wlr_output_manager_v1*> manager;
 
     double current_scale{1.};
 };

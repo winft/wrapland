@@ -87,7 +87,7 @@ private:
     friend class PlasmaVirtualDesktopManager;
 
     class Private;
-    const std::unique_ptr<Private> d_ptr;
+    std::unique_ptr<Private> d_ptr;
 };
 
 }

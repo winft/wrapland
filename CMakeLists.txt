@@ -49,6 +49,9 @@ set_package_properties(WaylandProtocols PROPERTIES TYPE REQUIRED)
 find_package(EGL)
 set_package_properties(EGL PROPERTIES TYPE REQUIRED)
 
+find_package(Microsoft.GSL)
+set_package_properties(Microsoft.GSL PROPERTIES TYPE REQUIRED)
+
 include(KDEInstallDirs)
 include(CheckIncludeFile)
 include(CTest)
