@@ -123,9 +123,9 @@ std::string Display::socket_name() const
     return d_ptr->socket_name;
 }
 
-void Display::start(StartMode mode)
+void Display::start()
 {
-    d_ptr->start(mode == StartMode::ConnectToSocket);
+    d_ptr->start();
     Q_EMIT started();
 }
 

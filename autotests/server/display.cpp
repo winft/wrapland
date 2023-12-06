@@ -205,7 +205,7 @@ void TestServerDisplay::testClientConnection()
 void TestServerDisplay::testConnectNoSocket()
 {
     Wrapland::Server::Display display;
-    display.start(Wrapland::Server::Display::StartMode::ConnectClientsOnly);
+    display.start();
     QVERIFY(display.running());
 
     // let's try connecting a client

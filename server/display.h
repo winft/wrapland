@@ -93,12 +93,7 @@ public:
     uint32_t serial();
     uint32_t nextSerial();
 
-    enum class StartMode {
-        ConnectToSocket,
-        ConnectClientsOnly,
-    };
-
-    void start(StartMode mode = StartMode::ConnectToSocket);
+    void start();
     void terminate();
 
     void startLoop();

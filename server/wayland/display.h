@@ -54,7 +54,7 @@ public:
 
     wl_display* native() const;
 
-    void start(bool createSocket);
+    void start();
     void terminate();
 
     void startLoop();

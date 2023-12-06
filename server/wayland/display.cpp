@@ -124,7 +124,7 @@ void Display::addSocket()
     }
 }
 
-void Display::start(bool createSocket)
+void Display::start()
 {
     Q_ASSERT(!m_running);
 
@@ -132,14 +132,12 @@ void Display::start(bool createSocket)
         m_display = wl_display_create();
     }
 
-    if (createSocket) {
-        try {
-            addSocket();
-        } catch (std::bad_exception&) {
-            qCWarning(WRAPLAND_SERVER, "Failed to create Wayland socket");
-            // TODO(romangg): Shall we rethrow?
-            return;
-        }
+    try {
+        addSocket();
+    } catch (std::bad_exception&) {
+        qCWarning(WRAPLAND_SERVER, "Failed to create Wayland socket");
+        // TODO(romangg): Shall we rethrow?
+        return;
     }
 
     m_loop = wl_display_get_event_loop(m_display);

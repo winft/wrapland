@@ -277,7 +277,7 @@ void TestWaylandConnectionThread::testConnectFdNoSocketName()
     m_display = nullptr;
 
     Srv::Display display;
-    display.start(Srv::Display::StartMode::ConnectClientsOnly);
+    display.start();
     QVERIFY(display.running());
 
     int sv[2];
