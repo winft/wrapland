@@ -108,8 +108,6 @@ public:
     wl_display* native() const;
     bool running() const;
 
-    void add_socket_fd(int fd);
-
     void createShm();
 
     void dispatch();

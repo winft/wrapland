@@ -49,8 +49,6 @@ public:
     explicit Display(Server::Display* handle);
     virtual ~Display();
 
-    void add_socket_fd(int fd);
-
     void addGlobal(BasicNucleus* nucleus);
     void removeGlobal(BasicNucleus* nucleus);
 
