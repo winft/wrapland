@@ -123,14 +123,9 @@ std::string Display::socket_name() const
     return d_ptr->socket_name;
 }
 
-void Display::add_socket_fd(int fd)
+void Display::start()
 {
-    d_ptr->add_socket_fd(fd);
-}
-
-void Display::start(StartMode mode)
-{
-    d_ptr->start(mode == StartMode::ConnectToSocket);
+    d_ptr->start();
     Q_EMIT started();
 }
 

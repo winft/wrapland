@@ -49,14 +49,12 @@ public:
     explicit Display(Server::Display* handle);
     virtual ~Display();
 
-    void add_socket_fd(int fd);
-
     void addGlobal(BasicNucleus* nucleus);
     void removeGlobal(BasicNucleus* nucleus);
 
     wl_display* native() const;
 
-    void start(bool createSocket);
+    void start();
     void terminate();
 
     void startLoop();
