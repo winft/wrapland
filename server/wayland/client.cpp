@@ -74,6 +74,17 @@ void Client::destroy() const
     wl_client_destroy(native);
 }
 
+Client* Client::cast_client(Server::Client* client)
+{
+    return client->d_ptr.get();
+}
+
+Client* Client::create_client(wl_client* wlClient, Display* display)
+{
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
+    return (new Server::Client(wlClient, display->handle))->d_ptr.get();
+}
+
 void Client::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] void* data)
 {
     // The wl_container_of macro can not be used with auto keyword and in the macro from libwayland

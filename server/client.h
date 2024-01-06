@@ -36,6 +36,12 @@ namespace Wrapland::Server
 
 class Display;
 
+namespace Wayland
+{
+class Client;
+class Display;
+}
+
 class WRAPLANDSERVER_EXPORT Client : public QObject
 {
     Q_OBJECT
@@ -58,8 +64,9 @@ Q_SIGNALS:
     void disconnected(Client*);
 
 private:
+    friend class Wayland::Client;
+
     Client(wl_client* wlClient, Display* display);
-    friend class Private;
 
     class Private;
     std::unique_ptr<Private> d_ptr;

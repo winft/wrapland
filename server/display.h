@@ -34,7 +34,6 @@ namespace Wrapland::Server
 {
 
 class Client;
-class Private;
 class WlOutput;
 
 class AppmenuManager;
@@ -80,6 +79,10 @@ class XdgForeign;
 class XdgOutputManager;
 class XdgShell;
 
+namespace Wayland
+{
+class Display;
+}
 class WRAPLANDSERVER_EXPORT Display : public QObject
 {
     Q_OBJECT
@@ -188,8 +191,8 @@ Q_SIGNALS:
     void clientDisconnected(Wrapland::Server::Client*);
 
 private:
-    friend class Private;
-    std::unique_ptr<Private> d_ptr;
+    friend class Wayland::Display;
+    std::unique_ptr<Wayland::Display> d_ptr;
 };
 
 }

@@ -19,6 +19,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 
+#include <EGL/egl.h>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -71,9 +72,8 @@ public:
     wl_client* createClient(int fd);
     Client* getClient(wl_client* wlClient);
 
+    Server::Client* createClientHandle(wl_client* wlClient);
     void setupClient(Client* client);
-
-    static Client* castClient(Server::Client* client);
 
     std::vector<Client*> const& clients() const;
 
@@ -83,12 +83,11 @@ public:
 
     std::string socket_name;
     Server::Display* handle;
-
-protected:
-    virtual Client* castClientImpl(Server::Client* client) = 0;
+    EGLDisplay eglDisplay{EGL_NO_DISPLAY};
 
 private:
     void addSocket();
+
     wl_display* m_display = nullptr;
     wl_event_loop* m_loop = nullptr;
 

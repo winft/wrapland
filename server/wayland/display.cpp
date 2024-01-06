@@ -34,9 +34,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utils.h"
 
-#include "../client.h"
+#include "../client_p.h"
 #include "../display.h"
-#include "../display_p.h"
 
 #include <algorithm>
 #include <exception>
@@ -47,12 +46,7 @@ namespace Wrapland::Server::Wayland
 
 Display* Display::backendCast(Server::Display* display)
 {
-    return Private::castDisplay(display);
-}
-
-Client* Display::castClient(Server::Client* client)
-{
-    return backendCast(client->display())->castClientImpl(client);
+    return display->d_ptr.get();
 }
 
 Display::Display(Server::Display* handle)
@@ -256,6 +250,13 @@ Client* Display::getClient(wl_client* wlClient)
     }
 
     return nullptr;
+}
+
+Server::Client* Display::createClientHandle(wl_client* wlClient)
+{
+    auto priv_cl = Client::create_client(wlClient, this);
+    setupClient(priv_cl);
+    return priv_cl->handle;
 }
 
 void Display::setupClient(Client* client)

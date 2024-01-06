@@ -62,6 +62,9 @@ public:
 
     void destroy() const;
 
+    static Client* cast_client(Server::Client* client);
+    static Client* create_client(wl_client* wlClient, Display* display);
+
     wl_client* native;
     Server::Client* handle;
 
