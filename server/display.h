@@ -108,9 +108,11 @@ public:
     void dispatch();
     void flush();
 
-    Client* createClient(int fd);
-    Client* getClient(wl_client* client);
+    Client* getClient(wl_client* client) const;
     std::vector<Client*> clients() const;
+
+    Client* createClient(wl_client* client);
+    Client* createClient(int fd);
 
     void setEglDisplay(void* display);
     void* eglDisplay() const;

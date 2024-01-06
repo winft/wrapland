@@ -145,7 +145,7 @@ private:
         }
         // Client not yet known to the server.
         // TODO(romangg): Create backend representation only?
-        nucleus->display->handle->getClient(wlClient);
+        nucleus->display->handle->createClient(wlClient);
 
         // Now the client must be available.
         // TODO(romangg): otherwise send protocol error (oom)

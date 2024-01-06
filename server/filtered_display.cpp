@@ -54,6 +54,11 @@ bool FilteredDisplay::Private::filterCallback(wl_client const* wlClient,
     // respective clang-tidy check.
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
     auto client = priv->q_ptr->getClient(const_cast<wl_client*>(wlClient));
+    if (!client) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+        client = priv->q_ptr->createClient(const_cast<wl_client*>(wlClient));
+    }
+
     auto interface = wl_global_get_interface(wlGlobal);
     auto name = QByteArray::fromRawData(interface->name, static_cast<int>(strlen(interface->name)));
 

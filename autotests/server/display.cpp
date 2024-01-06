@@ -136,8 +136,12 @@ void TestServerDisplay::testClientConnection()
 
     QVERIFY(connectedSpy.isEmpty());
     QVERIFY(display.clients().empty());
+
     auto connection = display.getClient(wlClient);
+    QVERIFY(!connection);
+    connection = display.createClient(wlClient);
     QVERIFY(connection);
+
     QCOMPARE(connection->native(), wlClient);
 
     if (getuid() == 0) {

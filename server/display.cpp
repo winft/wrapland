@@ -98,9 +98,6 @@ Wayland::Client* Private::castClientImpl(Server::Client* client)
 
 Client* Private::createClientHandle(wl_client* wlClient)
 {
-    if (auto* client = getClient(wlClient)) {
-        return client->handle;
-    }
     auto* clientHandle = new Client(wlClient, q_ptr);
     setupClient(clientHandle->d_ptr.get());
     return clientHandle;
@@ -180,9 +177,12 @@ wl_display* Display::native() const
     return d_ptr->native();
 }
 
-Client* Display::getClient(wl_client* wlClient)
+Client* Display::getClient(wl_client* wlClient) const
 {
-    return d_ptr->createClientHandle(wlClient);
+    if (auto client = d_ptr->getClient(wlClient)) {
+        return client->handle;
+    }
+    return nullptr;
 }
 
 std::vector<Client*> Display::clients() const
@@ -194,9 +194,16 @@ std::vector<Client*> Display::clients() const
     return ret;
 }
 
+Client* Display::createClient(wl_client* wlClient)
+{
+    assert(!getClient(wlClient));
+    return d_ptr->createClientHandle(wlClient);
+}
+
 Client* Display::createClient(int fd)
 {
-    return getClient(d_ptr->createClient(fd));
+    auto wlClient = d_ptr->createClient(fd);
+    return createClient(wlClient);
 }
 
 void Display::setEglDisplay(void* display)
