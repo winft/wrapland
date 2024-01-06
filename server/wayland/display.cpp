@@ -255,21 +255,16 @@ Client* Display::getClient(wl_client* wlClient)
 Server::Client* Display::createClientHandle(wl_client* wlClient)
 {
     auto priv_cl = Client::create_client(wlClient, this);
-    setupClient(priv_cl);
+    m_clients.push_back(priv_cl);
+
+    QObject::connect(priv_cl->handle, &Server::Client::disconnected, handle, [this](auto client) {
+        remove_all_if(m_clients,
+                      [client](auto&& candidate) { return candidate->handle == client; });
+        Q_EMIT handle->clientDisconnected(client);
+    });
+
+    Q_EMIT handle->clientConnected(priv_cl->handle);
     return priv_cl->handle;
-}
-
-void Display::setupClient(Client* client)
-{
-    m_clients.push_back(client);
-
-    QObject::connect(
-        client->handle, &Server::Client::disconnected, handle, [this](Server::Client* client) {
-            remove_all_if(m_clients,
-                          [client](auto&& candidate) { return candidate->handle == client; });
-            Q_EMIT handle->clientDisconnected(client);
-        });
-    Q_EMIT handle->clientConnected(client->handle);
 }
 
 std::vector<Client*> const& Display::clients() const

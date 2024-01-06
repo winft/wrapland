@@ -73,7 +73,6 @@ public:
     Client* getClient(wl_client* wlClient);
 
     Server::Client* createClientHandle(wl_client* wlClient);
-    void setupClient(Client* client);
 
     std::vector<Client*> const& clients() const;
 
