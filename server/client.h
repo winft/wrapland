@@ -46,8 +46,6 @@ public:
 
     void flush();
 
-    wl_resource* getResource(quint32 id);
-
     wl_client* native() const;
     Display* display();
 

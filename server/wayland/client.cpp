@@ -102,14 +102,6 @@ Client::createResource(wl_interface const* interface, uint32_t version, uint32_t
     return wl_resource_create(native, interface, static_cast<int>(version), id);
 }
 
-wl_resource* Client::getResource(uint32_t id) const
-{
-    if (!native) {
-        return nullptr;
-    }
-    return wl_client_get_object(native, id);
-}
-
 gid_t Client::groupId() const
 {
     return m_group;

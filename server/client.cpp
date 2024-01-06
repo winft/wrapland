@@ -48,11 +48,6 @@ void Client::destroy()
     d_ptr->destroy();
 }
 
-wl_resource* Client::getResource(quint32 id)
-{
-    return d_ptr->getResource(id);
-}
-
 wl_client* Client::native() const
 {
     return d_ptr->native;
