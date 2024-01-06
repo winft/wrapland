@@ -78,4 +78,14 @@ std::string Client::executablePath() const
     return d_ptr->executablePath();
 }
 
+std::string Client::security_context_app_id() const
+{
+    return d_ptr->security_context_app_id();
+}
+
+void Client::set_security_context_app_id(std::string const& id)
+{
+    d_ptr->set_security_context_app_id(id);
+}
+
 }

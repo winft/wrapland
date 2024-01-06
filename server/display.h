@@ -64,6 +64,7 @@ class PresentationManager;
 class primary_selection_device_manager;
 class RelativePointerManagerV1;
 class Seat;
+class security_context_manager_v1;
 class ServerSideDecorationPaletteManager;
 class ShadowManager;
 class SlideManager;
@@ -183,6 +184,9 @@ public:
         Server::kde_idle* kde_idle{nullptr};
         Server::drm_lease_device_v1* drm_lease_device_v1{nullptr};
         Server::IdleInhibitManagerV1* idle_inhibit_manager_v1{nullptr};
+
+        // Security
+        Server::security_context_manager_v1* security_context_manager_v1{nullptr};
     } globals;
 
 Q_SIGNALS:

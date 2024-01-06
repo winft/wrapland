@@ -133,4 +133,14 @@ std::string Client::executablePath() const
     return m_executablePath;
 }
 
+std::string Client::security_context_app_id() const
+{
+    return m_security_context_app_id;
+}
+
+void Client::set_security_context_app_id(std::string const& id)
+{
+    m_security_context_app_id = id;
+}
+
 }

@@ -59,6 +59,8 @@ public:
     uid_t userId() const;
     gid_t groupId() const;
     std::string executablePath() const;
+    std::string security_context_app_id() const;
+    void set_security_context_app_id(std::string const& id);
 
 Q_SIGNALS:
     void disconnected(Client*);

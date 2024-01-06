@@ -59,6 +59,8 @@ public:
     uid_t userId() const;
     gid_t groupId() const;
     std::string executablePath() const;
+    std::string security_context_app_id() const;
+    void set_security_context_app_id(std::string const& id);
 
     void destroy() const;
 
@@ -75,6 +77,7 @@ private:
     uid_t m_user = 0;
     gid_t m_group = 0;
     std::string m_executablePath;
+    std::string m_security_context_app_id;
 
     struct DestroyWrapper {
         Client* client;
