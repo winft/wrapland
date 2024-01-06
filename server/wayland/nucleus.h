@@ -150,6 +150,7 @@ private:
         // Now the client must be available.
         // TODO(romangg): otherwise send protocol error (oom)
         auto client = get_client();
+        Q_EMIT nucleus->display->handle->clientConnected(client->handle);
         bind_to_global(client);
     }
 

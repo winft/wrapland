@@ -249,7 +249,6 @@ Server::Client* Display::createClientHandle(wl_client* wlClient)
         Q_EMIT handle->clientDisconnected(client);
     });
 
-    Q_EMIT handle->clientConnected(priv_cl->handle);
     return priv_cl->handle;
 }
 
