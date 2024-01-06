@@ -223,20 +223,6 @@ void Display::dispatch()
     }
 }
 
-wl_client* Display::createClient(int fd)
-{
-    Q_ASSERT(fd >= 0);
-    Q_ASSERT(m_display);
-
-    auto* wlClient = wl_client_create(m_display, fd);
-
-    // TODO(romangg): throw instead?
-    if (!wlClient) {
-        return nullptr;
-    }
-    return wlClient;
-}
-
 Client* Display::getClient(wl_client* wlClient)
 {
     Q_ASSERT(wlClient);

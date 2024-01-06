@@ -177,8 +177,17 @@ Client* Display::createClient(wl_client* wlClient)
 
 Client* Display::createClient(int fd)
 {
-    auto wlClient = d_ptr->createClient(fd);
-    return createClient(wlClient);
+    assert(fd >= 0);
+    assert(d_ptr->native());
+
+    auto wl_client = wl_client_create(d_ptr->native(), fd);
+
+    // TODO(romangg): throw instead?
+    if (!wl_client) {
+        return nullptr;
+    }
+
+    return createClient(wl_client);
 }
 
 void Display::setEglDisplay(void* display)

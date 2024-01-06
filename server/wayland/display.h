@@ -69,7 +69,6 @@ public:
     void setRunning(bool running);
     void installSocketNotifier(QObject* parent);
 
-    wl_client* createClient(int fd);
     Client* getClient(wl_client* wlClient);
 
     Server::Client* createClientHandle(wl_client* wlClient);
