@@ -51,6 +51,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "primary_selection.h"
 #include "relativepointer.h"
 #include "seat.h"
+#include "security_context_v1.h"
 #include "server_decoration_palette.h"
 #include "shadow.h"
 #include "shell.h"
@@ -94,6 +95,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <wayland-presentation-time-client-protocol.h>
 #include <wayland-primary-selection-unstable-v1-client-protocol.h>
 #include <wayland-relativepointer-unstable-v1-client-protocol.h>
+#include <wayland-security-context-v1-client-protocol.h>
 #include <wayland-server-decoration-palette-client-protocol.h>
 #include <wayland-shadow-client-protocol.h>
 #include <wayland-slide-client-protocol.h>
@@ -215,6 +217,16 @@ static QMap<Registry::Interface, SuppertedInterfaceData> const s_interfaces = {
             &wl_seat_interface,
             &Registry::seatAnnounced,
             &Registry::seatRemoved,
+        },
+    },
+    {
+        Registry::Interface::SecurityContextManagerV1,
+        {
+            1,
+            QByteArrayLiteral("wp_security_context_manager_v1"),
+            &wp_security_context_manager_v1_interface,
+            &Registry::securityContextManagerV1Announced,
+            &Registry::securityContextManagerV1Removed,
         },
     },
     {
@@ -911,6 +923,7 @@ BIND(PointerGesturesUnstableV1, zwp_pointer_gestures_v1)
 BIND(PointerConstraintsUnstableV1, zwp_pointer_constraints_v1)
 BIND(PresentationManager, wp_presentation)
 BIND(PrimarySelectionDeviceManager, zwp_primary_selection_device_manager_v1)
+BIND(SecurityContextManagerV1, wp_security_context_manager_v1)
 BIND(XdgActivationV1, xdg_activation_v1)
 BIND(XdgExporterUnstableV2, zxdg_exporter_v2)
 BIND(XdgImporterUnstableV2, zxdg_importer_v2)
@@ -1037,6 +1050,13 @@ Registry::createInputMethodManagerV2(quint32 name, quint32 version, QObject* par
 {
     return d->create<input_method_manager_v2>(
         name, version, parent, &Registry::bindInputMethodManagerV2);
+}
+
+security_context_manager_v1*
+Registry::createSecurityContextManagerV1(quint32 name, quint32 version, QObject* parent)
+{
+    return d->create<security_context_manager_v1>(
+        name, version, parent, &Registry::bindSecurityContextManagerV1);
 }
 
 text_input_manager_v3*

@@ -74,6 +74,17 @@ void Client::destroy() const
     wl_client_destroy(native);
 }
 
+Client* Client::cast_client(Server::Client* client)
+{
+    return client->d_ptr.get();
+}
+
+Client* Client::create_client(wl_client* wlClient, Display* display)
+{
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
+    return (new Server::Client(wlClient, display->handle))->d_ptr.get();
+}
+
 void Client::destroyListenerCallback(wl_listener* listener, [[maybe_unused]] void* data)
 {
     // The wl_container_of macro can not be used with auto keyword and in the macro from libwayland
@@ -102,14 +113,6 @@ Client::createResource(wl_interface const* interface, uint32_t version, uint32_t
     return wl_resource_create(native, interface, static_cast<int>(version), id);
 }
 
-wl_resource* Client::getResource(uint32_t id) const
-{
-    if (!native) {
-        return nullptr;
-    }
-    return wl_client_get_object(native, id);
-}
-
 gid_t Client::groupId() const
 {
     return m_group;
@@ -128,6 +131,16 @@ uid_t Client::userId() const
 std::string Client::executablePath() const
 {
     return m_executablePath;
+}
+
+std::string Client::security_context_app_id() const
+{
+    return m_security_context_app_id;
+}
+
+void Client::set_security_context_app_id(std::string const& id)
+{
+    m_security_context_app_id = id;
 }
 
 }

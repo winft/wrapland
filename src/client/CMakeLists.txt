@@ -46,6 +46,7 @@ set(CLIENT_LIB_SRCS
     registry.cpp
     relativepointer.cpp
     seat.cpp
+    security_context_v1.cpp
     server_decoration_palette.cpp
     shadow.cpp
     shell.cpp
@@ -82,6 +83,11 @@ ecm_qt_declare_logging_category(CLIENT_LIB_SRCS
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
   PROTOCOL ${WaylandProtocols_DATADIR}/staging/drm-lease/drm-lease-v1.xml
   BASENAME drm-lease-v1
+)
+
+ecm_add_wayland_server_protocol(CLIENT_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/staging/security-context/security-context-v1.xml
+  BASENAME security-context-v1
 )
 
 ecm_add_wayland_client_protocol(CLIENT_LIB_SRCS
@@ -267,6 +273,7 @@ set(CLIENT_GENERATED_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-contrast-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-slide-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-dpms-client-protocol.h
+    ${CMAKE_CURRENT_BINARY_DIR}/wayland-security-context-v1-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-server-decoration-palette-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-text-input-v2-client-protocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/wayland-viewporter-client-protocol.h
@@ -366,6 +373,7 @@ set(CLIENT_LIB_HEADERS
     registry.h
     relativepointer.h
     seat.h
+    security_context_v1.h
     server_decoration_palette.h
     shadow.h
     shell.h

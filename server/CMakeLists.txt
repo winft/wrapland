@@ -41,6 +41,7 @@ set(SERVER_LIB_SRCS
   region.cpp
   relative_pointer_v1.cpp
   seat.cpp
+  security_context_v1.cpp
   server_decoration_palette.cpp
   shadow.cpp
   slide.cpp
@@ -128,6 +129,11 @@ ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
   PROTOCOL ${WaylandProtocols_DATADIR}/staging/drm-lease/drm-lease-v1.xml
   BASENAME drm-lease-v1
+)
+
+ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
+  PROTOCOL ${WaylandProtocols_DATADIR}/staging/security-context/security-context-v1.xml
+  BASENAME security-context-staging-v1
 )
 
 ecm_add_wayland_server_protocol(SERVER_LIB_SRCS
@@ -300,6 +306,8 @@ set(SERVER_GENERATED_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-qt-surface-extension-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-relativepointer-unstable-v1-server-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-security-context-staging-v1-client-protocol.h
+  ${CMAKE_CURRENT_BINARY_DIR}/wayland-security-context-staging-v1-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-server_decoration_palette-client-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-server_decoration_palette-server-protocol.h
   ${CMAKE_CURRENT_BINARY_DIR}/wayland-shadow-client-protocol.h
@@ -413,6 +421,7 @@ set(SERVER_LIB_HEADERS
   region.h
   relative_pointer_v1.h
   seat.h
+  security_context_v1.h
   server_decoration_palette.h
   shadow.h
   slide.h

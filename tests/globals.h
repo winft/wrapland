@@ -34,6 +34,7 @@
 #include "../../server/primary_selection.h"
 #include "../../server/relative_pointer_v1.h"
 #include "../../server/seat.h"
+#include "../../server/security_context_v1.h"
 #include "../../server/server_decoration_palette.h"
 #include "../../server/shadow.h"
 #include "../../server/slide.h"
@@ -127,6 +128,9 @@ struct globals {
     std::unique_ptr<Server::kde_idle> kde_idle;
     std::unique_ptr<Server::drm_lease_device_v1> drm_lease_device_v1;
     std::unique_ptr<Server::IdleInhibitManagerV1> idle_inhibit_manager_v1;
+
+    // Security
+    std::unique_ptr<Server::security_context_manager_v1> security_context_manager_v1;
 };
 
 }

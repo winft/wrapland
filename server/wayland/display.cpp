@@ -34,9 +34,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utils.h"
 
-#include "../client.h"
+#include "../client_p.h"
 #include "../display.h"
-#include "../display_p.h"
 
 #include <algorithm>
 #include <exception>
@@ -47,12 +46,7 @@ namespace Wrapland::Server::Wayland
 
 Display* Display::backendCast(Server::Display* display)
 {
-    return Private::castDisplay(display);
-}
-
-Client* Display::castClient(Server::Client* client)
-{
-    return backendCast(client->display())->castClientImpl(client);
+    return display->d_ptr.get();
 }
 
 Display::Display(Server::Display* handle)
@@ -229,20 +223,6 @@ void Display::dispatch()
     }
 }
 
-wl_client* Display::createClient(int fd)
-{
-    Q_ASSERT(fd >= 0);
-    Q_ASSERT(m_display);
-
-    auto* wlClient = wl_client_create(m_display, fd);
-
-    // TODO(romangg): throw instead?
-    if (!wlClient) {
-        return nullptr;
-    }
-    return wlClient;
-}
-
 Client* Display::getClient(wl_client* wlClient)
 {
     Q_ASSERT(wlClient);
@@ -258,17 +238,18 @@ Client* Display::getClient(wl_client* wlClient)
     return nullptr;
 }
 
-void Display::setupClient(Client* client)
+Server::Client* Display::createClientHandle(wl_client* wlClient)
 {
-    m_clients.push_back(client);
+    auto priv_cl = Client::create_client(wlClient, this);
+    m_clients.push_back(priv_cl);
 
-    QObject::connect(
-        client->handle, &Server::Client::disconnected, handle, [this](Server::Client* client) {
-            remove_all_if(m_clients,
-                          [client](auto&& candidate) { return candidate->handle == client; });
-            Q_EMIT handle->clientDisconnected(client);
-        });
-    Q_EMIT handle->clientConnected(client->handle);
+    QObject::connect(priv_cl->handle, &Server::Client::disconnected, handle, [this](auto client) {
+        remove_all_if(m_clients,
+                      [client](auto&& candidate) { return candidate->handle == client; });
+        Q_EMIT handle->clientDisconnected(client);
+    });
+
+    return priv_cl->handle;
 }
 
 std::vector<Client*> const& Display::clients() const

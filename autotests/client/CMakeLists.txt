@@ -469,6 +469,20 @@ add_test(NAME wrapland-testKdeIdle COMMAND testKdeIdle)
 ecm_mark_as_test(testKdeIdle)
 
 # ##################################################################################################
+# Test security-context
+# ##################################################################################################
+set(security_context_test_SRCS security_context.cpp)
+add_executable(security-context-test ${security_context_test_SRCS})
+target_link_libraries(security-context-test
+  Qt6::Test
+  Qt6::Gui
+  Wrapland::Client
+  Wrapland::Server
+)
+add_test(NAME wrapland-test-security-context COMMAND security-context-test)
+ecm_mark_as_test(security-context-test)
+
+# ##################################################################################################
 # Test Keyboard Shortcuts Inhibitor
 # ##################################################################################################
 set(testKeyboardShortcutsInhibitor_SRCS keyboard_shortcuts_inhibitor.cpp)

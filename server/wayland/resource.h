@@ -57,7 +57,7 @@ public:
              wl_interface const* interface,
              void const* impl,
              Handle* handle)
-        : Resource(Display::castClient(client), version, id, interface, impl, handle)
+        : Resource(Client::cast_client(client), version, id, interface, impl, handle)
     {
     }
 

@@ -136,8 +136,12 @@ void TestServerDisplay::testClientConnection()
 
     QVERIFY(connectedSpy.isEmpty());
     QVERIFY(display.clients().empty());
+
     auto connection = display.getClient(wlClient);
+    QVERIFY(!connection);
+    connection = display.createClient(wlClient);
     QVERIFY(connection);
+
     QCOMPARE(connection->native(), wlClient);
 
     if (getuid() == 0) {
@@ -157,14 +161,13 @@ void TestServerDisplay::testClientConnection()
 
     auto const& constRef = *connection;
     QCOMPARE(constRef.native(), wlClient);
-    QCOMPARE(connectedSpy.count(), 1);
+    QCOMPARE(connectedSpy.count(), 0);
 
-    QCOMPARE(connectedSpy.first().first().value<Wrapland::Server::Client*>(), connection);
     QCOMPARE(display.clients().size(), 1);
     QCOMPARE(display.clients()[0], connection);
 
     QCOMPARE(connection, display.getClient(wlClient));
-    QCOMPARE(connectedSpy.count(), 1);
+    QCOMPARE(connectedSpy.count(), 0);
 
     // Create a second client.
     int sv2[2];
@@ -176,10 +179,7 @@ void TestServerDisplay::testClientConnection()
     auto connection2 = display.getClient(client2->native());
     QVERIFY(connection2);
     QCOMPARE(connection2, client2);
-    QCOMPARE(connectedSpy.count(), 2);
-    QCOMPARE(connectedSpy.first().first().value<Wrapland::Server::Client*>(), connection);
-    QCOMPARE(connectedSpy.last().first().value<Wrapland::Server::Client*>(), connection2);
-    QCOMPARE(connectedSpy.last().first().value<Wrapland::Server::Client*>(), client2);
+    QCOMPARE(connectedSpy.count(), 0);
     QCOMPARE(display.clients().size(), 2);
     QCOMPARE(display.clients()[0], connection);
     QCOMPARE(display.clients()[1], connection2);

@@ -52,7 +52,6 @@ public:
 
     void flush() const;
     wl_resource* createResource(wl_interface const* interface, uint32_t version, uint32_t id) const;
-    wl_resource* getResource(uint32_t id) const;
 
     Display* display() const;
 
@@ -60,8 +59,13 @@ public:
     uid_t userId() const;
     gid_t groupId() const;
     std::string executablePath() const;
+    std::string security_context_app_id() const;
+    void set_security_context_app_id(std::string const& id);
 
     void destroy() const;
+
+    static Client* cast_client(Server::Client* client);
+    static Client* create_client(wl_client* wlClient, Display* display);
 
     wl_client* native;
     Server::Client* handle;
@@ -73,6 +77,7 @@ private:
     uid_t m_user = 0;
     gid_t m_group = 0;
     std::string m_executablePath;
+    std::string m_security_context_app_id;
 
     struct DestroyWrapper {
         Client* client;

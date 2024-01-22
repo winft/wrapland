@@ -58,6 +58,7 @@ struct org_kde_plasma_virtual_desktop_management;
 struct org_kde_plasma_window_management;
 struct org_kde_kwin_server_decoration_palette_manager;
 struct wp_drm_lease_device_v1;
+struct wp_security_context_manager_v1;
 struct wp_viewporter;
 struct xdg_activation_v1;
 struct xdg_shell;
@@ -118,6 +119,7 @@ class ContrastManager;
 class SlideManager;
 class Shell;
 class ShmPool;
+class security_context_manager_v1;
 class ServerSideDecorationPaletteManager;
 class SubCompositor;
 class TextInputManagerV2;
@@ -224,6 +226,7 @@ public:
         PrimarySelectionDeviceManager,
         DrmLeaseDeviceV1,     ///< Refers to wp_drm_lease_device_v1, @since 0.523.0
         DataControlManagerV1, ///< Refers to zwlr_data_control_manager_v1 interface, @since 0.523.0
+        SecurityContextManagerV1,
     };
     explicit Registry(QObject* parent = nullptr);
     virtual ~Registry();
@@ -564,6 +567,15 @@ public:
      * @since 0.522.0
      **/
     zwlr_layer_shell_v1* bindLayerShellV1(uint32_t name, uint32_t version) const;
+    /**
+     * Binds the wp_security_context_manager_v1 with @p name and @p version.
+     * If the @p name does not exists or is not for the maanger extension in version 1,
+     * @c null will be returned.
+     *
+     * Prefer using createSecurityContextManagerV1
+     */
+    wp_security_context_manager_v1* bindSecurityContextManagerV1(uint32_t name,
+                                                                 uint32_t version) const;
     /**
      * Binds the org_kde_kwin_slide_manager with @p name and @p version.
      * If the @p name does not exist or is not for the slide manager interface,
@@ -1152,6 +1164,24 @@ public:
      * @since 5.4
      **/
     FakeInput* createFakeInput(quint32 name, quint32 version, QObject* parent = nullptr);
+    /**
+     * Creates a security_context_manager_v1 and sets it up to manage the interface identified by
+     * @p name and @p version.
+     *
+     * This factory method supports the following interfaces:
+     * @li wp_security_context_manager_v1
+     *
+     * If @p name is for one of the supported interfaces the corresponding manager will be created,
+     * otherwise @c null will be returned.
+     *
+     * @param name The name of the interface to bind
+     * @param version The version of the interface to use
+     * @param parent The parent for the security_context_manager_v1
+     *
+     * @returns The created security_context_manager_v1
+     **/
+    security_context_manager_v1*
+    createSecurityContextManagerV1(quint32 name, quint32 version, QObject* parent = nullptr);
     /**
      * Creates a ShadowManager and sets it up to manage the interface identified by
      * @p name and @p version.
@@ -1763,6 +1793,12 @@ Q_SIGNALS:
      **/
     void fakeInputAnnounced(quint32 name, quint32 version);
     /**
+     * Emitted whenever a wp_security_context_manager_v1 interface gets announced.
+     * @param name The name for the announced interface
+     * @param version The maximum supported version of the announced interface
+     **/
+    void securityContextManagerV1Announced(quint32 name, quint32 version);
+    /**
      * Emitted whenever a org_kde_kwin_shadow_manager interface gets announced.
      * @param name The name for the announced interface
      * @param version The maximum supported version of the announced interface
@@ -1967,6 +2003,11 @@ Q_SIGNALS:
      * @param name The name for the removed interface
      **/
     void seatRemoved(quint32 name);
+    /**
+     * Emitted whenever a wp_security_context_manager_v1 interface gets removed.
+     * @param name The name for the removed interface
+     **/
+    void securityContextManagerV1Removed(quint32 name);
     /**
      * Emitted whenever a wl_shm interface gets removed.
      * @param name The name for the removed interface
