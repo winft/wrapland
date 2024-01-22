@@ -34,7 +34,6 @@ namespace Wrapland::Server
 {
 
 class Client;
-class Private;
 class WlOutput;
 
 class AppmenuManager;
@@ -65,6 +64,7 @@ class PresentationManager;
 class primary_selection_device_manager;
 class RelativePointerManagerV1;
 class Seat;
+class security_context_manager_v1;
 class ServerSideDecorationPaletteManager;
 class ShadowManager;
 class SlideManager;
@@ -80,6 +80,10 @@ class XdgForeign;
 class XdgOutputManager;
 class XdgShell;
 
+namespace Wayland
+{
+class Display;
+}
 class WRAPLANDSERVER_EXPORT Display : public QObject
 {
     Q_OBJECT
@@ -108,9 +112,11 @@ public:
     void dispatch();
     void flush();
 
-    Client* createClient(int fd);
-    Client* getClient(wl_client* client);
+    Client* getClient(wl_client* client) const;
     std::vector<Client*> clients() const;
+
+    Client* createClient(wl_client* client);
+    Client* createClient(int fd);
 
     void setEglDisplay(void* display);
     void* eglDisplay() const;
@@ -178,6 +184,9 @@ public:
         Server::kde_idle* kde_idle{nullptr};
         Server::drm_lease_device_v1* drm_lease_device_v1{nullptr};
         Server::IdleInhibitManagerV1* idle_inhibit_manager_v1{nullptr};
+
+        // Security
+        Server::security_context_manager_v1* security_context_manager_v1{nullptr};
     } globals;
 
 Q_SIGNALS:
@@ -186,8 +195,8 @@ Q_SIGNALS:
     void clientDisconnected(Wrapland::Server::Client*);
 
 private:
-    friend class Private;
-    std::unique_ptr<Private> d_ptr;
+    friend class Wayland::Display;
+    std::unique_ptr<Wayland::Display> d_ptr;
 };
 
 }

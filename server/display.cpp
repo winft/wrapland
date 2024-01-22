@@ -70,8 +70,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "logging.h"
 
-#include "display_p.h"
-
 #include <EGL/egl.h>
 
 #include <algorithm>
@@ -80,34 +78,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 namespace Wrapland::Server
 {
 
-Private* Private::castDisplay(Server::Display* display)
-{
-    return display->d_ptr.get();
-}
-
-Private::Private(Server::Display* display)
-    : Wayland::Display(display)
-    , q_ptr(display)
-{
-}
-
-Wayland::Client* Private::castClientImpl(Server::Client* client)
-{
-    return client->d_ptr.get();
-}
-
-Client* Private::createClientHandle(wl_client* wlClient)
-{
-    if (auto* client = getClient(wlClient)) {
-        return client->handle;
-    }
-    auto* clientHandle = new Client(wlClient, q_ptr);
-    setupClient(clientHandle->d_ptr.get());
-    return clientHandle;
-}
-
 Display::Display()
-    : d_ptr(new Private(this))
+    : d_ptr(new Wayland::Display(this))
 {
 }
 
@@ -180,9 +152,12 @@ wl_display* Display::native() const
     return d_ptr->native();
 }
 
-Client* Display::getClient(wl_client* wlClient)
+Client* Display::getClient(wl_client* wlClient) const
 {
-    return d_ptr->createClientHandle(wlClient);
+    if (auto client = d_ptr->getClient(wlClient)) {
+        return client->handle;
+    }
+    return nullptr;
 }
 
 std::vector<Client*> Display::clients() const
@@ -194,9 +169,25 @@ std::vector<Client*> Display::clients() const
     return ret;
 }
 
+Client* Display::createClient(wl_client* wlClient)
+{
+    assert(!getClient(wlClient));
+    return d_ptr->createClientHandle(wlClient);
+}
+
 Client* Display::createClient(int fd)
 {
-    return getClient(d_ptr->createClient(fd));
+    assert(fd >= 0);
+    assert(d_ptr->native());
+
+    auto wl_client = wl_client_create(d_ptr->native(), fd);
+
+    // TODO(romangg): throw instead?
+    if (!wl_client) {
+        return nullptr;
+    }
+
+    return createClient(wl_client);
 }
 
 void Display::setEglDisplay(void* display)

@@ -36,6 +36,12 @@ namespace Wrapland::Server
 
 class Display;
 
+namespace Wayland
+{
+class Client;
+class Display;
+}
+
 class WRAPLANDSERVER_EXPORT Client : public QObject
 {
     Q_OBJECT
@@ -46,8 +52,6 @@ public:
 
     void flush();
 
-    wl_resource* getResource(quint32 id);
-
     wl_client* native() const;
     Display* display();
 
@@ -55,13 +59,16 @@ public:
     uid_t userId() const;
     gid_t groupId() const;
     std::string executablePath() const;
+    std::string security_context_app_id() const;
+    void set_security_context_app_id(std::string const& id);
 
 Q_SIGNALS:
     void disconnected(Client*);
 
 private:
+    friend class Wayland::Client;
+
     Client(wl_client* wlClient, Display* display);
-    friend class Private;
 
     class Private;
     std::unique_ptr<Private> d_ptr;
