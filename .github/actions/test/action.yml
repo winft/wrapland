@@ -1,0 +1,24 @@
+
+name: Test with CTest
+description: Runs tests through CTest, starts Xvfb in the background.
+runs:
+    using: "composite"
+    steps:
+      - name: Untar artifact
+        run: tar -xzf build-dir.tar
+        shell: bash
+      - name: List all tests
+        run: ctest --test-dir build -N
+        shell: bash
+      # Tests currently only run in one thread.
+      - name: Run selected tests
+        env:
+          DISPLAY: ":1"
+          WAYLAND_DEBUG: "server"
+          MESA_DEBUG: "1"
+          LIBGL_DEBUG: "verbose"
+          QT_LOGGING_RULES: "*=true"
+          ASAN_OPTIONS: "detect_odr_violation=0"
+        run: "Xvfb :1 -ac -screen 0 1920x1080x24 > /dev/null 2>&1 &
+          eval dbus-run-session ctest --test-dir build -T Test --output-on-failure --no-compress-output $CTEST_ARGS"
+        shell: bash

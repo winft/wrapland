@@ -1,0 +1,90 @@
+name: Validate code change
+on: push
+jobs:
+  clang-format:
+    name: Clang-Format
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - run: pacman -Sy --needed --quiet --noconfirm clang python
+      - run: bash tooling/analysis/clang-format.sh
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.com/kwinft/ci-images/archlinux/frameworks-master
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          artifact-name: 'build'
+
+  build-sanitized:
+    name: Build with Sanitizers
+    runs-on: ubuntu-latest
+    container:
+        image: registry.gitlab.com/kwinft/ci-images/archlinux/frameworks-master
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          artifact-name: 'build-sanitized'
+          is-sanitized: 'true'
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: build
+    container:
+      image: registry.gitlab.com/kwinft/ci-images/archlinux/frameworks-master
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+      - name: Run tests
+        uses: ./.github/actions/test
+
+  test-sanitized:
+    name: Tests With Sanitizers
+    runs-on: ubuntu-latest
+    needs: build-sanitized
+    container:
+      image: registry.gitlab.com/kwinft/ci-images/archlinux/frameworks-master
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-sanitized
+      - name: Run tests
+        uses: ./.github/actions/test
+
+  clang-tidy:
+    name: Clang-Tidy
+    runs-on: ubuntu-latest
+    needs: build
+    container:
+      image: registry.gitlab.com/kwinft/ci-images/archlinux/frameworks-master
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+      - name: Untar artifact
+        run: tar -xzf build-dir.tar
+      - name: Run Clang-Tidy
+        run: bash tooling/analysis/clang-tidy.sh build

@@ -1,0 +1,53 @@
+name: Build and Install
+description: For C++ apps with CMake and clang.
+inputs:
+  artifact-name:
+    description: "Artifact name of build dir"
+    required: false
+    default: 'build'
+  is-sanitized:
+    description: Should sanitizers be compiled into the build
+    required: false
+    default: 'false'
+  cmake-args:
+    description: Specify CMake arguments manually
+    required: false
+    default: ''
+outputs:
+  cmake-args:
+    description: Computed CMake arguments
+    value: ${{ steps.set-cmake-args.outputs.cmake-args }}
+runs:
+  using: "composite"
+  steps:
+    - id: set-cmake-args
+      run:
+        "if [[ -z \"${{ inputs.cmake-args }}\" ]]; then \
+          if [[ \"${{ inputs.is-sanitized }}\" == \"true\" ]]; then \
+            echo \"cmake-args=-DECM_ENABLE_SANITIZERS='address;leak;undefined' \
+              -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++\" >> $GITHUB_OUTPUT; \
+          else \
+            echo \"cmake-args=-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+              -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_EXE_LINKER_FLAGS=--coverage \
+              -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++\" >> $GITHUB_OUTPUT; \
+          fi; \
+        else \
+          echo \"cmake-args=${{ inputs.cmake-args }}\" >> $GITHUB_OUTPUT; \
+        fi"
+      shell: bash
+    - run: mkdir build
+      shell: bash
+    - run: cmake -S . -B build ${{ steps.set-cmake-args.outputs.cmake-args }}
+      shell: bash
+    - run: cmake --build build
+      shell: bash
+    - run: cmake --install build
+      shell: bash
+    - name: 'Tar artifact (keep permissions)'
+      run: tar -czf build-dir.tar build
+      shell: bash
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: build-dir.tar
+        retention-days: 1
