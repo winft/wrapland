@@ -88,3 +88,16 @@ jobs:
         run: tar -xzf build-dir.tar
       - name: Run Clang-Tidy
         run: bash tooling/analysis/clang-tidy.sh build
+
+  ci-image-rebuild:
+    name: Trigger CI Image Rebuild
+    runs-on: ubuntu-latest
+    needs: [test, test-sanitized, clang-tidy]
+    if: github.repository == 'winft/wrapland' && github.ref_name == 'master'
+    env:
+      GITLAB_TARGET_ID: 17539846
+    steps:
+      - run: >
+          curl --request POST --form token=${{ secrets.GITLAB_CI_IMAGES_REBUILD }}
+          --form ref=master --form "variables[TRIGGER_TYPE]=wrapland_rebuild"
+          https://gitlab.com/api/v4/projects/${{ env.GITLAB_TARGET_ID }}/trigger/pipeline
