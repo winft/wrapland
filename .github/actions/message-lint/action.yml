@@ -1,0 +1,21 @@
+# action.yml
+name: 'Commitlint'
+description: 'Lint commit messages between source branch and compare branch'
+inputs:
+  upstream-repo:
+    description: 'The repo with the target branch to compare against'
+    required: true
+  upstream-branch:
+    description: 'The target branch we compare against'
+    required: false
+    default: 'master'
+  source-branch:
+    description: 'The source branch that is ahead of upstream target branch'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.upstream-repo }}
+    - ${{ inputs.upstream-branch }}
+    - ${{ inputs.source-branch }}

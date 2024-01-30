@@ -1,6 +1,18 @@
 name: Validate code change
 on: push
 jobs:
+  message-lint:
+    name: Commit Message Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Lint commit messages
+        uses: ./.github/actions/message-lint
+        with:
+          upstream-repo: 'https://github.com/winft/wrapland.git'
+          source-branch: ${{ github.ref_name }}
+
   clang-format:
     name: Clang-Format
     runs-on: ubuntu-latest
