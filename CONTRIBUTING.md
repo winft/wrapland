@@ -1,9 +1,14 @@
 # Contributing to Wrapland
 
- - [Logging and Debugging](#logging-and-debugging)
- - [Submission Guideline](#submission-guideline)
- - [Commit Message Guideline](#commit-message-guideline)
- - [Contact](#contact)
+- [Contributing to Wrapland](#contributing-to-wrapland)
+  - [Logging and Debugging](#logging-and-debugging)
+  - [Submission Guideline](#submission-guideline)
+    - [Issues for large changes](#issues-for-large-changes)
+    - [Pull requests](#pull-requests)
+  - [Commit Message Guideline](#commit-message-guideline)
+    - [Example](#example)
+    - [Tooling](#tooling)
+  - [Contact](#contact)
 
 ## Logging and Debugging
 The first step in contributing to the project
@@ -14,10 +19,11 @@ that makes use of Wrapland.
 This means studying the debug log
 of the program.
 
-*KWinFT* is a program that makes use of Wrapland's server and client libraries.
-For further information on how to log and debug KWinFT and by that also Wrapland
+*Theseus' Ship* is a program that makes use of Wrapland's server and client libraries
+through *The Compositor Modules*.
+For further information on how to log and debug Theseus' Ship and by that also Wrapland
 see the Logging and Debugging chapter
-in [KWinFT's Contributing document][kwinft-log-debug].
+in [Theseus' Ship's Contributing document][theseus-ship-log-debug].
 
 Another library and system service with a backend plugin
 that makes use of Wrapland's client library is *Disman*.
@@ -29,7 +35,7 @@ Contributions are very welcome but follow a strict process.
 
 ### Issues for large changes
 For smaller contributions like bug fixes or spelling corrections it is sufficient to open a
-[merge request][merge-request].
+[pull request][pull-request].
 
 For larger feature patches or code refactorings opening an [issue ticket][issue] *beforehand* is
 mandatory. In such an issue primarily must be outlined:
@@ -42,7 +48,7 @@ but explicative enough, if necessary with graphics, diagrams, examples, such tha
 able to quickly understand the gist of it and can come to a decision if this is indeed a valid
 issue and the proposed solution is sensible as well as if it fits the overall project direction.
 
-While such an issue must be created before a merge request for the final implementation of the
+While such an issue must be created before a pull request for the final implementation of the
 proposed solution is opened, it is permissible to attach a sample, prototype branch implementing the
 proposed solution, demonstrating its applicability. There is no guarantee though that this sample
 implementation or even the proposed solution at all will be selected for further processing.
@@ -58,7 +64,7 @@ specified. Then the issue will keep the decide label until that changes.
 be opened with the initial main/overview issue keeping the decide label.
 * The proposed solution is sensible and actionable. Then the decide label will be replaced with the
 *execute* label. At this point an issue might be assigned to a contributor for executing the
-described solution and submitting it in form of a merge request.
+described solution and submitting it in form of a pull request.
 
 The overall idea behind this process is not to make contributions difficult but to allow the
 maintainers and project lead to act quickly on contributions and to keep them moving forward at a
@@ -69,8 +75,8 @@ If a change is small enough for making an issue optional or not is the maintaine
 general it is better to assume opening an issue is needed, especially for feature changes and
 refactorings.
 
-### Merge requests
-The change in a merge request must be split up in small logical partitioned commits.
+### Pull requests
+The change in a pull request must be split up in small logical partitioned commits.
 
 New features *must* come with new autotests making sure the added functionality behaves as
 advertised, bug fixes *should* come with an adaption or extension to one of the existing one.
@@ -82,8 +88,8 @@ Wrapland releases are aligned with Plasma releases. See the [Plasma schedule][pl
 information on when the next new major version is released from master branch or a minor release
 with changes from one of the bug-fix branches.
 
-To land the merge request in the next release it must be concluded before the branch off to the new
-version. The exception are bug fixes. Such contributions will be merged first to the master branch
+To land the pull request in the next release it must be concluded before the branch off to the new
+version. The exception are bug fixes. Such contributions will be pulled first to the master branch
 and if no issues with the change were found on there will be cherry-picked back to the current
 stable branch. The current stable branch is the last branch being branched off with the name
 pattern *Plasma/\**.
@@ -110,7 +116,7 @@ amendments:
 * Any line of the message must be 90 characters or shorter.
 * Angular's [Revert][angular-revert] and [Subject][angular-subject] policies are applied.
 
-Commits deliberately ignoring this guideline will not be merged and in case reverted.
+Commits deliberately ignoring this guideline will not be pulled and in case reverted.
 
 ### Example
 
@@ -120,15 +126,15 @@ Commits deliberately ignoring this guideline will not be merged and in case reve
     Instead provide the correct value A by changing B to C.
 
 ### Tooling
-There is a linter on merge requests checking every included commit for being in line with this
-specification. This linter can also be used locally before opening a merge request:
+There is a linter on pull requests checking every included commit for being in line with this
+specification. This linter can also be used locally before opening a pull request:
 
     yarn global add commitlint
     yarn add conventional-changelog-conventionalcommits
     commitlint --verbose --config ci/commitlint.config.js -f origin/master
 
 ## Contact
-When you have a quick question about contributing to Wrapland join our [Gitter room][gitter-room].
+When you have a quick question about contributing to Wrapland join The Compositor Modules [Matrix room][matrix-room].
 For more complex questions open a separate [issue ticket][issue].
 
 In case you are unsure if your question should go into a separate issue ticket drop by in our Gitter
@@ -140,8 +146,8 @@ referred to doing that.
 [conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/#specification
 [disman-log-debug]: https://gitlab.com/kwinft/disman/-/blob/master/CONTRIBUTING.md#logging-and-debugging
 [frameworks-style]: https://community.kde.org/Policies/Frameworks_Coding_Style
-[gitter-room]: https://gitter.im/kwinft/community
-[issue]: https://gitlab.com/kwinft/wrapland/-/issues
-[kwinft-log-debug]: https://gitlab.com/kwinft/kwinft/-/blob/master/CONTRIBUTING.md#logging-and-debugging
-[merge-request]: https://gitlab.com/kwinft/wrapland/-/merge_requests
+[matrix-room]: https://matrix.to/#/#como:matrix.org
+[issue]: https://github.com/winft/wrapland/issues
+[theseus-ship-log-debug]: https://github.com/winft/theseus-ship/blob/master/CONTRIBUTING.md#logging-and-debugging
+[pull-request]: https://github.com/winft/wrapland/pulls
 [plasma-schedule]: https://community.kde.org/Schedules/Plasma_5

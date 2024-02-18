@@ -1,8 +1,8 @@
 # Wrapland
 
 Wrapland is a Qt/C++ library that wraps and mediates the libwayland client and server API for its
-consumers. Wrapland is an independent part of the [KWinFT project][kwinft-project] with the KWinFT
-window manager being Wrapland's first and most prominent user.
+consumers. Wrapland is an independent part of the [WinFT project][winft-project] with
+The Compositor Modules being Wrapland's most prominent user.
 
 ## Introduction
 
@@ -178,5 +178,5 @@ Please make sure that your project is configured with C++11 support:
 
     CONFIG += c++11
 
-[kwinft-project]: https://gitlab.com/kwinft
+[winft-project]: https://github.com/winft
 [plasma-schedule]: https://community.kde.org/Schedules/Plasma_5
