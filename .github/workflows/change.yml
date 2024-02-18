@@ -60,6 +60,13 @@ jobs:
       - name: Run Clang-Tidy
         run: bash tooling/analysis/clang-tidy.sh build
 
+  package:
+    uses: ./.github/workflows/package.yml
+    needs: build
+    with:
+      image: registry.gitlab.com/kwinft/ci-images/archlinux/frameworks-master
+      package-name: wrapland
+
   ci-image-rebuild:
     name: Trigger CI Image Rebuild
     runs-on: ubuntu-latest
