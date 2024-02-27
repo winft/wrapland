@@ -1,5 +1,63 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.600.0](https://github.com/winft/wrapland/compare/wrapland@0.527.0-beta.0...v0.600.0) (2024-02-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **server:** `Display::getClient` doesn't create clients implicitly
+* **server:** Display::start always creates a socket.
+* **server:** Display::add_socket_fd removed
+* **server:** output API changes
+
+### Features
+
+* bump wlr_output_management_unstable_v1 to version 3 ([63e4934](https://github.com/winft/wrapland/commit/63e4934c13d3be8e27c9b7cfc2b4779f696884d1))
+* **client:** support pointer hold gestures ([0fd69f4](https://github.com/winft/wrapland/commit/0fd69f4d1417e2f4b8d86783d8400ec466e507a5))
+* implement security context v1 protocol ([7d0be51](https://github.com/winft/wrapland/commit/7d0be514abe73b710eddfecb1c9c03e0de5b9fe2))
+* remove output device and management protocol support ([23980f3](https://github.com/winft/wrapland/commit/23980f31d49496262b9f0a1c37e3a68d14cd95b6))
+* **server:** always create socket on start ([7c66a3a](https://github.com/winft/wrapland/commit/7c66a3a823817f45a49256ae67516c390f9ee195))
+* **server:** introduce output manager ([e2f5e12](https://github.com/winft/wrapland/commit/e2f5e12acebcdddf76879ff650d87e09e1ee74d0))
+* **server:** provide output state getter and setter ([514c8ff](https://github.com/winft/wrapland/commit/514c8ff495ae3d51885e4cdd558e68a8b44dbdb7))
+* **server:** provide way to construct output with metadata ([b6d236a](https://github.com/winft/wrapland/commit/b6d236afed693d739e667014113511ea40194885))
+* **server:** remove ability to add a socket fd ([15e61ef](https://github.com/winft/wrapland/commit/15e61ef6ac3b039169bc1e0a5130033fc74c6c57))
+* **server:** remove client resource getter ([ea1f175](https://github.com/winft/wrapland/commit/ea1f17582b6b04f7137099d64cf8be373a4b791e))
+* **server:** support pointer hold gestures ([40dce4b](https://github.com/winft/wrapland/commit/40dce4b9abdb937bed7fb9ddae2248e8e64152a4))
+* **server:** support wlr_output_management_unstable_v1 ([8b6a490](https://github.com/winft/wrapland/commit/8b6a49055ff969af334e3b1917f3b730d9c2978a))
+* support wlr_output_management_unstable_v1 version 4 ([52ed043](https://github.com/winft/wrapland/commit/52ed043c9feebb96904f221ed44890312d093038))
+* switch to C++20 ([ea40d25](https://github.com/winft/wrapland/commit/ea40d251269a5ad58807b9b25722ea473272fe87))
+* use Qt 6 ([87cf5bc](https://github.com/winft/wrapland/commit/87cf5bcb2db7dfff4a8263ad4bf83fdb16082e9b))
+
+
+### Bug Fixes
+
+* **client:** destroy configuration heads ([558a5ea](https://github.com/winft/wrapland/commit/558a5ea3139f7d4ea55ae8fb6f4230331b98e1c3))
+* **client:** set correct parent of output configuration ([ac23f41](https://github.com/winft/wrapland/commit/ac23f41afcfada2dc60121f53067b2b86abaa4dc))
+* emit xdg activation token as QByteArray ([87a40e2](https://github.com/winft/wrapland/commit/87a40e2eafb5964b6a6a6fca1fd51200a97688d8))
+* **server:** constify functions ([952fb8c](https://github.com/winft/wrapland/commit/952fb8cd1892c4277219bb4470a8cce54be6fe4a))
+* **server:** manage output configuration lifetimes through front ([183e288](https://github.com/winft/wrapland/commit/183e288bf5d71bdfcd4ea710e833dc37fba8e879))
+* **server:** replace reference data members with pointers ([7af472b](https://github.com/winft/wrapland/commit/7af472b8b3c99bc3191906018f0e0ccdd7b26006))
+* **server:** unconstify data members ([3d1c8f5](https://github.com/winft/wrapland/commit/3d1c8f5c567e055811fef2a785deb7b4fe629e5e))
+* **server:** use anonymous namespace ([66dd3bc](https://github.com/winft/wrapland/commit/66dd3bcaa2c2dcc2193cbe3968bcf8f41c811c6e))
+
+
+### Refactors
+
+* **client:** set current mode without iterators ([a078a9f](https://github.com/winft/wrapland/commit/a078a9f556340edef740465b21893dce32bf1144))
+* **server:** create client through separate function ([21b56ca](https://github.com/winft/wrapland/commit/21b56ca5e902a459518861e778608df9dc8f3882))
+* **server:** define helper types outside output ([65ca35e](https://github.com/winft/wrapland/commit/65ca35e695548f97a6c5127fb04948e0a75d88ba))
+* **server:** define output metadata outside of output state ([2aef85b](https://github.com/winft/wrapland/commit/2aef85b59d01beb8f97aa6cbb37fe35f3eb8d5f7))
+* **server:** emit clientConnected only on implicit creation ([639960c](https://github.com/winft/wrapland/commit/639960cce69578bf38caedbb2625c0f7da1c9eb2))
+* **server:** get and set metadata in public output API ([d281763](https://github.com/winft/wrapland/commit/d281763a5815728b32fdfecfbefbd813ce7d4d1f))
+* **server:** omit exporting WlOutput ([16517b1](https://github.com/winft/wrapland/commit/16517b1c015e3fb0c94521e2535dc6015f436b2d))
+* **server:** reference globals in display ([879c0e5](https://github.com/winft/wrapland/commit/879c0e50ffcf39fa62aac808b1fe84034d545844))
+* **server:** remove createClient function ([e0370fd](https://github.com/winft/wrapland/commit/e0370fd451546967a63a26bc3cc07fb7999e7397))
+* **server:** remove private Display ([7ff41b0](https://github.com/winft/wrapland/commit/7ff41b0e8499b61400b79d2e0b0088401a9c2325))
+* **server:** remove setupClient function ([269b61a](https://github.com/winft/wrapland/commit/269b61abfd0806ec43d1e266db5af48c3f03f838))
+* **server:** remove wlr output configuration member ([eb698bb](https://github.com/winft/wrapland/commit/eb698bb49c5f48d8bd541909dc7b06b51e02a4a6))
+* **server:** use QThreadPool instead of QtConcurrentRun ([7c2e640](https://github.com/winft/wrapland/commit/7c2e640c2011189dad82558c6c47fbfe3607dd59))
+* **server:** usg gsl::not_null ([3065b33](https://github.com/winft/wrapland/commit/3065b3313187ed86f7080d266e7d1872dda7ee34))
+
 ## [0.527.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.527.0-beta.0...wrapland@0.527.0) (2023-02-17)
 
 ## [0.527.0-beta.0](https://gitlab.com/kwinft/wrapland/compare/wrapland@0.526.0-beta.0...wrapland@0.527.0-beta.0) (2023-02-16)
