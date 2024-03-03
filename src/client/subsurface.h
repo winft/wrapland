@@ -58,8 +58,8 @@ class WRAPLANDCLIENT_EXPORT SubSurface : public QObject
 {
     Q_OBJECT
 public:
-    explicit SubSurface(QPointer<Surface> surface,
-                        QPointer<Surface> parentSurface,
+    explicit SubSurface(Surface const& surface,
+                        Surface const& parentSurface,
                         QObject* parent = nullptr);
     virtual ~SubSurface();
 
@@ -118,7 +118,7 @@ public:
      * The change is only applied after the parent surface got committed.
      * @param sibling The SubSurface on top of which this SubSurface should be placed
      **/
-    void placeAbove(QPointer<SubSurface> sibling);
+    void placeAbove(SubSurface const& sibling);
     /**
      * Places the SubSurface above the @p referenceSurface.
      *
@@ -129,7 +129,7 @@ public:
      * The change is only applied after the parent surface got committed.
      * @param referenceSurface Either a sibling or parent Surface
      **/
-    void placeAbove(QPointer<Surface> referenceSurface);
+    void placeAbove(Surface const& referenceSurface);
 
     /**
      * Lowers this SubSurface below all siblings.
@@ -146,7 +146,7 @@ public:
      * The change is only applied after the parent surface got committed.
      * @param sibling The SubSurface under which the SubSurface should be put
      **/
-    void placeBelow(QPointer<SubSurface> sibling);
+    void placeBelow(SubSurface const& sibling);
     /**
      * Places the SubSurface below the @p referenceSurface.
      *
@@ -157,18 +157,18 @@ public:
      * The change is only applied after the parent surface got committed.
      * @param referenceSurface Either a sibling or parent Surface
      **/
-    void placeBelow(QPointer<Surface> referenceSurface);
+    void placeBelow(Surface const& referenceSurface);
 
     /**
      * @returns The Surface for which this SubSurface got created.
      **/
-    QPointer<Surface> surface() const;
+    Surface const& surface() const;
     /**
      * @returns The parent Surface of this SubSurface.
      **/
-    QPointer<Surface> parentSurface() const;
+    Surface const& parentSurface() const;
 
-    static QPointer<SubSurface> get(wl_subsurface* native);
+    static SubSurface const* get(wl_subsurface* native);
 
     operator wl_subsurface*();
     operator wl_subsurface*() const;

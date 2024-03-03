@@ -213,8 +213,7 @@ void TestSubsurface::testCreate()
 
     // create subsurface for surface of parent
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface, *parent));
 
     QVERIFY(subsurfaceCreatedSpy.wait());
 
@@ -267,8 +266,7 @@ void TestSubsurface::testMode()
 
     // create the Subsurface for surface of parent
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface, *parent));
     QVERIFY(subsurfaceCreatedSpy.wait());
     auto serverSubsurface
         = subsurfaceCreatedSpy.first().first().value<Wrapland::Server::Subsurface*>();
@@ -321,8 +319,7 @@ void TestSubsurface::testPosition()
 
     // create the Subsurface for surface of parent
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface, *parent));
     QVERIFY(subsurfaceCreatedSpy.wait());
     auto serverSubsurface
         = subsurfaceCreatedSpy.first().first().value<Wrapland::Server::Subsurface*>();
@@ -379,8 +376,7 @@ void TestSubsurface::testPlaceAbove()
 
     // Create the Subsurfaces for surface of parent.
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface1(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface1.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface1, *parent));
     QVERIFY(subsurfaceCreatedSpy.wait());
 
     auto serverSubsurface1
@@ -389,8 +385,7 @@ void TestSubsurface::testPlaceAbove()
 
     subsurfaceCreatedSpy.clear();
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface2(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface2.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface2, *parent));
     QVERIFY(subsurfaceCreatedSpy.wait());
 
     auto serverSubsurface2
@@ -399,8 +394,7 @@ void TestSubsurface::testPlaceAbove()
 
     subsurfaceCreatedSpy.clear();
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface3(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface3.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface3, *parent));
     QVERIFY(subsurfaceCreatedSpy.wait());
 
     auto serverSubsurface3
@@ -443,7 +437,7 @@ void TestSubsurface::testPlaceAbove()
     QCOMPARE(serverSubsurface1->parentSurface()->state().children.at(2), serverSubsurface1);
 
     // Try placing 3 above 1, should result in 2, 1, 3.
-    subsurface3->placeAbove(QPointer<Wrapland::Client::SubSurface>(subsurface1.get()));
+    subsurface3->placeAbove(*subsurface1);
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -453,7 +447,7 @@ void TestSubsurface::testPlaceAbove()
     QCOMPARE(serverSubsurface1->parentSurface()->state().children.at(2), serverSubsurface3);
 
     // try placing 3 above 2, should result in 2, 3, 1
-    subsurface3->placeAbove(QPointer<Wrapland::Client::SubSurface>(subsurface2.get()));
+    subsurface3->placeAbove(*subsurface2);
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -463,7 +457,7 @@ void TestSubsurface::testPlaceAbove()
     QCOMPARE(serverSubsurface1->parentSurface()->state().children.at(2), serverSubsurface1);
 
     // try placing 1 above 3 - shouldn't change
-    subsurface1->placeAbove(QPointer<Wrapland::Client::SubSurface>(subsurface3.get()));
+    subsurface1->placeAbove(*subsurface3);
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -473,7 +467,7 @@ void TestSubsurface::testPlaceAbove()
     QCOMPARE(serverSubsurface1->parentSurface()->state().children.at(2), serverSubsurface1);
 
     // and 2 above 3 - > 3, 2, 1
-    subsurface2->placeAbove(QPointer<Wrapland::Client::SubSurface>(subsurface3.get()));
+    subsurface2->placeAbove(*subsurface3);
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -498,24 +492,21 @@ void TestSubsurface::testPlaceBelow()
 
     // create the Subsurfaces for surface of parent
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface1(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface1.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface1, *parent));
     QVERIFY(subsurfaceCreatedSpy.wait());
     auto serverSubsurface1
         = subsurfaceCreatedSpy.first().first().value<Wrapland::Server::Subsurface*>();
     QVERIFY(serverSubsurface1);
     subsurfaceCreatedSpy.clear();
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface2(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface2.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface2, *parent));
     QVERIFY(subsurfaceCreatedSpy.wait());
     auto serverSubsurface2
         = subsurfaceCreatedSpy.first().first().value<Wrapland::Server::Subsurface*>();
     QVERIFY(serverSubsurface2);
     subsurfaceCreatedSpy.clear();
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface3(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface3.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface3, *parent));
     QVERIFY(subsurfaceCreatedSpy.wait());
     auto serverSubsurface3
         = subsurfaceCreatedSpy.first().first().value<Wrapland::Server::Subsurface*>();
@@ -552,7 +543,7 @@ void TestSubsurface::testPlaceBelow()
     QCOMPARE(serverSubsurface1->parentSurface()->state().children.at(2), serverSubsurface2);
 
     // place 1 below 3 -> 1, 3, 2
-    subsurface1->placeBelow(QPointer<Wrapland::Client::SubSurface>(subsurface3.get()));
+    subsurface1->placeBelow(*subsurface3);
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -562,7 +553,7 @@ void TestSubsurface::testPlaceBelow()
     QCOMPARE(serverSubsurface1->parentSurface()->state().children.at(2), serverSubsurface2);
 
     // 2 below 3 -> 1, 2, 3
-    subsurface2->placeBelow(QPointer<Wrapland::Client::SubSurface>(subsurface3.get()));
+    subsurface2->placeBelow(*subsurface3);
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -572,7 +563,7 @@ void TestSubsurface::testPlaceBelow()
     QCOMPARE(serverSubsurface1->parentSurface()->state().children.at(2), serverSubsurface3);
 
     // 1 below 2 -> shouldn't change
-    subsurface1->placeBelow(QPointer<Wrapland::Client::SubSurface>(subsurface2.get()));
+    subsurface1->placeBelow(*subsurface2);
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -582,7 +573,7 @@ void TestSubsurface::testPlaceBelow()
     QCOMPARE(serverSubsurface1->parentSurface()->state().children.at(2), serverSubsurface3);
 
     // and 3 below 1 -> 3, 1, 2
-    subsurface3->placeBelow(QPointer<Wrapland::Client::SubSurface>(subsurface1.get()));
+    subsurface3->placeBelow(*subsurface1);
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
     wl_display_flush(m_connection->display());
     QCoreApplication::processEvents();
@@ -599,8 +590,7 @@ void TestSubsurface::testDestroy()
     std::unique_ptr<Wrapland::Client::Surface> parent(m_compositor->createSurface());
     // create subsurface for surface of parent
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface, *parent));
 
     connect(m_connection,
             &Wrapland::Client::ConnectionThread::establishedChanged,
@@ -650,8 +640,7 @@ void TestSubsurface::testCast()
 
     // Create subsurface for surface with parent.
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface, *parent));
 
     QCOMPARE(Wrapland::Client::SubSurface::get(*(subsurface.get())),
              QPointer<Wrapland::Client::SubSurface>(subsurface.get()));
@@ -684,8 +673,7 @@ void TestSubsurface::testSyncMode()
 
     // create subsurface for surface of parent
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface, *parent));
     QVERIFY(!subsurfaceTreeChangedSpy.wait(100));
 
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
@@ -774,8 +762,7 @@ void TestSubsurface::testDeSyncMode()
 
     // create subsurface for surface of parent
     std::unique_ptr<Wrapland::Client::SubSurface> subsurface(
-        m_subCompositor->createSubSurface(QPointer<Wrapland::Client::Surface>(surface.get()),
-                                          QPointer<Wrapland::Client::Surface>(parent.get())));
+        m_subCompositor->createSubSurface(*surface, *parent));
     QVERIFY(!subsurfaceTreeChangedSpy.wait(100));
 
     parent->commit(Wrapland::Client::Surface::CommitFlag::None);
@@ -865,11 +852,9 @@ void TestSubsurface::testMainSurfaceFromTree()
                                         &Wrapland::Server::Surface::subsurfaceTreeChanged);
     QVERIFY(subsurfaceTreeChangedSpy.isValid());
 
-    auto* sub1 = m_subCompositor->createSubSurface(childLevel1Surface.get(), parentSurface.get());
-    auto* sub2
-        = m_subCompositor->createSubSurface(childLevel2Surface.get(), childLevel1Surface.get());
-    auto* sub3
-        = m_subCompositor->createSubSurface(childLevel3Surface.get(), childLevel2Surface.get());
+    auto* sub1 = m_subCompositor->createSubSurface(*childLevel1Surface, *parentSurface);
+    auto* sub2 = m_subCompositor->createSubSurface(*childLevel2Surface, *childLevel1Surface);
+    auto* sub3 = m_subCompositor->createSubSurface(*childLevel3Surface, *childLevel2Surface);
 
     childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     childLevel1Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
@@ -927,7 +912,7 @@ void TestSubsurface::testRemoveSurface()
     QVERIFY(subsurfaceTreeChangedSpy.isValid());
 
     std::unique_ptr<Wrapland::Client::SubSurface> sub(
-        m_subCompositor->createSubSurface(childSurface.get(), parentSurface.get()));
+        m_subCompositor->createSubSurface(*childSurface, *parentSurface));
 
     parentSurface->commit(Wrapland::Client::Surface::CommitFlag::None);
     QVERIFY(parent_commit_spy.wait());
@@ -976,12 +961,11 @@ void TestSubsurface::testMappingOfSurfaceTree()
                                         &Wrapland::Server::Surface::subsurfaceTreeChanged);
     QVERIFY(subsurfaceTreeChangedSpy.isValid());
 
-    auto subsurfaceLevel1
-        = m_subCompositor->createSubSurface(childLevel1Surface.get(), parentSurface.get());
+    auto subsurfaceLevel1 = m_subCompositor->createSubSurface(*childLevel1Surface, *parentSurface);
     auto subsurfaceLevel2
-        = m_subCompositor->createSubSurface(childLevel2Surface.get(), childLevel1Surface.get());
+        = m_subCompositor->createSubSurface(*childLevel2Surface, *childLevel1Surface);
     auto subsurfaceLevel3
-        = m_subCompositor->createSubSurface(childLevel3Surface.get(), childLevel2Surface.get());
+        = m_subCompositor->createSubSurface(*childLevel3Surface, *childLevel2Surface);
 
     childLevel3Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
     childLevel2Surface->commit(Wrapland::Client::Surface::CommitFlag::None);
@@ -1150,7 +1134,7 @@ void TestSubsurface::testSurfaceAt()
 
     // Create the subsurfaces for the children.
     std::unique_ptr<Wrapland::Client::SubSurface> child1Sub(
-        m_subCompositor->createSubSurface(child1.get(), parent.get()));
+        m_subCompositor->createSubSurface(*child1, *parent));
     child1Sub->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
 
     child1->attachBuffer(m_shm->createBuffer(childImage));
@@ -1159,7 +1143,7 @@ void TestSubsurface::testSurfaceAt()
 
     // Note: child2Sub is initially above child1Sub since it is added after.
     std::unique_ptr<Wrapland::Client::SubSurface> child2Sub(
-        m_subCompositor->createSubSurface(child2.get(), parent.get()));
+        m_subCompositor->createSubSurface(*child2, *parent));
     child2Sub->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
     child2Sub->setPosition(QPoint(50, 50));
 
@@ -1180,12 +1164,12 @@ void TestSubsurface::testSurfaceAt()
 
     // Create subsurfaces for the grandchildren.
     std::unique_ptr<Wrapland::Client::SubSurface> grandchild1Sub(
-        m_subCompositor->createSubSurface(grandchild1.get(), child1.get()));
+        m_subCompositor->createSubSurface(*grandchild1, *child1));
     grandchild1Sub->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
     grandchild1Sub->setPosition(QPoint(-25, -25));
 
     std::unique_ptr<Wrapland::Client::SubSurface> grandchild2Sub(
-        m_subCompositor->createSubSurface(grandchild2.get(), child2.get()));
+        m_subCompositor->createSubSurface(*grandchild2, *child2));
     grandchild2Sub->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
     grandchild2Sub->setPosition(QPoint(25, 25));
 
@@ -1314,7 +1298,7 @@ void TestSubsurface::testDestroyAttachedBuffer()
     auto serverChildSurface
         = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
     // create sub-surface
-    auto* sub = m_subCompositor->createSubSurface(child.get(), parent.get());
+    auto sub = m_subCompositor->createSubSurface(*child, *parent);
 
     // let's damage this surface, will be in sub-surface pending state
     QImage image(QSize(100, 100), QImage::Format_ARGB32_Premultiplied);
@@ -1358,9 +1342,9 @@ void TestSubsurface::testDestroyParentSurface()
     auto serverGrandChildSurface
         = serverSurfaceCreated.last().first().value<Wrapland::Server::Surface*>();
     // create sub-surface in desynchronized mode as Qt uses them
-    auto sub1 = m_subCompositor->createSubSurface(child.get(), parent.get());
+    auto sub1 = m_subCompositor->createSubSurface(*child, *parent);
     sub1->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
-    auto sub2 = m_subCompositor->createSubSurface(grandChild.get(), child.get());
+    auto sub2 = m_subCompositor->createSubSurface(*grandChild, *child);
     sub2->setMode(Wrapland::Client::SubSurface::Mode::Desynchronized);
 
     // let's damage this surface

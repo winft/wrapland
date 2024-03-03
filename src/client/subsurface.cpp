@@ -21,6 +21,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "surface.h"
 #include "wayland_pointer_p.h"
 // Wayland
+#include <gsl/pointers>
 #include <wayland-client-protocol.h>
 
 namespace Wrapland
@@ -31,12 +32,12 @@ namespace Client
 class Q_DECL_HIDDEN SubSurface::Private
 {
 public:
-    Private(QPointer<Surface> surface, QPointer<Surface> parentSurface, SubSurface* q);
+    Private(Surface const& surface, Surface const& parentSurface, SubSurface* q);
     void setup(wl_subsurface* subsurface);
 
     WaylandPointer<wl_subsurface, wl_subsurface_destroy> subSurface;
-    QPointer<Surface> surface;
-    QPointer<Surface> parentSurface;
+    gsl::not_null<Surface const*> surface;
+    gsl::not_null<Surface const*> parentSurface;
     Mode mode = Mode::Synchronized;
     QPoint pos = QPoint(0, 0);
 
@@ -46,11 +47,9 @@ private:
     SubSurface* q;
 };
 
-SubSurface::Private::Private(QPointer<Surface> surface,
-                             QPointer<Surface> parentSurface,
-                             SubSurface* q)
-    : surface(surface)
-    , parentSurface(parentSurface)
+SubSurface::Private::Private(Surface const& surface, Surface const& parentSurface, SubSurface* q)
+    : surface(&surface)
+    , parentSurface(&parentSurface)
     , q(q)
 {
 }
@@ -68,7 +67,7 @@ SubSurface* SubSurface::Private::cast(wl_subsurface* native)
     return reinterpret_cast<Private*>(wl_subsurface_get_user_data(native))->q;
 }
 
-SubSurface::SubSurface(QPointer<Surface> surface, QPointer<Surface> parentSurface, QObject* parent)
+SubSurface::SubSurface(Surface const& surface, Surface const& parentSurface, QObject* parent)
     : QObject(parent)
     , d(new Private(surface, parentSurface, this))
 {
@@ -94,14 +93,14 @@ bool SubSurface::isValid() const
     return d->subSurface.isValid();
 }
 
-QPointer<Surface> SubSurface::surface() const
+Surface const& SubSurface::surface() const
 {
-    return d->surface;
+    return *d->surface.get();
 }
 
-QPointer<Surface> SubSurface::parentSurface() const
+Surface const& SubSurface::parentSurface() const
 {
-    return d->parentSurface;
+    return *d->parentSurface.get();
 }
 
 void SubSurface::setMode(SubSurface::Mode mode)
@@ -141,49 +140,37 @@ QPoint SubSurface::position() const
 
 void SubSurface::raise()
 {
-    placeAbove(d->parentSurface);
+    placeAbove(*d->parentSurface.get());
 }
 
-void SubSurface::placeAbove(QPointer<SubSurface> sibling)
+void SubSurface::placeAbove(SubSurface const& sibling)
 {
-    if (sibling.isNull()) {
-        return;
-    }
-    placeAbove(sibling->surface());
+    placeAbove(sibling.surface());
 }
 
-void SubSurface::placeAbove(QPointer<Surface> sibling)
+void SubSurface::placeAbove(Surface const& sibling)
 {
-    if (sibling.isNull()) {
-        return;
-    }
-    wl_subsurface_place_above(d->subSurface, *sibling);
+    wl_subsurface_place_above(d->subSurface, sibling);
 }
 
 void SubSurface::lower()
 {
-    placeBelow(d->parentSurface);
+    placeBelow(*d->parentSurface.get());
 }
 
-void SubSurface::placeBelow(QPointer<Surface> sibling)
+void SubSurface::placeBelow(Surface const& sibling)
 {
-    if (sibling.isNull()) {
-        return;
-    }
-    wl_subsurface_place_below(d->subSurface, *sibling);
+    wl_subsurface_place_below(d->subSurface, sibling);
 }
 
-void SubSurface::placeBelow(QPointer<SubSurface> sibling)
+void SubSurface::placeBelow(SubSurface const& sibling)
 {
-    if (sibling.isNull()) {
-        return;
-    }
-    placeBelow(sibling->surface());
+    placeBelow(sibling.surface());
 }
 
-QPointer<SubSurface> SubSurface::get(wl_subsurface* native)
+SubSurface const* SubSurface::get(wl_subsurface* native)
 {
-    return QPointer<SubSurface>(Private::cast(native));
+    return static_cast<SubSurface const*>(Private::cast(native));
 }
 
 SubSurface::operator wl_subsurface*() const
