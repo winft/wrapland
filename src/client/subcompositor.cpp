@@ -60,13 +60,13 @@ void SubCompositor::setup(wl_subcompositor* subcompositor)
     d->subCompositor.setup(subcompositor);
 }
 
-SubSurface* SubCompositor::createSubSurface(QPointer<Surface> surface,
-                                            QPointer<Surface> parentSurface,
+SubSurface* SubCompositor::createSubSurface(Surface const& surface,
+                                            Surface const& parentSurface,
                                             QObject* parent)
 {
     Q_ASSERT(isValid());
     SubSurface* s = new SubSurface(surface, parentSurface, parent);
-    auto w = wl_subcompositor_get_subsurface(d->subCompositor, *surface, *parentSurface);
+    auto w = wl_subcompositor_get_subsurface(d->subCompositor, surface, parentSurface);
     if (d->queue) {
         d->queue->addProxy(w);
     }

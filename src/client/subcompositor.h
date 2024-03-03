@@ -21,7 +21,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #define WAYLAND_SUBCOMPOSITOR_H
 
 #include <QObject>
-#include <QPointer>
 // STD
 #include <Wrapland/Client/wraplandclient_export.h>
 #include <memory>
@@ -85,8 +84,8 @@ public:
      * @param parent The parent to pass to the Surface.
      * @returns The new created Surface
      **/
-    SubSurface* createSubSurface(QPointer<Surface> surface,
-                                 QPointer<Surface> parentSurface,
+    SubSurface* createSubSurface(Surface const& surface,
+                                 Surface const& parentSurface,
                                  QObject* parent = nullptr);
 
     operator wl_subcompositor*();

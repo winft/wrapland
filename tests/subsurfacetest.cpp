@@ -146,7 +146,7 @@ void SubSurfaceTest::setupRegistry(Registry* registry)
             // create the sub surface
             auto surface = m_compositor->createSurface(this);
             Q_ASSERT(surface);
-            auto subsurface = m_subCompositor->createSubSurface(surface, m_surface, this);
+            auto subsurface = m_subCompositor->createSubSurface(*surface, *m_surface, this);
             Q_ASSERT(subsurface);
             QImage image(QSize(100, 100), QImage::Format_ARGB32_Premultiplied);
             image.fill(Qt::red);
@@ -156,7 +156,7 @@ void SubSurfaceTest::setupRegistry(Registry* registry)
             // and another sub-surface to the sub-surface
             auto surface2 = m_compositor->createSurface(this);
             Q_ASSERT(surface2);
-            auto subsurface2 = m_subCompositor->createSubSurface(surface2, surface, this);
+            auto subsurface2 = m_subCompositor->createSubSurface(*surface2, *surface, this);
             Q_ASSERT(subsurface2);
             QImage green(QSize(50, 50), QImage::Format_ARGB32_Premultiplied);
             green.fill(Qt::green);
