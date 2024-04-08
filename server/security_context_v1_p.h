@@ -16,6 +16,7 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <unordered_map>
 #include <wayland-security-context-staging-v1-server-protocol.h>
 
 namespace Wrapland::Server
