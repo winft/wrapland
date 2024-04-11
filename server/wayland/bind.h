@@ -89,15 +89,14 @@ public:
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(Args&&... args)
     {
-        Wayland::send<sender, minVersion>(resource, version, args...);
+        Wayland::send<sender, minVersion>(resource, version, std::forward<Args>(args)...);
     }
 
     // We only support std::tuple but since it's just internal API that should be well enough.
     template<auto sender, uint32_t minVersion = 0, typename... Args>
     void send(std::tuple<Args...>&& tuple)
     {
-        Wayland::send_tuple<sender, minVersion>(
-            resource, version, std::forward<decltype(tuple)>(tuple));
+        Wayland::send_tuple<sender, minVersion>(resource, version, std::move(tuple));
     }
 
     void post_error(uint32_t code, char const* msg, ...)
