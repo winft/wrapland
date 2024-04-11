@@ -265,8 +265,11 @@ void input_method_keyboard_grab_v2::set_keymap(std::string const& content)
         qCWarning(WRAPLAND_SERVER, "Failed to set input-method keymap with %d.", rc);
         // TODO(romangg): Handle error by closing file here and returning?
     }
+    if (std::fseek(tmpf, 0, SEEK_SET) != 0) {
+        qCWarning(WRAPLAND_SERVER, "Failed to seek begin of input-method keymap.");
+        // TODO(romangg): Handle error by closing file here and returning?
+    }
 
-    std::rewind(tmpf);
     d_ptr->send<zwp_input_method_keyboard_grab_v2_send_keymap>(
         WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1, fileno(tmpf), content.size());
     d_ptr->keymap = file_wrap(tmpf);
