@@ -204,8 +204,8 @@ void drag_pool::update_target(Surface* surface,
                       // TODO(romangg): Inform source?
                   }
               });
-        target.devices.push_back(
-            {dev, nullptr, QMetaObject::Connection(), std::move(destroy_notifier)});
+        target.devices.emplace_back(
+            dev, nullptr, QMetaObject::Connection(), std::move(destroy_notifier));
     }
 
     assert(surface);
