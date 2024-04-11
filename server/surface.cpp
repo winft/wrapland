@@ -1132,7 +1132,7 @@ void Feedbacks::presented(uint32_t tvSecHi,
                           uint32_t seqLo,
                           Surface::PresentationKinds kinds)
 {
-    std::for_each(m_feedbacks.begin(), m_feedbacks.end(), [=](PresentationFeedback* fb) {
+    std::for_each(m_feedbacks.begin(), m_feedbacks.end(), [&, this](auto fb) {
         fb->sync(m_output);
         fb->presented(tvSecHi, tvSecLo, tvNsec, refresh, seqHi, seqLo, toKinds(kinds));
         delete fb;
@@ -1142,9 +1142,9 @@ void Feedbacks::presented(uint32_t tvSecHi,
 
 void Feedbacks::discard()
 {
-    std::for_each(m_feedbacks.begin(), m_feedbacks.end(), [=](PresentationFeedback* feedback) {
-        feedback->discarded();
-        delete feedback;
+    std::for_each(m_feedbacks.begin(), m_feedbacks.end(), [](auto fb) {
+        fb->discarded();
+        delete fb;
     });
     m_feedbacks.clear();
 }
