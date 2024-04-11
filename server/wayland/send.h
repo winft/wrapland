@@ -30,10 +30,10 @@ template<auto sender, uint32_t min_version = 0, typename... Args>
 void send(wl_resource* resource, uint32_t version, Args&&... args)
 {
     if constexpr (min_version <= 1) {
-        sender(resource, args...);
+        sender(resource, std::forward<Args>(args)...);
     } else {
         if (version >= min_version) {
-            sender(resource, args...);
+            sender(resource, std::forward<Args>(args)...);
         }
     }
 }
@@ -41,7 +41,7 @@ void send(wl_resource* resource, uint32_t version, Args&&... args)
 template<auto sender, uint32_t min_version, typename Tuple, std::size_t... Indices>
 void send_tuple_impl(wl_resource* resource,
                      uint32_t version,
-                     Tuple&& tuple,
+                     Tuple const&& tuple,
                      [[maybe_unused]] std::index_sequence<Indices...> indices)
 {
     send<sender, min_version>(resource, version, std::get<Indices>(tuple)...);
@@ -52,8 +52,7 @@ void send_tuple(wl_resource* resource, uint32_t version, std::tuple<Args...>&& t
 {
     auto constexpr size = std::tuple_size_v<std::decay_t<decltype(tuple)>>;
     auto constexpr indices = std::make_index_sequence<size>{};
-    send_tuple_impl<sender, min_version>(
-        resource, version, std::forward<decltype(tuple)>(tuple), indices);
+    send_tuple_impl<sender, min_version>(resource, version, std::move(tuple), indices);
 }
 
 }
