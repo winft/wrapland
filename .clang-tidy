@@ -61,6 +61,7 @@ WarningsAsErrors: "*"
 #   possible later on to remove Pimple or the need for dtors and use rule of zero.
 # hicpp-signed-bitwise: Qt macros like Q_DECLARE_OPERATORS_FOR_FLAGS conflict.
 #   hicpp-special-member-functions: See cppcoreguidelines-special-member-functions.
+# misc-include-cleaner: For now ignore, as we move to modules later on.
 # misc-no-recursion: Qt macros like Q_DECLARE_METATYPE are within recursive call chains.
 # performance-no-int-to-ptr: Qt macros like Q_DECLARE_METATYPE fail.
 #
@@ -97,6 +98,7 @@ Checks: "*,
 -llvmlibc-implementation-in-namespace,
 -llvmlibc-inline-function-decl,
 -llvmlibc-restrict-system-libc-headers,
+-misc-include-cleaner,
 -misc-no-recursion,
 -misc-non-private-member-variables-in-classes,
 -modernize-use-nodiscard,
