@@ -35,6 +35,7 @@ WarningsAsErrors: "*"
 # llvm-qualified-auto: We use auto without qualifiers when not needed like C++ Core Guiedelines do.
 # llvmlibc-callee-namespace: We don't require llvm-libc.
 # llvmlibc-implementation-in-namespace: We don't require llvm-libc.
+# llvmlibc-inline-function-decl: We don't require llvm-libc.
 # llvmlibc-restrict-system-libc-headers: We don't require llvm-libc.
 # misc-non-private-member-variables-in-classes: See
 #   cppcoreguidelines-non-private-member-variables-in-classes.
@@ -94,6 +95,7 @@ Checks: "*,
 -llvm-qualified-auto,
 -llvmlibc-callee-namespace,
 -llvmlibc-implementation-in-namespace,
+-llvmlibc-inline-function-decl,
 -llvmlibc-restrict-system-libc-headers,
 -misc-no-recursion,
 -misc-non-private-member-variables-in-classes,
