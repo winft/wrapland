@@ -131,10 +131,10 @@ private:
                                   zxdg_toplevel_decoration_v1* zxdg_toplevel_decoration_v1,
                                   uint32_t mode);
 
-    static const zxdg_toplevel_decoration_v1_listener s_listener;
+    static zxdg_toplevel_decoration_v1_listener const s_listener;
 };
 
-const zxdg_toplevel_decoration_v1_listener XdgDecoration::Private::s_listener = {
+zxdg_toplevel_decoration_v1_listener const XdgDecoration::Private::s_listener = {
     configureCallback,
 };
 

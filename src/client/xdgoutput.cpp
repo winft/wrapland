@@ -129,7 +129,7 @@ private:
     static void
     description_callback(void* data, zxdg_output_v1* zxdg_output_v1, char const* description);
 
-    static const zxdg_output_v1_listener s_listener;
+    static zxdg_output_v1_listener const s_listener;
 };
 
 XdgOutput* XdgOutputManager::getXdgOutput(Output* output, QObject* parent)
@@ -148,7 +148,7 @@ XdgOutput* XdgOutputManager::getXdgOutput(Output* output, QObject* parent)
 
     return p;
 }
-const zxdg_output_v1_listener XdgOutput::Private::s_listener = {
+zxdg_output_v1_listener const XdgOutput::Private::s_listener = {
     logical_positionCallback,
     logical_sizeCallback,
     doneCallback,

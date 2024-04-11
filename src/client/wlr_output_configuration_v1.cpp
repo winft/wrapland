@@ -85,7 +85,7 @@ private:
     static void cancelledCallback(void* data, zwlr_output_configuration_v1* config);
 };
 
-const zwlr_output_configuration_v1_listener WlrOutputConfigurationV1::Private::s_listener = {
+zwlr_output_configuration_v1_listener const WlrOutputConfigurationV1::Private::s_listener = {
     succeededCallback,
     failedCallback,
     cancelledCallback,

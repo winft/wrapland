@@ -172,7 +172,7 @@ void XdgShellToplevel::Private::ackConfigure(uint32_t serial)
 
 uint32_t XdgShellToplevel::Private::configure(XdgShellSurface::States states, QSize const& size)
 {
-    const uint32_t serial = client->display()->handle->nextSerial();
+    uint32_t const serial = client->display()->handle->nextSerial();
 
     wl_array configureStates;
     wl_array_init(&configureStates);

@@ -319,8 +319,8 @@ void TestSurface::testDamage()
     QCOMPARE(committedSpy.count(), 3);
 
     // damage buffer
-    const QRegion testRegion2(30, 40, 22, 4);
-    const QRegion cmpRegion2(15, 20, 11, 2); // divided by scale factor
+    QRegion const testRegion2(30, 40, 22, 4);
+    QRegion const cmpRegion2(15, 20, 11, 2); // divided by scale factor
     img = QImage(QSize(80, 70), QImage::Format_ARGB32_Premultiplied);
     img.fill(Qt::black);
     b = m_shm->createBuffer(img);
@@ -332,7 +332,7 @@ void TestSurface::testDamage()
     QVERIFY(serverSurface->isMapped());
 
     // combined regular damage and damaged buffer
-    const QRegion testRegion3 = testRegion.united(cmpRegion2);
+    QRegion const testRegion3 = testRegion.united(cmpRegion2);
     img = QImage(QSize(80, 70), QImage::Format_ARGB32_Premultiplied);
     img.fill(Qt::black);
     b = m_shm->createBuffer(img);

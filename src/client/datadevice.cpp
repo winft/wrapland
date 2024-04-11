@@ -73,7 +73,7 @@ public:
     DataOffer* lastOffer = nullptr;
 };
 
-const wl_data_device_listener DataDevice::Private::s_listener = {
+wl_data_device_listener const DataDevice::Private::s_listener = {
     data_offer_callback<Private>,
     enterCallback,
     leaveCallback,

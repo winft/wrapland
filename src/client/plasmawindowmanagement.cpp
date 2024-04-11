@@ -566,7 +566,7 @@ void PlasmaWindow::Private::titleChangedCallback(void* data,
 {
     Q_UNUSED(window)
     Private* p = cast(data);
-    const QString t = QString::fromUtf8(title);
+    QString const t = QString::fromUtf8(title);
     if (p->title == t) {
         return;
     }
@@ -580,7 +580,7 @@ void PlasmaWindow::Private::appIdChangedCallback(void* data,
 {
     Q_UNUSED(window)
     Private* p = cast(data);
-    const QString s = QString::fromUtf8(app_id);
+    QString const s = QString::fromUtf8(app_id);
     if (s == p->appId) {
         return;
     }
@@ -639,7 +639,7 @@ void PlasmaWindow::Private::virtualDesktopEnteredCallback(void* data,
 {
     auto p = cast(data);
     Q_UNUSED(window);
-    const QString stringId(QString::fromUtf8(id));
+    QString const stringId(QString::fromUtf8(id));
     p->plasmaVirtualDesktops << stringId;
     Q_EMIT p->q->plasmaVirtualDesktopEntered(stringId);
     if (p->plasmaVirtualDesktops.count() == 1) {
@@ -653,7 +653,7 @@ void PlasmaWindow::Private::virtualDesktopLeftCallback(void* data,
 {
     auto p = cast(data);
     Q_UNUSED(window);
-    const QString stringId(QString::fromUtf8(id));
+    QString const stringId(QString::fromUtf8(id));
     p->plasmaVirtualDesktops.removeAll(stringId);
     Q_EMIT p->q->plasmaVirtualDesktopLeft(stringId);
     if (p->plasmaVirtualDesktops.isEmpty()) {
@@ -695,7 +695,7 @@ void PlasmaWindow::Private::themedIconNameChangedCallback(void* data,
 {
     auto p = cast(data);
     Q_UNUSED(window);
-    const QString themedName = QString::fromUtf8(name);
+    QString const themedName = QString::fromUtf8(name);
     if (!themedName.isEmpty()) {
         QIcon icon = QIcon::fromTheme(themedName);
         p->icon = icon;

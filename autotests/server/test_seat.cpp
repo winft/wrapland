@@ -76,7 +76,7 @@ void TestWaylandServerSeat::testName()
     auto seat = std::make_unique<Wrapland::Server::Seat>(&display);
     QCOMPARE(seat->name().size(), 0);
 
-    const std::string name = "foobar";
+    std::string const name = "foobar";
     seat->setName(name);
     QCOMPARE(seat->name(), name);
 }

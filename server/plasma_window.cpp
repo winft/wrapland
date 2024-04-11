@@ -386,7 +386,7 @@ void PlasmaWindow::Private::setAppId(QString const& appId)
         return;
     }
     m_appId = appId;
-    const QByteArray utf8 = m_appId.toUtf8();
+    QByteArray const utf8 = m_appId.toUtf8();
     for (auto&& res : resources) {
         res->d_ptr->send<org_kde_plasma_window_send_app_id_changed>(utf8.constData());
     }
@@ -409,7 +409,7 @@ void PlasmaWindow::Private::setThemedIconName(QString const& iconName)
         return;
     }
     m_themedIconName = iconName;
-    const QByteArray utf8 = m_themedIconName.toUtf8();
+    QByteArray const utf8 = m_themedIconName.toUtf8();
     for (auto&& res : resources) {
         res->d_ptr->send<org_kde_plasma_window_send_themed_icon_name_changed>(utf8.constData());
     }
@@ -435,7 +435,7 @@ void PlasmaWindow::Private::setTitle(QString const& title)
         return;
     }
     m_title = title;
-    const QByteArray utf8 = m_title.toUtf8();
+    QByteArray const utf8 = m_title.toUtf8();
     for (auto&& res : resources) {
         res->d_ptr->send<org_kde_plasma_window_send_title_changed>(utf8.constData());
     }

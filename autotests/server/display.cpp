@@ -59,7 +59,7 @@ void TestServerDisplay::testSocketName()
 
 void TestServerDisplay::testStartStop()
 {
-    const std::string testSocketName = "kwin-wayland-server-display-test-0";
+    std::string const testSocketName = "kwin-wayland-server-display-test-0";
     QDir runtimeDir(qgetenv("XDG_RUNTIME_DIR"));
     QVERIFY(runtimeDir.exists());
     QVERIFY(!runtimeDir.exists(testSocketName.c_str()));

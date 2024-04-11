@@ -47,10 +47,10 @@ public:
 private:
     static void clockIdCallback(void* data, wp_presentation* presentation, uint32_t clk_id);
 
-    static const wp_presentation_listener s_listener;
+    static wp_presentation_listener const s_listener;
 };
 
-const wp_presentation_listener PresentationManager::Private::s_listener = {
+wp_presentation_listener const PresentationManager::Private::s_listener = {
     clockIdCallback,
 };
 
@@ -175,10 +175,10 @@ private:
 
     PresentationFeedback* q;
 
-    static const wp_presentation_feedback_listener s_listener;
+    static wp_presentation_feedback_listener const s_listener;
 };
 
-const wp_presentation_feedback_listener PresentationFeedback::Private::s_listener = {
+wp_presentation_feedback_listener const PresentationFeedback::Private::s_listener = {
     syncOutputCallback,
     presentedCallback,
     discardedCallback,

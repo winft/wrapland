@@ -130,7 +130,7 @@ void PanelTest::showTooltip(QPointF const& pos)
     m_tooltip.shellSurface->setTransient(m_surface, pos.toPoint());
 
     if (!m_tooltip.visible) {
-        const QSize size(100, 50);
+        QSize const size(100, 50);
         auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
         buffer->setUsed(true);
         QImage image(

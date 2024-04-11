@@ -99,7 +99,7 @@ private:
     idle_notification_v1* q;
 };
 
-const ext_idle_notification_v1_listener idle_notification_v1::Private::s_listener = {
+ext_idle_notification_v1_listener const idle_notification_v1::Private::s_listener = {
     idled_callback,
     resumed_callback,
 };

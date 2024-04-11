@@ -113,7 +113,7 @@ private:
     IdleTimeout* q;
 };
 
-const org_kde_kwin_idle_timeout_listener IdleTimeout::Private::s_listener
+org_kde_kwin_idle_timeout_listener const IdleTimeout::Private::s_listener
     = {idleCallback, resumedCallback};
 
 void IdleTimeout::Private::idleCallback(void* data,

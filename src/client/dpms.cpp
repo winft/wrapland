@@ -126,7 +126,7 @@ private:
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-const org_kde_kwin_dpms_listener Dpms::Private::s_listener = {
+org_kde_kwin_dpms_listener const Dpms::Private::s_listener = {
     supportedCallback,
     modeCallback,
     doneCallback,

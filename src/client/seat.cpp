@@ -55,7 +55,7 @@ private:
     static void nameCallback(void* data, wl_seat* wl_seat, char const* name);
 
     Seat* q;
-    static const wl_seat_listener s_listener;
+    static wl_seat_listener const s_listener;
 };
 
 Seat::Private::Private(Seat* q)
@@ -71,7 +71,7 @@ void Seat::Private::setup(wl_seat* s)
     wl_seat_add_listener(seat, &s_listener, this);
 }
 
-const wl_seat_listener Seat::Private::s_listener = {
+wl_seat_listener const Seat::Private::s_listener = {
     capabilitiesCallback,
     nameCallback,
 };

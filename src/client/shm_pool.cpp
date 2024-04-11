@@ -242,7 +242,7 @@ ShmPool::Private::getBuffer(QSize const& s, int32_t stride, Buffer::Format forma
         buffer->setReleased(false);
         return it;
     }
-    const int32_t byteCount = s.height() * stride;
+    int32_t const byteCount = s.height() * stride;
     if (offset + byteCount > size) {
         if (!resizePool(size + byteCount)) {
             return buffers.end();

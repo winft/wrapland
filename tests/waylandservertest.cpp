@@ -33,7 +33,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 static int startXServer()
 {
-    const QByteArray process = QByteArrayLiteral("Xwayland");
+    QByteArray const process = QByteArrayLiteral("Xwayland");
     int pipeFds[2];
     if (pipe(pipeFds) != 0) {
         std::cerr << "FATAL ERROR failed to create pipe to start X Server " << process.constData()

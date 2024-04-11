@@ -52,7 +52,7 @@ private:
     static void done_callback(void* data, wp_drm_lease_device_v1* wp_drm_lease_device_v1);
     static void released_callback(void* data, wp_drm_lease_device_v1* wp_drm_lease_device_v1);
 
-    static const wp_drm_lease_device_v1_listener s_listener;
+    static wp_drm_lease_device_v1_listener const s_listener;
 };
 
 class Q_DECL_HIDDEN drm_lease_connector_v1::Private
@@ -87,7 +87,7 @@ private:
 
     drm_lease_connector_v1* q_ptr;
 
-    static const wp_drm_lease_connector_v1_listener s_listener;
+    static wp_drm_lease_connector_v1_listener const s_listener;
 };
 
 class Q_DECL_HIDDEN drm_lease_v1::Private
@@ -114,7 +114,7 @@ private:
 
     drm_lease_v1* q_ptr;
 
-    static const wp_drm_lease_v1_listener s_listener;
+    static wp_drm_lease_v1_listener const s_listener;
 };
 
 }

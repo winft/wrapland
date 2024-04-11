@@ -377,7 +377,7 @@ void TestDataDevice::test_drag_internally()
 
     // TODO: This test would be better, if it could also test that a client trying to guess
     //       the last serial of a different client can't start a drag.
-    const quint32 pointerButtonSerial
+    quint32 const pointerButtonSerial
         = success ? server.seat->pointers().button_serial(Qt::LeftButton) : 0;
 
     QCoreApplication::processEvents();

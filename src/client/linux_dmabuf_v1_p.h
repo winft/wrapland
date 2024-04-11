@@ -54,7 +54,7 @@ public:
     WaylandPointer<zwp_linux_dmabuf_v1, zwp_linux_dmabuf_v1_destroy> dmabuf;
     EventQueue* queue = nullptr;
     LinuxDmabufV1* q_ptr;
-    static const zwp_linux_dmabuf_v1_listener s_listener;
+    static zwp_linux_dmabuf_v1_listener const s_listener;
 };
 
 class Q_DECL_HIDDEN ParamsV1::Private
@@ -68,7 +68,7 @@ public:
     callbackCreateSucceeded(void* data, zwp_linux_buffer_params_v1* wlParams, wl_buffer* wlBuffer);
     static void callbackBufferCreationFail(void* data, zwp_linux_buffer_params_v1* wlParams);
 
-    static const zwp_linux_buffer_params_v1_listener s_listener;
+    static zwp_linux_buffer_params_v1_listener const s_listener;
     wl_buffer* createdBuffer = nullptr;
     ParamsV1* q_ptr;
 };

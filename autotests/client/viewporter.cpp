@@ -351,7 +351,7 @@ void TestViewporter::testSourceRectangle()
     QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Change the source rectangle.
-    const QRectF rect(QPointF(100, 50), QSizeF(400, 200));
+    QRectF const rect(QPointF(100, 50), QSizeF(400, 200));
     vp->setSourceRectangle(rect);
     s->commit(Clt::Surface::CommitFlag::None);
 
@@ -409,11 +409,11 @@ void TestViewporter::testDestinationSizeAndSourceRectangle()
     QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Change the destination size.
-    const QSize destinationSize = QSize(100, 50);
+    QSize const destinationSize = QSize(100, 50);
     vp->setDestinationSize(destinationSize);
 
     // Change the source rectangle.
-    const QRectF rect(QPointF(100.1, 50.5), QSizeF(400.9, 200.8));
+    QRectF const rect(QPointF(100.1, 50.5), QSizeF(400.9, 200.8));
     vp->setSourceRectangle(rect);
     s->commit(Clt::Surface::CommitFlag::None);
 
@@ -542,7 +542,7 @@ void TestViewporter::testBufferSizeChange()
     QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Change the source rectangle.
-    const QRectF rect(QPointF(100, 200), QSizeF(500, 200));
+    QRectF const rect(QPointF(100, 200), QSizeF(500, 200));
     vp->setSourceRectangle(rect);
     s->commit(Clt::Surface::CommitFlag::None);
 
@@ -561,7 +561,7 @@ void TestViewporter::testBufferSizeChange()
     s->damage(QRect(0, 0, 599, 399));
 
     // Change the source rectangle accordingly.
-    const QRectF rect2(QPointF(100, 200), QSizeF(499, 199));
+    QRectF const rect2(QPointF(100, 200), QSizeF(499, 199));
     vp->setSourceRectangle(rect2);
     s->commit(Clt::Surface::CommitFlag::None);
 
@@ -626,11 +626,11 @@ void TestViewporter::testDestinationSizeChange()
     QVERIFY(serverSurface->state().updates & Wrapland::Server::surface_change::size);
 
     // Set the destination size.
-    const QSize destinationSize = QSize(100, 50);
+    QSize const destinationSize = QSize(100, 50);
     vp->setDestinationSize(destinationSize);
 
     // Change the source rectangle.
-    const QRectF rect(QPointF(100.5, 200.3), QSizeF(200, 100));
+    QRectF const rect(QPointF(100.5, 200.3), QSizeF(200, 100));
     vp->setSourceRectangle(rect);
     s->commit(Clt::Surface::CommitFlag::None);
 
@@ -667,7 +667,7 @@ void TestViewporter::testDestinationSizeChange()
     vp->setDestinationSize(destinationSize);
 
     // Change the source rectangle to non-integer values.
-    const QRectF rect2(QPointF(100.5, 200.3), QSizeF(200.5, 100.5));
+    QRectF const rect2(QPointF(100.5, 200.3), QSizeF(200.5, 100.5));
     vp->setSourceRectangle(rect2);
     s->commit(Clt::Surface::CommitFlag::None);
 

@@ -112,7 +112,7 @@ void XdgShellPopup::Private::reposition_callback(wl_client* /*wlClient*/,
 
 uint32_t XdgShellPopup::Private::configure(QRect const& rect)
 {
-    const uint32_t serial = client->display()->handle->nextSerial();
+    uint32_t const serial = client->display()->handle->nextSerial();
     shellSurface->d_ptr->configureSerials.push_back(serial);
 
     send<xdg_popup_send_configure>(rect.x(), rect.y(), rect.width(), rect.height());
@@ -157,7 +157,7 @@ XdgShellSurface* XdgShellPopup::transientFor() const
 QPoint XdgShellPopup::transientOffset() const
 {
     auto rect = get_positioner().anchor.rect;
-    const QPoint center = rect.isEmpty() ? rect.topLeft() : rect.center();
+    QPoint const center = rect.isEmpty() ? rect.topLeft() : rect.center();
 
     // Compensate for QRect::right + 1.
     rect = rect.adjusted(0, 0, 1, 1);

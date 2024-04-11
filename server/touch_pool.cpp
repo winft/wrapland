@@ -104,7 +104,7 @@ void touch_pool::set_focused_surface_position(QPointF const& surfacePosition)
 
 int32_t touch_pool::touch_down(QPointF const& globalPosition)
 {
-    const int32_t id = ids.empty() ? 0 : ids.crbegin()->first + 1;
+    int32_t const id = ids.empty() ? 0 : ids.crbegin()->first + 1;
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
     auto const pos = globalPosition - focus.offset;
     for (auto touch : focus.devices) {
@@ -148,7 +148,7 @@ void touch_pool::touch_up(int32_t id)
 #if HAVE_LINUX_INPUT_H
     if (id == 0 && focus.devices.empty() && seat->hasPointer()) {
         // Client did not bind touch, fall back to emulating with pointer events.
-        const uint32_t serial = seat->d_ptr->display()->handle->nextSerial();
+        uint32_t const serial = seat->d_ptr->display()->handle->nextSerial();
         forEachInterface(focus.surface, seat->pointers().get_devices(), [serial](auto pointer) {
             pointer->buttonReleased(serial, BTN_LEFT);
         });

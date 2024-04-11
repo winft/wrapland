@@ -127,7 +127,7 @@ private:
     LayerSurfaceV1* qptr;
 };
 
-const zwlr_layer_surface_v1_listener LayerSurfaceV1::Private::s_listener = {
+zwlr_layer_surface_v1_listener const LayerSurfaceV1::Private::s_listener = {
     LayerSurfaceV1::Private::configure_callback,
     LayerSurfaceV1::Private::closed_callback,
 };

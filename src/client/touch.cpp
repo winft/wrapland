@@ -69,7 +69,7 @@ private:
     void motion(quint32 time, qint32 id, QPointF const& position);
 
     Touch* q;
-    static const wl_touch_listener s_listener;
+    static wl_touch_listener const s_listener;
 };
 
 class TouchPoint::Private
@@ -155,7 +155,7 @@ void Touch::Private::setup(wl_touch* t)
     wl_touch_add_listener(touch, &s_listener, this);
 }
 
-const wl_touch_listener Touch::Private::s_listener = {
+wl_touch_listener const Touch::Private::s_listener = {
     downCallback,
     upCallback,
     motionCallback,

@@ -57,7 +57,7 @@ public:
     quint32 serial;
 };
 
-const zwlr_output_manager_v1_listener WlrOutputManagerV1::Private::s_listener = {
+zwlr_output_manager_v1_listener const WlrOutputManagerV1::Private::s_listener = {
     headCallback,
     doneCallback,
     finishedCallback,
@@ -186,7 +186,7 @@ public:
     bool preferred = false;
 };
 
-const zwlr_output_mode_v1_listener WlrOutputModeV1::Private::s_listener = {
+zwlr_output_mode_v1_listener const WlrOutputModeV1::Private::s_listener = {
     sizeCallback,
     refreshCallback,
     preferredCallback,
@@ -309,7 +309,7 @@ private:
     WlrOutputModeV1* getMode(zwlr_output_mode_v1* mode) const;
 };
 
-const zwlr_output_head_v1_listener WlrOutputHeadV1::Private::s_listener = {
+zwlr_output_head_v1_listener const WlrOutputHeadV1::Private::s_listener = {
     nameCallback,
     descriptionCallback,
     physicalSizeCallback,
