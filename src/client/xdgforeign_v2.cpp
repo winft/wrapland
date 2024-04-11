@@ -175,7 +175,7 @@ public:
 private:
     static void handleCallback(void* data, zxdg_exported_v2* zxdg_exported_v2, char const* handle);
 
-    static const zxdg_exported_v2_listener s_listener;
+    static zxdg_exported_v2_listener const s_listener;
 };
 
 zxdg_exported_v2* XdgExportedUnstableV2::Private::exportedV2()
@@ -193,7 +193,7 @@ bool XdgExportedUnstableV2::Private::isValid()
     return exported.isValid();
 }
 
-const zxdg_exported_v2_listener XdgExportedUnstableV2::Private::s_listener = {
+zxdg_exported_v2_listener const XdgExportedUnstableV2::Private::s_listener = {
     handleCallback,
 };
 
@@ -247,7 +247,7 @@ public:
 private:
     static void destroyedCallback(void* data, zxdg_imported_v2* zxdg_imported_v2);
 
-    static const zxdg_imported_v2_listener s_listener;
+    static zxdg_imported_v2_listener const s_listener;
 };
 
 XdgImportedUnstableV2::Private::Private(XdgImportedUnstableV2* q)
@@ -276,7 +276,7 @@ void XdgImportedUnstableV2::Private::setParentOf(Surface* surface)
     zxdg_imported_v2_set_parent_of(imported, *surface);
 }
 
-const zxdg_imported_v2_listener XdgImportedUnstableV2::Private::s_listener = {
+zxdg_imported_v2_listener const XdgImportedUnstableV2::Private::s_listener = {
     destroyedCallback,
 };
 

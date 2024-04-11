@@ -44,7 +44,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 static int startXServer()
 {
-    const QByteArray process = QByteArrayLiteral("Xwayland");
+    QByteArray const process = QByteArrayLiteral("Xwayland");
     int pipeFds[2];
     if (pipe(pipeFds) != 0) {
         std::cerr << "FATAL ERROR failed to create pipe to start X Server " << process.constData()
@@ -274,7 +274,7 @@ int main(int argc, char** argv)
 
     Wrapland::Server::output_metadata meta{.physical_size = {269, 202}};
     auto output = std::make_unique<Wrapland::Server::output>(meta, output_manager);
-    const QSize windowSize(1024, 768);
+    QSize const windowSize(1024, 768);
     output->add_mode(Wrapland::Server::output_mode{windowSize});
 
     auto seat = std::make_unique<Wrapland::Server::Seat>(&display);

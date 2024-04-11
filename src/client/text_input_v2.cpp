@@ -100,7 +100,7 @@ TextInputV2::Private::Private(TextInputV2* q, Seat* seat)
     pendingCommit.deleteSurrounding.beforeLength = 0;
 }
 
-const zwp_text_input_v2_listener TextInputV2::Private::s_listener = {
+zwp_text_input_v2_listener const TextInputV2::Private::s_listener = {
     enterCallback,
     leaveCallback,
     inputPanelStateCallback,

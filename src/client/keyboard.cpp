@@ -73,7 +73,7 @@ private:
                                    int32_t charactersPerSecond,
                                    int32_t delay);
     Keyboard* q;
-    static const wl_keyboard_listener s_listener;
+    static wl_keyboard_listener const s_listener;
 };
 
 Keyboard::Private::Private(Keyboard* q)
@@ -89,7 +89,7 @@ void Keyboard::Private::setup(wl_keyboard* k)
     wl_keyboard_add_listener(keyboard, &s_listener, this);
 }
 
-const wl_keyboard_listener Keyboard::Private::s_listener = {
+wl_keyboard_listener const Keyboard::Private::s_listener = {
     keymapCallback,
     enterCallback,
     leaveCallback,

@@ -81,7 +81,7 @@ private:
     axisDiscreteCallback(void* data, wl_pointer* pointer, uint32_t axis, int32_t discrete);
 
     Pointer* q;
-    static const wl_pointer_listener s_listener;
+    static wl_pointer_listener const s_listener;
 };
 
 Pointer::Private::Private(Pointer* q)
@@ -97,7 +97,7 @@ void Pointer::Private::setup(wl_pointer* p)
     wl_pointer_add_listener(pointer, &s_listener, this);
 }
 
-const wl_pointer_listener Pointer::Private::s_listener = {
+wl_pointer_listener const Pointer::Private::s_listener = {
     enterCallback,
     leaveCallback,
     motionCallback,

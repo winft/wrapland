@@ -276,7 +276,7 @@ void TestPointerConstraints::testLockPointer()
     QVERIFY(lockedSpy.wait());
     QVERIFY(unlockedSpy.isEmpty());
 
-    const QPointF hint = QPointF(1.5, 0.5);
+    QPointF const hint = QPointF(1.5, 0.5);
     QSignalSpy hintChangedSpy(serverLockedPointer,
                               &Wrapland::Server::LockedPointerV1::cursorPositionHintChanged);
     lockedPointer->setCursorPositionHint(hint);

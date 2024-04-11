@@ -50,7 +50,7 @@ public:
     DataSource* q;
 };
 
-const wl_data_source_listener DataSource::Private::s_listener = {
+wl_data_source_listener const DataSource::Private::s_listener = {
     targetCallback,
     send_callback<Private>,
     cancelled_callback<Private>,

@@ -92,7 +92,7 @@ KeyboardShortcutsInhibitManagerV1::inhibitShortcuts(Surface* surface, Seat* seat
     return p;
 }
 
-const zwp_keyboard_shortcuts_inhibitor_v1_listener KeyboardShortcutsInhibitorV1::Private::s_listener
+zwp_keyboard_shortcuts_inhibitor_v1_listener const KeyboardShortcutsInhibitorV1::Private::s_listener
     = {
         ActiveCallback,
         InactiveCallback,

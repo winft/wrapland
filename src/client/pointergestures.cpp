@@ -156,10 +156,10 @@ private:
                             int32_t cancelled);
 
     PointerSwipeGesture* q;
-    static const zwp_pointer_gesture_swipe_v1_listener s_listener;
+    static zwp_pointer_gesture_swipe_v1_listener const s_listener;
 };
 
-const zwp_pointer_gesture_swipe_v1_listener PointerSwipeGesture::Private::s_listener = {
+zwp_pointer_gesture_swipe_v1_listener const PointerSwipeGesture::Private::s_listener = {
     beginCallback,
     updateCallback,
     endCallback,
@@ -302,10 +302,10 @@ private:
                             int32_t cancelled);
 
     PointerPinchGesture* q;
-    static const zwp_pointer_gesture_pinch_v1_listener s_listener;
+    static zwp_pointer_gesture_pinch_v1_listener const s_listener;
 };
 
-const zwp_pointer_gesture_pinch_v1_listener PointerPinchGesture::Private::s_listener = {
+zwp_pointer_gesture_pinch_v1_listener const PointerPinchGesture::Private::s_listener = {
     beginCallback,
     updateCallback,
     endCallback,
@@ -442,10 +442,10 @@ private:
                              int32_t cancelled);
 
     pointer_hold_gesture* q;
-    static const zwp_pointer_gesture_hold_v1_listener s_listener;
+    static zwp_pointer_gesture_hold_v1_listener const s_listener;
 };
 
-const zwp_pointer_gesture_hold_v1_listener pointer_hold_gesture::Private::s_listener = {
+zwp_pointer_gesture_hold_v1_listener const pointer_hold_gesture::Private::s_listener = {
     begin_callback,
     end_callback,
 };

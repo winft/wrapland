@@ -47,10 +47,10 @@ public:
         q->stateChanged(Key(k), State(s));
     }
 
-    static const org_kde_kwin_keystate_listener s_listener;
+    static org_kde_kwin_keystate_listener const s_listener;
 };
 
-const org_kde_kwin_keystate_listener Keystate::Private::s_listener = {
+org_kde_kwin_keystate_listener const Keystate::Private::s_listener = {
     org_kde_kwin_keystate_stateChanged,
 };
 

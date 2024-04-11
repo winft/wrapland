@@ -158,7 +158,7 @@ void TestDataSource::test_offer()
     QSignalSpy offered_spy(server_source.data(), &Wrapland::Server::data_source::mime_type_offered);
     QVERIFY(offered_spy.isValid());
 
-    const std::string plain = "text/plain";
+    std::string const plain = "text/plain";
     QMimeDatabase db;
     source->offer(db.mimeTypeForName(QString::fromStdString(plain)));
 
@@ -169,7 +169,7 @@ void TestDataSource::test_offer()
     QCOMPARE(server_source->mime_types().size(), 1);
     QCOMPARE(server_source->mime_types().front(), plain);
 
-    const std::string html = "text/html";
+    std::string const html = "text/html";
     source->offer(db.mimeTypeForName(QString::fromStdString(html)));
 
     QVERIFY(offered_spy.wait());
@@ -233,7 +233,7 @@ void TestDataSource::test_request_send()
     QSignalSpy send_requested_spy(source.get(), &Wrapland::Client::DataSource::sendDataRequested);
     QVERIFY(send_requested_spy.isValid());
 
-    const std::string plain = "text/plain";
+    std::string const plain = "text/plain";
     QVERIFY(source_created_spy.wait());
     QCOMPARE(source_created_spy.count(), 1);
     QTemporaryFile file;

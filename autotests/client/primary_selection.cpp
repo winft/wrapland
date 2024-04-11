@@ -477,7 +477,7 @@ void TestPrimarySelection::testOffer()
                           &Wrapland::Server::primary_selection_source::mime_type_offered);
     QVERIFY(offeredSpy.isValid());
 
-    const std::string plain = "text/plain";
+    std::string const plain = "text/plain";
     QMimeDatabase db;
     source->offer(db.mimeTypeForName(QString::fromStdString(plain)));
 
@@ -488,7 +488,7 @@ void TestPrimarySelection::testOffer()
     QCOMPARE(serverSource->mime_types().size(), 1);
     QCOMPARE(serverSource->mime_types().front(), plain);
 
-    const std::string html = "text/html";
+    std::string const html = "text/html";
     source->offer(db.mimeTypeForName(QString::fromStdString(html)));
 
     QVERIFY(offeredSpy.wait());
@@ -523,7 +523,7 @@ void TestPrimarySelection::testRequestSend()
                                 &Wrapland::Client::PrimarySelectionSource::sendDataRequested);
     QVERIFY(sendRequestedSpy.isValid());
 
-    const std::string plain = "text/plain";
+    std::string const plain = "text/plain";
     QVERIFY(sourceCreatedSpy.wait());
     QCOMPARE(sourceCreatedSpy.count(), 1);
     QTemporaryFile file;

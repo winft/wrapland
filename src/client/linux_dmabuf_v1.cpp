@@ -127,7 +127,7 @@ LinuxDmabufV1::operator zwp_linux_dmabuf_v1*() const
     return d_ptr->dmabuf;
 }
 
-const zwp_linux_buffer_params_v1_listener ParamsV1::Private::s_listener = {
+zwp_linux_buffer_params_v1_listener const ParamsV1::Private::s_listener = {
     ParamsV1::Private::callbackCreateSucceeded,
     ParamsV1::Private::callbackBufferCreationFail,
 };

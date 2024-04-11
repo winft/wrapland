@@ -252,7 +252,7 @@ text_input_v3::Private::Private(Seat* seat, text_input_v3* q)
 {
 }
 
-const zwp_text_input_v3_listener text_input_v3::Private::s_listener = {
+zwp_text_input_v3_listener const text_input_v3::Private::s_listener = {
     enter_callback,
     leave_callback,
     preedit_string_callback,

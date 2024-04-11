@@ -178,10 +178,10 @@ private:
     static void lockedCallback(void* data, zwp_locked_pointer_v1* zwp_locked_pointer_v1);
     static void unlockedCallback(void* data, zwp_locked_pointer_v1* zwp_locked_pointer_v1);
 
-    static const zwp_locked_pointer_v1_listener s_listener;
+    static zwp_locked_pointer_v1_listener const s_listener;
 };
 
-const zwp_locked_pointer_v1_listener LockedPointer::Private::s_listener = {
+zwp_locked_pointer_v1_listener const LockedPointer::Private::s_listener = {
     lockedCallback,
     unlockedCallback,
 };
@@ -285,10 +285,10 @@ private:
     static void confinedCallback(void* data, zwp_confined_pointer_v1* zwp_confined_pointer_v1);
     static void unconfinedCallback(void* data, zwp_confined_pointer_v1* zwp_confined_pointer_v1);
 
-    static const zwp_confined_pointer_v1_listener s_listener;
+    static zwp_confined_pointer_v1_listener const s_listener;
 };
 
-const zwp_confined_pointer_v1_listener ConfinedPointer::Private::s_listener = {
+zwp_confined_pointer_v1_listener const ConfinedPointer::Private::s_listener = {
     confinedCallback,
     unconfinedCallback,
 };

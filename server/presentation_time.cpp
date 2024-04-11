@@ -51,10 +51,10 @@ private:
     feedbackCallback(PresentationManagerBind* bind, wl_resource* wlSurface, uint32_t id);
 
     static const struct wp_presentation_interface s_interface;
-    static const uint32_t s_version;
+    static uint32_t const s_version;
 };
 
-const uint32_t PresentationManager::Private::s_version = 1;
+uint32_t const PresentationManager::Private::s_version = 1;
 
 PresentationManager::Private::Private(PresentationManager* q_ptr, Display* display)
     : PresentationManagerGlobal(q_ptr, display, &wp_presentation_interface, &s_interface)

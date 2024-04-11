@@ -59,7 +59,7 @@ private:
 
     PlasmaShellSurface* q;
     static QVector<Private*> s_surfaces;
-    static const org_kde_plasma_surface_listener s_listener;
+    static org_kde_plasma_surface_listener const s_listener;
 };
 
 QVector<PlasmaShellSurface::Private*> PlasmaShellSurface::Private::s_surfaces;
@@ -174,7 +174,7 @@ void PlasmaShellSurface::Private::setup(org_kde_plasma_surface* s)
     org_kde_plasma_surface_add_listener(surface, &s_listener, this);
 }
 
-const org_kde_plasma_surface_listener PlasmaShellSurface::Private::s_listener = {
+org_kde_plasma_surface_listener const PlasmaShellSurface::Private::s_listener = {
     autoHidingPanelHiddenCallback,
     autoHidingPanelShownCallback,
 };

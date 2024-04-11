@@ -72,9 +72,8 @@ public:
             void const* implementation)
         : BasicNucleus(display)
         , global{global}
-        , interface {
-        interface
-    }, implementation{implementation}
+        , interface{interface}
+        , implementation{implementation}
     {
         this->display->addGlobal(this);
     }

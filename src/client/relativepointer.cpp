@@ -123,7 +123,7 @@ private:
 
     RelativePointer* q;
 
-    static const zwp_relative_pointer_v1_listener s_listener;
+    static zwp_relative_pointer_v1_listener const s_listener;
 };
 
 RelativePointer::Private::Private(RelativePointer* q)
@@ -131,7 +131,7 @@ RelativePointer::Private::Private(RelativePointer* q)
 {
 }
 
-const zwp_relative_pointer_v1_listener RelativePointer::Private::s_listener = {
+zwp_relative_pointer_v1_listener const RelativePointer::Private::s_listener = {
     relativeMotionCallback,
 };
 
@@ -147,9 +147,9 @@ void RelativePointer::Private::relativeMotionCallback(
 {
     auto p = reinterpret_cast<RelativePointer::Private*>(data);
     Q_ASSERT(p->relativepointerunstablev1 == zwp_relative_pointer_v1);
-    const QSizeF delta(wl_fixed_to_double(dx), wl_fixed_to_double(dy));
-    const QSizeF deltaNonAccel(wl_fixed_to_double(dx_unaccel), wl_fixed_to_double(dy_unaccel));
-    const quint64 timestamp = quint64(utime_lo) | (quint64(utime_hi) << 32);
+    QSizeF const delta(wl_fixed_to_double(dx), wl_fixed_to_double(dy));
+    QSizeF const deltaNonAccel(wl_fixed_to_double(dx_unaccel), wl_fixed_to_double(dy_unaccel));
+    quint64 const timestamp = quint64(utime_lo) | (quint64(utime_hi) << 32);
     Q_EMIT p->q->relativeMotion(delta, deltaNonAccel, timestamp);
 }
 

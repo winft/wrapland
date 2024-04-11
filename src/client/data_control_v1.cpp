@@ -86,7 +86,7 @@ data_control_manager_v1::operator zwlr_data_control_manager_v1*()
     return d_ptr->manager;
 }
 
-const zwlr_data_control_device_v1_listener data_control_device_v1::Private::s_listener = {
+zwlr_data_control_device_v1_listener const data_control_device_v1::Private::s_listener = {
     data_offer_callback<Private>,
     selection_callback<Private>,
     finished_callback,
@@ -260,7 +260,7 @@ data_control_offer_v1::operator zwlr_data_control_offer_v1*() const
     return d_ptr->dataOffer;
 }
 
-const zwlr_data_control_source_v1_listener data_control_source_v1::Private::s_listener = {
+zwlr_data_control_source_v1_listener const data_control_source_v1::Private::s_listener = {
     send_callback<Private>,
     cancelled_callback<Private>,
 };

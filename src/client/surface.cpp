@@ -62,8 +62,8 @@ private:
     static void leaveCallback(void* data, wl_surface* wl_surface, wl_output* output);
 
     Surface* q;
-    static const wl_callback_listener s_listener;
-    static const wl_surface_listener s_surfaceListener;
+    static wl_callback_listener const s_listener;
+    static wl_surface_listener const s_surfaceListener;
 };
 
 QList<Surface*> Surface::Private::s_surfaces = QList<Surface*>();

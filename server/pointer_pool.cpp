@@ -227,7 +227,7 @@ void pointer_pool::set_focused_surface_transformation(QMatrix4x4 const& transfor
 
 void pointer_pool::button_pressed(Qt::MouseButton button)
 {
-    const uint32_t nativeButton = qtToWaylandButton(button);
+    uint32_t const nativeButton = qtToWaylandButton(button);
     if (nativeButton == 0) {
         return;
     }
@@ -252,7 +252,7 @@ void pointer_pool::button_pressed(uint32_t button)
 
 void pointer_pool::button_released(Qt::MouseButton button)
 {
-    const uint32_t nativeButton = qtToWaylandButton(button);
+    uint32_t const nativeButton = qtToWaylandButton(button);
     if (nativeButton == 0) {
         return;
     }
@@ -262,7 +262,7 @@ void pointer_pool::button_released(Qt::MouseButton button)
 void pointer_pool::button_released(uint32_t button)
 {
     auto const serial = seat->d_ptr->display()->handle->nextSerial();
-    const uint32_t currentButtonSerial = button_serial(button);
+    uint32_t const currentButtonSerial = button_serial(button);
     update_button_serial(button, serial);
     update_button_state(button, button_state::released);
     if (seat->drags().is_pointer_drag()) {

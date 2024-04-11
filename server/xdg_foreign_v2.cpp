@@ -59,7 +59,7 @@ void XdgExporterV2::Private::exportToplevelCallback(XdgExporterV2Bind* bind,
 
     auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
 
-    const QString protocolHandle = QUuid::createUuid().toString();
+    QString const protocolHandle = QUuid::createUuid().toString();
 
     auto exported = new XdgExportedV2(
         bind->client->handle, wl_resource_get_version(bind->resource), id, surface, protocolHandle);

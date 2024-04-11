@@ -148,7 +148,7 @@ private:
 
     TextInputV2* q;
 
-    static const zwp_text_input_v2_listener s_listener;
+    static zwp_text_input_v2_listener const s_listener;
 };
 
 }

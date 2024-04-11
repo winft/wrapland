@@ -238,7 +238,7 @@ bool PlasmaWindowModelTest::testBooleanData(Clt::PlasmaWindowModel::AdditionalRo
     // Make sure we do not get additional data changed signals before actually setting the data.
     VERIFY(!dataChangedSpy.wait(100));
 
-    const QModelIndex index = model->index(0);
+    QModelIndex const index = model->index(0);
     COMPARE(model->data(index, role).toBool(), false);
 
     (serverWindow->*(function))(true);
@@ -558,14 +558,14 @@ void PlasmaWindowModelTest::testGeometry()
     QVERIFY(serverWindow);
     QVERIFY(rowInsertedSpy.wait());
 
-    const QModelIndex index = model->index(0);
+    QModelIndex const index = model->index(0);
 
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::Geometry).toRect(), QRect());
 
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     QVERIFY(dataChangedSpy.isValid());
 
-    const QRect geom(0, 15, 50, 75);
+    QRect const geom(0, 15, 50, 75);
     serverWindow->setGeometry(geom);
 
     QVERIFY(dataChangedSpy.wait());
@@ -603,7 +603,7 @@ void PlasmaWindowModelTest::testTitle()
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     QVERIFY(dataChangedSpy.isValid());
 
-    const QModelIndex index = model->index(0);
+    QModelIndex const index = model->index(0);
     QCOMPARE(model->data(index, Qt::DisplayRole).toString(), QString());
 
     serverWindow->setTitle(QStringLiteral("foo"));
@@ -641,7 +641,7 @@ void PlasmaWindowModelTest::testAppId()
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     QVERIFY(dataChangedSpy.isValid());
 
-    const QModelIndex index = model->index(0);
+    QModelIndex const index = model->index(0);
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::AppId).toString(), QString());
 
     serverWindow->setAppId(QStringLiteral("org.kde.testapp"));
@@ -679,7 +679,7 @@ void PlasmaWindowModelTest::testPid()
     QVERIFY(rowInsertedSpy.wait());
 
     // pid should be set as soon as the new row appears
-    const QModelIndex index = model->index(0);
+    QModelIndex const index = model->index(0);
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::Pid).toInt(), 1337);
 }
 
@@ -699,7 +699,7 @@ void PlasmaWindowModelTest::testVirtualDesktops()
     QSignalSpy dataChangedSpy(model, &Clt::PlasmaWindowModel::dataChanged);
     QVERIFY(dataChangedSpy.isValid());
 
-    const QModelIndex index = model->index(0);
+    QModelIndex const index = model->index(0);
     QCOMPARE(model->data(index, Clt::PlasmaWindowModel::VirtualDesktops).toStringList(),
              QStringList());
 

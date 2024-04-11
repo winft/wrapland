@@ -269,7 +269,7 @@ void TestSeat::testName()
     QSignalSpy spy(m_seat, &Clt::Seat::nameChanged);
     QVERIFY(spy.isValid());
 
-    const std::string name("foobar");
+    std::string const name("foobar");
     server.seat->setName(name);
     QVERIFY(spy.wait());
     QCOMPARE(m_seat->name(), QString::fromStdString(name));

@@ -188,7 +188,7 @@ uint32_t XdgShell::Private::ping(Client* client)
         return 0;
     }
 
-    const uint32_t pingSerial = display()->handle->nextSerial();
+    uint32_t const pingSerial = display()->handle->nextSerial();
 
     send<xdg_wm_base_send_ping>((*bindIt).first, pingSerial);
 

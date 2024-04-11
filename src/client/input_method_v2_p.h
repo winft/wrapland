@@ -83,7 +83,7 @@ private:
 
     input_method_v2* q_ptr;
 
-    static const zwp_input_method_v2_listener s_listener;
+    static zwp_input_method_v2_listener const s_listener;
 };
 
 class Q_DECL_HIDDEN input_popup_surface_v2::Private
@@ -117,7 +117,7 @@ private:
 
     input_popup_surface_v2* q_ptr;
 
-    static const zwp_input_popup_surface_v2_listener s_listener;
+    static zwp_input_popup_surface_v2_listener const s_listener;
 };
 
 class Q_DECL_HIDDEN input_method_keyboard_grab_v2::Private
@@ -173,7 +173,7 @@ private:
 
     input_method_keyboard_grab_v2* q_ptr;
 
-    static const zwp_input_method_keyboard_grab_v2_listener s_listener;
+    static zwp_input_method_keyboard_grab_v2_listener const s_listener;
 };
 
 }

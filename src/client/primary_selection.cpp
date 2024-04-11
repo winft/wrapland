@@ -13,7 +13,7 @@
 namespace Wrapland::Client
 {
 
-const zwp_primary_selection_device_v1_listener PrimarySelectionDevice::Private::s_listener = {
+zwp_primary_selection_device_v1_listener const PrimarySelectionDevice::Private::s_listener = {
     data_offer_callback<Private>,
     selection_callback<Private>,
 };
@@ -221,7 +221,7 @@ PrimarySelectionOffer::operator zwp_primary_selection_offer_v1*() const
     return d_ptr->dataOffer;
 }
 
-const zwp_primary_selection_source_v1_listener PrimarySelectionSource::Private::s_listener = {
+zwp_primary_selection_source_v1_listener const PrimarySelectionSource::Private::s_listener = {
     send_callback<Private>,
     cancelled_callback<Private>,
 };

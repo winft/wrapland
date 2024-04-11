@@ -69,7 +69,7 @@ private:
 
     PlasmaVirtualDesktopManagement* q;
 
-    static const org_kde_plasma_virtual_desktop_management_listener s_listener;
+    static org_kde_plasma_virtual_desktop_management_listener const s_listener;
 };
 
 class Q_DECL_HIDDEN PlasmaVirtualDesktop::Private
@@ -106,7 +106,7 @@ private:
     static void removedCallback(void* data,
                                 org_kde_plasma_virtual_desktop* org_kde_plasma_virtual_desktop);
 
-    static const org_kde_plasma_virtual_desktop_listener s_listener;
+    static org_kde_plasma_virtual_desktop_listener const s_listener;
 };
 
 inline QList<PlasmaVirtualDesktop*>::const_iterator
@@ -125,7 +125,7 @@ PlasmaVirtualDesktopManagement::Private::findDesktop(QString const& id)
     });
 }
 
-const org_kde_plasma_virtual_desktop_management_listener
+org_kde_plasma_virtual_desktop_management_listener const
     PlasmaVirtualDesktopManagement::Private::s_listener
     = {
         createdCallback,
@@ -142,7 +142,7 @@ void PlasmaVirtualDesktopManagement::Private::createdCallback(
 {
     auto p = reinterpret_cast<PlasmaVirtualDesktopManagement::Private*>(data);
     Q_ASSERT(p->plasmavirtualdesktopmanagement == org_kde_plasma_virtual_desktop_management);
-    const QString stringId = QString::fromUtf8(id);
+    QString const stringId = QString::fromUtf8(id);
     PlasmaVirtualDesktop* vd = p->q->getVirtualDesktop(stringId);
     Q_ASSERT(vd);
 
@@ -159,7 +159,7 @@ void PlasmaVirtualDesktopManagement::Private::removedCallback(
 {
     auto p = reinterpret_cast<PlasmaVirtualDesktopManagement::Private*>(data);
     Q_ASSERT(p->plasmavirtualdesktopmanagement == org_kde_plasma_virtual_desktop_management);
-    const QString stringId = QString::fromUtf8(id);
+    QString const stringId = QString::fromUtf8(id);
     PlasmaVirtualDesktop* vd = p->q->getVirtualDesktop(stringId);
     // TODO: emit a lot of desktopMoved?
     Q_ASSERT(vd);
@@ -312,7 +312,7 @@ quint32 PlasmaVirtualDesktopManagement::rows() const
     return d->rows;
 }
 
-const org_kde_plasma_virtual_desktop_listener PlasmaVirtualDesktop::Private::s_listener = {
+org_kde_plasma_virtual_desktop_listener const PlasmaVirtualDesktop::Private::s_listener = {
     idCallback,
     nameCallback,
     activatedCallback,
