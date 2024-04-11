@@ -106,8 +106,11 @@ void Keyboard::setKeymap(char const* content)
         qCWarning(WRAPLAND_SERVER, "Failed to set keyboard keymap with %d.", rc);
         // TODO(romangg): Handle error by closing file here and returning?
     }
+    if (std::fseek(tmpf, 0, SEEK_SET) != 0) {
+        qCWarning(WRAPLAND_SERVER, "Failed to seek begin of keyboard keymap.");
+        // TODO(romangg): Handle error by closing file here and returning?
+    }
 
-    std::rewind(tmpf);
     d_ptr->sendKeymap(fileno(tmpf), strlen(content));
     d_ptr->keymap = file_wrap(tmpf);
     d_ptr->needs_keymap_update = false;
