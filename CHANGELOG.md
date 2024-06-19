@@ -1,5 +1,24 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.601.0](https://github.com/winft/wrapland/compare/v0.600.0...v0.601.0) (2024-06-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **client:** subsurfaces managed with references instead of QPointers
+
+### Bug Fixes
+
+* **server:** add missing header for libc++ after 7d0be514abe7 ([13e266f](https://github.com/winft/wrapland/commit/13e266fe4370c7a35b16075e0bd5f84b3f51084c))
+* **server:** clean up lambda includes ([0f72c97](https://github.com/winft/wrapland/commit/0f72c97cea3068623d753044e5207e93ee42c4fe))
+* **server:** forward and move arguments correctly ([e98c8e4](https://github.com/winft/wrapland/commit/e98c8e44c4c07182d0101135dfaff9db064dca2c))
+
+
+### Refactors
+
+* **client:** handle subsurfaces without QPointer ([f3a01c2](https://github.com/winft/wrapland/commit/f3a01c25f2859496d54a2ae19ba0a6c1c3cbadc0))
+* **server:** replace rewind with fseek ([630343d](https://github.com/winft/wrapland/commit/630343d61c4671ebc0c5d4d1c40cbf91f9beaf2f))
+
 ## [0.600.0](https://github.com/winft/wrapland/compare/wrapland@0.527.0-beta.0...v0.600.0) (2024-02-27)
 
 
