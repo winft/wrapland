@@ -7,11 +7,11 @@ jobs:
     if: github.repository == 'winft/wrapland'
     uses: ./.github/workflows/build.yml
     with:
-      image: registry.gitlab.com/kwinft/ci-images/archlinux/frameworks-master
+      image: registry.gitlab.com/kwinft/ci-images/archlinux/kf-master
 
   package:
     uses: ./.github/workflows/package.yml
     needs: build
     with:
-      image: registry.gitlab.com/kwinft/ci-images/archlinux/frameworks-master
+      image: registry.gitlab.com/kwinft/ci-images/archlinux/kf-master
       package-name: wrapland
