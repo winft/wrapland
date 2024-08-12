@@ -58,7 +58,7 @@ void PlasmaWindowModel::Private::addWindow(PlasmaWindow* window)
     q->endInsertRows();
 
     auto removeWindow = [window, this] {
-        const int row = windows.indexOf(window);
+        int const row = windows.indexOf(window);
         if (row != -1) {
             q->beginRemoveRows(QModelIndex(), row, row);
             windows.removeAt(row);

@@ -33,10 +33,10 @@ const struct org_kde_kwin_server_decoration_palette_manager_interface
 ServerSideDecorationPaletteManager::Private::Private(Display* display,
                                                      ServerSideDecorationPaletteManager* qptr)
     : ServerSideDecorationPaletteManagerGlobal(
-        qptr,
-        display,
-        &org_kde_kwin_server_decoration_palette_manager_interface,
-        &s_interface)
+          qptr,
+          display,
+          &org_kde_kwin_server_decoration_palette_manager_interface,
+          &s_interface)
 {
     create();
 }
@@ -111,12 +111,12 @@ ServerSideDecorationPalette::Private::Private(Client* client,
                                               Surface* surface,
                                               ServerSideDecorationPalette* qptr)
     : Wayland::Resource<ServerSideDecorationPalette>(
-        client,
-        version,
-        id,
-        &org_kde_kwin_server_decoration_palette_interface,
-        &s_interface,
-        qptr)
+          client,
+          version,
+          id,
+          &org_kde_kwin_server_decoration_palette_interface,
+          &s_interface,
+          qptr)
     , surface(surface)
 {
 }

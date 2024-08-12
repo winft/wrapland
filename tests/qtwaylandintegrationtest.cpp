@@ -77,7 +77,7 @@ void WaylandClientTest::setupRegistry(Registry* registry)
         connect(m_shellSurface,
                 &ShellSurface::sizeChanged,
                 this,
-                static_cast<void (WaylandClientTest::*)(const QSize&)>(&WaylandClientTest::render));
+                static_cast<void (WaylandClientTest::*)(QSize const&)>(&WaylandClientTest::render));
         render(QSize(200, 200));
     });
     connect(registry, &Registry::shmAnnounced, this, [this, registry](quint32 name) {

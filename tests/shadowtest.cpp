@@ -141,7 +141,7 @@ void ShadowTest::setupShadow()
     Q_ASSERT(shadow);
 
     auto addElement = [shadow, this](QColor const color) {
-        const QSize size = QSize(10, 10);
+        QSize const size = QSize(10, 10);
         auto buffer = m_shm->getBuffer(size, size.width() * 4).lock();
         buffer->setUsed(true);
         QImage image(

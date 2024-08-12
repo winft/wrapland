@@ -209,13 +209,13 @@ void PanelTest::setupRegistry(Registry* registry)
                 connect(p,
                         &Pointer::entered,
                         this,
-                        [this, p](quint32 serial, const QPointF& relativeToSurface) {
+                        [this, p](quint32 serial, QPointF const& relativeToSurface) {
                             Q_UNUSED(serial)
                             if (p->enteredSurface() == m_surface) {
                                 showTooltip(relativeToSurface);
                             }
                         });
-                connect(p, &Pointer::motion, this, [this, p](const QPointF& relativeToSurface) {
+                connect(p, &Pointer::motion, this, [this, p](QPointF const& relativeToSurface) {
                     if (p->enteredSurface() == m_surface) {
                         moveTooltip(relativeToSurface);
                     }
