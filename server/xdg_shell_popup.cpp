@@ -192,7 +192,7 @@ xdg_shell_positioner const& XdgShellPopup::get_positioner() const
 
 void XdgShellPopup::popupDone()
 {
-    return d_ptr->popupDone();
+    d_ptr->popupDone();
 }
 
 uint32_t XdgShellPopup::configure(QRect const& rect)
