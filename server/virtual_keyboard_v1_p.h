@@ -22,7 +22,6 @@ class Display;
 constexpr uint32_t virtual_keyboard_manager_v1_version = 1;
 using virtual_keyboard_manager_v1_global
     = Wayland::Global<virtual_keyboard_manager_v1, virtual_keyboard_manager_v1_version>;
-using virtual_keyboard_manager_v1_bind = Wayland::Bind<virtual_keyboard_manager_v1_global>;
 
 class virtual_keyboard_manager_v1::Private : public virtual_keyboard_manager_v1_global
 {
@@ -30,7 +29,7 @@ public:
     Private(Display* display, virtual_keyboard_manager_v1* q_ptr);
 
 private:
-    static void create_virtual_keyboard_callback(virtual_keyboard_manager_v1_bind* bind,
+    static void create_virtual_keyboard_callback(virtual_keyboard_manager_v1_global::bind_t* bind,
                                                  wl_resource* wlSeat,
                                                  uint32_t id);
 

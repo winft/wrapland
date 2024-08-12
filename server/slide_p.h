@@ -33,7 +33,6 @@ class Display;
 
 constexpr uint32_t SlideManagerVersion = 1;
 using SlideManagerGlobal = Wayland::Global<SlideManager, SlideManagerVersion>;
-using SlideManagerBind = Wayland::Bind<SlideManagerGlobal>;
 
 class SlideManager::Private : public SlideManagerGlobal
 {
@@ -41,8 +40,9 @@ public:
     Private(Display* display, SlideManager* qptr);
 
 private:
-    static void createCallback(SlideManagerBind* bind, uint32_t id, wl_resource* wlSurface);
-    static void unsetCallback(SlideManagerBind* bind, wl_resource* wlSurface);
+    static void
+    createCallback(SlideManagerGlobal::bind_t* bind, uint32_t id, wl_resource* wlSurface);
+    static void unsetCallback(SlideManagerGlobal::bind_t* bind, wl_resource* wlSurface);
 
     static const struct org_kde_kwin_slide_manager_interface s_interface;
 };

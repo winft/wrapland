@@ -17,7 +17,6 @@ namespace Wrapland::Server
 
 constexpr uint32_t idle_notifier_v1_version = 1;
 using idle_notifier_v1_global = Wayland::Global<idle_notifier_v1, idle_notifier_v1_version>;
-using idle_notifier_v1_bind = Wayland::Bind<idle_notifier_v1_global>;
 
 class idle_notifier_v1::Private : public idle_notifier_v1_global
 {
@@ -25,7 +24,7 @@ public:
     Private(Display* display, idle_notifier_v1* q_ptr);
 
 private:
-    static void get_idle_notification_callback(idle_notifier_v1_bind* bind,
+    static void get_idle_notification_callback(idle_notifier_v1_global::bind_t* bind,
                                                uint32_t id,
                                                uint32_t timeout,
                                                wl_resource* wlSeat);

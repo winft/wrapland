@@ -44,7 +44,7 @@ wlr_output_head_v1::~wlr_output_head_v1()
     remove_all(manager->d_ptr->heads, this);
 }
 
-wlr_output_head_v1_res* wlr_output_head_v1::add_bind(wlr_output_manager_v1_bind& bind)
+wlr_output_head_v1_res* wlr_output_head_v1::add_bind(wlr_output_manager_v1_global::bind_t& bind)
 {
     auto res = new wlr_output_head_v1_res(bind.client->handle, bind.version, *this);
     bind.send<zwlr_output_manager_v1_send_head>(res->d_ptr->resource);

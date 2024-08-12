@@ -35,20 +35,19 @@ namespace Wrapland::Server
 
 constexpr uint32_t PresentationManagerVersion = 1;
 using PresentationManagerGlobal = Wayland::Global<PresentationManager, PresentationManagerVersion>;
-using PresentationManagerBind = Wayland::Bind<PresentationManagerGlobal>;
 
 class PresentationManager::Private : public PresentationManagerGlobal
 {
 public:
     Private(PresentationManager* q_ptr, Display* display);
 
-    void bindInit(PresentationManagerBind* bind) override;
+    void bindInit(PresentationManagerGlobal::bind_t* bind) override;
 
     clockid_t clockId = 0;
 
 private:
     static void
-    feedbackCallback(PresentationManagerBind* bind, wl_resource* wlSurface, uint32_t id);
+    feedbackCallback(PresentationManagerGlobal::bind_t* bind, wl_resource* wlSurface, uint32_t id);
 
     static const struct wp_presentation_interface s_interface;
     static uint32_t const s_version;
@@ -66,12 +65,12 @@ const struct wp_presentation_interface PresentationManager::Private::s_interface
     cb<feedbackCallback>,
 };
 
-void PresentationManager::Private::bindInit(PresentationManagerBind* bind)
+void PresentationManager::Private::bindInit(PresentationManagerGlobal::bind_t* bind)
 {
     send<wp_presentation_send_clock_id>(bind, clockId);
 }
 
-void PresentationManager::Private::feedbackCallback(PresentationManagerBind* bind,
+void PresentationManager::Private::feedbackCallback(PresentationManagerGlobal::bind_t* bind,
                                                     wl_resource* wlSurface,
                                                     uint32_t id)
 {

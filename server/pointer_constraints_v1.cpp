@@ -53,7 +53,7 @@ const struct zwp_pointer_constraints_v1_interface PointerConstraintsV1::Private:
     cb<confinePointerCallback>,
 };
 
-void PointerConstraintsV1::Private::lockPointerCallback(PointerConstraintsV1Bind* bind,
+void PointerConstraintsV1::Private::lockPointerCallback(PointerConstraintsV1Global::bind_t* bind,
                                                         uint32_t id,
                                                         wl_resource* wlSurface,
                                                         wl_resource* wlPointer,
@@ -65,7 +65,7 @@ void PointerConstraintsV1::Private::lockPointerCallback(PointerConstraintsV1Bind
         bind->resource, id, wlSurface, wlPointer, wlRegion, lifetime);
 }
 
-void PointerConstraintsV1::Private::confinePointerCallback(PointerConstraintsV1Bind* bind,
+void PointerConstraintsV1::Private::confinePointerCallback(PointerConstraintsV1Global::bind_t* bind,
                                                            uint32_t id,
                                                            wl_resource* wlSurface,
                                                            wl_resource* wlPointer,

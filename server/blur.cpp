@@ -46,7 +46,7 @@ BlurManager::Private::Private(Display* display, BlurManager* qptr)
     create();
 }
 
-void BlurManager::Private::createCallback(BlurManagerBind* bind,
+void BlurManager::Private::createCallback(BlurManagerGlobal::bind_t* bind,
                                           uint32_t id,
                                           wl_resource* wlSurface)
 {
@@ -61,7 +61,7 @@ void BlurManager::Private::createCallback(BlurManagerBind* bind,
     surface->d_ptr->setBlur(blur);
 }
 
-void BlurManager::Private::unsetCallback([[maybe_unused]] BlurManagerBind* bind,
+void BlurManager::Private::unsetCallback([[maybe_unused]] BlurManagerGlobal::bind_t* bind,
                                          wl_resource* wlSurface)
 {
     auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);

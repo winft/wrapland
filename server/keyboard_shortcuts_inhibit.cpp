@@ -46,7 +46,7 @@ KeyboardShortcutsInhibitManagerV1::Private::Private(Display* display,
 }
 
 void KeyboardShortcutsInhibitManagerV1::Private::inhibitShortcutsCallback(
-    KeyboardShortcutsInhibitManagerV1Bind* bind,
+    KeyboardShortcutsInhibitManagerV1Global::bind_t* bind,
     uint32_t id,
     wl_resource* wlSurface,
     wl_resource* wlSeat)

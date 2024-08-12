@@ -34,7 +34,7 @@ PlasmaShell::Private::Private(Display* display, PlasmaShell* qptr)
     create();
 }
 
-void PlasmaShell::Private::createSurfaceCallback(PlasmaShellBind* bind,
+void PlasmaShell::Private::createSurfaceCallback(PlasmaShellGlobal::bind_t* bind,
                                                  uint32_t id,
                                                  wl_resource* surface)
 {
@@ -42,7 +42,9 @@ void PlasmaShell::Private::createSurfaceCallback(PlasmaShellBind* bind,
     priv->createSurface(bind, id, Wayland::Resource<Surface>::get_handle(surface));
 }
 
-void PlasmaShell::Private::createSurface(PlasmaShellBind* bind, uint32_t id, Surface* surface)
+void PlasmaShell::Private::createSurface(PlasmaShellGlobal::bind_t* bind,
+                                         uint32_t id,
+                                         Surface* surface)
 {
     auto it = std::find_if(surfaces.constBegin(), surfaces.constEnd(), [surface](auto pss) {
         return surface == pss->surface();

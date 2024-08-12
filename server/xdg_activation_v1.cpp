@@ -26,7 +26,8 @@ XdgActivationV1::Private::Private(Display* display, XdgActivationV1* q_ptr)
     create();
 }
 
-void XdgActivationV1::Private::getActivationTokenCallback(XdgActivationV1Bind* bind, uint32_t id)
+void XdgActivationV1::Private::getActivationTokenCallback(XdgActivationV1Global::bind_t* bind,
+                                                          uint32_t id)
 {
     auto request
         = new XdgActivationTokenV1(bind->client->handle, bind->version, id, bind->global()->handle);
@@ -36,7 +37,7 @@ void XdgActivationV1::Private::getActivationTokenCallback(XdgActivationV1Bind* b
     }
 }
 
-void XdgActivationV1::Private::activateCallback(XdgActivationV1Bind* bind,
+void XdgActivationV1::Private::activateCallback(XdgActivationV1Global::bind_t* bind,
                                                 char const* token,
                                                 wl_resource* wlSurface)
 {

@@ -42,7 +42,7 @@ ServerSideDecorationPaletteManager::Private::Private(Display* display,
 }
 
 void ServerSideDecorationPaletteManager::Private::createCallback(
-    ServerSideDecorationPaletteManagerBind* bind,
+    ServerSideDecorationPaletteManagerGlobal::bind_t* bind,
     uint32_t id,
     wl_resource* wlSurface)
 {

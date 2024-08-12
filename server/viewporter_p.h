@@ -36,7 +36,6 @@ class Viewport;
 
 constexpr uint32_t ViewporterVersion = 1;
 using ViewporterGlobal = Wayland::Global<Viewporter, ViewporterVersion>;
-using ViewporterBind = Wayland::Bind<ViewporterGlobal>;
 
 class Viewporter::Private : public ViewporterGlobal
 {
@@ -44,9 +43,10 @@ public:
     Private(Display* display, Viewporter* q_ptr);
 
 private:
-    void getViewport(ViewporterBind* bind, uint32_t id, wl_resource* wlSurface);
+    void getViewport(ViewporterGlobal::bind_t* bind, uint32_t id, wl_resource* wlSurface);
 
-    static void getViewportCallback(ViewporterBind* bind, uint32_t id, wl_resource* wlSurface);
+    static void
+    getViewportCallback(ViewporterGlobal::bind_t* bind, uint32_t id, wl_resource* wlSurface);
 
     static const struct wp_viewporter_interface s_interface;
 };

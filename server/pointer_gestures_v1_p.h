@@ -32,7 +32,6 @@ class Pointer;
 
 constexpr uint32_t PointerGesturesV1Version = 3;
 using PointerGesturesV1Global = Wayland::Global<PointerGesturesV1, PointerGesturesV1Version>;
-using PointerGesturesV1Bind = Wayland::Bind<PointerGesturesV1Global>;
 
 class PointerGesturesV1::Private : public PointerGesturesV1Global
 {
@@ -40,12 +39,14 @@ public:
     Private(PointerGesturesV1* q_ptr, Display* display);
 
 private:
+    static void swipeGestureCallback(PointerGesturesV1Global::bind_t* bind,
+                                     uint32_t id,
+                                     wl_resource* wlPointer);
+    static void pinchGestureCallback(PointerGesturesV1Global::bind_t* bind,
+                                     uint32_t id,
+                                     wl_resource* wlPointer);
     static void
-    swipeGestureCallback(PointerGesturesV1Bind* bind, uint32_t id, wl_resource* wlPointer);
-    static void
-    pinchGestureCallback(PointerGesturesV1Bind* bind, uint32_t id, wl_resource* wlPointer);
-    static void
-    holdGestureCallback(PointerGesturesV1Bind* bind, uint32_t id, wl_resource* wlPointer);
+    holdGestureCallback(PointerGesturesV1Global::bind_t* bind, uint32_t id, wl_resource* wlPointer);
 
     static const struct zwp_pointer_gestures_v1_interface s_interface;
 };

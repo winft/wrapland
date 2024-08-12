@@ -34,13 +34,13 @@ drm_lease_device_v1::Private::~Private()
     }
 }
 
-void drm_lease_device_v1::Private::bindInit(drm_lease_device_v1_bind* bind)
+void drm_lease_device_v1::Private::bindInit(drm_lease_device_v1_global::bind_t* bind)
 {
     waiting_binds.push_back(bind);
     Q_EMIT handle->needs_new_client_fd();
 }
 
-void drm_lease_device_v1::Private::prepareUnbind(drm_lease_device_v1_bind* bind)
+void drm_lease_device_v1::Private::prepareUnbind(drm_lease_device_v1_global::bind_t* bind)
 {
     auto priv = bind->global()->handle->d_ptr.get();
 
@@ -48,8 +48,9 @@ void drm_lease_device_v1::Private::prepareUnbind(drm_lease_device_v1_bind* bind)
     remove_one(priv->waiting_binds, bind);
 }
 
-void drm_lease_device_v1::Private::create_lease_request_callback(drm_lease_device_v1_bind* bind,
-                                                                 uint32_t id)
+void drm_lease_device_v1::Private::create_lease_request_callback(
+    drm_lease_device_v1_global::bind_t* bind,
+    uint32_t id)
 {
     auto request
         = new drm_lease_request_v1(bind->client->handle, bind->version, id, bind->global()->handle);
@@ -60,7 +61,8 @@ void drm_lease_device_v1::Private::create_lease_request_callback(drm_lease_devic
     }
 }
 
-void drm_lease_device_v1::Private::release_callback([[maybe_unused]] drm_lease_device_v1_bind* bind)
+void drm_lease_device_v1::Private::release_callback(
+    [[maybe_unused]] drm_lease_device_v1_global::bind_t* bind)
 {
     auto priv = bind->global()->handle->d_ptr.get();
 
@@ -82,7 +84,7 @@ void drm_lease_device_v1::Private::add_connector(drm_lease_connector_v1* connect
     }
 }
 
-void drm_lease_device_v1::Private::send_connector(drm_lease_device_v1_bind* bind,
+void drm_lease_device_v1::Private::send_connector(drm_lease_device_v1_global::bind_t* bind,
                                                   drm_lease_connector_v1* connector)
 {
     auto con_res = new drm_lease_connector_v1_res(bind->client, bind->version, 0, connector);

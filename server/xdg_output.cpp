@@ -44,7 +44,7 @@ XdgOutputManager::XdgOutputManager(Display* display)
 
 XdgOutputManager::~XdgOutputManager() = default;
 
-void XdgOutputManager::Private::getXdgOutputCallback(XdgOutputManagerBind* bind,
+void XdgOutputManager::Private::getXdgOutputCallback(XdgOutputManagerGlobal::bind_t* bind,
                                                      uint32_t id,
                                                      wl_resource* outputResource)
 {

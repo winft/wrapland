@@ -22,7 +22,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 
 #include "client.h"
-#include "nucleus.h"
 #include "send.h"
 
 #include <cassert>
@@ -36,14 +35,11 @@ namespace Wrapland::Server::Wayland
 {
 class Client;
 
-template<typename Global>
-class Nucleus;
-
-template<typename Global>
+template<typename Global, typename Nucleus>
 class Bind
 {
 public:
-    Bind(Client* client, uint32_t version, uint32_t id, Nucleus<Global>* global_nucleus)
+    Bind(Client* client, uint32_t version, uint32_t id, Nucleus* global_nucleus)
         : client{client}
         , version{version}
         , resource{client->createResource(global_nucleus->interface, version, id)}
@@ -132,9 +128,9 @@ public:
     wl_resource* resource;
 
 private:
-    static Bind<Global>* self(wl_resource* resource)
+    static Bind<Global, Nucleus>* self(wl_resource* resource)
     {
-        return static_cast<Bind<Global>*>(wl_resource_get_user_data(resource));
+        return static_cast<Bind<Global, Nucleus>*>(wl_resource_get_user_data(resource));
     }
 
     static void destroy(wl_resource* wlResource)
@@ -142,7 +138,7 @@ private:
         delete self(wlResource);
     }
 
-    Nucleus<Global>* global_nucleus;
+    Nucleus* global_nucleus;
 };
 
 }

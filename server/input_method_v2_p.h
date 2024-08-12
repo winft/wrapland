@@ -19,13 +19,13 @@ namespace Wrapland::Server
 constexpr uint32_t input_method_manager_v2_version = 1;
 using input_method_manager_v2_global
     = Wayland::Global<input_method_manager_v2, input_method_manager_v2_version>;
-using input_method_manager_v2_bind = Wayland::Bind<input_method_manager_v2_global>;
 
 class input_method_manager_v2::Private : public input_method_manager_v2_global
 {
 private:
-    static void
-    get_input_method_callback(input_method_manager_v2_bind* bind, wl_resource* wlSeat, uint32_t id);
+    static void get_input_method_callback(input_method_manager_v2_global::bind_t* bind,
+                                          wl_resource* wlSeat,
+                                          uint32_t id);
 
     static struct zwp_input_method_manager_v2_interface const s_interface;
 

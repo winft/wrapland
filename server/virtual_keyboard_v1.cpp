@@ -27,7 +27,7 @@ virtual_keyboard_manager_v1::Private::Private(Display* display, virtual_keyboard
 }
 
 void virtual_keyboard_manager_v1::Private::create_virtual_keyboard_callback(
-    virtual_keyboard_manager_v1_bind* bind,
+    virtual_keyboard_manager_v1_global::bind_t* bind,
     wl_resource* wlSeat,
     uint32_t id)
 {

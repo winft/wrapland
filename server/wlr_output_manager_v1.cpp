@@ -33,7 +33,7 @@ wlr_output_manager_v1::Private::~Private()
     }
 }
 
-void wlr_output_manager_v1::Private::bindInit(wlr_output_manager_v1_bind* bind)
+void wlr_output_manager_v1::Private::bindInit(wlr_output_manager_v1_global::bind_t* bind)
 {
     for (auto&& head : heads) {
         head->add_bind(*bind);
@@ -41,7 +41,7 @@ void wlr_output_manager_v1::Private::bindInit(wlr_output_manager_v1_bind* bind)
     bind->send<zwlr_output_manager_v1_send_done>(serial);
 }
 
-void wlr_output_manager_v1::Private::prepareUnbind(wlr_output_manager_v1_bind* bind)
+void wlr_output_manager_v1::Private::prepareUnbind(wlr_output_manager_v1_global::bind_t* bind)
 {
     remove_all(finished_binds, bind);
 }
@@ -56,14 +56,15 @@ void wlr_output_manager_v1::Private::add_head(wlr_output_head_v1& head)
     }
 }
 
-bool wlr_output_manager_v1::Private::is_finished(wlr_output_manager_v1_bind* bind) const
+bool wlr_output_manager_v1::Private::is_finished(wlr_output_manager_v1_global::bind_t* bind) const
 {
     return contains(finished_binds, bind);
 }
 
-void wlr_output_manager_v1::Private::create_configuration_callback(wlr_output_manager_v1_bind* bind,
-                                                                   uint32_t id,
-                                                                   uint32_t serial)
+void wlr_output_manager_v1::Private::create_configuration_callback(
+    wlr_output_manager_v1_global::bind_t* bind,
+    uint32_t id,
+    uint32_t serial)
 {
     auto priv = bind->global()->handle->d_ptr.get();
     if (priv->is_finished(bind)) {
@@ -81,7 +82,7 @@ void wlr_output_manager_v1::Private::create_configuration_callback(wlr_output_ma
     priv->configurations.push_back(config);
 }
 
-void wlr_output_manager_v1::Private::stop_callback(wlr_output_manager_v1_bind* bind)
+void wlr_output_manager_v1::Private::stop_callback(wlr_output_manager_v1_global::bind_t* bind)
 {
     auto priv = bind->global()->handle->d_ptr.get();
     if (priv->is_finished(bind)) {

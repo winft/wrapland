@@ -22,7 +22,6 @@ class Display;
 
 constexpr uint32_t drm_lease_device_v1Version = 1;
 using drm_lease_device_v1_global = Wayland::Global<drm_lease_device_v1, drm_lease_device_v1Version>;
-using drm_lease_device_v1_bind = Wayland::Bind<drm_lease_device_v1_global>;
 
 class drm_lease_device_v1::Private : public drm_lease_device_v1_global
 {
@@ -30,22 +29,24 @@ public:
     Private(Display* display, drm_lease_device_v1* q_ptr);
     ~Private() override;
 
-    void bindInit(drm_lease_device_v1_bind* bind) override;
-    void prepareUnbind(drm_lease_device_v1_bind* bind) override;
+    void bindInit(drm_lease_device_v1_global::bind_t* bind) override;
+    void prepareUnbind(drm_lease_device_v1_global::bind_t* bind) override;
 
     void add_connector(drm_lease_connector_v1* connector);
-    void send_connector(drm_lease_device_v1_bind* bind, drm_lease_connector_v1* connector);
+    void send_connector(drm_lease_device_v1_global::bind_t* bind,
+                        drm_lease_connector_v1* connector);
 
     void add_lease(drm_lease_v1* lease, int leese_id);
     void remove_lease(int leese_id);
 
-    std::deque<drm_lease_device_v1_bind*> waiting_binds;
-    std::vector<drm_lease_device_v1_bind*> active_binds;
+    std::deque<drm_lease_device_v1_global::bind_t*> waiting_binds;
+    std::vector<drm_lease_device_v1_global::bind_t*> active_binds;
     std::vector<drm_lease_connector_v1*> connectors;
 
 private:
-    static void create_lease_request_callback(drm_lease_device_v1_bind* bind, uint32_t id);
-    static void release_callback(drm_lease_device_v1_bind* bind);
+    static void create_lease_request_callback(drm_lease_device_v1_global::bind_t* bind,
+                                              uint32_t id);
+    static void release_callback(drm_lease_device_v1_global::bind_t* bind);
 
     static const struct wp_drm_lease_device_v1_interface s_interface;
 

@@ -36,9 +36,10 @@ IdleInhibitManagerV1::Private::Private(Display* display, IdleInhibitManagerV1* q
     create();
 }
 
-void IdleInhibitManagerV1::Private::createInhibitorCallback(IdleInhibitManagerV1Bind* bind,
-                                                            uint32_t id,
-                                                            wl_resource* wlSurface)
+void IdleInhibitManagerV1::Private::createInhibitorCallback(
+    IdleInhibitManagerV1Global::bind_t* bind,
+    uint32_t id,
+    wl_resource* wlSurface)
 {
     auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);
     auto inhibitor = new IdleInhibitor(bind->client->handle, bind->version, id);

@@ -40,9 +40,6 @@ namespace Wayland
 {
 class Client;
 
-template<typename Global>
-class Bind;
-
 class BasicNucleus
 {
 public:
@@ -111,7 +108,7 @@ public:
         native_global = wl_global_create(display->native(), interface, Global::version, this, bind);
     }
 
-    void unbind(Bind<Global>* bind)
+    void unbind(typename Global::bind_t* bind)
     {
         if (global) {
             global->prepareUnbind(bind);
@@ -123,7 +120,7 @@ public:
     wl_interface const* interface;
     void const* implementation;
 
-    std::vector<Bind<Global>*> binds;
+    std::vector<typename Global::bind_t*> binds;
 
 private:
     static void bind(wl_client* wlClient, void* data, uint32_t version, uint32_t id)
@@ -155,7 +152,7 @@ private:
 
     void bind(Client* client, uint32_t version, uint32_t id)
     {
-        auto resource = new Bind(client, version, id, this);
+        auto resource = new typename Global::bind_t(client, version, id, this);
         binds.push_back(resource);
 
         if (global) {

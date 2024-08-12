@@ -23,7 +23,6 @@ class Display;
 
 constexpr uint32_t XdgActivationV1Version = 1;
 using XdgActivationV1Global = Wayland::Global<XdgActivationV1, XdgActivationV1Version>;
-using XdgActivationV1Bind = Wayland::Bind<XdgActivationV1Global>;
 
 class XdgActivationV1::Private : public XdgActivationV1Global
 {
@@ -31,9 +30,10 @@ public:
     Private(Display* display, XdgActivationV1* q_ptr);
 
 private:
-    static void getActivationTokenCallback(XdgActivationV1Bind* bind, uint32_t id);
-    static void
-    activateCallback(XdgActivationV1Bind* bind, char const* token, wl_resource* wlSurface);
+    static void getActivationTokenCallback(XdgActivationV1Global::bind_t* bind, uint32_t id);
+    static void activateCallback(XdgActivationV1Global::bind_t* bind,
+                                 char const* token,
+                                 wl_resource* wlSurface);
 
     static const struct xdg_activation_v1_interface s_interface;
 };

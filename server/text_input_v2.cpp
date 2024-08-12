@@ -45,9 +45,10 @@ text_input_manager_v2::Private::Private(Display* display, text_input_manager_v2*
     create();
 }
 
-void text_input_manager_v2::Private::get_text_input_callback(text_input_manager_v2_bind* bind,
-                                                             uint32_t id,
-                                                             wl_resource* wlSeat)
+void text_input_manager_v2::Private::get_text_input_callback(
+    text_input_manager_v2_global::bind_t* bind,
+    uint32_t id,
+    wl_resource* wlSeat)
 {
     auto seat = SeatGlobal::get_handle(wlSeat);
 

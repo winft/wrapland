@@ -24,9 +24,10 @@ struct zwp_input_method_manager_v2_interface const input_method_manager_v2::Priv
     resourceDestroyCallback,
 };
 
-void input_method_manager_v2::Private::get_input_method_callback(input_method_manager_v2_bind* bind,
-                                                                 wl_resource* wlSeat,
-                                                                 uint32_t id)
+void input_method_manager_v2::Private::get_input_method_callback(
+    input_method_manager_v2_global::bind_t* bind,
+    wl_resource* wlSeat,
+    uint32_t id)
 {
     auto seat = SeatGlobal::get_handle(wlSeat);
     auto im = new input_method_v2(bind->client->handle, bind->version, id);

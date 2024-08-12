@@ -34,7 +34,6 @@ namespace Wrapland::Server
 
 constexpr uint32_t CompositorVersion = 4;
 using CompositorGlobal = Wayland::Global<Compositor, CompositorVersion>;
-using CompositorBind = Wayland::Bind<CompositorGlobal>;
 
 class Compositor::Private : public CompositorGlobal
 {
@@ -44,8 +43,8 @@ public:
     std::vector<Surface*> surfaces;
 
 private:
-    static void createSurfaceCallback(CompositorBind* bind, uint32_t id);
-    static void createRegionCallback(CompositorBind* bind, uint32_t id);
+    static void createSurfaceCallback(CompositorGlobal::bind_t* bind, uint32_t id);
+    static void createRegionCallback(CompositorGlobal::bind_t* bind, uint32_t id);
 
     static const struct wl_compositor_interface s_interface;
 };
@@ -69,7 +68,7 @@ Compositor::Compositor(Display* display)
 
 Compositor::~Compositor() = default;
 
-void Compositor::Private::createSurfaceCallback(CompositorBind* bind, uint32_t id)
+void Compositor::Private::createSurfaceCallback(CompositorGlobal::bind_t* bind, uint32_t id)
 {
     auto priv = bind->global()->handle->d_ptr.get();
 
@@ -85,7 +84,7 @@ void Compositor::Private::createSurfaceCallback(CompositorBind* bind, uint32_t i
     Q_EMIT priv->handle->surfaceCreated(surface);
 }
 
-void Compositor::Private::createRegionCallback(CompositorBind* bind, uint32_t id)
+void Compositor::Private::createRegionCallback(CompositorGlobal::bind_t* bind, uint32_t id)
 {
     auto compositor = bind->global()->handle;
 

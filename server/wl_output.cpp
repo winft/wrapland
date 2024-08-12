@@ -73,7 +73,7 @@ WlOutput::Private::geometry_args(output_data const& data)
                            output_to_transform(data.state.transform));
 }
 
-void WlOutput::Private::bindInit(WlOutputBind* bind)
+void WlOutput::Private::bindInit(WlOutputGlobal::bind_t* bind)
 {
     auto const data = output->d_ptr->published;
 
@@ -91,7 +91,7 @@ void WlOutput::Private::bindInit(WlOutputBind* bind)
     bind->client->flush();
 }
 
-void WlOutput::Private::sendMode(WlOutputBind* bind, output_mode const& mode)
+void WlOutput::Private::sendMode(WlOutputGlobal::bind_t* bind, output_mode const& mode)
 {
     // Only called on bind. In this case we want to send the currently published mode.
     auto flags = output::Private::get_mode_flags(mode, output->d_ptr->published.state);
@@ -142,7 +142,7 @@ void WlOutput::Private::done()
     send<wl_output_send_done, WL_OUTPUT_DONE_SINCE_VERSION>();
 }
 
-void WlOutput::Private::done(WlOutputBind* bind)
+void WlOutput::Private::done(WlOutputGlobal::bind_t* bind)
 {
     send<wl_output_send_done, WL_OUTPUT_DONE_SINCE_VERSION>(bind);
 }

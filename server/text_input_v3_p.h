@@ -23,7 +23,6 @@ uint32_t convert_change_cause(text_input_v3_change_cause cause);
 constexpr uint32_t text_input_manager_v3_version = 1;
 using text_input_manager_v3_global
     = Wayland::Global<text_input_manager_v3, text_input_manager_v3_version>;
-using text_input_manager_v3_bind = Wayland::Bind<text_input_manager_v3_global>;
 
 class text_input_manager_v3::Private : public text_input_manager_v3_global
 {
@@ -31,8 +30,9 @@ public:
     Private(Display* display, text_input_manager_v3* q_ptr);
 
 private:
-    static void
-    get_text_input_callback(text_input_manager_v3_bind* bind, uint32_t id, wl_resource* wlSeat);
+    static void get_text_input_callback(text_input_manager_v3_global::bind_t* bind,
+                                        uint32_t id,
+                                        wl_resource* wlSeat);
 
     static struct zwp_text_input_manager_v3_interface const s_interface;
 };

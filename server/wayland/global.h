@@ -166,6 +166,8 @@ class Global
 {
 public:
     using type = Global<Handle, Version>;
+    using bind_t = Bind<type, Nucleus<type>>;
+
     static int constexpr version = Version;
 
     Global(Global const&) = delete;
@@ -191,7 +193,7 @@ public:
 
     static Handle* get_handle(wl_resource* wlResource)
     {
-        auto bind = static_cast<Bind<type>*>(wl_resource_get_user_data(wlResource));
+        auto bind = static_cast<bind_t*>(wl_resource_get_user_data(wlResource));
 
         if (auto global = bind->global()) {
             return global->handle;
@@ -202,7 +204,7 @@ public:
     }
 
     template<auto sender, uint32_t minVersion = 0, typename... Args>
-    void send(Bind<type>* bind, Args&&... args)
+    void send(bind_t* bind, Args&&... args)
     {
         // See Vandevoorde et al.: C++ Templates - The Complete Guide p.79
         // or https://stackoverflow.com/a/4942746.
@@ -227,7 +229,7 @@ public:
         }
     }
 
-    Bind<type>* getBind(wl_resource* wlResource)
+    bind_t* getBind(wl_resource* wlResource)
     {
         for (auto bind : nucleus->binds) {
             if (bind->resource == wlResource) {
@@ -237,14 +239,14 @@ public:
         return nullptr;
     }
 
-    std::vector<Bind<type>*> getBinds()
+    std::vector<bind_t*> getBinds()
     {
         return nucleus->binds;
     }
 
-    std::vector<Bind<type>*> getBinds(Server::Client* client)
+    std::vector<bind_t*> getBinds(Server::Client* client)
     {
-        std::vector<Bind<type>*> ret;
+        std::vector<bind_t*> ret;
         for (auto bind : nucleus->binds) {
             if (bind->client->handle == client) {
                 ret.push_back(bind);
@@ -253,11 +255,11 @@ public:
         return ret;
     }
 
-    virtual void bindInit([[maybe_unused]] Bind<type>* bind)
+    virtual void bindInit([[maybe_unused]] bind_t* bind)
     {
     }
 
-    virtual void prepareUnbind([[maybe_unused]] Bind<type>* bind)
+    virtual void prepareUnbind([[maybe_unused]] bind_t* bind)
     {
     }
 
@@ -278,7 +280,7 @@ protected:
 
     static void resourceDestroyCallback(wl_client* wlClient, wl_resource* wlResource)
     {
-        Bind<type>::destroy_callback(wlClient, wlResource);
+        bind_t::destroy_callback(wlClient, wlResource);
     }
 
     template<auto callback, typename... Args>
@@ -286,7 +288,7 @@ protected:
     {
         // The global might be destroyed already on the compositor side.
         if (get_handle(resource)) {
-            auto bind = static_cast<Bind<type>*>(wl_resource_get_user_data(resource));
+            auto bind = static_cast<bind_t*>(wl_resource_get_user_data(resource));
             callback(bind, std::forward<Args>(args)...);
         }
     }

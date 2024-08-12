@@ -38,7 +38,6 @@ namespace Wrapland::Server
 
 constexpr uint32_t PlasmaShellVersion = 8;
 using PlasmaShellGlobal = Wayland::Global<PlasmaShell, PlasmaShellVersion>;
-using PlasmaShellBind = Wayland::Bind<PlasmaShellGlobal>;
 
 class PlasmaShell::Private : public PlasmaShellGlobal
 {
@@ -48,8 +47,9 @@ public:
     QList<PlasmaShellSurface*> surfaces;
 
 private:
-    static void createSurfaceCallback(PlasmaShellBind* bind, uint32_t id, wl_resource* surface);
-    void createSurface(PlasmaShellBind* bind, uint32_t id, Surface* surface);
+    static void
+    createSurfaceCallback(PlasmaShellGlobal::bind_t* bind, uint32_t id, wl_resource* surface);
+    void createSurface(PlasmaShellGlobal::bind_t* bind, uint32_t id, Surface* surface);
 
     static const struct org_kde_plasma_shell_interface s_interface;
 };

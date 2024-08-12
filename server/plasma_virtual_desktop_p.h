@@ -37,14 +37,13 @@ class PlasmaVirtualDesktop;
 constexpr uint32_t PlasmaVirtualDesktopManagerVersion = 2;
 using PlasmaVirtualDesktopManagerGlobal
     = Wayland::Global<PlasmaVirtualDesktopManager, PlasmaVirtualDesktopManagerVersion>;
-using PlasmaVirtualDesktopManagerBind = Wayland::Bind<PlasmaVirtualDesktopManagerGlobal>;
 
 class PlasmaVirtualDesktopManager::Private : public PlasmaVirtualDesktopManagerGlobal
 {
 public:
     Private(Display* display, PlasmaVirtualDesktopManager* q_ptr);
 
-    void bindInit(PlasmaVirtualDesktopManagerBind* bind) override;
+    void bindInit(PlasmaVirtualDesktopManagerGlobal::bind_t* bind) override;
     void send_removed(std::string const& id);
 
     uint32_t rows = 0;

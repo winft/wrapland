@@ -32,7 +32,6 @@ namespace Wrapland::Server
 constexpr uint32_t RelativePointerManagerV1Version = 1;
 using RelativePointerManagerV1Global
     = Wayland::Global<RelativePointerManagerV1, RelativePointerManagerV1Version>;
-using RelativePointerManagerV1Bind = Wayland::Bind<RelativePointerManagerV1Global>;
 
 class RelativePointerManagerV1::Private : public RelativePointerManagerV1Global
 {
@@ -40,7 +39,7 @@ public:
     Private(RelativePointerManagerV1* q_ptr, Display* display);
 
 private:
-    static void relativePointerCallback(RelativePointerManagerV1Bind* bind,
+    static void relativePointerCallback(RelativePointerManagerV1Global::bind_t* bind,
                                         uint32_t id,
                                         wl_resource* wlPointer);
 
