@@ -51,7 +51,7 @@ public:
     void commit();
 
     QPoint pos = QPoint(0, 0);
-    QPoint scheduledPos = QPoint();
+    QPoint scheduledPos;
     bool scheduledPosChange = false;
     Mode mode = Mode::Synchronized;
 

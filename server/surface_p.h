@@ -54,13 +54,13 @@ public:
 
     surface_state pub;
 
-    QRegion bufferDamage = QRegion();
+    QRegion bufferDamage;
 
     bool destinationSizeIsSet = false;
 
     std::deque<wl_resource*> callbacks;
 
-    QSize destinationSize = QSize();
+    QSize destinationSize;
 
     std::unique_ptr<Feedbacks> feedbacks{std::make_unique<Feedbacks>()};
 };
