@@ -37,10 +37,10 @@ const struct zwp_keyboard_shortcuts_inhibit_manager_v1_interface
 KeyboardShortcutsInhibitManagerV1::Private::Private(Display* display,
                                                     KeyboardShortcutsInhibitManagerV1* q_ptr)
     : Wayland::Global<KeyboardShortcutsInhibitManagerV1>(
-        q_ptr,
-        display,
-        &zwp_keyboard_shortcuts_inhibit_manager_v1_interface,
-        &s_interface)
+          q_ptr,
+          display,
+          &zwp_keyboard_shortcuts_inhibit_manager_v1_interface,
+          &s_interface)
 {
     create();
 }
@@ -67,9 +67,7 @@ void KeyboardShortcutsInhibitManagerV1::Private::inhibitShortcutsCallback(
     QObject::connect(inhibitor,
                      &KeyboardShortcutsInhibitorV1::resourceDestroyed,
                      priv->handle,
-                     [priv, surface, seat]() {
-                         priv->m_inhibitors.remove({surface, seat});
-                     });
+                     [priv, surface, seat]() { priv->m_inhibitors.remove({surface, seat}); });
 
     priv->m_inhibitors[{surface, seat}] = inhibitor;
     Q_EMIT bind->global()->handle->inhibitorCreated(inhibitor);
@@ -116,12 +114,12 @@ KeyboardShortcutsInhibitorV1::Private::Private(Client* client,
                                                Seat* seat,
                                                KeyboardShortcutsInhibitorV1* q_ptr)
     : Wayland::Resource<KeyboardShortcutsInhibitorV1>(
-        client,
-        version,
-        id,
-        &zwp_keyboard_shortcuts_inhibitor_v1_interface,
-        &s_interface,
-        q_ptr)
+          client,
+          version,
+          id,
+          &zwp_keyboard_shortcuts_inhibitor_v1_interface,
+          &s_interface,
+          q_ptr)
     , m_surface(surface)
     , m_seat(seat)
 {

@@ -38,10 +38,10 @@ namespace Wrapland::Server
 
 PointerGesturesV1::Private::Private(PointerGesturesV1* q_ptr, Display* display)
     : Wayland::Global<PointerGesturesV1, PointerGesturesV1Version>(
-        q_ptr,
-        display,
-        &zwp_pointer_gestures_v1_interface,
-        &s_interface)
+          q_ptr,
+          display,
+          &zwp_pointer_gestures_v1_interface,
+          &s_interface)
 {
 }
 

@@ -109,7 +109,7 @@ Output::Private::~Private()
 Output* Output::Private::get(wl_output* o)
 {
     auto it = std::find_if(s_allOutputs.constBegin(), s_allOutputs.constEnd(), [o](Private* p) {
-        const wl_output* reference = p->output;
+        wl_output const* reference = p->output;
         return reference == o;
     });
     if (it != s_allOutputs.constEnd()) {

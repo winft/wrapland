@@ -26,10 +26,10 @@ const struct zwp_primary_selection_device_manager_v1_interface
 primary_selection_device_manager::Private::Private(Display* display,
                                                    primary_selection_device_manager* q_ptr)
     : device_manager<primary_selection_device_manager_global>(
-        q_ptr,
-        display,
-        &zwp_primary_selection_device_manager_v1_interface,
-        &s_interface)
+          q_ptr,
+          display,
+          &zwp_primary_selection_device_manager_v1_interface,
+          &s_interface)
 {
     create();
 }

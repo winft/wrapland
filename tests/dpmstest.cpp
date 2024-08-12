@@ -94,7 +94,7 @@ setupOutput(Registry::AnnouncedInterface outputInterface, Registry* registry, Dp
             &Dpms::supportedChanged,
             supportedLabel,
             [supportedLabel, dpms, standbyButton, suspendButton, offButton] {
-                const bool supported = dpms->isSupported();
+                bool const supported = dpms->isSupported();
                 supportedLabel->setText(supportedToString(supported));
                 standbyButton->setEnabled(supported);
                 suspendButton->setEnabled(supported);
@@ -139,7 +139,7 @@ int main(int argc, char** argv)
         &Registry::interfacesAnnounced,
         &app,
         [&registry, &window] {
-            const bool hasDpms = registry.hasInterface(Registry::Interface::Dpms);
+            bool const hasDpms = registry.hasInterface(Registry::Interface::Dpms);
             QLabel* hasDpmsLabel = new QLabel(&window);
             if (hasDpms) {
                 hasDpmsLabel->setText(QStringLiteral("Compositor provides a DpmsManager"));
@@ -155,12 +155,12 @@ int main(int argc, char** argv)
 
             DpmsManager* dpmsManager = nullptr;
             if (hasDpms) {
-                const auto dpmsData = registry.interface(Registry::Interface::Dpms);
+                auto const dpmsData = registry.interface(Registry::Interface::Dpms);
                 dpmsManager = registry.createDpmsManager(dpmsData.name, dpmsData.version);
             }
 
             // get all Outputs
-            const auto outputs = registry.interfaces(Registry::Interface::Output);
+            auto const outputs = registry.interfaces(Registry::Interface::Output);
             for (auto o : outputs) {
                 layout->addLayout(setupOutput(o, &registry, dpmsManager));
                 QFrame* hline = new QFrame;
