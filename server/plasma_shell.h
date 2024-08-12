@@ -59,7 +59,7 @@ public:
     QPoint position() const;
     bool isPositionSet() const;
 
-    enum class Role {
+    enum class Role : std::uint8_t {
         Normal,
         Desktop,
         Panel,
@@ -72,7 +72,7 @@ public:
 
     Role role() const;
 
-    enum class PanelBehavior {
+    enum class PanelBehavior : std::uint8_t {
         AlwaysVisible,
         AutoHide,
         WindowsCanCover,

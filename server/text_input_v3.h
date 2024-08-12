@@ -22,7 +22,7 @@ class Display;
 class Seat;
 class Surface;
 
-enum class text_input_v3_content_hint : uint32_t {
+enum class text_input_v3_content_hint : uint16_t {
     none = 0,
     completion = 1 << 0,
     spellcheck = 1 << 1,
@@ -37,7 +37,7 @@ enum class text_input_v3_content_hint : uint32_t {
 };
 Q_DECLARE_FLAGS(text_input_v3_content_hints, text_input_v3_content_hint)
 
-enum class text_input_v3_content_purpose : uint32_t {
+enum class text_input_v3_content_purpose : uint8_t {
     normal,
     alpha,
     digits,
@@ -53,7 +53,7 @@ enum class text_input_v3_content_purpose : uint32_t {
     terminal,
 };
 
-enum class text_input_v3_change_cause {
+enum class text_input_v3_change_cause : std::uint8_t {
     input_method,
     other,
 };

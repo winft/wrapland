@@ -36,13 +36,13 @@ public:
     explicit KeyState(Display* display);
     ~KeyState() override;
 
-    enum class Key {
+    enum class Key : std::uint8_t {
         CapsLock = 0,
         NumLock = 1,
         ScrollLock = 2,
     };
     Q_ENUM(Key);
-    enum State {
+    enum State : std::uint8_t {
         Unlocked = 0,
         Latched = 1,
         Locked = 2,

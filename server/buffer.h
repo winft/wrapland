@@ -40,7 +40,7 @@ class linux_dmabuf_buffer_v1;
 class WRAPLANDSERVER_EXPORT ShmImage
 {
 public:
-    enum class Format {
+    enum class Format : std::uint8_t {
         invalid,
         argb8888,
         xrgb8888,

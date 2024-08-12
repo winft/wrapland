@@ -35,14 +35,14 @@ class output_manager;
 class WlOutput;
 class XdgOutput;
 
-enum class output_dpms_mode {
+enum class output_dpms_mode : std::uint8_t {
     on,
     standby,
     suspend,
     off,
 };
 
-enum class output_subpixel {
+enum class output_subpixel : std::uint8_t {
     unknown,
     none,
     horizontal_rgb,
@@ -51,7 +51,7 @@ enum class output_subpixel {
     vertical_bgr,
 };
 
-enum class output_transform {
+enum class output_transform : std::uint8_t {
     normal,
     rotated_90,
     rotated_180,

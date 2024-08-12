@@ -44,7 +44,7 @@ class WRAPLANDSERVER_EXPORT Slide : public QObject
 {
     Q_OBJECT
 public:
-    enum Location {
+    enum Location : std::uint8_t {
         Left = 0,
         Top,
         Right,

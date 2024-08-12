@@ -42,7 +42,7 @@ struct drm_format {
     std::unordered_set<uint64_t> modifiers;
 };
 
-enum class linux_dmabuf_flag_v1 {
+enum class linux_dmabuf_flag_v1 : std::uint8_t {
     y_inverted = 0x1,
     interlaced = 0x2,
     bottom_field_first = 0x4,

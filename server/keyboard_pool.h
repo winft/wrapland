@@ -21,7 +21,7 @@ class Keyboard;
 class Surface;
 class Seat;
 
-enum class key_state {
+enum class key_state : std::uint8_t {
     released,
     pressed,
 };
