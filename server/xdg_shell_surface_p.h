@@ -26,6 +26,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wayland-xdg-shell-server-protocol.h>
 
+#include <QRect>
 #include <QSize>
 
 #include <deque>
