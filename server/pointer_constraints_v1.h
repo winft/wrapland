@@ -47,7 +47,7 @@ class WRAPLANDSERVER_EXPORT LockedPointerV1 : public QObject
 {
     Q_OBJECT
 public:
-    enum class LifeTime {
+    enum class LifeTime : std::uint8_t {
         OneShot,
         Persistent,
     };
@@ -80,7 +80,7 @@ class WRAPLANDSERVER_EXPORT ConfinedPointerV1 : public QObject
 {
     Q_OBJECT
 public:
-    enum class LifeTime {
+    enum class LifeTime : std::uint8_t {
         OneShot,
         Persistent,
     };

@@ -23,7 +23,7 @@ namespace Wrapland::Server
 {
 class Seat;
 
-enum class button_state;
+enum class button_state : std::uint8_t;
 
 struct pointer_focus {
     Surface* surface{nullptr};

@@ -33,7 +33,7 @@ class Client;
 class Seat;
 class Surface;
 
-enum class text_input_v2_content_hint : uint32_t {
+enum class text_input_v2_content_hint : uint16_t {
     none = 0,
     completion = 1 << 0,
     correction = 1 << 1,
@@ -48,7 +48,7 @@ enum class text_input_v2_content_hint : uint32_t {
 };
 Q_DECLARE_FLAGS(text_input_v2_content_hints, text_input_v2_content_hint)
 
-enum class text_input_v2_content_purpose : uint32_t {
+enum class text_input_v2_content_purpose : uint8_t {
     normal,
     alpha,
     digits,

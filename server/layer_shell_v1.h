@@ -41,13 +41,13 @@ class WRAPLANDSERVER_EXPORT LayerSurfaceV1 : public QObject
 {
     Q_OBJECT
 public:
-    enum class Layer {
+    enum class Layer : std::uint8_t {
         Background,
         Bottom,
         Top,
         Overlay,
     };
-    enum class KeyboardInteractivity {
+    enum class KeyboardInteractivity : std::uint8_t {
         None,
         Exclusive,
         OnDemand,

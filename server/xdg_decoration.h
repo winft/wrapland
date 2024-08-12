@@ -51,7 +51,7 @@ class WRAPLANDSERVER_EXPORT XdgDecoration : public QObject
 {
     Q_OBJECT
 public:
-    enum class Mode {
+    enum class Mode : std::uint8_t {
         Undefined,
         ClientSide,
         ServerSide,

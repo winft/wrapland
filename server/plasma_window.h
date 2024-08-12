@@ -45,7 +45,10 @@ public:
     explicit PlasmaWindowManager(Display* display);
     ~PlasmaWindowManager() override;
 
-    enum class ShowingDesktopState { Disabled, Enabled };
+    enum class ShowingDesktopState : std::uint8_t {
+        Disabled,
+        Enabled,
+    };
     void setShowingDesktopState(ShowingDesktopState state);
 
     /// Create a window with random uuid.

@@ -48,7 +48,7 @@ class text_input_v3;
 class Touch;
 class touch_pool;
 
-enum class PointerAxisSource {
+enum class PointerAxisSource : std::uint8_t {
     Unknown,
     Wheel,
     Finger,

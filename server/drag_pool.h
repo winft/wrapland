@@ -21,7 +21,7 @@ class Seat;
 class Surface;
 class Touch;
 
-enum class dnd_action {
+enum class dnd_action : std::uint8_t {
     none = 0,
     copy = 1 << 0,
     move = 1 << 1,
@@ -29,7 +29,7 @@ enum class dnd_action {
 };
 Q_DECLARE_FLAGS(dnd_actions, dnd_action)
 
-enum class drag_mode {
+enum class drag_mode : std::uint8_t {
     none,
     pointer,
     touch,

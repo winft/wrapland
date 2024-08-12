@@ -53,7 +53,7 @@ class WRAPLANDSERVER_EXPORT PresentationFeedback : public QObject
 {
     Q_OBJECT
 public:
-    enum class Kind {
+    enum class Kind : std::uint8_t {
         Vsync = 1 << 0,
         HwClock = 1 << 1,
         HwCompletion = 1 << 2,

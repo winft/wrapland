@@ -37,7 +37,7 @@ class output;
 class Seat;
 class XdgShellSurface;
 
-enum class xdg_shell_wm_capability {
+enum class xdg_shell_wm_capability : std::uint8_t {
     window_menu = 1,
     maximize,
     fullscreen,

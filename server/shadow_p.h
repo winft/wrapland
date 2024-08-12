@@ -60,7 +60,7 @@ public:
     Private(Client* client, uint32_t version, uint32_t id, Shadow* q_ptr);
     ~Private() override;
 
-    enum class AttachSide {
+    enum class AttachSide : std::uint8_t {
         Left,
         TopLeft,
         Top,
@@ -71,7 +71,7 @@ public:
         BottomLeft,
     };
 
-    enum class OffsetSide {
+    enum class OffsetSide : std::uint8_t {
         Left,
         Top,
         Right,

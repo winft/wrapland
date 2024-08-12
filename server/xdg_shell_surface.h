@@ -35,7 +35,7 @@ class WRAPLANDSERVER_EXPORT XdgShellSurface : public QObject
 {
     Q_OBJECT
 public:
-    enum class State {
+    enum class State : std::uint8_t {
         Maximized = 1 << 0,
         Fullscreen = 1 << 1,
         Resizing = 1 << 2,
@@ -47,7 +47,7 @@ public:
     };
     Q_DECLARE_FLAGS(States, State)
 
-    enum class ConstraintAdjustment {
+    enum class ConstraintAdjustment : std::uint8_t {
         SlideX = 1 << 0,
         SlideY = 1 << 1,
         FlipX = 1 << 2,

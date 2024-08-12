@@ -50,7 +50,7 @@ class Subsurface;
 class Viewport;
 class Viewporter;
 
-enum class surface_change {
+enum class surface_change : std::uint16_t {
     none = 0,
     mapped = 1 << 0,
     buffer = 1 << 1,
@@ -100,7 +100,7 @@ class WRAPLANDSERVER_EXPORT Surface : public QObject
 {
     Q_OBJECT
 public:
-    enum class PresentationKind {
+    enum class PresentationKind : std::uint8_t {
         None = 0,
         Vsync = 1 << 0,
         HwClock = 1 << 1,

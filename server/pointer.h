@@ -33,7 +33,7 @@ class Cursor;
 class Seat;
 class Surface;
 
-enum class PointerAxisSource;
+enum class PointerAxisSource : std::uint8_t;
 
 class WRAPLANDSERVER_EXPORT Pointer : public QObject
 {

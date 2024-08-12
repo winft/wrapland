@@ -23,7 +23,7 @@
 namespace Wrapland::Server
 {
 
-enum class button_state {
+enum class button_state : std::uint8_t {
     released,
     pressed,
 };

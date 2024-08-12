@@ -55,7 +55,7 @@ public:
 
     QPoint position() const;
 
-    enum class Mode {
+    enum class Mode : std::uint8_t {
         Synchronized,
         Desynchronized,
     };
