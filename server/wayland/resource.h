@@ -47,7 +47,7 @@ public:
              wl_interface const* interface,
              void const* impl,
              Handle* handle)
-        : Resource(parent->client(), parent->version(), id, interface, impl, handle)
+        : Resource(parent->client, parent->version, id, interface, impl, handle)
     {
     }
 
