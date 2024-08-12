@@ -23,7 +23,6 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 
 // For Qt metatype declaration.
 #include "seat.h"
-#include "xdg_shell.h"
 #include "xdg_shell_positioner.h"
 
 #include <QObject>

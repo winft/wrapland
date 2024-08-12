@@ -20,6 +20,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "xdg_shell.h"
+#include "xdg_shell_surface.h"
 
 #include "wayland/global.h"
 #include "wayland/resource.h"
