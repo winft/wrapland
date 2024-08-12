@@ -18,7 +18,6 @@ namespace Wrapland::Server
 
 constexpr uint32_t kde_idle_version = 1;
 using kde_idle_global = Wayland::Global<kde_idle, kde_idle_version>;
-using kde_idle_bind = Wayland::Bind<kde_idle_global>;
 
 class kde_idle::Private : public kde_idle_global
 {
@@ -26,7 +25,7 @@ public:
     Private(Display* display, kde_idle* q_ptr);
 
 private:
-    static void get_idle_timeout_callback(kde_idle_bind* bind,
+    static void get_idle_timeout_callback(kde_idle_global::bind_t* bind,
                                           uint32_t id,
                                           wl_resource* wlSeat,
                                           uint32_t timeout);

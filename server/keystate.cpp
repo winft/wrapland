@@ -31,7 +31,7 @@ KeyState::Private::Private(Display* display, KeyState* q_ptr)
     create();
 }
 
-void KeyState::Private::fetchStatesCallback(KeyStateBind* bind)
+void KeyState::Private::fetchStatesCallback(KeyStateGlobal::bind_t* bind)
 {
     auto priv = bind->global()->handle->d_ptr.get();
 

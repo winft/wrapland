@@ -47,9 +47,10 @@ const struct zwp_relative_pointer_manager_v1_interface
         cb<relativePointerCallback>,
 };
 
-void RelativePointerManagerV1::Private::relativePointerCallback(RelativePointerManagerV1Bind* bind,
-                                                                uint32_t id,
-                                                                wl_resource* wlPointer)
+void RelativePointerManagerV1::Private::relativePointerCallback(
+    RelativePointerManagerV1Global::bind_t* bind,
+    uint32_t id,
+    wl_resource* wlPointer)
 {
     auto relative = new RelativePointerV1(bind->client->handle, bind->version, id);
     if (!relative) {

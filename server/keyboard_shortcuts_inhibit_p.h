@@ -34,15 +34,13 @@ namespace Wrapland::Server
 constexpr uint32_t KeyboardShortcutsInhibitManagerV1Version = 1;
 using KeyboardShortcutsInhibitManagerV1Global
     = Wayland::Global<KeyboardShortcutsInhibitManagerV1, KeyboardShortcutsInhibitManagerV1Version>;
-using KeyboardShortcutsInhibitManagerV1Bind
-    = Wayland::Bind<KeyboardShortcutsInhibitManagerV1Global>;
 
 class KeyboardShortcutsInhibitManagerV1::Private : public KeyboardShortcutsInhibitManagerV1Global
 {
 public:
     Private(Display* display, KeyboardShortcutsInhibitManagerV1* q_ptr);
 
-    static void inhibitShortcutsCallback(KeyboardShortcutsInhibitManagerV1Bind* bind,
+    static void inhibitShortcutsCallback(KeyboardShortcutsInhibitManagerV1Global::bind_t* bind,
                                          uint32_t id,
                                          wl_resource* wlSurface,
                                          wl_resource* wlSeat);

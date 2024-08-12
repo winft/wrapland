@@ -45,7 +45,7 @@ const struct xdg_wm_base_interface XdgShell::Private::s_interface = {
     cb<pongCallback>,
 };
 
-void XdgShell::Private::prepareUnbind(XdgShellBind* bind)
+void XdgShell::Private::prepareUnbind(XdgShellGlobal::bind_t* bind)
 {
     if (auto it = bindsObjects.find(bind); it != bindsObjects.end()) {
         auto& surfaces = it->second.surfaces;
@@ -67,7 +67,7 @@ void XdgShell::Private::prepareUnbind(XdgShellBind* bind)
     }
 }
 
-void XdgShell::Private::createPositionerCallback(XdgShellBind* bind, uint32_t id)
+void XdgShell::Private::createPositionerCallback(XdgShellGlobal::bind_t* bind, uint32_t id)
 {
     auto priv = bind->global()->handle->d_ptr.get();
 
@@ -90,7 +90,7 @@ void XdgShell::Private::createPositionerCallback(XdgShellBind* bind, uint32_t id
         });
 }
 
-void XdgShell::Private::getXdgSurfaceCallback(XdgShellBind* bind,
+void XdgShell::Private::getXdgSurfaceCallback(XdgShellGlobal::bind_t* bind,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
@@ -135,7 +135,7 @@ void XdgShell::Private::getXdgSurfaceCallback(XdgShellBind* bind,
                      });
 }
 
-void XdgShell::Private::pongCallback(XdgShellBind* bind, uint32_t serial)
+void XdgShell::Private::pongCallback(XdgShellGlobal::bind_t* bind, uint32_t serial)
 {
     auto priv = bind->global()->handle->d_ptr.get();
 

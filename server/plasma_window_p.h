@@ -42,7 +42,6 @@ class PlasmaWindowRes;
 
 constexpr uint32_t PlasmaWindowManagerVersion = 16;
 using PlasmaWindowManagerGlobal = Wayland::Global<PlasmaWindowManager, PlasmaWindowManagerVersion>;
-using PlasmaWindowManagerBind = Wayland::Bind<PlasmaWindowManagerGlobal>;
 
 class PlasmaWindowManager::Private : public PlasmaWindowManagerGlobal
 {
@@ -51,11 +50,11 @@ public:
 
     void sendShowingDesktopState();
     void send_stacking_order_changed();
-    void send_stacking_order_changed(PlasmaWindowManagerBind* bind);
+    void send_stacking_order_changed(PlasmaWindowManagerGlobal::bind_t* bind);
     void send_stacking_order_uuid_changed();
-    void send_stacking_order_uuid_changed(PlasmaWindowManagerBind* bind);
+    void send_stacking_order_uuid_changed(PlasmaWindowManagerGlobal::bind_t* bind);
 
-    void bindInit(PlasmaWindowManagerBind* bind) override;
+    void bindInit(PlasmaWindowManagerGlobal::bind_t* bind) override;
 
     ShowingDesktopState desktopState = ShowingDesktopState::Disabled;
     std::vector<PlasmaWindow*> windows;

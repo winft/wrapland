@@ -20,6 +20,8 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include "text_input_v2.h"
 
+#include "wayland/global.h"
+
 #include <QRect>
 #include <QVector>
 #include <vector>
@@ -32,7 +34,6 @@ namespace Wrapland::Server
 constexpr uint32_t text_input_manager_v2_version = 1;
 using text_input_manager_v2_global
     = Wayland::Global<text_input_manager_v2, text_input_manager_v2_version>;
-using text_input_manager_v2_bind = Wayland::Bind<text_input_manager_v2_global>;
 
 class text_input_manager_v2::Private : public text_input_manager_v2_global
 {
@@ -40,8 +41,9 @@ public:
     Private(Display* display, text_input_manager_v2* q_ptr);
 
 private:
-    static void
-    get_text_input_callback(text_input_manager_v2_bind* bind, uint32_t id, wl_resource* wlSeat);
+    static void get_text_input_callback(text_input_manager_v2_global::bind_t* bind,
+                                        uint32_t id,
+                                        wl_resource* wlSeat);
 
     static const struct zwp_text_input_manager_v2_interface s_interface;
 };

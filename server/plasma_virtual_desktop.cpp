@@ -86,7 +86,7 @@ void PlasmaVirtualDesktopManager::Private::requestRemoveVirtualDesktopCallback(
     Q_EMIT manager->desktopRemoveRequested(id);
 }
 
-void PlasmaVirtualDesktopManager::Private::bindInit(PlasmaVirtualDesktopManagerBind* bind)
+void PlasmaVirtualDesktopManager::Private::bindInit(PlasmaVirtualDesktopManagerGlobal::bind_t* bind)
 {
     uint32_t position = 0;
     for (auto& desktop : desktops) {

@@ -52,7 +52,7 @@ const struct zwp_pointer_gestures_v1_interface PointerGesturesV1::Private::s_int
     cb<holdGestureCallback>,
 };
 
-void PointerGesturesV1::Private::swipeGestureCallback(PointerGesturesV1Bind* bind,
+void PointerGesturesV1::Private::swipeGestureCallback(PointerGesturesV1Global::bind_t* bind,
                                                       uint32_t id,
                                                       wl_resource* wlPointer)
 {
@@ -66,7 +66,7 @@ void PointerGesturesV1::Private::swipeGestureCallback(PointerGesturesV1Bind* bin
     pointer->d_ptr->registerSwipeGesture(swiper);
 }
 
-void PointerGesturesV1::Private::pinchGestureCallback(PointerGesturesV1Bind* bind,
+void PointerGesturesV1::Private::pinchGestureCallback(PointerGesturesV1Global::bind_t* bind,
                                                       uint32_t id,
                                                       wl_resource* wlPointer)
 {
@@ -80,7 +80,7 @@ void PointerGesturesV1::Private::pinchGestureCallback(PointerGesturesV1Bind* bin
     pointer->d_ptr->registerPinchGesture(pincher);
 }
 
-void PointerGesturesV1::Private::holdGestureCallback(PointerGesturesV1Bind* bind,
+void PointerGesturesV1::Private::holdGestureCallback(PointerGesturesV1Global::bind_t* bind,
                                                      uint32_t id,
                                                      wl_resource* wlPointer)
 {

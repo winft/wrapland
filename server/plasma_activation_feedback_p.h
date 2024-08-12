@@ -24,20 +24,19 @@ class plasma_activation;
 constexpr uint32_t plasma_activation_feedback_version = 1;
 using plasma_activation_feedback_global
     = Wayland::Global<plasma_activation_feedback, plasma_activation_feedback_version>;
-using plasma_activation_feedback_bind = Wayland::Bind<plasma_activation_feedback_global>;
 
 class plasma_activation_feedback::Private : public plasma_activation_feedback_global
 {
 public:
     Private(Display* display, plasma_activation_feedback* q_ptr);
 
-    plasma_activation* create_activation(plasma_activation_feedback_bind* bind,
+    plasma_activation* create_activation(plasma_activation_feedback_global::bind_t* bind,
                                          std::string const& id);
 
     std::unordered_map<std::string, std::vector<plasma_activation*>> activations;
 
 private:
-    void bindInit(plasma_activation_feedback_bind* bind) override;
+    void bindInit(plasma_activation_feedback_global::bind_t* bind) override;
 
     plasma_activation_feedback* q_ptr;
 

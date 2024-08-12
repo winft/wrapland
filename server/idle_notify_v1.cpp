@@ -21,10 +21,11 @@ idle_notifier_v1::Private::Private(Display* display, idle_notifier_v1* q_ptr)
     create();
 }
 
-void idle_notifier_v1::Private::get_idle_notification_callback(idle_notifier_v1_bind* bind,
-                                                               uint32_t id,
-                                                               uint32_t timeout,
-                                                               wl_resource* wlSeat)
+void idle_notifier_v1::Private::get_idle_notification_callback(
+    idle_notifier_v1_global::bind_t* bind,
+    uint32_t id,
+    uint32_t timeout,
+    wl_resource* wlSeat)
 {
     auto priv = bind->global()->handle->d_ptr.get();
     auto seat = SeatGlobal::get_handle(wlSeat);

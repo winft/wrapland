@@ -51,7 +51,7 @@ XdgExportedV2* XdgExporterV2::exportedSurface(QString const& handle) const
     }
     return nullptr;
 }
-void XdgExporterV2::Private::exportToplevelCallback(XdgExporterV2Bind* bind,
+void XdgExporterV2::Private::exportToplevelCallback(XdgExporterV2Global::bind_t* bind,
                                                     uint32_t id,
                                                     wl_resource* wlSurface)
 {

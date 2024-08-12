@@ -44,7 +44,7 @@ Viewporter::Private::Private(Display* display, Viewporter* q_ptr)
     create();
 }
 
-void Viewporter::Private::getViewportCallback(ViewporterBind* bind,
+void Viewporter::Private::getViewportCallback(ViewporterGlobal::bind_t* bind,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {
@@ -52,7 +52,9 @@ void Viewporter::Private::getViewportCallback(ViewporterBind* bind,
     priv->getViewport(bind, id, wlSurface);
 }
 
-void Viewporter::Private::getViewport(ViewporterBind* bind, uint32_t id, wl_resource* wlSurface)
+void Viewporter::Private::getViewport(ViewporterGlobal::bind_t* bind,
+                                      uint32_t id,
+                                      wl_resource* wlSurface)
 {
 
     auto surface = Wayland::Resource<Surface>::get_handle(wlSurface);

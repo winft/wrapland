@@ -33,7 +33,6 @@ namespace Wrapland::Server
 constexpr uint32_t PointerConstraintsV1Version = 1;
 using PointerConstraintsV1Global
     = Wayland::Global<PointerConstraintsV1, PointerConstraintsV1Version>;
-using PointerConstraintsV1Bind = Wayland::Bind<PointerConstraintsV1Global>;
 
 class PointerConstraintsV1::Private : public PointerConstraintsV1Global
 {
@@ -41,13 +40,13 @@ public:
     Private(PointerConstraintsV1* q_ptr, Display* display);
 
     static void destroyCallback(wl_client* client, wl_resource* resource);
-    static void lockPointerCallback(PointerConstraintsV1Bind* bind,
+    static void lockPointerCallback(PointerConstraintsV1Global::bind_t* bind,
                                     uint32_t id,
                                     wl_resource* wlSurface,
                                     wl_resource* wlPointer,
                                     wl_resource* wlRegion,
                                     uint32_t lifetime);
-    static void confinePointerCallback(PointerConstraintsV1Bind* bind,
+    static void confinePointerCallback(PointerConstraintsV1Global::bind_t* bind,
                                        uint32_t id,
                                        wl_resource* wlSurface,
                                        wl_resource* wlPointer,

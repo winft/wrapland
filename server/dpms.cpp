@@ -38,7 +38,9 @@ DpmsManager::Private::Private(Display* display, DpmsManager* q_ptr)
     create();
 }
 
-void DpmsManager::Private::getDpmsCallback(DpmsManagerBind* bind, uint32_t id, wl_resource* output)
+void DpmsManager::Private::getDpmsCallback(DpmsManagerGlobal::bind_t* bind,
+                                           uint32_t id,
+                                           wl_resource* output)
 {
     auto dpms
         = new Dpms(bind->client->handle, bind->version, id, WlOutputGlobal::get_handle(output));

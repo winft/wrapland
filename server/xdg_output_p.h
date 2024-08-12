@@ -45,7 +45,6 @@ class XdgOutputV1;
 
 constexpr uint32_t XdgOutputManagerVersion = 3;
 using XdgOutputManagerGlobal = Wayland::Global<XdgOutputManager, XdgOutputManagerVersion>;
-using XdgOutputManagerBind = Wayland::Bind<XdgOutputManagerGlobal>;
 
 class XdgOutputManager::Private : public XdgOutputManagerGlobal
 {
@@ -55,7 +54,8 @@ public:
     std::map<output*, XdgOutput*> outputs;
 
 private:
-    static void getXdgOutputCallback(XdgOutputManagerBind* bind, uint32_t id, wl_resource* output);
+    static void
+    getXdgOutputCallback(XdgOutputManagerGlobal::bind_t* bind, uint32_t id, wl_resource* output);
 
     static const struct zxdg_output_manager_v1_interface s_interface;
 };

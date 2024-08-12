@@ -50,7 +50,7 @@ AppmenuManager::AppmenuManager(Display* display)
 
 AppmenuManager::~AppmenuManager() = default;
 
-void AppmenuManager::Private::createCallback(AppmenuManagerBind* bind,
+void AppmenuManager::Private::createCallback(AppmenuManagerGlobal::bind_t* bind,
                                              uint32_t id,
                                              wl_resource* wlSurface)
 {

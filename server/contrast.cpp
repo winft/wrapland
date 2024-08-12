@@ -47,7 +47,7 @@ ContrastManager::Private::Private(Display* display, ContrastManager* q_ptr)
     create();
 }
 
-void ContrastManager::Private::createCallback(ContrastManagerBind* bind,
+void ContrastManager::Private::createCallback(ContrastManagerGlobal::bind_t* bind,
                                               uint32_t id,
                                               wl_resource* wlSurface)
 {

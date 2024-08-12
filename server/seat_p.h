@@ -48,7 +48,6 @@ class primary_selection_device;
 
 constexpr uint32_t SeatVersion = 5;
 using SeatGlobal = Wayland::Global<Seat, SeatVersion>;
-using SeatBind = Wayland::Bind<SeatGlobal>;
 
 class Seat::Private : public SeatGlobal
 {
@@ -56,7 +55,7 @@ public:
     Private(Seat* q_ptr, Display* display);
     ~Private() override;
 
-    void bindInit(SeatBind* bind) override;
+    void bindInit(SeatGlobal::bind_t* bind) override;
 
     void sendCapabilities();
     void sendName();
@@ -100,9 +99,9 @@ public:
     Seat* q_ptr;
 
 private:
-    static void getPointerCallback(SeatBind* bind, uint32_t id);
-    static void getKeyboardCallback(SeatBind* bind, uint32_t id);
-    static void getTouchCallback(SeatBind* bind, uint32_t id);
+    static void getPointerCallback(SeatGlobal::bind_t* bind, uint32_t id);
+    static void getKeyboardCallback(SeatGlobal::bind_t* bind, uint32_t id);
+    static void getTouchCallback(SeatGlobal::bind_t* bind, uint32_t id);
 
     static const struct wl_seat_interface s_interface;
 };

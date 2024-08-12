@@ -61,7 +61,6 @@ public:
 
 constexpr uint32_t XdgExporterV2Version = 1;
 using XdgExporterV2Global = Wayland::Global<XdgExporterV2, XdgExporterV2Version>;
-using XdgExporterV2Bind = Wayland::Bind<XdgExporterV2Global>;
 
 class Q_DECL_HIDDEN XdgExporterV2::Private
     : public Wayland::Global<XdgExporterV2, XdgExporterV2Version>
@@ -73,7 +72,7 @@ public:
 
 private:
     static void
-    exportToplevelCallback(XdgExporterV2Bind* bind, uint32_t id, wl_resource* wlSurface);
+    exportToplevelCallback(XdgExporterV2Global::bind_t* bind, uint32_t id, wl_resource* wlSurface);
 
     static const struct zxdg_exporter_v2_interface s_interface;
 };

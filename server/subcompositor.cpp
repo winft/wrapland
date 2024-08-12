@@ -35,7 +35,6 @@ namespace Wrapland::Server
 
 constexpr uint32_t SubcompositorVersion = 1;
 using SubcompositorGlobal = Wayland::Global<Subcompositor, SubcompositorVersion>;
-using SubcompositorBind = Wayland::Bind<SubcompositorGlobal>;
 
 class Subcompositor::Private : public SubcompositorGlobal
 {
@@ -43,8 +42,8 @@ public:
     Private(Subcompositor* q_ptr, Display* display);
 
 private:
-    static void destroyCallback(SubcompositorBind* bind);
-    static void subsurfaceCallback(SubcompositorBind* bind,
+    static void destroyCallback(SubcompositorGlobal::bind_t* bind);
+    static void subsurfaceCallback(SubcompositorGlobal::bind_t* bind,
                                    uint32_t id,
                                    wl_resource* wlSurface,
                                    wl_resource* wlParent);
@@ -62,7 +61,7 @@ Subcompositor::Private::Private(Subcompositor* q_ptr, Display* display)
 {
 }
 
-void Subcompositor::Private::subsurfaceCallback(SubcompositorBind* bind,
+void Subcompositor::Private::subsurfaceCallback(SubcompositorGlobal::bind_t* bind,
                                                 uint32_t id,
                                                 wl_resource* wlSurface,
                                                 wl_resource* wlParent)

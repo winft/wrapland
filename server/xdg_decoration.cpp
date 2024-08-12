@@ -35,7 +35,6 @@ namespace Wrapland::Server
 constexpr uint32_t XdgDecorationManagerVersion = 1;
 using XdgDecorationManagerGlobal
     = Wayland::Global<XdgDecorationManager, XdgDecorationManagerVersion>;
-using XdgDecorationManagerBind = Wayland::Bind<XdgDecorationManagerGlobal>;
 
 class XdgDecorationManager::Private : public XdgDecorationManagerGlobal
 {
@@ -45,7 +44,7 @@ public:
     std::map<XdgShellToplevel*, XdgDecoration*> m_decorations;
 
 private:
-    static void getToplevelDecorationCallback(XdgDecorationManagerBind* bind,
+    static void getToplevelDecorationCallback(XdgDecorationManagerGlobal::bind_t* bind,
                                               uint32_t id,
                                               wl_resource* wlToplevel);
 
@@ -70,9 +69,10 @@ const struct zxdg_decoration_manager_v1_interface XdgDecorationManager::Private:
     cb<getToplevelDecorationCallback>,
 };
 
-void XdgDecorationManager::Private::getToplevelDecorationCallback(XdgDecorationManagerBind* bind,
-                                                                  uint32_t id,
-                                                                  wl_resource* wlToplevel)
+void XdgDecorationManager::Private::getToplevelDecorationCallback(
+    XdgDecorationManagerGlobal::bind_t* bind,
+    uint32_t id,
+    wl_resource* wlToplevel)
 {
     auto priv = bind->global()->handle->d_ptr.get();
 

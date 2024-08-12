@@ -25,6 +25,7 @@ License along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #include "wayland/resource.h"
 
 #include <QObject>
+#include <QRegion>
 
 #include <wayland-blur-server-protocol.h>
 
@@ -35,7 +36,6 @@ class Display;
 
 constexpr uint32_t BlurManagerVersion = 1;
 using BlurManagerGlobal = Wayland::Global<BlurManager, BlurManagerVersion>;
-using BlurManagerBind = Wayland::Bind<BlurManagerGlobal>;
 
 class BlurManager::Private : public BlurManagerGlobal
 {
@@ -43,8 +43,9 @@ public:
     Private(Display* display, BlurManager* qptr);
 
 private:
-    static void createCallback(BlurManagerBind* bind, uint32_t id, wl_resource* wlSurface);
-    static void unsetCallback(BlurManagerBind* bind, wl_resource* wlSurface);
+    static void
+    createCallback(BlurManagerGlobal::bind_t* bind, uint32_t id, wl_resource* wlSurface);
+    static void unsetCallback(BlurManagerGlobal::bind_t* bind, wl_resource* wlSurface);
 
     static const struct org_kde_kwin_blur_manager_interface s_interface;
 };

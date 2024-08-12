@@ -37,7 +37,6 @@ class linux_dmabuf_params_v1;
 
 constexpr uint32_t linux_dmabuf_v1_version = 3;
 using linux_dmabuf_v1_global = Wayland::Global<linux_dmabuf_v1, linux_dmabuf_v1_version>;
-using linux_dmabuf_v1_bind = Wayland::Bind<linux_dmabuf_v1_global>;
 
 class linux_dmabuf_v1::Private : public linux_dmabuf_v1_global
 {
@@ -45,8 +44,8 @@ public:
     Private(linux_dmabuf_v1* q_ptr, Display* display, linux_dmabuf_import_v1 import);
     ~Private() override;
 
-    void bindInit(linux_dmabuf_v1_bind* bind) final;
-    static void create_params_callback(linux_dmabuf_v1_bind* bind, uint32_t id);
+    void bindInit(linux_dmabuf_v1_global::bind_t* bind) final;
+    static void create_params_callback(linux_dmabuf_v1_global::bind_t* bind, uint32_t id);
 
     std::vector<linux_dmabuf_params_v1*> pending_params;
     linux_dmabuf_import_v1 import;

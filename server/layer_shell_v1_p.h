@@ -22,7 +22,6 @@ class Display;
 
 constexpr uint32_t LayerShellV1Version = 4;
 using LayerShellV1Global = Wayland::Global<LayerShellV1, LayerShellV1Version>;
-using LayerShellV1Bind = Wayland::Bind<LayerShellV1Global>;
 
 using Interactivity = LayerSurfaceV1::KeyboardInteractivity;
 using Layer = LayerSurfaceV1::Layer;
@@ -33,13 +32,13 @@ public:
     Private(Display* display, LayerShellV1* qptr);
 
 private:
-    static void getCallback(LayerShellV1Bind* bind,
+    static void getCallback(LayerShellV1Global::bind_t* bind,
                             uint32_t id,
                             wl_resource* wlSurface,
                             wl_resource* wlOutput,
                             uint32_t wlLayer,
                             char const* nspace);
-    static void destroyCallback(LayerShellV1Bind* bind);
+    static void destroyCallback(LayerShellV1Global::bind_t* bind);
 
     static const struct zwlr_layer_shell_v1_interface s_interface;
 };

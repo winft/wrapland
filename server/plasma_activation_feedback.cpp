@@ -45,16 +45,16 @@ plasma_activation_feedback::~plasma_activation_feedback()
     }
 }
 
-void plasma_activation_feedback::Private::bindInit(plasma_activation_feedback_bind* bind)
+void plasma_activation_feedback::Private::bindInit(plasma_activation_feedback_global::bind_t* bind)
 {
     for (auto& activation : activations) {
         activation.second.push_back(create_activation(bind, activation.first));
     }
 }
 
-plasma_activation*
-plasma_activation_feedback::Private::create_activation(plasma_activation_feedback_bind* bind,
-                                                       std::string const& id)
+plasma_activation* plasma_activation_feedback::Private::create_activation(
+    plasma_activation_feedback_global::bind_t* bind,
+    std::string const& id)
 {
     auto activation = new plasma_activation(bind->client->handle, bind->version, 0, id, q_ptr);
     bind->send<org_kde_plasma_activation_feedback_send_activation>(activation->d_ptr->resource);

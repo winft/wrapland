@@ -34,7 +34,6 @@ class XdgShellPositioner;
 
 constexpr uint32_t XdgShellVersion = 5;
 using XdgShellGlobal = Wayland::Global<XdgShell, XdgShellVersion>;
-using XdgShellBind = Wayland::Bind<XdgShellGlobal>;
 
 class XdgShell::Private : public XdgShellGlobal
 {
@@ -53,18 +52,19 @@ public:
         std::vector<XdgShellSurface*> surfaces;
         std::vector<XdgShellPositioner*> positioners;
     };
-    std::map<XdgShellBind*, BindResources> bindsObjects;
+    std::map<XdgShellGlobal::bind_t*, BindResources> bindsObjects;
 
     // ping-serial to timer
     std::map<uint32_t, QTimer*> pingTimers;
 
 protected:
-    void prepareUnbind(XdgShellBind* bind) override;
+    void prepareUnbind(XdgShellGlobal::bind_t* bind) override;
 
 private:
-    static void createPositionerCallback(XdgShellBind* bind, uint32_t id);
-    static void getXdgSurfaceCallback(XdgShellBind* bind, uint32_t id, wl_resource* wlSurface);
-    static void pongCallback(XdgShellBind* bind, uint32_t serial);
+    static void createPositionerCallback(XdgShellGlobal::bind_t* bind, uint32_t id);
+    static void
+    getXdgSurfaceCallback(XdgShellGlobal::bind_t* bind, uint32_t id, wl_resource* wlSurface);
+    static void pongCallback(XdgShellGlobal::bind_t* bind, uint32_t serial);
 
     static const struct xdg_wm_base_interface s_interface;
 };

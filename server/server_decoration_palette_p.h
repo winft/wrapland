@@ -36,8 +36,6 @@ constexpr uint32_t ServerSideDecorationPaletteManagerVersion = 1;
 using ServerSideDecorationPaletteManagerGlobal
     = Wayland::Global<ServerSideDecorationPaletteManager,
                       ServerSideDecorationPaletteManagerVersion>;
-using ServerSideDecorationPaletteManagerBind
-    = Wayland::Bind<ServerSideDecorationPaletteManagerGlobal>;
 
 class ServerSideDecorationPaletteManager::Private : public ServerSideDecorationPaletteManagerGlobal
 {
@@ -47,8 +45,9 @@ public:
     std::vector<ServerSideDecorationPalette*> palettes;
 
 private:
-    static void
-    createCallback(ServerSideDecorationPaletteManagerBind* bind, uint32_t id, wl_resource* surface);
+    static void createCallback(ServerSideDecorationPaletteManagerGlobal::bind_t* bind,
+                               uint32_t id,
+                               wl_resource* surface);
 
     static const struct org_kde_kwin_server_decoration_palette_manager_interface s_interface;
 };

@@ -64,7 +64,7 @@ const struct zwp_linux_dmabuf_v1_interface linux_dmabuf_v1::Private::s_interface
 constexpr size_t modifier_shift = 32;
 constexpr uint32_t modifier_cut = 0xFFFFFFFF;
 
-void linux_dmabuf_v1::Private::bindInit(linux_dmabuf_v1_bind* bind)
+void linux_dmabuf_v1::Private::bindInit(linux_dmabuf_v1_global::bind_t* bind)
 {
     // Send formats & modifiers.
     if (bind->version < ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION) {
@@ -105,7 +105,8 @@ void linux_dmabuf_v1::Private::bindInit(linux_dmabuf_v1_bind* bind)
     }
 }
 
-void linux_dmabuf_v1::Private::create_params_callback(linux_dmabuf_v1_bind* bind, uint32_t id)
+void linux_dmabuf_v1::Private::create_params_callback(linux_dmabuf_v1_global::bind_t* bind,
+                                                      uint32_t id)
 {
     auto priv = bind->global()->handle->d_ptr.get();
 

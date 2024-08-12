@@ -75,7 +75,7 @@ PlasmaWindowManager::~PlasmaWindowManager()
     }
 }
 
-void PlasmaWindowManager::Private::bindInit(PlasmaWindowManagerBind* bind)
+void PlasmaWindowManager::Private::bindInit(PlasmaWindowManagerGlobal::bind_t* bind)
 {
     for (auto&& window : windows) {
         if (bind->version >= ORG_KDE_PLASMA_WINDOW_MANAGEMENT_WINDOW_WITH_UUID_SINCE_VERSION) {
@@ -114,7 +114,8 @@ void PlasmaWindowManager::Private::send_stacking_order_changed()
     }
 }
 
-void PlasmaWindowManager::Private::send_stacking_order_changed(PlasmaWindowManagerBind* bind)
+void PlasmaWindowManager::Private::send_stacking_order_changed(
+    PlasmaWindowManagerGlobal::bind_t* bind)
 {
     if (bind->version < ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STACKING_ORDER_CHANGED_SINCE_VERSION) {
         return;
@@ -138,7 +139,8 @@ void PlasmaWindowManager::Private::send_stacking_order_uuid_changed()
     }
 }
 
-void PlasmaWindowManager::Private::send_stacking_order_uuid_changed(PlasmaWindowManagerBind* bind)
+void PlasmaWindowManager::Private::send_stacking_order_uuid_changed(
+    PlasmaWindowManagerGlobal::bind_t* bind)
 {
     if (bind->version
         < ORG_KDE_PLASMA_WINDOW_MANAGEMENT_STACKING_ORDER_UUID_CHANGED_SINCE_VERSION) {

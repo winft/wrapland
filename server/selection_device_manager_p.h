@@ -20,23 +20,21 @@ template<typename Global>
 class device_manager : public Global
 {
 public:
-    using Bind = Wayland::Bind<Global>;
-
     using Global::Global;
 
-    static void get_device(Bind* bind, uint32_t id, wl_resource* wlSeat);
-    static void create_source(Bind* bind, uint32_t id);
+    static void get_device(Global::bind_t* bind, uint32_t id, wl_resource* wlSeat);
+    static void create_source(Global::bind_t* bind, uint32_t id);
 };
 
 template<typename Global>
-void device_manager<Global>::get_device(Bind* bind, uint32_t id, wl_resource* wlSeat)
+void device_manager<Global>::get_device(Global::bind_t* bind, uint32_t id, wl_resource* wlSeat)
 {
     auto seat = SeatGlobal::get_handle(wlSeat);
     bind->global()->handle->get_device(bind->client->handle, bind->version, id, seat);
 }
 
 template<typename Global>
-void device_manager<Global>::create_source(Bind* bind, uint32_t id)
+void device_manager<Global>::create_source(Global::bind_t* bind, uint32_t id)
 {
     bind->global()->handle->create_source(bind->client->handle, bind->version, id);
 }

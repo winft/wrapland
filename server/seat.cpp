@@ -70,7 +70,7 @@ Seat::Seat(Display* display)
 
 Seat::~Seat() = default;
 
-void Seat::Private::bindInit(SeatBind* bind)
+void Seat::Private::bindInit(SeatGlobal::bind_t* bind)
 {
     send<wl_seat_send_capabilities>(bind, getCapabilities());
     send<wl_seat_send_name, WL_SEAT_NAME_SINCE_VERSION>(bind, name.c_str());
@@ -162,7 +162,7 @@ void Seat::setName(std::string const& name)
     d_ptr->sendName();
 }
 
-void Seat::Private::getPointerCallback(SeatBind* bind, uint32_t id)
+void Seat::Private::getPointerCallback(SeatGlobal::bind_t* bind, uint32_t id)
 {
     auto priv = bind->global()->handle->d_ptr.get();
     auto& manager = priv->pointers;
@@ -177,7 +177,7 @@ void Seat::Private::getPointerCallback(SeatBind* bind, uint32_t id)
     manager.value().create_device(bind->client->handle, bind->version, id);
 }
 
-void Seat::Private::getKeyboardCallback(SeatBind* bind, uint32_t id)
+void Seat::Private::getKeyboardCallback(SeatGlobal::bind_t* bind, uint32_t id)
 {
     auto priv = bind->global()->handle->d_ptr.get();
     auto& manager = priv->keyboards;
@@ -192,7 +192,7 @@ void Seat::Private::getKeyboardCallback(SeatBind* bind, uint32_t id)
     manager.value().create_device(bind->client->handle, bind->version, id);
 }
 
-void Seat::Private::getTouchCallback(SeatBind* bind, uint32_t id)
+void Seat::Private::getTouchCallback(SeatGlobal::bind_t* bind, uint32_t id)
 {
     auto priv = bind->global()->handle->d_ptr.get();
     auto& manager = priv->touches;

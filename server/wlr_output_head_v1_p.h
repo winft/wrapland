@@ -31,7 +31,7 @@ public:
     wlr_output_head_v1(Server::output& output, wlr_output_manager_v1& manager);
     ~wlr_output_head_v1() override;
 
-    wlr_output_head_v1_res* add_bind(wlr_output_manager_v1_bind& bind);
+    wlr_output_head_v1_res* add_bind(wlr_output_manager_v1_global::bind_t& bind);
     void broadcast();
 
     gsl::not_null<Server::output*> output;

@@ -39,7 +39,7 @@ LayerSurfaceV1::Layer get_layer(uint32_t layer)
     }
 }
 
-void LayerShellV1::Private::getCallback(LayerShellV1Bind* bind,
+void LayerShellV1::Private::getCallback(LayerShellV1Global::bind_t* bind,
                                         uint32_t id,
                                         wl_resource* wlSurface,
                                         wl_resource* wlOutput,
@@ -73,7 +73,7 @@ void LayerShellV1::Private::getCallback(LayerShellV1Bind* bind,
     Q_EMIT bind->global()->handle->surface_created(layer_surface);
 }
 
-void LayerShellV1::Private::destroyCallback([[maybe_unused]] LayerShellV1Bind* bind)
+void LayerShellV1::Private::destroyCallback([[maybe_unused]] LayerShellV1Global::bind_t* bind)
 {
     // TODO(romangg): unregister the client?
 }

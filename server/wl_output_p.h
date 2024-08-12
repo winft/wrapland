@@ -30,7 +30,6 @@ class Display;
 
 constexpr uint32_t WlOutputVersion = 3;
 using WlOutputGlobal = Wayland::Global<WlOutput, WlOutputVersion>;
-using WlOutputBind = Wayland::Bind<WlOutputGlobal>;
 
 class WlOutput::Private : public WlOutputGlobal
 {
@@ -39,18 +38,18 @@ public:
 
     bool broadcast();
     void done();
-    void done(WlOutputBind* bind);
+    void done(WlOutputGlobal::bind_t* bind);
 
     Server::output* output;
 
 private:
-    void bindInit(WlOutputBind* bind) override;
+    void bindInit(WlOutputGlobal::bind_t* bind) override;
 
     static std::
         tuple<int32_t, int32_t, int32_t, int32_t, int32_t, char const*, char const*, int32_t>
         geometry_args(output_data const& data);
 
-    void sendMode(WlOutputBind* bind, output_mode const& mode);
+    void sendMode(WlOutputGlobal::bind_t* bind, output_mode const& mode);
     void sendMode(output_mode const& mode);
 
     static const struct wl_output_interface s_interface;

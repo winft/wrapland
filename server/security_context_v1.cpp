@@ -50,7 +50,7 @@ void security_context_manager_v1::Private::add_inviter(int listen_fd,
 }
 
 void security_context_manager_v1::Private::create_listener_callback(
-    security_context_manager_v1_bind* bind,
+    security_context_manager_v1_global::bind_t* bind,
     uint32_t id,
     int listen_fd,
     int close_fd)

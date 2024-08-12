@@ -25,7 +25,6 @@ namespace Wrapland::Server
 constexpr uint32_t security_context_manager_v1_version = 1;
 using security_context_manager_v1_global
     = Wayland::Global<security_context_manager_v1, security_context_manager_v1_version>;
-using security_context_manager_v1_bind = Wayland::Bind<security_context_manager_v1_global>;
 
 struct security_context_inviter {
     security_context_inviter(int listen_fd,
@@ -112,7 +111,7 @@ public:
     uint32_t inviter_index{0};
 
 private:
-    static void create_listener_callback(security_context_manager_v1_bind* bind,
+    static void create_listener_callback(security_context_manager_v1_global::bind_t* bind,
                                          uint32_t id,
                                          int listen_fd,
                                          int close_fd);
