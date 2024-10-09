@@ -1,5 +1,20 @@
 # Changelog
 All notable changes to Wrapland will be documented in this file.
+## [0.602.0](https://github.com/winft/wrapland/compare/v0.601.0...v0.602.0) (2024-10-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **server:** required header includes change
+
+### Bug Fixes
+
+* remove unneeded initializers ([bab01d7](https://github.com/winft/wrapland/commit/bab01d79106df211ed8b5f4e6c71a3cf1bf4b272))
+* **server:** access members ([3765a32](https://github.com/winft/wrapland/commit/3765a324f6e858eccede15636d7622e531455c95))
+* **server:** remove circular xdg-shell includes ([fe7a48e](https://github.com/winft/wrapland/commit/fe7a48ef44b483864a178c196d339cb673df08d4))
+* **server:** remove unneeded return instruction ([e3c2acc](https://github.com/winft/wrapland/commit/e3c2acc3b2ccaf473c5b3b50395699511544db99))
+* **server:** use bind type in global ([4b8aec3](https://github.com/winft/wrapland/commit/4b8aec3cef4bb4a64f694d91b635969a56270f47))
+
 ## [0.601.0](https://github.com/winft/wrapland/compare/v0.600.0...v0.601.0) (2024-06-19)
 
 
