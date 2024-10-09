@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Wrapland VERSION 0.602.0)
+project(Wrapland VERSION 0.602.80)
 
 # ECM setup
 include(FeatureSummary)
